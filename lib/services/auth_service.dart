@@ -50,6 +50,7 @@ abstract class BaseAuthService {
     required String onboardingId,
     required String parentEmail,
   });
+  Future<dynamic> logOut({required String accessToken});
 }
 
 class AuthServices implements BaseAuthService {
@@ -234,6 +235,16 @@ class AuthServices implements BaseAuthService {
     final res = await _api.post(
       'save-parent-email',
       data: {"onboardingId": onboardingId, "parentEmail": parentEmail},
+    );
+    return res.data;
+  }
+
+  @override
+  Future<dynamic> logOut({required String accessToken}) async {
+    final res = await _api.post(
+      'logout',
+      data: {"accessToken": accessToken},
+      options: Options(headers: {"Authorization": "Bearer $accessToken"}),
     );
     return res.data;
   }

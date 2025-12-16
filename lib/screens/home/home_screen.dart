@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
+import 'package:redstreakapp/providers/auth_provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -89,9 +91,36 @@ class _HomeHeader extends StatelessWidget {
           children: [
             SvgIcon(AppAssets.notification, size: 24.w),
             12.w.horizontalSpace,
-            CircleAvatar(
-              radius: 18.w,
-              backgroundImage: AssetImage(AppAssets.profile),
+            GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text("Log Out"),
+                    content: const Text("Are you sure you want to Log Out?"),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Cancel"),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          context.read<AuthProvider>().logOut(context);
+                        },
+                        child: const Text(
+                          "Log Out",
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              child: CircleAvatar(
+                radius: 18.w,
+                backgroundImage: AssetImage(AppAssets.profile),
+              ),
             ),
           ],
         ),

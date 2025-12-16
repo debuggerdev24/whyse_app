@@ -43,4 +43,8 @@ class SharedPrefs {
   Future<void> setAgeCompleted(bool val) async {
     await prefs.setBool(_ageCompletedKey, val);
   }
+
+  Future<void> clear() async {
+    await prefs.clear();
+  }
 }

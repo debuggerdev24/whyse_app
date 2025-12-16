@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/constants/shared_pref.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
+import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:redstreakapp/services/auth_service.dart';
 
 class AuthProvider with ChangeNotifier {
@@ -713,6 +715,32 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
       CustomToast.showError(context, e.toString());
       return false;
+    }
+  }
+
+  Future<void> logOut(BuildContext context) async {
+    try {
+      isLoading = true;
+      notifyListeners();
+
+      final token = SharedPrefs.instance.token;
+      if (token != null) {
+        // Attempt to call API, but don't block logout if it fails (e.g. network issue)
+        await AuthServices().logOut(accessToken: token);
+      }
+    } catch (e) {
+      debugPrint("Logout API error: $e");
+    } finally {
+      // Always clear local data and navigate out
+      await SharedPrefs.instance.clear();
+      isLoading = false;
+      notifyListeners();
+
+      // Use GoRouter to go to Splash or Login, clearing history
+      if (context.mounted) {
+        // Using pushReplacement or go to clear stack effectively
+        GoRouter.of(context).goNamed(UserAppRoutes.splashScreen.name);
+      }
     }
   }
 }
