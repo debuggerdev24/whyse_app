@@ -31,6 +31,8 @@ class AppAssets {
   static const book = "$_iconPath/book.svg";
   static const thunder = "$_iconPath/thunder.svg";
   static const notification = "$_iconPath/notification.svg";
+    static const eye = "$_iconPath/eye.svg";
+
 
   // images
   static const _imagePath = "assets/images";

@@ -19,13 +19,15 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  bool _isObscure = true;
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<AuthProvider>().clearLoginFields();
+      }
+    });
     super.dispose();
   }
 
@@ -80,14 +82,27 @@ class _LoginScreenState extends State<LoginScreen> {
                           8.h.verticalSpace,
                           AppTextField(
                             hintText: "Password",
-                            obSecureText: true,
+                            obSecureText: _isObscure,
                             controller: authProvider.passwordController,
                             suffixIcon: Padding(
                               padding: const EdgeInsets.all(13.0),
-                              child: SvgIcon(
-                                AppAssets.password,
-                                size: 24.w,
-                                color: AppColors.black,
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _isObscure = !_isObscure;
+                                  });
+                                },
+                                child: _isObscure
+                                    ? SvgIcon(
+                                        AppAssets.password,
+                                        size: 24.w,
+                                        color: AppColors.black,
+                                      )
+                                    : SvgIcon(
+                                        AppAssets.eye,
+                                        size: 24.w,
+                                        color: AppColors.black,
+                                      ),
                               ),
                             ),
                           ),

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/constants/shared_pref.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
+import 'package:dio/dio.dart';
 import 'package:redstreakapp/services/auth_service.dart';
 
 class AuthProvider with ChangeNotifier {
@@ -274,29 +275,22 @@ class AuthProvider with ChangeNotifier {
         final data = response['data'];
 
         // If success here, it usually means account created OR verified successfully
-        // Depending on backend, a second call might return error if "already exists" but not verified.
-        // Or if verified, it returns success.
-
-        // If we are in verification check mode, we want to proceed.
-
         CustomToast.showSuccess(
           context,
           response['message'] ?? "Account created successfully",
         );
         return true;
       } else {
-        if (isVerificationCheck) {
-          // If checking verification and it fails, assume it's because email isn't verified yet
-          // or show the generic "Please verify" message as requested.
-          CustomToast.showError(
-            context,
-            "Please verify your email to continue",
-          );
+        // Handle structured errors if present (e.g. valid JSON response with 'errors' list)
+        if (response['errors'] != null &&
+            (response['errors'] as List).isNotEmpty) {
+          final firstError = response['errors'][0];
+          final msg = firstError['msg'] ?? "Failed to create account";
+          CustomToast.showError(context, msg);
         } else {
-          CustomToast.showError(
-            context,
-            response['message'] ?? "Failed to create account",
-          );
+          // Fallback to generic message
+          final msg = response['message'] ?? "Failed to create account";
+          CustomToast.showError(context, msg);
         }
         return false;
       }
@@ -304,9 +298,29 @@ class AuthProvider with ChangeNotifier {
       isLoading = false;
       notifyListeners();
 
+      // Check for DioException to extract backend error message
+      if (e is DioException) {
+        final data = e.response?.data;
+        if (data != null) {
+          // Check for 'errors' list style
+          if (data['errors'] != null && (data['errors'] as List).isNotEmpty) {
+            final firstError = data['errors'][0];
+            final msg = firstError['msg'] ?? "An error occurred";
+            CustomToast.showError(context, msg);
+            return false;
+          }
+          // Check for top-level 'message'
+          if (data['message'] != null) {
+            CustomToast.showError(context, data['message']);
+            return false;
+          }
+        }
+      }
+
       if (isVerificationCheck) {
         CustomToast.showError(context, "Please verify your email to continue");
       } else {
+        // Fallback or other exceptions
         CustomToast.showError(context, e.toString());
       }
       return false;
@@ -733,6 +747,7 @@ class AuthProvider with ChangeNotifier {
     } finally {
       // Always clear local data and navigate out
       await SharedPrefs.instance.clear();
+      clearAllData();
       isLoading = false;
       notifyListeners();
 
@@ -742,5 +757,37 @@ class AuthProvider with ChangeNotifier {
         GoRouter.of(context).goNamed(UserAppRoutes.splashScreen.name);
       }
     }
+  }
+
+  void clearLoginFields() {
+    emailController.clear();
+    passwordController.clear();
+    notifyListeners();
+  }
+
+  void clearSignupFields() {
+    emailController.clear();
+    notifyListeners();
+  }
+
+  void clearCreateAccountFields() {
+    firstNameController.clear();
+    lastNameController.clear();
+    signupEmailController.clear();
+    passwordController.clear();
+    confirmPasswordController.clear();
+    notifyListeners();
+  }
+
+  void clearAllData() {
+    emailController.clear();
+    firstNameController.clear();
+    lastNameController.clear();
+    signupEmailController.clear();
+    passwordController.clear();
+    confirmPasswordController.clear();
+    age = null;
+    selectedDate = null;
+    notifyListeners();
   }
 }

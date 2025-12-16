@@ -21,6 +21,18 @@ class CreateAccountScreen extends StatefulWidget {
 class _CreateAccountScreenState extends State<CreateAccountScreen> {
   bool acceptedTerms = false;
   bool isEmailSent = false;
+  bool _isPasswordObscure = true;
+  bool _isConfirmPasswordObscure = true;
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<AuthProvider>().clearCreateAccountFields();
+      }
+    });
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,25 +118,54 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                     ),
                     AppTextField(
                       hintText: "Password",
+                      obSecureText: _isPasswordObscure,
                       controller: authProvider.passwordController,
                       suffixIcon: Padding(
                         padding: const EdgeInsets.all(13.0),
-                        child: SvgIcon(
-                          AppAssets.password,
-                          size: 24.w,
-                          color: AppColors.black,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _isPasswordObscure = !_isPasswordObscure;
+                            });
+                          },
+                          child: _isPasswordObscure
+                              ? SvgIcon(
+                                  AppAssets.password,
+                                  size: 24.w,
+                                  color: AppColors.black,
+                                )
+                              : SvgIcon(
+                                  AppAssets.eye,
+                                  size: 24.w,
+                                  color: AppColors.black,
+                                ),
                         ),
                       ),
                     ),
                     AppTextField(
                       hintText: "Confirm Password",
                       controller: authProvider.confirmPasswordController,
+                      obSecureText: _isConfirmPasswordObscure,
                       suffixIcon: Padding(
                         padding: const EdgeInsets.all(13.0),
-                        child: SvgIcon(
-                          AppAssets.password,
-                          size: 24.w,
-                          color: AppColors.black,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _isConfirmPasswordObscure =
+                                  !_isConfirmPasswordObscure;
+                            });
+                          },
+                          child: _isConfirmPasswordObscure
+                              ? SvgIcon(
+                                  AppAssets.password,
+                                  size: 24.w,
+                                  color: AppColors.black,
+                                )
+                              : SvgIcon(
+                                  AppAssets.eye,
+                                  size: 24.w,
+                                  color: AppColors.black,
+                                ),
                         ),
                       ),
                     ),

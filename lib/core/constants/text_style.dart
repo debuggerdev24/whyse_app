@@ -86,39 +86,39 @@ class AppTextStyles {
   }
 
   // Common text styles (using SF Pro Display as default)
-  static TextStyle get textStyle14Regular => sfProDisplayRegular(fontSize: 14);
-  static TextStyle get textStyle14Medium => sfProDisplayMedium(fontSize: 14);
+  static TextStyle get textStyle14Regular => sfProDisplayRegular(fontSize: 14.sp);
+  static TextStyle get textStyle14Medium => sfProDisplayMedium(fontSize: 14.sp);
   static TextStyle get textStyle14Semibold =>
-      sfProDisplaySemibold(fontSize: 14);
-  static TextStyle get textStyle14Bold => sfProDisplayBold(fontSize: 14);
+      sfProDisplaySemibold(fontSize: 14.sp);
+  static TextStyle get textStyle14Bold => sfProDisplayBold(fontSize: 14.sp);
 
-  static TextStyle get textStyle16Regular => sfProDisplayRegular(fontSize: 16);
-  static TextStyle get textStyle16Medium => sfProDisplayMedium(fontSize: 16);
+  static TextStyle get textStyle16Regular => sfProDisplayRegular(fontSize: 16.sp);
+  static TextStyle get textStyle16Medium => sfProDisplayMedium(fontSize: 16.sp);
   static TextStyle get textStyle16Semibold =>
       sfProDisplaySemibold(fontSize: 16);
-  static TextStyle get textStyle16Bold => sfProDisplayBold(fontSize: 16);
+  static TextStyle get textStyle16Bold => sfProDisplayBold(fontSize: 16.sp);
 
-  static TextStyle get textStyle18Regular => sfProDisplayRegular(fontSize: 18);
-  static TextStyle get textStyle18Medium => sfProDisplayMedium(fontSize: 18);
+  static TextStyle get textStyle18Regular => sfProDisplayRegular(fontSize: 18.sp);
+  static TextStyle get textStyle18Medium => sfProDisplayMedium(fontSize: 18.sp);
   static TextStyle get textStyle18Semibold =>
       sfProDisplaySemibold(fontSize: 18);
-  static TextStyle get textStyle18Bold => sfProDisplayBold(fontSize: 18);
+  static TextStyle get textStyle18Bold => sfProDisplayBold(fontSize: 18.sp);
 
-  static TextStyle get textStyle20Regular => sfProDisplayRegular(fontSize: 20);
-  static TextStyle get textStyle20Medium => sfProDisplayMedium(fontSize: 20);
+  static TextStyle get textStyle20Regular => sfProDisplayRegular(fontSize: 20.sp);
+  static TextStyle get textStyle20Medium => sfProDisplayMedium(fontSize: 20.sp);
   static TextStyle get textStyle20Semibold =>
       sfProDisplaySemibold(fontSize: 20);
-  static TextStyle get textStyle20Bold => sfProDisplayBold(fontSize: 20);
+  static TextStyle get textStyle20Bold => sfProDisplayBold(fontSize: 20.sp);
 
-  static TextStyle get textStyle24Regular => sfProDisplayRegular(fontSize: 24);
-  static TextStyle get textStyle24Medium => sfProDisplayMedium(fontSize: 24);
+  static TextStyle get textStyle24Regular => sfProDisplayRegular(fontSize: 24.sp);
+  static TextStyle get textStyle24Medium => sfProDisplayMedium(fontSize: 24.sp);
   static TextStyle get textStyle24Semibold =>
-      sfProDisplaySemibold(fontSize: 24);
-  static TextStyle get textStyle24Bold => sfProDisplayBold(fontSize: 24);
+      sfProDisplaySemibold(fontSize: 24.sp);
+  static TextStyle get textStyle24Bold => sfProDisplayBold(fontSize: 24.sp);
 
-  static TextStyle get textStyle28Regular => sfProDisplayRegular(fontSize: 28);
-  static TextStyle get textStyle28Medium => sfProDisplayMedium(fontSize: 28);
+  static TextStyle get textStyle28Regular => sfProDisplayRegular(fontSize: 28.sp);
+  static TextStyle get textStyle28Medium => sfProDisplayMedium(fontSize: 28.sp);
   static TextStyle get textStyle28Semibold =>
       sfProDisplaySemibold(fontSize: 28);
-  static TextStyle get textStyle28Bold => sfProDisplayBold(fontSize: 28);
+  static TextStyle get textStyle28Bold => sfProDisplayBold(fontSize: 28.sp);
 }

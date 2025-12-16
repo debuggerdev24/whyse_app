@@ -92,7 +92,6 @@ class _AgeEntryScreenState extends State<AgeEntryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final ageProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
