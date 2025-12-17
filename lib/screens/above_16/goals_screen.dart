@@ -35,7 +35,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
   void _onGoalSelected(String id) {
     setState(() {
       selectedGoalId = id;
-      customGoalController.clear(); 
+      customGoalController.clear();
     });
   }
 
@@ -98,7 +98,17 @@ class _GoalsScreenState extends State<GoalsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const OnboardingHeader(currentStep: 5, totalSteps: 5),
+              OnboardingHeader(
+                currentStep: 5,
+                totalSteps: 5,
+                onBack: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.goNamed(UserAppRoutes.topicsScreen.name);
+                  }
+                },
+              ),
 
               AppText(
                 text: "What's Your Goal?",

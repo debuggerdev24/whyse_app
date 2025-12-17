@@ -64,7 +64,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const OnboardingHeader(currentStep: 1, totalSteps: 5),
+              const OnboardingHeader(currentStep: 1, totalSteps: 5,),
 
               AppText(
                 text: "Profile Information",

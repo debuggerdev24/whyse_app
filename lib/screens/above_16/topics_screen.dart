@@ -158,7 +158,13 @@ class _TopicsScreenState extends State<TopicsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const OnboardingHeader(currentStep: 4, totalSteps: 5),
+               OnboardingHeader(currentStep: 4, totalSteps: 5,onBack:(){
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.goNamed(UserAppRoutes.interestsScreen.name);
+                }
+               } ,),
 
               AppText(
                 text: "Choose Your Favorite Topics",
