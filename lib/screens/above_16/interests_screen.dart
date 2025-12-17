@@ -127,7 +127,17 @@ class _InterestsScreenState extends State<InterestsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const OnboardingHeader(currentStep: 3, totalSteps: 5),
+              OnboardingHeader(
+                currentStep: 3,
+                totalSteps: 5,
+                onBack: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.goNamed(UserAppRoutes.readingGoalScreen.name);
+                  }
+                },
+              ),
 
               AppText(
                 text: "Pick Your Interests",

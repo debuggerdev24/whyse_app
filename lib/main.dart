@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
       ],
       child: ScreenUtilInit(
-        designSize: const Size(375, 812),
+        designSize: const Size(402, 874),
         minTextAdapt: true,
         splitScreenMode: true,
         builder: (context, child) {

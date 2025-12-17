@@ -13,18 +13,21 @@ class BaseRepository {
   late Dio _dio;
 
   initialize() {
-    _dio = Dio(BaseOptions(
-      baseUrl: apiBaseUrl,
-      headers: {
-        "Content-Type": "application/json",
-        if (SharedPrefs.instance.token != null)
-          "Authorization": "Bearer ${SharedPrefs.instance.token}"
-      },
-    ));
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: apiBaseUrl,
+        headers: {
+          "Content-Type": "application/json",
+          if (SharedPrefs.instance.token != null)
+            "Authorization": "Bearer ${SharedPrefs.instance.token}",
+        },
+      ),
+    );
 
     log("============>access token${SharedPrefs.instance.token}");
     _dio.interceptors.add(
-        PrettyDioLogger(request: true, requestBody: true, requestHeader: true));
+      PrettyDioLogger(request: true, requestBody: true, requestHeader: true),
+    );
 
     // _dio.interceptors.add(InterceptorsWrapper(
     //   onError: (DioException error, ErrorInterceptorHandler handler) async {
@@ -53,9 +56,9 @@ class BaseRepository {
   Dio get dio => _dio;
 
   addToken(String token) {
-    _dio.options = _dio.options.copyWith(headers: {
-      'Authorization': "Bearer $token",
-    });
+    _dio.options = _dio.options.copyWith(
+      headers: {'Authorization': "Bearer $token"},
+    );
     print("Authorization token =======> $token");
   }
 
@@ -75,7 +78,7 @@ class BaseRepository {
         options: Options(headers: {'Content-Type': 'application/json'}),
       );
 
-//---modification----
+      //---modification----
       // if (response.data is Map<String, dynamic>) {
       //   final newAccessToken = response.data['access'];
       //   final newRefreshToken = response.data['refresh'];
@@ -95,7 +98,7 @@ class BaseRepository {
       //   print("Unexpected response format: ${response.data}");
       //   return false;
       // }
-// ---finish modification---
+      // ---finish modification---
 
       final newAccessToken = response.data['access'];
       final newRefreshToken = response.data['refresh'];
@@ -108,7 +111,8 @@ class BaseRepository {
       SharedPrefs.instance.setToken(response.data['access']);
       print("stored not in shared prefrence");
       print(
-          "store refresh token:->${SharedPrefs.instance.setToken(response.data['access'])}");
+        "store refresh token:->${SharedPrefs.instance.setToken(response.data['access'])}",
+      );
       addToken(newAccessToken);
       print("new access token:->${newAccessToken}");
       print("Token refreshed successfully");

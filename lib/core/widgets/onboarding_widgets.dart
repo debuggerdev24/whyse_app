@@ -26,7 +26,14 @@ class OnboardingHeader extends StatelessWidget {
           children: [
             /// BACK BUTTON
             GestureDetector(
-              onTap: currentStep == 0 ? null : (onBack ?? () => context.pop()),
+              onTap: currentStep == 0
+                  ? null
+                  : (onBack ??
+                        () {
+                          if (context.canPop()) {
+                            context.pop();
+                          }
+                        }),
               child: Opacity(
                 opacity: currentStep == 0 ? 0.3 : 1,
                 child: SvgIcon(

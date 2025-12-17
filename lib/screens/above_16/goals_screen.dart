@@ -35,14 +35,14 @@ class _GoalsScreenState extends State<GoalsScreen> {
   void _onGoalSelected(String id) {
     setState(() {
       selectedGoalId = id;
-      customGoalController.clear(); // Clear custom if list item selected
+      customGoalController.clear(); 
     });
   }
 
   void _onCustomGoalChanged(String? val) {
     if (val != null && val.isNotEmpty) {
       setState(() {
-        selectedGoalId = null; // Clear list selection if typing custom
+        selectedGoalId = null;
       });
     }
   }

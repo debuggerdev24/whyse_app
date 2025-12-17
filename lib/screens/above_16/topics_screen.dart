@@ -25,11 +25,8 @@ class _TopicsScreenState extends State<TopicsScreen> {
   // Local state for custom topics
   final List<String> customTopics = [];
   final TextEditingController customTopicController = TextEditingController();
-  // Store selected IDs (from API) and Custom Strings
   final Set<String> selectedTopicIds = {};
   final Set<String> selectedCustomTopics = {};
-
-  // Map API topic titles to local assets for display
   String _getIconForTopic(String title) {
     String lower = title.toLowerCase();
 

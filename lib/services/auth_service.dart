@@ -18,6 +18,10 @@ abstract class BaseAuthService {
     required String password,
     required String confirmPassword,
   });
+  Future<dynamic> verifyEmail({
+    required String onboardingId,
+    required String email,
+  });
   Future<dynamic> saveProfileInfo({
     required String onboardingId,
     required String country,
@@ -109,6 +113,18 @@ class AuthServices implements BaseAuthService {
         "password": password,
         "confirmPassword": confirmPassword,
       },
+    );
+    return res.data;
+  }
+
+  @override
+  Future<dynamic> verifyEmail({
+    required String onboardingId,
+    required String email,
+  }) async {
+    final res = await _api.post(
+      'verify-email',
+      data: {"onboardingId": onboardingId, "email": email},
     );
     return res.data;
   }

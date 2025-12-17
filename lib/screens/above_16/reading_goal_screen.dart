@@ -73,8 +73,17 @@ class _ReadingGoalScreenState extends State<ReadingGoalScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               /// HEADER
-              const OnboardingHeader(currentStep: 2, totalSteps: 5),
-
+              OnboardingHeader(
+                currentStep: 2,
+                totalSteps: 5,
+                onBack: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.goNamed(UserAppRoutes.profileInfoScreen.name);
+                  }
+                },
+              ),
               /// TITLE
               AppText(
                 text: "Set Your Daily Reading Goal",
@@ -105,12 +114,9 @@ class _ReadingGoalScreenState extends State<ReadingGoalScreen> {
                   children: List.generate(options.length, (index) {
                     final option = options[index];
                     final isSelected = selectedOption == option;
-
                     return Row(
                       children: [
                         _buildOptionButton(option, isSelected),
-
-                        /// Divider except last
                         if (index != options.length - 1)
                           Container(
                             width: 1.w,

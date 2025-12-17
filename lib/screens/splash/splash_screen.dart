@@ -49,6 +49,8 @@ class _SplashScreenState extends State<SplashScreen>
         } else {
           context.goNamed(UserAppRoutes.enterAgeScreen.name);
         }
+      } else if (step == 'EMAIL') {
+        context.goNamed(UserAppRoutes.enterAgeScreen.name);
       } else if (step == 'PARENT_EMAIL') {
         context.goNamed(UserAppRoutes.parentEmailScreen.name);
       } else if (step == 'CONSENT_STATUS') {

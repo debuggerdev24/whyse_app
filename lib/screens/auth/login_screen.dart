@@ -59,7 +59,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: AppColors.teal,
                     ),
                   ),
-
                   15.h.verticalSpace,
                   AppText(
                     text: 'Login',

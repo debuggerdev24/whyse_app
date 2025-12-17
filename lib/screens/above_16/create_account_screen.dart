@@ -64,10 +64,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 // );
               }
             } else {
-              final success = await authProvider.createAccount(
+              final success = await authProvider.checkEmailVerification(
                 context,
-                isTermsAccepted: acceptedTerms,
-                isVerificationCheck: true,
               );
 
               if (success && context.mounted) {

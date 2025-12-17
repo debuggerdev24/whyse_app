@@ -88,10 +88,22 @@ class AuthProvider with ChangeNotifier {
       );
       if (response != null && response['success'] == true) {
         final data = response['data'];
+
+        if (data['nextStep'] != null &&
+            data['nextStep'].toString().isNotEmpty) {
+          return data['nextStep'];
+        }
+
         if (data['currentStep'] == 'CREATE_ACCOUNT' &&
             data['userProfile'] != null &&
             data['userProfile']['firstName'] != null) {
           return 'PROFILE_INFO';
+        }
+
+        if (data['currentStep'] == 'PROFILE_INFO' &&
+            data['userProfile'] != null &&
+            data['userProfile']['country'] != null) {
+          return 'READING_GOAL';
         }
 
         if (data['currentStep'] == 'READING_GOAL' &&
@@ -99,6 +111,31 @@ class AuthProvider with ChangeNotifier {
             data['userProfile']['dailyReadingGoal'] != null) {
           return 'INTERESTS';
         }
+
+        if (data['currentStep'] == 'INTERESTS' &&
+            ((data['userInterests'] != null &&
+                    (data['userInterests'] as List).isNotEmpty) ||
+                (data['userProfile']['interests'] != null &&
+                    (data['userProfile']['interests'] as List).isNotEmpty))) {
+          return 'TOPICS';
+        }
+
+        if (data['currentStep'] == 'TOPICS' &&
+            ((data['userTopics'] != null &&
+                    (data['userTopics'] as List).isNotEmpty) ||
+                (data['userProfile']['topics'] != null &&
+                    (data['userProfile']['topics'] as List).isNotEmpty))) {
+          return 'GOALS';
+        }
+
+        if (data['currentStep'] == 'GOALS' &&
+            ((data['userGoals'] != null &&
+                    (data['userGoals'] as List).isNotEmpty) ||
+                (data['userProfile']['goals'] != null &&
+                    (data['userProfile']['goals'] as List).isNotEmpty))) {
+          return 'COMPLETED';
+        }
+
         return data['currentStep'];
       }
       return null;
@@ -198,20 +235,12 @@ class AuthProvider with ChangeNotifier {
   Future<bool> createAccount(
     BuildContext context, {
     required bool isTermsAccepted,
-    bool isVerificationCheck = false,
   }) async {
     final firstName = firstNameController.text.trim();
     final lastName = lastNameController.text.trim();
     final email = signupEmailController.text.trim();
     final password = passwordController.text.trim();
     final confirmPassword = confirmPasswordController.text.trim();
-
-    // Validation checks should be skipped or minimal if we are just checking verification status?
-    // Actually, usually we re-send the same data to check status or just hit an endpoint.
-    // Assuming the user flow is:
-    // 1. Initial call -> creates account (or returns success if already created but not verified).
-    // 2. Second call -> User claims they verified email. We call same API.
-    // If we are just checking, we still validate inputs to be safe.
 
     if (firstName.isEmpty) {
       CustomToast.showError(context, "Please enter your first name");
@@ -281,14 +310,12 @@ class AuthProvider with ChangeNotifier {
         );
         return true;
       } else {
-        // Handle structured errors if present (e.g. valid JSON response with 'errors' list)
         if (response['errors'] != null &&
             (response['errors'] as List).isNotEmpty) {
           final firstError = response['errors'][0];
           final msg = firstError['msg'] ?? "Failed to create account";
           CustomToast.showError(context, msg);
         } else {
-          // Fallback to generic message
           final msg = response['message'] ?? "Failed to create account";
           CustomToast.showError(context, msg);
         }
@@ -317,12 +344,49 @@ class AuthProvider with ChangeNotifier {
         }
       }
 
-      if (isVerificationCheck) {
-        CustomToast.showError(context, "Please verify your email to continue");
+      CustomToast.showError(context, e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> checkEmailVerification(BuildContext context) async {
+    final onboardingId = SharedPrefs.instance.onboardingId;
+    final email = signupEmailController.text.trim();
+
+    if (onboardingId == null) {
+      CustomToast.showError(context, "Session invalid");
+      return false;
+    }
+
+    try {
+      isLoading = true;
+      notifyListeners();
+
+      final response = await AuthServices().verifyEmail(
+        onboardingId: onboardingId,
+        email: email,
+      );
+
+      isLoading = false;
+      notifyListeners();
+
+      if (response != null && response['success'] == true) {
+        CustomToast.showSuccess(
+          context,
+          response['message'] ?? "Email verified successfully",
+        );
+        return true;
       } else {
-        // Fallback or other exceptions
-        CustomToast.showError(context, e.toString());
+        CustomToast.showError(
+          context,
+          response['message'] ?? "Email not verified or verification failed",
+        );
+        return false;
       }
+    } catch (e) {
+      isLoading = false;
+      notifyListeners();
+      CustomToast.showError(context, e.toString());
       return false;
     }
   }
@@ -423,9 +487,7 @@ class AuthProvider with ChangeNotifier {
     try {
       isLoadingInterests = true;
       notifyListeners();
-
       final response = await AuthServices().getDefaultInterests();
-
       isLoadingInterests = false;
       notifyListeners();
 
