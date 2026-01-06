@@ -49,10 +49,11 @@ class SuccessScreen extends StatelessWidget {
                 ),
               ),
 
+              /// ---------- BUTTON AT BOTTOM ----------
               AppButton(
                 text: "proccesing",
                 onPressed: () {
-                  context.pushNamed(UserAppRoutes.readingScreen.name);
+                  context.pushNamed(UserAppRoutes.tabScreen.name);
                 },
               ),
 

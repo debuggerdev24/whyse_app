@@ -12,6 +12,7 @@ import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
 
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/providers/auth_provider.dart';
+import 'package:redstreakapp/core/widgets/custom_toast.dart';
 
 class TopicsScreen extends StatefulWidget {
   const TopicsScreen({super.key});
@@ -21,14 +22,15 @@ class TopicsScreen extends StatefulWidget {
 }
 
 class _TopicsScreenState extends State<TopicsScreen> {
+  // Local state for custom topics
   final List<String> customTopics = [];
   final TextEditingController customTopicController = TextEditingController();
   final Set<String> selectedTopicIds = {};
   final Set<String> selectedCustomTopics = {};
-
   String _getIconForTopic(String title) {
     String lower = title.toLowerCase();
 
+    // Direct Mappings
     if (lower.contains("space") || lower.contains("planet"))
       return AppAssets.space;
     if (lower.contains("invention") ||
@@ -59,7 +61,6 @@ class _TopicsScreenState extends State<TopicsScreen> {
     if (lower.contains("history")) return AppAssets.hauntedhouse;
     if (lower.contains("adventure")) return AppAssets.space;
 
-    // Rotation fallback for any other topics to ensure variety
     List<String> fallbacks = [
       AppAssets.space,
       AppAssets.inventions,
@@ -68,7 +69,6 @@ class _TopicsScreenState extends State<TopicsScreen> {
       AppAssets.wizard,
       AppAssets.dargon,
     ];
-    // Use hash code to consistently return the same random image for the same title
     return fallbacks[title.hashCode.abs() % fallbacks.length];
   }
 
@@ -123,31 +123,30 @@ class _TopicsScreenState extends State<TopicsScreen> {
 
       // Fixed bottom button
       bottomNavigationBar: Padding(
-        padding: EdgeInsets.only(left: 24.w, right: 24.w, bottom: 20.h),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AppButton(
-              text: "Next",
-              backgroundColor: AppColors.yellowcolor,
-              isLoading: isSaving,
-              onPressed: () async {
-                if (selectedTopicIds.isEmpty && selectedCustomTopics.isEmpty) {
-                  context.pushNamed(UserAppRoutes.whatinterestScreen.name);
-                } else {
-                  // final success = await authProvider.saveTopics(
-                  //   context,
-                  //   topicIds: selectedTopicIds.toList(),
-                  //   customTopics: selectedCustomTopics.toList(),
-                  // );
+        padding: EdgeInsets.only(left: 24.w, right: 24.w, bottom: 40.h),
+        child: AppButton(
+          text: "Next",
+          backgroundColor: AppColors.yellowcolor,
+          isLoading: isSaving,
+          onPressed: () async {
+            if (selectedTopicIds.isEmpty && selectedCustomTopics.isEmpty) {
+              CustomToast.showError(
+                context,
+                "Please select at least one topic",
+              );
+              return;
+            }
 
-                  // if (success && context.mounted) {
-                  context.pushNamed(UserAppRoutes.readingGoalScreen.name);
-                  // }
-                }
-              },
-            ),
-          ],
+            final success = await authProvider.saveTopics(
+              context,
+              topicIds: selectedTopicIds.toList(),
+              customTopics: selectedCustomTopics.toList(),
+            );
+
+            if (success && context.mounted) {
+              context.pushNamed(UserAppRoutes.goalsScreen.name);
+            }
+          },
         ),
       ),
 
@@ -157,26 +156,13 @@ class _TopicsScreenState extends State<TopicsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              OnboardingHeader(
-                currentStep: 3,
-                totalSteps: 5,
-                onSkip: () {
-                  if (selectedTopicIds.isEmpty &&
-                      selectedCustomTopics.isEmpty) {
-                    context.pushNamed(UserAppRoutes.whatinterestScreen.name);
-                  } else {
-                    // final success = await authProvider.saveTopics(
-                    //   context,
-                    //   topicIds: selectedTopicIds.toList(),
-                    //   customTopics: selectedCustomTopics.toList(),
-                    // );
-
-                    // if (success && context.mounted) {
-                    context.pushNamed(UserAppRoutes.readingGoalScreen.name);
-                  }
-                  ;
-                },
-              ),
+               OnboardingHeader(currentStep: 4, totalSteps: 5,onBack:(){
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.goNamed(UserAppRoutes.interestsScreen.name);
+                }
+               } ,),
 
               AppText(
                 text: "Choose Your Favorite Topics",
@@ -184,6 +170,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
               ),
 
               10.h.verticalSpace,
+
               AppText(
                 text:
                     "Here are some topics we think you'll love based on your interests. You can pick the ones that excite you the most!",
@@ -197,7 +184,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
               // Custom Topic Input
               AppTextField(
                 controller: customTopicController,
-                hintText: "Search Your Favorite Topics",
+                hintText: "Add Topic...",
                 onFieldSubmitted: (val) => _addCustomTopic(val),
               ),
               37.h.verticalSpace,
