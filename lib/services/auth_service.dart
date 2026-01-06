@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:redstreakapp/models/story_models/generate_story_request.dart';
 import 'package:redstreakapp/services/base_api_service.dart';
@@ -73,6 +74,7 @@ class AuthServices implements BaseAuthService {
 
   factory AuthServices() => _instance;
 
+  //todo 2nd
   @override
   Future<dynamic> startOnboarding({required String email}) async {
     Map<String, String> data = {"email": email};
@@ -80,6 +82,7 @@ class AuthServices implements BaseAuthService {
     return res.data;
   }
 
+  //todo 1st
   @override
   Future<dynamic> getOnboardingProgress({required String onboardingId}) async {
     final res = await _api.post(

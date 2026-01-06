@@ -92,7 +92,6 @@ class _AgeEntryScreenState extends State<AgeEntryScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: CustomBackAppBar(
@@ -170,7 +169,7 @@ class _AgeEntryScreenState extends State<AgeEntryScreen> {
             if (success && context.mounted) {
               // if (authProvider.apiIsUnder16) {
               // context.pushNamed(UserAppRoutes.parentEmailScreen.name);
-              //  else {
+              // } else {
               context.pushNamed(UserAppRoutes.createAccountScreen.name);
               // }
             }

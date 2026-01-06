@@ -43,12 +43,16 @@ class _SplashScreenState extends State<SplashScreen>
       final step = await authProvider.fetchOnboardingStep();
       final isAgeDone = SharedPrefs.instance.isAgeCompleted;
 
+      if (!mounted) {
+        return;
+      }
+
       if (step == 'AGE') {
-        if (isAgeDone) {
-          context.goNamed(UserAppRoutes.createAccountScreen.name);
-        } else {
-          context.goNamed(UserAppRoutes.enterAgeScreen.name);
-        }
+        // if (isAgeDone) {
+        //   context.goNamed(UserAppRoutes.createAccountScreen.name);
+        // } else {
+        context.goNamed(UserAppRoutes.enterAgeScreen.name);
+        // }
       } else if (step == 'EMAIL') {
         context.goNamed(UserAppRoutes.enterAgeScreen.name);
       } else if (step == 'PARENT_EMAIL') {

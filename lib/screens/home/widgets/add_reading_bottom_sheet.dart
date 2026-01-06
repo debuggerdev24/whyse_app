@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
-
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
+import 'package:redstreakapp/providers/auth_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
 class AddReadingBottomSheet extends StatefulWidget {
@@ -23,7 +23,6 @@ class _AddReadingBottomSheetState extends State<AddReadingBottomSheet> {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 27.w, vertical: 16.h),
-
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
@@ -46,7 +45,7 @@ class _AddReadingBottomSheetState extends State<AddReadingBottomSheet> {
           ),
           27.h.verticalSpace,
           Divider(
-            color: AppColors.black.withOpacity(0.1),
+            color: AppColors.black.withValues(alpha: 0.1),
             thickness: 1,
             height: 1,
           ),
@@ -64,16 +63,9 @@ class _AddReadingBottomSheetState extends State<AddReadingBottomSheet> {
 
               Future.delayed(const Duration(milliseconds: 200), () {
                 context.pop();
-                context.pushNamed(UserAppRoutes.goalsScreen.name);
 
-                // context.pushNamed(UserAppRoutes.bookReadingScreen.name);
-                // Navigator.pop(context);
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (_) => const GenerateReadingScreen(),
-                //   ),
-                // );
+                context.read<AuthProvider>().isFromHome = true;
+                context.pushNamed(UserAppRoutes.goalsScreen.name, extra: true);
               });
             },
           ),
@@ -146,7 +138,7 @@ class _OptionCard extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),

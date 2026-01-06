@@ -96,6 +96,10 @@ class AppTextField extends StatelessWidget {
             FocusScope.of(context).unfocus();
           },
           decoration: InputDecoration(
+            errorStyle: AppTextStyles.sfProDisplayRegular(
+              color: AppColors.redcolor,
+              fontSize: 14.sp,
+            ),
             filled: false,
             prefixIcon: prefixIcon,
             prefixText: prefixText,
@@ -108,7 +112,7 @@ class AppTextField extends StatelessWidget {
                 hintStyle ??
                 AppTextStyles.sfProDisplaySemibold(
                   color: AppColors.black.withOpacity(0.3),
-                  fontSize: 14.sp,
+                  fontSize: 15.sp,
                 ),
             contentPadding:
                 contentPadding ??
@@ -132,12 +136,15 @@ class AppTextField extends StatelessWidget {
                     color: AppColors.black.withOpacity(0.1),
                   ),
                 ),
-            errorBorder:
-                errorBorder ??
-                OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: Colors.red, width: 1.w),
-                ), // Optional: Added for error styling
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(color: AppColors.redcolor, width: 1.w),
+            ), // Op ,
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+
+              borderSide: BorderSide(color: AppColors.redcolor, width: 1.w),
+            ), // Optional: Added for error styling
           ),
           onChanged: onChanged,
           maxLines: maxLines ?? 1, // Optional: Default to 1

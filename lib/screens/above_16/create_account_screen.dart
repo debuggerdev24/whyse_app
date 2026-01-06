@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:redstreakapp/providers/auth_provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
-import 'package:go_router/go_router.dart';
+import 'package:redstreakapp/providers/auth_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
 class CreateAccountScreen extends StatefulWidget {
@@ -48,7 +48,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               context,
               listen: false,
             );
-            if (!isEmailSent) {
+            if (isEmailSent) {
+              final success = await authProvider.checkEmailVerification(
+                context,
+              );
+
+              if (success && context.mounted) {
+                context.pushNamed(UserAppRoutes.profileInfoScreen.name);
+              }
+            } else {
               final success = await authProvider.createAccount(
                 context,
                 isTermsAccepted: acceptedTerms,
@@ -62,14 +70,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 //   "Please verify your email to continue",
                 //   true,
                 // );
-              }
-            } else {
-              final success = await authProvider.checkEmailVerification(
-                context,
-              );
-
-              if (success && context.mounted) {
-                context.pushNamed(UserAppRoutes.profileInfoScreen.name);
               }
             }
           },

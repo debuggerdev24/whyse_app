@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
-import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
-
-import 'package:provider/provider.dart';
-import 'package:redstreakapp/providers/auth_provider.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
+import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
+import 'package:redstreakapp/providers/auth_provider.dart';
+import 'package:redstreakapp/routes/user_routes.dart';
 
 class GoalsScreen extends StatefulWidget {
+  // final bool? isFromHome;
   const GoalsScreen({super.key});
 
   @override
@@ -50,64 +50,45 @@ class _GoalsScreenState extends State<GoalsScreen> {
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
+    final authProviderRead = context.read<AuthProvider>();
     final goalsList = authProvider.goalsList;
     final isLoading = authProvider.isLoadingGoals;
     final isSaving = authProvider.isLoading;
-
+    final isFromHome = authProviderRead.isFromHome;
     return Scaffold(
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.only(left: 24.w, right: 24.w, bottom: 40.h),
-        child: AppButton(
-          text: "Next",
-          backgroundColor: AppColors.yellowcolor,
-          isLoading: isSaving,
-          onPressed: () async {
-            final customGoalText = customGoalController.text.trim();
-
-            if (selectedGoalId == null && customGoalText.isEmpty) {
-              CustomToast.showError(context, "Please select at least one goal");
-              return;
-            }
-
-            List<String> ids = [];
-            List<Map<String, String>> customs = [];
-
-            if (selectedGoalId != null) {
-              ids.add(selectedGoalId!);
-            }
-            if (customGoalText.isNotEmpty) {
-              customs.add({"title": customGoalText, "description": ""});
-            }
-
-            final success = await authProvider.saveGoals(
-              context,
-              goalIds: ids,
-              customGoals: customs,
-            );
-
-            if (success && context.mounted) {
-              context.pushNamed(UserAppRoutes.successScreen.name);
-            }
-          },
-        ),
-      ),
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 27.w, vertical: 20.h),
+          padding: EdgeInsets.symmetric(horizontal: 25.w, vertical: 20.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              OnboardingHeader(
-                currentStep: 5,
-                totalSteps: 5,
-                onBack: () {
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.goNamed(UserAppRoutes.topicsScreen.name);
-                  }
-                },
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: isFromHome ?? false ? 8.w : 0,
+                children: [
+                  Expanded(
+                    //todo on boarding steps header
+                    child: OnboardingHeader(
+                      currentStep: (isFromHome) ? 1 : 5,
+                      totalSteps: 5,
+                      onSkip: (isFromHome)
+                          ? () {
+                              context.pushNamed(
+                                UserAppRoutes.interestsScreen.name,
+                              );
+                            }
+                          : null,
+                      onBack: () {
+                        if (context.canPop()) {
+                          context.pop();
+                        } else {
+                          context.goNamed(UserAppRoutes.topicsScreen.name);
+                        }
+                      },
+                    ),
+                  ),
+                ],
               ),
 
               AppText(
@@ -120,7 +101,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                     "Choose what motivates you most — we'll help you reach it.",
                 style: AppTextStyles.sfProDisplayMedium(
                   fontSize: 16.sp,
-                  color: AppColors.black.withOpacity(0.8),
+                  color: AppColors.black.withValues(alpha: 0.8),
                 ),
               ),
 
@@ -135,11 +116,11 @@ class _GoalsScreenState extends State<GoalsScreen> {
               else
                 Expanded(
                   child: ListView.separated(
-                    itemCount: goalsList.length + 1,
+                    itemCount: goalsList.length + ((isFromHome) ? 0 : 1),
                     separatorBuilder: (context, index) => 8.h.verticalSpace,
                     itemBuilder: (context, index) {
                       // Custom Goal Field at the bottom
-                      if (index == goalsList.length) {
+                      if (index == goalsList.length && !isFromHome) {
                         return Padding(
                           padding: EdgeInsets.only(bottom: 20.h, top: 1.h),
                           child: AppTextField(
@@ -203,6 +184,48 @@ class _GoalsScreenState extends State<GoalsScreen> {
                 ),
             ],
           ),
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: EdgeInsets.only(left: 24.w, right: 24.w, bottom: 40.h),
+        child: AppButton(
+          text: "Next",
+          backgroundColor: AppColors.yellowcolor,
+          isLoading: isSaving,
+          onPressed: () async {
+            final customGoalText = customGoalController.text.trim();
+
+            if (selectedGoalId == null &&
+                customGoalText.isEmpty &&
+                !isFromHome) {
+              CustomToast.showError(context, "Please select at least one goal");
+              return;
+            }
+
+            List<String> ids = [];
+            List<Map<String, String>> customs = [];
+
+            if (selectedGoalId != null) {
+              ids.add(selectedGoalId!);
+            }
+            if (customGoalText.isNotEmpty) {
+              customs.add({"title": customGoalText, "description": ""});
+            }
+
+            final success = await authProvider.saveGoals(
+              context,
+              goalIds: ids,
+              customGoals: customs,
+            );
+
+            if (success && context.mounted) {
+              context.pushNamed(
+                (isFromHome)
+                    ? UserAppRoutes.interestsScreen.name
+                    : UserAppRoutes.successScreen.name,
+              );
+            }
+          },
         ),
       ),
     );

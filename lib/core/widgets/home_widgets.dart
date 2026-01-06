@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
-import 'package:redstreakapp/providers/auth_provider.dart';
-import 'package:redstreakapp/screens/home/widgets/add_reading_bottom_sheet.dart';
-import 'package:redstreakapp/providers/home_provider.dart';
-import 'package:go_router/go_router.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:redstreakapp/core/widgets/custom_shimmer.dart';
+import 'package:redstreakapp/providers/auth_provider.dart';
+import 'package:redstreakapp/providers/home_provider.dart';
+import 'package:redstreakapp/routes/user_routes.dart';
+import 'package:redstreakapp/screens/home/widgets/add_reading_bottom_sheet.dart';
 
 class HomeHeader extends StatelessWidget {
   const HomeHeader();
@@ -446,7 +446,7 @@ class YourPlanSection extends StatelessWidget {
           context: context,
           backgroundColor: Colors.transparent,
           isScrollControlled: true,
-          builder: (context) => const AddReadingBottomSheet(),
+          builder: (sheetContext) => const AddReadingBottomSheet(),
         );
       },
       child: Container(

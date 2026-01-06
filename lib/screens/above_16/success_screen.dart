@@ -6,6 +6,7 @@ import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
+import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
 class SuccessScreen extends StatelessWidget {
@@ -41,7 +42,7 @@ class SuccessScreen extends StatelessWidget {
                             "Your reading journey starts today — let’s build your first streak!",
                         style: AppTextStyles.sfProDisplayMedium(
                           fontSize: 16.sp,
-                          color: AppColors.black.withOpacity(0.8),
+                          color: AppColors.black.withValues(alpha: 0.8),
                         ),
                       ),
                     ],
@@ -51,9 +52,13 @@ class SuccessScreen extends StatelessWidget {
 
               /// ---------- BUTTON AT BOTTOM ----------
               AppButton(
-                text: "proccesing",
+                text: "Continue",
                 onPressed: () {
-                  context.pushNamed(UserAppRoutes.tabScreen.name);
+                  context.pushNamed(UserAppRoutes.loginScreen.name);
+                  CustomToast.showSuccess(
+                    context,
+                    "Register Successfully, Login to your account.",
+                  );
                 },
               ),
 

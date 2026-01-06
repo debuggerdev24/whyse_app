@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
-import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
-
-import 'package:provider/provider.dart';
-import 'package:redstreakapp/providers/auth_provider.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
+import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
+import 'package:redstreakapp/providers/auth_provider.dart';
+import 'package:redstreakapp/routes/user_routes.dart';
 
 class InterestsScreen extends StatefulWidget {
   const InterestsScreen({super.key});
@@ -92,34 +91,6 @@ class _InterestsScreenState extends State<InterestsScreen> {
     final isSaving = authProvider.isLoading;
 
     return Scaffold(
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.only(left: 24.w, right: 24.w, bottom: 30.h),
-        child: AppButton(
-          text: "Next",
-          backgroundColor: AppColors.yellowcolor,
-          isLoading: isSaving,
-          onPressed: () async {
-            if (selectedInterestIds.isEmpty &&
-                selectedCustomInterests.isEmpty) {
-              CustomToast.showError(
-                context,
-                "Please select at least one interest",
-              );
-              return;
-            }
-
-            final success = await authProvider.saveInterests(
-              context,
-              interestIds: selectedInterestIds.toList(),
-              customInterests: selectedCustomInterests.toList(),
-            );
-
-            if (success && context.mounted) {
-              context.pushNamed(UserAppRoutes.topicsScreen.name);
-            }
-          },
-        ),
-      ),
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
         child: Padding(
@@ -128,7 +99,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               OnboardingHeader(
-                currentStep: 3,
+                currentStep: (authProvider.isFromHome) ? 2 : 3,
                 totalSteps: 5,
                 onBack: () {
                   if (context.canPop()) {
@@ -206,6 +177,35 @@ class _InterestsScreenState extends State<InterestsScreen> {
                 ),
             ],
           ),
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: EdgeInsets.only(left: 24.w, right: 24.w, bottom: 30.h),
+        child: AppButton(
+          text: "Next",
+          backgroundColor: AppColors.yellowcolor,
+          isLoading: isSaving,
+          onPressed: () async {
+            if (selectedInterestIds.isEmpty &&
+                selectedCustomInterests.isEmpty) {
+              CustomToast.showError(
+                context,
+                "Please select at least one interest",
+              );
+              return;
+            }
+
+            final success = await authProvider.saveInterests(
+              context,
+
+              interestIds: selectedInterestIds.toList(),
+              customInterests: selectedCustomInterests.toList(),
+            );
+
+            if (success && context.mounted) {
+              context.pushNamed(UserAppRoutes.topicsScreen.name);
+            }
+          },
         ),
       ),
     );

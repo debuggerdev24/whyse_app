@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
+import 'package:redstreakapp/core/utils/field_validator.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
-import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
-
-import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
+import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
 import 'package:redstreakapp/providers/auth_provider.dart';
+import 'package:redstreakapp/routes/user_routes.dart';
 
 class ReadingGoalScreen extends StatefulWidget {
   const ReadingGoalScreen({super.key});
@@ -20,6 +21,7 @@ class ReadingGoalScreen extends StatefulWidget {
 }
 
 class _ReadingGoalScreenState extends State<ReadingGoalScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String selectedOption = '5 mins';
   final List<String> options = ['5 mins', '10 mins', '20 mins', 'Custom'];
   final TextEditingController customGoalController = TextEditingController();
@@ -27,44 +29,6 @@ class _ReadingGoalScreenState extends State<ReadingGoalScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.only(left: 24.w, right: 24.w, bottom: 40.h),
-        child: AppButton(
-          text: "Next",
-          backgroundColor: AppColors.yellowcolor,
-          onPressed: () async {
-            int goal = 0;
-            if (selectedOption == 'Custom') {
-              if (customGoalController.text.trim().isEmpty) {
-                // Show toast
-                return;
-              }
-              goal = int.tryParse(customGoalController.text.trim()) ?? 0;
-            } else {
-              goal = int.tryParse(selectedOption.split(' ')[0]) ?? 0;
-            }
-
-            if (goal <= 0) {
-              // Show toast
-              return;
-            }
-
-            final authProvider = Provider.of<AuthProvider>(
-              context,
-              listen: false,
-            );
-            final success = await authProvider.saveReadingGoal(
-              context,
-              dailyReadingGoal: goal,
-            );
-
-            if (success && context.mounted) {
-              context.pushNamed(UserAppRoutes.interestsScreen.name);
-            }
-          },
-          isLoading: context.watch<AuthProvider>().isLoading,
-        ),
-      ),
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
         child: Padding(
@@ -84,6 +48,7 @@ class _ReadingGoalScreenState extends State<ReadingGoalScreen> {
                   }
                 },
               ),
+
               /// TITLE
               AppText(
                 text: "Set Your Daily Reading Goal",
@@ -121,7 +86,7 @@ class _ReadingGoalScreenState extends State<ReadingGoalScreen> {
                           Container(
                             width: 1.w,
                             height: 22.h,
-                            color: Colors.grey.withOpacity(0.3),
+                            color: Colors.grey.withValues(alpha: 0.3),
                           ),
                       ],
                     );
@@ -131,14 +96,59 @@ class _ReadingGoalScreenState extends State<ReadingGoalScreen> {
 
               if (selectedOption == 'Custom') ...[
                 20.h.verticalSpace,
-                AppTextField(
-                  hintText: "Enter minutes",
-                  controller: customGoalController,
-                  keyboardType: TextInputType.number,
+                Form(
+                  key: _formKey,
+                  child: AppTextField(
+                    hintText: "Enter minutes",
+                    controller: customGoalController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    validator: (value) =>
+                        FieldValidators().required(value, "Minutes"),
+                  ),
                 ),
               ],
             ],
           ),
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: EdgeInsets.only(left: 24.w, right: 24.w, bottom: 40.h),
+        child: AppButton(
+          text: "Next",
+          backgroundColor: AppColors.yellowcolor,
+          onPressed: () async {
+            int goal = 0;
+            if (selectedOption == "Custom") {
+              if (!_formKey.currentState!.validate()) {
+                //customGoalController.text.trim().isEmpty
+                // Show toast
+                return;
+              }
+              goal = int.tryParse(customGoalController.text.trim()) ?? 0;
+            } else {
+              goal = int.tryParse(selectedOption.split(' ')[0]) ?? 0;
+            }
+
+            if (goal <= 0) {
+              // Show toast
+              return;
+            }
+
+            final authProvider = Provider.of<AuthProvider>(
+              context,
+              listen: false,
+            );
+            final success = await authProvider.saveReadingGoal(
+              context,
+              dailyReadingGoal: goal,
+            );
+
+            if (success && context.mounted) {
+              context.pushNamed(UserAppRoutes.interestsScreen.name);
+            }
+          },
+          isLoading: context.watch<AuthProvider>().isLoading,
         ),
       ),
     );

@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
-import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
-
-import 'package:provider/provider.dart';
-import 'package:redstreakapp/providers/auth_provider.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
+import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
+import 'package:redstreakapp/providers/auth_provider.dart';
+import 'package:redstreakapp/routes/user_routes.dart';
 
 class TopicsScreen extends StatefulWidget {
   const TopicsScreen({super.key});
@@ -61,6 +60,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
     if (lower.contains("history")) return AppAssets.hauntedhouse;
     if (lower.contains("adventure")) return AppAssets.space;
 
+    // Rotation fallback for any other topics to ensure variety
     List<String> fallbacks = [
       AppAssets.space,
       AppAssets.inventions,
@@ -69,6 +69,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
       AppAssets.wizard,
       AppAssets.dargon,
     ];
+    // Use hash code to consistently return the same random image for the same title
     return fallbacks[title.hashCode.abs() % fallbacks.length];
   }
 
@@ -156,13 +157,17 @@ class _TopicsScreenState extends State<TopicsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-               OnboardingHeader(currentStep: 4, totalSteps: 5,onBack:(){
-                if (context.canPop()) {
-                  context.pop();
-                } else {
-                  context.goNamed(UserAppRoutes.interestsScreen.name);
-                }
-               } ,),
+              OnboardingHeader(
+                currentStep: 4,
+                totalSteps: 5,
+                onBack: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.goNamed(UserAppRoutes.interestsScreen.name);
+                  }
+                },
+              ),
 
               AppText(
                 text: "Choose Your Favorite Topics",

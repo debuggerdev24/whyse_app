@@ -1,30 +1,29 @@
-import 'dart:io';
-import 'package:redstreakapp/models/story_models/story_model.dart';
-
 import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/extensions/routes_extensions.dart';
+import 'package:redstreakapp/models/story_models/story_model.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:redstreakapp/screens/above_16/create_account_screen.dart';
+import 'package:redstreakapp/screens/above_16/interests_screen.dart';
+import 'package:redstreakapp/screens/above_16/profile_info_screen.dart';
+import 'package:redstreakapp/screens/above_16/reading_goal_screen.dart';
 import 'package:redstreakapp/screens/above_16/subscription_screen.dart';
 import 'package:redstreakapp/screens/above_16/success_screen.dart';
+import 'package:redstreakapp/screens/above_16/topics_screen.dart';
+import 'package:redstreakapp/screens/above_16/what_goals_screen.dart';
 import 'package:redstreakapp/screens/above_16/what_intrest_screen.dart';
 import 'package:redstreakapp/screens/auth/enter_age_screen.dart';
 import 'package:redstreakapp/screens/auth/login_screen.dart';
 import 'package:redstreakapp/screens/auth/signup_screen.dart';
 import 'package:redstreakapp/screens/home/generate_reading_screen.dart';
-import 'package:redstreakapp/screens/home/home_screen.dart';
+import 'package:redstreakapp/screens/home/quiz_completed_screen.dart';
 import 'package:redstreakapp/screens/home/quiz_question_screen.dart';
 import 'package:redstreakapp/screens/home/reading_screen.dart';
 import 'package:redstreakapp/screens/home/start_quiz_screen.dart';
-import 'package:redstreakapp/screens/home/quiz_completed_screen.dart';
-import 'package:redstreakapp/screens/splash/splash_screen.dart';
 
-import 'package:redstreakapp/screens/above_16/goals_screen.dart';
-import 'package:redstreakapp/screens/above_16/interests_screen.dart';
-import 'package:redstreakapp/screens/above_16/profile_info_screen.dart';
-import 'package:redstreakapp/screens/above_16/reading_goal_screen.dart';
-import 'package:redstreakapp/screens/above_16/topics_screen.dart';
-import 'package:redstreakapp/screens/tabs/tab.dart';
+import '../screens/below_16/consent_status_screen.dart';
+import '../screens/below_16/parent_email_screen.dart';
+import '../screens/splash/splash_screen.dart';
+import '../screens/tabs/tab.dart';
 
 class UserAppRoute {
   static final GoRouter goRouter = GoRouter(
@@ -69,22 +68,22 @@ class UserAppRoute {
       },
     ),
     // Below 16 Routes
-    // GoRoute(
-    //   path: UserAppRoutes.parentEmailScreen.path,
-    //   name: UserAppRoutes.parentEmailScreen.name,
-    //   builder: (context, state) {
-    //     return ParentEmailScreen();
-    //   },
-    // ),
-    // GoRoute(
-    //   path: UserAppRoutes.consentStatusScreen.path,
-    //   name: UserAppRoutes.consentStatusScreen.name,
-    //   builder: (context, state) {
-    //     // Optional: Parse extra for testing/demo purposes if we want to toggle state
-    //     // final bool isAccepted = state.extra as bool? ?? true;
-    //     return ConsentStatusScreen();
-    //   },
-    // ),
+    GoRoute(
+      path: UserAppRoutes.parentEmailScreen.path,
+      name: UserAppRoutes.parentEmailScreen.name,
+      builder: (context, state) {
+        return ParentEmailScreen();
+      },
+    ),
+    GoRoute(
+      path: UserAppRoutes.consentStatusScreen.path,
+      name: UserAppRoutes.consentStatusScreen.name,
+      builder: (context, state) {
+        // Optional: Parse extra for testing/demo purposes if we want to toggle state
+        // final bool isAccepted = state.extra as bool? ?? true;
+        return ConsentStatusScreen();
+      },
+    ),
     // Onboarding Routes
     GoRoute(
       path: UserAppRoutes.profileInfoScreen.path,
@@ -129,8 +128,8 @@ class UserAppRoute {
       },
     ),
     GoRoute(
-      path: UserAppRoutes.subScriptionScreen.path,
-      name: UserAppRoutes.subScriptionScreen.name,
+      path: UserAppRoutes.subscriptionScreen.path,
+      name: UserAppRoutes.subscriptionScreen.name,
       builder: (context, state) {
         return SubScriptionScreen();
       },
@@ -190,11 +189,18 @@ class UserAppRoute {
       },
     ),
     GoRoute(
-      path: UserAppRoutes.whatinterestScreen.path,
-      name: UserAppRoutes.whatinterestScreen.name,
+      path: UserAppRoutes.whatInterestScreen.path,
+      name: UserAppRoutes.whatInterestScreen.name,
       builder: (context, state) {
         return WhatInatestScreen();
       },
     ),
+    // GoRoute(
+    //   path: UserAppRoutes.whatInterestScreen.path,
+    //   name: UserAppRoutes.whatInterestScreen.name,
+    //   builder: (context, state) {
+    //     return WhatInatestScreen();
+    //   },
+    // ),
   ];
 }

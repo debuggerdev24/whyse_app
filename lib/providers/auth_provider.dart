@@ -1,21 +1,27 @@
 import 'dart:developer';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/constants/shared_pref.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
-import 'package:dio/dio.dart';
 import 'package:redstreakapp/models/story_models/generate_story_request.dart';
 import 'package:redstreakapp/models/story_models/story_model.dart';
+import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:redstreakapp/services/auth_service.dart';
 import 'package:redstreakapp/services/base_api_service.dart';
 
+import '../core/helper/log_helper.dart';
+
 class AuthProvider with ChangeNotifier {
   TextEditingController emailController = TextEditingController();
-  bool isLoading = false;
+  bool isLoading = false, isFromHome = false;
   int? age;
   DateTime? selectedDate;
+
+  set setIsFromHome(bool value) {
+    isFromHome = value;
+  }
 
   void setDate(DateTime date) {
     selectedDate = date;
@@ -86,6 +92,7 @@ class AuthProvider with ChangeNotifier {
   Future<String?> fetchOnboardingStep() async {
     try {
       final onboardingId = SharedPrefs.instance.onboardingId;
+      Logger.info("onBoardingId : $onboardingId");
       if (onboardingId == null) return null;
 
       final response = await AuthServices().getOnboardingProgress(
@@ -164,7 +171,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   // Remove _apiIsUnder16 field since we force the getter
-  bool get apiIsUnder16 => false; // Forced to always be false
+  bool get apiIsUnder16 => true; // Forced to always be false
 
   Future<bool> saveUserAge(BuildContext context) async {
     if (selectedDate == null) {
@@ -198,11 +205,12 @@ class AuthProvider with ChangeNotifier {
       dateToSend =
           "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
     }
+    Logger.info("dateToSend $dateToSend");
 
     try {
       isLoading = true;
       notifyListeners();
-
+      Logger.info("dateToSend $dateToSend");
       final response = await AuthServices().saveAge(
         onboardingId: onboardingId,
         dateOfBirth: dateToSend,

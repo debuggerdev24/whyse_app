@@ -19,7 +19,7 @@ enum UserAppRoutes {
   goalsScreen,
 
   successScreen,
-  subScriptionScreen,
+  subscriptionScreen,
 
   tabScreen,
   bookReadingScreen,
@@ -27,5 +27,5 @@ enum UserAppRoutes {
   startQuizScreen,
   quizQuestionScreen,
   quizCompletedScreen,
-  whatinterestScreen,
+  whatInterestScreen,
 }

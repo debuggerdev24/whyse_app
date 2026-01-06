@@ -6,10 +6,8 @@ import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
-import 'package:redstreakapp/screens/home/quiz_question_screen.dart';
-
 import 'package:redstreakapp/models/story_models/story_model.dart';
+import 'package:redstreakapp/routes/user_routes.dart';
 
 class StartQuizScreen extends StatelessWidget {
   final List<Quiz> quizzes;
