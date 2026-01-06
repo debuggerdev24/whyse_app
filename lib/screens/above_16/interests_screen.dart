@@ -94,30 +94,35 @@ class _InterestsScreenState extends State<InterestsScreen> {
     return Scaffold(
       bottomNavigationBar: Padding(
         padding: EdgeInsets.only(left: 24.w, right: 24.w, bottom: 30.h),
-        child: AppButton(
-          text: "Next",
-          backgroundColor: AppColors.yellowcolor,
-          isLoading: isSaving,
-          onPressed: () async {
-            if (selectedInterestIds.isEmpty &&
-                selectedCustomInterests.isEmpty) {
-              CustomToast.showError(
-                context,
-                "Please select at least one interest",
-              );
-              return;
-            }
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppButton(
+              text: "Next",
+              backgroundColor: AppColors.yellowcolor,
+              isLoading: isSaving,
+              onPressed: () async {
+                if (selectedInterestIds.isEmpty &&
+                    selectedCustomInterests.isEmpty) {
+                  CustomToast.showError(
+                    context,
+                    "Please select at least one interest",
+                  );
+                  return;
+                }
 
-            final success = await authProvider.saveInterests(
-              context,
-              interestIds: selectedInterestIds.toList(),
-              customInterests: selectedCustomInterests.toList(),
-            );
+                final success = await authProvider.saveInterests(
+                  context,
+                  interestIds: selectedInterestIds.toList(),
+                  customInterests: selectedCustomInterests.toList(),
+                );
 
-            if (success && context.mounted) {
-              context.pushNamed(UserAppRoutes.topicsScreen.name);
-            }
-          },
+                if (success && context.mounted) {
+                  context.pushNamed(UserAppRoutes.topicsScreen.name);
+                }
+              },
+            ),
+          ],
         ),
       ),
       backgroundColor: AppColors.backgroundColor,
@@ -128,7 +133,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               OnboardingHeader(
-                currentStep: 3,
+                currentStep: 2,
                 totalSteps: 5,
                 onBack: () {
                   if (context.canPop()) {
@@ -136,6 +141,9 @@ class _InterestsScreenState extends State<InterestsScreen> {
                   } else {
                     context.goNamed(UserAppRoutes.readingGoalScreen.name);
                   }
+                },
+                onSkip: () {
+                  context.pushNamed(UserAppRoutes.topicsScreen.name);
                 },
               ),
 
@@ -191,16 +199,16 @@ class _InterestsScreenState extends State<InterestsScreen> {
                       }),
 
                       // Custom Interest Input
-                      Padding(
-                        padding: EdgeInsets.only(top: 10.h),
-                        child: AppTextField(
-                          controller: customInterestController,
-                          hintText: "Add Custom Interest...",
-                          onFieldSubmitted: (val) {
-                            _addCustomInterest(val);
-                          },
-                        ),
-                      ),
+                      // Padding(
+                      //   padding: EdgeInsets.only(top: 10.h),
+                      //   child: AppTextField(
+                      //     controller: customInterestController,
+                      //     hintText: "Add Custom Interest...",
+                      //     onFieldSubmitted: (val) {
+                      //       _addCustomInterest(val);
+                      //     },
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),

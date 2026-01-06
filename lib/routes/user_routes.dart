@@ -22,4 +22,10 @@ enum UserAppRoutes {
   subScriptionScreen,
 
   tabScreen,
+  bookReadingScreen,
+  readingScreen,
+  startQuizScreen,
+  quizQuestionScreen,
+  quizCompletedScreen,
+  whatinterestScreen,
 }

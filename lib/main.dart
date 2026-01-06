@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/shared_pref.dart';
 import 'package:redstreakapp/providers/auth_provider.dart';
+import 'package:redstreakapp/providers/home_provider.dart';
 import 'package:redstreakapp/routes/go_routes.dart';
 import 'package:redstreakapp/services/base_api_service.dart';
 
@@ -21,6 +22,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
+        ChangeNotifierProvider<HomeProvider>(create: (_) => HomeProvider()),
       ],
       child: ScreenUtilInit(
         designSize: const Size(402, 874),

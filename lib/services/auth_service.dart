@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:redstreakapp/models/story_models/generate_story_request.dart';
 import 'package:redstreakapp/services/base_api_service.dart';
 
 abstract class BaseAuthService {
@@ -55,6 +55,13 @@ abstract class BaseAuthService {
     required String parentEmail,
   });
   Future<dynamic> logOut({required String accessToken});
+  Future<dynamic> generateMobileStory(GenerateStoryRequest request);
+  Future<dynamic> generateStoryImage(GenerateStoryRequest request);
+  Future<dynamic> linkImageToStory({
+    required String storyId,
+    required List<String> images,
+  });
+  Future<dynamic> getAllStories();
 }
 
 class AuthServices implements BaseAuthService {
@@ -265,110 +272,41 @@ class AuthServices implements BaseAuthService {
     return res.data;
   }
 
-  // @override
-  // Future signUpUser({
-  //   required String userName,
-  //   required String mobileNo,
-  //   required String password,
-  //   required String confirmPassword,
-  // }) async {
-  //   final Map<String, dynamic> parms = {
-  //     "username": userName,
-  //     "mobile_number": mobileNo,
-  //     "password": password,
-  //     "confirm_password": confirmPassword,
-  //   };
-  //   final res = await _api.post("auth/signup/user", data: parms);
-  //   return res.data;
-  // }
+  @override
+  Future<dynamic> generateMobileStory(GenerateStoryRequest request) async {
+    final res = await _api.post(
+      'http://167.172.45.71/api/v1/story/generateMobileStory',
+      data: request.toJson(),
+      options: Options(receiveTimeout: const Duration(minutes: 5)),
+    );
+    return res.data;
+  }
 
-  // @override
-  // Future signUpAdmin({
-  //   required String userName,
-  //   required String mobileNo,
-  //   required String password,
-  //   required String confirmPassword,
-  // }) async {
-  //   final Map<String, dynamic> parms = {
-  //     "username": userName,
-  //     "mobile_number": mobileNo,
-  //     "password": password,
-  //     "confirm_password": confirmPassword,
-  //   };
-  //   final res = await _api.post("auth/signup/admin", data: parms);
-  //   return res.data;
-  // }
+  @override
+  Future<dynamic> generateStoryImage(GenerateStoryRequest request) async {
+    final res = await _api.post(
+      'http://167.172.45.71/api/v1/story/generateMobileStoryImage',
+      data: request.toJson(),
+      options: Options(receiveTimeout: const Duration(minutes: 5)),
+    );
+    return res.data;
+  }
 
-  // @override
-  // Future signUpMechanic({
-  //   required String userName,
-  //   required String mobileNo,
-  //   required String password,
-  //   required String confirmPassword,
-  //   /*required List<String> servicesExpertise*/
-  // }) async {
-  //   final Map<String, dynamic> parms = {
-  //     "username": userName,
-  //     "mobile_number": mobileNo,
-  //     "password": password,
-  //     "confirm_password": confirmPassword,
-  //     /*"services_expertise": servicesExpertise*/
-  //   };
-  //   final res = await _api.post("auth/signup/mechanic", data: parms);
-  //   return res.data;
-  // }
+  @override
+  Future<dynamic> linkImageToStory({
+    required String storyId,
+    required List<String> images,
+  }) async {
+    final res = await _api.post(
+      'http://167.172.45.71/api/v1/story/mobile-story/$storyId/store-images',
+      data: {"images": images},
+    );
+    return res.data;
+  }
 
-  // @override
-  // Future verifyOtp({required String mobileNo, required String otp}) async {
-  //   final Map<String, dynamic> parms = {
-  //     "mobile_number": mobileNo,
-  //     "otp_code": otp,
-  //   };
-  //   final res = await _api.post("auth/verify-otp", data: parms);
-  //   return res.data;
-  // }
-
-  // @override
-  // Future requestOtp({required String mobileNo}) async {
-  //   final Map<String, dynamic> parms = {"mobile_number": mobileNo};
-  //   final res = await _api.post(
-  //     "auth/forget-password/request-otp",
-  //     data: parms,
-  //   );
-  //   return res.data;
-  // }
-
-  // @override
-  // Future forgetVerifyOtp({
-  //   required String mobileNo,
-  //   required String otp,
-  // }) async {
-  //   final Map<String, dynamic> parms = {
-  //     "mobile_number": mobileNo,
-  //     "otp_code": otp,
-  //   };
-  //   final res = await _api.post("auth/forget-password/verify-otp", data: parms);
-  //   return res.data;
-  // }
-
-  // @override
-  // Future resetPassoword({
-  //   required String mobileNo,
-  //   required String newPassword,
-  //   required String confirmPassword,
-  // }) async {
-  //   final Map<String, dynamic> params = {
-  //     "mobile_number": mobileNo,
-  //     "new_password": newPassword,
-  //     "confirm_password": confirmPassword,
-  //   };
-  //   final res = await _api.post("auth/forget-password/reset", data: params);
-  //   return res.data;
-  // }
-
-  // @override
-  // Future logOut() async {
-  //   final res = await _api.get('logout');
-  //   return res.data;
-  // }
+  @override
+  Future<dynamic> getAllStories() async {
+    final res = await _api.get('http://167.172.45.71/api/v1/story/mobile');
+    return res.data;
+  }
 }

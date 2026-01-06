@@ -1,10 +1,15 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/constants/shared_pref.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:dio/dio.dart';
+import 'package:redstreakapp/models/story_models/generate_story_request.dart';
+import 'package:redstreakapp/models/story_models/story_model.dart';
 import 'package:redstreakapp/services/auth_service.dart';
+import 'package:redstreakapp/services/base_api_service.dart';
 
 class AuthProvider with ChangeNotifier {
   TextEditingController emailController = TextEditingController();
@@ -138,8 +143,21 @@ class AuthProvider with ChangeNotifier {
 
         return data['currentStep'];
       }
+
       return null;
     } catch (e) {
+      if (e is DioException) {
+        // Check for 404 or specific "Onboarding not found" message
+        if (e.response?.statusCode == 404 ||
+            (e.response?.data.toString().contains("Onboarding not found") ??
+                false)) {
+          debugPrint(
+            "Onboarding session invalid or expired. Clearing local session.",
+          );
+          await SharedPrefs.instance.clearOnboardingSession();
+          return null;
+        }
+      }
       debugPrint("Onboarding progress error: $e");
       return null;
     }
@@ -167,9 +185,6 @@ class AuthProvider with ChangeNotifier {
         (today.month == selectedDate!.month && today.day < selectedDate!.day)) {
       calculatedAge--;
     }
-
-    // If actual age is < 16, send a fake adult DOB (18 years ago)
-    // to bypass "Parent Consent" error while allowing UI freedom.
     String dateToSend;
     if (calculatedAge < 16) {
       final spoofDate = DateTime(
@@ -725,8 +740,50 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
 
       if (response != null && response['success'] == true) {
-        // final data = response['data'];
-        // TODO: Save token/user info
+        final data = response['data'];
+        debugPrint("Login Response Data: $data"); // Debug log
+
+        if (data != null) {
+          String? token;
+
+          // Check for nested session object first (as seen in logs)
+          if (data['session'] != null) {
+            final session = data['session'];
+
+            // Extract access token
+            if (session['accessToken'] != null) {
+              token = session['accessToken'];
+            }
+
+            // Extract refresh token
+            if (session['refreshToken'] != null) {
+              await SharedPrefs.instance.setRefreshToken(
+                session['refreshToken'],
+              );
+            }
+          }
+          // Fallback to flat structure
+          else if (data['accessToken'] != null) {
+            token = data['accessToken'];
+          } else if (data['token'] != null) {
+            token = data['token'];
+          }
+
+          if (token != null) {
+            await SharedPrefs.instance.setToken(token);
+            // Update the current API instance with the new token immediately
+            BaseRepository.instance.addToken(token);
+            debugPrint("Token saved successfully from login: $token");
+          } else {
+            debugPrint("No access token found in login response!");
+          }
+
+          if (data['onboardingId'] != null) {
+            await SharedPrefs.instance.setOnboardingId(
+              data['onboardingId'].toString(),
+            );
+          }
+        }
 
         CustomToast.showSuccess(
           context,
@@ -748,6 +805,21 @@ class AuthProvider with ChangeNotifier {
     } catch (e) {
       isLoading = false;
       notifyListeners();
+
+      if (e is DioException) {
+        final data = e.response?.data;
+        if (data != null &&
+            data['errors'] != null &&
+            (data['errors'] as List).isNotEmpty) {
+          final firstError = data['errors'][0];
+          final msg = firstError['msg'];
+          if (msg != null) {
+            CustomToast.showError(context, msg);
+            return false;
+          }
+        }
+      }
+
       CustomToast.showError(context, e.toString());
       return false;
     }
@@ -779,7 +851,6 @@ class AuthProvider with ChangeNotifier {
         );
         return true;
       } else {
-        // Show error specifically if user is under 16 (handled by backend usually but we can show msg)
         CustomToast.showError(
           context,
           response['message'] ?? "Failed to save parent email",
@@ -795,28 +866,24 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> logOut(BuildContext context) async {
-    try {
-      isLoading = true;
-      notifyListeners();
+    final token = SharedPrefs.instance.token;
 
-      final token = SharedPrefs.instance.token;
-      if (token != null) {
-        // Attempt to call API, but don't block logout if it fails (e.g. network issue)
-        await AuthServices().logOut(accessToken: token);
-      }
-    } catch (e) {
-      debugPrint("Logout API error: $e");
-    } finally {
-      // Always clear local data and navigate out
-      await SharedPrefs.instance.clear();
-      clearAllData();
-      isLoading = false;
-      notifyListeners();
+    // 1. Clear Local Data Immediately
+    await SharedPrefs.instance.clear();
+    clearAllData();
+    notifyListeners();
 
-      // Use GoRouter to go to Splash or Login, clearing history
-      if (context.mounted) {
-        // Using pushReplacement or go to clear stack effectively
-        GoRouter.of(context).goNamed(UserAppRoutes.splashScreen.name);
+    // 2. Navigate Directly to Login
+    if (context.mounted) {
+      GoRouter.of(context).goNamed(UserAppRoutes.splashScreen.name);
+    }
+
+    // 3. Call API in background (fire and forget)
+    if (token != null) {
+      try {
+        AuthServices().logOut(accessToken: token);
+      } catch (e) {
+        debugPrint("Logout API error: $e");
       }
     }
   }
@@ -851,5 +918,105 @@ class AuthProvider with ChangeNotifier {
     age = null;
     selectedDate = null;
     notifyListeners();
+  }
+
+  // Story Generation Logic
+  bool isLoadingStory = false;
+
+  Future<Story?> generateStory(
+    BuildContext context, {
+    required GenerateStoryRequest request,
+  }) async {
+    try {
+      isLoadingStory = true;
+      notifyListeners();
+
+      // 1. Generate Story & Image in Parallel
+      // We wrap image generation to ensure it doesn't fail the whole batch if it throws
+      final results = await Future.wait([
+        AuthServices().generateMobileStory(request),
+        AuthServices().generateStoryImage(request).catchError((e) {
+          log("Image generation error in parallel: $e");
+          return null;
+        }),
+      ]);
+
+      final storyResponse = results[0];
+      final imageResponse = results[1];
+
+      if (storyResponse != null && storyResponse['success'] == true) {
+        log("Story Response: $storyResponse");
+
+        Story? story;
+        if (storyResponse['data'] != null) {
+          story = Story.fromJson(storyResponse['data']);
+        }
+
+        if (story != null) {
+          try {
+            log("Image Response: $imageResponse");
+
+            if (imageResponse != null && imageResponse['success'] == true) {
+              final imageData = imageResponse['data'];
+              if (imageData != null && imageData['imagePath'] != null) {
+                final String imagePath = imageData['imagePath'];
+
+                // 3. Link Image
+                await AuthServices().linkImageToStory(
+                  storyId: story.id,
+                  images: [imagePath],
+                );
+
+                // Update local object
+                story.images.add(imagePath);
+              }
+            }
+          } catch (e) {
+            log("Image linking failed or timed out: $e");
+          }
+
+          isLoadingStory = false;
+          notifyListeners();
+
+          CustomToast.showSuccess(
+            context,
+            storyResponse['message'] ?? "Story generated successfully",
+          );
+          return story;
+        }
+
+        isLoadingStory = false;
+        notifyListeners();
+        return null;
+      } else {
+        isLoadingStory = false;
+        notifyListeners();
+        CustomToast.showError(
+          context,
+          storyResponse?['message'] ?? "Failed to generate story",
+        );
+        return null;
+      }
+    } catch (e) {
+      isLoadingStory = false;
+      notifyListeners();
+
+      if (e is DioException) {
+        final data = e.response?.data;
+        if (data != null &&
+            data['errors'] != null &&
+            (data['errors'] as List).isNotEmpty) {
+          final firstError = data['errors'][0];
+          final msg = firstError['msg'];
+          if (msg != null) {
+            CustomToast.showError(context, msg);
+            return null;
+          }
+        }
+      }
+
+      CustomToast.showError(context, e.toString());
+      return null;
+    }
   }
 }

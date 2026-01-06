@@ -31,12 +31,23 @@ class AppAssets {
   static const book = "$_iconPath/book.svg";
   static const thunder = "$_iconPath/thunder.svg";
   static const notification = "$_iconPath/notification.svg";
-    static const eye = "$_iconPath/eye.svg";
+  static const eye = "$_iconPath/eye.svg";
+  static const check1 = "$_iconPath/check1.svg";
+  static const vocabulary = "$_iconPath/vocabulary.svg";
+  static const pronunciation = "$_iconPath/pronunciation.svg";
+  static const comprehension = "$_iconPath/comprehension.svg";
+  static const readingskill = "$_iconPath/readingskill.svg";
+  static const close = "$_iconPath/close.svg";
+  static const bookmark = "$_iconPath/bookmark.svg";
+  static const disable = "$_iconPath/disable.svg";
+  static const canceloption = "$_iconPath/canceloption.svg";
+  static const correctoption = "$_iconPath/correct.svg";
 
+  static const font = "$_iconPath/font.svg";
 
   // images
   static const _imagePath = "assets/images";
-  static const dargon = "$_imagePath/dargon.png";
+  static const dargon = "$_imagePath/dinosaur.png";
   static const detativeclue = "$_imagePath/detativeclue.png";
   static const hauntedhouse = "$_imagePath/hauntedhouse.png";
   static const inventions = "$_imagePath/inventions.png";
@@ -48,6 +59,14 @@ class AppAssets {
   static const story1 = "$_imagePath/story1.png";
   static const story2 = "$_imagePath/story2.png";
   static const story3 = "$_imagePath/story3.png";
+  static const robot = "$_imagePath/robot.png";
+  static const quizcomplete = "$_imagePath/quizcomplete.png";
+
+  static const book1 = "$_imagePath/book.png";
+
+  static const ebook = "$_imagePath/e-book.png";
+  static const pterodactylus = "$_imagePath/pterodactylus.png";
+  static const quiz = "$_imagePath/quiz.png";
 }
 
 class SvgIcon extends StatelessWidget {

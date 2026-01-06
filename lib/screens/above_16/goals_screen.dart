@@ -56,39 +56,47 @@ class _GoalsScreenState extends State<GoalsScreen> {
 
     return Scaffold(
       bottomNavigationBar: Padding(
-        padding: EdgeInsets.only(left: 24.w, right: 24.w, bottom: 40.h),
-        child: AppButton(
-          text: "Next",
-          backgroundColor: AppColors.yellowcolor,
-          isLoading: isSaving,
-          onPressed: () async {
-            final customGoalText = customGoalController.text.trim();
+        padding: EdgeInsets.only(left: 24.w, right: 24.w, bottom: 20.h),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppButton(
+              text: "Next",
+              backgroundColor: AppColors.yellowcolor,
+              isLoading: isSaving,
+              onPressed: () async {
+                final customGoalText = customGoalController.text.trim();
 
-            if (selectedGoalId == null && customGoalText.isEmpty) {
-              CustomToast.showError(context, "Please select at least one goal");
-              return;
-            }
+                if (selectedGoalId == null && customGoalText.isEmpty) {
+                  CustomToast.showError(
+                    context,
+                    "Please select at least one goal",
+                  );
+                  return;
+                }
 
-            List<String> ids = [];
-            List<Map<String, String>> customs = [];
+                List<String> ids = [];
+                List<Map<String, String>> customs = [];
 
-            if (selectedGoalId != null) {
-              ids.add(selectedGoalId!);
-            }
-            if (customGoalText.isNotEmpty) {
-              customs.add({"title": customGoalText, "description": ""});
-            }
+                if (selectedGoalId != null) {
+                  ids.add(selectedGoalId!);
+                }
+                if (customGoalText.isNotEmpty) {
+                  customs.add({"title": customGoalText, "description": ""});
+                }
 
-            final success = await authProvider.saveGoals(
-              context,
-              goalIds: ids,
-              customGoals: customs,
-            );
+                final success = await authProvider.saveGoals(
+                  context,
+                  goalIds: ids,
+                  customGoals: customs,
+                );
 
-            if (success && context.mounted) {
-              context.pushNamed(UserAppRoutes.successScreen.name);
-            }
-          },
+                if (success && context.mounted) {
+                  context.pushNamed(UserAppRoutes.interestsScreen.name);
+                }
+              },
+            ),
+          ],
         ),
       ),
       backgroundColor: AppColors.backgroundColor,
@@ -99,7 +107,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               OnboardingHeader(
-                currentStep: 5,
+                currentStep: 1,
                 totalSteps: 5,
                 onBack: () {
                   if (context.canPop()) {
@@ -107,6 +115,9 @@ class _GoalsScreenState extends State<GoalsScreen> {
                   } else {
                     context.goNamed(UserAppRoutes.topicsScreen.name);
                   }
+                },
+                onSkip: () {
+                  context.pushNamed(UserAppRoutes.interestsScreen.name);
                 },
               ),
 
@@ -135,19 +146,19 @@ class _GoalsScreenState extends State<GoalsScreen> {
               else
                 Expanded(
                   child: ListView.separated(
-                    itemCount: goalsList.length + 1,
+                    itemCount: goalsList.length,
                     separatorBuilder: (context, index) => 8.h.verticalSpace,
                     itemBuilder: (context, index) {
                       // Custom Goal Field at the bottom
                       if (index == goalsList.length) {
-                        return Padding(
-                          padding: EdgeInsets.only(bottom: 20.h, top: 1.h),
-                          child: AppTextField(
-                            controller: customGoalController,
-                            hintText: "Add Custom Goal...",
-                            onChanged: _onCustomGoalChanged,
-                          ),
-                        );
+                        // return Padding(
+                        //   padding: EdgeInsets.only(bottom: 20.h, top: 1.h),
+                        //   child: AppTextField(
+                        //     controller: customGoalController,
+                        //     hintText: "Add Custom Goal...",
+                        //     onChanged: _onCustomGoalChanged,
+                        //   ),
+                        // );
                       }
 
                       final goal = goalsList[index];

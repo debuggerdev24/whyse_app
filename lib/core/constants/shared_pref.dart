@@ -44,6 +44,12 @@ class SharedPrefs {
     await prefs.setBool(_ageCompletedKey, val);
   }
 
+  Future<void> clearOnboardingSession() async {
+    await prefs.remove(_emailKey);
+    await prefs.remove(_onboardingIdKey);
+    await prefs.remove(_ageCompletedKey);
+  }
+
   Future<void> clear() async {
     await prefs.clear();
   }

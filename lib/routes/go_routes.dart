@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:redstreakapp/models/story_models/story_model.dart';
 
 import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/extensions/routes_extensions.dart';
@@ -6,10 +7,16 @@ import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:redstreakapp/screens/above_16/create_account_screen.dart';
 import 'package:redstreakapp/screens/above_16/subscription_screen.dart';
 import 'package:redstreakapp/screens/above_16/success_screen.dart';
+import 'package:redstreakapp/screens/above_16/what_intrest_screen.dart';
 import 'package:redstreakapp/screens/auth/enter_age_screen.dart';
 import 'package:redstreakapp/screens/auth/login_screen.dart';
 import 'package:redstreakapp/screens/auth/signup_screen.dart';
+import 'package:redstreakapp/screens/home/generate_reading_screen.dart';
 import 'package:redstreakapp/screens/home/home_screen.dart';
+import 'package:redstreakapp/screens/home/quiz_question_screen.dart';
+import 'package:redstreakapp/screens/home/reading_screen.dart';
+import 'package:redstreakapp/screens/home/start_quiz_screen.dart';
+import 'package:redstreakapp/screens/home/quiz_completed_screen.dart';
 import 'package:redstreakapp/screens/splash/splash_screen.dart';
 
 import 'package:redstreakapp/screens/above_16/goals_screen.dart';
@@ -133,6 +140,60 @@ class UserAppRoute {
       name: UserAppRoutes.tabScreen.name,
       builder: (context, state) {
         return TabScreen();
+      },
+    ),
+    GoRoute(
+      path: UserAppRoutes.bookReadingScreen.path,
+      name: UserAppRoutes.bookReadingScreen.name,
+      builder: (context, state) {
+        return GenerateReadingScreen();
+      },
+    ),
+    GoRoute(
+      path: UserAppRoutes.readingScreen.path,
+      name: UserAppRoutes.readingScreen.name,
+      builder: (context, state) {
+        final story = state.extra as Story?;
+        return ReadingScreen(story: story);
+      },
+    ),
+    GoRoute(
+      path: UserAppRoutes.startQuizScreen.path,
+      name: UserAppRoutes.startQuizScreen.name,
+      builder: (context, state) {
+        return StartQuizScreen();
+      },
+    ),
+    GoRoute(
+      path: UserAppRoutes.quizQuestionScreen.path,
+      name: UserAppRoutes.quizQuestionScreen.name,
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>?;
+        final quizzes = extra?['quizzes'] as List<Quiz>? ?? [];
+        final storyTitle = extra?['storyTitle'] as String? ?? "";
+        return QuizQuestionScreen(quizzes: quizzes, storyTitle: storyTitle);
+      },
+    ),
+    GoRoute(
+      path: UserAppRoutes.quizCompletedScreen.path,
+      name: UserAppRoutes.quizCompletedScreen.name,
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>?;
+        final score = extra?['score'] as int? ?? 0;
+        final total = extra?['total'] as int? ?? 0;
+        final storyTitle = extra?['storyTitle'] as String? ?? "";
+        return QuizCompletedScreen(
+          score: score,
+          total: total,
+          storyTitle: storyTitle,
+        );
+      },
+    ),
+    GoRoute(
+      path: UserAppRoutes.whatinterestScreen.path,
+      name: UserAppRoutes.whatinterestScreen.name,
+      builder: (context, state) {
+        return WhatInatestScreen();
       },
     ),
   ];

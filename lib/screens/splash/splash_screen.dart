@@ -70,7 +70,13 @@ class _SplashScreenState extends State<SplashScreen>
       } else if (step == 'COMPLETED') {
         context.goNamed(UserAppRoutes.tabScreen.name);
       } else {
-        context.goNamed(UserAppRoutes.loginScreen.name);
+        // Check if user is already logged in
+        final token = SharedPrefs.instance.token;
+        if (token != null && token.isNotEmpty) {
+          context.goNamed(UserAppRoutes.tabScreen.name);
+        } else {
+          context.goNamed(UserAppRoutes.loginScreen.name);
+        }
       }
     });
   }

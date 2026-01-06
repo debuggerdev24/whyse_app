@@ -1,0 +1,47 @@
+import 'package:flutter/material.dart';
+import 'package:redstreakapp/models/story_models/story_model.dart';
+import 'package:redstreakapp/services/auth_service.dart';
+
+class HomeProvider extends ChangeNotifier {
+  int _currentIndex = 0;
+  bool _isLoading = false;
+  List<Story> _stories = [];
+
+  bool get isLoading => _isLoading;
+  List<Story> get stories => _stories;
+
+  final List<String> contents = [
+    "*Dinosaurs* lived a very long time ago, even before people were on Earth. They were animals that came in many sizes. Some *dinosaurs* were as big as houses, while others were small, almost like chickens. They lived in many different places, such as *forests*, *swamps*, and even *deserts*. *Dinosaurs* ruled the Earth for *millions* of years.",
+    "Dinosaurs did not all eat the same food. Some dinosaurs liked to eat plants, such as *leaves* and *ferns*. These are called *plant-eaters*. Other dinosaurs ate meat and used their *sharp teeth* to catch animals. These are called *meat-eaters*. Some walked on two legs, and some walked on four. There were even flying dinosaurs, like *pterosaurs*, that could glide in the sky.",
+    "Dinosau looked very different from each other. Some had *long necks* to reach tall trees, while others had *horns* or *spikes* to stay safe. A few even had big *plates* on their backs or sharp *claws*. After many, many years, all dinosaurs *disappeared*. Today, scientists find their *bones* and study them to learn what they were like. We can see these bones in *museums*, and that helps us imagine how amazing dinosaurs once were.",
+  ];
+
+  int get currentIndex => _currentIndex;
+  int get total => contents.length;
+  String get currentContent => contents[_currentIndex];
+
+  void next() {
+    if (_currentIndex < contents.length - 1) {
+      _currentIndex++;
+      notifyListeners();
+    }
+  }
+
+  Future<void> getAllStories() async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      final response = await AuthServices().getAllStories();
+      if (response != null && response['success'] == true) {
+        final data = response['data'] as List;
+        _stories = data.map((e) => Story.fromJson(e)).toList();
+      }
+    } catch (e) {
+      debugPrint("Error fetching stories: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+}

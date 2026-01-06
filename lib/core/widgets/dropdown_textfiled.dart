@@ -87,3 +87,100 @@ class CustomDropDown extends StatelessWidget {
     );
   }
 }
+
+class CustomDropdownField extends StatefulWidget {
+  final String label;
+  final List<String> items;
+  final String hint;
+  final ValueChanged<String?> onChanged;
+
+  const CustomDropdownField({
+    super.key,
+    required this.label,
+    required this.items,
+    required this.hint,
+    required this.onChanged,
+  });
+
+  @override
+  State<CustomDropdownField> createState() => _CustomDropdownFieldState();
+}
+
+class _CustomDropdownFieldState extends State<CustomDropdownField> {
+  String? selectedValue;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        /// Label
+        Row(
+          children: [
+            Container(
+              width: 8.w,
+              height: 8.w,
+              decoration: BoxDecoration(
+                color: AppColors.yellowcolor,
+                shape: BoxShape.circle,
+              ),
+            ),
+            8.w.horizontalSpace,
+            AppText(
+              text: widget.label,
+              style: AppTextStyles.textStyle16Semibold,
+            ),
+          ],
+        ),
+
+        Divider(thickness: 0, color: AppColors.black.withOpacity(0.1)),
+        10.h.verticalSpace,
+
+        /// Dropdown Container
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14.r),
+            border: Border.all(color: AppColors.black.withOpacity(0.1)),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              isExpanded: true,
+              value: selectedValue,
+              hint: AppText(
+                text: widget.hint,
+                style: AppTextStyles.sfProDisplayMedium(
+                  fontSize: 14.sp,
+                  color: AppColors.black.withOpacity(0.3),
+                ),
+              ),
+              icon: const Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: AppColors.black,
+              ),
+              items: widget.items.map((item) {
+                return DropdownMenuItem<String>(
+                  value: item,
+                  child: AppText(
+                    text: item,
+                    style: AppTextStyles.sfProDisplayMedium(
+                      fontSize: 14.sp,
+                      color: AppColors.black,
+                    ),
+                  ),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedValue = value;
+                });
+                widget.onChanged(value);
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

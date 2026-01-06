@@ -10,12 +10,19 @@ class OnboardingHeader extends StatelessWidget {
   final int currentStep;
   final int totalSteps;
   final VoidCallback? onBack;
+  final VoidCallback? onSkip;
+
+  final String backIcon;
+  final double backIconSize;
 
   const OnboardingHeader({
     super.key,
     required this.currentStep,
     required this.totalSteps,
     this.onBack,
+    this.onSkip,
+    this.backIcon = AppAssets.backButton,
+    this.backIconSize = 14,
   });
 
   @override
@@ -24,7 +31,6 @@ class OnboardingHeader extends StatelessWidget {
       children: [
         Row(
           children: [
-            /// BACK BUTTON
             GestureDetector(
               onTap: currentStep == 0
                   ? null
@@ -37,8 +43,8 @@ class OnboardingHeader extends StatelessWidget {
               child: Opacity(
                 opacity: currentStep == 0 ? 0.3 : 1,
                 child: SvgIcon(
-                  AppAssets.backButton,
-                  size: 14.sp,
+                  backIcon,
+                  size: backIconSize.sp, // ✅ flexible
                   color: currentStep == 0 ? Colors.grey : AppColors.black,
                 ),
               ),
@@ -64,6 +70,19 @@ class OnboardingHeader extends StatelessWidget {
                 }),
               ),
             ),
+            if (onSkip != null) ...[
+              16.w.horizontalSpace,
+              GestureDetector(
+                onTap: onSkip,
+                child: AppText(
+                  text: "Skip",
+                  style: AppTextStyles.sfProDisplayMedium(
+                    fontSize: 16.sp,
+                    color: AppColors.yellowcolor,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
 
@@ -149,7 +168,6 @@ class TopicCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20.r),
-
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.5), // soft black
@@ -176,6 +194,77 @@ class TopicCard extends StatelessWidget {
             color: Colors.white,
             letterSpacing: 0.2,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class OptionCard extends StatelessWidget {
+  final String text;
+  final bool isSelected;
+  final bool isCorrect;
+  final bool isChecked;
+  final VoidCallback? onTap;
+
+  const OptionCard({
+    required this.text,
+    required this.isSelected,
+    required this.isCorrect,
+    required this.isChecked,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Color borderColor = Colors.black.withOpacity(0.1);
+    Color backgroundColor = Colors.white;
+    Color textColor = Colors.black;
+    Widget? trailingIcon;
+
+    if (isChecked) {
+      if (isCorrect) {
+        borderColor = Color(0xFF4CAF50);
+        backgroundColor = Color(0xFFE8F5E9);
+        trailingIcon = SvgIcon(AppAssets.correctoption, size: 24.w);
+      } else if (isSelected && !isCorrect) {
+        borderColor = AppColors.redcolor;
+        backgroundColor = Color(0xFFFFEBEE);
+        trailingIcon = SvgIcon(AppAssets.canceloption, size: 24.w);
+      } else {
+        borderColor = Colors.black.withOpacity(0.1);
+        backgroundColor = Colors.white;
+      }
+    } else {
+      if (isSelected) {
+        borderColor = AppColors.teal;
+        backgroundColor = AppColors.teal.withOpacity(0.1);
+      }
+    }
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: EdgeInsets.only(bottom: 12.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 15.h),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: borderColor, width: 1),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: AppText(
+                text: text,
+                style: AppTextStyles.sfProTextBold(
+                  fontSize: 14.sp,
+                  color: textColor,
+                ),
+              ),
+            ),
+            if (trailingIcon != null) ...[12.w.horizontalSpace, trailingIcon],
+          ],
         ),
       ),
     );
