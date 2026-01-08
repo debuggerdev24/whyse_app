@@ -25,11 +25,11 @@ class _WhatInatestScreenState extends State<WhatInatestScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            AppButton(
+            AppFilledButton(
               text: "Next",
-              backgroundColor: AppColors.yellowcolor,
-              onPressed: () async {
-                context.pushNamed(UserAppRoutes.readingGoalScreen.name);
+              backgroundColor: AppColors.yellowColor,
+              onTap: () async {
+                context.pushNamed(AppRoutes.readingGoalScreen.name);
               },
             ),
           ],
@@ -51,11 +51,11 @@ class _WhatInatestScreenState extends State<WhatInatestScreen> {
                       if (context.canPop()) {
                         context.pop();
                       } else {
-                        context.goNamed(UserAppRoutes.topicsScreen.name);
+                        context.goNamed(AppRoutes.topicsScreen.name);
                       }
                     },
                     onSkip: () {
-                      context.pushNamed(UserAppRoutes.readingGoalScreen.name);
+                      context.pushNamed(AppRoutes.readingGoalScreen.name);
                     },
                   ),
                   AppText(
@@ -68,7 +68,7 @@ class _WhatInatestScreenState extends State<WhatInatestScreen> {
                     padding: EdgeInsets.only(top: 10.h),
                     child: AppTextField(
                       hintText: "Add Custom Interest...",
-                      onFieldSubmitted: (val) {},
+                      onSubmit: (val) {},
                     ),
                   ),
                 ],

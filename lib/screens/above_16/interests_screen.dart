@@ -5,13 +5,15 @@ import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
-import 'package:redstreakapp/core/widgets/app_button.dart';
+import 'package:redstreakapp/core/utils/custom_loader.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
-import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
 import 'package:redstreakapp/providers/auth_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
+
+import '../../core/widgets/app_button.dart';
+import '../../core/widgets/custom_toast.dart';
 
 class InterestsScreen extends StatefulWidget {
   const InterestsScreen({super.key});
@@ -85,126 +87,134 @@ class _InterestsScreenState extends State<InterestsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = context.watch<AuthProvider>();
-    final interestsList = authProvider.interestsList;
-    final isLoading = authProvider.isLoadingInterests;
-    final isSaving = authProvider.isLoading;
-
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              OnboardingHeader(
-                currentStep: (authProvider.isFromHome) ? 2 : 3,
-                totalSteps: 5,
-                onBack: () {
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.goNamed(UserAppRoutes.readingGoalScreen.name);
-                  }
-                },
-              ),
-
-              AppText(
-                text: "Pick Your Interests",
-                style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
-              ),
-              10.h.verticalSpace,
-              AppText(
-                text:
-                    "Choose topics you love to personalize your reading journey.",
-                style: AppTextStyles.sfProDisplayMedium(
-                  fontSize: 16.sp,
-                  color: AppColors.black.withOpacity(0.8),
-                ),
-              ),
-
-              20.h.verticalSpace,
-
-              // Loading State
-              if (isLoading)
-                const Expanded(
-                  child: Center(
-                    child: CircularProgressIndicator(color: AppColors.teal),
+        child: Consumer<AuthProvider>(
+          builder: (context, provider, child) {
+            return Stack(
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 24.w,
+                    vertical: 20.h,
                   ),
-                )
-              else
-                Expanded(
-                  child: ListView(
-                    physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // API Interests
-                      ...interestsList.map((interest) {
-                        final id = interest['id'];
-                        final name = interest['name'];
-                        return SelectionOption(
-                          label: name,
-                          isSelected: selectedInterestIds.contains(id),
-                          onTap: () => _toggleApiInterest(id),
-                          iconPath: _getIconForInterest(name),
-                        );
-                      }),
+                      OnboardingHeader(
+                        currentStep: (provider.isStoryCreation) ? 2 : 3,
+                        totalSteps: (provider.isStoryCreation) ? 4 : 5,
+                        onBack: () {
+                          if (context.canPop()) {
+                            context.pop();
+                          } else {
+                            context.goNamed(AppRoutes.readingGoalScreen.name);
+                          }
+                        },
+                      ),
 
-                      // Custom Interests
-                      ...customInterests.map((name) {
-                        return SelectionOption(
-                          label: name,
-                          isSelected: selectedCustomInterests.contains(name),
-                          onTap: () => _toggleCustomInterest(name),
-                          // Fallback icon for custom?
-                          iconPath: AppAssets.adventure,
-                        );
-                      }),
-
-                      // Custom Interest Input
-                      Padding(
-                        padding: EdgeInsets.only(top: 10.h),
-                        child: AppTextField(
-                          controller: customInterestController,
-                          hintText: "Add Custom Interest...",
-                          onFieldSubmitted: (val) {
-                            _addCustomInterest(val);
-                          },
+                      AppText(
+                        text: "Pick Your Interests",
+                        style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
+                      ),
+                      10.h.verticalSpace,
+                      AppText(
+                        text:
+                            "Choose topics you love to personalize your reading journey.",
+                        style: AppTextStyles.sfProDisplayMedium(
+                          fontSize: 16.sp,
+                          color: AppColors.black.withValues(alpha: 0.8),
                         ),
+                      ),
+
+                      20.h.verticalSpace,
+
+                      // Loading State
+                      if (provider.isLoadingInterests)
+                        const Expanded(
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: AppColors.teal,
+                            ),
+                          ),
+                        )
+                      else
+                        Expanded(
+                          child: ListView(
+                            physics: const BouncingScrollPhysics(),
+                            children: [
+                              // API Interests
+                              ...provider.interestsList.map((interest) {
+                                final id = interest['id'];
+                                final name = interest['name'];
+                                return SelectionOption(
+                                  label: name,
+                                  isSelected: selectedInterestIds.contains(id),
+                                  onTap: () => _toggleApiInterest(id),
+                                  iconPath: _getIconForInterest(name),
+                                );
+                              }),
+
+                              // Custom Interests
+                              ...customInterests.map((name) {
+                                return SelectionOption(
+                                  label: name,
+                                  isSelected: selectedCustomInterests.contains(
+                                    name,
+                                  ),
+                                  onTap: () => _toggleCustomInterest(name),
+                                  // Fallback icon for custom?
+                                  iconPath: AppAssets.adventure,
+                                );
+                              }),
+
+                              // Custom Interest Input
+                              Padding(
+                                padding: EdgeInsets.only(top: 10.h),
+                                child: AppTextField(
+                                  controller: customInterestController,
+                                  hintText: "Add Custom Interest...",
+                                  onSubmit: (val) {
+                                    _addCustomInterest(val);
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      AppFilledButton(
+                        text: "Next",
+                        backgroundColor: AppColors.yellowColor,
+
+                        onTap: () async {
+                          if (selectedInterestIds.isEmpty &&
+                              selectedCustomInterests.isEmpty) {
+                            AppToast.error(
+                              context,
+                              "Please select at least one interest",
+                            );
+                            return;
+                          }
+
+                          final success = await provider.saveInterests(
+                            context,
+
+                            interestIds: selectedInterestIds.toList(),
+                            customInterests: selectedCustomInterests.toList(),
+                          );
+
+                          if (success && context.mounted) {
+                            context.pushNamed(AppRoutes.topicsScreen.name);
+                          }
+                        },
                       ),
                     ],
                   ),
                 ),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.only(left: 24.w, right: 24.w, bottom: 30.h),
-        child: AppButton(
-          text: "Next",
-          backgroundColor: AppColors.yellowcolor,
-          isLoading: isSaving,
-          onPressed: () async {
-            if (selectedInterestIds.isEmpty &&
-                selectedCustomInterests.isEmpty) {
-              CustomToast.showError(
-                context,
-                "Please select at least one interest",
-              );
-              return;
-            }
-
-            final success = await authProvider.saveInterests(
-              context,
-
-              interestIds: selectedInterestIds.toList(),
-              customInterests: selectedCustomInterests.toList(),
+                if (provider.isSaveInterestLoading) FullPageIndicator(),
+              ],
             );
-
-            if (success && context.mounted) {
-              context.pushNamed(UserAppRoutes.topicsScreen.name);
-            }
           },
         ),
       ),

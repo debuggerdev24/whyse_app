@@ -5,11 +5,14 @@ import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
+import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
-import 'package:redstreakapp/core/widgets/kback_button.dart';
 import 'package:redstreakapp/providers/auth_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
+
+import '../../core/widgets/custom_toast.dart';
+import '../../core/widgets/kback_button.dart';
 
 class ParentEmailScreen extends StatefulWidget {
   const ParentEmailScreen({super.key});
@@ -19,72 +22,82 @@ class ParentEmailScreen extends StatefulWidget {
 }
 
 class _ParentEmailScreenState extends State<ParentEmailScreen> {
-  final TextEditingController _emailController = TextEditingController();
-
   @override
-  void dispose() {
-    _emailController.dispose();
-    super.dispose();
+  void initState() {
+    context.read<AuthProvider>().parentEmailCtr.clear();
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
-      appBar: const CustomBackAppBar(),
+    return AppLayout(
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              117.h.verticalSpace,
-              AppText(
-                text: "Need Parent’s help to Proceed",
-                style: AppTextStyles.sfProDisplayBold(
-                  fontSize: 40.sp,
-                  color: AppColors.black,
+        child: Consumer<AuthProvider>(
+          builder: (context, provider, child) {
+            return Stack(
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24.w),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomBackButton(margin: EdgeInsets.only(top: 20.h)),
+
+                      120.h.verticalSpace,
+                      AppText(
+                        text: "Need Parent’s help to Proceed",
+                        style: AppTextStyles.sfProDisplayBold(
+                          fontSize: 40.sp,
+                          color: AppColors.black,
+                        ),
+                      ),
+                      13.h.verticalSpace,
+                      AppText(
+                        text: "Enter your Parent’s email to proceed.",
+                        style: AppTextStyles.sfProDisplayMedium(
+                          fontSize: 16.sp,
+                          color: AppColors.black,
+                        ),
+                      ),
+                      18.h.verticalSpace,
+                      AppTextField(
+                        controller: provider.parentEmailCtr,
+                        hintText: "Email",
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      const Spacer(),
+                      AppFilledButton(
+                        isLoading: provider.isLoading,
+                        onTap: () async {
+                          context.pushNamed(AppRoutes.consentStatusScreen.name);
+                          return;
+                          await provider.saveParentEmail(
+                            context: context,
+                            onFailed: (error) {
+                              AppToast.error(context, error);
+                            },
+                            onSuccess: () {
+                              context.pushNamed(
+                                AppRoutes.consentStatusScreen.name,
+                              );
+                              AppToast.success(
+                                context,
+                                "Parent's email saved successfully",
+                              );
+                            },
+                          );
+                        },
+                        text: "Send Request",
+                        backgroundColor: AppColors.yellowColor,
+                      ),
+
+                      10.h.verticalSpace,
+                    ],
+                  ),
                 ),
-              ),
-              13.h.verticalSpace,
-              AppText(
-                text: "Enter your Parent’s email to proceed.",
-                style: AppTextStyles.sfProDisplayMedium(
-                  fontSize: 16.sp,
-                  color: AppColors.black,
-                ),
-              ),
-              18.h.verticalSpace,
-              AppTextField(
-                controller: _emailController,
-                hintText: "Email",
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const Spacer(),
-              Consumer<AuthProvider>(
-                builder: (context, authProvider, child) {
-                  return AppButton(
-                    isLoading: authProvider.isLoading,
-                    onPressed: () async {
-                      final email = _emailController.text.trim();
-                      final success = await authProvider.saveParentEmail(
-                        context,
-                        email,
-                      );
-                      if (success && context.mounted) {
-                        context.pushNamed(
-                          UserAppRoutes.consentStatusScreen.name,
-                        );
-                      }
-                    },
-                    text: "Send Request",
-                    backgroundColor: AppColors.yellowcolor,
-                  );
-                },
-              ),
-              10.h.verticalSpace,
-            ],
-          ),
+              ],
+            );
+          },
         ),
       ),
     );

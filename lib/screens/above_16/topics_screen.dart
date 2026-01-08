@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
+import 'package:redstreakapp/core/utils/custom_loader.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
@@ -30,33 +31,40 @@ class _TopicsScreenState extends State<TopicsScreen> {
     String lower = title.toLowerCase();
 
     // Direct Mappings
-    if (lower.contains("space") || lower.contains("planet"))
+    if (lower.contains("space") || lower.contains("planet")) {
       return AppAssets.space;
+    }
     if (lower.contains("invention") ||
         lower.contains("tech") ||
-        lower.contains("science"))
+        lower.contains("science")) {
       return AppAssets.inventions;
+    }
     if (lower.contains("haunted") ||
         lower.contains("ghost") ||
-        lower.contains("horror"))
+        lower.contains("horror")) {
       return AppAssets.hauntedhouse;
+    }
     if (lower.contains("mystery") ||
         lower.contains("detective") ||
-        lower.contains("clue"))
+        lower.contains("clue")) {
       return AppAssets.detativeclue;
+    }
     if (lower.contains("wizard") ||
         lower.contains("magic") ||
-        lower.contains("fantasy"))
+        lower.contains("fantasy")) {
       return AppAssets.wizard;
+    }
     if (lower.contains("dragon") ||
         lower.contains("animal") ||
         lower.contains("creature") ||
-        lower.contains("nature"))
+        lower.contains("nature")) {
       return AppAssets.dargon;
+    }
 
     // Looser Mappings for other known categories
-    if (lower.contains("comic") || lower.contains("fun"))
+    if (lower.contains("comic") || lower.contains("fun")) {
       return AppAssets.wizard;
+    }
     if (lower.contains("history")) return AppAssets.hauntedhouse;
     if (lower.contains("adventure")) return AppAssets.space;
 
@@ -114,130 +122,144 @@ class _TopicsScreenState extends State<TopicsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = context.watch<AuthProvider>();
-    final topicsList = authProvider.topicsList;
-    final isLoading = authProvider.isLoadingTopics;
-    final isSaving = authProvider.isLoading;
-
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
 
       // Fixed bottom button
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.only(left: 24.w, right: 24.w, bottom: 40.h),
-        child: AppButton(
-          text: "Next",
-          backgroundColor: AppColors.yellowcolor,
-          isLoading: isSaving,
-          onPressed: () async {
-            if (selectedTopicIds.isEmpty && selectedCustomTopics.isEmpty) {
-              CustomToast.showError(
-                context,
-                "Please select at least one topic",
-              );
-              return;
-            }
-
-            final success = await authProvider.saveTopics(
-              context,
-              topicIds: selectedTopicIds.toList(),
-              customTopics: selectedCustomTopics.toList(),
-            );
-
-            if (success && context.mounted) {
-              context.pushNamed(UserAppRoutes.goalsScreen.name);
-            }
-          },
-        ),
-      ),
-
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              OnboardingHeader(
-                currentStep: 4,
-                totalSteps: 5,
-                onBack: () {
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.goNamed(UserAppRoutes.interestsScreen.name);
-                  }
-                },
-              ),
-
-              AppText(
-                text: "Choose Your Favorite Topics",
-                style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
-              ),
-
-              10.h.verticalSpace,
-
-              AppText(
-                text:
-                    "Here are some topics we think you'll love based on your interests. You can pick the ones that excite you the most!",
-                style: AppTextStyles.sfProDisplayMedium(
-                  fontSize: 16.sp,
-                  color: AppColors.black.withOpacity(0.8),
-                ),
-              ),
-
-              18.h.verticalSpace,
-              // Custom Topic Input
-              AppTextField(
-                controller: customTopicController,
-                hintText: "Add Topic...",
-                onFieldSubmitted: (val) => _addCustomTopic(val),
-              ),
-              37.h.verticalSpace,
-
-              // Loading State
-              if (isLoading)
-                const Expanded(
-                  child: Center(
-                    child: CircularProgressIndicator(color: AppColors.teal),
+        child: Consumer<AuthProvider>(
+          builder: (context, provider, child) {
+            return Stack(
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 24.w,
+                    vertical: 20.h,
                   ),
-                )
-              else
-                Expanded(
-                  child: GridView(
-                    padding: EdgeInsets.zero,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 20.w,
-                      mainAxisSpacing: 25.h,
-                      childAspectRatio: 1.4,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // API Topics
-                      ...topicsList.map((topic) {
-                        final id = topic['id'];
-                        final title = topic['title'];
-                        return TopicCard(
-                          label: title,
-                          assetPath: _getIconForTopic(title),
-                          isSelected: selectedTopicIds.contains(id),
-                          onTap: () => _toggleApiTopic(id),
-                        );
-                      }),
+                      OnboardingHeader(
+                        currentStep: (provider.isStoryCreation) ? 4 : 3,
+                        totalSteps: (provider.isStoryCreation) ? 4 : 5,
+                        onBack: () {
+                          if (context.canPop()) {
+                            context.pop();
+                          } else {
+                            context.goNamed(AppRoutes.interestsScreen.name);
+                          }
+                        },
+                      ),
 
-                      // Custom Topics
-                      ...customTopics.map((title) {
-                        return TopicCard(
-                          label: title,
-                          assetPath: _getIconForTopic(title),
-                          isSelected: selectedCustomTopics.contains(title),
-                          onTap: () => _toggleCustomTopic(title),
-                        );
-                      }),
+                      AppText(
+                        text: "Choose Your Favorite Topics",
+                        style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
+                      ),
+
+                      10.h.verticalSpace,
+
+                      AppText(
+                        text:
+                            "Here are some topics we think you'll love based on your interests. You can pick the ones that excite you the most!",
+                        style: AppTextStyles.sfProDisplayMedium(
+                          fontSize: 16.sp,
+                          color: AppColors.black.withValues(alpha: 0.8),
+                        ),
+                      ),
+
+                      18.h.verticalSpace,
+                      // Custom Topic Input
+                      AppTextField(
+                        controller: customTopicController,
+                        hintText: "Add Topic...",
+                        onSubmit: (val) => _addCustomTopic(val),
+                      ),
+                      37.h.verticalSpace,
+
+                      // Loading State
+                      if (provider.isLoadingTopics)
+                        const Expanded(
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: AppColors.teal,
+                            ),
+                          ),
+                        )
+                      else
+                        Expanded(
+                          child: GridView(
+                            padding: EdgeInsets.zero,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing: 20.w,
+                                  mainAxisSpacing: 25.h,
+                                  childAspectRatio: 1.4,
+                                ),
+                            children: [
+                              // API Topics
+                              ...provider.topicsList.map((topic) {
+                                final id = topic['id'];
+                                final title = topic['title'];
+                                return TopicCard(
+                                  label: title,
+                                  assetPath: _getIconForTopic(title),
+                                  isSelected: selectedTopicIds.contains(id),
+                                  onTap: () => _toggleApiTopic(id),
+                                );
+                              }),
+
+                              // Custom Topics
+                              ...customTopics.map((title) {
+                                return TopicCard(
+                                  label: title,
+                                  assetPath: _getIconForTopic(title),
+                                  isSelected: selectedCustomTopics.contains(
+                                    title,
+                                  ),
+                                  onTap: () => _toggleCustomTopic(title),
+                                );
+                              }),
+                            ],
+                          ),
+                        ),
+
+                      AppFilledButton(
+                        text: "Next",
+                        backgroundColor: AppColors.yellowColor,
+
+                        onTap: () async {
+                          if (selectedTopicIds.isEmpty &&
+                              selectedCustomTopics.isEmpty) {
+                            AppToast.error(
+                              context,
+                              "Please select at least one topic",
+                            );
+                            return;
+                          }
+
+                          final success = await provider.saveTopics(
+                            context,
+                            topicIds: selectedTopicIds.toList(),
+                            customTopics: selectedCustomTopics.toList(),
+                          );
+
+                          if (success && context.mounted) {
+                            context.pushNamed(
+                              (provider.isStoryCreation)
+                                  ? AppRoutes.readingGoalScreen.name
+                                  : AppRoutes.goalsScreen.name,
+                            );
+                          }
+                        },
+                      ),
                     ],
                   ),
                 ),
-            ],
-          ),
+                if (provider.isSaveTopicsLoading) FullPageIndicator(),
+              ],
+            );
+          },
         ),
       ),
     );

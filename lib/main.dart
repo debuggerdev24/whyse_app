@@ -4,13 +4,13 @@ import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/shared_pref.dart';
 import 'package:redstreakapp/providers/auth_provider.dart';
 import 'package:redstreakapp/providers/home_provider.dart';
-import 'package:redstreakapp/routes/go_routes.dart';
+import 'package:redstreakapp/routes/app_router.dart';
 import 'package:redstreakapp/services/base_api_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SharedPrefs.instance.init();
-  await BaseRepository.instance.initialize();
+  await DioClient.instance.initialize();
   runApp(const MyApp());
 }
 
@@ -40,5 +40,9 @@ class MyApp extends StatelessWidget {
 }
 
 /*
+todo update
+
+
+
 
 */

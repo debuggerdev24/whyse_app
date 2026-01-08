@@ -2,25 +2,30 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/constants/shared_pref.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
-import 'package:redstreakapp/models/story_models/generate_story_request.dart';
-import 'package:redstreakapp/models/story_models/story_model.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
-import 'package:redstreakapp/services/auth_service.dart';
+import 'package:redstreakapp/services/auth/auth_api_service.dart';
 import 'package:redstreakapp/services/base_api_service.dart';
 
 import '../core/helper/log_helper.dart';
+import '../models/home/story_models/generate_story_request.dart';
+import '../models/home/story_models/story_model.dart';
 
 class AuthProvider with ChangeNotifier {
-  TextEditingController emailController = TextEditingController();
-  bool isLoading = false, isFromHome = false;
+  TextEditingController signUpEmailCtr = TextEditingController();
+  TextEditingController loginEmailCtr = TextEditingController();
+  TextEditingController forgotPasswordCtr = TextEditingController();
+  TextEditingController otpCtr = TextEditingController();
+  TextEditingController newPasswordCtr = TextEditingController();
+  TextEditingController resetConfirmPasswordCtr = TextEditingController();
+  TextEditingController parentEmailCtr = TextEditingController();
+  bool isLoading = false, isStoryCreation = false;
   int? age;
+  int calculatedAge = 0;
   DateTime? selectedDate;
 
   set setIsFromHome(bool value) {
-    isFromHome = value;
+    isStoryCreation = value;
   }
 
   void setDate(DateTime date) {
@@ -47,59 +52,54 @@ class AuthProvider with ChangeNotifier {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
-  Future<bool> startOnboarding(BuildContext context) async {
-    final email = emailController.text.trim();
+  bool isStartOnBoardingLoading = false;
+  Future<void> startOnboarding({
+    required BuildContext context,
+    required VoidCallback onSuccess,
+    required Function(String error) onFailed,
+  }) async {
+    final email = signUpEmailCtr.text.trim();
     if (email.isEmpty) {
-      CustomToast.showError(context, "Please enter email");
-      return false;
+      AppToast.error(context, "Please enter email!");
+      return;
     }
     if (!_isValidEmail(email)) {
-      CustomToast.showError(context, "Please enter a valid email");
-      return false;
+      AppToast.error(context, "Please enter a valid email");
+      return;
     }
 
-    try {
-      isLoading = true;
-      notifyListeners();
+    isStartOnBoardingLoading = true;
+    notifyListeners();
 
-      final response = await AuthServices().startOnboarding(email: email);
+    final response = await AuthServices().startOnboarding(email: email);
 
-      isLoading = false;
-      notifyListeners();
-
-      if (response != null && response['success'] == true) {
-        final data = response['data'];
+    response.fold(
+      (l) {
+        onFailed.call(l.errorMsg);
+      },
+      (r) async {
+        final data = r['data'];
         await SharedPrefs.instance.setOnboardingEmail(data['email']);
         await SharedPrefs.instance.setOnboardingId(data['onboardingId']);
+        onSuccess.call();
+        signUpEmailCtr.clear();
+      },
+    );
 
-        CustomToast.showSuccess(
-          context,
-          response['message'] ?? "Onboarding started",
-        );
-        return true;
-      }
-
-      CustomToast.showError(context, response['message'] ?? "Failed");
-      return false;
-    } catch (e) {
-      isLoading = false;
-      notifyListeners();
-      CustomToast.showError(context, e.toString());
-      return false;
-    }
+    isStartOnBoardingLoading = false;
+    notifyListeners();
   }
 
   Future<String?> fetchOnboardingStep() async {
     try {
       final onboardingId = SharedPrefs.instance.onboardingId;
-      Logger.info("onBoardingId : $onboardingId");
       if (onboardingId == null) return null;
 
       final response = await AuthServices().getOnboardingProgress(
         onboardingId: onboardingId,
       );
-      if (response != null && response['success'] == true) {
-        final data = response['data'];
+      response.fold((l) {}, (r) {
+        final data = r['data'];
 
         if (data['nextStep'] != null &&
             data['nextStep'].toString().isNotEmpty) {
@@ -149,103 +149,79 @@ class AuthProvider with ChangeNotifier {
         }
 
         return data['currentStep'];
-      }
-
+      });
       return null;
     } catch (e) {
-      if (e is DioException) {
-        // Check for 404 or specific "Onboarding not found" message
-        if (e.response?.statusCode == 404 ||
-            (e.response?.data.toString().contains("Onboarding not found") ??
-                false)) {
-          debugPrint(
-            "Onboarding session invalid or expired. Clearing local session.",
-          );
-          await SharedPrefs.instance.clearOnboardingSession();
-          return null;
-        }
-      }
       debugPrint("Onboarding progress error: $e");
       return null;
     }
   }
 
-  // Remove _apiIsUnder16 field since we force the getter
-  bool get apiIsUnder16 => true; // Forced to always be false
+  //todo
+  bool get isUnder16 => calculatedAge! < 16;
 
-  Future<bool> saveUserAge(BuildContext context) async {
-    if (selectedDate == null) {
-      CustomToast.showError(context, "Please select your date of birth");
-      return false;
-    }
-
+  bool isSaveUserAgeLoading = false;
+  Future<void> saveUserAge({
+    required BuildContext context,
+    required Function onSuccess,
+    required Function(String error) onFailed,
+  }) async {
+    //todo checking onBoarding id null or not
     final onboardingId = SharedPrefs.instance.onboardingId;
     if (onboardingId == null) {
-      CustomToast.showError(context, "Onboarding session not found");
-      return false;
+      AppToast.error(context, "Onboarding session not found");
+      return;
     }
 
-    // Calculate age to check if we need to spoof for backend compliance
+    //todo Calculate age to check if we need to spoof for backend compliance
+    String dateToSend = calculateDateToSend();
+    Logger.info("dateToSend $dateToSend");
+
+    isSaveUserAgeLoading = true;
+    notifyListeners();
+
+    final response = await AuthServices().saveBirthDate(
+      onboardingId: onboardingId,
+      dateOfBirth: dateToSend,
+    );
+    response.fold(
+      (l) {
+        onFailed.call(l.errorMsg);
+      },
+      (r) async {
+        await SharedPrefs.instance.setAgeCompleted(true);
+
+        onSuccess.call();
+      },
+    );
+
+    isSaveUserAgeLoading = false;
+    notifyListeners();
+  }
+
+  String calculateDateToSend() {
     final today = DateTime.now();
-    int calculatedAge = today.year - selectedDate!.year;
+    calculatedAge = today.year - selectedDate!.year;
     if (today.month < selectedDate!.month ||
         (today.month == selectedDate!.month && today.day < selectedDate!.day)) {
       calculatedAge--;
     }
     String dateToSend;
-    if (calculatedAge < 16) {
-      final spoofDate = DateTime(
-        today.year - 18,
-        selectedDate!.month,
-        selectedDate!.day,
-      );
-      dateToSend =
-          "${spoofDate.year}-${spoofDate.month.toString().padLeft(2, '0')}-${spoofDate.day.toString().padLeft(2, '0')}";
-    } else {
-      dateToSend =
-          "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
-    }
-    Logger.info("dateToSend $dateToSend");
-
-    try {
-      isLoading = true;
-      notifyListeners();
-      Logger.info("dateToSend $dateToSend");
-      final response = await AuthServices().saveAge(
-        onboardingId: onboardingId,
-        dateOfBirth: dateToSend,
-      );
-
-      isLoading = false;
-
-      if (response != null && response['success'] == true) {
-        // final data = response['data'];
-        // _apiIsUnder16 = data['isUnder16']; // Removed as we ignore it
-
-        await SharedPrefs.instance.setAgeCompleted(
-          true,
-        ); // Persist local success
-
-        CustomToast.showSuccess(
-          context,
-          response['message'] ?? "Age saved successfully",
-        );
-        notifyListeners();
-        return true;
-      } else {
-        CustomToast.showError(
-          context,
-          response['message'] ?? "Failed to save age",
-        );
-        notifyListeners();
-        return false;
-      }
-    } catch (e) {
-      isLoading = false;
-      notifyListeners();
-      CustomToast.showError(context, e.toString());
-      return false;
-    }
+    // if (calculatedAge < 16) {
+    //   final spoofDate = DateTime(
+    //     today.year, //- 18
+    //     selectedDate!.month,
+    //     selectedDate!.day,
+    //   );
+    //   dateToSend =
+    //       "${spoofDate.year}-${spoofDate.month.toString().padLeft(2, '0')}-${spoofDate.day.toString().padLeft(2, '0')}";
+    // } else {
+    //   dateToSend =
+    //   "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
+    // }
+    dateToSend =
+        "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
+    return dateToSend;
   }
 
   // Create Account Properties
@@ -255,6 +231,7 @@ class AuthProvider with ChangeNotifier {
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
 
+  bool isCreateAccountLoading = false;
   Future<bool> createAccount(
     BuildContext context, {
     required bool isTermsAccepted,
@@ -266,49 +243,49 @@ class AuthProvider with ChangeNotifier {
     final confirmPassword = confirmPasswordController.text.trim();
 
     if (firstName.isEmpty) {
-      CustomToast.showError(context, "Please enter your first name");
+      AppToast.error(context, "Please enter your first name");
       return false;
     }
     if (lastName.isEmpty) {
-      CustomToast.showError(context, "Please enter your last name");
+      AppToast.error(context, "Please enter your last name");
       return false;
     }
     if (email.isEmpty) {
-      CustomToast.showError(context, "Please enter your email");
+      AppToast.error(context, "Please enter your email");
       return false;
     }
     if (!_isValidEmail(email)) {
-      CustomToast.showError(context, "Please enter a valid email");
+      AppToast.error(context, "Please enter a valid email");
       return false;
     }
 
     if (password.isEmpty) {
-      CustomToast.showError(context, "Please enter your password");
+      AppToast.error(context, "Please enter your password");
       return false;
     }
     if (confirmPassword.isEmpty) {
-      CustomToast.showError(context, "Please confirm your password");
+      AppToast.error(context, "Please confirm your password");
       return false;
     }
 
     if (password != confirmPassword) {
-      CustomToast.showError(context, "Passwords do not match");
+      AppToast.error(context, "Passwords do not match");
       return false;
     }
 
     if (!isTermsAccepted) {
-      CustomToast.showError(context, "Please accept Terms and Conditions");
+      AppToast.error(context, "Please accept Terms and Conditions");
       return false;
     }
 
     final onboardingId = SharedPrefs.instance.onboardingId;
     if (onboardingId == null) {
-      CustomToast.showError(context, "Session invalid");
+      AppToast.error(context, "Session invalid");
       return false;
     }
 
     try {
-      isLoading = true;
+      isCreateAccountLoading = true;
       notifyListeners();
 
       final response = await AuthServices().createAccount(
@@ -320,14 +297,12 @@ class AuthProvider with ChangeNotifier {
         confirmPassword: confirmPassword,
       );
 
-      isLoading = false;
+      isCreateAccountLoading = false;
       notifyListeners();
 
       if (response != null && response['success'] == true) {
-        final data = response['data'];
-
         // If success here, it usually means account created OR verified successfully
-        CustomToast.showSuccess(
+        AppToast.success(
           context,
           response['message'] ?? "Account created successfully",
         );
@@ -337,15 +312,15 @@ class AuthProvider with ChangeNotifier {
             (response['errors'] as List).isNotEmpty) {
           final firstError = response['errors'][0];
           final msg = firstError['msg'] ?? "Failed to create account";
-          CustomToast.showError(context, msg);
+          AppToast.error(context, msg);
         } else {
           final msg = response['message'] ?? "Failed to create account";
-          CustomToast.showError(context, msg);
+          AppToast.error(context, msg);
         }
         return false;
       }
     } catch (e) {
-      isLoading = false;
+      isCreateAccountLoading = false;
       notifyListeners();
 
       // Check for DioException to extract backend error message
@@ -356,33 +331,34 @@ class AuthProvider with ChangeNotifier {
           if (data['errors'] != null && (data['errors'] as List).isNotEmpty) {
             final firstError = data['errors'][0];
             final msg = firstError['msg'] ?? "An error occurred";
-            CustomToast.showError(context, msg);
+            AppToast.error(context, msg);
             return false;
           }
           // Check for top-level 'message'
           if (data['message'] != null) {
-            CustomToast.showError(context, data['message']);
+            AppToast.error(context, data['message']);
             return false;
           }
         }
       }
 
-      CustomToast.showError(context, e.toString());
+      AppToast.error(context, e.toString());
       return false;
     }
   }
 
+  bool isVerifyEmailLoading = false;
   Future<bool> checkEmailVerification(BuildContext context) async {
     final onboardingId = SharedPrefs.instance.onboardingId;
     final email = signupEmailController.text.trim();
 
     if (onboardingId == null) {
-      CustomToast.showError(context, "Session invalid");
+      AppToast.error(context, "Session invalid");
       return false;
     }
 
     try {
-      isLoading = true;
+      isVerifyEmailLoading = true;
       notifyListeners();
 
       final response = await AuthServices().verifyEmail(
@@ -390,30 +366,32 @@ class AuthProvider with ChangeNotifier {
         email: email,
       );
 
-      isLoading = false;
+      isVerifyEmailLoading = false;
       notifyListeners();
 
       if (response != null && response['success'] == true) {
-        CustomToast.showSuccess(
+        AppToast.success(
           context,
           response['message'] ?? "Email verified successfully",
         );
+
         return true;
       } else {
-        CustomToast.showError(
+        AppToast.error(
           context,
           response['message'] ?? "Email not verified or verification failed",
         );
         return false;
       }
     } catch (e) {
-      isLoading = false;
+      isVerifyEmailLoading = false;
       notifyListeners();
-      CustomToast.showError(context, e.toString());
+      AppToast.error(context, e.toString());
       return false;
     }
   }
 
+  bool isSaveProfileLoading = false;
   Future<bool> saveProfileInfo(
     BuildContext context, {
     required String country,
@@ -421,12 +399,12 @@ class AuthProvider with ChangeNotifier {
   }) async {
     final onboardingId = SharedPrefs.instance.onboardingId;
     if (onboardingId == null) {
-      CustomToast.showError(context, "Session invalid");
+      AppToast.error(context, "Session invalid");
       return false;
     }
 
     try {
-      isLoading = true;
+      isSaveProfileLoading = true;
       notifyListeners();
 
       final response = await AuthServices().saveProfileInfo(
@@ -435,42 +413,43 @@ class AuthProvider with ChangeNotifier {
         preferredLanguage: preferredLanguage,
       );
 
-      isLoading = false;
+      isSaveProfileLoading = false;
       notifyListeners();
 
       if (response != null && response['success'] == true) {
-        CustomToast.showSuccess(
+        AppToast.success(
           context,
           response['message'] ?? "Profile info saved successfully",
         );
         return true;
       } else {
-        CustomToast.showError(
+        AppToast.error(
           context,
           response['message'] ?? "Failed to save profile info",
         );
         return false;
       }
     } catch (e) {
-      isLoading = false;
+      isSaveProfileLoading = false;
       notifyListeners();
-      CustomToast.showError(context, e.toString());
+      AppToast.error(context, e.toString());
       return false;
     }
   }
 
+  bool isSaveReadingGoal = false;
   Future<bool> saveReadingGoal(
     BuildContext context, {
     required int dailyReadingGoal,
   }) async {
     final onboardingId = SharedPrefs.instance.onboardingId;
     if (onboardingId == null) {
-      CustomToast.showError(context, "Session invalid");
+      AppToast.error(context, "Session invalid");
       return false;
     }
 
     try {
-      isLoading = true;
+      isSaveReadingGoal = true;
       notifyListeners();
 
       final response = await AuthServices().saveReadingGoal(
@@ -478,26 +457,26 @@ class AuthProvider with ChangeNotifier {
         dailyReadingGoal: dailyReadingGoal,
       );
 
-      isLoading = false;
+      isSaveReadingGoal = false;
       notifyListeners();
 
       if (response != null && response['success'] == true) {
-        CustomToast.showSuccess(
+        AppToast.success(
           context,
           response['message'] ?? "Reading goal saved successfully",
         );
         return true;
       } else {
-        CustomToast.showError(
+        AppToast.error(
           context,
           response['message'] ?? "Failed to save reading goal",
         );
         return false;
       }
     } catch (e) {
-      isLoading = false;
+      isSaveReadingGoal = false;
       notifyListeners();
-      CustomToast.showError(context, e.toString());
+      AppToast.error(context, e.toString());
       return false;
     }
   }
@@ -529,6 +508,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  bool isSaveInterestLoading = false;
   Future<bool> saveInterests(
     BuildContext context, {
     required List<String> interestIds,
@@ -536,12 +516,12 @@ class AuthProvider with ChangeNotifier {
   }) async {
     final onboardingId = SharedPrefs.instance.onboardingId;
     if (onboardingId == null) {
-      CustomToast.showError(context, "Session invalid");
+      AppToast.error(context, "Session invalid");
       return false;
     }
 
     try {
-      isLoading = true;
+      isSaveInterestLoading = true;
       notifyListeners();
 
       final response = await AuthServices().saveInterests(
@@ -550,26 +530,26 @@ class AuthProvider with ChangeNotifier {
         customInterests: customInterests,
       );
 
-      isLoading = false;
+      isSaveInterestLoading = false;
       notifyListeners();
 
       if (response != null && response['success'] == true) {
-        CustomToast.showSuccess(
+        AppToast.success(
           context,
           response['message'] ?? "Interests saved successfully",
         );
         return true;
       } else {
-        CustomToast.showError(
+        AppToast.error(
           context,
           response['message'] ?? "Failed to save interests",
         );
         return false;
       }
     } catch (e) {
-      isLoading = false;
+      isSaveInterestLoading = false;
       notifyListeners();
-      CustomToast.showError(context, e.toString());
+      AppToast.error(context, e.toString());
       return false;
     }
   }
@@ -591,7 +571,7 @@ class AuthProvider with ChangeNotifier {
       if (response != null && response['success'] == true) {
         topicsList = response['data'] ?? [];
       } else {
-        CustomToast.showError(
+        AppToast.error(
           context,
           response['message'] ?? "Failed to fetch topics",
         );
@@ -603,6 +583,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  bool isSaveTopicsLoading = false;
   Future<bool> saveTopics(
     BuildContext context, {
     required List<String> topicIds,
@@ -610,12 +591,12 @@ class AuthProvider with ChangeNotifier {
   }) async {
     final onboardingId = SharedPrefs.instance.onboardingId;
     if (onboardingId == null) {
-      CustomToast.showError(context, "Session invalid");
+      AppToast.error(context, "Session invalid");
       return false;
     }
 
     try {
-      isLoading = true;
+      isSaveTopicsLoading = true;
       notifyListeners();
 
       final response = await AuthServices().saveTopics(
@@ -624,26 +605,23 @@ class AuthProvider with ChangeNotifier {
         customTopics: customTopics,
       );
 
-      isLoading = false;
+      isSaveTopicsLoading = false;
       notifyListeners();
 
       if (response != null && response['success'] == true) {
-        CustomToast.showSuccess(
+        AppToast.success(
           context,
           response['message'] ?? "Topics saved successfully",
         );
         return true;
       } else {
-        CustomToast.showError(
-          context,
-          response['message'] ?? "Failed to save topics",
-        );
+        AppToast.error(context, response['message'] ?? "Failed to save topics");
         return false;
       }
     } catch (e) {
-      isLoading = false;
+      isSaveTopicsLoading = false;
       notifyListeners();
-      CustomToast.showError(context, e.toString());
+      AppToast.error(context, e.toString());
       return false;
     }
   }
@@ -652,12 +630,12 @@ class AuthProvider with ChangeNotifier {
   bool isLoadingGoals = false;
   List<dynamic> goalsList = [];
 
-  Future<void> fetchDefaultGoals(BuildContext context) async {
+  Future<void> getGoals(BuildContext context) async {
     try {
       isLoadingGoals = true;
       notifyListeners();
 
-      final response = await AuthServices().getDefaultGoals();
+      final response = await AuthServices().getGoals();
 
       isLoadingGoals = false;
       notifyListeners();
@@ -665,10 +643,7 @@ class AuthProvider with ChangeNotifier {
       if (response != null && response['success'] == true) {
         goalsList = response['data'] ?? [];
       } else {
-        CustomToast.showError(
-          context,
-          response['message'] ?? "Failed to fetch goals",
-        );
+        AppToast.error(context, response['message'] ?? "Failed to fetch goals");
       }
     } catch (e) {
       isLoadingGoals = false;
@@ -677,6 +652,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  bool isSaveGoalsLoading = false;
   Future<bool> saveGoals(
     BuildContext context, {
     required List<String> goalIds,
@@ -684,12 +660,12 @@ class AuthProvider with ChangeNotifier {
   }) async {
     final onboardingId = SharedPrefs.instance.onboardingId;
     if (onboardingId == null) {
-      CustomToast.showError(context, "Session invalid");
+      AppToast.error(context, "Session invalid");
       return false;
     }
 
     try {
-      isLoading = true;
+      isSaveGoalsLoading = true;
       notifyListeners();
 
       final response = await AuthServices().saveGoals(
@@ -698,45 +674,43 @@ class AuthProvider with ChangeNotifier {
         customGoals: customGoals,
       );
 
-      isLoading = false;
+      isSaveGoalsLoading = false;
       notifyListeners();
 
       if (response != null && response['success'] == true) {
-        CustomToast.showSuccess(
+        AppToast.success(
           context,
           response['message'] ?? "Goals saved successfully",
         );
         return true;
       } else {
-        CustomToast.showError(
-          context,
-          response['message'] ?? "Failed to save goals",
-        );
+        AppToast.error(context, response['message'] ?? "Failed to save goals");
         return false;
       }
     } catch (e) {
-      isLoading = false;
+      isSaveGoalsLoading = false;
       notifyListeners();
-      CustomToast.showError(context, e.toString());
+      AppToast.error(context, e.toString());
       return false;
     }
   }
 
+  bool isLoginLoading = false;
   Future<bool> login(BuildContext context) async {
-    final email = emailController.text.trim();
+    final email = loginEmailCtr.text.trim();
     final password = passwordController.text.trim();
 
     if (email.isEmpty) {
-      CustomToast.showError(context, "Please enter your email");
+      AppToast.error(context, "Please enter your email");
       return false;
     }
     if (password.isEmpty) {
-      CustomToast.showError(context, "Please enter your password");
+      AppToast.error(context, "Please enter your password");
       return false;
     }
 
     try {
-      isLoading = true;
+      isLoginLoading = true;
       notifyListeners();
 
       final response = await AuthServices().login(
@@ -744,7 +718,7 @@ class AuthProvider with ChangeNotifier {
         password: password,
       );
 
-      isLoading = false;
+      isLoginLoading = false;
       notifyListeners();
 
       if (response != null && response['success'] == true) {
@@ -780,7 +754,7 @@ class AuthProvider with ChangeNotifier {
           if (token != null) {
             await SharedPrefs.instance.setToken(token);
             // Update the current API instance with the new token immediately
-            BaseRepository.instance.addToken(token);
+            DioClient.instance.addToken(token);
             debugPrint("Token saved successfully from login: $token");
           } else {
             debugPrint("No access token found in login response!");
@@ -793,10 +767,9 @@ class AuthProvider with ChangeNotifier {
           }
         }
 
-        CustomToast.showSuccess(
-          context,
-          response['message'] ?? "Login successful",
-        );
+        AppToast.success(context, response['message'] ?? "Login successful");
+        loginEmailCtr.clear();
+        passwordController.clear();
         return true;
       } else {
         // Parse errors array if present
@@ -804,14 +777,14 @@ class AuthProvider with ChangeNotifier {
             (response['errors'] as List).isNotEmpty) {
           final firstError = response['errors'][0];
           final msg = firstError['msg'] ?? "Login failed";
-          CustomToast.showError(context, msg);
+          AppToast.error(context, msg);
         } else {
-          CustomToast.showError(context, response['message'] ?? "Login failed");
+          AppToast.error(context, response['message'] ?? "Login failed");
         }
         return false;
       }
     } catch (e) {
-      isLoading = false;
+      isLoginLoading = false;
       notifyListeners();
 
       if (e is DioException) {
@@ -822,71 +795,56 @@ class AuthProvider with ChangeNotifier {
           final firstError = data['errors'][0];
           final msg = firstError['msg'];
           if (msg != null) {
-            CustomToast.showError(context, msg);
+            AppToast.error(context, msg);
             return false;
           }
         }
       }
 
-      CustomToast.showError(context, e.toString());
+      AppToast.error(context, e.toString());
       return false;
     }
   }
 
-  Future<bool> saveParentEmail(BuildContext context, String parentEmail) async {
+  bool isSaveParentEmailLoading = false;
+  Future<void> saveParentEmail({
+    required BuildContext context,
+    required VoidCallback onSuccess,
+    required Function(String error) onFailed,
+  }) async {
     final onboardingId = SharedPrefs.instance.onboardingId;
     if (onboardingId == null) {
-      CustomToast.showError(context, "Session invalid");
-      return false;
+      AppToast.error(context, "On Boarding Id not found!");
+      return;
     }
 
-    try {
-      isLoading = true;
-      notifyListeners();
-
-      final response = await AuthServices().saveParentEmail(
-        onboardingId: onboardingId,
-        parentEmail: parentEmail,
-      );
-
-      isLoading = false;
-      notifyListeners();
-
-      if (response != null && response['success'] == true) {
-        CustomToast.showSuccess(
-          context,
-          response['message'] ?? "Parent email saved successfully",
-        );
-        return true;
-      } else {
-        CustomToast.showError(
-          context,
-          response['message'] ?? "Failed to save parent email",
-        );
-        return false;
-      }
-    } catch (e) {
-      isLoading = false;
-      notifyListeners();
-      CustomToast.showError(context, e.toString());
-      return false;
-    }
-  }
-
-  Future<void> logOut(BuildContext context) async {
-    final token = SharedPrefs.instance.token;
-
-    // 1. Clear Local Data Immediately
-    await SharedPrefs.instance.clear();
-    clearAllData();
+    isSaveParentEmailLoading = true;
     notifyListeners();
 
-    // 2. Navigate Directly to Login
-    if (context.mounted) {
-      GoRouter.of(context).goNamed(UserAppRoutes.splashScreen.name);
-    }
+    final response = await AuthServices().saveParentEmail(
+      onboardingId: onboardingId,
+      parentEmail: parentEmailCtr.text.trim(),
+    );
 
-    // 3. Call API in background (fire and forget)
+    response.fold(
+      (l) {
+        onFailed.call(l.errorMsg);
+      },
+      (r) {
+        onSuccess.call();
+      },
+    );
+
+    isSaveParentEmailLoading = false;
+    notifyListeners();
+  }
+
+  bool isLogOutLoading = false;
+  Future<void> logOutUser({required VoidCallback onSuccess}) async {
+    final token = SharedPrefs.instance.authToken;
+    isLogOutLoading = true;
+    notifyListeners();
+
     if (token != null) {
       try {
         AuthServices().logOut(accessToken: token);
@@ -894,16 +852,26 @@ class AuthProvider with ChangeNotifier {
         debugPrint("Logout API error: $e");
       }
     }
+
+    // 1. Clear Local Data Immediately
+    await SharedPrefs.instance.clear();
+    clearAllData();
+    notifyListeners();
+
+    isLogOutLoading = false;
+    notifyListeners();
+
+    // 3. Call API in background (fire and forget)
   }
 
   void clearLoginFields() {
-    emailController.clear();
+    signUpEmailCtr.clear();
     passwordController.clear();
     notifyListeners();
   }
 
   void clearSignupFields() {
-    emailController.clear();
+    signUpEmailCtr.clear();
     notifyListeners();
   }
 
@@ -917,7 +885,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   void clearAllData() {
-    emailController.clear();
+    signUpEmailCtr.clear();
     firstNameController.clear();
     lastNameController.clear();
     signupEmailController.clear();
@@ -986,7 +954,7 @@ class AuthProvider with ChangeNotifier {
           isLoadingStory = false;
           notifyListeners();
 
-          CustomToast.showSuccess(
+          AppToast.success(
             context,
             storyResponse['message'] ?? "Story generated successfully",
           );
@@ -999,7 +967,7 @@ class AuthProvider with ChangeNotifier {
       } else {
         isLoadingStory = false;
         notifyListeners();
-        CustomToast.showError(
+        AppToast.error(
           context,
           storyResponse?['message'] ?? "Failed to generate story",
         );
@@ -1017,13 +985,13 @@ class AuthProvider with ChangeNotifier {
           final firstError = data['errors'][0];
           final msg = firstError['msg'];
           if (msg != null) {
-            CustomToast.showError(context, msg);
+            AppToast.error(context, msg);
             return null;
           }
         }
       }
 
-      CustomToast.showError(context, e.toString());
+      AppToast.error(context, e.toString());
       return null;
     }
   }

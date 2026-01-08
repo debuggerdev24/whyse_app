@@ -8,14 +8,21 @@ import 'package:redstreakapp/core/widgets/app_text.dart';
 class CustomBackButton extends StatelessWidget {
   final VoidCallback? onTap;
   final Color color;
+  final EdgeInsetsGeometry? margin;
 
-  const CustomBackButton({super.key, this.onTap, this.color = Colors.black});
+  const CustomBackButton({
+    super.key,
+    this.onTap,
+    this.color = Colors.black,
+    this.margin,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(left: 27.w, top: 20.h),
+      padding: margin ?? EdgeInsetsGeometry.zero,
       child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap:
             onTap ??
             () {
@@ -30,7 +37,10 @@ class CustomBackButton extends StatelessWidget {
             12.w.horizontalSpace,
             AppText(
               text: "Back",
-              style: AppTextStyles.textStyle14Semibold.copyWith(color: color),
+              style: AppTextStyles.sfProDisplaySemibold(
+                color: color,
+                fontSize: 15.sp,
+              ),
             ),
           ],
         ),

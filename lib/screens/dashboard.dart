@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
+import 'package:redstreakapp/core/widgets/custom_toast.dart';
+import 'package:redstreakapp/providers/home_provider.dart';
 import 'package:redstreakapp/screens/home/home_screen.dart';
 
 class TabScreen extends StatefulWidget {
@@ -26,7 +29,16 @@ class _TabScreenState extends State<TabScreen> {
   @override
   void initState() {
     super.initState();
+    callInitApis(context: context);
     currentIndex = widget.initialIndex;
+  }
+
+  void callInitApis({required BuildContext context}) {
+    context.read<HomeProvider>().getGoals(
+      onFailed: (error) {
+        AppToast.error(context, error);
+      },
+    );
   }
 
   @override
@@ -75,7 +87,7 @@ class KBottomNavBar extends StatelessWidget {
 
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 18,
             spreadRadius: -3,
             offset: const Offset(0, 8),
@@ -96,11 +108,11 @@ class KBottomNavBar extends StatelessWidget {
 
 class BottomNavItem extends StatelessWidget {
   const BottomNavItem({
-    Key? key,
+    super.key,
     required this.icon,
     this.label,
     this.isSelected = false,
-  }) : super(key: key);
+  });
 
   final String icon;
   final String? label;
@@ -110,7 +122,7 @@ class BottomNavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color color = isSelected
         ? AppColors.black
-        : AppColors.darkGrey.withOpacity(0.3);
+        : AppColors.darkGrey.withValues(alpha: 0.3);
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 12.h),

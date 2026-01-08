@@ -13,9 +13,10 @@ import 'package:redstreakapp/core/widgets/custom_shimmer.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/core/widgets/dropdown_textfiled.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
-import 'package:redstreakapp/models/story_models/story_enums.dart';
 import 'package:redstreakapp/providers/auth_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
+
+import '../../models/home/story_models/story_enums.dart';
 
 class GenerateReadingScreen extends StatefulWidget {
   const GenerateReadingScreen({super.key});
@@ -149,7 +150,7 @@ class _GenerateReadingScreenState extends State<GenerateReadingScreen> {
                           "Create a reading task tailored just for you with the help of AI",
                       style: AppTextStyles.sfProDisplayMedium(
                         fontSize: 12.sp,
-                        color: AppColors.black.withOpacity(0.6),
+                        color: AppColors.black.withValues(alpha: 0.6),
                       ),
                     ),
                     17.h.verticalSpace,
@@ -264,7 +265,7 @@ class _GenerateReadingScreenState extends State<GenerateReadingScreen> {
                           width: 8.w,
                           height: 8.w,
                           decoration: BoxDecoration(
-                            color: AppColors.yellowcolor,
+                            color: AppColors.yellowColor,
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -278,7 +279,7 @@ class _GenerateReadingScreenState extends State<GenerateReadingScreen> {
 
                     Divider(
                       thickness: 0,
-                      color: AppColors.black.withOpacity(0.1),
+                      color: AppColors.black.withValues(alpha: 0.1),
                     ),
                     10.h.verticalSpace,
                     LessonDurationContainer(
@@ -293,7 +294,7 @@ class _GenerateReadingScreenState extends State<GenerateReadingScreen> {
                           width: 8.w,
                           height: 8.w,
                           decoration: BoxDecoration(
-                            color: AppColors.yellowcolor,
+                            color: AppColors.yellowColor,
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -306,7 +307,7 @@ class _GenerateReadingScreenState extends State<GenerateReadingScreen> {
                     ),
                     Divider(
                       thickness: 0,
-                      color: AppColors.black.withOpacity(0.1),
+                      color: AppColors.black.withValues(alpha: 0.1),
                     ),
                     10.h.verticalSpace,
                     Wrap(
@@ -330,7 +331,7 @@ class _GenerateReadingScreenState extends State<GenerateReadingScreen> {
                           width: 8.w,
                           height: 8.w,
                           decoration: BoxDecoration(
-                            color: AppColors.yellowcolor,
+                            color: AppColors.yellowColor,
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -343,7 +344,7 @@ class _GenerateReadingScreenState extends State<GenerateReadingScreen> {
                     ),
                     Divider(
                       thickness: 0,
-                      color: AppColors.black.withOpacity(0.1),
+                      color: AppColors.black.withValues(alpha: 0.1),
                     ),
                     10.h.verticalSpace,
 
@@ -383,7 +384,7 @@ class _GenerateReadingScreenState extends State<GenerateReadingScreen> {
                           width: 8.w,
                           height: 8.w,
                           decoration: BoxDecoration(
-                            color: AppColors.yellowcolor,
+                            color: AppColors.yellowColor,
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -396,7 +397,7 @@ class _GenerateReadingScreenState extends State<GenerateReadingScreen> {
                     ),
                     Divider(
                       thickness: 0,
-                      color: AppColors.black.withOpacity(0.1),
+                      color: AppColors.black.withValues(alpha: 0.1),
                     ),
                     10.h.verticalSpace,
 
@@ -406,7 +407,7 @@ class _GenerateReadingScreenState extends State<GenerateReadingScreen> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16.r),
                         border: Border.all(
-                          color: AppColors.black.withOpacity(0.1),
+                          color: AppColors.black.withValues(alpha: 0.1),
                         ),
                       ),
                       child: Column(
@@ -448,54 +449,51 @@ class _GenerateReadingScreenState extends State<GenerateReadingScreen> {
 
                     Consumer<AuthProvider>(
                       builder: (context, authProvider, _) {
-                        return AppButton(
+                        return AppFilledButton(
                           fixedSize: Size(348.w, 42.h),
                           isLoading: authProvider.isLoadingStory,
-                          onPressed: () async {
+                          onTap: () async {
                             if (_selectedTopic.isEmpty) {
-                              CustomToast.showError(
+                              AppToast.error(
                                 context,
                                 "Please select a reading topic",
                               );
                               return;
                             }
                             if (_selectedTextType.isEmpty) {
-                              CustomToast.showError(
+                              AppToast.error(
                                 context,
                                 "Please select a text type",
                               );
                               return;
                             }
                             if (_selectedLanguage.isEmpty) {
-                              CustomToast.showError(
+                              AppToast.error(
                                 context,
                                 "Please select a language",
                               );
                               return;
                             }
                             if (_selectedTopic.isEmpty) {
-                              CustomToast.showError(
+                              AppToast.error(
                                 context,
                                 "Please select a reading topic",
                               );
                               return;
                             }
                             if (_selectedSkill.isEmpty) {
-                              CustomToast.showError(
+                              AppToast.error(
                                 context,
                                 "Please select a reading skill focus",
                               );
                               return;
                             }
                             if (_selectedAge.isEmpty) {
-                              CustomToast.showError(
-                                context,
-                                "Please select an age",
-                              );
+                              AppToast.error(context, "Please select an age");
                               return;
                             }
                             context.pushNamed(
-                              UserAppRoutes.interestsScreen.name,
+                              AppRoutes.interestsScreen.name,
                               // extra: story,
                             );
 
@@ -530,7 +528,7 @@ class _GenerateReadingScreenState extends State<GenerateReadingScreen> {
                             // }
                           },
                           text: "Generate Reading Lesson",
-                          backgroundColor: AppColors.yellowcolor,
+                          backgroundColor: AppColors.yellowColor,
                         );
                       },
                     ),
@@ -583,7 +581,7 @@ class _GenerateReadingScreenState extends State<GenerateReadingScreen> {
                       ? Icon(Icons.check, color: AppColors.teal)
                       : null,
                 );
-              }).toList(),
+              }),
               20.h.verticalSpace,
             ],
           ),
@@ -603,7 +601,7 @@ class LessonDurationContainer extends StatelessWidget {
     required this.onChanged,
   });
 
-  Color get _activeColor => AppColors.teal.withOpacity(0.8);
+  Color get _activeColor => AppColors.teal.withValues(alpha: 0.8);
 
   @override
   Widget build(BuildContext context) {
@@ -611,7 +609,10 @@ class LessonDurationContainer extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.black.withOpacity(0.1), width: 0),
+        border: Border.all(
+          color: AppColors.black.withValues(alpha: 0.1),
+          width: 0,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -756,7 +757,7 @@ class _ReadingLevelCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: AppColors.black.withOpacity(0.1)),
+          border: Border.all(color: AppColors.black.withValues(alpha: 0.1)),
         ),
         child: Column(
           children: [

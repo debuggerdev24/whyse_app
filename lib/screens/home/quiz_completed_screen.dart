@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
-import 'package:provider/provider.dart';
 import 'package:redstreakapp/providers/home_provider.dart';
+import 'package:redstreakapp/routes/user_routes.dart';
 
 class QuizCompletedScreen extends StatelessWidget {
   final int score;
@@ -44,7 +44,7 @@ class QuizCompletedScreen extends StatelessWidget {
                     text: "Quiz Completed!",
                     style: AppTextStyles.sfProDisplayMedium(
                       fontSize: 12.sp,
-                      color: AppColors.black.withOpacity(0.8),
+                      color: AppColors.black.withValues(alpha: 0.8),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -73,7 +73,7 @@ class QuizCompletedScreen extends StatelessWidget {
                     text: "Your Score:",
                     style: AppTextStyles.sfProDisplayBold(
                       fontSize: 14.sp,
-                      color: AppColors.black.withOpacity(0.6),
+                      color: AppColors.black.withValues(alpha: 0.6),
                     ),
                   ),
                   8.h.verticalSpace,
@@ -89,7 +89,7 @@ class QuizCompletedScreen extends StatelessWidget {
                     text: "Reward:",
                     style: AppTextStyles.sfProDisplayBold(
                       fontSize: 14.sp,
-                      color: AppColors.black.withOpacity(0.6),
+                      color: AppColors.black.withValues(alpha: 0.6),
                     ),
                   ),
                   20.h.verticalSpace,
@@ -101,10 +101,10 @@ class QuizCompletedScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(40.r),
                       border: Border.all(
-                        color: AppColors.yellowcolor,
+                        color: AppColors.yellowColor,
                         width: 1.2,
                       ),
-                      color: AppColors.yellowcolor.withOpacity(0.1),
+                      color: AppColors.yellowColor.withValues(alpha: 0.1),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -112,7 +112,7 @@ class QuizCompletedScreen extends StatelessWidget {
                         SvgIcon(
                           AppAssets.thunder,
                           size: 18.w,
-                          color: AppColors.yellowcolor,
+                          color: AppColors.yellowColor,
                         ),
                         8.w.horizontalSpace,
                         AppText(
@@ -127,11 +127,12 @@ class QuizCompletedScreen extends StatelessWidget {
                   ),
                   Spacer(flex: 2),
 
-                  AppButton(
+                  AppFilledButton(
                     text: "Continue",
-                    onPressed: () async {
+                    onTap: () async {
                       await context.read<HomeProvider>().getAllStories();
-                      context.goNamed(UserAppRoutes.tabScreen.name);
+                      if (!context.mounted) return;
+                      context.goNamed(AppRoutes.tabScreen.name);
                     },
                     backgroundColor: AppColors.teal,
                     fixedSize: Size(348, 42.h),

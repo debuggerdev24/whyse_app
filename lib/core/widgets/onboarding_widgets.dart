@@ -61,7 +61,7 @@ class OnboardingHeader extends StatelessWidget {
                       height: 4.h,
                       decoration: BoxDecoration(
                         color: index < currentStep
-                            ? AppColors.yellowcolor
+                            ? AppColors.yellowColor
                             : AppColors.lightwhiteColor,
                         borderRadius: BorderRadius.circular(16.r),
                       ),
@@ -78,7 +78,7 @@ class OnboardingHeader extends StatelessWidget {
                   text: "Skip",
                   style: AppTextStyles.sfProDisplayMedium(
                     fontSize: 16.sp,
-                    color: AppColors.yellowcolor,
+                    color: AppColors.yellowColor,
                   ),
                 ),
               ),
@@ -121,7 +121,7 @@ class SelectionOption extends StatelessWidget {
           border: Border.all(
             color: isSelected
                 ? AppColors.teal
-                : AppColors.black.withOpacity(0.15),
+                : AppColors.black.withValues(alpha: 0.15),
             width: 1.w,
           ),
         ),
@@ -170,7 +170,7 @@ class TopicCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.5), // soft black
+              color: Colors.black.withValues(alpha: 0.5), // soft black
               blurRadius: 18, // more blur = smooth shadow
               spreadRadius: -1,
               offset: const Offset(0, 8), // pushed downward
@@ -183,7 +183,7 @@ class TopicCard extends StatelessWidget {
           ),
 
           border: isSelected
-              ? Border.all(color: AppColors.yellowcolor, width: 2)
+              ? Border.all(color: AppColors.yellowColor, width: 2)
               : null,
         ),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 13.h),
@@ -208,6 +208,7 @@ class OptionCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const OptionCard({
+    super.key,
     required this.text,
     required this.isSelected,
     required this.isCorrect,
@@ -217,7 +218,7 @@ class OptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color borderColor = Colors.black.withOpacity(0.1);
+    Color borderColor = Colors.black.withValues(alpha: 0.1);
     Color backgroundColor = Colors.white;
     Color textColor = Colors.black;
     Widget? trailingIcon;
@@ -232,13 +233,13 @@ class OptionCard extends StatelessWidget {
         backgroundColor = Color(0xFFFFEBEE);
         trailingIcon = SvgIcon(AppAssets.canceloption, size: 24.w);
       } else {
-        borderColor = Colors.black.withOpacity(0.1);
+        borderColor = Colors.black.withValues(alpha: 0.1);
         backgroundColor = Colors.white;
       }
     } else {
       if (isSelected) {
         borderColor = AppColors.teal;
-        backgroundColor = AppColors.teal.withOpacity(0.1);
+        backgroundColor = AppColors.teal.withValues(alpha: 0.1);
       }
     }
 

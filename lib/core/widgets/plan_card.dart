@@ -35,7 +35,7 @@ class PlanCard extends StatelessWidget {
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 1,
                   spreadRadius: -2,
                   offset: const Offset(0, 2),
@@ -71,8 +71,7 @@ class PlanCard extends StatelessWidget {
                       Align(
                         alignment: Alignment.bottomRight,
                         child: Padding(
-                          padding:
-                              EdgeInsets.only(bottom: 13.h, right: 15.w),
+                          padding: EdgeInsets.only(bottom: 13.h, right: 15.w),
                           child: AppText(
                             text: price,
                             style: AppTextStyles.sfProDisplayBold(
@@ -90,13 +89,10 @@ class PlanCard extends StatelessWidget {
 
           if (isSelected)
             Positioned(
-              right:0,
+              right: 0,
               top: -8,
               bottom: -9,
-              child: SvgIcon(
-                AppAssets.check,
-                size: 32.w,
-              ),
+              child: SvgIcon(AppAssets.check, size: 32.w),
             ),
         ],
       ),
@@ -105,9 +101,7 @@ class PlanCard extends StatelessWidget {
 
   Widget _bullet(String text) {
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: 23.w,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 23.w),
       child: Row(
         children: [
           SvgIcon(AppAssets.done, size: 20.w),
@@ -121,5 +115,3 @@ class PlanCard extends StatelessWidget {
     );
   }
 }
-
-

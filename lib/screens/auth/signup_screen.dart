@@ -5,11 +5,16 @@ import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
+import 'package:redstreakapp/core/utils/custom_loader.dart';
+import 'package:redstreakapp/core/utils/de_bouncing.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
+import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/providers/auth_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
+
+import '../../core/widgets/custom_toast.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -31,131 +36,153 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = context.watch<AuthProvider>();
-
-    return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+    return AppLayout(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Container(
-            height:
-                MediaQuery.of(context).size.height -
-                MediaQuery.of(context).padding.top,
-            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 40.h),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Consumer<AuthProvider>(
+          builder: (context, provider, child) {
+            return Stack(
               children: [
-                const Spacer(flex: 2),
-
-                Column(
-                  children: [
-                    SvgIcon(AppAssets.welcome),
-                    30.h.verticalSpace,
-
-                    AppText(
-                      text: 'Welcome to',
-                      style: AppTextStyles.sfProDisplayBold(
-                        fontSize: 32.sp,
-                        color: AppColors.teal,
-                      ),
+                SingleChildScrollView(
+                  child: Container(
+                    height:
+                        MediaQuery.of(context).size.height -
+                        MediaQuery.of(context).padding.top,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 24.w,
+                      vertical: 40.h,
                     ),
-                    AppText(
-                      text: 'ReadStreakApp',
-                      style: AppTextStyles.sfProDisplayBold(
-                        fontSize: 32.sp,
-                        color: AppColors.teal,
-                      ),
-                    ),
-
-                    15.h.verticalSpace,
-                    AppText(
-                      text: 'Read. Learn. Grow.',
-                      style: AppTextStyles.textStyle16Semibold,
-                    ),
-
-                    61.h.verticalSpace,
-
-                    AppTextField(
-                      hintText: "Email",
-                      controller: authProvider.emailController,
-                    ),
-
-                    32.h.verticalSpace,
-
-                    AppButton(
-                      isLoading: authProvider.isLoading,
-                      onPressed: authProvider.isLoading
-                          ? null
-                          : () async {
-                              final success = await authProvider
-                                  .startOnboarding(context);
-
-                              if (success && context.mounted) {
-                                context.pushNamed(
-                                  UserAppRoutes.enterAgeScreen.name,
-                                );
-                              }
-                            },
-                      text: "Sign up with Email",
-                    ),
-
-                    17.h.verticalSpace,
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        AppText(
-                          text: "Already have an account? ",
-                          style: AppTextStyles.textStyle14Regular,
+                        const Spacer(flex: 2),
+
+                        Column(
+                          children: [
+                            SvgIcon(AppAssets.welcome),
+                            30.h.verticalSpace,
+
+                            AppText(
+                              text: 'Welcome to',
+                              style: AppTextStyles.sfProDisplayBold(
+                                fontSize: 32.sp,
+                                color: AppColors.teal,
+                              ),
+                            ),
+                            AppText(
+                              text: 'ReadStreakApp',
+                              style: AppTextStyles.sfProDisplayBold(
+                                fontSize: 32.sp,
+                                color: AppColors.teal,
+                              ),
+                            ),
+
+                            15.h.verticalSpace,
+                            AppText(
+                              text: 'Read. Learn. Grow.',
+                              style: AppTextStyles.textStyle16Semibold,
+                            ),
+
+                            61.h.verticalSpace,
+
+                            AppTextField(
+                              hintText: "Email",
+                              controller: provider.signUpEmailCtr,
+                            ),
+
+                            32.h.verticalSpace,
+
+                            AppFilledButton(
+                              onTap: () async {
+                                deBouncer.run(() async {
+                                  await provider.startOnboarding(
+                                    context: context,
+                                    onSuccess: () {
+                                      AppToast.success(
+                                        context,
+                                        "Onboarding started",
+                                      );
+                                      context.pushNamed(
+                                        AppRoutes.enterAgeScreen.name,
+                                      );
+                                    },
+
+                                    onFailed: (error) {
+                                      AppToast.error(context, error);
+                                    },
+                                  );
+                                });
+                              },
+                              text: "Sign up with Email",
+                            ),
+
+                            17.h.verticalSpace,
+
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                AppText(
+                                  text: "Already have an account? ",
+                                  style: AppTextStyles.textStyle14Regular,
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    context.pushNamed(
+                                      AppRoutes.loginScreen.name,
+                                    );
+                                  },
+                                  child: AppText(
+                                    text: "Login",
+                                    style: AppTextStyles.textStyle14Bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            context.pushNamed(UserAppRoutes.loginScreen.name);
-                          },
-                          child: AppText(
-                            text: "Login",
-                            style: AppTextStyles.textStyle14Bold,
-                          ),
+                        32.h.verticalSpace,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Divider(
+                                color: AppColors.black.withValues(alpha: 0.2),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12.w),
+                              child: AppText(
+                                text: "OR",
+                                style: AppTextStyles.textStyle14Semibold,
+                              ),
+                            ),
+                            Expanded(
+                              child: Divider(
+                                color: AppColors.black.withValues(alpha: 0.2),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        32.h.verticalSpace,
+
+                        _socialButton(
+                          label: "Sign up with Google",
+                          icon: AppAssets.google,
+                        ),
+
+                        12.h.verticalSpace,
+
+                        _socialButton(
+                          label: "Sign up with Apple",
+                          icon: AppAssets.apple,
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
-                32.h.verticalSpace,
-                Row(
-                  children: [
-                    Expanded(
-                      child: Divider(color: AppColors.black.withOpacity(0.2)),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12.w),
-                      child: AppText(
-                        text: "OR",
-                        style: AppTextStyles.textStyle14Semibold,
-                      ),
-                    ),
-                    Expanded(
-                      child: Divider(color: AppColors.black.withOpacity(0.2)),
-                    ),
-                  ],
-                ),
-
-                32.h.verticalSpace,
-
-                _socialButton(
-                  label: "Sign up with Google",
-                  icon: AppAssets.google,
-                ),
-
-                12.h.verticalSpace,
-
-                _socialButton(
-                  label: "Sign up with Apple",
-                  icon: AppAssets.apple,
-                ),
+                if (provider.isStartOnBoardingLoading) FullPageIndicator(),
               ],
-            ),
-          ),
+            );
+          },
         ),
       ),
     );

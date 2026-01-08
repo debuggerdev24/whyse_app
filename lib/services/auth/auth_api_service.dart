@@ -1,72 +1,14 @@
 import 'dart:async';
 
+import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:redstreakapp/models/story_models/generate_story_request.dart';
+import 'package:redstreakapp/core/constants/end_points.dart';
 import 'package:redstreakapp/services/base_api_service.dart';
 
-abstract class BaseAuthService {
-  Future<dynamic> startOnboarding({required String email});
-  Future<dynamic> getOnboardingProgress({required String onboardingId});
-  Future<dynamic> saveAge({
-    required String onboardingId,
-    required String dateOfBirth,
-  });
-  Future<dynamic> createAccount({
-    required String onboardingId,
-    required String firstName,
-    required String lastName,
-    required String email,
-    required String password,
-    required String confirmPassword,
-  });
-  Future<dynamic> verifyEmail({
-    required String onboardingId,
-    required String email,
-  });
-  Future<dynamic> saveProfileInfo({
-    required String onboardingId,
-    required String country,
-    required String preferredLanguage,
-  });
-  Future<dynamic> saveReadingGoal({
-    required String onboardingId,
-    required int dailyReadingGoal,
-  });
-  Future<dynamic> getDefaultInterests();
-  Future<dynamic> saveInterests({
-    required String onboardingId,
-    required List<String> interestIds,
-    required List<String> customInterests,
-  });
-  Future<dynamic> getDefaultTopics();
-  Future<dynamic> saveTopics({
-    required String onboardingId,
-    required List<String> topicIds,
-    required List<String> customTopics,
-  });
-  Future<dynamic> getDefaultGoals();
-  Future<dynamic> saveGoals({
-    required String onboardingId,
-    required List<String> goalIds,
-    required List<Map<String, String>> customGoals,
-  });
-  Future<dynamic> login({required String email, required String password});
-  Future<dynamic> saveParentEmail({
-    required String onboardingId,
-    required String parentEmail,
-  });
-  Future<dynamic> logOut({required String accessToken});
-  Future<dynamic> generateMobileStory(GenerateStoryRequest request);
-  Future<dynamic> generateStoryImage(GenerateStoryRequest request);
-  Future<dynamic> linkImageToStory({
-    required String storyId,
-    required List<String> images,
-  });
-  Future<dynamic> getAllStories();
-}
+import '../../models/home/story_models/generate_story_request.dart';
 
-class AuthServices implements BaseAuthService {
-  final _api = BaseRepository.instance.dio;
+class AuthServices {
+  final _api = DioClient.instance.dio;
 
   AuthServices._();
 
@@ -75,36 +17,39 @@ class AuthServices implements BaseAuthService {
   factory AuthServices() => _instance;
 
   //todo 2nd
-  @override
-  Future<dynamic> startOnboarding({required String email}) async {
+  //@override
+  Future<Either<ApiException, Map<String, dynamic>>> startOnboarding({
+    required String email,
+  }) async {
     Map<String, String> data = {"email": email};
-    final res = await _api.post('start-onboarding', data: data);
-    return res.data;
+    return await BaseApiHelper.instance.post(
+      EndPoints.startOnBoarding,
+      data: data,
+    );
   }
 
   //todo 1st
-  @override
-  Future<dynamic> getOnboardingProgress({required String onboardingId}) async {
-    final res = await _api.post(
-      'onboarding-progress',
+  Future<Either<ApiException, Map<String, dynamic>>> getOnboardingProgress({
+    required String onboardingId,
+  }) async {
+    return BaseApiHelper.instance.post(
+      EndPoints.onBoardingProgress,
       data: {"identifier": onboardingId},
     );
-    return res.data;
   }
 
-  @override
-  Future<dynamic> saveAge({
+  //@override
+  Future<Either<ApiException, Map<String, dynamic>>> saveBirthDate({
     required String onboardingId,
     required String dateOfBirth,
   }) async {
-    final res = await _api.post(
-      'save-age',
+    return await BaseApiHelper.instance.post(
+      EndPoints.saveAge,
       data: {"onboardingId": onboardingId, "dateOfBirth": dateOfBirth},
     );
-    return res.data;
   }
 
-  @override
+  //@override
   Future<dynamic> createAccount({
     required String onboardingId,
     required String firstName,
@@ -114,7 +59,7 @@ class AuthServices implements BaseAuthService {
     required String confirmPassword,
   }) async {
     final res = await _api.post(
-      'create-account',
+      EndPoints.createAccount,
       data: {
         "onboardingId": onboardingId,
         "firstName": firstName,
@@ -127,26 +72,26 @@ class AuthServices implements BaseAuthService {
     return res.data;
   }
 
-  @override
+  //@override
   Future<dynamic> verifyEmail({
     required String onboardingId,
     required String email,
   }) async {
     final res = await _api.post(
-      'verify-email',
+      EndPoints.verifyEmail,
       data: {"onboardingId": onboardingId, "email": email},
     );
     return res.data;
   }
 
-  @override
+  //@override
   Future<dynamic> saveProfileInfo({
     required String onboardingId,
     required String country,
     required String preferredLanguage,
   }) async {
     final res = await _api.post(
-      'save-profile-info',
+      EndPoints.saveProfile,
       data: {
         "onboardingId": onboardingId,
         "country": country,
@@ -156,13 +101,13 @@ class AuthServices implements BaseAuthService {
     return res.data;
   }
 
-  @override
+  //@override
   Future<dynamic> saveReadingGoal({
     required String onboardingId,
     required int dailyReadingGoal,
   }) async {
     final res = await _api.post(
-      'save-reading-goal',
+      EndPoints.saveReadings,
       data: {
         "onboardingId": onboardingId,
         "dailyReadingGoal": dailyReadingGoal,
@@ -171,21 +116,21 @@ class AuthServices implements BaseAuthService {
     return res.data;
   }
 
-  @override
+  //@override
   Future<dynamic> getDefaultInterests() async {
     final res = await _api.get('default-interests');
     return res.data;
   }
 
-  @override
-  @override
+  //@override
+  //@override
   Future<dynamic> saveInterests({
     required String onboardingId,
     required List<String> interestIds,
     required List<String> customInterests,
   }) async {
     final res = await _api.post(
-      'save-interests',
+      EndPoints.saveInterest,
       data: {
         "onboardingId": onboardingId,
         "interestIds": interestIds,
@@ -195,20 +140,20 @@ class AuthServices implements BaseAuthService {
     return res.data;
   }
 
-  @override
+  //@override
   Future<dynamic> getDefaultTopics() async {
     final res = await _api.get('default-topics');
     return res.data;
   }
 
-  @override
+  //@override
   Future<dynamic> saveTopics({
     required String onboardingId,
     required List<String> topicIds,
     required List<String> customTopics,
   }) async {
     final res = await _api.post(
-      'save-topics',
+      EndPoints.saveTopics,
       data: {
         "onboardingId": onboardingId,
         "topicIds": topicIds,
@@ -218,13 +163,13 @@ class AuthServices implements BaseAuthService {
     return res.data;
   }
 
-  @override
-  Future<dynamic> getDefaultGoals() async {
-    final res = await _api.get('default-goals');
+  //@override
+  Future<dynamic> getGoals() async {
+    final res = await _api.get(EndPoints.getGoals);
     return res.data;
   }
 
-  @override
+  //@override
   Future<dynamic> saveGoals({
     required String onboardingId,
     required List<String> goalIds,
@@ -241,41 +186,40 @@ class AuthServices implements BaseAuthService {
     return res.data;
   }
 
-  @override
+  //@override
   Future<dynamic> login({
     required String email,
     required String password,
   }) async {
     final res = await _api.post(
-      'login',
+      EndPoints.logIn,
       data: {"email": email, "password": password},
     );
     return res.data;
   }
 
-  @override
-  Future<dynamic> saveParentEmail({
+  //@override
+  Future<Either<ApiException, Map<String, dynamic>>> saveParentEmail({
     required String onboardingId,
     required String parentEmail,
   }) async {
-    final res = await _api.post(
-      'save-parent-email',
+    return BaseApiHelper.instance.post(
+      EndPoints.saveParentEmail,
       data: {"onboardingId": onboardingId, "parentEmail": parentEmail},
     );
-    return res.data;
   }
 
-  @override
+  //@override
   Future<dynamic> logOut({required String accessToken}) async {
     final res = await _api.post(
-      'logout',
+      EndPoints.logOut,
       data: {"accessToken": accessToken},
       options: Options(headers: {"Authorization": "Bearer $accessToken"}),
     );
     return res.data;
   }
 
-  @override
+  //@override
   Future<dynamic> generateMobileStory(GenerateStoryRequest request) async {
     final res = await _api.post(
       'http://167.172.45.71/api/v1/story/generateMobileStory',
@@ -285,7 +229,7 @@ class AuthServices implements BaseAuthService {
     return res.data;
   }
 
-  @override
+  //@override
   Future<dynamic> generateStoryImage(GenerateStoryRequest request) async {
     final res = await _api.post(
       'http://167.172.45.71/api/v1/story/generateMobileStoryImage',
@@ -295,7 +239,7 @@ class AuthServices implements BaseAuthService {
     return res.data;
   }
 
-  @override
+  //@override
   Future<dynamic> linkImageToStory({
     required String storyId,
     required List<String> images,
@@ -307,7 +251,7 @@ class AuthServices implements BaseAuthService {
     return res.data;
   }
 
-  @override
+  //@override
   Future<dynamic> getAllStories() async {
     final res = await _api.get('http://167.172.45.71/api/v1/story/mobile');
     return res.data;

@@ -36,7 +36,7 @@ class AppTextField extends StatelessWidget {
     this.bottomText,
     this.bottomTextStyle,
     this.readOnly = false,
-    this.onFieldSubmitted,
+    this.onSubmit,
   });
 
   final String? labelText;
@@ -68,7 +68,7 @@ class AppTextField extends StatelessWidget {
   final String? bottomText;
   final TextStyle? bottomTextStyle;
   final bool readOnly;
-  final ValueChanged<String>? onFieldSubmitted;
+  final ValueChanged<String>? onSubmit;
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +95,7 @@ class AppTextField extends StatelessWidget {
           onTapOutside: (event) {
             FocusScope.of(context).unfocus();
           },
+
           decoration: InputDecoration(
             errorStyle: AppTextStyles.sfProDisplayRegular(
               color: AppColors.redcolor,
@@ -111,7 +112,7 @@ class AppTextField extends StatelessWidget {
             hintStyle:
                 hintStyle ??
                 AppTextStyles.sfProDisplaySemibold(
-                  color: AppColors.black.withOpacity(0.3),
+                  color: AppColors.black.withValues(alpha: 0.3),
                   fontSize: 15.sp,
                 ),
             contentPadding:
@@ -122,7 +123,7 @@ class AppTextField extends StatelessWidget {
                 border ??
                 OutlineInputBorder(
                   borderSide: BorderSide(
-                    color: AppColors.black.withOpacity(0.1),
+                    color: AppColors.black.withValues(alpha: 0.25),
                     width: 1.w,
                   ),
                   borderRadius: BorderRadius.circular(12.r),
@@ -133,7 +134,7 @@ class AppTextField extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12.r),
                   borderSide: BorderSide(
                     width: 1.w,
-                    color: AppColors.black.withOpacity(0.1),
+                    color: AppColors.black.withValues(alpha: 0.45),
                   ),
                 ),
             focusedErrorBorder: OutlineInputBorder(
@@ -150,7 +151,7 @@ class AppTextField extends StatelessWidget {
           maxLines: maxLines ?? 1, // Optional: Default to 1
           autovalidateMode:
               autoValidateMode, // Forward for real-time validation
-          onFieldSubmitted: onFieldSubmitted,
+          onFieldSubmitted: onSubmit,
         ),
       ],
     );

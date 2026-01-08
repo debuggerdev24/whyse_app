@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:redstreakapp/models/story_models/story_model.dart';
-import 'package:redstreakapp/services/auth_service.dart';
+import 'package:redstreakapp/models/home/goal_model.dart';
+import 'package:redstreakapp/services/auth/auth_api_service.dart';
+import 'package:redstreakapp/services/home/home_api_service.dart';
+
+import '../models/home/story_models/story_model.dart';
 
 class HomeProvider extends ChangeNotifier {
+  TextEditingController customGoalController = TextEditingController();
   int _currentIndex = 0;
   bool _isLoading = false;
   List<Story> _stories = [];
+  List<GoalModel> goalsList = [];
+  String? selectedGoalId;
+
+  set setSelectedId(String? value) {
+    selectedGoalId = value;
+    customGoalController.clear();
+  }
 
   bool get isLoading => _isLoading;
   List<Story> get stories => _stories;
@@ -43,5 +54,24 @@ class HomeProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  bool isGetGoalsLoading = false;
+  Future<void> getGoals({required Function(String error) onFailed}) async {
+    isGetGoalsLoading = true;
+    notifyListeners();
+
+    final response = await HomeApiService.instance.getGoals();
+    response.fold(
+      (l) {
+        onFailed.call(l.errorMsg);
+      },
+      (r) {
+        goalsList = (r as List).map((e) => GoalModel.fromJson(e)).toList();
+      },
+    );
+
+    isGetGoalsLoading = false;
+    notifyListeners();
   }
 }

@@ -1,4 +1,4 @@
-enum UserAppRoutes {
+enum AppRoutes {
   splashScreen,
   loginScreen,
   signUpScreen,
@@ -28,4 +28,7 @@ enum UserAppRoutes {
   quizQuestionScreen,
   quizCompletedScreen,
   whatInterestScreen,
+  forgotPasswordScreen,
+  verifyOtpScreen,
+  resetPasswordScreen,
 }

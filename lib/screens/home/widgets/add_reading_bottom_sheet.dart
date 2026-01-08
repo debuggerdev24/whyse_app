@@ -62,10 +62,12 @@ class _AddReadingBottomSheetState extends State<AddReadingBottomSheet> {
               setState(() => selectedIndex = 0);
 
               Future.delayed(const Duration(milliseconds: 200), () {
+                if (!context.mounted) return;
+
                 context.pop();
 
-                context.read<AuthProvider>().isFromHome = true;
-                context.pushNamed(UserAppRoutes.goalsScreen.name, extra: true);
+                context.read<AuthProvider>().isStoryCreation = true;
+                context.pushNamed(AppRoutes.goalsScreen.name, extra: true);
               });
             },
           ),
@@ -194,7 +196,7 @@ class ReadingLevelCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: AppColors.black.withOpacity(0.1)),
+          border: Border.all(color: AppColors.black.withValues(alpha: 0.1)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,7 +221,7 @@ class ReadingLevelCard extends StatelessWidget {
                         text: description,
                         style: AppTextStyles.sfProDisplayMedium(
                           fontSize: 12.sp,
-                          color: AppColors.black.withOpacity(0.4),
+                          color: AppColors.black.withValues(alpha: 0.4),
                         ),
                       ),
                     ],
@@ -242,7 +244,7 @@ class ReadingLevelCard extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: progress,
                 minHeight: 8.h,
-                backgroundColor: AppColors.black.withOpacity(0.08),
+                backgroundColor: AppColors.black.withValues(alpha: 0.08),
                 valueColor: const AlwaysStoppedAnimation(Color(0xFF0E8C8A)),
               ),
             ),

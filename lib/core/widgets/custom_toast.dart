@@ -1,38 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:toastification/toastification.dart';
 
-class CustomToast {
-  static void showSuccess(BuildContext context, String message) {
+class AppToast {
+  static void success(BuildContext context, String message) {
     _show(
-      context,
-      message,
-      ToastificationType.success,
-      AppColors.greenColor,
-      Icons.check_circle_outline,
+      context: context,
+      message: message,
+      type: ToastificationType.success,
+      primaryColor: AppColors.greenColor,
+      icon: Icons.check_circle_outline,
     );
   }
 
-  static void showError(BuildContext context, String message) {
+  static void error(BuildContext context, String message) {
     _show(
-      context,
-      message,
-      ToastificationType.error,
-      Colors.red, // Using standard red for errors for better visibility
-      Icons.error_outline,
+      context: context,
+      message: message,
+      type: ToastificationType.error,
+      primaryColor:
+          Colors.red, // Using standard red for errors for better visibility
+      icon: Icons.error_outline,
     );
   }
 
-  static void _show(
-    BuildContext context,
-    String message,
-    ToastificationType type,
-    Color primaryColor,
-    IconData icon,
-  ) {
+  static void info({
+    required BuildContext context,
+    required String message,
+    int? durationSecond,
+  }) {
+    _show(
+      context: context,
+      message: message,
+      type: ToastificationType.info,
+      primaryColor: Colors.blue,
+    );
+  }
+
+  static void _show({
+    required BuildContext context,
+    required String message,
+    required ToastificationType type,
+    required Color primaryColor,
+    IconData? icon,
+  }) {
     try {
       toastification.show(
         context: context,
@@ -55,7 +68,7 @@ class CustomToast {
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: primaryColor.withOpacity(0.3),
+            color: primaryColor.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

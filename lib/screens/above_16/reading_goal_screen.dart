@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
+import 'package:redstreakapp/core/utils/custom_loader.dart';
 import 'package:redstreakapp/core/utils/field_validator.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
@@ -31,124 +32,131 @@ class _ReadingGoalScreenState extends State<ReadingGoalScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        child: Consumer<AuthProvider>(
+          builder: (context, provider, child) => Stack(
             children: [
-              /// HEADER
-              OnboardingHeader(
-                currentStep: 2,
-                totalSteps: 5,
-                onBack: () {
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.goNamed(UserAppRoutes.profileInfoScreen.name);
-                  }
-                },
-              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    /// HEADER
+                    OnboardingHeader(
+                      currentStep: 2,
+                      totalSteps: 5,
+                      onBack: () {
+                        if (context.canPop()) {
+                          context.pop();
+                        } else {
+                          context.goNamed(AppRoutes.profileInfoScreen.name);
+                        }
+                      },
+                    ),
 
-              /// TITLE
-              AppText(
-                text: "Set Your Daily Reading Goal",
-                style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
-              ),
+                    /// TITLE
+                    AppText(
+                      text: "Set Your Daily Reading Goal",
+                      style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
+                    ),
 
-              8.h.verticalSpace,
+                    8.h.verticalSpace,
 
-              AppText(
-                text:
-                    "Choose how much time you want to read \neach day to keep your streak alive and earn rewards.",
-                style: AppTextStyles.sfProDisplayMedium(
-                  fontSize: 16.sp,
-                  color: AppColors.black.withOpacity(0.8),
+                    AppText(
+                      text:
+                          "Choose how much time you want to read \neach day to keep your streak alive and earn rewards.",
+                      style: AppTextStyles.sfProDisplayMedium(
+                        fontSize: 16.sp,
+                        color: AppColors.black.withValues(alpha: 0.8),
+                      ),
+                    ),
+
+                    18.h.verticalSpace,
+
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(
+                          color: AppColors.black.withValues(alpha: 0.1),
+                        ),
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: List.generate(options.length, (index) {
+                          final option = options[index];
+                          final isSelected = selectedOption == option;
+                          return Row(
+                            children: [
+                              _buildOptionButton(option, isSelected),
+                              if (index != options.length - 1)
+                                Container(
+                                  width: 1.w,
+                                  height: 22.h,
+                                  color: Colors.grey.withValues(alpha: 0.3),
+                                ),
+                            ],
+                          );
+                        }),
+                      ),
+                    ),
+
+                    if (selectedOption == 'Custom') ...[
+                      20.h.verticalSpace,
+                      Form(
+                        key: _formKey,
+                        child: AppTextField(
+                          hintText: "Enter minutes",
+                          controller: customGoalController,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          validator: (value) =>
+                              FieldValidators().required(value, "Minutes"),
+                        ),
+                      ),
+                    ],
+                    Spacer(),
+
+                    AppFilledButton(
+                      text: "Next",
+                      backgroundColor: AppColors.yellowColor,
+                      onTap: () async {
+                        int goal = 0;
+                        if (selectedOption == "Custom") {
+                          if (!_formKey.currentState!.validate()) {
+                            //customGoalController.text.trim().isEmpty
+                            // Show toast
+                            return;
+                          }
+                          goal =
+                              int.tryParse(customGoalController.text.trim()) ??
+                              0;
+                        } else {
+                          goal =
+                              int.tryParse(selectedOption.split(' ')[0]) ?? 0;
+                        }
+
+                        if (goal <= 0) {
+                          // Show toast
+                          return;
+                        }
+                        final success = await provider.saveReadingGoal(
+                          context,
+                          dailyReadingGoal: goal,
+                        );
+
+                        if (success && context.mounted) {
+                          context.pushNamed(AppRoutes.interestsScreen.name);
+                        }
+                      },
+                    ),
+                  ],
                 ),
               ),
-
-              18.h.verticalSpace,
-
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: AppColors.black.withOpacity(0.1)),
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: List.generate(options.length, (index) {
-                    final option = options[index];
-                    final isSelected = selectedOption == option;
-                    return Row(
-                      children: [
-                        _buildOptionButton(option, isSelected),
-                        if (index != options.length - 1)
-                          Container(
-                            width: 1.w,
-                            height: 22.h,
-                            color: Colors.grey.withValues(alpha: 0.3),
-                          ),
-                      ],
-                    );
-                  }),
-                ),
-              ),
-
-              if (selectedOption == 'Custom') ...[
-                20.h.verticalSpace,
-                Form(
-                  key: _formKey,
-                  child: AppTextField(
-                    hintText: "Enter minutes",
-                    controller: customGoalController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    validator: (value) =>
-                        FieldValidators().required(value, "Minutes"),
-                  ),
-                ),
-              ],
+              if (provider.isSaveReadingGoal) FullPageIndicator(),
             ],
           ),
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.only(left: 24.w, right: 24.w, bottom: 40.h),
-        child: AppButton(
-          text: "Next",
-          backgroundColor: AppColors.yellowcolor,
-          onPressed: () async {
-            int goal = 0;
-            if (selectedOption == "Custom") {
-              if (!_formKey.currentState!.validate()) {
-                //customGoalController.text.trim().isEmpty
-                // Show toast
-                return;
-              }
-              goal = int.tryParse(customGoalController.text.trim()) ?? 0;
-            } else {
-              goal = int.tryParse(selectedOption.split(' ')[0]) ?? 0;
-            }
-
-            if (goal <= 0) {
-              // Show toast
-              return;
-            }
-
-            final authProvider = Provider.of<AuthProvider>(
-              context,
-              listen: false,
-            );
-            final success = await authProvider.saveReadingGoal(
-              context,
-              dailyReadingGoal: goal,
-            );
-
-            if (success && context.mounted) {
-              context.pushNamed(UserAppRoutes.interestsScreen.name);
-            }
-          },
-          isLoading: context.watch<AuthProvider>().isLoading,
         ),
       ),
     );
@@ -172,7 +180,9 @@ class _ReadingGoalScreenState extends State<ReadingGoalScreen> {
           text: text,
           style: AppTextStyles.sfProDisplaySemibold(
             fontSize: isSelected ? 16.sp : 14.sp,
-            color: isSelected ? Colors.white : AppColors.black.withOpacity(0.3),
+            color: isSelected
+                ? Colors.white
+                : AppColors.black.withValues(alpha: 0.3),
           ),
         ),
       ),

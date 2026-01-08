@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -15,7 +16,7 @@ import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:redstreakapp/screens/home/widgets/add_reading_bottom_sheet.dart';
 
 class HomeHeader extends StatelessWidget {
-  const HomeHeader();
+  const HomeHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +34,7 @@ class HomeHeader extends StatelessWidget {
               SvgIcon(
                 AppAssets.thunder,
                 size: 20.w,
-                color: AppColors.yellowcolor,
+                color: AppColors.yellowColor,
               ),
               10.w.horizontalSpace,
               AppText(
@@ -60,29 +61,30 @@ class HomeHeader extends StatelessWidget {
             12.w.horizontalSpace,
             GestureDetector(
               onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text("Log Out"),
-                    content: const Text("Are you sure you want to Log Out?"),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text("Cancel"),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          context.read<AuthProvider>().logOut(context);
-                        },
-                        child: const Text(
-                          "Log Out",
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
+                showLogOutConfirmationDialog(context: context);
+                // showDialog(
+                //   context: context,
+                //   builder: (context) => AlertDialog(
+                //     title: const Text("Log Out"),
+                //     content: const Text("Are you sure you want to Log Out?"),
+                //     actions: [
+                //       TextButton(
+                //         onPressed: () => Navigator.pop(context),
+                //         child: const Text("Cancel"),
+                //       ),
+                //       TextButton(
+                //         onPressed: () {
+                //           Navigator.pop(context);
+                //           context.read<AuthProvider>().logOutUser(context);
+                //         },
+                //         child: const Text(
+                //           "Log Out",
+                //           style: TextStyle(color: Colors.red),
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // );
               },
               child: CircleAvatar(
                 radius: 18.w,
@@ -94,10 +96,73 @@ class HomeHeader extends StatelessWidget {
       ],
     );
   }
+
+  void showLogOutConfirmationDialog({required BuildContext context}) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return ZoomIn(
+          child: AlertDialog(
+            title: Text(
+              "Are you sure you want to Log Out?",
+              style: AppTextStyles
+                  .textStyle22Regular, //regular(color: AppColors.black, fontSize: 19.sp),
+            ),
+            actions: [
+              myActionButtonTheme(
+                onPressed: () async {
+                  context.pop(dialogContext);
+                  await context.read<AuthProvider>().logOutUser(
+                    onSuccess: () {
+                      context.goNamed(AppRoutes.splashScreen.name);
+                    },
+                  );
+                  //    onSuccess: () {
+                  //                       AppToast.showSuccess(
+                  //
+                  //                          context,
+                  //                         "Log Out Successfully",
+                  //                       );
+                  //                       context.goNamed(UserAppRoutes.loginScreen.name);
+                  //                     },
+                  //                     onFailed: (error) {
+                  //                       AppToast.showError( context,"Log out failed");
+                  //                     },
+                },
+                title: "Yes",
+              ),
+              myActionButtonTheme(
+                onPressed: () {
+                  context.pop();
+                },
+                title: "Cancel",
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget myActionButtonTheme({
+    required VoidCallback onPressed,
+    required String title,
+  }) {
+    return TextButton(
+      onPressed: onPressed,
+      child: Text(
+        title,
+        style: AppTextStyles.sfProDisplayRegular(
+          color: (title == "Yes") ? AppColors.redcolor : AppColors.black,
+          fontSize: 18.sp,
+        ),
+      ),
+    );
+  }
 }
 
 class CalendarStrip extends StatelessWidget {
-  const CalendarStrip();
+  const CalendarStrip({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +187,7 @@ class CalendarStrip extends StatelessWidget {
                 child: Container(
                   height: 4.h,
                   decoration: BoxDecoration(
-                    color: AppColors.yellowcolor,
+                    color: AppColors.yellowColor,
                     borderRadius: BorderRadius.circular(2.r),
                   ),
                 ),
@@ -156,7 +221,7 @@ class CalendarStrip extends StatelessWidget {
           text: "1/3 Exercises",
           style: AppTextStyles.sfProDisplayBold(
             fontSize: 12.sp,
-            color: AppColors.black.withOpacity(0.4),
+            color: AppColors.black.withValues(alpha: 0.4),
           ),
         ),
         13.h.verticalSpace,
@@ -195,7 +260,7 @@ class CalendarStrip extends StatelessWidget {
                           Container(
                             height: 4.h,
                             decoration: BoxDecoration(
-                              color: AppColors.yellowcolor,
+                              color: AppColors.yellowColor,
                               borderRadius: BorderRadius.only(
                                 bottomRight: Radius.circular(10.r),
                                 bottomLeft: Radius.circular(10.r),
@@ -207,7 +272,7 @@ class CalendarStrip extends StatelessWidget {
                           text: days[index],
                           style: AppTextStyles.sfProDisplaySemibold(
                             fontSize: 12.sp,
-                            color: AppColors.black.withOpacity(0.4),
+                            color: AppColors.black.withValues(alpha: 0.4),
                           ),
                         ),
                         6.h.verticalSpace,
@@ -246,7 +311,7 @@ class YourPlanSection extends StatelessWidget {
           return _buildShimmerLoading();
         }
 
-        /// ---------------- EMPTY STATE ----------------
+        //todo ---------------- EMPTY STATE ----------------
         if (provider.stories.isEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -264,20 +329,22 @@ class YourPlanSection extends StatelessWidget {
               ),
               24.h.verticalSpace,
 
-              /// ✅ ALWAYS SHOW BUTTON
+              //todo ✅ ALWAYS SHOW BUTTON
               _addNewReadingButton(context),
             ],
           );
         }
 
-        /// ---------------- DATA AVAILABLE ----------------
+        //todo ---------------- DATA AVAILABLE ----------------
         final recentStory = provider.stories.first;
-        final otherStories = provider.stories.skip(1).take(3).toList();
-
+        final otherStories = provider.stories
+            .skip(1)
+            .take(provider.stories.length)
+            .toList();
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// ----------- TODAY'S READING CARD -----------
+            //todo ----------- TODAY'S READING CARD -----------
             Container(
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
@@ -285,7 +352,7 @@ class YourPlanSection extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -304,7 +371,7 @@ class YourPlanSection extends StatelessWidget {
                   InkWell(
                     onTap: () {
                       context.pushNamed(
-                        UserAppRoutes.readingScreen.name,
+                        AppRoutes.readingScreen.name,
                         extra: recentStory,
                       );
                     },
@@ -329,7 +396,9 @@ class YourPlanSection extends StatelessWidget {
                                         "Read for ${recentStory.lessonDuration ?? 10} mins",
                                     style: AppTextStyles.sfProDisplayMedium(
                                       fontSize: 14.sp,
-                                      color: AppColors.black.withOpacity(0.8),
+                                      color: AppColors.black.withValues(
+                                        alpha: 0.8,
+                                      ),
                                     ),
                                   ),
                                   const Spacer(),
@@ -385,13 +454,13 @@ class YourPlanSection extends StatelessWidget {
                                 SvgIcon(
                                   AppAssets.thunder,
                                   size: 16.w,
-                                  color: AppColors.yellowcolor,
+                                  color: AppColors.yellowColor,
                                 ),
                                 4.w.horizontalSpace,
                                 AppText(
                                   text: "3",
                                   style: AppTextStyles.sfProDisplayBold(
-                                    color: AppColors.yellowcolor,
+                                    color: AppColors.yellowColor,
                                     fontSize: 16.sp,
                                   ),
                                 ),
@@ -413,7 +482,7 @@ class YourPlanSection extends StatelessWidget {
 
             24.h.verticalSpace,
 
-            /// ----------- OTHER STORIES -----------
+            //todo ----------- OTHER STORIES -----------
             ...otherStories.map(
               (story) => Padding(
                 padding: EdgeInsets.only(bottom: 16.h),
@@ -425,7 +494,7 @@ class YourPlanSection extends StatelessWidget {
                   reward: "3",
                   onTap: () {
                     context.pushNamed(
-                      UserAppRoutes.readingScreen.name,
+                      AppRoutes.readingScreen.name,
                       extra: story,
                     );
                   },
@@ -528,7 +597,7 @@ class BookCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -563,7 +632,7 @@ class BookCard extends StatelessWidget {
                         text: subtitle,
                         style: AppTextStyles.sfProDisplayMedium(
                           fontSize: 14.sp,
-                          color: AppColors.black.withOpacity(0.8),
+                          color: AppColors.black.withValues(alpha: 0.8),
                         ),
                       ),
                       Spacer(),
@@ -635,13 +704,13 @@ class BookCard extends StatelessWidget {
                     SvgIcon(
                       AppAssets.thunder,
                       size: 16.w,
-                      color: AppColors.yellowcolor,
+                      color: AppColors.yellowColor,
                     ),
                     4.w.horizontalSpace,
                     AppText(
                       text: "3",
                       style: AppTextStyles.sfProDisplayBold(
-                        color: AppColors.yellowcolor,
+                        color: AppColors.yellowColor,
                         fontSize: 16.sp,
                       ),
                     ),
@@ -657,7 +726,7 @@ class BookCard extends StatelessWidget {
 }
 
 class PracticeZoneSection extends StatelessWidget {
-  const PracticeZoneSection();
+  const PracticeZoneSection({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -701,6 +770,7 @@ class PracticeCard extends StatelessWidget {
   final String reward;
 
   const PracticeCard({
+    super.key,
     required this.title,
     required this.subtitle,
     required this.icon,
@@ -716,7 +786,7 @@ class PracticeCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -733,7 +803,10 @@ class PracticeCard extends StatelessWidget {
                   text: title,
                   style: AppTextStyles.sfProDisplayBold(fontSize: 20.sp),
                 ),
-                Divider(color: AppColors.black.withOpacity(0.1), thickness: 0),
+                Divider(
+                  color: AppColors.black.withValues(alpha: 0.1),
+                  thickness: 0,
+                ),
 
                 Row(
                   children: [
@@ -751,7 +824,7 @@ class PracticeCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: AppColors.black.withOpacity(0.1),
+                          color: AppColors.black.withValues(alpha: 0.1),
                           width: 0,
                         ),
                       ),
@@ -786,13 +859,13 @@ class PracticeCard extends StatelessWidget {
                   SvgIcon(
                     AppAssets.thunder,
                     size: 16.w,
-                    color: AppColors.yellowcolor,
+                    color: AppColors.yellowColor,
                   ),
                   4.w.horizontalSpace,
                   AppText(
                     text: "3",
                     style: AppTextStyles.sfProDisplayBold(
-                      color: AppColors.yellowcolor,
+                      color: AppColors.yellowColor,
                       fontSize: 16.sp,
                     ),
                   ),
@@ -807,7 +880,7 @@ class PracticeCard extends StatelessWidget {
 }
 
 class BottomStatsCard extends StatelessWidget {
-  BottomStatsCard();
+  const BottomStatsCard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -834,7 +907,7 @@ class BottomStatsCard extends StatelessWidget {
               AppText(
                 text: "OXFORD",
                 style: AppTextStyles.textStyle16Regular.copyWith(
-                  color: AppColors.white.withOpacity(0.5),
+                  color: AppColors.white.withValues(alpha: 0.5),
                   fontSize: 14.sp,
                   letterSpacing: 2,
                 ),
@@ -855,7 +928,7 @@ class BottomStatsCard extends StatelessWidget {
               AppText(
                 text: "60%",
                 style: AppTextStyles.textStyle14Bold.copyWith(
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withValues(alpha: 0.8),
                 ),
               ),
             ],
@@ -865,7 +938,7 @@ class BottomStatsCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: 0.6,
-              backgroundColor: Colors.white.withOpacity(0.1),
+              backgroundColor: Colors.white.withValues(alpha: 0.1),
               valueColor: AlwaysStoppedAnimation(AppColors.darkgreenColor),
               minHeight: 6.h,
               borderRadius: BorderRadius.circular(42.r),

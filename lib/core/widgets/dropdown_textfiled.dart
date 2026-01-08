@@ -11,12 +11,12 @@ class CustomDropDown extends StatelessWidget {
   final Function(String?) onChanged;
 
   const CustomDropDown({
-    Key? key,
+    super.key,
     required this.hint,
     required this.items,
     this.value,
     required this.onChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class CustomDropDown extends StatelessWidget {
         splashColor: Colors.transparent,
         highlightColor: Colors.transparent,
         hoverColor: Colors.transparent,
-        focusColor: AppColors.darkGrey.withOpacity(0.1),
+        focusColor: AppColors.darkGrey.withValues(alpha: 0.1),
         canvasColor: Colors.white,
       ),
       child: Container(
@@ -34,7 +34,10 @@ class CustomDropDown extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: AppColors.black.withOpacity(0.1), width: 1),
+          border: Border.all(
+            color: AppColors.black.withValues(alpha: 0.1),
+            width: 1,
+          ),
         ),
         child: DropdownButtonHideUnderline(
           child: DropdownButton<String>(
@@ -57,7 +60,7 @@ class CustomDropDown extends StatelessWidget {
               text: hint,
               style: AppTextStyles.sfProDisplaySemibold(
                 fontSize: 14.sp,
-                color: AppColors.black.withOpacity(0.3),
+                color: AppColors.black.withValues(alpha: 0.3),
               ),
             ),
 
@@ -121,7 +124,7 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
               width: 8.w,
               height: 8.w,
               decoration: BoxDecoration(
-                color: AppColors.yellowcolor,
+                color: AppColors.yellowColor,
                 shape: BoxShape.circle,
               ),
             ),
@@ -133,7 +136,7 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
           ],
         ),
 
-        Divider(thickness: 0, color: AppColors.black.withOpacity(0.1)),
+        Divider(thickness: 0, color: AppColors.black.withValues(alpha: 0.1)),
         10.h.verticalSpace,
 
         /// Dropdown Container
@@ -142,7 +145,7 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(14.r),
-            border: Border.all(color: AppColors.black.withOpacity(0.1)),
+            border: Border.all(color: AppColors.black.withValues(alpha: 0.1)),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
@@ -152,7 +155,7 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
                 text: widget.hint,
                 style: AppTextStyles.sfProDisplayMedium(
                   fontSize: 14.sp,
-                  color: AppColors.black.withOpacity(0.3),
+                  color: AppColors.black.withValues(alpha: 0.3),
                 ),
               ),
               icon: const Icon(

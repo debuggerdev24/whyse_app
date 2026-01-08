@@ -74,7 +74,7 @@ class _SubScriptionScreenState extends State<SubScriptionScreen> {
                       "Pick a plan that fits your reading goals and\nstart learning your way.",
                       style: AppTextStyles.sfProDisplayRegular(
                         fontSize: 16.sp,
-                        color: AppColors.white.withOpacity(0.8),
+                        color: AppColors.white.withValues(alpha: 0.8),
                       ),
                     ),
                   ],
@@ -135,9 +135,9 @@ class _SubScriptionScreenState extends State<SubScriptionScreen> {
             ),
           ),
 
-          AppButton(
-            onPressed: () {
-              context.pushNamed(UserAppRoutes.tabScreen.name);
+          AppFilledButton(
+            onTap: () {
+              context.pushNamed(AppRoutes.tabScreen.name);
             },
             text: "Subscribe",
             backgroundColor: AppColors.teal,

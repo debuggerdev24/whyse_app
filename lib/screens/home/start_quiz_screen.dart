@@ -6,8 +6,9 @@ import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
-import 'package:redstreakapp/models/story_models/story_model.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
+
+import '../../models/home/story_models/story_model.dart';
 
 class StartQuizScreen extends StatelessWidget {
   final List<Quiz> quizzes;
@@ -61,22 +62,22 @@ class StartQuizScreen extends StatelessWidget {
                   "You’ll answer ${quizzes.length} quick questions about the \npassage you just read. Let’s see what you remember!",
               style: AppTextStyles.sfProDisplayMedium(
                 fontSize: 16.sp,
-                color: AppColors.black.withOpacity(0.6),
+                color: AppColors.black.withValues(alpha: 0.6),
               ).copyWith(height: 1.5),
               textAlign: TextAlign.center,
             ),
             Spacer(flex: 3),
 
             // Start Quiz Button
-            AppButton(
+            AppFilledButton(
               text: "Start Quiz",
-              onPressed: () {
+              onTap: () {
                 context.pushNamed(
-                  UserAppRoutes.quizQuestionScreen.name,
+                  AppRoutes.quizQuestionScreen.name,
                   extra: {'quizzes': quizzes, 'storyTitle': storyTitle},
                 );
               },
-              backgroundColor: AppColors.yellowcolor,
+              backgroundColor: AppColors.yellowColor,
               fixedSize: Size(348.w, 42.h),
             ),
             40.h.verticalSpace,

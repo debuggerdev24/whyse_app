@@ -1,6 +1,5 @@
 import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/extensions/routes_extensions.dart';
-import 'package:redstreakapp/models/story_models/story_model.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:redstreakapp/screens/above_16/create_account_screen.dart';
 import 'package:redstreakapp/screens/above_16/interests_screen.dart';
@@ -12,72 +11,76 @@ import 'package:redstreakapp/screens/above_16/topics_screen.dart';
 import 'package:redstreakapp/screens/above_16/what_goals_screen.dart';
 import 'package:redstreakapp/screens/above_16/what_intrest_screen.dart';
 import 'package:redstreakapp/screens/auth/enter_age_screen.dart';
+import 'package:redstreakapp/screens/auth/forgot_password_screen.dart';
 import 'package:redstreakapp/screens/auth/login_screen.dart';
+import 'package:redstreakapp/screens/auth/reset_password_screen.dart';
 import 'package:redstreakapp/screens/auth/signup_screen.dart';
+import 'package:redstreakapp/screens/auth/verify_otp_screen.dart';
 import 'package:redstreakapp/screens/home/generate_reading_screen.dart';
 import 'package:redstreakapp/screens/home/quiz_completed_screen.dart';
 import 'package:redstreakapp/screens/home/quiz_question_screen.dart';
 import 'package:redstreakapp/screens/home/reading_screen.dart';
 import 'package:redstreakapp/screens/home/start_quiz_screen.dart';
 
+import '../models/home/story_models/story_model.dart';
 import '../screens/below_16/consent_status_screen.dart';
 import '../screens/below_16/parent_email_screen.dart';
+import '../screens/dashboard.dart';
 import '../screens/splash/splash_screen.dart';
-import '../screens/tabs/tab.dart';
 
 class UserAppRoute {
   static final GoRouter goRouter = GoRouter(
-    initialLocation: UserAppRoutes.splashScreen.path,
+    initialLocation: AppRoutes.splashScreen.path,
     routes: routes,
   );
 
   static final List<RouteBase> routes = [
     GoRoute(
-      path: UserAppRoutes.splashScreen.path,
-      name: UserAppRoutes.splashScreen.name,
+      path: AppRoutes.splashScreen.path,
+      name: AppRoutes.splashScreen.name,
       builder: (context, state) {
         return SplashScreen();
       },
     ),
     GoRoute(
-      path: UserAppRoutes.loginScreen.path,
-      name: UserAppRoutes.loginScreen.name,
+      path: AppRoutes.loginScreen.path,
+      name: AppRoutes.loginScreen.name,
       builder: (context, state) {
         return LoginScreen();
       },
     ),
     GoRoute(
-      path: UserAppRoutes.signUpScreen.path,
-      name: UserAppRoutes.signUpScreen.name,
+      path: AppRoutes.signUpScreen.path,
+      name: AppRoutes.signUpScreen.name,
       builder: (context, state) {
         return SignupScreen();
       },
     ),
     GoRoute(
-      path: UserAppRoutes.enterAgeScreen.path,
-      name: UserAppRoutes.enterAgeScreen.name,
+      path: AppRoutes.enterAgeScreen.path,
+      name: AppRoutes.enterAgeScreen.name,
       builder: (context, state) {
         return AgeEntryScreen();
       },
     ),
     GoRoute(
-      path: UserAppRoutes.createAccountScreen.path,
-      name: UserAppRoutes.createAccountScreen.name,
+      path: AppRoutes.createAccountScreen.path,
+      name: AppRoutes.createAccountScreen.name,
       builder: (context, state) {
         return CreateAccountScreen();
       },
     ),
     // Below 16 Routes
     GoRoute(
-      path: UserAppRoutes.parentEmailScreen.path,
-      name: UserAppRoutes.parentEmailScreen.name,
+      path: AppRoutes.parentEmailScreen.path,
+      name: AppRoutes.parentEmailScreen.name,
       builder: (context, state) {
         return ParentEmailScreen();
       },
     ),
     GoRoute(
-      path: UserAppRoutes.consentStatusScreen.path,
-      name: UserAppRoutes.consentStatusScreen.name,
+      path: AppRoutes.consentStatusScreen.path,
+      name: AppRoutes.consentStatusScreen.name,
       builder: (context, state) {
         // Optional: Parse extra for testing/demo purposes if we want to toggle state
         // final bool isAccepted = state.extra as bool? ?? true;
@@ -86,86 +89,86 @@ class UserAppRoute {
     ),
     // Onboarding Routes
     GoRoute(
-      path: UserAppRoutes.profileInfoScreen.path,
-      name: UserAppRoutes.profileInfoScreen.name,
+      path: AppRoutes.profileInfoScreen.path,
+      name: AppRoutes.profileInfoScreen.name,
       builder: (context, state) {
         return ProfileInfoScreen();
       },
     ),
     GoRoute(
-      path: UserAppRoutes.readingGoalScreen.path,
-      name: UserAppRoutes.readingGoalScreen.name,
+      path: AppRoutes.readingGoalScreen.path,
+      name: AppRoutes.readingGoalScreen.name,
       builder: (context, state) {
         return ReadingGoalScreen();
       },
     ),
     GoRoute(
-      path: UserAppRoutes.interestsScreen.path,
-      name: UserAppRoutes.interestsScreen.name,
+      path: AppRoutes.interestsScreen.path,
+      name: AppRoutes.interestsScreen.name,
       builder: (context, state) {
         return InterestsScreen();
       },
     ),
     GoRoute(
-      path: UserAppRoutes.topicsScreen.path,
-      name: UserAppRoutes.topicsScreen.name,
+      path: AppRoutes.topicsScreen.path,
+      name: AppRoutes.topicsScreen.name,
       builder: (context, state) {
         return TopicsScreen();
       },
     ),
     GoRoute(
-      path: UserAppRoutes.goalsScreen.path,
-      name: UserAppRoutes.goalsScreen.name,
+      path: AppRoutes.goalsScreen.path,
+      name: AppRoutes.goalsScreen.name,
       builder: (context, state) {
         return GoalsScreen();
       },
     ),
     GoRoute(
-      path: UserAppRoutes.successScreen.path,
-      name: UserAppRoutes.successScreen.name,
+      path: AppRoutes.successScreen.path,
+      name: AppRoutes.successScreen.name,
       builder: (context, state) {
         return SuccessScreen();
       },
     ),
     GoRoute(
-      path: UserAppRoutes.subscriptionScreen.path,
-      name: UserAppRoutes.subscriptionScreen.name,
+      path: AppRoutes.subscriptionScreen.path,
+      name: AppRoutes.subscriptionScreen.name,
       builder: (context, state) {
         return SubScriptionScreen();
       },
     ),
     GoRoute(
-      path: UserAppRoutes.tabScreen.path,
-      name: UserAppRoutes.tabScreen.name,
+      path: AppRoutes.tabScreen.path,
+      name: AppRoutes.tabScreen.name,
       builder: (context, state) {
         return TabScreen();
       },
     ),
     GoRoute(
-      path: UserAppRoutes.bookReadingScreen.path,
-      name: UserAppRoutes.bookReadingScreen.name,
+      path: AppRoutes.bookReadingScreen.path,
+      name: AppRoutes.bookReadingScreen.name,
       builder: (context, state) {
         return GenerateReadingScreen();
       },
     ),
     GoRoute(
-      path: UserAppRoutes.readingScreen.path,
-      name: UserAppRoutes.readingScreen.name,
+      path: AppRoutes.readingScreen.path,
+      name: AppRoutes.readingScreen.name,
       builder: (context, state) {
         final story = state.extra as Story?;
         return ReadingScreen(story: story);
       },
     ),
     GoRoute(
-      path: UserAppRoutes.startQuizScreen.path,
-      name: UserAppRoutes.startQuizScreen.name,
+      path: AppRoutes.startQuizScreen.path,
+      name: AppRoutes.startQuizScreen.name,
       builder: (context, state) {
         return StartQuizScreen();
       },
     ),
     GoRoute(
-      path: UserAppRoutes.quizQuestionScreen.path,
-      name: UserAppRoutes.quizQuestionScreen.name,
+      path: AppRoutes.quizQuestionScreen.path,
+      name: AppRoutes.quizQuestionScreen.name,
       builder: (context, state) {
         final extra = state.extra as Map<String, dynamic>?;
         final quizzes = extra?['quizzes'] as List<Quiz>? ?? [];
@@ -174,8 +177,8 @@ class UserAppRoute {
       },
     ),
     GoRoute(
-      path: UserAppRoutes.quizCompletedScreen.path,
-      name: UserAppRoutes.quizCompletedScreen.name,
+      path: AppRoutes.quizCompletedScreen.path,
+      name: AppRoutes.quizCompletedScreen.name,
       builder: (context, state) {
         final extra = state.extra as Map<String, dynamic>?;
         final score = extra?['score'] as int? ?? 0;
@@ -189,12 +192,34 @@ class UserAppRoute {
       },
     ),
     GoRoute(
-      path: UserAppRoutes.whatInterestScreen.path,
-      name: UserAppRoutes.whatInterestScreen.name,
+      path: AppRoutes.whatInterestScreen.path,
+      name: AppRoutes.whatInterestScreen.name,
       builder: (context, state) {
         return WhatInatestScreen();
       },
     ),
+    GoRoute(
+      path: AppRoutes.forgotPasswordScreen.path,
+      name: AppRoutes.forgotPasswordScreen.name,
+      builder: (context, state) {
+        return ForgotPasswordScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.verifyOtpScreen.path,
+      name: AppRoutes.verifyOtpScreen.name,
+      builder: (context, state) {
+        return VerifyOtpScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.resetPasswordScreen.path,
+      name: AppRoutes.resetPasswordScreen.name,
+      builder: (context, state) {
+        return ResetPasswordScreen();
+      },
+    ),
+
     // GoRoute(
     //   path: UserAppRoutes.whatInterestScreen.path,
     //   name: UserAppRoutes.whatInterestScreen.name,

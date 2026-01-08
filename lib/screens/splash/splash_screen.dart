@@ -39,47 +39,52 @@ class _SplashScreenState extends State<SplashScreen>
     // Go to next screen after delay
     Future.delayed(const Duration(seconds: 2), () async {
       if (!mounted) return;
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final step = await authProvider.fetchOnboardingStep();
-      final isAgeDone = SharedPrefs.instance.isAgeCompleted;
+      final authProvider = context.read<AuthProvider>();
+      final step = await authProvider.fetchOnboardingStep(
+        // onFailed: (error) {
+        //   AppToast.error(context, error);
+        // },
+      );
 
       if (!mounted) {
         return;
       }
+      //todo fetch all the API in init phase of the app.
+      context.read<AuthProvider>().getGoals(context);
 
-      if (step == 'AGE') {
+      if (step == "AGE") {
         // if (isAgeDone) {
         //   context.goNamed(UserAppRoutes.createAccountScreen.name);
         // } else {
-        context.goNamed(UserAppRoutes.enterAgeScreen.name);
+        context.goNamed(AppRoutes.enterAgeScreen.name);
         // }
       } else if (step == 'EMAIL') {
-        context.goNamed(UserAppRoutes.enterAgeScreen.name);
+        context.goNamed(AppRoutes.enterAgeScreen.name);
       } else if (step == 'PARENT_EMAIL') {
-        context.goNamed(UserAppRoutes.parentEmailScreen.name);
+        context.goNamed(AppRoutes.parentEmailScreen.name);
       } else if (step == 'CONSENT_STATUS') {
-        context.goNamed(UserAppRoutes.consentStatusScreen.name);
+        context.goNamed(AppRoutes.consentStatusScreen.name);
       } else if (step == 'CREATE_ACCOUNT') {
-        context.goNamed(UserAppRoutes.createAccountScreen.name);
+        context.goNamed(AppRoutes.createAccountScreen.name);
       } else if (step == 'PROFILE_INFO') {
-        context.goNamed(UserAppRoutes.profileInfoScreen.name);
+        context.goNamed(AppRoutes.profileInfoScreen.name);
       } else if (step == 'READING_GOAL') {
-        context.goNamed(UserAppRoutes.readingGoalScreen.name);
+        context.goNamed(AppRoutes.readingGoalScreen.name);
       } else if (step == 'INTERESTS') {
-        context.goNamed(UserAppRoutes.interestsScreen.name);
+        context.goNamed(AppRoutes.interestsScreen.name);
       } else if (step == 'TOPICS') {
-        context.goNamed(UserAppRoutes.topicsScreen.name);
+        context.goNamed(AppRoutes.topicsScreen.name);
       } else if (step == 'GOALS') {
-        context.goNamed(UserAppRoutes.goalsScreen.name);
+        context.goNamed(AppRoutes.goalsScreen.name);
       } else if (step == 'COMPLETED') {
-        context.goNamed(UserAppRoutes.tabScreen.name);
+        context.goNamed(AppRoutes.tabScreen.name);
       } else {
         // Check if user is already logged in
-        final token = SharedPrefs.instance.token;
+        final token = SharedPrefs.instance.authToken;
         if (token != null && token.isNotEmpty) {
-          context.goNamed(UserAppRoutes.tabScreen.name);
+          context.goNamed(AppRoutes.tabScreen.name);
         } else {
-          context.goNamed(UserAppRoutes.loginScreen.name);
+          context.goNamed(AppRoutes.loginScreen.name);
         }
       }
     });

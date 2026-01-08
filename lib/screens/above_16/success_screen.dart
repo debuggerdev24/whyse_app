@@ -51,11 +51,11 @@ class SuccessScreen extends StatelessWidget {
               ),
 
               /// ---------- BUTTON AT BOTTOM ----------
-              AppButton(
+              AppFilledButton(
                 text: "Continue",
-                onPressed: () {
-                  context.pushNamed(UserAppRoutes.loginScreen.name);
-                  CustomToast.showSuccess(
+                onTap: () {
+                  context.pushNamed(AppRoutes.loginScreen.name);
+                  AppToast.success(
                     context,
                     "Register Successfully, Login to your account.",
                   );

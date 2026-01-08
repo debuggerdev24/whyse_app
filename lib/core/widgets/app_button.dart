@@ -8,78 +8,152 @@ enum AppButtonWidthType { full, half }
 
 enum AppButtonColorType { primary, secondary, greyed }
 
-class AppButton extends StatefulWidget {
-  const AppButton({
+class AppFilledButton extends StatelessWidget {
+  const AppFilledButton({
     super.key,
-    required this.onPressed,
+    required this.onTap,
     required this.text,
     this.textStyle,
     this.backgroundColor,
     this.foregroundColor,
     this.type = AppButtonWidthType.full,
-    this.colorType = AppButtonColorType.primary,
+    this.colorType,
     this.isLoading = false,
     this.elevation,
     this.radius = 16,
     this.fixedSize,
     this.icon,
     this.isVisible = true,
+    this.margin,
   });
 
-  final VoidCallback? onPressed;
+  final VoidCallback? onTap;
   final String text;
   final Widget? icon;
-  final Color? backgroundColor;
-  final Color? foregroundColor;
-  final AppButtonWidthType? type;
-  final AppButtonColorType? colorType;
+  final Color? backgroundColor, foregroundColor;
+  final AppButtonWidthType? type, colorType;
   final bool? isLoading;
-  final double? radius;
-  final double? elevation;
+  final double? radius, elevation;
   final TextStyle? textStyle;
   final bool isVisible;
   final Size? fixedSize;
+  final EdgeInsetsGeometry? margin;
 
-  @override
-  State<AppButton> createState() => _AppButtonState();
-}
-
-class _AppButtonState extends State<AppButton> {
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton.icon(
-      onPressed: widget.onPressed,
+    return Padding(
+      padding: margin ?? EdgeInsetsGeometry.zero,
+      child: ElevatedButton.icon(
+        onPressed: onTap,
 
-      style: ElevatedButton.styleFrom(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(40.r),
+        style: ElevatedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(40.r),
+          ),
+
+          elevation: 0,
+          backgroundColor: backgroundColor ?? AppColors.black,
+
+          fixedSize: fixedSize ?? Size(354.w, 50.h),
+          splashFactory: NoSplash.splashFactory,
         ),
 
-        elevation: 0,
-        backgroundColor: widget.backgroundColor ?? AppColors.black,
-
-        fixedSize: widget.fixedSize ?? Size(354.w, 50.h),
-
-        splashFactory: NoSplash.splashFactory,
-      ),
-
-      icon: widget.isLoading ?? false
-          ? Container()
-          : widget.icon ?? Container(),
-      label: widget.isLoading ?? false
-          ? SizedBox(
-              height: 25.h,
-              width: 20.w,
-              child: CircularProgressIndicator(strokeWidth: 4.r),
-            )
-          : Text(
-              widget.text,
-              textAlign: TextAlign.start,
-              style: AppTextStyles.sfProDisplaySemibold(
-                fontSize: 15.sp,
-                color: AppColors.white,
+        icon: isLoading ?? false ? Container() : icon ?? Container(),
+        label: isLoading ?? false
+            ? SizedBox(
+                height: 25.h,
+                width: 20.w,
+                child: CircularProgressIndicator(strokeWidth: 4.r),
+              )
+            : Text(
+                text,
+                textAlign: TextAlign.start,
+                style:
+                    textStyle ??
+                    AppTextStyles.sfProDisplaySemibold(
+                      fontSize: 17.5.sp,
+                      color: AppColors.white,
+                    ),
               ),
-            ),
+      ),
+    );
+  }
+}
+
+class AppOutlinedButton extends StatelessWidget {
+  const AppOutlinedButton({
+    super.key,
+    required this.onTap,
+    required this.text,
+    this.textStyle,
+    this.borderColor,
+    this.foregroundColor,
+    this.type = AppButtonWidthType.full,
+    this.isLoading = false,
+    this.elevation,
+    this.radius = 50,
+    this.fixedSize,
+    this.icon,
+    this.isVisible = true,
+    this.margin,
+    this.borderWidth = 1.5,
+  });
+
+  final VoidCallback? onTap;
+  final String text;
+  final Widget? icon;
+
+  final Color? borderColor;
+  final Color? foregroundColor;
+
+  final AppButtonWidthType? type;
+  final bool? isLoading;
+  final double? radius, elevation, borderWidth;
+  final TextStyle? textStyle;
+  final bool isVisible;
+  final Size? fixedSize;
+  final EdgeInsetsGeometry? margin;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isVisible) return const SizedBox.shrink();
+
+    return Padding(
+      padding: margin ?? EdgeInsets.zero,
+      child: OutlinedButton.icon(
+        onPressed: onTap,
+        style: OutlinedButton.styleFrom(
+          fixedSize: fixedSize ?? Size(354.w, 50.h),
+          foregroundColor: foregroundColor ?? AppColors.black,
+          side: BorderSide(
+            color: borderColor ?? AppColors.black,
+            width: borderWidth ?? 1.5,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radius!.r),
+          ),
+          splashFactory: NoSplash.splashFactory,
+        ),
+        icon: isLoading ?? false ? const SizedBox() : icon ?? const SizedBox(),
+        label: isLoading ?? false
+            ? SizedBox(
+                height: 25.h,
+                width: 20.w,
+                child: CircularProgressIndicator(
+                  strokeWidth: 4.r,
+                  color: foregroundColor ?? AppColors.black,
+                ),
+              )
+            : Text(
+                text,
+                style:
+                    textStyle ??
+                    AppTextStyles.sfProDisplaySemibold(
+                      fontSize: 16.sp,
+                      color: foregroundColor ?? AppColors.black,
+                    ),
+              ),
+      ),
     );
   }
 }
@@ -87,7 +161,7 @@ class _AppButtonState extends State<AppButton> {
 class ActionButton extends StatelessWidget {
   final String text;
   final Color color;
-  const ActionButton({required this.text, required this.color});
+  const ActionButton({super.key, required this.text, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +208,7 @@ class ReadingSkillButton extends StatelessWidget {
           border: Border.all(
             color: isSelected
                 ? Colors.transparent
-                : AppColors.black.withOpacity(0.1),
+                : AppColors.black.withValues(alpha: 0.1),
           ),
         ),
         child: Center(
@@ -146,7 +220,7 @@ class ReadingSkillButton extends StatelessWidget {
                 size: 18.sp,
                 color: isSelected
                     ? Colors.white
-                    : AppColors.black.withOpacity(0.4),
+                    : AppColors.black.withValues(alpha: 0.4),
               ),
               8.w.horizontalSpace,
               AppText(
@@ -155,7 +229,7 @@ class ReadingSkillButton extends StatelessWidget {
                   fontSize: 14.sp,
                   color: isSelected
                       ? Colors.white
-                      : AppColors.black.withOpacity(0.4),
+                      : AppColors.black.withValues(alpha: 0.4),
                 ),
               ),
             ],

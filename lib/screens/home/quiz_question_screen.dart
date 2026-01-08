@@ -3,13 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
+import 'package:redstreakapp/routes/user_routes.dart';
 
-import 'package:redstreakapp/models/story_models/story_model.dart';
+import '../../models/home/story_models/story_model.dart';
 
 class QuizQuestionScreen extends StatefulWidget {
   final List<Quiz> quizzes;
@@ -102,7 +102,7 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
       });
     } else {
       context.pushNamed(
-        UserAppRoutes.quizCompletedScreen.name,
+        AppRoutes.quizCompletedScreen.name,
         extra: {
           'score': _score,
           'total': _questions.length,
@@ -146,11 +146,11 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                         children: List.generate(_questions.length, (index) {
                           Color color;
                           if (index < _currentQuestionIndex) {
-                            color = AppColors.yellowcolor;
+                            color = AppColors.yellowColor;
                           } else if (index == _currentQuestionIndex) {
-                            color = AppColors.yellowcolor;
+                            color = AppColors.yellowColor;
                           } else {
-                            color = Colors.grey.withOpacity(0.2);
+                            color = Colors.grey.withValues(alpha: 0.2);
                           }
 
                           return Expanded(
@@ -212,18 +212,16 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
 
               // Button
               if (_isChecked)
-                AppButton(
+                AppFilledButton(
                   text: "Continue",
-                  onPressed: _continue,
+                  onTap: _continue,
                   backgroundColor: Color(0xFF00796B),
                   fixedSize: Size(348.w, 42.h),
                 )
               else
-                AppButton(
+                AppFilledButton(
                   text: "Check",
-                  onPressed: _selectedOptionIndex != null
-                      ? _checkAnswer
-                      : () {},
+                  onTap: _selectedOptionIndex != null ? _checkAnswer : () {},
                   backgroundColor: _selectedOptionIndex != null
                       ? AppColors.black
                       : Colors.grey,

@@ -12,7 +12,7 @@ class SharedPrefs {
   }
 
   /// ---------------- Token ----------------
-  String? get token => prefs.getString('token');
+  String? get authToken => prefs.getString('token');
   String? get refreshToken => prefs.getString('refresh_token');
 
   Future<void> setToken(String token) async {

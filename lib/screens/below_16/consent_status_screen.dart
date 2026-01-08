@@ -49,9 +49,7 @@ class _ConsentStatusScreenState extends State<ConsentStatusScreen> {
               const Spacer(),
 
               SvgIcon(AppAssets.accepted, size: 144.w),
-
               42.h.verticalSpace,
-
               AppText(
                 text: "Request sent successfully.",
                 style: AppTextStyles.sfProDisplaySemibold(
@@ -60,14 +58,13 @@ class _ConsentStatusScreenState extends State<ConsentStatusScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
-
               35.h.verticalSpace,
 
               AppText(
                 text: "Consent Status",
                 style: AppTextStyles.sfProDisplaySemibold(
                   fontSize: 14.sp,
-                  color: AppColors.black.withOpacity(0.6),
+                  color: AppColors.black.withValues(alpha: 0.6),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -85,12 +82,12 @@ class _ConsentStatusScreenState extends State<ConsentStatusScreen> {
 
               const Spacer(),
 
-              AppButton(
-                onPressed: () {
-                  context.pushNamed(UserAppRoutes.createAccountScreen.name);
+              AppFilledButton(
+                onTap: () {
+                  context.pushNamed(AppRoutes.createAccountScreen.name);
                 },
                 text: "Continue",
-                backgroundColor: AppColors.yellowcolor,
+                backgroundColor: AppColors.yellowColor,
               ),
 
               10.h.verticalSpace,

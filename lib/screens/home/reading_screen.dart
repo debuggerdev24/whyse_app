@@ -2,14 +2,15 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:redstreakapp/core/widgets/custom_shimmer.dart';
-import 'package:redstreakapp/screens/home/start_quiz_screen.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
-import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
-import 'package:redstreakapp/models/story_models/story_model.dart';
+import 'package:redstreakapp/core/widgets/app_text.dart';
+import 'package:redstreakapp/core/widgets/custom_shimmer.dart';
+import 'package:redstreakapp/screens/home/start_quiz_screen.dart';
+
+import '../../models/home/story_models/story_model.dart';
 
 class ReadingScreen extends StatefulWidget {
   final Story? story;
@@ -150,8 +151,8 @@ class _ReadingScreenState extends State<ReadingScreen> {
                                           style:
                                               AppTextStyles.sfProDisplaySemibold(
                                                 fontSize: 14.sp,
-                                                color: Colors.white.withOpacity(
-                                                  0.8,
+                                                color: Colors.white.withValues(
+                                                  alpha: 0.8,
                                                 ),
                                               ),
                                         ),
@@ -223,13 +224,15 @@ class _ReadingScreenState extends State<ReadingScreen> {
                               text: TextSpan(
                                 style: AppTextStyles.sfProDisplayRegular(
                                   fontSize: 16.sp,
-                                  color: AppColors.black.withOpacity(0.8),
+                                  color: AppColors.black.withValues(alpha: 0.8),
                                 ).copyWith(height: 1.8),
                                 children: _buildTextSpans(
                                   _pages[index],
                                   AppTextStyles.sfProDisplayRegular(
                                     fontSize: 16.sp,
-                                    color: AppColors.black.withOpacity(0.8),
+                                    color: AppColors.black.withValues(
+                                      alpha: 0.8,
+                                    ),
                                   ).copyWith(height: 1.8),
                                   AppTextStyles.sfProDisplayBold(
                                     fontSize: 16.sp,
@@ -307,15 +310,15 @@ class _ReadingScreenState extends State<ReadingScreen> {
                     text: "Completed Reading?",
                     style: AppTextStyles.sfProDisplaySemibold(
                       fontSize: 12.sp,
-                      color: AppColors.black.withOpacity(0.6),
+                      color: AppColors.black.withValues(alpha: 0.6),
                     ),
                   ),
                   10.h.verticalSpace,
-                  AppButton(
+                  AppFilledButton(
                     fixedSize: Size(348.w, 42.h),
-                    backgroundColor: AppColors.yellowcolor,
+                    backgroundColor: AppColors.yellowColor,
                     text: "Take Quiz",
-                    onPressed: () {
+                    onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -386,7 +389,7 @@ class GlassIconButton extends StatelessWidget {
             width: size,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.35),
+              color: Colors.black.withValues(alpha: 0.35),
               borderRadius: borderRadius,
             ),
             child: child,

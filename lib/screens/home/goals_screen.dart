@@ -2,19 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:redstreakapp/core/constants/app_color.dart';
-import 'package:redstreakapp/core/constants/text_style.dart';
-import 'package:redstreakapp/core/utils/custom_loader.dart';
-import 'package:redstreakapp/core/widgets/app_button.dart';
-import 'package:redstreakapp/core/widgets/app_text.dart';
-import 'package:redstreakapp/core/widgets/app_textfiled.dart';
-import 'package:redstreakapp/core/widgets/custom_toast.dart';
-import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
-import 'package:redstreakapp/providers/auth_provider.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
+import 'package:redstreakapp/core/widgets/app_layout.dart';
+import 'package:redstreakapp/providers/home_provider.dart';
+
+import '../../core/constants/app_color.dart';
+import '../../core/constants/text_style.dart';
+import '../../core/utils/custom_loader.dart';
+import '../../core/widgets/app_button.dart';
+import '../../core/widgets/app_text.dart';
+import '../../core/widgets/app_textfiled.dart';
+import '../../core/widgets/custom_toast.dart';
+import '../../core/widgets/onboarding_widgets.dart';
+import '../../routes/user_routes.dart';
 
 class GoalsScreen extends StatefulWidget {
-  // final bool? isFromHome;
   const GoalsScreen({super.key});
 
   @override
@@ -22,39 +23,13 @@ class GoalsScreen extends StatefulWidget {
 }
 
 class _GoalsScreenState extends State<GoalsScreen> {
-  String? selectedGoalId;
-  final TextEditingController customGoalController = TextEditingController();
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   WidgetsBinding.instance.addPostFrameCallback((_) {});
-  // }
-
-  void _onGoalSelected(String id) {
-    setState(() {
-      selectedGoalId = id;
-      customGoalController.clear();
-    });
-  }
-
-  void _onCustomGoalChanged(String? val) {
-    if (val != null && val.isNotEmpty) {
-      setState(() {
-        selectedGoalId = null;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+    return AppLayout(
       body: SafeArea(
-        child: Consumer<AuthProvider>(
+        child: Consumer<HomeProvider>(
           builder: (context, provider, child) {
             final goalsList = provider.goalsList;
-            final isStoryCreation = provider.isStoryCreation;
             return Stack(
               children: [
                 Padding(
@@ -67,20 +42,13 @@ class _GoalsScreenState extends State<GoalsScreen> {
                     children: [
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: provider.isStoryCreation ? 8.w : 0,
+                        spacing: 8.w,
                         children: [
                           Expanded(
                             //todo on boarding steps header
                             child: OnboardingHeader(
-                              currentStep: (isStoryCreation) ? 1 : 5,
-                              totalSteps: (isStoryCreation) ? 4 : 5,
-                              onSkip: (isStoryCreation)
-                                  ? () {
-                                      context.pushNamed(
-                                        AppRoutes.interestsScreen.name,
-                                      );
-                                    }
-                                  : null,
+                              currentStep: 5,
+                              totalSteps: 5,
                               onBack: () {
                                 if (context.canPop()) {
                                   context.pop();
@@ -109,47 +77,43 @@ class _GoalsScreenState extends State<GoalsScreen> {
 
                       18.h.verticalSpace,
 
-                      if (provider.isLoadingGoals)
-                        const Expanded(
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: AppColors.teal,
-                            ),
-                          ),
-                        )
+                      if (provider.isGetGoalsLoading)
+                        const Expanded(child: ApiLoadingIndicator())
                       else
                         Expanded(
                           child: ListView.separated(
-                            itemCount:
-                                goalsList.length + ((isStoryCreation) ? 0 : 1),
+                            itemCount: provider.goalsList.length + 1,
                             separatorBuilder: (context, index) =>
                                 8.h.verticalSpace,
                             itemBuilder: (context, index) {
                               // Custom Goal Field at the bottom
-                              if (index == goalsList.length &&
-                                  !isStoryCreation) {
+                              if (index == goalsList.length) {
                                 return Padding(
                                   padding: EdgeInsets.only(
                                     bottom: 20.h,
                                     top: 1.h,
                                   ),
                                   child: AppTextField(
-                                    controller: customGoalController,
+                                    controller: provider.customGoalController,
                                     hintText: "Add Custom Goal...",
-                                    onChanged: _onCustomGoalChanged,
+                                    onChanged: (value) {
+                                      provider.selectedGoalId = null;
+                                    },
                                   ),
                                 );
                               }
 
                               final goal = goalsList[index];
-                              final id = goal['id']; // Assuming ID exists
-                              final title = goal['title'] ?? '';
-                              final description = goal['description'] ?? '';
+                              final id = goal.id; // Assuming ID exists
+                              final title = goal.title;
+                              final description = goal.description;
 
-                              final isSelected = selectedGoalId == id;
+                              final isSelected = provider.selectedGoalId == id;
 
                               return GestureDetector(
-                                onTap: () => _onGoalSelected(id),
+                                onTap: () {
+                                  provider.setSelectedId = id;
+                                },
                                 child: Container(
                                   padding: EdgeInsets.symmetric(
                                     horizontal: 16.w,
@@ -202,12 +166,13 @@ class _GoalsScreenState extends State<GoalsScreen> {
                         backgroundColor: AppColors.yellowColor,
 
                         onTap: () async {
-                          final customGoalText = customGoalController.text
+                          final customGoalText = provider
+                              .customGoalController
+                              .text
                               .trim();
 
-                          if (selectedGoalId == null &&
-                              customGoalText.isEmpty &&
-                              !isStoryCreation) {
+                          if (provider.selectedGoalId == null &&
+                              customGoalText.isEmpty) {
                             AppToast.error(
                               context,
                               "Please select at least one goal",
@@ -218,8 +183,8 @@ class _GoalsScreenState extends State<GoalsScreen> {
                           List<String> ids = [];
                           List<Map<String, String>> customs = [];
 
-                          if (selectedGoalId != null) {
-                            ids.add(selectedGoalId!);
+                          if (provider.selectedGoalId != null) {
+                            ids.add(provider.selectedGoalId!);
                           }
                           if (customGoalText.isNotEmpty) {
                             customs.add({
@@ -228,25 +193,15 @@ class _GoalsScreenState extends State<GoalsScreen> {
                             });
                           }
 
-                          final success = await provider.saveGoals(
-                            context,
-                            goalIds: ids,
-                            customGoals: customs,
-                          );
-
-                          if (success && context.mounted) {
-                            context.pushNamed(
-                              (isStoryCreation)
-                                  ? AppRoutes.interestsScreen.name
-                                  : AppRoutes.successScreen.name,
-                            );
+                          if (context.mounted) {
+                            context.pushNamed(AppRoutes.interestsScreen.name);
                           }
                         },
                       ),
                     ],
                   ),
                 ),
-                if (provider.isSaveGoalsLoading) FullPageIndicator(),
+                // if (provider.isSaveGoalsLoading) FullPageIndicator(),
               ],
             );
           },
