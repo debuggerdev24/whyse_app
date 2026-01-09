@@ -21,7 +21,7 @@ enum AppRoutes {
   successScreen,
   subscriptionScreen,
 
-  tabScreen,
+  dashBoardScreen,
   bookReadingScreen,
   readingScreen,
   startQuizScreen,
@@ -31,4 +31,7 @@ enum AppRoutes {
   forgotPasswordScreen,
   verifyOtpScreen,
   resetPasswordScreen,
+  storyGoalsScreen,
+  storyInterestScreen,
+  storyTopicsScreen,
 }

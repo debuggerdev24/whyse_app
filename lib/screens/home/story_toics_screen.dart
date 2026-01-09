@@ -14,14 +14,14 @@ import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
-class TopicsScreen extends StatefulWidget {
-  const TopicsScreen({super.key});
+class StoryTopicsScreen extends StatefulWidget {
+  const StoryTopicsScreen({super.key});
 
   @override
-  State<TopicsScreen> createState() => _TopicsScreenState();
+  State<StoryTopicsScreen> createState() => _StoryTopicsScreenState();
 }
 
-class _TopicsScreenState extends State<TopicsScreen> {
+class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
   // Local state for custom topics
   final List<String> customTopics = [];
   final TextEditingController customTopicController = TextEditingController();
@@ -81,14 +81,6 @@ class _TopicsScreenState extends State<TopicsScreen> {
     return fallbacks[title.hashCode.abs() % fallbacks.length];
   }
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AuthProvider>().fetchDefaultTopics(context);
-    });
-  }
-
   void _toggleApiTopic(String id) {
     setState(() {
       if (selectedTopicIds.contains(id)) {
@@ -140,8 +132,8 @@ class _TopicsScreenState extends State<TopicsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       OnboardingHeader(
-                        currentStep: (provider.isStoryCreation) ? 4 : 3,
-                        totalSteps: (provider.isStoryCreation) ? 4 : 5,
+                        currentStep: 3,
+                        totalSteps: 4,
                         onBack: () {
                           if (context.canPop()) {
                             context.pop();

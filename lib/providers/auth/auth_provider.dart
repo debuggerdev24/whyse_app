@@ -2,14 +2,15 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:redstreakapp/core/constants/shared_pref.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/services/auth/auth_api_service.dart';
 import 'package:redstreakapp/services/base_api_service.dart';
 
-import '../core/helper/log_helper.dart';
-import '../models/home/story_models/generate_story_request.dart';
-import '../models/home/story_models/story_model.dart';
+import '../../core/helper/log_helper.dart';
+import '../../models/home/story_models/generate_story_request.dart';
+import '../../models/home/story_models/story_model.dart';
 
 class AuthProvider with ChangeNotifier {
   TextEditingController signUpEmailCtr = TextEditingController();
@@ -19,6 +20,7 @@ class AuthProvider with ChangeNotifier {
   TextEditingController newPasswordCtr = TextEditingController();
   TextEditingController resetConfirmPasswordCtr = TextEditingController();
   TextEditingController parentEmailCtr = TextEditingController();
+  TextEditingController forgotPasswordEmailCtr = TextEditingController();
   bool isLoading = false, isStoryCreation = false;
   int? age;
   int calculatedAge = 0;
@@ -71,7 +73,7 @@ class AuthProvider with ChangeNotifier {
     isStartOnBoardingLoading = true;
     notifyListeners();
 
-    final response = await AuthServices().startOnboarding(email: email);
+    final response = await AuthApiServices().startOnboarding(email: email);
 
     response.fold(
       (l) {
@@ -95,7 +97,7 @@ class AuthProvider with ChangeNotifier {
       final onboardingId = SharedPrefs.instance.onboardingId;
       if (onboardingId == null) return null;
 
-      final response = await AuthServices().getOnboardingProgress(
+      final response = await AuthApiServices().getOnboardingProgress(
         onboardingId: onboardingId,
       );
       response.fold((l) {}, (r) {
@@ -180,7 +182,7 @@ class AuthProvider with ChangeNotifier {
     isSaveUserAgeLoading = true;
     notifyListeners();
 
-    final response = await AuthServices().saveBirthDate(
+    final response = await AuthApiServices().saveBirthDate(
       onboardingId: onboardingId,
       dateOfBirth: dateToSend,
     );
@@ -288,7 +290,7 @@ class AuthProvider with ChangeNotifier {
       isCreateAccountLoading = true;
       notifyListeners();
 
-      final response = await AuthServices().createAccount(
+      final response = await AuthApiServices().createAccount(
         onboardingId: onboardingId,
         firstName: firstName,
         lastName: lastName,
@@ -361,7 +363,7 @@ class AuthProvider with ChangeNotifier {
       isVerifyEmailLoading = true;
       notifyListeners();
 
-      final response = await AuthServices().verifyEmail(
+      final response = await AuthApiServices().verifyEmail(
         onboardingId: onboardingId,
         email: email,
       );
@@ -407,7 +409,7 @@ class AuthProvider with ChangeNotifier {
       isSaveProfileLoading = true;
       notifyListeners();
 
-      final response = await AuthServices().saveProfileInfo(
+      final response = await AuthApiServices().saveProfileInfo(
         onboardingId: onboardingId,
         country: country,
         preferredLanguage: preferredLanguage,
@@ -452,7 +454,7 @@ class AuthProvider with ChangeNotifier {
       isSaveReadingGoal = true;
       notifyListeners();
 
-      final response = await AuthServices().saveReadingGoal(
+      final response = await AuthApiServices().saveReadingGoal(
         onboardingId: onboardingId,
         dailyReadingGoal: dailyReadingGoal,
       );
@@ -489,7 +491,7 @@ class AuthProvider with ChangeNotifier {
     try {
       isLoadingInterests = true;
       notifyListeners();
-      final response = await AuthServices().getDefaultInterests();
+      final response = await AuthApiServices().getDefaultInterests();
       isLoadingInterests = false;
       notifyListeners();
 
@@ -524,7 +526,7 @@ class AuthProvider with ChangeNotifier {
       isSaveInterestLoading = true;
       notifyListeners();
 
-      final response = await AuthServices().saveInterests(
+      final response = await AuthApiServices().saveInterests(
         onboardingId: onboardingId,
         interestIds: interestIds,
         customInterests: customInterests,
@@ -563,7 +565,7 @@ class AuthProvider with ChangeNotifier {
       isLoadingTopics = true;
       notifyListeners();
 
-      final response = await AuthServices().getDefaultTopics();
+      final response = await AuthApiServices().getDefaultTopics();
 
       isLoadingTopics = false;
       notifyListeners();
@@ -599,7 +601,7 @@ class AuthProvider with ChangeNotifier {
       isSaveTopicsLoading = true;
       notifyListeners();
 
-      final response = await AuthServices().saveTopics(
+      final response = await AuthApiServices().saveTopics(
         onboardingId: onboardingId,
         topicIds: topicIds,
         customTopics: customTopics,
@@ -635,7 +637,7 @@ class AuthProvider with ChangeNotifier {
       isLoadingGoals = true;
       notifyListeners();
 
-      final response = await AuthServices().getGoals();
+      final response = await AuthApiServices().getGoals();
 
       isLoadingGoals = false;
       notifyListeners();
@@ -668,7 +670,7 @@ class AuthProvider with ChangeNotifier {
       isSaveGoalsLoading = true;
       notifyListeners();
 
-      final response = await AuthServices().saveGoals(
+      final response = await AuthApiServices().saveGoals(
         onboardingId: onboardingId,
         goalIds: goalIds,
         customGoals: customGoals,
@@ -696,7 +698,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   bool isLoginLoading = false;
-  Future<bool> login(BuildContext context) async {
+  Future<bool> loginUser(BuildContext context) async {
     final email = loginEmailCtr.text.trim();
     final password = passwordController.text.trim();
 
@@ -713,7 +715,7 @@ class AuthProvider with ChangeNotifier {
       isLoginLoading = true;
       notifyListeners();
 
-      final response = await AuthServices().login(
+      final response = await AuthApiServices().login(
         email: email,
         password: password,
       );
@@ -806,6 +808,90 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  //todo social login
+  bool isSocialLoginLoading = false;
+  Future<void> socialLogin({
+    required VoidCallback onSuccess,
+    required Function(String error) onFailed,
+  }) async {
+    // isSocialLoginLoading = true;
+    // notifyListeners();
+
+    final String? accessToken = await googleSignIn();
+
+    final data = {
+      "provider": "google",
+      "idToken": accessToken, //YOUR_GOOGLE_ID_TOKEN_HERE
+      // "onboardingId": SharedPrefs.instance.onboardingId,
+    };
+    final response = await AuthApiServices().socialLogin(data: data);
+    response.fold(
+      (l) {
+        onFailed.call(l.errorMsg);
+      },
+      (r) async {
+        final data = r['data'];
+        debugPrint("Login Response Data: $data");
+
+        if (data != null) {
+          String? accessToken;
+
+          //todo Check for nested session object first (as seen in logs)
+          if (data['session'] != null) {
+            final session = data['session'];
+
+            if (session["accessToken"] != null) {
+              accessToken = session["accessToken"];
+              await SharedPrefs.instance.setToken(accessToken!);
+            }
+
+            if (session["refreshToken"] != null) {
+              await SharedPrefs.instance.setRefreshToken(
+                session["refreshToken"],
+              );
+            }
+          }
+
+          if (accessToken != null) {
+            //todo Update the current API instance with the new token immediately
+            DioClient.instance.addToken(accessToken);
+            Logger.error("Token saved successfully from login: $accessToken");
+          } else {
+            Logger.error("No access token found in login response!");
+          }
+
+          // if (data['onboardingId'] != null) {
+          //   await SharedPrefs.instance.setOnboardingId(
+          //     data['onboardingId'].toString(),
+          //   );
+          // }
+        }
+        onSuccess.call();
+      },
+    );
+
+    isSocialLoginLoading = false;
+    notifyListeners();
+  }
+
+  //todo google login
+  Future<String?> googleSignIn() async {
+    GoogleSignIn googleSignIn = GoogleSignIn(scopes: ["email", "profile"]);
+
+    GoogleSignInAccount? account = await googleSignIn.signIn();
+
+    if (account == null) {
+      Logger.error("User cancelled sign-in");
+      return null;
+    }
+
+    final auth = await account.authentication;
+    Logger.info(account.email);
+    Logger.info("access Token ${auth.accessToken!}");
+    // Logger.info("idToken" + auth.idToken!);
+    return auth.accessToken;
+  }
+
   bool isSaveParentEmailLoading = false;
   Future<void> saveParentEmail({
     required BuildContext context,
@@ -821,7 +907,7 @@ class AuthProvider with ChangeNotifier {
     isSaveParentEmailLoading = true;
     notifyListeners();
 
-    final response = await AuthServices().saveParentEmail(
+    final response = await AuthApiServices().saveParentEmail(
       onboardingId: onboardingId,
       parentEmail: parentEmailCtr.text.trim(),
     );
@@ -839,6 +925,30 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  bool isForgotPasswordLoading = false;
+  Future<void> forgotPassword({
+    required Function(String error) onFailed,
+    required VoidCallback onSuccess,
+  }) async {
+    isForgotPasswordLoading = true;
+    notifyListeners();
+
+    final response = await AuthApiServices().forgotPassword(
+      data: {"email": forgotPasswordEmailCtr.text.trim()},
+    );
+    response.fold(
+      (l) {
+        onFailed.call(l.errorMsg);
+      },
+      (r) {
+        onSuccess.call();
+      },
+    );
+
+    isForgotPasswordLoading = false;
+    notifyListeners();
+  }
+
   bool isLogOutLoading = false;
   Future<void> logOutUser({required VoidCallback onSuccess}) async {
     final token = SharedPrefs.instance.authToken;
@@ -847,7 +957,7 @@ class AuthProvider with ChangeNotifier {
 
     if (token != null) {
       try {
-        AuthServices().logOut(accessToken: token);
+        AuthApiServices().logOut(accessToken: token);
       } catch (e) {
         debugPrint("Logout API error: $e");
       }
@@ -855,11 +965,13 @@ class AuthProvider with ChangeNotifier {
 
     // 1. Clear Local Data Immediately
     await SharedPrefs.instance.clear();
+
     clearAllData();
     notifyListeners();
 
     isLogOutLoading = false;
     notifyListeners();
+    onSuccess.call();
 
     // 3. Call API in background (fire and forget)
   }
@@ -910,8 +1022,8 @@ class AuthProvider with ChangeNotifier {
       // 1. Generate Story & Image in Parallel
       // We wrap image generation to ensure it doesn't fail the whole batch if it throws
       final results = await Future.wait([
-        AuthServices().generateMobileStory(request),
-        AuthServices().generateStoryImage(request).catchError((e) {
+        AuthApiServices().generateMobileStory(request),
+        AuthApiServices().generateStoryImage(request).catchError((e) {
           log("Image generation error in parallel: $e");
           return null;
         }),
@@ -938,7 +1050,7 @@ class AuthProvider with ChangeNotifier {
                 final String imagePath = imageData['imagePath'];
 
                 // 3. Link Image
-                await AuthServices().linkImageToStory(
+                await AuthApiServices().linkImageToStory(
                   storyId: story.id,
                   images: [imagePath],
                 );

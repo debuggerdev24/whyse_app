@@ -5,18 +5,18 @@ import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
-import 'package:redstreakapp/providers/home_provider.dart';
+import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/screens/home/home_screen.dart';
 
-class TabScreen extends StatefulWidget {
+class UserDashBoard extends StatefulWidget {
   final int initialIndex;
-  const TabScreen({super.key, this.initialIndex = 0});
+  const UserDashBoard({super.key, this.initialIndex = 0});
 
   @override
-  State<StatefulWidget> createState() => _TabScreenState();
+  State<StatefulWidget> createState() => _UserDashBoardState();
 }
 
-class _TabScreenState extends State<TabScreen> {
+class _UserDashBoardState extends State<UserDashBoard> {
   late int currentIndex;
 
   final List<Widget> screens = [
@@ -29,7 +29,9 @@ class _TabScreenState extends State<TabScreen> {
   @override
   void initState() {
     super.initState();
-    callInitApis(context: context);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      callInitApis(context: context);
+    });
     currentIndex = widget.initialIndex;
   }
 
@@ -39,6 +41,13 @@ class _TabScreenState extends State<TabScreen> {
         AppToast.error(context, error);
       },
     );
+
+    context.read<HomeProvider>().getInterest(
+      onFailed: (error) {
+        AppToast.error(context, error);
+      },
+    );
+    context.read<HomeProvider>().getAllStories();
   }
 
   @override

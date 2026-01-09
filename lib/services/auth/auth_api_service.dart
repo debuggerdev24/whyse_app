@@ -7,14 +7,14 @@ import 'package:redstreakapp/services/base_api_service.dart';
 
 import '../../models/home/story_models/generate_story_request.dart';
 
-class AuthServices {
+class AuthApiServices {
   final _api = DioClient.instance.dio;
 
-  AuthServices._();
+  AuthApiServices._();
 
-  static final AuthServices _instance = AuthServices._();
+  static final AuthApiServices _instance = AuthApiServices._();
 
-  factory AuthServices() => _instance;
+  factory AuthApiServices() => _instance;
 
   //todo 2nd
   //@override
@@ -165,7 +165,7 @@ class AuthServices {
 
   //@override
   Future<dynamic> getGoals() async {
-    final res = await _api.get(EndPoints.getGoals);
+    final res = await _api.get(EndPoints.getStoryGoals);
     return res.data;
   }
 
@@ -196,6 +196,12 @@ class AuthServices {
       data: {"email": email, "password": password},
     );
     return res.data;
+  }
+
+  Future<Either<ApiException, Map<String, dynamic>>> socialLogin({
+    required Map<String, dynamic> data,
+  }) async {
+    return await BaseApiHelper.instance.post(EndPoints.socialLogin, data: data);
   }
 
   //@override
@@ -255,5 +261,11 @@ class AuthServices {
   Future<dynamic> getAllStories() async {
     final res = await _api.get('http://167.172.45.71/api/v1/story/mobile');
     return res.data;
+  }
+
+  Future<Either<ApiException, Map<String, dynamic>>> forgotPassword({
+    required Map<String, dynamic> data,
+  }) {
+    return BaseApiHelper.instance.post(EndPoints.forgotPassword, data: data);
   }
 }

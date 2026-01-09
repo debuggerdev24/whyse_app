@@ -8,7 +8,6 @@ import 'package:redstreakapp/screens/above_16/reading_goal_screen.dart';
 import 'package:redstreakapp/screens/above_16/subscription_screen.dart';
 import 'package:redstreakapp/screens/above_16/success_screen.dart';
 import 'package:redstreakapp/screens/above_16/topics_screen.dart';
-import 'package:redstreakapp/screens/above_16/what_goals_screen.dart';
 import 'package:redstreakapp/screens/above_16/what_intrest_screen.dart';
 import 'package:redstreakapp/screens/auth/enter_age_screen.dart';
 import 'package:redstreakapp/screens/auth/forgot_password_screen.dart';
@@ -21,6 +20,9 @@ import 'package:redstreakapp/screens/home/quiz_completed_screen.dart';
 import 'package:redstreakapp/screens/home/quiz_question_screen.dart';
 import 'package:redstreakapp/screens/home/reading_screen.dart';
 import 'package:redstreakapp/screens/home/start_quiz_screen.dart';
+import 'package:redstreakapp/screens/home/story_goals_screen.dart';
+import 'package:redstreakapp/screens/home/story_interest_screen.dart';
+import 'package:redstreakapp/screens/home/story_toics_screen.dart';
 
 import '../models/home/story_models/story_model.dart';
 import '../screens/below_16/consent_status_screen.dart';
@@ -117,10 +119,10 @@ class UserAppRoute {
       },
     ),
     GoRoute(
-      path: AppRoutes.goalsScreen.path,
-      name: AppRoutes.goalsScreen.name,
+      path: AppRoutes.storyGoalsScreen.path,
+      name: AppRoutes.storyGoalsScreen.name,
       builder: (context, state) {
-        return GoalsScreen();
+        return StoryGoalsScreen();
       },
     ),
     GoRoute(
@@ -138,10 +140,10 @@ class UserAppRoute {
       },
     ),
     GoRoute(
-      path: AppRoutes.tabScreen.path,
-      name: AppRoutes.tabScreen.name,
+      path: AppRoutes.dashBoardScreen.path,
+      name: AppRoutes.dashBoardScreen.name,
       builder: (context, state) {
-        return TabScreen();
+        return UserDashBoard();
       },
     ),
     GoRoute(
@@ -219,13 +221,19 @@ class UserAppRoute {
         return ResetPasswordScreen();
       },
     ),
-
-    // GoRoute(
-    //   path: UserAppRoutes.whatInterestScreen.path,
-    //   name: UserAppRoutes.whatInterestScreen.name,
-    //   builder: (context, state) {
-    //     return WhatInatestScreen();
-    //   },
-    // ),
+    GoRoute(
+      path: AppRoutes.storyInterestScreen.path,
+      name: AppRoutes.storyInterestScreen.name,
+      builder: (context, state) {
+        return StoryInterestsScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.storyTopicsScreen.path,
+      name: AppRoutes.storyTopicsScreen.name,
+      builder: (context, state) {
+        return StoryTopicsScreen();
+      },
+    ),
   ];
 }

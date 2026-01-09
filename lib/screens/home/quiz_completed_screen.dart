@@ -8,7 +8,7 @@ import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
-import 'package:redstreakapp/providers/home_provider.dart';
+import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
 class QuizCompletedScreen extends StatelessWidget {
@@ -132,7 +132,7 @@ class QuizCompletedScreen extends StatelessWidget {
                     onTap: () async {
                       await context.read<HomeProvider>().getAllStories();
                       if (!context.mounted) return;
-                      context.goNamed(AppRoutes.tabScreen.name);
+                      context.goNamed(AppRoutes.dashBoardScreen.name);
                     },
                     backgroundColor: AppColors.teal,
                     fixedSize: Size(348, 42.h),

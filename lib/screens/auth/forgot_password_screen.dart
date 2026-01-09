@@ -5,13 +5,14 @@ import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
+import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
 import '../../core/constants/app_color.dart';
 import '../../core/utils/de_bouncing.dart';
 import '../../core/utils/field_validator.dart';
 import '../../core/widgets/app_textfiled.dart';
-import '../../providers/auth_provider.dart';
+import '../../providers/auth/auth_provider.dart';
 
 class ForgotPasswordScreen extends StatelessWidget {
   const ForgotPasswordScreen({super.key});
@@ -71,16 +72,22 @@ class ForgotPasswordScreen extends StatelessWidget {
                         Spacer(),
                         AppFilledButton(
                           margin: EdgeInsets.only(bottom: 20.h),
-                          text: "Send OTP",
+                          text: "Send Link",
 
                           onTap: () {
                             deBouncer.run(() {
-                              if (true) {
-                                //formKey.currentState!.validate()
+                              if (formKey.currentState!.validate()) {
                                 context.pushNamed(
                                   AppRoutes.verifyOtpScreen.name,
                                 );
-                                // provider.sendOTP(context: context);
+                                provider.forgotPassword(
+                                  onFailed: (error) {
+                                    AppToast.error(context, error);
+                                  },
+                                  onSuccess: () {
+                                    // context.push
+                                  },
+                                );
                               }
                             });
                           },

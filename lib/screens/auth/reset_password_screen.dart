@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
-import 'package:redstreakapp/providers/auth_provider.dart';
+import 'package:redstreakapp/providers/auth/auth_provider.dart';
 
 import '../../core/constants/app_color.dart';
 import '../../core/utils/field_validator.dart';

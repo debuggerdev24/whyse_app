@@ -43,7 +43,7 @@ class DioClient {
 
   addToken(String token) {
     _dio.options = _dio.options.copyWith(
-      headers: {'Authorization': "Bearer $token"},
+      headers: {"Authorization": "Bearer $token"},
     );
     print("Authorization token =======> $token");
   }

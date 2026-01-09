@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:redstreakapp/core/helper/log_helper.dart';
 
 import '../../core/constants/end_points.dart';
 import '../base_api_service.dart';
@@ -10,6 +11,16 @@ class HomeApiService {
   static HomeApiService instance = _instance;
 
   Future<Either<ApiException, Map<String, dynamic>>> getGoals() async {
-    return await BaseApiHelper.instance.get(EndPoints.getGoals);
+    return await BaseApiHelper.instance.get(EndPoints.getStoryGoals);
+  }
+
+  Future<Either<ApiException, Map<String, dynamic>>> getInterest() async {
+    Logger.info("Called : ${EndPoints.getStoryInterest}");
+
+    return await BaseApiHelper.instance.get(EndPoints.getStoryInterest);
+  }
+
+  Future<Either<ApiException, Map<String, dynamic>>> getTopics() async {
+    return await BaseApiHelper.instance.get(EndPoints.getStoryTopics);
   }
 }

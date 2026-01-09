@@ -137,7 +137,7 @@ class _SubScriptionScreenState extends State<SubScriptionScreen> {
 
           AppFilledButton(
             onTap: () {
-              context.pushNamed(AppRoutes.tabScreen.name);
+              context.pushNamed(AppRoutes.dashBoardScreen.name);
             },
             text: "Subscribe",
             backgroundColor: AppColors.teal,

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/widgets/home_widgets.dart';
-import 'package:redstreakapp/providers/home_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,14 +11,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<HomeProvider>().getAllStories();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

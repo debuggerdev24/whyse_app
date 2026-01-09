@@ -10,7 +10,7 @@ import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/core/widgets/dropdown_textfiled.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
-import 'package:redstreakapp/providers/auth_provider.dart';
+import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
 class ProfileInfoScreen extends StatefulWidget {

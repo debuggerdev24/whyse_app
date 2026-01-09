@@ -10,26 +10,28 @@ import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
-import 'package:redstreakapp/providers/auth_provider.dart';
+import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
-class GoalsScreen extends StatefulWidget {
+class WhatGoalScreen extends StatefulWidget {
   // final bool? isFromHome;
-  const GoalsScreen({super.key});
+  const WhatGoalScreen({super.key});
 
   @override
-  State<GoalsScreen> createState() => _GoalsScreenState();
+  State<WhatGoalScreen> createState() => _WhatGoalScreenState();
 }
 
-class _GoalsScreenState extends State<GoalsScreen> {
+class _WhatGoalScreenState extends State<WhatGoalScreen> {
   String? selectedGoalId;
   final TextEditingController customGoalController = TextEditingController();
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   WidgetsBinding.instance.addPostFrameCallback((_) {});
-  // }
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthProvider>().getGoals(context);
+    });
+  }
 
   void _onGoalSelected(String id) {
     setState(() {

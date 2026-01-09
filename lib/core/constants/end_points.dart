@@ -1,3 +1,5 @@
+import 'dart:core';
+
 class EndPoints {
   EndPoints._();
   static const startOnBoarding = "/mobile/auth/start-onboarding";
@@ -12,5 +14,12 @@ class EndPoints {
   static const verifyEmail = "/mobile/auth/verify-email";
   static const createAccount = "/mobile/auth/create-account";
   static const saveAge = "/mobile/auth/save-age";
-  static const getGoals = "/story-flow/goals";
+  static const socialLogin = "/mobile/auth/social-login";
+  static const getStoryGoals = "/story-flow/goals";
+  static const getStoryInterest = "/story-flow/interests";
+  static const getStoryTopics = "/story-flow/topics";
+  static String searchTopics({required String query}) =>
+      "/api/v1/story-flow/topics?search=$query";
+  static const forgotPassword = "/mobile/auth/forgot-password";
+  static const resetPassword = "/mobile/auth/reset-password";
 }

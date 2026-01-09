@@ -10,8 +10,8 @@ import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/custom_shimmer.dart';
-import 'package:redstreakapp/providers/auth_provider.dart';
-import 'package:redstreakapp/providers/home_provider.dart';
+import 'package:redstreakapp/providers/auth/auth_provider.dart';
+import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:redstreakapp/screens/home/widgets/add_reading_bottom_sheet.dart';
 
@@ -114,7 +114,7 @@ class HomeHeader extends StatelessWidget {
                   context.pop(dialogContext);
                   await context.read<AuthProvider>().logOutUser(
                     onSuccess: () {
-                      context.goNamed(AppRoutes.splashScreen.name);
+                      context.goNamed(AppRoutes.loginScreen.name);
                     },
                   );
                   //    onSuccess: () {

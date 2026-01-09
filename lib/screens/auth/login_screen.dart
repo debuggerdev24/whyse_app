@@ -9,7 +9,8 @@ import 'package:redstreakapp/core/utils/custom_loader.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
-import 'package:redstreakapp/providers/auth_provider.dart';
+import 'package:redstreakapp/core/widgets/custom_toast.dart';
+import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -129,9 +130,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           32.h.verticalSpace,
                           AppFilledButton(
                             onTap: () async {
-                              final success = await provider.login(context);
+                              final success = await provider.loginUser(context);
                               if (success && context.mounted) {
-                                context.goNamed(AppRoutes.tabScreen.name);
+                                context.goNamed(AppRoutes.dashBoardScreen.name);
                               }
                             },
                             text: "Login with Email",
@@ -188,6 +189,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       _socialButton(
                         label: "Login with Google",
                         icon: AppAssets.google,
+                        onTap: () {
+                          provider.socialLogin(
+                            onSuccess: () {
+                              context.goNamed(AppRoutes.dashBoardScreen.name);
+                            },
+                            onFailed: (error) {
+                              AppToast.error(context, error);
+                            },
+                          );
+                        },
                       ),
 
                       8.h.verticalSpace,
@@ -195,12 +206,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       _socialButton(
                         label: "Login with Apple",
                         icon: AppAssets.apple,
+                        onTap: () {},
                       ),
                     ],
                   ),
                 ),
               ),
-              if (provider.isLoginLoading) FullPageIndicator(),
+              if (provider.isLoginLoading || provider.isSocialLoginLoading)
+                FullPageIndicator(),
             ],
           ),
         ),
@@ -208,7 +221,11 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _socialButton({required String label, required String icon}) {
+  Widget _socialButton({
+    required String label,
+    required String icon,
+    required VoidCallback onTap,
+  }) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -217,7 +234,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(40.r),
-        onTap: () {},
+        onTap: onTap,
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 28.w),
           child: Stack(

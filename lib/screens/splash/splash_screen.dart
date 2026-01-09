@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/shared_pref.dart';
-import 'package:redstreakapp/providers/auth_provider.dart';
+import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -50,7 +50,6 @@ class _SplashScreenState extends State<SplashScreen>
         return;
       }
       //todo fetch all the API in init phase of the app.
-      context.read<AuthProvider>().getGoals(context);
 
       if (step == "AGE") {
         // if (isAgeDone) {
@@ -77,12 +76,12 @@ class _SplashScreenState extends State<SplashScreen>
       } else if (step == 'GOALS') {
         context.goNamed(AppRoutes.goalsScreen.name);
       } else if (step == 'COMPLETED') {
-        context.goNamed(AppRoutes.tabScreen.name);
+        context.goNamed(AppRoutes.dashBoardScreen.name);
       } else {
         // Check if user is already logged in
         final token = SharedPrefs.instance.authToken;
         if (token != null && token.isNotEmpty) {
-          context.goNamed(AppRoutes.tabScreen.name);
+          context.goNamed(AppRoutes.dashBoardScreen.name);
         } else {
           context.goNamed(AppRoutes.loginScreen.name);
         }

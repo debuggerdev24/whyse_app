@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../constants/app_color.dart';
@@ -31,17 +32,11 @@ class ApiLoadingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      // height: 0.86.sh,
-      // alignment: Alignment.center,
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(5).r,
-        ),
+    return Card(
+      child: Padding(
         padding: EdgeInsets.all(12).r,
         child: CupertinoActivityIndicator(
-          radius: 18.h,
+          radius: 20.w,
           color: Color(0xff030C09),
         ),
       ),
