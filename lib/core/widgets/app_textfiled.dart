@@ -50,7 +50,7 @@ class AppTextField extends StatelessWidget {
   final TextStyle? labelStyle;
   final TextEditingController? controller;
   final FormFieldValidator<String>? validator;
-  final Function(String?)? onChanged;
+  final Function(String value)? onChanged;
   final void Function()? onTap;
   final AutovalidateMode? autoValidateMode;
   final TextInputType? keyboardType;

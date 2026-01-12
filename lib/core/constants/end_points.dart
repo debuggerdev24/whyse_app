@@ -18,8 +18,8 @@ class EndPoints {
   static const getStoryGoals = "/story-flow/goals";
   static const getStoryInterest = "/story-flow/interests";
   static const getStoryTopics = "/story-flow/topics";
-  static String searchTopics({required String query}) =>
-      "/api/v1/story-flow/topics?search=$query";
+  // static String getSearchTopics({required String query}) => "/api/v1/story-flow/topics?search=$query";
+  static const getSearchTopics = "story-flow/topics";
   static const forgotPassword = "/mobile/auth/forgot-password";
   static const resetPassword = "/mobile/auth/reset-password";
 }

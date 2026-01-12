@@ -30,7 +30,9 @@ class OnboardingHeader extends StatelessWidget {
     return Column(
       children: [
         Row(
+          spacing: 16.w,
           children: [
+            //todo back button
             GestureDetector(
               onTap: currentStep == 0
                   ? null
@@ -50,13 +52,13 @@ class OnboardingHeader extends StatelessWidget {
               ),
             ),
 
-            16.w.horizontalSpace,
 
             Expanded(
               child: Row(
                 children: List.generate(totalSteps, (index) {
                   return Expanded(
-                    child: Container(
+                    child: AnimatedContainer(
+                      duration: Duration(milliseconds: 600),
                       margin: EdgeInsets.symmetric(horizontal: 3.w),
                       height: 4.h,
                       decoration: BoxDecoration(
@@ -86,7 +88,7 @@ class OnboardingHeader extends StatelessWidget {
           ],
         ),
 
-        30.h.verticalSpace,
+        25.h.verticalSpace,
       ],
     );
   }

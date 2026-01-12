@@ -132,7 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             onTap: () async {
                               final success = await provider.loginUser(context);
                               if (success && context.mounted) {
-                                context.goNamed(AppRoutes.dashBoardScreen.name);
+                                context.goNamed(AppRoutes.homeScreen.name);
                               }
                             },
                             text: "Login with Email",

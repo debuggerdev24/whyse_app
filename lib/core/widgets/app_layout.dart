@@ -1,12 +1,27 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
+import 'package:redstreakapp/screens/dashboard.dart';
 
 class AppLayout extends StatelessWidget {
   final Widget body;
-  const AppLayout({super.key, required this.body});
+  final bool? resizeToAvoidBottomInset;
+  const AppLayout({
+    super.key,
+    required this.body,
+    this.resizeToAvoidBottomInset,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(backgroundColor: AppColors.backgroundColor, body: body);
+    return Scaffold(
+      resizeToAvoidBottomInset: resizeToAvoidBottomInset,
+      backgroundColor: AppColors.backgroundColor,
+      body: ValueListenableBuilder<int>(
+        valueListenable: tabIndex,
+        builder: (context, value, child) =>
+            FadeInUp(key: ValueKey(value), from: 8, child: body),
+      ),
+    );
   }
 }

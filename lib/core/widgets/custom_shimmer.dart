@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class Shimmer extends StatefulWidget {
+class CustomShimmer extends StatefulWidget {
   final Widget child;
   final Color baseColor;
   final Color highlightColor;
   final Duration duration;
 
-  const Shimmer({
+  const CustomShimmer({
     super.key,
     required this.child,
     this.baseColor = const Color(0xFFE0E0E0),
@@ -15,10 +15,10 @@ class Shimmer extends StatefulWidget {
   });
 
   @override
-  State<Shimmer> createState() => _ShimmerState();
+  State<CustomShimmer> createState() => _CustomShimmerState();
 }
 
-class _ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
+class _CustomShimmerState extends State<CustomShimmer> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -79,7 +79,7 @@ class ShimmerLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer(
+    return CustomShimmer(
       child: Container(
         width: width,
         height: height,

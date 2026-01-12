@@ -94,7 +94,6 @@ class _WhatGoalScreenState extends State<WhatGoalScreen> {
                           ),
                         ],
                       ),
-
                       AppText(
                         text: "What's Your Goal?",
                         style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),

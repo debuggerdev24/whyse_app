@@ -71,7 +71,7 @@ class AppFilledButton extends StatelessWidget {
                 style:
                     textStyle ??
                     AppTextStyles.sfProDisplaySemibold(
-                      fontSize: 17.5.sp,
+                      fontSize: 16.5.sp,
                       color: AppColors.white,
                     ),
               ),

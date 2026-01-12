@@ -237,60 +237,56 @@ class CalendarStrip extends StatelessWidget {
               final isChecked = status[index] == 'check';
               final isToday = status[index] == 'today';
 
-              return Column(
-                children: [
-                  Container(
-                    width: 50.w,
-                    height: 76.h,
-                    decoration: BoxDecoration(
-                      color: isToday
-                          ? AppColors.lighttealcolor
-                          : isChecked
-                          ? AppColors.lightyellowcolor
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.only(
-                        bottomRight: Radius.circular(10.r),
-                        bottomLeft: Radius.circular(10.r),
+              return Container(
+                width: 50.w,
+                height: 68.h,
+                decoration: BoxDecoration(
+                  color: isToday
+                      ? AppColors.lighttealcolor
+                      : isChecked
+                      ? AppColors.lightyellowcolor
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.only(
+                    bottomRight: Radius.circular(10.r),
+                    bottomLeft: Radius.circular(10.r),
+                  ),
+                ),
+
+                child: Column(
+                  children: [
+                    if (isChecked)
+                      Container(
+                        height: 3.w,
+                        decoration: BoxDecoration(
+                          color: AppColors.yellowColor,
+                          borderRadius: BorderRadius.only(
+                            bottomRight: Radius.circular(10.r),
+                            bottomLeft: Radius.circular(10.r),
+                          ),
+                        ),
+                      ),
+                    6.h.verticalSpace,
+                    AppText(
+                      text: days[index],
+                      style: AppTextStyles.sfProDisplaySemibold(
+                        fontSize: 12.sp,
+                        color: AppColors.black.withValues(alpha: 0.4),
                       ),
                     ),
-
-                    child: Column(
-                      children: [
-                        if (isChecked)
-                          Container(
-                            height: 4.h,
-                            decoration: BoxDecoration(
-                              color: AppColors.yellowColor,
-                              borderRadius: BorderRadius.only(
-                                bottomRight: Radius.circular(10.r),
-                                bottomLeft: Radius.circular(10.r),
-                              ),
-                            ),
-                          ),
-                        6.h.verticalSpace,
-                        AppText(
-                          text: days[index],
-                          style: AppTextStyles.sfProDisplaySemibold(
-                            fontSize: 12.sp,
-                            color: AppColors.black.withValues(alpha: 0.4),
-                          ),
-                        ),
-                        6.h.verticalSpace,
-                        AppText(
-                          text: dates[index],
-                          style: AppTextStyles.sfProDisplayBold(
-                            fontSize: 14.sp,
-                            color: AppColors.black,
-                          ),
-                        ),
-                        if (isChecked) ...[
-                          4.h.verticalSpace,
-                          SvgPicture.asset(AppAssets.check1),
-                        ],
-                      ],
+                    4.h.verticalSpace,
+                    AppText(
+                      text: dates[index],
+                      style: AppTextStyles.sfProDisplayBold(
+                        fontSize: 14.sp,
+                        color: AppColors.black,
+                      ),
                     ),
-                  ),
-                ],
+                    if (isChecked) ...[
+                      4.h.verticalSpace,
+                      SvgPicture.asset(AppAssets.check1),
+                    ],
+                  ],
+                ),
               );
             },
           ),

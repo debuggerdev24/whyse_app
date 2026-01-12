@@ -15,7 +15,6 @@ import '../../models/home/story_models/story_model.dart';
 class AuthProvider with ChangeNotifier {
   TextEditingController signUpEmailCtr = TextEditingController();
   TextEditingController loginEmailCtr = TextEditingController();
-  TextEditingController forgotPasswordCtr = TextEditingController();
   TextEditingController otpCtr = TextEditingController();
   TextEditingController newPasswordCtr = TextEditingController();
   TextEditingController resetConfirmPasswordCtr = TextEditingController();
@@ -817,11 +816,11 @@ class AuthProvider with ChangeNotifier {
     // isSocialLoginLoading = true;
     // notifyListeners();
 
-    final String? accessToken = await googleSignIn();
+    final String? idToken = await googleSignIn();
 
     final data = {
       "provider": "google",
-      "idToken": accessToken, //YOUR_GOOGLE_ID_TOKEN_HERE
+      "idToken": idToken, //YOUR_GOOGLE_ID_TOKEN_HERE
       // "onboardingId": SharedPrefs.instance.onboardingId,
     };
     final response = await AuthApiServices().socialLogin(data: data);
@@ -876,7 +875,12 @@ class AuthProvider with ChangeNotifier {
 
   //todo google login
   Future<String?> googleSignIn() async {
-    GoogleSignIn googleSignIn = GoogleSignIn(scopes: ["email", "profile"]);
+    GoogleSignIn googleSignIn = GoogleSignIn(
+      serverClientId:
+          "1072520967140-7566tlns04ge757cqiailkl8j405a9am.apps.googleusercontent.com",
+      // "928198076650-i9h7snbj7mlmpb3mie676vv54q53ndd4.apps.googleusercontent.com",
+      scopes: ["email", "profile"],
+    );
 
     GoogleSignInAccount? account = await googleSignIn.signIn();
 
@@ -887,9 +891,20 @@ class AuthProvider with ChangeNotifier {
 
     final auth = await account.authentication;
     Logger.info(account.email);
-    Logger.info("access Token ${auth.accessToken!}");
-    // Logger.info("idToken" + auth.idToken!);
-    return auth.accessToken;
+    Logger.info("access Token: ${auth.accessToken ?? 'NULL'}");
+    Logger.info("idToken: /${auth.idToken ?? 'NULL'}");
+    Logger.info("\nclose");
+
+    // Check if ID token is null
+    if (auth.idToken == null) {
+      Logger.error("⚠️ ID Token is NULL - Check serverClientId configuration!");
+      Logger.error(
+        "Make sure you're using the Web Client ID, not Android Client ID",
+      );
+      return null;
+    }
+
+    return auth.idToken;
   }
 
   bool isSaveParentEmailLoading = false;
@@ -941,6 +956,7 @@ class AuthProvider with ChangeNotifier {
         onFailed.call(l.errorMsg);
       },
       (r) {
+        forgotPasswordEmailCtr.clear();
         onSuccess.call();
       },
     );

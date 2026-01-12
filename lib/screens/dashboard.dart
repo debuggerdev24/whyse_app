@@ -1,30 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
-import 'package:redstreakapp/screens/home/home_screen.dart';
+import 'package:redstreakapp/providers/home/story_provider.dart';
+
+ValueNotifier<int> tabIndex = ValueNotifier<int>(0);
 
 class UserDashBoard extends StatefulWidget {
-  final int initialIndex;
-  const UserDashBoard({super.key, this.initialIndex = 0});
+  final StatefulNavigationShell navigationShell;
+
+  const UserDashBoard({super.key,required this.navigationShell});
 
   @override
   State<StatefulWidget> createState() => _UserDashBoardState();
 }
 
 class _UserDashBoardState extends State<UserDashBoard> {
-  late int currentIndex;
-
-  final List<Widget> screens = [
-    HomeScreen(),
-    HomeScreen(),
-    HomeScreen(),
-    HomeScreen(),
-  ];
 
   @override
   void initState() {
@@ -32,60 +28,66 @@ class _UserDashBoardState extends State<UserDashBoard> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       callInitApis(context: context);
     });
-    currentIndex = widget.initialIndex;
   }
 
   void callInitApis({required BuildContext context}) {
-    context.read<HomeProvider>().getGoals(
+    context.read<HomeProvider>().getAllStories();
+
+    context.read<StoryProvider>().getStoryGoals(
       onFailed: (error) {
         AppToast.error(context, error);
       },
     );
 
-    context.read<HomeProvider>().getInterest(
+    context.read<StoryProvider>().getStoryInterest(
       onFailed: (error) {
         AppToast.error(context, error);
       },
     );
-    context.read<HomeProvider>().getAllStories();
+
+    context.read<StoryProvider>().getStoryTopics(
+      onFailed: (error) {
+        AppToast.error(context, error);
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: screens[currentIndex],
-      bottomNavigationBar: bottomNavigationBar(),
+    return ValueListenableBuilder<int>(
+      valueListenable: tabIndex,
+      builder: (context, value, child) => Scaffold(
+        body: widget.navigationShell,
+        bottomNavigationBar:  BottomNavigationBar(
+          currentIndex: value,
+          onTap: (index) {
+            tabIndex.value = index;
+            // todo widget.navigationShell.goBranch(index);
+          },
+          items: [
+            BottomNavItem(icon: AppAssets.note, isSelected: value == 0,),
+            BottomNavItem(icon: AppAssets.book, isSelected: value == 1),
+            BottomNavItem(icon: AppAssets.dumble, isSelected: value == 2),
+            BottomNavItem(icon: AppAssets.star, isSelected: value == 3),
+          ],
+
+        ),
+      ),
     );
   }
 
-  Widget bottomNavigationBar() {
-    return KBottomNavBar(
-      currentIndex: currentIndex,
-      onTap: (index) {
-        setState(() {
-          currentIndex = index;
-        });
-      },
-      items: [
-        BottomNavItem(icon: AppAssets.note, isSelected: currentIndex == 0),
-        BottomNavItem(icon: AppAssets.book, isSelected: currentIndex == 1),
-        BottomNavItem(icon: AppAssets.dumble, isSelected: currentIndex == 2),
-        BottomNavItem(icon: AppAssets.star, isSelected: currentIndex == 3),
-      ],
-    );
-  }
 }
 
-class KBottomNavBar extends StatelessWidget {
-  const KBottomNavBar({
+class BottomNavigationBar extends StatelessWidget {
+  const BottomNavigationBar({
     super.key,
     required this.items,
-    this.onTap,
+    required this.onTap,
     this.currentIndex = 0,
   });
 
   final List<BottomNavItem> items;
-  final ValueChanged<int>? onTap;
+  final ValueChanged<int> onTap;
   final int currentIndex;
 
   @override
@@ -103,13 +105,10 @@ class KBottomNavBar extends StatelessWidget {
           ),
         ],
       ),
-      height: 74.h,
+      height: 80.w,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          for (var i = 0; i < items.length; i++)
-            GestureDetector(onTap: () => onTap?.call(i), child: items[i]),
-        ],
+        children: List.generate(items.length, (index) => GestureDetector(onTap: () => onTap.call(index), child: items[index]),)
       ),
     );
   }
@@ -119,12 +118,10 @@ class BottomNavItem extends StatelessWidget {
   const BottomNavItem({
     super.key,
     required this.icon,
-    this.label,
-    this.isSelected = false,
+    required this.isSelected,
   });
 
   final String icon;
-  final String? label;
   final bool isSelected;
 
   @override

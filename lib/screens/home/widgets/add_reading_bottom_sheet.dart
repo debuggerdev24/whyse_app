@@ -57,16 +57,14 @@ class _AddReadingBottomSheetState extends State<AddReadingBottomSheet> {
             image: AppAssets.robot,
             isSelected: selectedIndex == 0,
             onTap: () {
-              setState(() => selectedIndex = 0);
 
-              Future.delayed(const Duration(milliseconds: 200), () {
                 if (!context.mounted) return;
 
                 context.pop();
 
-                // context.read<AuthProvider>().isStoryCreation = true;
                 context.pushNamed(AppRoutes.storyGoalsScreen.name, extra: true);
-              });
+                setState(() => selectedIndex = 0);
+
             },
           ),
 

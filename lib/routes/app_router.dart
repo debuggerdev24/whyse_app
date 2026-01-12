@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/extensions/routes_extensions.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
@@ -16,24 +17,54 @@ import 'package:redstreakapp/screens/auth/reset_password_screen.dart';
 import 'package:redstreakapp/screens/auth/signup_screen.dart';
 import 'package:redstreakapp/screens/auth/verify_otp_screen.dart';
 import 'package:redstreakapp/screens/home/generate_reading_screen.dart';
+import 'package:redstreakapp/screens/home/home_screen.dart';
 import 'package:redstreakapp/screens/home/quiz_completed_screen.dart';
 import 'package:redstreakapp/screens/home/quiz_question_screen.dart';
 import 'package:redstreakapp/screens/home/reading_screen.dart';
 import 'package:redstreakapp/screens/home/start_quiz_screen.dart';
-import 'package:redstreakapp/screens/home/story_goals_screen.dart';
-import 'package:redstreakapp/screens/home/story_interest_screen.dart';
-import 'package:redstreakapp/screens/home/story_toics_screen.dart';
+import 'package:redstreakapp/screens/home/generate_story/story_goals_screen.dart';
+import 'package:redstreakapp/screens/home/generate_story/story_toics_screen.dart';
 
 import '../models/home/story_models/story_model.dart';
 import '../screens/below_16/consent_status_screen.dart';
 import '../screens/below_16/parent_email_screen.dart';
 import '../screens/dashboard.dart';
+import '../screens/home/generate_story/story_interest_screen.dart';
 import '../screens/splash/splash_screen.dart';
 
 class UserAppRoute {
+  static final rootNavigatorKey = GlobalKey<NavigatorState>();
+
+  static StatefulNavigationShell? indexedStackNavigationShell;
+
   static final GoRouter goRouter = GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: AppRoutes.splashScreen.path,
-    routes: routes,
+    routes: [
+      ...routes,
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          indexedStackNavigationShell = navigationShell;
+          return UserDashBoard(
+            // key: state.pageKey,
+            navigationShell: indexedStackNavigationShell!,
+          );
+        },
+        branches: <StatefulShellBranch>[
+          //todo home tab
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.homeScreen.path,
+                name: AppRoutes.homeScreen.name,
+                builder: (context, state) => HomeScreen(),
+              ),
+
+            ],
+          ),
+        ],
+      ),
+    ],
   );
 
   static final List<RouteBase> routes = [
@@ -118,13 +149,7 @@ class UserAppRoute {
         return TopicsScreen();
       },
     ),
-    GoRoute(
-      path: AppRoutes.storyGoalsScreen.path,
-      name: AppRoutes.storyGoalsScreen.name,
-      builder: (context, state) {
-        return StoryGoalsScreen();
-      },
-    ),
+
     GoRoute(
       path: AppRoutes.successScreen.path,
       name: AppRoutes.successScreen.name,
@@ -137,13 +162,6 @@ class UserAppRoute {
       name: AppRoutes.subscriptionScreen.name,
       builder: (context, state) {
         return SubScriptionScreen();
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.dashBoardScreen.path,
-      name: AppRoutes.dashBoardScreen.name,
-      builder: (context, state) {
-        return UserDashBoard();
       },
     ),
     GoRoute(
@@ -219,6 +237,13 @@ class UserAppRoute {
       name: AppRoutes.resetPasswordScreen.name,
       builder: (context, state) {
         return ResetPasswordScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.storyGoalsScreen.path,
+      name: AppRoutes.storyGoalsScreen.name,
+      builder: (context, state) {
+        return StoryGoalsScreen();
       },
     ),
     GoRoute(

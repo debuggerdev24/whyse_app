@@ -50,7 +50,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                         ),
                         26.h.verticalSpace,
                         AppTextField(
-                          controller: provider.forgotPasswordCtr,
+                          controller: provider.forgotPasswordEmailCtr,
                           hintText: "Email",
                           validator: FieldValidators().email,
                           // errorStyle: medium(
@@ -73,18 +73,22 @@ class ForgotPasswordScreen extends StatelessWidget {
                         AppFilledButton(
                           margin: EdgeInsets.only(bottom: 20.h),
                           text: "Send Link",
-
                           onTap: () {
                             deBouncer.run(() {
                               if (formKey.currentState!.validate()) {
                                 context.pushNamed(
                                   AppRoutes.verifyOtpScreen.name,
                                 );
+
                                 provider.forgotPassword(
                                   onFailed: (error) {
                                     AppToast.error(context, error);
                                   },
                                   onSuccess: () {
+                                    AppToast.success(
+                                      context,
+                                      "A verification link has been sent to your email address.",
+                                    );
                                     // context.push
                                   },
                                 );

@@ -23,4 +23,8 @@ class HomeApiService {
   Future<Either<ApiException, Map<String, dynamic>>> getTopics() async {
     return await BaseApiHelper.instance.get(EndPoints.getStoryTopics);
   }
+
+  Future<Either<ApiException, Map<String, dynamic>>> getSearchedTopics({required Map<String, dynamic> queryParams}) async {
+    return await BaseApiHelper.instance.get(EndPoints.getSearchTopics,queryParameters: queryParams);
+  }
 }

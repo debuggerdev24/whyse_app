@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/shared_pref.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
+import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/routes/app_router.dart';
 import 'package:redstreakapp/services/base_api_service.dart';
 
@@ -23,6 +24,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
         ChangeNotifierProvider<HomeProvider>(create: (_) => HomeProvider()),
+        ChangeNotifierProvider<StoryProvider>(create: (_) => StoryProvider()),
       ],
       child: ScreenUtilInit(
         designSize: const Size(402, 874),
@@ -41,4 +43,5 @@ class MyApp extends StatelessWidget {
 
 /*
 todo update
+
 */

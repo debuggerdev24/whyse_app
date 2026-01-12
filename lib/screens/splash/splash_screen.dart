@@ -81,7 +81,7 @@ class _SplashScreenState extends State<SplashScreen>
         // Check if user is already logged in
         final token = SharedPrefs.instance.authToken;
         if (token != null && token.isNotEmpty) {
-          context.goNamed(AppRoutes.dashBoardScreen.name);
+          context.goNamed(AppRoutes.homeScreen.name);
         } else {
           context.goNamed(AppRoutes.loginScreen.name);
         }

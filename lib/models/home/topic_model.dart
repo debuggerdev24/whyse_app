@@ -32,16 +32,22 @@ class TopicModel {
     createdAt: DateTime.parse(json["createdAt"]),
     updatedAt: DateTime.parse(json["updatedAt"]),
   );
+}
 
-  Map<String, dynamic> toJson() => {
-    "id": id,
-    "title": title,
-    "learningGoal": learningGoal,
-    "adminPromptId": adminPromptId,
-    "userId": userId,
-    "type": type,
-    "interestIds": List<dynamic>.from(interestIds.map((x) => x)),
-    "createdAt": createdAt.toIso8601String(),
-    "updatedAt": updatedAt.toIso8601String(),
-  };
+class SearchTopicModel {
+  String id, title, learningGoal;
+
+  SearchTopicModel({
+    required this.title,
+    required this.id,
+    required this.learningGoal,
+  });
+
+  factory SearchTopicModel.fromJson({required Map json}) {
+    return SearchTopicModel(
+      title: json["title"],
+      id: json["id"],
+      learningGoal: json["learningGoal"],
+    );
+  }
 }
