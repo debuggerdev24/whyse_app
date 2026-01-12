@@ -17,13 +17,15 @@ import 'package:redstreakapp/screens/auth/reset_password_screen.dart';
 import 'package:redstreakapp/screens/auth/signup_screen.dart';
 import 'package:redstreakapp/screens/auth/verify_otp_screen.dart';
 import 'package:redstreakapp/screens/home/generate_reading_screen.dart';
+import 'package:redstreakapp/screens/home/generate_story/custom_story_topic_screen.dart';
+import 'package:redstreakapp/screens/home/generate_story/story_goals_screen.dart';
+import 'package:redstreakapp/screens/home/generate_story/story_reading_goal_screen.dart';
+import 'package:redstreakapp/screens/home/generate_story/story_toics_screen.dart';
 import 'package:redstreakapp/screens/home/home_screen.dart';
 import 'package:redstreakapp/screens/home/quiz_completed_screen.dart';
 import 'package:redstreakapp/screens/home/quiz_question_screen.dart';
 import 'package:redstreakapp/screens/home/reading_screen.dart';
 import 'package:redstreakapp/screens/home/start_quiz_screen.dart';
-import 'package:redstreakapp/screens/home/generate_story/story_goals_screen.dart';
-import 'package:redstreakapp/screens/home/generate_story/story_toics_screen.dart';
 
 import '../models/home/story_models/story_model.dart';
 import '../screens/below_16/consent_status_screen.dart';
@@ -59,7 +61,6 @@ class UserAppRoute {
                 name: AppRoutes.homeScreen.name,
                 builder: (context, state) => HomeScreen(),
               ),
-
             ],
           ),
         ],
@@ -254,10 +255,24 @@ class UserAppRoute {
       },
     ),
     GoRoute(
+      path: AppRoutes.customTopicScreen.path,
+      name: AppRoutes.customTopicScreen.name,
+      builder: (context, state) {
+        return CustomStoryTopicScreen();
+      },
+    ),
+    GoRoute(
       path: AppRoutes.storyTopicsScreen.path,
       name: AppRoutes.storyTopicsScreen.name,
       builder: (context, state) {
         return StoryTopicsScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.storyReadingGoalScreen.path,
+      name: AppRoutes.storyReadingGoalScreen.name,
+      builder: (context, state) {
+        return StoryReadingGoalScreen();
       },
     ),
   ];

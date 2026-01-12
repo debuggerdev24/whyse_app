@@ -86,9 +86,6 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
       body: SafeArea(
         child: Consumer<StoryProvider>(
           builder: (context, provider, child) {
-            // Logger.info(
-            //   "Topics List length : ${provider.topicsList[0].interestIds.length}",
-            // );
             if (provider.isGetTopicsLoading) {
               return Center(child: ApiLoadingIndicator());
             }
@@ -107,6 +104,10 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                       } else {
                         context.goNamed(AppRoutes.interestsScreen.name);
                       }
+                    },
+                    onSkip: () {
+                      provider.toggleApiTopic("");
+                      context.pushNamed(AppRoutes.customTopicScreen.name);
                     },
                   ),
                   AppText(
@@ -141,7 +142,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                       });
                     },
                   ),
-                  34.h.verticalSpace,
+                  18.h.verticalSpace,
                   if (provider.searchTopicCtr.text.trim().isEmpty &&
                       !provider.isGetSearchedTopicsLoading)
                     Expanded(
@@ -164,8 +165,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                                   return TopicCard(
                                     label: title,
                                     assetPath: _getIconForTopic(title),
-                                    isSelected: provider.selectedTopicIds
-                                        .contains(id),
+                                    isSelected: provider.selectedTopicId == id,
                                     onTap: () => provider.toggleApiTopic(id),
                                   );
                                 }),
@@ -192,9 +192,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                             return TopicCard(
                               label: title,
                               assetPath: _getIconForTopic(title),
-                              isSelected: provider.selectedTopicIds.contains(
-                                id,
-                              ),
+                              isSelected: provider.selectedTopicId == id,
                               onTap: () => provider.toggleApiTopic(id),
                             );
                           }),
@@ -219,13 +217,16 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                     backgroundColor: AppColors.yellowColor,
                     margin: EdgeInsetsGeometry.only(top: 4.3.h),
                     onTap: () async {
-                      if (provider.selectedTopicIds.isEmpty) {
+                      if (provider.selectedTopicId.isEmpty) {
                         AppToast.error(
                           context,
                           "Please select at least one topic",
                         );
                         return;
                       }
+                      provider.setSelectedReadingDuration = "5 mins";
+
+                      context.pushNamed(AppRoutes.storyReadingGoalScreen.name);
 
                       // final success = await provider.saveTopics(
                       //   context,

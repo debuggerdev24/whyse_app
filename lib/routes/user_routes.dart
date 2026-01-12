@@ -33,5 +33,8 @@ enum AppRoutes {
   resetPasswordScreen,
   storyGoalsScreen,
   storyInterestScreen,
-  storyTopicsScreen, homeScreen,
+  storyTopicsScreen,
+  homeScreen,
+  customTopicScreen,
+  storyReadingGoalScreen,
 }

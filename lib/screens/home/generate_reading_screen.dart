@@ -258,7 +258,7 @@ class _GenerateReadingScreenState extends State<GenerateReadingScreen> {
 
                     20.h.verticalSpace,
 
-                    /// Lesson Duration
+                    // Lesson Duration
                     Row(
                       children: [
                         Container(

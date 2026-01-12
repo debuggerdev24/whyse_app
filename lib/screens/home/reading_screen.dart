@@ -5,11 +5,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
+import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
-import 'package:redstreakapp/core/widgets/custom_shimmer.dart';
 import 'package:redstreakapp/screens/home/start_quiz_screen.dart';
 
+import '../../core/widgets/custom_shimmer.dart';
 import '../../models/home/story_models/story_model.dart';
 
 class ReadingScreen extends StatefulWidget {
@@ -63,6 +64,8 @@ class _ReadingScreenState extends State<ReadingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Logger.info("http://167.172.45.71${widget.story!.images}");
+
     // final provider = context.watch<HomeProvider>(); // Removing dependency on HomeProvider for content if using story
 
     return Scaffold(

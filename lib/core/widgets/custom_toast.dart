@@ -18,7 +18,7 @@ class AppToast {
   static void error(BuildContext context, String message) {
     _show(
       context: context,
-      message: message,
+      message: "$message!",
       type: ToastificationType.error,
       primaryColor:
           Colors.red, // Using standard red for errors for better visibility
@@ -55,7 +55,7 @@ class AppToast {
           message,
           maxLines: 2,
           style: AppTextStyles.sfProDisplayMedium(
-            fontSize: 16.sp,
+            fontSize: 17.sp,
             color: AppColors.white,
           ),
         ),

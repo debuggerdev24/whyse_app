@@ -57,25 +57,9 @@ enum Language {
 }
 
 enum TextType {
-  NARRATIVE_STORY("Narrative Story"),
-  MIXED_STORY_PLUS_FACTS("Mixed Story + Facts"),
-  ARTICLE_SIMPLE("Article (simple)"),
-  DIALOGUE_SIMPLE_CHARACTERS("Dialogue (simple characters)"),
-  STORY_BASED_LEARNING_MODULES("Story-based learning modules"),
-  DEBATE_FORMAT("Debate Format"),
-  ARTICLE("Article"),
-  ARGUMENTATIVE_TEXT("Argumentative Text"),
-  INTERVIEW("Interview"),
-  SHORT_FICTION("Short Fiction"),
-  NARRATIVE("Narrative"),
-  INFORMATIONAL_REPORT("Informational Report"),
-  CASE_STUDIES("Case Studies"),
-  WORKPLACE_SCENARIOS("Workplace Scenarios"),
-  REPORTS("Reports"),
-  MICROLEARNING_MODULES("Microlearning Modules"),
-  HOW_TO_GUIDES("How-to Guides"),
-  ANALYTICAL_ESSAYS("Analytical Essays"),
-  STORY("Story");
+  STORY("Story"),
+  FACTS("Informational Report"),
+  STORYFACTS("Mixed Story + Facts");
 
   final String value;
   const TextType(this.value);

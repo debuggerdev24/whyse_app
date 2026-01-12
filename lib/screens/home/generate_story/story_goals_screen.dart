@@ -4,15 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
-import 'package:redstreakapp/providers/home/home_provider.dart';
 
 import '../../../core/constants/app_color.dart';
 import '../../../core/constants/text_style.dart';
 import '../../../core/utils/custom_loader.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text.dart';
-import '../../../core/widgets/app_textfiled.dart';
-import '../../../core/widgets/custom_toast.dart';
 import '../../../core/widgets/onboarding_widgets.dart';
 import '../../../providers/home/story_provider.dart';
 import '../../../routes/user_routes.dart';
@@ -57,24 +54,29 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                               context.goNamed(AppRoutes.topicsScreen.name);
                             }
                           },
+                          onSkip: () {
+                            context.pushNamed(
+                              AppRoutes.storyInterestScreen.name,
+                            );
+                          },
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          provider.getStoryInterest(
-                            onFailed: (error) {
-                              AppToast.error(context, error);
-                            },
-                          );
-                          context.pushNamed(AppRoutes.storyInterestScreen.name);
-                        },
-                        child: Text(
-                          "Skip",
-                          style: AppTextStyles.textStyle16Medium.copyWith(
-                            color: AppColors.yellowColor,
-                          ),
-                        ),
-                      ),
+                      // GestureDetector(
+                      //   onTap: () {
+                      //     provider.getStoryInterest(
+                      //       onFailed: (error) {
+                      //         AppToast.error(context, error);
+                      //       },
+                      //     );
+                      //     context.pushNamed(AppRoutes.storyInterestScreen.name);
+                      //   },
+                      //   child: Text(
+                      //     "Skip",
+                      //     style: AppTextStyles.textStyle16Medium.copyWith(
+                      //       color: AppColors.yellowColor,
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                   GestureDetector(
@@ -107,37 +109,37 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                   else
                     Expanded(
                       child: ListView.separated(
-                        itemCount: provider.goalsList.length + 1,
+                        itemCount: provider.goalsList.length, //+1
                         separatorBuilder: (context, index) => 8.h.verticalSpace,
                         itemBuilder: (context, index) {
-                          // Custom Goal Field at the bottom
-                          if (index == goalsList.length) {
-                            return Padding(
-                              padding: EdgeInsets.only(bottom: 20.h, top: 1.h),
-                              child: Column(
-                                spacing: 8.h,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (provider.isCustomGoalSelected)
-                                    AppTextField(
-                                      controller: provider.goalTitleController,
-                                      hintText: "Add Custom Goal Title...",
-                                    ),
-                                  AppTextField(
-                                    onTap: () {
-                                      if (!provider.isCustomGoalSelected) {
-                                        provider.toggleCustomGoal();
-                                      }
-                                    },
-                                    controller: provider.goalDesController,
-                                    hintText: provider.isCustomGoalSelected
-                                        ? "Add Custom Goal Description..."
-                                        : "Add Custom Goal...",
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
+                          //todo Custom Goal Field at the bottom
+                          // if (index == goalsList.length) {
+                          //   return Padding(
+                          //     padding: EdgeInsets.only(bottom: 20.h, top: 1.h),
+                          //     child: Column(
+                          //       spacing: 8.h,
+                          //       mainAxisSize: MainAxisSize.min,
+                          //       children: [
+                          //         if (provider.isCustomGoalSelected)
+                          //           AppTextField(
+                          //             controller: provider.goalTitleController,
+                          //             hintText: "Add Custom Goal Title...",
+                          //           ),
+                          //         AppTextField(
+                          //           onTap: () {
+                          //             if (!provider.isCustomGoalSelected) {
+                          //               provider.toggleCustomGoal();
+                          //             }
+                          //           },
+                          //           controller: provider.goalDesController,
+                          //           hintText: provider.isCustomGoalSelected
+                          //               ? "Add Custom Goal Description..."
+                          //               : "Add Custom Goal...",
+                          //         ),
+                          //       ],
+                          //     ),
+                          //   );
+                          // }
 
                           final goal = goalsList[index];
 

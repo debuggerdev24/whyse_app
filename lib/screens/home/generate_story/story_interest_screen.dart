@@ -8,10 +8,10 @@ import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/utils/custom_loader.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
-import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
+
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/custom_toast.dart';
 
@@ -106,19 +106,18 @@ class _StoryInterestsScreenState extends State<StoryInterestsScreen> {
                               iconPath: AppAssets.adventure,
                             );
                           }),
-
-                          // Custom Interest Input
-                          Padding(
-                            padding: EdgeInsets.only(top: 10.h),
-                            child: AppTextField(
-                              controller: provider.customInterestCtr,
-                              hintText: "Add Custom Interest...",
-                              onSubmit: (val) {
-                                provider.addCustomInterest(val);
-                              },
-                            ),
-                          ),
-                          16.h.verticalSpace,
+                          //todo Custom Interest Input
+                          // Padding(
+                          //   padding: EdgeInsets.only(top: 10.h),
+                          //   child: AppTextField(
+                          //     controller: provider.customInterestCtr,
+                          //     hintText: "Add Custom Interest...",
+                          //     onSubmit: (val) {
+                          //       provider.addCustomInterest(val);
+                          //     },
+                          //   ),
+                          // ),
+                          // 16.h.verticalSpace,
                         ],
                       ),
                     ),

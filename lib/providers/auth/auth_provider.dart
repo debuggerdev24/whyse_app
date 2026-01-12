@@ -877,8 +877,8 @@ class AuthProvider with ChangeNotifier {
   Future<String?> googleSignIn() async {
     GoogleSignIn googleSignIn = GoogleSignIn(
       serverClientId:
-          "1072520967140-7566tlns04ge757cqiailkl8j405a9am.apps.googleusercontent.com",
-      // "928198076650-i9h7snbj7mlmpb3mie676vv54q53ndd4.apps.googleusercontent.com",
+          // "1072520967140-7566tlns04ge757cqiailkl8j405a9am.apps.googleusercontent.com",
+          "928198076650-i9h7snbj7mlmpb3mie676vv54q53ndd4.apps.googleusercontent.com",
       scopes: ["email", "profile"],
     );
 

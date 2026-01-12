@@ -22,4 +22,9 @@ class EndPoints {
   static const getSearchTopics = "story-flow/topics";
   static const forgotPassword = "/mobile/auth/forgot-password";
   static const resetPassword = "/mobile/auth/reset-password";
+  static const createStory = "/story/generateMobileStory";
+  static const createStoryImage = "/story/generateMobileStoryImage";
+
+  static String storeImage({required String storyId}) =>
+      "/story/mobile-story/$storyId/store-images";
 }

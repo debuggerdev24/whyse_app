@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
@@ -34,14 +33,7 @@ class OnboardingHeader extends StatelessWidget {
           children: [
             //todo back button
             GestureDetector(
-              onTap: currentStep == 0
-                  ? null
-                  : (onBack ??
-                        () {
-                          if (context.canPop()) {
-                            context.pop();
-                          }
-                        }),
+              onTap: currentStep == 0 ? null : onBack,
               child: Opacity(
                 opacity: currentStep == 0 ? 0.3 : 1,
                 child: SvgIcon(
@@ -51,7 +43,6 @@ class OnboardingHeader extends StatelessWidget {
                 ),
               ),
             ),
-
 
             Expanded(
               child: Row(
@@ -73,7 +64,7 @@ class OnboardingHeader extends StatelessWidget {
               ),
             ),
             if (onSkip != null) ...[
-              16.w.horizontalSpace,
+              // 16.w.horizontalSpace,
               GestureDetector(
                 onTap: onSkip,
                 child: AppText(

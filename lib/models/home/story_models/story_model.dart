@@ -1,13 +1,9 @@
 class Story {
-  final String id;
-  final String title;
-  final String content;
+  final String id, title, content;
   final List<String> images;
   final String? image; // Single image from get all stories API
   final List<Quiz> quiz;
-  final String? readingTopic;
-  final String? readingLevel;
-  final String? readingSkillFocus;
+  final String? readingTopic, readingLevel, readingSkillFocus;
   final int? age;
   final String? language;
   final String? textType;
