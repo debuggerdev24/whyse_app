@@ -29,13 +29,21 @@ class AuthApiServices {
   }
 
   //todo 1st
-  Future<Either<ApiException, Map<String, dynamic>>> getOnboardingProgress({
-    required String onboardingId,
-  }) async {
-    return BaseApiHelper.instance.post(
-      EndPoints.onBoardingProgress,
+  // Future<Either<ApiException, Map<String, dynamic>>> getOnboardingProgress({
+  //   required String onboardingId,
+  // }) async {
+  //   return BaseApiHelper.instance.post(
+  //     EndPoints.onBoardingProgress,
+  //     data: {"identifier": onboardingId},
+  //   );
+  // }
+
+  Future<dynamic> getOnboardingProgress({required String onboardingId}) async {
+    final res = await _api.post(
+      'onboarding-progress',
       data: {"identifier": onboardingId},
     );
+    return res.data;
   }
 
   //@override

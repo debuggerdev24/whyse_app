@@ -56,6 +56,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   bool isStartOnBoardingLoading = false;
+
   Future<void> startOnboarding({
     required BuildContext context,
     required VoidCallback onSuccess,
@@ -95,6 +96,73 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // Future<String?> fetchOnboardingStep() async {
+  //   try {
+  //     final onboardingId = SharedPrefs.instance.onboardingId;
+  //     if (onboardingId == null) return null;
+  //
+  //     final response = await AuthApiServices().getOnboardingProgress(
+  //       onboardingId: onboardingId,
+  //     );
+  //     response.fold((l) {}, (r) {
+  //       final data = r['data'];
+  //
+  //       if (data['nextStep'] != null &&
+  //           data['nextStep'].toString().isNotEmpty) {
+  //         return data['nextStep'];
+  //       }
+  //
+  //       if (data['currentStep'] == 'CREATE_ACCOUNT' &&
+  //           data['userProfile'] != null &&
+  //           data['userProfile']['firstName'] != null) {
+  //         return 'PROFILE_INFO';
+  //       }
+  //
+  //       if (data['currentStep'] == 'PROFILE_INFO' &&
+  //           data['userProfile'] != null &&
+  //           data['userProfile']['country'] != null) {
+  //         return 'READING_GOAL';
+  //       }
+  //
+  //       if (data['currentStep'] == 'READING_GOAL' &&
+  //           data['userProfile'] != null &&
+  //           data['userProfile']['dailyReadingGoal'] != null) {
+  //         return 'INTERESTS';
+  //       }
+  //
+  //       if (data['currentStep'] == 'INTERESTS' &&
+  //           ((data['userInterests'] != null &&
+  //                   (data['userInterests'] as List).isNotEmpty) ||
+  //               (data['userProfile']['interests'] != null &&
+  //                   (data['userProfile']['interests'] as List).isNotEmpty))) {
+  //         return 'TOPICS';
+  //       }
+  //
+  //       if (data['currentStep'] == 'TOPICS' &&
+  //           ((data['userTopics'] != null &&
+  //                   (data['userTopics'] as List).isNotEmpty) ||
+  //               (data['userProfile']['topics'] != null &&
+  //                   (data['userProfile']['topics'] as List).isNotEmpty))) {
+  //         return 'GOALS';
+  //       }
+  //
+  //       if (data['currentStep'] == 'GOALS' &&
+  //           ((data['userGoals'] != null &&
+  //                   (data['userGoals'] as List).isNotEmpty) ||
+  //               (data['userProfile']['goals'] != null &&
+  //                   (data['userProfile']['goals'] as List).isNotEmpty))) {
+  //         return 'COMPLETED';
+  //       }
+  //
+  //       return data['currentStep'];
+  //     });
+  //     return null;
+  //   } catch (e) {
+  //     debugPrint("Onboarding progress error: $e");
+  //     return null;
+  //   }
+  // }
+
   Future<String?> fetchOnboardingStep() async {
     try {
       final onboardingId = SharedPrefs.instance.onboardingId;
@@ -103,8 +171,8 @@ class AuthProvider with ChangeNotifier {
       final response = await AuthApiServices().getOnboardingProgress(
         onboardingId: onboardingId,
       );
-      response.fold((l) {}, (r) {
-        final data = r['data'];
+      if (response != null && response['success'] == true) {
+        final data = response['data'];
 
         if (data['nextStep'] != null &&
             data['nextStep'].toString().isNotEmpty) {
@@ -154,7 +222,7 @@ class AuthProvider with ChangeNotifier {
         }
 
         return data['currentStep'];
-      });
+      }
       return null;
     } catch (e) {
       debugPrint("Onboarding progress error: $e");
@@ -166,6 +234,7 @@ class AuthProvider with ChangeNotifier {
   bool get isUnder16 => calculatedAge < 16;
 
   bool isSaveUserAgeLoading = false;
+
   Future<void> saveUserAge({
     required BuildContext context,
     required Function onSuccess,
@@ -226,6 +295,7 @@ class AuthProvider with ChangeNotifier {
   TextEditingController confirmPasswordController = TextEditingController();
 
   bool isCreateAccountLoading = false;
+
   Future<bool> createAccount(
     BuildContext context, {
     required bool isTermsAccepted,
@@ -342,6 +412,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   bool isVerifyEmailLoading = false;
+
   Future<bool> checkEmailVerification(BuildContext context) async {
     final onboardingId = SharedPrefs.instance.onboardingId;
     final email = signupEmailController.text.trim();
@@ -386,6 +457,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   bool isSaveProfileLoading = false;
+
   Future<bool> saveProfileInfo(
     BuildContext context, {
     required String country,
@@ -432,6 +504,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   bool isSaveReadingGoal = false;
+
   Future<bool> saveReadingGoal(
     BuildContext context, {
     required int dailyReadingGoal,
@@ -503,6 +576,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   bool isSaveInterestLoading = false;
+
   Future<bool> saveInterests(
     BuildContext context, {
     required List<String> interestIds,
@@ -578,6 +652,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   bool isSaveTopicsLoading = false;
+
   Future<bool> saveTopics(
     BuildContext context, {
     required List<String> topicIds,
@@ -647,6 +722,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   bool isSaveGoalsLoading = false;
+
   Future<bool> saveGoals(
     BuildContext context, {
     required List<String> goalIds,
@@ -690,6 +766,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   bool isLoginLoading = false;
+
   Future<bool> loginUser(BuildContext context) async {
     final email = loginEmailCtr.text.trim();
     final password = passwordController.text.trim();
@@ -802,6 +879,7 @@ class AuthProvider with ChangeNotifier {
 
   //todo social login
   bool isSocialLoginLoading = false;
+
   Future<void> socialLogin({
     required VoidCallback onSuccess,
     VoidCallback? onNoAccountFound,
@@ -914,6 +992,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   bool isSaveParentEmailLoading = false;
+
   Future<void> saveParentEmail({
     required BuildContext context,
     required VoidCallback onSuccess,
@@ -947,6 +1026,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   bool isForgotPasswordLoading = false;
+
   Future<void> forgotPassword({
     required Function(String error) onFailed,
     required VoidCallback onSuccess,
@@ -972,6 +1052,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   bool isLogOutLoading = false;
+
   Future<void> logOutUser({required VoidCallback onSuccess}) async {
     final token = SharedPrefs.instance.authToken;
     Logger.info(token.toString());
@@ -1133,6 +1214,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   bool isVerifyTokenLoading = true;
+
   Future<void> verifyToken({
     required VoidCallback onSuccess,
     required Function(String error) onFailed,
@@ -1155,6 +1237,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   bool isResetPasswordLoading = false;
+
   Future<void> resetPassword({
     required VoidCallback onSuccess,
     required Function(String error) onFailed,
