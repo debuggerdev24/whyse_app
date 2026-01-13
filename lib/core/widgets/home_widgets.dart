@@ -106,7 +106,7 @@ class HomeHeader extends StatelessWidget {
             title: Text(
               "Are you sure you want to Log Out?",
               style: AppTextStyles
-                  .textStyle22Regular, //regular(color: AppColors.black, fontSize: 19.sp),
+                  .textStyle20Regular, //regular(color: AppColors.black, fontSize: 19.sp),
             ),
             actions: [
               myActionButtonTheme(
@@ -154,7 +154,7 @@ class HomeHeader extends StatelessWidget {
         title,
         style: AppTextStyles.sfProDisplayRegular(
           color: (title == "Yes") ? AppColors.redcolor : AppColors.black,
-          fontSize: 18.sp,
+          fontSize: 17.sp,
         ),
       ),
     );

@@ -268,4 +268,14 @@ class AuthApiServices {
   }) {
     return BaseApiHelper.instance.post(EndPoints.forgotPassword, data: data);
   }
+
+  Future<Either<ApiException, Map<String, dynamic>>> verifyToken() {
+    return BaseApiHelper.instance.post(EndPoints.verifyToken);
+  }
+
+  Future<Either<ApiException, Map<String, dynamic>>> resetPassword({
+    required Map<String, dynamic> data,
+  }) {
+    return BaseApiHelper.instance.post(EndPoints.resetPassword, data: data);
+  }
 }

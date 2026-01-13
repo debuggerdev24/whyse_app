@@ -132,7 +132,7 @@ class QuizCompletedScreen extends StatelessWidget {
                     onTap: () async {
                       await context.read<HomeProvider>().getAllStories();
                       if (!context.mounted) return;
-                      context.goNamed(AppRoutes.dashBoardScreen.name);
+                      context.goNamed(AppRoutes.homeScreen.name);
                     },
                     backgroundColor: AppColors.teal,
                     fixedSize: Size(348, 42.h),

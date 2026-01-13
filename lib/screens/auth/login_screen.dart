@@ -185,17 +185,27 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
 
                       32.h.verticalSpace,
-                      // Google Login
+                      //todo Google Login
                       _socialButton(
                         label: "Login with Google",
                         icon: AppAssets.google,
                         onTap: () {
                           provider.socialLogin(
                             onSuccess: () {
-                              context.goNamed(AppRoutes.dashBoardScreen.name);
+                              AppToast.success(context, "Login Successfully.");
+                              context.goNamed(AppRoutes.homeScreen.name);
+                            },
+                            onNoAccountFound: () {
+                              AppToast.error(
+                                context,
+                                "No Account Found, Please register!",
+                              );
                             },
                             onFailed: (error) {
-                              AppToast.error(context, error);
+                              AppToast.error(
+                                context,
+                                "Failed google login,\nPlease try again",
+                              );
                             },
                           );
                         },

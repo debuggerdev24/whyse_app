@@ -179,7 +179,7 @@ class _ReadingGoalScreenState extends State<ReadingGoalScreen> {
         child: AppText(
           text: text,
           style: AppTextStyles.sfProDisplaySemibold(
-            fontSize: isSelected ? 16.sp : 14.sp,
+            fontSize: isSelected ? 15.sp : 13.sp,
             color: isSelected
                 ? Colors.white
                 : AppColors.black.withValues(alpha: 0.3),

@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 
@@ -8,7 +7,6 @@ import '../../models/home/goal_model.dart';
 import '../../models/home/interest_model.dart';
 import '../../models/home/story_models/story_model.dart';
 import '../../models/home/topic_model.dart';
-import '../../routes/user_routes.dart';
 import '../../services/home/home_api_service.dart';
 
 class StoryProvider extends ChangeNotifier {
@@ -19,6 +17,7 @@ class StoryProvider extends ChangeNotifier {
   TextEditingController customTopicCtr = TextEditingController();
   TextEditingController customReadingDurationCtr = TextEditingController();
   int lessonDuration = 0;
+  String storyId = "", imagePath = "";
   final allowedDurations = {5, 10, 15, 20, 25, 30, 35, 40, 45};
 
   //todo topics field
@@ -272,11 +271,6 @@ class StoryProvider extends ChangeNotifier {
       return;
     }
 
-    // if (lessonDuration == 0) {
-    //   AppToast.error(context, "Please enter valid minutes");
-    //   return;
-    // }
-
     isCreateStoryLoading = true;
     notifyListeners();
 
@@ -306,8 +300,9 @@ class StoryProvider extends ChangeNotifier {
       },
       (r) {
         final data = r["data"];
-        story = Story.fromJson(data);
-        context.pushNamed(AppRoutes.readingScreen.name, extra: story);
+        storyId = data["id"];
+        // story = Story.fromJson(data);
+        // context.pushNamed(AppRoutes.readingScreen.name, extra: story);
         // if (!(isCreateStoryImageLoading && isCreateStoryLoading)) {
 
         onSuccess.call();
@@ -321,6 +316,7 @@ class StoryProvider extends ChangeNotifier {
   bool isCreateStoryImageLoading = false;
   Future<void> createStoryImage({
     required VoidCallback onSuccess,
+    required VoidCallback onLinkSuccess,
     required Function(String error) onFailed,
   }) async {
     if (customReadingDurationCtr.text.trim().isEmpty &&
@@ -369,17 +365,26 @@ class StoryProvider extends ChangeNotifier {
         onFailed.call(l.errorMsg);
       },
       (r) async {
-        final storyId = r["data"]["storyId"];
-        final imagePath = r["data"]["imagePath"];
+        imagePath = r["data"]["imagePath"];
         onSuccess.call();
-        isCreateStoryImageLoading = false;
-        notifyListeners();
-        await HomeApiService.instance.storeImage(
+
+        final response = await HomeApiService.instance.storeImage(
           id: storyId,
           data: {
             "images": [imagePath],
           },
         );
+
+        response.fold(
+          (l) {
+            onFailed.call(l.errorMsg);
+          },
+          (r) {
+            onLinkSuccess.call();
+          },
+        );
+        isCreateStoryImageLoading = false;
+        notifyListeners();
       },
     );
   }

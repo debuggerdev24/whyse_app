@@ -36,6 +36,7 @@ class AppToast {
       message: message,
       type: ToastificationType.info,
       primaryColor: Colors.blue,
+      icon: Icons.info_outline_rounded,
     );
   }
 

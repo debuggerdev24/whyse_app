@@ -99,7 +99,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                     onSuccess: () {
                                       AppToast.success(
                                         context,
-                                        "Onboarding started",
+                                        "Onboarding session started",
                                       );
                                       context.pushNamed(
                                         AppRoutes.enterAgeScreen.name,
@@ -167,6 +167,36 @@ class _SignupScreenState extends State<SignupScreen> {
                         _socialButton(
                           label: "Sign up with Google",
                           icon: AppAssets.google,
+                          onTap: () {
+                            provider.socialLogin(
+                              onSuccess: () async {
+                                await provider.startOnboarding(
+                                  context: context,
+                                  onSuccess: () {
+                                    AppToast.success(
+                                      context,
+                                      "Sign Up Successfully and Onboarding session started",
+                                    );
+                                    context.pushNamed(
+                                      AppRoutes.enterAgeScreen.name,
+                                    );
+                                  },
+
+                                  onFailed: (error) {
+                                    AppToast.error(context, error);
+                                  },
+                                );
+                                // context.goNamed(AppRoutes.enterAgeScreen.name);
+                              },
+
+                              onFailed: (error) {
+                                AppToast.error(
+                                  context,
+                                  "Failed google login,\nPlease try again",
+                                );
+                              },
+                            );
+                          },
                         ),
 
                         12.h.verticalSpace,
@@ -174,12 +204,15 @@ class _SignupScreenState extends State<SignupScreen> {
                         _socialButton(
                           label: "Sign up with Apple",
                           icon: AppAssets.apple,
+                          onTap: () {},
                         ),
                       ],
                     ),
                   ),
                 ),
-                if (provider.isStartOnBoardingLoading) FullPageIndicator(),
+                if (provider.isStartOnBoardingLoading ||
+                    provider.isSocialLoginLoading)
+                  FullPageIndicator(),
               ],
             );
           },
@@ -189,7 +222,11 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   /// ---------------- SOCIAL BUTTON ----------------
-  Widget _socialButton({required String label, required String icon}) {
+  Widget _socialButton({
+    required String label,
+    required String icon,
+    required VoidCallback onTap,
+  }) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -198,7 +235,7 @@ class _SignupScreenState extends State<SignupScreen> {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(40.r),
-        onTap: () {},
+        onTap: onTap,
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 24.w),
           child: Stack(

@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:redstreakapp/core/constants/end_points.dart';
 import 'package:redstreakapp/core/constants/shared_pref.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/services/auth/auth_api_service.dart';
@@ -24,6 +25,7 @@ class AuthProvider with ChangeNotifier {
   int? age;
   int calculatedAge = 0;
   DateTime? selectedDate;
+  String googleLoginEmail = "";
 
   set setIsFromHome(bool value) {
     isStoryCreation = value;
@@ -59,7 +61,9 @@ class AuthProvider with ChangeNotifier {
     required VoidCallback onSuccess,
     required Function(String error) onFailed,
   }) async {
-    final email = signUpEmailCtr.text.trim();
+    final email = (signUpEmailCtr.text.isEmpty)
+        ? googleLoginEmail
+        : signUpEmailCtr.text.trim();
     if (email.isEmpty) {
       AppToast.error(context, "Please enter email!");
       return;
@@ -159,7 +163,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   //todo
-  bool get isUnder16 => calculatedAge! < 16;
+  bool get isUnder16 => calculatedAge < 16;
 
   bool isSaveUserAgeLoading = false;
   Future<void> saveUserAge({
@@ -191,7 +195,7 @@ class AuthProvider with ChangeNotifier {
       },
       (r) async {
         await SharedPrefs.instance.setAgeCompleted(true);
-
+        clearCreateAccountFields();
         onSuccess.call();
       },
     );
@@ -208,18 +212,7 @@ class AuthProvider with ChangeNotifier {
       calculatedAge--;
     }
     String dateToSend;
-    // if (calculatedAge < 16) {
-    //   final spoofDate = DateTime(
-    //     today.year, //- 18
-    //     selectedDate!.month,
-    //     selectedDate!.day,
-    //   );
-    //   dateToSend =
-    //       "${spoofDate.year}-${spoofDate.month.toString().padLeft(2, '0')}-${spoofDate.day.toString().padLeft(2, '0')}";
-    // } else {
-    //   dateToSend =
-    //   "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
-    // }
+
     dateToSend =
         "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
     return dateToSend;
@@ -811,12 +804,14 @@ class AuthProvider with ChangeNotifier {
   bool isSocialLoginLoading = false;
   Future<void> socialLogin({
     required VoidCallback onSuccess,
+    VoidCallback? onNoAccountFound,
+
     required Function(String error) onFailed,
   }) async {
-    // isSocialLoginLoading = true;
-    // notifyListeners();
+    isSocialLoginLoading = true;
+    notifyListeners();
 
-    final String? idToken = await googleSignIn();
+    final String? idToken = await getGoogleSignInIDToken();
 
     final data = {
       "provider": "google",
@@ -830,10 +825,14 @@ class AuthProvider with ChangeNotifier {
       },
       (r) async {
         final data = r['data'];
-        debugPrint("Login Response Data: $data");
+        Logger.info("Login Response Data: $data");
 
         if (data != null) {
           String? accessToken;
+          if (data["session"] == null && onNoAccountFound != null) {
+            onNoAccountFound.call();
+            return;
+          }
 
           //todo Check for nested session object first (as seen in logs)
           if (data['session'] != null) {
@@ -859,6 +858,12 @@ class AuthProvider with ChangeNotifier {
             Logger.error("No access token found in login response!");
           }
 
+          if (data['onboardingId'] != null) {
+            await SharedPrefs.instance.setOnboardingId(
+              data['onboardingId'].toString(),
+            );
+          }
+
           // if (data['onboardingId'] != null) {
           //   await SharedPrefs.instance.setOnboardingId(
           //     data['onboardingId'].toString(),
@@ -874,11 +879,11 @@ class AuthProvider with ChangeNotifier {
   }
 
   //todo google login
-  Future<String?> googleSignIn() async {
+  Future<String?> getGoogleSignInIDToken() async {
     GoogleSignIn googleSignIn = GoogleSignIn(
       serverClientId:
           // "1072520967140-7566tlns04ge757cqiailkl8j405a9am.apps.googleusercontent.com",
-          "928198076650-i9h7snbj7mlmpb3mie676vv54q53ndd4.apps.googleusercontent.com",
+          serverClientId,
       scopes: ["email", "profile"],
     );
 
@@ -890,6 +895,7 @@ class AuthProvider with ChangeNotifier {
     }
 
     final auth = await account.authentication;
+    googleLoginEmail = account.email;
     Logger.info(account.email);
     Logger.info("access Token: ${auth.accessToken ?? 'NULL'}");
     Logger.info("idToken: /${auth.idToken ?? 'NULL'}");
@@ -968,6 +974,7 @@ class AuthProvider with ChangeNotifier {
   bool isLogOutLoading = false;
   Future<void> logOutUser({required VoidCallback onSuccess}) async {
     final token = SharedPrefs.instance.authToken;
+    Logger.info(token.toString());
     isLogOutLoading = true;
     notifyListeners();
 
@@ -980,6 +987,7 @@ class AuthProvider with ChangeNotifier {
     }
 
     // 1. Clear Local Data Immediately
+    await SharedPrefs.instance.removeTokens();
     await SharedPrefs.instance.clear();
 
     clearAllData();
@@ -1122,5 +1130,51 @@ class AuthProvider with ChangeNotifier {
       AppToast.error(context, e.toString());
       return null;
     }
+  }
+
+  bool isVerifyTokenLoading = true;
+  Future<void> verifyToken({
+    required VoidCallback onSuccess,
+    required Function(String error) onFailed,
+  }) async {
+    isVerifyTokenLoading = true;
+    notifyListeners();
+
+    final response = await AuthApiServices().verifyToken();
+
+    response.fold(
+      (l) {
+        onFailed.call(l.errorMsg);
+      },
+      (r) {
+        onSuccess.call();
+      },
+    );
+    isVerifyTokenLoading = false;
+    notifyListeners();
+  }
+
+  bool isResetPasswordLoading = false;
+  Future<void> resetPassword({
+    required VoidCallback onSuccess,
+    required Function(String error) onFailed,
+  }) async {
+    isResetPasswordLoading = true;
+    notifyListeners();
+
+    final response = await AuthApiServices().resetPassword(
+      data: {"newPassword": newPasswordCtr.text.trim()},
+    );
+
+    response.fold(
+      (l) {
+        onFailed.call(l.errorMsg);
+      },
+      (r) {
+        onSuccess.call();
+      },
+    );
+    isResetPasswordLoading = false;
+    notifyListeners();
   }
 }

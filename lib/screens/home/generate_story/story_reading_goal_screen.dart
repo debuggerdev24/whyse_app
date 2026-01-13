@@ -15,7 +15,9 @@ import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
+import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
+import 'package:redstreakapp/routes/user_routes.dart';
 
 import '../../../core/widgets/dropdown_textfiled.dart';
 import '../../../models/home/story_models/story_enums.dart';
@@ -170,13 +172,25 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                               //todo create story image
                               provider.createStoryImage(
                                 onSuccess: () {
-                                  AppToast.success(
-                                    context,
-                                    "Image Created Successfully.",
-                                  );
+                                  // AppToast.success(
+                                  //   context,
+                                  //   "Image Created Successfully.",
+                                  // );
+                                  Logger.info("Image Created Successfully");
                                 },
                                 onFailed: (error) {
                                   AppToast.error(context, error);
+                                },
+                                onLinkSuccess: () async {
+                                  await context
+                                      .read<HomeProvider>()
+                                      .getAllStories();
+
+                                  AppToast.success(
+                                    context,
+                                    "Story Created Successfully.",
+                                  );
+                                  context.goNamed(AppRoutes.homeScreen.name);
                                 },
                               ),
                               //todo create story
@@ -194,12 +208,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                                   Logger.error(error);
                                   AppToast.error(context, error);
                                 },
-                                onSuccess: () {
-                                  AppToast.success(
-                                    context,
-                                    "Story Created Successfully.",
-                                  );
-                                },
+                                onSuccess: () {},
                                 context: context,
                               ),
                             ]);
@@ -209,7 +218,9 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                     ],
                   ),
                 ),
-                if (provider.isCreateStoryLoading) FullPageIndicator(),
+                if (provider.isCreateStoryLoading ||
+                    provider.isCreateStoryImageLoading)
+                  FullPageIndicator(),
               ],
             ),
           ),
@@ -235,7 +246,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
         child: AppText(
           text: text,
           style: AppTextStyles.sfProDisplaySemibold(
-            fontSize: isSelected ? 16.sp : 14.sp,
+            fontSize: isSelected ? 15.sp : 13.sp,
             color: isSelected
                 ? Colors.white
                 : AppColors.black.withValues(alpha: 0.3),

@@ -69,8 +69,8 @@ class _ParentEmailScreenState extends State<ParentEmailScreen> {
                       AppFilledButton(
                         isLoading: provider.isLoading,
                         onTap: () async {
-                          context.pushNamed(AppRoutes.consentStatusScreen.name);
-                          return;
+                          // context.pushNamed(AppRoutes.consentStatusScreen.name);
+                          // return;
                           await provider.saveParentEmail(
                             context: context,
                             onFailed: (error) {

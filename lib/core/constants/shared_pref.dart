@@ -16,11 +16,15 @@ class SharedPrefs {
   String? get refreshToken => prefs.getString('refresh_token');
 
   Future<void> setToken(String token) async {
-    await prefs.setString('token', token);
+    await prefs.setString("token", token);
   }
 
   Future<void> setRefreshToken(String token) async {
-    await prefs.setString('refresh_token', token);
+    await prefs.setString("refresh_token", token);
+  }
+
+  Future<void> removeTokens() async {
+    Future.wait([prefs.remove("token"), prefs.remove("refresh_token")]);
   }
 
   /// ---------------- Onboarding ----------------
