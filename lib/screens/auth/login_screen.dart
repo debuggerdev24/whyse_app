@@ -48,13 +48,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   //     MediaQuery.of(context).padding.top,
                   padding: EdgeInsets.symmetric(
                     horizontal: 24.w,
-                    vertical: 40.h,
+                    vertical: 30.h,
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Spacer(flex: 2),
+                      88.h.verticalSpace,
+
                       SvgIcon(AppAssets.welcome),
                       36.h.verticalSpace,
 
@@ -112,15 +113,17 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           10.h.verticalSpace,
 
-                          GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () {
-                              context.pushNamed(
-                                AppRoutes.forgotPasswordScreen.name,
-                              );
-                            },
-                            child: Align(
-                              alignment: Alignment.centerRight,
+                          Align(
+                            alignment: AlignmentGeometry.centerRight,
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () {
+                                context.pushNamed(
+                                  AppRoutes.forgotPasswordScreen.name,
+                                );
+                                provider.forgotPasswordEmailCtr.clear();
+                                provider.setSendForgotPassLinkStatus = false;
+                              },
                               child: Text(
                                 "Forget Password?",
                                 style: AppTextStyles.textStyle14Bold,
@@ -149,6 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           GestureDetector(
                             onTap: () {
+                              provider.clearLoginFields();
                               context.pushNamed(AppRoutes.signUpScreen.name);
                             },
                             child: Text(

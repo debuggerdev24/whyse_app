@@ -222,7 +222,7 @@ class OptionCard extends StatelessWidget {
         backgroundColor = Color(0xFFE8F5E9);
         trailingIcon = SvgIcon(AppAssets.correctoption, size: 24.w);
       } else if (isSelected && !isCorrect) {
-        borderColor = AppColors.redcolor;
+        borderColor = AppColors.redColor;
         backgroundColor = Color(0xFFFFEBEE);
         trailingIcon = SvgIcon(AppAssets.canceloption, size: 24.w);
       } else {

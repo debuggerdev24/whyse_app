@@ -1,24 +1,35 @@
 import 'package:flutter/widgets.dart';
+import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
+import 'package:redstreakapp/services/base_api_service.dart';
 
 import '../../core/enums/app_enums.dart';
 import '../../models/home/goal_model.dart';
 import '../../models/home/interest_model.dart';
 import '../../models/home/story_models/story_model.dart';
 import '../../models/home/topic_model.dart';
+import '../../routes/user_routes.dart';
 import '../../services/home/home_api_service.dart';
 
 class StoryProvider extends ChangeNotifier {
-  TextEditingController goalTitleController = TextEditingController();
-  TextEditingController goalDesController = TextEditingController();
-  TextEditingController customInterestCtr = TextEditingController();
-  TextEditingController searchTopicCtr = TextEditingController();
-  TextEditingController customTopicCtr = TextEditingController();
-  TextEditingController customReadingDurationCtr = TextEditingController();
-  int lessonDuration = 0;
-  String storyId = "", imagePath = "";
+  TextEditingController goalTitleController = TextEditingController(),
+      goalDesController = TextEditingController(),
+      customInterestCtr = TextEditingController(),
+      searchTopicCtr = TextEditingController(),
+      customTopicCtr = TextEditingController(),
+      customReadingDurationCtr = TextEditingController();
+  int _lessonDuration = 0;
+  String createdStoryId = "", createdStoryImagePath = "";
+  Map<String, dynamic> createdStoryData = {},dataToSendCreateStory = {};
   final allowedDurations = {5, 10, 15, 20, 25, 30, 35, 40, 45};
+  final List<String> readingDurations = [
+    '5 mins',
+    '10 mins',
+    '20 mins',
+    'Custom',
+  ];
+  final List<String> ageRanges = ["6-8", "9-11", "12-14", "15-17", "18+"];
 
   //todo topics field
   String _selectedTextType = "", _selectedAgeRange = "", _selectedLanguage = "";
@@ -80,6 +91,7 @@ class StoryProvider extends ChangeNotifier {
   }
 
   bool isGetGoalsLoading = false;
+
   Future<void> getStoryGoals({required Function(String error) onFailed}) async {
     isGetGoalsLoading = true;
     notifyListeners();
@@ -102,6 +114,7 @@ class StoryProvider extends ChangeNotifier {
   }
 
   bool isGetInterestLoading = false;
+
   Future<void> getStoryInterest({
     required Function(String error) onFailed,
   }) async {
@@ -156,6 +169,7 @@ class StoryProvider extends ChangeNotifier {
   }
 
   bool isGetTopicsLoading = false;
+
   Future<void> getStoryTopics({
     required Function(String error) onFailed,
   }) async {
@@ -180,6 +194,7 @@ class StoryProvider extends ChangeNotifier {
   }
 
   bool isGetSearchedTopicsLoading = false;
+
   Future<void> getSearchedStoryTopics({
     required Function(String error) onFailed,
   }) async {
@@ -226,9 +241,11 @@ class StoryProvider extends ChangeNotifier {
   }
 
   bool isCreateStoryLoading = false;
+
+  //todo create story
   Future<void> createStory({
-    required Function(String error) onFailed,
-    required VoidCallback onSuccess,
+    required Function(String error) onCreateStoryFailed,
+    required Function(String error) onCreateImageFailed,
     required VoidCallback onStarted,
     required BuildContext context,
   }) async {
@@ -258,11 +275,11 @@ class StoryProvider extends ChangeNotifier {
         AppToast.error(context, "Please Enter Minutes");
         return;
       }
-      lessonDuration = int.tryParse(customReadingDurationCtr.text.trim()) ?? 0;
+      _lessonDuration = int.tryParse(customReadingDurationCtr.text.trim()) ?? 0;
     } else {
-      lessonDuration = int.tryParse(selectedReadingDuration.split(' ')[0]) ?? 0;
+      _lessonDuration = int.tryParse(selectedReadingDuration.split(' ')[0]) ?? 0;
     }
-    if (!allowedDurations.contains(lessonDuration)) {
+    if (!allowedDurations.contains(_lessonDuration)) {
       AppToast.error(
         context,
 
@@ -274,38 +291,38 @@ class StoryProvider extends ChangeNotifier {
     isCreateStoryLoading = true;
     notifyListeners();
 
-    Map<String, dynamic> data = {
+     dataToSendCreateStory = {
       "interestIds": selectedInterestIds.toList(),
       (selectedTopicId.isEmpty)
           ? "customTopicDescription"
           : "topicId": (selectedTopicId.isEmpty)
           ? customTopicCtr.text.trim()
           : selectedTopicId,
-      "lessonDuration": lessonDuration,
+      "lessonDuration": _lessonDuration,
       "language": _selectedLanguage,
       "textType": _selectedTextType,
       "ageRange": _selectedAgeRange,
     };
     //todo adding goalIds
     if (selectedGoalIds.isNotEmpty) {
-      data["goalIds"] = selectedGoalIds.toList();
+      dataToSendCreateStory["goalIds"] = selectedGoalIds.toList();
     }
 
-    Logger.info(data.toString());
-    final response = await HomeApiService.instance.createStory(data: data);
+    //todo create story image
+
+    createStoryImage(onFailed: onCreateImageFailed);
+    final response = await HomeApiService.instance.createStory(data: dataToSendCreateStory);
 
     response.fold(
       (l) {
-        onFailed.call(l.errorMsg);
+        onCreateStoryFailed.call(l.errorMsg);
       },
       (r) {
-        final data = r["data"];
-        storyId = data["id"];
-        // story = Story.fromJson(data);
-        // context.pushNamed(AppRoutes.readingScreen.name, extra: story);
-        // if (!(isCreateStoryImageLoading && isCreateStoryLoading)) {
+        createdStoryData = r["data"];
+        createdStoryId = createdStoryData["id"];
 
-        onSuccess.call();
+        story = Story.fromJson(createdStoryData);
+        context.goNamed(AppRoutes.readingScreen.name, extra: story);
       },
     );
 
@@ -313,78 +330,78 @@ class StoryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  //todo create story image
   bool isCreateStoryImageLoading = false;
+
   Future<void> createStoryImage({
-    required VoidCallback onSuccess,
-    required VoidCallback onLinkSuccess,
     required Function(String error) onFailed,
   }) async {
-    if (customReadingDurationCtr.text.trim().isEmpty &&
-        selectedReadingDuration.toLowerCase() == AppEnum.custom.name)
-      return;
-
-    if (_selectedTextType.isEmpty) return;
-
-    if (_selectedAgeRange.isEmpty) return;
-
-    if (_selectedLanguage.isEmpty) return;
-
-    if (selectedReadingDuration.toLowerCase() == AppEnum.custom.name) {
-      if (customReadingDurationCtr.text.isEmpty) return;
-
-      lessonDuration = int.tryParse(customReadingDurationCtr.text.trim()) ?? 0;
-    } else {
-      lessonDuration = int.tryParse(selectedReadingDuration.split(' ')[0]) ?? 0;
-    }
-    if (!allowedDurations.contains(lessonDuration)) return;
 
     isCreateStoryImageLoading = true;
     notifyListeners();
 
-    Map<String, dynamic> data = {
-      "interestIds": selectedInterestIds.toList(),
-      (selectedTopicId.isEmpty)
-          ? "customTopicDescription"
-          : "topicId": (selectedTopicId.isEmpty)
-          ? customTopicCtr.text.trim()
-          : selectedTopicId,
-      "lessonDuration": lessonDuration,
-      "language": _selectedLanguage,
-      "textType": _selectedTextType,
-      "ageRange": _selectedAgeRange,
-    };
+    // Map<String, dynamic> data = {
+    //   "interestIds": selectedInterestIds.toList(),
+    //   (selectedTopicId.isEmpty)
+    //       ? "customTopicDescription"
+    //       : "topicId": (selectedTopicId.isEmpty)
+    //       ? customTopicCtr.text.trim()
+    //       : selectedTopicId,
+    //   "lessonDuration": lessonDuration,
+    //   "language": _selectedLanguage,
+    //   "textType": _selectedTextType,
+    //   "ageRange": _selectedAgeRange,
+    // };
+    //
+    // if (selectedGoalIds.isNotEmpty) {
+    //   data["goalIds"] = selectedGoalIds.toList();
+    // }
 
-    if (selectedGoalIds.isNotEmpty) {
-      data["goalIds"] = selectedGoalIds.toList();
-    }
-
-    final response = await HomeApiService.instance.createStoryImage(data: data);
+    final response = await HomeApiService.instance.createStoryImage(data: dataToSendCreateStory);
 
     response.fold(
       (l) {
         onFailed.call(l.errorMsg);
       },
       (r) async {
-        imagePath = r["data"]["imagePath"];
-        onSuccess.call();
-
-        final response = await HomeApiService.instance.storeImage(
-          id: storyId,
-          data: {
-            "images": [imagePath],
-          },
-        );
-
-        response.fold(
-          (l) {
-            onFailed.call(l.errorMsg);
-          },
-          (r) {
-            onLinkSuccess.call();
-          },
-        );
+        createdStoryImagePath = DioClient.baseUrl + r["data"]["imagePath"];
+        clearAllStoryFields();
         isCreateStoryImageLoading = false;
         notifyListeners();
+
+      },
+
+    );
+  }
+
+  void clearAllStoryFields(){
+    selectedGoalIds.clear();
+    selectedInterestIds.clear();
+    selectedTopicId ="";
+    customTopicCtr.clear();
+    _lessonDuration =0;
+    _selectedLanguage = "";
+    _selectedTextType = "";
+    _selectedAgeRange = "";
+
+  }
+
+  Future<void> linkImageToStory({
+    required Function(String error) onFailed,
+  }) async {
+    //todo calling connect image to story API
+    final response = await HomeApiService.instance.storeImage(
+      id: createdStoryId,
+      data: {
+        "images": [createdStoryImagePath],
+      },
+    );
+
+    response.fold(
+      (l) {
+        onFailed.call(l.errorMsg);
+      },
+      (r) {
       },
     );
   }

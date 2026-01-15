@@ -44,23 +44,23 @@ class _SignupScreenState extends State<SignupScreen> {
               children: [
                 SingleChildScrollView(
                   child: Container(
-                    height:
-                        MediaQuery.of(context).size.height -
-                        MediaQuery.of(context).padding.top,
+                    // height:
+                    //     MediaQuery.of(context).size.height -
+                    //     MediaQuery.of(context).padding.top,
                     padding: EdgeInsets.symmetric(
                       horizontal: 24.w,
-                      vertical: 40.h,
+                      vertical: 30.h,
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Spacer(flex: 2),
+                        88.h.verticalSpace,
 
                         Column(
                           children: [
                             SvgIcon(AppAssets.welcome),
                             30.h.verticalSpace,
-
+                  
                             AppText(
                               text: 'Welcome to',
                               style: AppTextStyles.sfProDisplayBold(
@@ -75,22 +75,22 @@ class _SignupScreenState extends State<SignupScreen> {
                                 color: AppColors.teal,
                               ),
                             ),
-
+                  
                             15.h.verticalSpace,
                             AppText(
                               text: 'Read. Learn. Grow.',
                               style: AppTextStyles.textStyle16Semibold,
                             ),
-
+                  
                             61.h.verticalSpace,
-
+                  
                             AppTextField(
                               hintText: "Email",
                               controller: provider.signUpEmailCtr,
                             ),
-
+                  
                             32.h.verticalSpace,
-
+                  
                             AppFilledButton(
                               onTap: () async {
                                 deBouncer.run(() async {
@@ -105,7 +105,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                         AppRoutes.enterAgeScreen.name,
                                       );
                                     },
-
+                  
                                     onFailed: (error) {
                                       AppToast.error(context, error);
                                     },
@@ -114,9 +114,9 @@ class _SignupScreenState extends State<SignupScreen> {
                               },
                               text: "Sign up with Email",
                             ),
-
+                  
                             17.h.verticalSpace,
-
+                  
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -161,9 +161,9 @@ class _SignupScreenState extends State<SignupScreen> {
                             ),
                           ],
                         ),
-
+                  
                         32.h.verticalSpace,
-
+                  
                         _socialButton(
                           label: "Sign up with Google",
                           icon: AppAssets.google,
@@ -181,14 +181,14 @@ class _SignupScreenState extends State<SignupScreen> {
                                       AppRoutes.enterAgeScreen.name,
                                     );
                                   },
-
+                  
                                   onFailed: (error) {
                                     AppToast.error(context, error);
                                   },
                                 );
                                 // context.goNamed(AppRoutes.enterAgeScreen.name);
                               },
-
+                  
                               onFailed: (error) {
                                 AppToast.error(
                                   context,
@@ -198,9 +198,9 @@ class _SignupScreenState extends State<SignupScreen> {
                             );
                           },
                         ),
-
+                  
                         12.h.verticalSpace,
-
+                  
                         _socialButton(
                           label: "Sign up with Apple",
                           icon: AppAssets.apple,

@@ -9,8 +9,9 @@ import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
 import '../../core/constants/app_color.dart';
+import '../../core/helper/log_helper.dart';
+import '../../core/utils/custom_loader.dart';
 import '../../core/utils/de_bouncing.dart';
-import '../../core/utils/field_validator.dart';
 import '../../core/widgets/app_textfiled.dart';
 import '../../providers/auth/auth_provider.dart';
 
@@ -19,8 +20,6 @@ class ForgotPasswordScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
     return AppLayout(
       body: SafeArea(
         child: Consumer<AuthProvider>(
@@ -29,78 +28,102 @@ class ForgotPasswordScreen extends StatelessWidget {
               children: [
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 24.w),
-                  child: Form(
-                    key: formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        26.h.verticalSpace,
-                        Text(
-                          "Forgot Password",
-                          style: AppTextStyles.sfProDisplayBold(
-                            fontSize: 32.sp,
-                            color: AppColors.teal,
-                          ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      26.h.verticalSpace,
+                      Text(
+                        "Forgot Password",
+                        style: AppTextStyles.sfProDisplayBold(
+                          fontSize: 32.sp,
+                          color: AppColors.teal,
                         ),
-                        28.h.verticalSpace,
-                        Text(
-                          textAlign: TextAlign.center,
-                          "We will send you an OTP to the email address you signed up with.",
-                          style: AppTextStyles.textStyle16Semibold,
-                        ),
-                        26.h.verticalSpace,
-                        AppTextField(
-                          controller: provider.forgotPasswordEmailCtr,
-                          hintText: "Email",
-                          validator: FieldValidators().email,
-                          // errorStyle: medium(
-                          //   fontSize: (context.isBrowserMobile) ? 25.sp : 12.sp,
-                          //   color: AppColors.red,
-                          // ),
-                          // hintStyle: medium(
-                          //   fontSize: (context.isBrowserMobile) ? 28.sp : 14.sp,
-                          //   color: AppColors.primary.withValues(alpha: 0.4),
-                          // ),
-                          onSubmit: (value) {
-                            deBouncer.run(() {
-                              if (formKey.currentState!.validate()) {
-                                // provider.sendOTP(context: context);
-                              }
-                            });
-                          },
-                        ),
-                        Spacer(),
-                        AppFilledButton(
-                          margin: EdgeInsets.only(bottom: 20.h),
-                          text: "Send Link",
-                          onTap: () {
-                            deBouncer.run(() {
-                              if (formKey.currentState!.validate()) {
-                                context.pushNamed(
-                                  AppRoutes.verifyOtpScreen.name,
-                                );
+                      ),
+                      28.h.verticalSpace,
+                      Text(
+                        textAlign: TextAlign.center,
+                        "We will send you a link to the email address you signed up with.",
+                        style: AppTextStyles.textStyle16Semibold,
+                      ),
+                      26.h.verticalSpace,
+                      AppTextField(
+                        controller: provider.forgotPasswordEmailCtr,
+                        hintText: "Email",
+                      ),
 
-                                provider.forgotPassword(
-                                  onFailed: (error) {
-                                    AppToast.error(context, error);
-                                  },
-                                  onSuccess: () {
-                                    AppToast.success(
-                                      context,
-                                      "A verification link has been sent to your email address.",
-                                    );
-                                    // context.push
-                                  },
+                      Spacer(),
+                      AppFilledButton(
+                        margin: EdgeInsets.only(bottom: 10),
+                        onTap: () {
+                          Logger.info(
+                            "TRecovery Token: ${provider.recoveryToken}",
+                          );
+                        },
+                        text: "check token",
+                      ),
+                      if (provider.isSendForgotPassVerification)
+                        AppOutlinedButton(
+                          margin: EdgeInsets.only(bottom: 10),
+                          onTap: () {
+                            provider.verifyForgotPasswordEmail(
+                              onFailed: (error) {
+                                // if(error){
+                                //
+                                // }
+                                AppToast.error(context, error.errorMsg);
+                              },
+                              onSuccess: () {
+                                AppToast.success(
+                                  context,
+                                  "Email verify successfully.",
                                 );
-                              }
-                            });
+                                context.pushNamed(
+                                  AppRoutes.resetPasswordScreen.name,
+                                );
+                              },
+                            );
                           },
+                          text: "Verify Email",
                         ),
-                      ],
-                    ),
+                      AppFilledButton(
+                        margin: EdgeInsets.only(bottom: 20.h),
+                        text: (provider.isResendTimerRunning)
+                            ? "Resend in ${provider.resendSeconds}s"
+                            : "Send Link",
+                        onTap: (provider.isResendTimerRunning)
+                            ? () {}
+                            : () {
+                                deBouncer.run(() {
+                                  if (provider.forgotPasswordEmailCtr.text
+                                      .trim()
+                                      .isEmpty) {
+                                    AppToast.error(
+                                      context,
+                                      "Please enter email",
+                                    );
+                                    return;
+                                  }
+
+                                  provider.sendLinkForgotPass(
+                                    onFailed: (error) {
+                                      AppToast.error(context, error);
+                                    },
+                                    onSuccess: () {
+                                      AppToast.success(
+                                        context,
+                                        "A verification link has been sent to your email address.\nplease verify.",
+                                      );
+                                    },
+                                  );
+                                });
+                              },
+                      ),
+                    ],
                   ),
                 ),
-                // if (provider.isForgotPassLoading) FullPageIndicator(),
+                if (provider.isForgotPasswordLoading ||
+                    provider.isVerifyForgotPassMailLoading)
+                  FullPageIndicator(),
               ],
             );
           },

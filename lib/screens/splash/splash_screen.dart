@@ -76,7 +76,7 @@ class _SplashScreenState extends State<SplashScreen>
       } else if (step == 'GOALS') {
         context.goNamed(AppRoutes.goalsScreen.name);
       } else if (step == 'COMPLETED') {
-        context.goNamed(AppRoutes.dashBoardScreen.name);
+        context.goNamed(AppRoutes.homeScreen.name);
       } else {
         // Check if user is already logged in
         final token = SharedPrefs.instance.authToken;

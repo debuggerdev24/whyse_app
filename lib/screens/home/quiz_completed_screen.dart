@@ -7,6 +7,7 @@ import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
+import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
@@ -25,9 +26,7 @@ class QuizCompletedScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
-
+    return AppLayout(
       body: Stack(
         children: [
           Padding(
@@ -41,8 +40,10 @@ class QuizCompletedScreen extends StatelessWidget {
                   Image.asset(AppAssets.quizcomplete),
                   19.h.verticalSpace,
                   AppText(
+
                     text: "Quiz Completed!",
                     style: AppTextStyles.sfProDisplayMedium(
+
                       fontSize: 12.sp,
                       color: AppColors.black.withValues(alpha: 0.8),
                     ),
@@ -116,7 +117,7 @@ class QuizCompletedScreen extends StatelessWidget {
                         ),
                         8.w.horizontalSpace,
                         AppText(
-                          text: "3", // 👈 EXACT VALUE LIKE IMAGE
+                          text: score.toString(),
                           style: AppTextStyles.sfProDisplaySemibold(
                             fontSize: 16.sp,
                             color: AppColors.black,
@@ -130,7 +131,7 @@ class QuizCompletedScreen extends StatelessWidget {
                   AppFilledButton(
                     text: "Continue",
                     onTap: () async {
-                      await context.read<HomeProvider>().getAllStories();
+                       // context.read<HomeProvider>().getAllStories();
                       if (!context.mounted) return;
                       context.goNamed(AppRoutes.homeScreen.name);
                     },
@@ -143,15 +144,12 @@ class QuizCompletedScreen extends StatelessWidget {
             ),
           ),
           Positioned(
-            bottom: 0,
+            bottom: 150.h,
             left: 0,
             right: 0,
-            child: IgnorePointer(
-              child: Lottie.asset(
-                'assets/lottie/Congratulations.json',
-                height: 600.h,
-                repeat: false,
-              ),
+            child: Lottie.asset(
+              'assets/lottie/Congratulations.json',
+              // repeat: false,
             ),
           ),
         ],

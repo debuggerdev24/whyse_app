@@ -7,6 +7,7 @@ import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/utils/custom_loader.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
+import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
@@ -122,8 +123,8 @@ class _TopicsScreenState extends State<TopicsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+    return AppLayout(
+      resizeToAvoidBottomInset: false,
 
       // Fixed bottom button
       body: SafeArea(
@@ -246,9 +247,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
 
                           if (success && context.mounted) {
                             context.pushNamed(
-                              (provider.isStoryCreation)
-                                  ? AppRoutes.readingGoalScreen.name
-                                  : AppRoutes.goalsScreen.name,
+                                  AppRoutes.goalsScreen.name,
                             );
                           }
                         },

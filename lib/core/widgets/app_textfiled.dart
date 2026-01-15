@@ -98,7 +98,7 @@ class AppTextField extends StatelessWidget {
 
           decoration: InputDecoration(
             errorStyle: AppTextStyles.sfProDisplayRegular(
-              color: AppColors.redcolor,
+              color: AppColors.redColor,
               fontSize: 14.sp,
             ),
             filled: false,
@@ -139,12 +139,12 @@ class AppTextField extends StatelessWidget {
                 ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: AppColors.redcolor, width: 1.w),
+              borderSide: BorderSide(color: AppColors.redColor, width: 1.w),
             ), // Op ,
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
 
-              borderSide: BorderSide(color: AppColors.redcolor, width: 1.w),
+              borderSide: BorderSide(color: AppColors.redColor, width: 1.w),
             ), // Optional: Added for error styling
           ),
           onChanged: onChanged,

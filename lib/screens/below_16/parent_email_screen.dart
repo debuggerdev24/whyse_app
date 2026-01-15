@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
+import 'package:redstreakapp/core/utils/custom_loader.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
@@ -95,9 +96,11 @@ class _ParentEmailScreenState extends State<ParentEmailScreen> {
                     ],
                   ),
                 ),
+                if(provider.isSaveParentEmailLoading) FullPageIndicator()
               ],
             );
           },
+
         ),
       ),
     );

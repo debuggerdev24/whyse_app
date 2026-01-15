@@ -23,7 +23,7 @@ class AuthApiServices {
   }) async {
     Map<String, String> data = {"email": email};
     return await BaseApiHelper.instance.post(
-      EndPoints.startOnBoarding,
+      EndPoints.startOnBoarding, //ing,
       data: data,
     );
   }
@@ -40,7 +40,7 @@ class AuthApiServices {
 
   Future<dynamic> getOnboardingProgress({required String onboardingId}) async {
     final res = await _api.post(
-      'onboarding-progress',
+      EndPoints.onBoardingProgress,
       data: {"identifier": onboardingId},
     );
     return res.data;
@@ -126,7 +126,7 @@ class AuthApiServices {
 
   //@override
   Future<dynamic> getDefaultInterests() async {
-    final res = await _api.get('default-interests');
+    final res = await _api.get(EndPoints.getDefaultInterest);
     return res.data;
   }
 
@@ -150,7 +150,7 @@ class AuthApiServices {
 
   //@override
   Future<dynamic> getDefaultTopics() async {
-    final res = await _api.get('default-topics');
+    final res = await _api.get(EndPoints.getDefaultTopics);
     return res.data;
   }
 
@@ -173,7 +173,7 @@ class AuthApiServices {
 
   //@override
   Future<dynamic> getGoals() async {
-    final res = await _api.get(EndPoints.getStoryGoals);
+    final res = await _api.get(EndPoints.getDefaultGoals);
     return res.data;
   }
 
@@ -184,7 +184,7 @@ class AuthApiServices {
     required List<Map<String, String>> customGoals,
   }) async {
     final res = await _api.post(
-      'save-goals',
+      EndPoints.saveGoals,
       data: {
         "onboardingId": onboardingId,
         "goalIds": goalIds,
@@ -277,8 +277,10 @@ class AuthApiServices {
     return BaseApiHelper.instance.post(EndPoints.forgotPassword, data: data);
   }
 
-  Future<Either<ApiException, Map<String, dynamic>>> verifyToken() {
-    return BaseApiHelper.instance.post(EndPoints.verifyToken);
+  Future<Either<ApiException, Map<String, dynamic>>> verifyForgotPasswordEmail({
+    required Map<String, dynamic> data,
+  }) {
+    return BaseApiHelper.instance.post(EndPoints.verifyToken, data: data);
   }
 
   Future<Either<ApiException, Map<String, dynamic>>> resetPassword({

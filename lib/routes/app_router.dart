@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/extensions/routes_extensions.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:redstreakapp/screens/above_16/create_account_screen.dart';
+import 'package:redstreakapp/screens/above_16/goals_screen.dart';
 import 'package:redstreakapp/screens/above_16/interests_screen.dart';
 import 'package:redstreakapp/screens/above_16/profile_info_screen.dart';
 import 'package:redstreakapp/screens/above_16/reading_goal_screen.dart';
@@ -15,7 +16,7 @@ import 'package:redstreakapp/screens/auth/forgot_password_screen.dart';
 import 'package:redstreakapp/screens/auth/login_screen.dart';
 import 'package:redstreakapp/screens/auth/reset_password_screen.dart';
 import 'package:redstreakapp/screens/auth/signup_screen.dart';
-import 'package:redstreakapp/screens/auth/verify_otp_screen.dart';
+import 'package:redstreakapp/screens/auth/verify_mail_screen.dart';
 import 'package:redstreakapp/screens/home/generate_reading_screen.dart';
 import 'package:redstreakapp/screens/home/generate_story/custom_story_topic_screen.dart';
 import 'package:redstreakapp/screens/home/generate_story/story_goals_screen.dart';
@@ -184,9 +185,15 @@ class UserAppRoute {
       path: AppRoutes.startQuizScreen.path,
       name: AppRoutes.startQuizScreen.name,
       builder: (context, state) {
-        return StartQuizScreen();
+        final extra = state.extra as Map<String, dynamic>? ?? {};
+
+        return StartQuizScreen(
+          quizzes: (extra["quizzes"] as List<Quiz>? ?? []),
+          storyTitle: extra["storyTitle"] as String? ?? "",
+        );
       },
     ),
+
     GoRoute(
       path: AppRoutes.quizQuestionScreen.path,
       name: AppRoutes.quizQuestionScreen.name,
@@ -216,7 +223,7 @@ class UserAppRoute {
       path: AppRoutes.whatInterestScreen.path,
       name: AppRoutes.whatInterestScreen.name,
       builder: (context, state) {
-        return WhatInatestScreen();
+        return WhatInterestScreen();
       },
     ),
     GoRoute(
@@ -273,6 +280,12 @@ class UserAppRoute {
       name: AppRoutes.storyReadingGoalScreen.name,
       builder: (context, state) {
         return StoryReadingGoalScreen();
+      },
+    ),GoRoute(
+      path: AppRoutes.goalsScreen.path,
+      name: AppRoutes.goalsScreen.name,
+      builder: (context, state) {
+        return GoalScreen();
       },
     ),
   ];

@@ -80,7 +80,7 @@ class _StoryInterestsScreenState extends State<StoryInterestsScreen> {
                   else
                     Expanded(
                       child: ListView(
-                        physics: const BouncingScrollPhysics(),
+
                         children: [
                           // API Interests
                           ...provider.interestsList.map((interest) {

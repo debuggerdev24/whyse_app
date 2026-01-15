@@ -112,7 +112,7 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                         itemCount: provider.goalsList.length, //+1
                         separatorBuilder: (context, index) => 8.h.verticalSpace,
                         itemBuilder: (context, index) {
-                          //todo Custom Goal Field at the bottom
+                          // todo Custom Goal Field at the bottom
                           // if (index == goalsList.length) {
                           //   return Padding(
                           //     padding: EdgeInsets.only(bottom: 20.h, top: 1.h),

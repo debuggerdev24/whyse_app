@@ -20,7 +20,8 @@ class FullPageIndicator extends StatelessWidget {
         padding: EdgeInsets.all(12.r),
         child: CupertinoActivityIndicator(
           radius: 19.w,
-          color: Color(0xff030C09),
+          color: AppColors
+          .indicatorColor,
         ),
       ),
     );
@@ -37,7 +38,8 @@ class ApiLoadingIndicator extends StatelessWidget {
         padding: EdgeInsets.all(12).r,
         child: CupertinoActivityIndicator(
           radius: 20.w,
-          color: Color(0xff030C09),
+          color: AppColors
+              .indicatorColor,
         ),
       ),
     );

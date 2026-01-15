@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
@@ -14,6 +15,8 @@ import '../../models/home/story_models/generate_story_request.dart';
 import '../../models/home/story_models/story_model.dart';
 
 class AuthProvider with ChangeNotifier {
+  TextEditingController customGoalTitleCtr = TextEditingController();
+  TextEditingController customGoalDesCtr = TextEditingController();
   TextEditingController signUpEmailCtr = TextEditingController();
   TextEditingController loginEmailCtr = TextEditingController();
   TextEditingController otpCtr = TextEditingController();
@@ -21,11 +24,43 @@ class AuthProvider with ChangeNotifier {
   TextEditingController resetConfirmPasswordCtr = TextEditingController();
   TextEditingController parentEmailCtr = TextEditingController();
   TextEditingController forgotPasswordEmailCtr = TextEditingController();
-  bool isLoading = false, isStoryCreation = false;
+  bool isLoading = false,
+      isStoryCreation = false,
+      isCustomGoalSelected = false,
+      isSendForgotPassVerification = false;
+
   int? age;
   int calculatedAge = 0;
   DateTime? selectedDate;
-  String googleLoginEmail = "";
+  String googleLoginEmail = "", selectedGoalId = "";
+
+  set setSendForgotPassLinkStatus(bool value) {
+    isSendForgotPassVerification = value;
+    notifyListeners();
+  }
+
+  void updateGoalId(String id) {
+    if (selectedGoalId == id) {
+      selectedGoalId = "";
+    } else {
+      isCustomGoalSelected = false;
+      customGoalTitleCtr.clear();
+      customGoalDesCtr.clear();
+      selectedGoalId = id;
+    }
+    notifyListeners();
+  }
+
+  void toggleCustomGoal() {
+    isCustomGoalSelected = !isCustomGoalSelected;
+    if (!isCustomGoalSelected) {
+      customGoalTitleCtr.clear();
+      customGoalDesCtr.clear();
+    } else {
+      selectedGoalId = "";
+    }
+    notifyListeners();
+  }
 
   set setIsFromHome(bool value) {
     isStoryCreation = value;
@@ -413,7 +448,7 @@ class AuthProvider with ChangeNotifier {
 
   bool isVerifyEmailLoading = false;
 
-  Future<bool> checkEmailVerification(BuildContext context) async {
+  Future<bool> verifyEmail(BuildContext context) async {
     final onboardingId = SharedPrefs.instance.onboardingId;
     final email = signupEmailController.text.trim();
 
@@ -752,6 +787,8 @@ class AuthProvider with ChangeNotifier {
           context,
           response['message'] ?? "Goals saved successfully",
         );
+        goalIds.clear();
+        customGoals.clear();
         return true;
       } else {
         AppToast.error(context, response['message'] ?? "Failed to save goals");
@@ -890,6 +927,11 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     final String? idToken = await getGoogleSignInIDToken();
+    if (idToken == null) {
+      isSocialLoginLoading = false;
+      notifyListeners();
+      return;
+    }
 
     final data = {
       "provider": "google",
@@ -958,37 +1000,44 @@ class AuthProvider with ChangeNotifier {
 
   //todo google login
   Future<String?> getGoogleSignInIDToken() async {
-    GoogleSignIn googleSignIn = GoogleSignIn(
-      serverClientId:
-          // "1072520967140-7566tlns04ge757cqiailkl8j405a9am.apps.googleusercontent.com",
-          serverClientId,
-      scopes: ["email", "profile"],
-    );
+    try {
+      GoogleSignIn googleSignIn = GoogleSignIn(
+        serverClientId: serverClientId,
 
-    GoogleSignInAccount? account = await googleSignIn.signIn();
-
-    if (account == null) {
-      Logger.error("User cancelled sign-in");
-      return null;
-    }
-
-    final auth = await account.authentication;
-    googleLoginEmail = account.email;
-    Logger.info(account.email);
-    Logger.info("access Token: ${auth.accessToken ?? 'NULL'}");
-    Logger.info("idToken: /${auth.idToken ?? 'NULL'}");
-    Logger.info("\nclose");
-
-    // Check if ID token is null
-    if (auth.idToken == null) {
-      Logger.error("⚠️ ID Token is NULL - Check serverClientId configuration!");
-      Logger.error(
-        "Make sure you're using the Web Client ID, not Android Client ID",
+        // "1072520967140-7566tlns04ge757cqiailkl8j405a9am.apps.googleusercontent.com",
+        scopes: ["email", "profile"],
       );
+
+      GoogleSignInAccount? account = await googleSignIn.signIn();
+
+      if (account == null) {
+        Logger.error("User cancelled sign-in");
+        return null;
+      }
+
+      final auth = await account.authentication;
+      googleLoginEmail = account.email;
+      Logger.info(account.email);
+      Logger.info("access Token: ${auth.accessToken ?? 'NULL'}");
+      Logger.info("idToken: /${auth.idToken ?? 'NULL'}");
+      Logger.info("\nclose");
+
+      // Check if ID token is null
+      if (auth.idToken == null) {
+        Logger.error(
+          "⚠️ ID Token is NULL - Check serverClientId configuration!",
+        );
+        Logger.error(
+          "Make sure you're using the Web Client ID, not Android Client ID",
+        );
+        return null;
+      }
+
+      return auth.idToken;
+    } catch (e) {
+      Logger.error("Google Sign In catch error : ${e.toString()}");
       return null;
     }
-
-    return auth.idToken;
   }
 
   bool isSaveParentEmailLoading = false;
@@ -1025,9 +1074,12 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  bool isForgotPasswordLoading = false;
+  int resendSeconds = 30;
+  bool isResendTimerRunning = false;
+  Timer? _resendTimer;
 
-  Future<void> forgotPassword({
+  bool isForgotPasswordLoading = false;
+  Future<void> sendLinkForgotPass({
     required Function(String error) onFailed,
     required VoidCallback onSuccess,
   }) async {
@@ -1042,7 +1094,9 @@ class AuthProvider with ChangeNotifier {
         onFailed.call(l.errorMsg);
       },
       (r) {
-        forgotPasswordEmailCtr.clear();
+        // forgotPasswordEmailCtr.clear();
+        setSendForgotPassLinkStatus = true;
+        startResendTimer();
         onSuccess.call();
       },
     );
@@ -1051,8 +1105,26 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  bool isLogOutLoading = false;
+  void startResendTimer() {
+    isResendTimerRunning = true;
+    resendSeconds = 30;
+    notifyListeners();
 
+    _resendTimer?.cancel();
+
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (resendSeconds > 0) {
+        resendSeconds--;
+        notifyListeners();
+      } else {
+        timer.cancel();
+        isResendTimerRunning = false;
+        notifyListeners();
+      }
+    });
+  }
+
+  bool isLogOutLoading = false;
   Future<void> logOutUser({required VoidCallback onSuccess}) async {
     final token = SharedPrefs.instance.authToken;
     Logger.info(token.toString());
@@ -1213,26 +1285,38 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  bool isVerifyTokenLoading = true;
+  String? _recoveryToken;
+  String? get recoveryToken => _recoveryToken;
 
-  Future<void> verifyToken({
+  void setRecoveryToken(String token) {
+    _recoveryToken = token;
+    notifyListeners();
+  }
+
+  bool isVerifyForgotPassMailLoading = false;
+
+  Future<void> verifyForgotPasswordEmail({
     required VoidCallback onSuccess,
-    required Function(String error) onFailed,
+    required Function(ApiException e) onFailed,
   }) async {
-    isVerifyTokenLoading = true;
+    isVerifyForgotPassMailLoading = true;
     notifyListeners();
 
-    final response = await AuthApiServices().verifyToken();
+    final response = await AuthApiServices().verifyForgotPasswordEmail(
+      data: {"accessToken": recoveryToken},
+    );
 
     response.fold(
       (l) {
-        onFailed.call(l.errorMsg);
+        onFailed.call(l);
       },
       (r) {
         onSuccess.call();
+        setSendForgotPassLinkStatus = true;
+        notifyListeners();
       },
     );
-    isVerifyTokenLoading = false;
+    isVerifyForgotPassMailLoading = false;
     notifyListeners();
   }
 

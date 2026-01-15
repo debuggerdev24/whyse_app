@@ -7,6 +7,10 @@ class EndPoints {
   EndPoints._();
   static const startOnBoarding = "/mobile/auth/start-onboarding";
   static const onBoardingProgress = "/mobile/auth/onboarding-progress";
+  static const getDefaultInterest = "/mobile/auth/default-interests";
+  static const getDefaultTopics = "/mobile/auth/default-topics";
+  static const getDefaultGoals = "/mobile/auth/default-goals";
+  static const saveGoals = "/mobile/auth/save-goals";
   static const saveParentEmail = "/mobile/auth/save-parent-email";
   static const logIn = "/mobile/auth/login";
   static const logOut = "/mobile/auth/logout";

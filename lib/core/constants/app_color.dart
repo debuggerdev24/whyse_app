@@ -22,5 +22,10 @@ class AppColors {
 
   static const Color lighttealcolor = Color(0xFFCFE5E5);
   static const Color extealighttealcolor = Color(0xFFE4EFF0);
-  static const Color redcolor = Color(0xFFE52222);
+  static const Color redColor = Color(0xFFE52222);
+  static const Color indicatorColor = Color(0xff030C09);
+
+
+  static const Color shimmerBaseColor = Color(0xFFE2E4E8);
+  static const Color shimmerHighlightColor = Color(0xFFFBFCFF);
 }

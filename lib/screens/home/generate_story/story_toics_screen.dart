@@ -196,6 +196,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                               onTap: () => provider.toggleApiTopic(id),
                             );
                           }),
+
                         ],
                       ),
                     )
@@ -246,8 +247,8 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
 
   Widget _shimmer() {
     return Shimmer.fromColors(
-      baseColor: const Color(0xFFE5E7EB),
-      highlightColor: const Color(0xFFF3F4F6),
+      baseColor: AppColors.shimmerBaseColor,
+      highlightColor: AppColors.shimmerHighlightColor,
       child: GridView.builder(
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

@@ -30,8 +30,6 @@ class StoryReadingGoalScreen extends StatefulWidget {
 }
 
 class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
-  final List<String> options = ['5 mins', '10 mins', '20 mins', 'Custom'];
-
   @override
   Widget build(BuildContext context) {
     final pr = context.read<StoryProvider>();
@@ -91,28 +89,33 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
-                          children: List.generate(options.length, (index) {
-                            final option = options[index];
-                            final isSelected =
-                                provider.selectedReadingDuration == option;
-                            return Row(
-                              children: [
-                                _buildOptionButton(
-                                  text: option,
-                                  isSelected: isSelected,
-                                  onTap: (String text) {
-                                    provider.setSelectedReadingDuration = text;
-                                  },
-                                ),
-                                if (index != options.length - 1)
-                                  Container(
-                                    width: 1.w,
-                                    height: 22.h,
-                                    color: Colors.grey.withValues(alpha: 0.3),
+                          children: List.generate(
+                            provider.readingDurations.length,
+                            (index) {
+                              final option = provider.readingDurations[index];
+                              final isSelected =
+                                  provider.selectedReadingDuration == option;
+                              return Row(
+                                children: [
+                                  _buildOptionButton(
+                                    text: option,
+                                    isSelected: isSelected,
+                                    onTap: (String text) {
+                                      provider.setSelectedReadingDuration =
+                                          text;
+                                    },
                                   ),
-                              ],
-                            );
-                          }),
+                                  if (index !=
+                                      provider.readingDurations.length - 1)
+                                    Container(
+                                      width: 1.w,
+                                      height: 22.h,
+                                      color: Colors.grey.withValues(alpha: 0.3),
+                                    ),
+                                ],
+                              );
+                            },
+                          ),
                         ),
                       ),
 
@@ -136,14 +139,13 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                         items: TextType.values.map((e) => e.value).toList(),
                         onChanged: (value) {
                           provider.setSelectedTextType = value!;
-                          // setState(() => _selectedTextType = value!);
                         },
                       ),
                       20.h.verticalSpace,
                       CustomDropdownField(
                         label: "Age Range",
                         hint: "Select age",
-                        items: const ["6-8", "9-11", "12-14", "15-17", "18+"],
+                        items: provider.ageRanges,
                         onChanged: (value) {
                           provider.setSelectedAgeRange = value!;
 
@@ -166,52 +168,38 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                       AppFilledButton(
                         text: "Create Story",
                         backgroundColor: AppColors.yellowColor,
-                        onTap: () async {
-                          deBouncer.run(() {
-                            Future.wait([
-                              //todo create story image
-                              provider.createStoryImage(
-                                onSuccess: () {
-                                  // AppToast.success(
-                                  //   context,
-                                  //   "Image Created Successfully.",
-                                  // );
-                                  Logger.info("Image Created Successfully");
-                                },
-                                onFailed: (error) {
-                                  AppToast.error(context, error);
-                                },
-                                onLinkSuccess: () async {
-                                  await context
-                                      .read<HomeProvider>()
-                                      .getAllStories();
-
-                                  AppToast.success(
-                                    context,
-                                    "Story Created Successfully.",
+                        onTap: () {
+                          deBouncer.run(() async {
+                            //todo create story
+                            await provider.createStory(
+                              onStarted: () {
+                                Future.delayed(Duration(seconds: 3), () {
+                                  AppToast.info(
+                                    context: context,
+                                    message: "It can take few seconds",
+                                    durationSecond: 4,
                                   );
-                                  context.goNamed(AppRoutes.homeScreen.name);
-                                },
-                              ),
-                              //todo create story
-                              provider.createStory(
-                                onStarted: () {
-                                  Future.delayed(Duration(seconds: 2), () {
-                                    AppToast.info(
-                                      context: context,
-                                      message: "It can take few seconds",
-                                      durationSecond: 5,
-                                    );
-                                  });
-                                },
-                                onFailed: (error) {
-                                  Logger.error(error);
-                                  AppToast.error(context, error);
-                                },
-                                onSuccess: () {},
-                                context: context,
-                              ),
-                            ]);
+                                });
+                              },
+                              onCreateStoryFailed: (error) {
+                                Logger.error(error);
+                                AppToast.error(context, error);
+                              },
+                              onCreateImageFailed: (error) {
+                                Logger.error(error);
+                                AppToast.error(context, error);
+                              },
+                              context: context,
+                            );
+
+                            provider.linkImageToStory(
+                              onFailed: (error) {
+                                AppToast.error(
+                                  context,
+                                  "Failed in link : $error",
+                                );
+                              },
+                            );
                           });
                         },
                       ),

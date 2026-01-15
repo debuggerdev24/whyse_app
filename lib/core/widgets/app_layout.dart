@@ -6,21 +6,23 @@ import 'package:redstreakapp/screens/dashboard.dart';
 class AppLayout extends StatelessWidget {
   final Widget body;
   final bool? resizeToAvoidBottomInset;
+  final AppBar? appBar;
   const AppLayout({
     super.key,
     required this.body,
-    this.resizeToAvoidBottomInset,
+    this.resizeToAvoidBottomInset, this.appBar,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: appBar,
       resizeToAvoidBottomInset: resizeToAvoidBottomInset,
       backgroundColor: AppColors.backgroundColor,
       body: ValueListenableBuilder<int>(
         valueListenable: tabIndex,
         builder: (context, value, child) =>
-            FadeInUp(key: ValueKey(value), from: 8, child: body),
+            FadeInUp(key: ValueKey(value), from: 9.5, child: body),
       ),
     );
   }

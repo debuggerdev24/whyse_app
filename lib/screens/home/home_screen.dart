@@ -23,12 +23,13 @@ class _HomeScreenState extends State<HomeScreen> {
             const CalendarStrip(),
             24.h.verticalSpace,
             const YourPlanSection(),
+
             24.h.verticalSpace,
 
-            // const PracticeZoneSection(),
+            const PracticeZoneSection(),
             24.h.verticalSpace,
-            // BottomStatsCard(),
-            80.h.verticalSpace,
+            BottomStatsCard(),
+            10.h.verticalSpace,
           ],
         ),
       ),

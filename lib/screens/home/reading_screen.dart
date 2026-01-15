@@ -1,17 +1,22 @@
 import 'dart:ui';
 
+import 'package:animate_do/animate_do.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
-import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
+import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
-import 'package:redstreakapp/screens/home/start_quiz_screen.dart';
+import 'package:redstreakapp/providers/home/story_provider.dart';
+import 'package:shimmer/shimmer.dart';
 
-import '../../core/widgets/custom_shimmer.dart';
 import '../../models/home/story_models/story_model.dart';
+import '../../routes/user_routes.dart';
 
 class ReadingScreen extends StatefulWidget {
   final Story? story;
@@ -37,19 +42,19 @@ class _ReadingScreenState extends State<ReadingScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.story != null) {
-      final content = widget.story!.content;
-      _pages = content
-          .split('</p>')
-          .where((e) => e.trim().isNotEmpty)
-          .map((e) => _removeAllHtmlTags(e))
-          .toList();
-    } else {
-      _pages = [
-        "Dinosaurs lived a very long time ago, even before people were on Earth. They were animals that came in many sizes. Some dinosaurs were as big as houses, while others were small, almost like chickens.",
-        "They lived in many different places, such as forests, swamps, and even deserts. Dinosaurs ruled the Earth for millions of years.",
-      ];
-    }
+    // if (widget.story != null) {
+    final content = widget.story!.content;
+    _pages = content
+        .split('</p>')
+        .where((e) => e.trim().isNotEmpty)
+        .map((e) => _removeAllHtmlTags(e))
+        .toList();
+    // } else {
+    //   _pages = [
+    //     "Dinosaurs lived a very long time ago, even before people were on Earth. They were animals that came in many sizes. Some dinosaurs were as big as houses, while others were small, almost like chickens.",
+    //     "They lived in many different places, such as forests, swamps, and even deserts. Dinosaurs ruled the Earth for millions of years.",
+    //   ];
+    // }
   }
 
   String _removeAllHtmlTags(String htmlText) {
@@ -64,50 +69,51 @@ class _ReadingScreenState extends State<ReadingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Logger.info("http://167.172.45.71${widget.story!.images}");
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        showLeaveStoryConfirmation(context: context);
+      },
 
-    // final provider = context.watch<HomeProvider>(); // Removing dependency on HomeProvider for content if using story
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          // 1. Background Image (Header)
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 300.h, // Approx height
-            child: Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(
-                    AppAssets.dargon,
-                  ), // Using dragon/dinosaur asset
-                  fit: BoxFit.cover,
+      child: AppLayout(
+        body: Stack(
+          children: [
+            //todo 1. Background Image (Header)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 300.h,
+              // Approx height
+              child: Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage(
+                      AppAssets.dargon,
+                    ), // Using dragon/dinosaur asset
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ),
-          ),
 
-          // 2. Main Scrollable Content
-          Positioned.fill(
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: _pages.length,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentIndex = index;
-                });
-              },
-              itemBuilder: (context, index) {
-                return SingleChildScrollView(
-                  child: Column(
+            //todo 2. Main Scrollable Content
+            Positioned.fill(
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: _pages.length,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                },
+                itemBuilder: (context, index) {
+                  return Column(
                     children: [
-                      // Spacer for Header Content
+                      //todo Spacer for Header Content
                       SizedBox(height: 150.h),
 
-                      // Header Text Content (Title)
+                      //todo Header Text Content (Title)
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 24.w),
                         child: Column(
@@ -177,166 +183,263 @@ class _ReadingScreenState extends State<ReadingScreen> {
 
                       24.h.verticalSpace,
 
-                      // Body Content Container
-                      Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(0),
-                            topRight: Radius.circular(0),
+                      //todo Body Content Container (image and story)
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.symmetric(vertical: 5),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 24.w,
+                            vertical: 15.h,
                           ),
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 24.w,
-                          vertical: 32.h,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Image.network(
-                              widget.story != null &&
-                                      widget.story!.images.isNotEmpty
-                                  ? "http://167.172.45.71${widget.story!.images.first}"
-                                  : "https://via.placeholder.com/350x150",
-                              width: double.infinity,
-                              height: 180.h,
-                              fit: BoxFit.cover,
-                              loadingBuilder:
-                                  (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return ShimmerLoading(
-                                      width: double.infinity,
-                                      height: 180.h,
-                                      borderRadius: 0,
-                                    );
-                                  },
-                              errorBuilder: (context, error, stackTrace) {
-                                return Image.asset(
-                                  AppAssets.pterodactylus,
-                                  width: double.infinity,
-                                  height: 180.h,
-                                  fit: BoxFit.cover,
-                                );
-                              },
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: AppColors.backgroundColor,
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(0),
+                              topRight: Radius.circular(0),
                             ),
-                            24.h.verticalSpace,
+                          ),
 
-                            RichText(
-                              textAlign: TextAlign.justify,
-                              text: TextSpan(
-                                style: AppTextStyles.sfProDisplayRegular(
-                                  fontSize: 16.sp,
-                                  color: AppColors.black.withValues(alpha: 0.8),
-                                ).copyWith(height: 1.8),
-                                children: _buildTextSpans(
-                                  _pages[index],
-                                  AppTextStyles.sfProDisplayRegular(
+                          child: ListView(
+                            padding: EdgeInsets.zero,
+                            children: [
+                              15.h.verticalSpace,
+                              //todo story image
+                              Consumer<StoryProvider>(
+                                builder: (context, provider, child) =>
+                                    CachedNetworkImage(
+                                      height: 280.h,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                      imageUrl: provider.createdStoryImagePath,
+                                      errorWidget: (context, url, error) =>
+                                          imageShimmer(),
+                                      placeholder: (context, url) =>
+                                          imageShimmer(),
+                                    ),
+
+                                //     Image.network(
+                                //   provider.createdStoryImagePath,
+                                //   // widget.story != null &&
+                                //   //         widget.story!.images.isNotEmpty
+                                //   //     ? "http://167.172.45.71${widget.story!.images.first}"
+                                //   //     : "https://via.placeholder.com/350x150",
+                                //   width: double.infinity,
+                                //   height: 180.h,
+                                //   fit: BoxFit.cover,
+                                //   loadingBuilder:
+                                //       (context, child, loadingProgress) {
+                                //         if (loadingProgress == null) return child;
+                                //         return ShimmerLoading(
+                                //           width: double.infinity,
+                                //           height: 180.h,
+                                //           borderRadius: 0,
+                                //         );
+                                //       },
+                                //   errorBuilder: (context, error, stackTrace) {
+                                //     return Image.asset(
+                                //       AppAssets.pterodactylus,
+                                //       width: double.infinity,
+                                //       height: 180.h,
+                                //       fit: BoxFit.cover,
+                                //     );
+                                //   },
+                                // ),
+                              ),
+                              24.h.verticalSpace,
+                              //todo story content
+                              RichText(
+                                textAlign: TextAlign.justify,
+                                text: TextSpan(
+                                  style: AppTextStyles.sfProDisplayRegular(
                                     fontSize: 16.sp,
                                     color: AppColors.black.withValues(
                                       alpha: 0.8,
                                     ),
                                   ).copyWith(height: 1.8),
-                                  AppTextStyles.sfProDisplayBold(
-                                    fontSize: 16.sp,
-                                    decoration: TextDecoration.underline,
-                                    color: AppColors.black,
-                                  ).copyWith(height: 1.6),
+                                  children: _buildTextSpans(
+                                    _pages[index],
+                                    AppTextStyles.sfProDisplayRegular(
+                                      fontSize: 16.sp,
+                                      color: AppColors.black.withValues(
+                                        alpha: 0.8,
+                                      ),
+                                    ).copyWith(height: 1.8),
+                                    AppTextStyles.sfProDisplayBold(
+                                      fontSize: 16.sp,
+                                      decoration: TextDecoration.underline,
+                                      color: AppColors.black,
+                                    ).copyWith(height: 1.6),
+                                  ),
                                 ),
                               ),
-                            ),
-                            100.h.verticalSpace,
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ],
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
 
-          // 3. Custom AppBar (Overlay)
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: SafeArea(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GlassIconButton(
-                      onTap: () => Navigator.pop(context),
-                      child: SvgIcon(
-                        AppAssets.close,
-                        color: Colors.white,
-                        size: 40.sp,
-                      ),
-                    ),
-
-                    Row(
-                      children: [
-                        SvgIcon(
-                          AppAssets.font,
+            //todo 3. Custom AppBar (Overlay)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: SafeArea(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 20.w,
+                    vertical: 10.h,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GlassIconButton(
+                        onTap: () =>
+                            showLeaveStoryConfirmation(context: context),
+                        child: SvgIcon(
+                          AppAssets.close,
                           color: Colors.white,
                           size: 40.sp,
                         ),
-                        12.w.horizontalSpace,
+                      ),
 
-                        GlassIconButton(
-                          onTap: () {},
-                          child: SvgIcon(
-                            AppAssets.bookmark,
+                      Row(
+                        children: [
+                          SvgIcon(
+                            AppAssets.font,
                             color: Colors.white,
                             size: 40.sp,
                           ),
-                        ),
-                      ],
+                          12.w.horizontalSpace,
+
+                          GlassIconButton(
+                            onTap: () {},
+                            child: SvgIcon(
+                              AppAssets.bookmark,
+                              color: Colors.white,
+                              size: 40.sp,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // 4. Fixed Bottom Button (Only on last page)
+            if (_currentIndex == _pages.length - 1)
+              Positioned(
+                bottom: 30.h,
+                left: 24.w,
+                right: 24.w,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AppText(
+                      text: "Completed Reading?",
+                      style: AppTextStyles.sfProDisplaySemibold(
+                        fontSize: 12.sp,
+                        color: AppColors.black.withValues(alpha: 0.6),
+                      ),
+                    ),
+                    10.h.verticalSpace,
+                    AppFilledButton(
+                      fixedSize: Size(348.w, 42.h),
+                      backgroundColor: AppColors.yellowColor,
+                      text: "Take Quiz",
+                      onTap: () {
+                        context.pushNamed(
+                          AppRoutes.startQuizScreen.name,
+                          extra: {
+                            "quizzes": widget.story?.quiz ?? <Quiz>[],
+                            "storyTitle": widget.story?.title ?? "",
+                          },
+                        );
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => StartQuizScreen(
+                        //       quizzes: widget.story?.quiz ?? [],
+                        //       storyTitle: widget.story?.title ?? "",
+                        //     ),
+                        //   ),
+                        // );
+                      },
                     ),
                   ],
                 ),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void showLeaveStoryConfirmation({required BuildContext context}) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return ZoomIn(
+          child: AlertDialog(
+            backgroundColor: AppColors.backgroundColor,
+            title: Text(
+              "Are you sure you want to quit this story?",
+              style: AppTextStyles
+                  .textStyle20Regular, //regular(color: AppColors.black, fontSize: 19.sp),
             ),
-          ),
-          // 4. Fixed Bottom Button (Only on last page)
-          if (_currentIndex == _pages.length - 1)
-            Positioned(
-              bottom: 30.h,
-              left: 24.w,
-              right: 24.w,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  AppText(
-                    text: "Completed Reading?",
-                    style: AppTextStyles.sfProDisplaySemibold(
-                      fontSize: 12.sp,
-                      color: AppColors.black.withValues(alpha: 0.6),
-                    ),
-                  ),
-                  10.h.verticalSpace,
-                  AppFilledButton(
-                    fixedSize: Size(348.w, 42.h),
-                    backgroundColor: AppColors.yellowColor,
-                    text: "Take Quiz",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StartQuizScreen(
-                            quizzes: widget.story?.quiz ?? [],
-                            storyTitle: widget.story?.title ?? "",
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
+            actions: [
+              myActionButtonTheme(
+                onPressed: () async {
+                  context.pop(dialogContext);
+                  context.goNamed(AppRoutes.homeScreen.name);
+                },
+                title: "Yes",
               ),
-            ),
-        ],
+              myActionButtonTheme(
+                onPressed: () {
+                  context.pop();
+                },
+                title: "Cancel",
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget myActionButtonTheme({
+    required VoidCallback onPressed,
+    required String title,
+  }) {
+    return TextButton(
+      onPressed: onPressed,
+      child: Text(
+        title,
+        style: AppTextStyles.sfProDisplayRegular(
+          color: (title == "Yes") ? AppColors.redColor : AppColors.black,
+          fontSize: 17.sp,
+        ),
+      ),
+    );
+  }
+
+  Shimmer imageShimmer() {
+    return Shimmer.fromColors(
+      baseColor: AppColors.shimmerBaseColor,
+      highlightColor: AppColors.shimmerHighlightColor,
+      child: Container(
+        height: 220.h,
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(15.r),
+        ),
       ),
     );
   }

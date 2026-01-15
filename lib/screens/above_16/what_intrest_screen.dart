@@ -9,14 +9,14 @@ import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
-class WhatInatestScreen extends StatefulWidget {
-  const WhatInatestScreen({super.key});
+class WhatInterestScreen extends StatefulWidget {
+  const WhatInterestScreen({super.key});
 
   @override
-  State<WhatInatestScreen> createState() => _WhatInatestScreenState();
+  State<WhatInterestScreen> createState() => _WhatInterestScreenState();
 }
 
-class _WhatInatestScreenState extends State<WhatInatestScreen> {
+class _WhatInterestScreenState extends State<WhatInterestScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

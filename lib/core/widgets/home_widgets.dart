@@ -1,4 +1,5 @@
 import 'package:animate_do/animate_do.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -10,10 +11,12 @@ import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/custom_shimmer.dart';
+import 'package:redstreakapp/models/home/story_models/story_model.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:redstreakapp/screens/home/widgets/add_reading_bottom_sheet.dart';
+import 'package:shimmer/shimmer.dart';
 
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
@@ -153,7 +156,7 @@ class HomeHeader extends StatelessWidget {
       child: Text(
         title,
         style: AppTextStyles.sfProDisplayRegular(
-          color: (title == "Yes") ? AppColors.redcolor : AppColors.black,
+          color: (title == "Yes") ? AppColors.redColor : AppColors.black,
           fontSize: 17.sp,
         ),
       ),
@@ -311,6 +314,7 @@ class YourPlanSection extends StatelessWidget {
         if (provider.stories.isEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               AppText(
                 text: "Your Plan",
@@ -324,7 +328,6 @@ class YourPlanSection extends StatelessWidget {
                 ),
               ),
               24.h.verticalSpace,
-
               //todo ✅ ALWAYS SHOW BUTTON
               _addNewReadingButton(context),
             ],
@@ -341,139 +344,11 @@ class YourPlanSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             //todo ----------- TODAY'S READING CARD -----------
-            Container(
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AppText(
-                    text: "Today's Reading",
-                    style: AppTextStyles.textStyle14Semibold.copyWith(
-                      color: AppColors.teal,
-                    ),
-                  ),
-                  3.h.verticalSpace,
-                  InkWell(
-                    onTap: () {
-                      context.pushNamed(
-                        AppRoutes.readingScreen.name,
-                        extra: recentStory,
-                      );
-                    },
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              AppText(
-                                text: recentStory.title,
-                                style: AppTextStyles.sfProDisplayBold(
-                                  fontSize: 20.sp,
-                                ),
-                              ),
-                              29.h.verticalSpace,
-                              Row(
-                                children: [
-                                  AppText(
-                                    text:
-                                        "Read for ${recentStory.lessonDuration ?? 10} mins",
-                                    style: AppTextStyles.sfProDisplayMedium(
-                                      fontSize: 14.sp,
-                                      color: AppColors.black.withValues(
-                                        alpha: 0.8,
-                                      ),
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  Container(
-                                    width: 16.w,
-                                    height: 16.w,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: Colors.grey[300]!,
-                                      ),
-                                    ),
-                                  ),
-                                  10.w.horizontalSpace,
-                                ],
-                              ),
-                              21.h.verticalSpace,
-                              Row(
-                                children: [
-                                  ActionButton(
-                                    text: "Start",
-                                    color: AppColors.teal,
-                                  ),
-                                  8.w.horizontalSpace,
-                                  Container(
-                                    height: 42.h,
-                                    width: 132.w,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.black,
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: AppText(
-                                      text: "Re-generate",
-                                      style: AppTextStyles.textStyle14Semibold
-                                          .copyWith(color: Colors.white),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        Column(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: _buildStoryImage(recentStory.image),
-                            ),
-                            12.h.verticalSpace,
-                            Row(
-                              children: [
-                                SvgIcon(
-                                  AppAssets.thunder,
-                                  size: 16.w,
-                                  color: AppColors.yellowColor,
-                                ),
-                                4.w.horizontalSpace,
-                                AppText(
-                                  text: "3",
-                                  style: AppTextStyles.sfProDisplayBold(
-                                    color: AppColors.yellowColor,
-                                    fontSize: 16.sp,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            todayReadingCard(context, recentStory),
 
             16.h.verticalSpace,
 
-            /// ✅ ALWAYS SHOW BUTTON
+            //todo ALWAYS SHOW BUTTON
             _addNewReadingButton(context),
 
             24.h.verticalSpace,
@@ -503,6 +378,159 @@ class YourPlanSection extends StatelessWidget {
     );
   }
 
+  Widget todayReadingCard(BuildContext context, Story recentStory) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        //todo navigate where you want
+        // context.pushNamed(
+        //   AppRoutes.readingScreen.name,
+        //   extra: recentStory,
+        // );
+      },
+      child: Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppText(
+              text: "Today's Reading",
+              style: AppTextStyles.textStyle14Semibold.copyWith(
+                color: AppColors.teal,
+              ),
+            ),
+            3.h.verticalSpace,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(right: 10.w),
+                        child: AppText(
+                          text: recentStory.title,
+                          style: AppTextStyles.sfProDisplayBold(
+                            fontSize: 20.sp,
+                          ),
+                        ),
+                      ),
+                      22.h.verticalSpace,
+                      AppText(
+                        text:
+                            "Read for ${recentStory.lessonDuration ?? 10} mins",
+                        style: AppTextStyles.sfProDisplayMedium(
+                          fontSize: 14.sp,
+                          color: AppColors.black.withValues(alpha: 0.8),
+                        ),
+                      ),
+                      // Row(
+                      //   children: [
+                      //     AppText(
+                      //       text:
+                      //           "Read for ${recentStory.lessonDuration ?? 10} mins",
+                      //       style: AppTextStyles.sfProDisplayMedium(
+                      //         fontSize: 14.sp,
+                      //         color: AppColors.black.withValues(
+                      //           alpha: 0.8,
+                      //         ),
+                      //       ),
+                      //     ),
+                      //     const Spacer(),
+                      //     Container(
+                      //       width: 16.w,
+                      //       height: 16.w,
+                      //       decoration: BoxDecoration(
+                      //         shape: BoxShape.circle,
+                      //         border: Border.all(
+                      //           color: Colors.grey[300]!,
+                      //         ),
+                      //       ),
+                      //     ),
+                      //     10.w.horizontalSpace,
+                      //   ],
+                      // ),
+                      16.h.verticalSpace,
+                      Row(
+                        spacing: 8.w,
+                        children: [
+                          ActionButton(text: "Start", color: AppColors.teal),
+                          Container(
+                            height: 42.h,
+                            width: 132.w,
+                            decoration: BoxDecoration(
+                              color: AppColors.black,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            alignment: Alignment.center,
+                            child: AppText(
+                              text: "Re-generate",
+                              style: AppTextStyles.textStyle14Semibold.copyWith(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: CachedNetworkImage(
+                        imageUrl:
+                            recentStory.image ??
+                            "https://commons.wikimedia.org/wiki/File:BLANK.jpg",
+                        width: 100.w,
+                        height: 96.w,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => _storyImageShimmer(),
+                        errorWidget: (c, e, s) => _storyImageShimmer(),
+                      ),
+                    ),
+                    12.h.verticalSpace,
+                    Row(
+                      children: [
+                        SvgIcon(
+                          AppAssets.thunder,
+                          size: 16.w,
+                          color: AppColors.yellowColor,
+                        ),
+                        4.w.horizontalSpace,
+                        AppText(
+                          text: "3",
+                          style: AppTextStyles.sfProDisplayBold(
+                            color: AppColors.yellowColor,
+                            fontSize: 16.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// ---------------- ADD NEW READING BUTTON ----------------
   Widget _addNewReadingButton(BuildContext context) {
     return GestureDetector(
@@ -511,7 +539,8 @@ class YourPlanSection extends StatelessWidget {
           context: context,
           backgroundColor: Colors.transparent,
           isScrollControlled: true,
-          builder: (sheetContext) => const AddReadingBottomSheet(),
+          builder: (sheetContext) =>
+              addReadingBottomSheet(context: sheetContext),
         );
       },
       child: Container(
@@ -534,24 +563,6 @@ class YourPlanSection extends StatelessWidget {
   }
 }
 
-Widget _buildStoryImage(String? imageUrl) {
-  if (imageUrl != null && imageUrl.isNotEmpty) {
-    final fullUrl = imageUrl.startsWith('http')
-        ? imageUrl
-        : "http://167.172.45.71$imageUrl";
-
-    return Image.network(
-      fullUrl,
-      width: 100.w,
-      height: 96.w,
-      fit: BoxFit.cover,
-      errorBuilder: (c, e, s) =>
-          Container(color: Colors.grey, width: 96.w, height: 96.w),
-    );
-  }
-  return Container(color: Colors.grey, width: 100.w, height: 96.w);
-}
-
 Widget _buildShimmerLoading() {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -568,14 +579,11 @@ Widget _buildShimmerLoading() {
 }
 
 class BookCard extends StatelessWidget {
-  final String category;
-  final String title;
-  final String subtitle;
-  final String imageUrl;
-  final String reward;
+  final String category, title, subtitle, imageUrl, reward;
   final VoidCallback? onTap;
 
   const BookCard({
+    super.key,
     required this.category,
     required this.title,
     required this.subtitle,
@@ -602,6 +610,7 @@ class BookCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Row(
+          spacing: 10.w,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
@@ -621,28 +630,29 @@ class BookCard extends StatelessWidget {
                     style: AppTextStyles.sfProDisplayBold(fontSize: 20.sp),
                     maxLines: 1,
                   ),
-                  29.h.verticalSpace,
-                  Row(
-                    children: [
-                      AppText(
-                        text: subtitle,
-                        style: AppTextStyles.sfProDisplayMedium(
-                          fontSize: 14.sp,
-                          color: AppColors.black.withValues(alpha: 0.8),
-                        ),
-                      ),
-                      Spacer(),
-                      Container(
-                        width: 16.w,
-                        height: 16.w,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.grey[300]!),
-                        ),
-                      ),
-                    ],
+                  22.h.verticalSpace,
+                  AppText(
+                    text: subtitle,
+                    style: AppTextStyles.sfProDisplayMedium(
+                      fontSize: 14.sp,
+                      color: AppColors.black.withValues(alpha: 0.8),
+                    ),
                   ),
-                  12.h.verticalSpace,
+                  // Row(
+                  //   children: [
+                  //
+                  //     Spacer(),
+                  //     Container(
+                  //       width: 16.w,
+                  //       height: 16.w,
+                  //       decoration: BoxDecoration(
+                  //         shape: BoxShape.circle,
+                  //         border: Border.all(color: Colors.grey[300]!),
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
+                  16.h.verticalSpace,
                   Row(
                     children: [
                       SizedBox(
@@ -657,42 +667,18 @@ class BookCard extends StatelessWidget {
                 ],
               ),
             ),
-            12.w.horizontalSpace,
             Column(
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: imageUrl.isEmpty
-                      ? Container(
-                          color: Colors.grey,
-                          width: 100.w,
-                          height: 96.w,
-                        )
-                      : (imageUrl.startsWith('http') || imageUrl.startsWith('/')
-                            ? Image.network(
-                                imageUrl.startsWith('http')
-                                    ? imageUrl
-                                    : "http://167.172.45.71$imageUrl",
-                                width: 100.w,
-                                height: 96.w,
-                                fit: BoxFit.cover,
-                                errorBuilder: (c, e, s) => Container(
-                                  color: Colors.grey,
-                                  width: 96.w,
-                                  height: 96.w,
-                                ),
-                              )
-                            : Image.asset(
-                                imageUrl,
-                                width: 100.w,
-                                height: 96.w,
-                                fit: BoxFit.cover,
-                                errorBuilder: (c, e, s) => Container(
-                                  color: Colors.grey,
-                                  width: 96.w,
-                                  height: 96.w,
-                                ),
-                              )),
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    width: 100.w,
+                    height: 96.w,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => _storyImageShimmer(),
+                    errorWidget: (c, e, s) => _storyImageShimmer(),
+                  ),
                 ),
                 20.h.verticalSpace,
                 Row(
@@ -944,4 +930,12 @@ class BottomStatsCard extends StatelessWidget {
       ),
     );
   }
+}
+
+Shimmer _storyImageShimmer() {
+  return Shimmer.fromColors(
+    baseColor: AppColors.shimmerBaseColor,
+    highlightColor: AppColors.shimmerHighlightColor,
+    child: Container(color: Colors.grey, width: 96.w, height: 96.w),
+  );
 }

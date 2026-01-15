@@ -25,15 +25,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   bool _isPasswordObscure = true;
   bool _isConfirmPasswordObscure = true;
 
-  @override
-  void dispose() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        context.read<AuthProvider>().clearCreateAccountFields();
-      }
-    });
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -180,7 +171,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                             );
                             if (isEmailSent) {
                               final success = await authProvider
-                                  .checkEmailVerification(context);
+                                  .verifyEmail(context);
 
                               if (success && context.mounted) {
                                 context.pushNamed(

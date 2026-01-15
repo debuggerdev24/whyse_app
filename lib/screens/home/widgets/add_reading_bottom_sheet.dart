@@ -1,123 +1,106 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
+import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
-class AddReadingBottomSheet extends StatefulWidget {
-  const AddReadingBottomSheet({super.key});
+Widget addReadingBottomSheet({required BuildContext context}){
+  return Container(
+    padding: EdgeInsets.symmetric(horizontal: 27.w, vertical: 16.h),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 40.w,
+          height: 4.h,
+          decoration: BoxDecoration(
+            color: const Color(0xFFD1D1D1),
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        27.h.verticalSpace,
+        AppText(
+          text: "Choose Reading Type",
+          style: AppTextStyles.sfProDisplayBold(fontSize: 20.sp),
+        ),
+        27.h.verticalSpace,
+        Divider(
+          color: AppColors.black.withValues(alpha: 0.1),
+          thickness: 1,
+          height: 1,
+        ),
+        20.h.verticalSpace,
 
-  @override
-  State<AddReadingBottomSheet> createState() => _AddReadingBottomSheetState();
+        //todo Generate Article
+        _OptionCard(
+          title: "Generate Article",
+          subtitle:
+          "Get a story made just for you by AI \n— every time it’s something new and exciting!",
+          image: AppAssets.robot,
+          onTap: () {
+            if (!context.mounted) return;
+            context.read<StoryProvider>().clearAllStoryFields();
+            context.pop();
+            context.pushNamed(AppRoutes.storyGoalsScreen.name);
+          },
+        ),
+
+        16.h.verticalSpace,
+
+        //todo Add Book
+        _OptionCard(
+          title: "Add a Book",
+          subtitle:
+          "Open your chosen book — continue your reading journey anytime!",
+          image: AppAssets.book1,
+          // isSelected: selectedIndex == 1,
+          onTap: () {
+            Navigator.pop(context);
+          },
+        ),
+
+        16.h.verticalSpace,
+
+        /// Add eBook
+        _OptionCard(
+          title: "Add an eBook",
+          subtitle:
+          "Start reading your eBook — pick up right where you left off!",
+          image: AppAssets.ebook,
+          // isSelected: selectedIndex == 2,
+          onTap: () {
+            Navigator.pop(context);
+          },
+        ),
+
+        20.h.verticalSpace,
+      ],
+    ),
+  );
 }
-
-class _AddReadingBottomSheetState extends State<AddReadingBottomSheet> {
-  int selectedIndex = -1;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 27.w, vertical: 16.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 40.w,
-            height: 4.h,
-            decoration: BoxDecoration(
-              color: const Color(0xFFD1D1D1),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          27.h.verticalSpace,
-          AppText(
-            text: "Choose Reading Type",
-            style: AppTextStyles.sfProDisplayBold(fontSize: 20.sp),
-          ),
-          27.h.verticalSpace,
-          Divider(
-            color: AppColors.black.withValues(alpha: 0.1),
-            thickness: 1,
-            height: 1,
-          ),
-          20.h.verticalSpace,
-
-          /// Generate Article
-          _OptionCard(
-            title: "Generate Article",
-            subtitle:
-                "Get a story made just for you by AI \n— every time it’s something new and exciting!",
-            image: AppAssets.robot,
-            isSelected: selectedIndex == 0,
-            onTap: () {
-
-                if (!context.mounted) return;
-
-                context.pop();
-
-                context.pushNamed(AppRoutes.storyGoalsScreen.name, extra: true);
-                setState(() => selectedIndex = 0);
-
-            },
-          ),
-
-          16.h.verticalSpace,
-
-          /// Add Book
-          _OptionCard(
-            title: "Add a Book",
-            subtitle:
-                "Open your chosen book — continue your reading journey anytime!",
-            image: AppAssets.book1,
-            isSelected: selectedIndex == 1,
-            onTap: () {
-              setState(() => selectedIndex = 1);
-              Navigator.pop(context);
-            },
-          ),
-
-          16.h.verticalSpace,
-
-          /// Add eBook
-          _OptionCard(
-            title: "Add an eBook",
-            subtitle:
-                "Start reading your eBook — pick up right where you left off!",
-            image: AppAssets.ebook,
-            isSelected: selectedIndex == 2,
-            onTap: () {
-              setState(() => selectedIndex = 2);
-              Navigator.pop(context);
-            },
-          ),
-
-          20.h.verticalSpace,
-        ],
-      ),
-    );
-  }
-}
-
 class _OptionCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final VoidCallback onTap;
   final String image;
-  final bool isSelected;
+
+  // final bool isSelected;
 
   const _OptionCard({
     required this.title,
     required this.subtitle,
     required this.onTap,
     required this.image,
-    required this.isSelected,
+    // required this.isSelected,
   });
 
   @override
@@ -131,7 +114,7 @@ class _OptionCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? AppColors.black : Colors.grey.shade200,
+            color: Colors.grey.shade200, //isSelected ? AppColors.black :
             width: 1,
           ),
           boxShadow: [

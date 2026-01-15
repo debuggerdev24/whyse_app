@@ -8,8 +8,8 @@ import '../core/helper/log_helper.dart';
 class DioClient {
   DioClient._();
   static final _instance = DioClient._();
-  static const baseUrl = "http://167.172.45.71/api/v1";
-  static const apiBaseUrl = "$baseUrl/";
+  static const baseUrl = "https://whyse.com"; //"http://167.172.45.71";
+  static const apiBaseUrl = "$baseUrl/api/v1/";
   static DioClient get instance => _instance;
   late Dio _dio;
 

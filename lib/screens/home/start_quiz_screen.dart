@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
+import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
+import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
@@ -16,24 +18,20 @@ class StartQuizScreen extends StatelessWidget {
 
   const StartQuizScreen({
     super.key,
-    this.quizzes = const [],
-    this.storyTitle = "",
+   required this.quizzes ,
+   required this.storyTitle,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
+    Logger.info("From parameter: ${quizzes.length}");
+    return AppLayout(
+
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: Padding(
-            padding: EdgeInsets.all(12.w),
-            child: IconButton(onPressed: () {}, icon: Icon(Icons.close)),
-          ),
-        ),
+        backgroundColor: AppColors.backgroundColor,
+        leading: IconButton(onPressed: () {
+          context.pop();
+        }, icon: Icon(Icons.close)),
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 27.w),
@@ -68,7 +66,7 @@ class StartQuizScreen extends StatelessWidget {
             ),
             Spacer(flex: 3),
 
-            // Start Quiz Button
+            //todo Start Quiz Button
             AppFilledButton(
               text: "Start Quiz",
               onTap: () {

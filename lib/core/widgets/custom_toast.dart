@@ -5,24 +5,34 @@ import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:toastification/toastification.dart';
 
 class AppToast {
-  static void success(BuildContext context, String message) {
+  static void success(
+    BuildContext context,
+    String message, [
+    int? durationSeconds,
+  ]) {
     _show(
       context: context,
       message: message,
       type: ToastificationType.success,
       primaryColor: AppColors.greenColor,
       icon: Icons.check_circle_outline,
+      durationSeconds: durationSeconds,
     );
   }
 
-  static void error(BuildContext context, String message) {
+  static void error(
+    BuildContext context,
+    String message, [
+    int? durationSeconds,
+  ]) {
     _show(
       context: context,
       message: "$message!",
       type: ToastificationType.error,
-      primaryColor:
-          Colors.red, // Using standard red for errors for better visibility
+      primaryColor: Colors.red,
+      // Using standard red for errors for better visibility
       icon: Icons.error_outline,
+      durationSeconds: durationSeconds,
     );
   }
 
@@ -37,6 +47,7 @@ class AppToast {
       type: ToastificationType.info,
       primaryColor: Colors.blue,
       icon: Icons.info_outline_rounded,
+      durationSeconds: durationSecond,
     );
   }
 
@@ -46,10 +57,12 @@ class AppToast {
     required ToastificationType type,
     required Color primaryColor,
     IconData? icon,
+    int? durationSeconds,
   }) {
     try {
       toastification.show(
         context: context,
+
         alignment: Alignment.topCenter,
         showProgressBar: false,
         title: Text(
@@ -65,7 +78,7 @@ class AppToast {
         type: type,
         primaryColor: primaryColor,
         icon: Icon(icon, color: AppColors.white),
-        autoCloseDuration: const Duration(seconds: 3),
+        autoCloseDuration: Duration(seconds: durationSeconds ?? 3),
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(

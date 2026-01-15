@@ -20,30 +20,112 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // AppLinks _appLinks = AppLinks();
-
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
-        ChangeNotifierProvider<HomeProvider>(create: (_) => HomeProvider()),
-        ChangeNotifierProvider<StoryProvider>(create: (_) => StoryProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => HomeProvider()),
+        ChangeNotifierProvider(create: (_) => StoryProvider()),
       ],
       child: ScreenUtilInit(
         designSize: const Size(402, 874),
         minTextAdapt: true,
         splitScreenMode: true,
         builder: (context, child) {
-          return MaterialApp.router(
-            debugShowCheckedModeBanner: false,
-            routerConfig: UserAppRoute.goRouter,
-          );
+          return const DeepLinkWrapper(); // ✅ NEW
         },
       ),
     );
   }
 }
 
+
+
+
+import 'package:app_links/app_links.dart';
+
+class DeepLinkWrapper extends StatefulWidget {
+  const DeepLinkWrapper({super.key});
+
+  @override
+  State<DeepLinkWrapper> createState() => _DeepLinkWrapperState();
+}
+
+class _DeepLinkWrapperState extends State<DeepLinkWrapper> {
+  late final AppLinks _appLinks;
+  StreamSubscription<Uri>? _sub;
+
+  @override
+  void initState() {
+    super.initState();
+    _initDeepLinks();
+  }
+
+  void _initDeepLinks() async {
+    _appLinks = AppLinks();
+
+    // Case 1: App already open, user taps email link
+    _sub = _appLinks.uriLinkStream.listen((Uri uri) {
+      _handleDeepLink(uri);
+    });
+
+    // Case 2: App was CLOSED and opened via link
+    final Uri? initialLink = await _appLinks.getInitialLink();
+    if (initialLink != null) {
+      //
+      _handleDeepLink(initialLink);
+    }
+  }
+
+  void _handleDeepLink(Uri uri) {
+    debugPrint("🔗 Opened Link: $uri");
+
+    String? token;
+
+    // --- CASE A: token is in ?access_token= ---
+    if (uri.queryParameters.containsKey("access_token")) {
+      token = uri.queryParameters["access_token"];
+    }
+
+    // --- CASE B: token is in #access_token= (your current case) ---
+    else if (uri.fragment.contains("access_token=")) {
+      token = uri.fragment
+          .split("access_token=")[1]
+          .split("&")[0];
+    }
+
+    if (token != null) {
+      debugPrint("✅ Extracted Token: $token");
+
+      // Send token to AuthProvider
+      final auth = context.read<AuthProvider>();
+      auth.setRecoveryToken(token);
+
+      // Navigate to Verify Screen (optional)
+      UserAppRoute.goRouter.go('/verify-email');
+    }
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
+      routerConfig: UserAppRoute.goRouter,
+    );
+  }
+}
+
+
 /*
 todo update
 
+
 */
+
+//forgot success but not sending link
+//parent save email is also same
