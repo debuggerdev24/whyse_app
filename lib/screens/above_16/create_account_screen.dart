@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
+import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/utils/custom_loader.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
@@ -12,8 +13,11 @@ import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
+import '../../core/widgets/custom_toast.dart';
+
 class CreateAccountScreen extends StatefulWidget {
-  const CreateAccountScreen({super.key});
+  final bool? isFromSuccessConsent;
+  const CreateAccountScreen({super.key, this.isFromSuccessConsent});
 
   @override
   State<CreateAccountScreen> createState() => _CreateAccountScreenState();
@@ -25,6 +29,17 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   bool _isPasswordObscure = true;
   bool _isConfirmPasswordObscure = true;
 
+  @override
+  void initState() {
+    Logger.info("CReate Account status${widget.isFromSuccessConsent}");
+    if (widget.isFromSuccessConsent ?? false) {
+      AppToast.success(
+        context,
+        "Parent consent verify successfully.Create account.",
+      );
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -162,7 +177,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       Padding(
                         padding: EdgeInsets.only(bottom: 10.h),
                         child: AppFilledButton(
-                          text: isEmailSent ? "Verified" : "Next",
+                          text: isEmailSent ? "Verify" : "Next",
                           backgroundColor: AppColors.yellowColor,
                           onTap: () async {
                             final authProvider = Provider.of<AuthProvider>(
@@ -170,8 +185,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                               listen: false,
                             );
                             if (isEmailSent) {
-                              final success = await authProvider
-                                  .verifyEmail(context);
+                              final success = await authProvider.verifyEmail(
+                                context,
+                              );
 
                               if (success && context.mounted) {
                                 context.pushNamed(

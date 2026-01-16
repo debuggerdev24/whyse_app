@@ -2,6 +2,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
@@ -12,6 +13,7 @@ import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
 import '../../models/home/story_models/story_model.dart';
+import '../../providers/home/story_provider.dart';
 
 class QuizQuestionScreen extends StatefulWidget {
   final List<Quiz>? quizzes;
@@ -255,6 +257,7 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                 onPressed: () async {
                   context.pop(dialogContext);
                   context.goNamed(AppRoutes.homeScreen.name);
+                  context.read<StoryProvider>().clareStoryData();
                 },
                 title: "Yes",
               ),

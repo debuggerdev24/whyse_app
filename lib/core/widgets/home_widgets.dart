@@ -16,6 +16,7 @@ import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:redstreakapp/screens/home/widgets/add_reading_bottom_sheet.dart';
+import 'package:redstreakapp/services/base_api_service.dart';
 import 'package:shimmer/shimmer.dart';
 
 class HomeHeader extends StatelessWidget {
@@ -361,7 +362,7 @@ class YourPlanSection extends StatelessWidget {
                   category: story.readingTopic ?? "General",
                   title: story.title,
                   subtitle: "Read for ${story.lessonDuration ?? 10} mins",
-                  imageUrl: story.image ?? "",
+                  imageUrl: "${DioClient.baseUrl}${story.image}",
                   reward: "3",
                   onTap: () {
                     context.pushNamed(
@@ -493,9 +494,7 @@ class YourPlanSection extends StatelessWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: CachedNetworkImage(
-                        imageUrl:
-                            recentStory.image ??
-                            "https://commons.wikimedia.org/wiki/File:BLANK.jpg",
+                        imageUrl: DioClient.baseUrl + recentStory.image!,
                         width: 100.w,
                         height: 96.w,
                         fit: BoxFit.cover,

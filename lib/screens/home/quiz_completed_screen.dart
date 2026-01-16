@@ -9,8 +9,9 @@ import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
-import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
+
+import '../../providers/home/story_provider.dart';
 
 class QuizCompletedScreen extends StatelessWidget {
   final int score;
@@ -40,10 +41,8 @@ class QuizCompletedScreen extends StatelessWidget {
                   Image.asset(AppAssets.quizcomplete),
                   19.h.verticalSpace,
                   AppText(
-
                     text: "Quiz Completed!",
                     style: AppTextStyles.sfProDisplayMedium(
-
                       fontSize: 12.sp,
                       color: AppColors.black.withValues(alpha: 0.8),
                     ),
@@ -131,9 +130,10 @@ class QuizCompletedScreen extends StatelessWidget {
                   AppFilledButton(
                     text: "Continue",
                     onTap: () async {
-                       // context.read<HomeProvider>().getAllStories();
+                      // context.read<HomeProvider>().getAllStories();
                       if (!context.mounted) return;
                       context.goNamed(AppRoutes.homeScreen.name);
+                      context.read<StoryProvider>().clareStoryData();
                     },
                     backgroundColor: AppColors.teal,
                     fixedSize: Size(348, 42.h),

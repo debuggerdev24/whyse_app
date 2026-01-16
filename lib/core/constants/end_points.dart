@@ -1,8 +1,5 @@
 import 'dart:core';
 
-String serverClientId =
-    "928198076650-04u77ekdg426kkjqq2rusho0k3vcthr0.apps.googleusercontent.com";
-
 class EndPoints {
   EndPoints._();
   static const startOnBoarding = "/mobile/auth/start-onboarding";
@@ -32,6 +29,7 @@ class EndPoints {
   static const createStory = "/story/generateMobileStory";
   static const createStoryImage = "/story/generateMobileStoryImage";
   static const verifyToken = "/mobile/auth/verify-recovery";
+  static const verifyParentConsent = "/mobile/auth/parent-consent";
 
   static String storeImage({required String storyId}) =>
       "/story/mobile-story/$storyId/store-images";

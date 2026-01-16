@@ -1,107 +1,162 @@
+import 'dart:async';
+
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/shared_pref.dart';
+import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/routes/app_router.dart';
+import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:redstreakapp/services/base_api_service.dart';
+
+import 'core/constants/app_constants.dart';
+import 'core/helper/log_helper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SharedPrefs.instance.init();
   await DioClient.instance.initialize();
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
+  runApp(
+    MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => HomeProvider()),
         ChangeNotifierProvider(create: (_) => StoryProvider()),
       ],
-      child: ScreenUtilInit(
-        designSize: const Size(402, 874),
-        minTextAdapt: true,
-        splitScreenMode: true,
-        builder: (context, child) {
-          return const DeepLinkWrapper(); // ✅ NEW
-        },
-      ),
-    );
-  }
+      child: const MyApp(),
+    ),
+  );
 }
 
-
-
-
-import 'package:app_links/app_links.dart';
-
-class DeepLinkWrapper extends StatefulWidget {
-  const DeepLinkWrapper({super.key});
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
 
   @override
-  State<DeepLinkWrapper> createState() => _DeepLinkWrapperState();
+  State<MyApp> createState() => _MyAppState();
 }
 
-class _DeepLinkWrapperState extends State<DeepLinkWrapper> {
-  late final AppLinks _appLinks;
-  StreamSubscription<Uri>? _sub;
+class _MyAppState extends State<MyApp> {
+  StreamSubscription? _sub;
+  final AppLinks _appLinks = AppLinks();
+  bool _isProcessingLink = false; // Prevent duplicate processing
 
   @override
   void initState() {
     super.initState();
-    _initDeepLinks();
+    // Delay to ensure router is ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _handleInitialLink();
+      _handleIncomingLinks();
+    });
   }
 
-  void _initDeepLinks() async {
-    _appLinks = AppLinks();
-
-    // Case 1: App already open, user taps email link
-    _sub = _appLinks.uriLinkStream.listen((Uri uri) {
-      _handleDeepLink(uri);
-    });
-
-    // Case 2: App was CLOSED and opened via link
-    final Uri? initialLink = await _appLinks.getInitialLink();
-    if (initialLink != null) {
-      //
-      _handleDeepLink(initialLink);
+  Future<void> _handleInitialLink() async {
+    try {
+      final initialLink = await _appLinks.getInitialLinkString();
+      if (initialLink != null && !_isProcessingLink) {
+        Logger.info("Initial Link: $initialLink");
+        _handleDeepLink(Uri.parse(initialLink));
+      }
+    } catch (e) {
+      Logger.error("Failed to get initial app link: $e");
     }
+  }
+
+  void _handleIncomingLinks() {
+    Logger.info("Deep Linking initialize");
+
+    _sub = _appLinks.stringLinkStream.listen(
+      (String? link) {
+        if (link != null && !_isProcessingLink) {
+          final uri = Uri.parse(link);
+          Logger.info("Incoming Link: $link");
+          _handleDeepLink(uri);
+        }
+      },
+      onError: (err) {
+        Logger.error("Error in incoming app link: $err");
+      },
+    );
+    Logger.info("Deep Linking Success");
   }
 
   void _handleDeepLink(Uri uri) {
-    debugPrint("🔗 Opened Link: $uri");
-
-    String? token;
-
-    // --- CASE A: token is in ?access_token= ---
-    if (uri.queryParameters.containsKey("access_token")) {
-      token = uri.queryParameters["access_token"];
+    if (_isProcessingLink) {
+      Logger.info("Already processing a link, skipping...");
+      return;
     }
 
-    // --- CASE B: token is in #access_token= (your current case) ---
-    else if (uri.fragment.contains("access_token=")) {
-      token = uri.fragment
-          .split("access_token=")[1]
-          .split("&")[0];
-    }
+    _isProcessingLink = true;
 
-    if (token != null) {
-      debugPrint("✅ Extracted Token: $token");
+    try {
+      Logger.info("URI -> $uri");
+      Logger.info("scheme -> ${uri.scheme}");
+      Logger.info("host -> ${uri.host}");
+      Logger.info("path -> ${uri.path}");
 
-      // Send token to AuthProvider
-      final auth = context.read<AuthProvider>();
-      auth.setRecoveryToken(token);
+      // Password Reset Link
+      if (uri.host == domain && uri.path == forgotPasswordPath) {
+        Logger.info("Navigation triggered from verify-reset-password link");
+        final token = uri.queryParameters["token"];
 
-      // Navigate to Verify Screen (optional)
-      UserAppRoute.goRouter.go('/verify-email');
+        if (token != null && token.isNotEmpty) {
+          context.read<AuthProvider>().setResetPasswordToken = token;
+          Logger.info("Reset Password Token: $token");
+
+          // Navigate after a short delay
+          Future.delayed(const Duration(milliseconds: 350), () {
+            context.pushNamed(AppRoutes.forgotPasswordScreen.name);
+            _isProcessingLink = false;
+          });
+        } else {
+          Logger.error("No token found in password reset link");
+          _isProcessingLink = false;
+        }
+        return;
+      }
+
+      //todo ------------------ Parent Consent Link -------------------
+      if (uri.host == domain && uri.path == parentEmailPath) {
+        Logger.info("Navigation triggered from verify-parent-consent link");
+        final token = uri.queryParameters["token"];
+
+        if (token != null && token.isNotEmpty) {
+          context.read<AuthProvider>().setParentEmailToken = token;
+          Logger.info("Parent Consent Token: $token");
+
+          //todo Navigate after a short delay
+          // Future.delayed(const Duration(milliseconds: 100), () {
+          // context.pushNamed(AppRoutes.consentStatusScreen.name);
+          context.read<AuthProvider>().verifyConsentRequest(
+            onSuccess: () {
+              UserAppRoute.goRouter.pushNamed(
+                AppRoutes.createAccountScreen.name,
+                extra: true,
+              );
+            },
+            onFailed: (e) {
+              AppToast.error(context, e.errorMsg);
+            },
+          );
+          _isProcessingLink = false;
+          // });
+        } else {
+          Logger.error("No token found in parent consent link");
+          _isProcessingLink = false;
+        }
+        return;
+      }
+
+      Logger.info("No matching route found for URI: $uri");
+      _isProcessingLink = false;
+    } catch (e, st) {
+      Logger.error("Deep link error -> $e\nStackTrace -> $st");
+      _isProcessingLink = false;
     }
   }
 
@@ -113,19 +168,16 @@ class _DeepLinkWrapperState extends State<DeepLinkWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      routerConfig: UserAppRoute.goRouter,
+    return ScreenUtilInit(
+      designSize: const Size(402, 874),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          routerConfig: UserAppRoute.goRouter,
+        );
+      },
     );
   }
 }
-
-
-/*
-todo update
-
-
-*/
-
-//forgot success but not sending link
-//parent save email is also same

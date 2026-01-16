@@ -102,7 +102,8 @@ class UserAppRoute {
       path: AppRoutes.createAccountScreen.path,
       name: AppRoutes.createAccountScreen.name,
       builder: (context, state) {
-        return CreateAccountScreen();
+        final status = state.extra as bool;
+        return CreateAccountScreen(isFromSuccessConsent: false);
       },
     ),
     // Below 16 Routes
@@ -281,7 +282,8 @@ class UserAppRoute {
       builder: (context, state) {
         return StoryReadingGoalScreen();
       },
-    ),GoRoute(
+    ),
+    GoRoute(
       path: AppRoutes.goalsScreen.path,
       name: AppRoutes.goalsScreen.name,
       builder: (context, state) {

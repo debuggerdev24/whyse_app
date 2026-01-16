@@ -78,12 +78,12 @@ class _ParentEmailScreenState extends State<ParentEmailScreen> {
                               AppToast.error(context, error);
                             },
                             onSuccess: () {
-                              context.pushNamed(
-                                AppRoutes.consentStatusScreen.name,
-                              );
                               AppToast.success(
                                 context,
-                                "Parent's email saved successfully",
+                                "The consent request has been sent to the parent. Verify your email.",
+                              );
+                              context.pushNamed(
+                                AppRoutes.consentStatusScreen.name,
                               );
                             },
                           );
@@ -96,11 +96,10 @@ class _ParentEmailScreenState extends State<ParentEmailScreen> {
                     ],
                   ),
                 ),
-                if(provider.isSaveParentEmailLoading) FullPageIndicator()
+                if (provider.isSaveParentEmailLoading) FullPageIndicator(),
               ],
             );
           },
-
         ),
       ),
     );

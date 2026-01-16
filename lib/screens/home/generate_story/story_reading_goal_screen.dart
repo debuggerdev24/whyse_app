@@ -15,9 +15,7 @@ import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
-import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
 
 import '../../../core/widgets/dropdown_textfiled.dart';
 import '../../../models/home/story_models/story_enums.dart';
@@ -41,176 +39,173 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
         resizeToAvoidBottomInset: false,
         body: SafeArea(
           child: Consumer<StoryProvider>(
-            builder: (context, provider, child) => Stack(
-              children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 24.w,
-                    vertical: 20.h,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // HEADER
-                      OnboardingHeader(
-                        currentStep: 4,
-                        totalSteps: 4,
-                        onBack: () {
-                          context.pop();
-                        },
-                      ),
-
-                      /// TITLE
-                      AppText(
-                        text: "Set Your Daily Reading Goal",
-                        style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
-                      ),
-
-                      8.h.verticalSpace,
-
-                      AppText(
-                        text:
-                            "Choose how much time you want to read \neach day to keep your streak alive and earn rewards.",
-                        style: AppTextStyles.sfProDisplayMedium(
-                          fontSize: 16.sp,
-                          color: AppColors.black.withValues(alpha: 0.8),
+            builder: (context, provider, child) {
+              return Stack(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 24.w,
+                      vertical: 20.h,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // HEADER
+                        OnboardingHeader(
+                          currentStep: 4,
+                          totalSteps: 4,
+                          onBack: () {
+                            context.pop();
+                          },
                         ),
-                      ),
 
-                      18.h.verticalSpace,
-
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(
-                            color: AppColors.black.withValues(alpha: 0.1),
+                        /// TITLE
+                        AppText(
+                          text: "Set Your Daily Reading Goal",
+                          style: AppTextStyles.sfProDisplayBold(
+                            fontSize: 32.sp,
                           ),
-                          borderRadius: BorderRadius.circular(12.r),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: List.generate(
-                            provider.readingDurations.length,
-                            (index) {
-                              final option = provider.readingDurations[index];
-                              final isSelected =
-                                  provider.selectedReadingDuration == option;
-                              return Row(
-                                children: [
-                                  _buildOptionButton(
-                                    text: option,
-                                    isSelected: isSelected,
-                                    onTap: (String text) {
-                                      provider.setSelectedReadingDuration =
-                                          text;
-                                    },
-                                  ),
-                                  if (index !=
-                                      provider.readingDurations.length - 1)
-                                    Container(
-                                      width: 1.w,
-                                      height: 22.h,
-                                      color: Colors.grey.withValues(alpha: 0.3),
+
+                        8.h.verticalSpace,
+
+                        AppText(
+                          text:
+                              "Choose how much time you want to read \neach day to keep your streak alive and earn rewards.",
+                          style: AppTextStyles.sfProDisplayMedium(
+                            fontSize: 16.sp,
+                            color: AppColors.black.withValues(alpha: 0.8),
+                          ),
+                        ),
+
+                        18.h.verticalSpace,
+
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(
+                              color: AppColors.black.withValues(alpha: 0.1),
+                            ),
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: List.generate(
+                              provider.readingDurations.length,
+                              (index) {
+                                final option = provider.readingDurations[index];
+                                final isSelected =
+                                    provider.selectedReadingDuration == option;
+                                return Row(
+                                  children: [
+                                    _buildOptionButton(
+                                      text: option,
+                                      isSelected: isSelected,
+                                      onTap: (String text) {
+                                        provider.setSelectedReadingDuration =
+                                            text;
+                                      },
                                     ),
-                                ],
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-
-                      if (provider.selectedReadingDuration.toLowerCase() ==
-                          AppEnum.custom.name) ...[
-                        20.h.verticalSpace,
-                        AppTextField(
-                          hintText: "Enter minutes",
-                          controller: provider.customReadingDurationCtr,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                          ],
-                        ),
-                      ],
-
-                      25.h.verticalSpace,
-                      CustomDropdownField(
-                        label: "Text Type",
-                        hint: "Select text type",
-                        items: TextType.values.map((e) => e.value).toList(),
-                        onChanged: (value) {
-                          provider.setSelectedTextType = value!;
-                        },
-                      ),
-                      20.h.verticalSpace,
-                      CustomDropdownField(
-                        label: "Age Range",
-                        hint: "Select age",
-                        items: provider.ageRanges,
-                        onChanged: (value) {
-                          provider.setSelectedAgeRange = value!;
-
-                          // setState(() => _selectedAge = value!);
-                        },
-                      ),
-                      20.h.verticalSpace,
-
-                      CustomDropdownField(
-                        label: "Language of Learning",
-                        hint: "Select language",
-                        items: Language.values.map((e) => e.value).toList(),
-                        onChanged: (value) {
-                          provider.setSelectedLanguage = value!;
-                          // setState(() => _selectedLanguage = value!);
-                        },
-                      ),
-                      Spacer(),
-
-                      AppFilledButton(
-                        text: "Create Story",
-                        backgroundColor: AppColors.yellowColor,
-                        onTap: () {
-                          deBouncer.run(() async {
-                            //todo create story
-                            await provider.createStory(
-                              onStarted: () {
-                                Future.delayed(Duration(seconds: 3), () {
-                                  AppToast.info(
-                                    context: context,
-                                    message: "It can take few seconds",
-                                    durationSecond: 4,
-                                  );
-                                });
-                              },
-                              onCreateStoryFailed: (error) {
-                                Logger.error(error);
-                                AppToast.error(context, error);
-                              },
-                              onCreateImageFailed: (error) {
-                                Logger.error(error);
-                                AppToast.error(context, error);
-                              },
-                              context: context,
-                            );
-
-                            provider.linkImageToStory(
-                              onFailed: (error) {
-                                AppToast.error(
-                                  context,
-                                  "Failed in link : $error",
+                                    if (index !=
+                                        provider.readingDurations.length - 1)
+                                      Container(
+                                        width: 1.w,
+                                        height: 22.h,
+                                        color: Colors.grey.withValues(
+                                          alpha: 0.3,
+                                        ),
+                                      ),
+                                  ],
                                 );
                               },
-                            );
-                          });
-                        },
-                      ),
-                    ],
+                            ),
+                          ),
+                        ),
+
+                        if (provider.selectedReadingDuration.toLowerCase() ==
+                            AppEnum.custom.name) ...[
+                          20.h.verticalSpace,
+                          AppTextField(
+                            hintText: "Enter minutes",
+                            controller: provider.customReadingDurationCtr,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                          ),
+                        ],
+
+                        25.h.verticalSpace,
+                        CustomDropdownField(
+                          label: "Text Type",
+                          hint: "Select text type",
+                          items: TextType.values.map((e) => e.value).toList(),
+                          onChanged: (value) {
+                            provider.setSelectedTextType = value!;
+                          },
+                        ),
+                        20.h.verticalSpace,
+                        CustomDropdownField(
+                          label: "Age Range",
+                          hint: "Select age",
+                          items: provider.ageRanges,
+                          onChanged: (value) {
+                            provider.setSelectedAgeRange = value!;
+
+                            // setState(() => _selectedAge = value!);
+                          },
+                        ),
+                        20.h.verticalSpace,
+
+                        CustomDropdownField(
+                          label: "Language of Learning",
+                          hint: "Select language",
+                          items: Language.values.map((e) => e.value).toList(),
+                          onChanged: (value) {
+                            provider.setSelectedLanguage = value!;
+                            // setState(() => _selectedLanguage = value!);
+                          },
+                        ),
+                        Spacer(),
+
+                        AppFilledButton(
+                          text: "Create Story",
+                          backgroundColor: AppColors.yellowColor,
+                          onTap: () {
+                            deBouncer.run(() async {
+                              //todo create story
+                              await provider.createStory(
+                                onStarted: () {
+                                  Future.delayed(Duration(seconds: 3), () {
+                                    AppToast.info(
+                                      context: context,
+                                      message: "It can take few seconds",
+                                      durationSecond: 4,
+                                    );
+                                  });
+                                },
+                                onCreateStoryFailed: (error) {
+                                  Logger.error(error);
+                                  AppToast.error(context, error);
+                                },
+                                onCreateImageFailed: (error) {
+                                  Logger.error(error);
+                                  AppToast.error(context, error);
+                                },
+                                context: context,
+                              );
+                            });
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                if (provider.isCreateStoryLoading ||
-                    provider.isCreateStoryImageLoading)
-                  FullPageIndicator(),
-              ],
-            ),
+                  if (provider.isCreateStoryLoading ||
+                      provider.isCreateStoryImageLoading)
+                    FullPageIndicator(),
+                ],
+              );
+            },
           ),
         ),
       ),

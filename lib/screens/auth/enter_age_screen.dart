@@ -185,13 +185,15 @@ class _AgeEntryScreenState extends State<AgeEntryScreen> {
                                 return;
                               }
 
-                              await provider.saveUserAge(
+                              await provider.saveAge(
                                 context: context,
                                 onSuccess: () {
                                   AppToast.success(
                                     context,
                                     "Age saved successfully",
                                   );
+                                  _dateController.clear();
+
                                   if (provider.isUnder16) {
                                     context.pushNamed(
                                       AppRoutes.parentEmailScreen.name,
@@ -202,7 +204,6 @@ class _AgeEntryScreenState extends State<AgeEntryScreen> {
                                   context.pushNamed(
                                     AppRoutes.createAccountScreen.name,
                                   );
-                                  _dateController.clear();
                                 },
                                 onFailed: (error) {
                                   AppToast.success(context, error);

@@ -4,30 +4,31 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:redstreakapp/core/constants/end_points.dart';
 import 'package:redstreakapp/core/constants/shared_pref.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/services/auth/auth_api_service.dart';
 import 'package:redstreakapp/services/base_api_service.dart';
 
+import '../../core/constants/app_constants.dart';
 import '../../core/helper/log_helper.dart';
 import '../../models/home/story_models/generate_story_request.dart';
 import '../../models/home/story_models/story_model.dart';
 
 class AuthProvider with ChangeNotifier {
-  TextEditingController customGoalTitleCtr = TextEditingController();
-  TextEditingController customGoalDesCtr = TextEditingController();
-  TextEditingController signUpEmailCtr = TextEditingController();
-  TextEditingController loginEmailCtr = TextEditingController();
-  TextEditingController otpCtr = TextEditingController();
-  TextEditingController newPasswordCtr = TextEditingController();
-  TextEditingController resetConfirmPasswordCtr = TextEditingController();
-  TextEditingController parentEmailCtr = TextEditingController();
-  TextEditingController forgotPasswordEmailCtr = TextEditingController();
+  TextEditingController customGoalTitleCtr = TextEditingController(),
+      customGoalDesCtr = TextEditingController(),
+      signUpEmailCtr = TextEditingController(),
+      loginEmailCtr = TextEditingController(),
+      otpCtr = TextEditingController(),
+      newPasswordCtr = TextEditingController(),
+      resetConfirmPasswordCtr = TextEditingController(),
+      parentEmailCtr = TextEditingController(),
+      forgotPasswordEmailCtr = TextEditingController();
   bool isLoading = false,
       isStoryCreation = false,
       isCustomGoalSelected = false,
-      isSendForgotPassVerification = false;
+      isSendForgotPassVerification = false,
+      isConsentRequestApproved = false;
 
   int? age;
   int calculatedAge = 0;
@@ -270,7 +271,7 @@ class AuthProvider with ChangeNotifier {
 
   bool isSaveUserAgeLoading = false;
 
-  Future<void> saveUserAge({
+  Future<void> saveAge({
     required BuildContext context,
     required Function onSuccess,
     required Function(String error) onFailed,
@@ -1066,6 +1067,7 @@ class AuthProvider with ChangeNotifier {
         onFailed.call(l.errorMsg);
       },
       (r) {
+        parentEmailCtr.clear();
         onSuccess.call();
       },
     );
@@ -1285,16 +1287,21 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  String? _recoveryToken;
-  String? get recoveryToken => _recoveryToken;
+  String? _resetPasswordToken, _parentEmailToken;
+  String? get recoveryToken => _resetPasswordToken;
+  String? get parentEmailToken => _parentEmailToken;
 
-  void setRecoveryToken(String token) {
-    _recoveryToken = token;
+  set setResetPasswordToken(String token) {
+    _resetPasswordToken = token;
+    notifyListeners();
+  }
+
+  set setParentEmailToken(String token) {
+    _resetPasswordToken = token;
     notifyListeners();
   }
 
   bool isVerifyForgotPassMailLoading = false;
-
   Future<void> verifyForgotPasswordEmail({
     required VoidCallback onSuccess,
     required Function(ApiException e) onFailed,
@@ -1317,6 +1324,36 @@ class AuthProvider with ChangeNotifier {
       },
     );
     isVerifyForgotPassMailLoading = false;
+    notifyListeners();
+  }
+
+  bool isVerifyConsentRequestLoading = false;
+  Future<void> verifyConsentRequest({
+    required VoidCallback onSuccess,
+    required Function(ApiException e) onFailed,
+  }) async {
+    isVerifyConsentRequestLoading = true;
+    notifyListeners();
+
+    final response = await AuthApiServices().verifyParentConsent(
+      data: {
+        "token": recoveryToken,
+        "onboardingId": SharedPrefs.instance.onboardingId,
+        "action": "approve",
+      },
+    );
+
+    response.fold(
+      (l) {
+        onFailed.call(l);
+      },
+      (r) {
+        onSuccess.call();
+        isConsentRequestApproved = true;
+        notifyListeners();
+      },
+    );
+    isVerifyConsentRequestLoading = false;
     notifyListeners();
   }
 

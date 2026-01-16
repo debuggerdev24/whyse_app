@@ -9,7 +9,7 @@ import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
-Widget addReadingBottomSheet({required BuildContext context}){
+Widget addReadingBottomSheet({required BuildContext context}) {
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 27.w, vertical: 16.h),
     decoration: BoxDecoration(
@@ -44,11 +44,11 @@ Widget addReadingBottomSheet({required BuildContext context}){
         _OptionCard(
           title: "Generate Article",
           subtitle:
-          "Get a story made just for you by AI \n— every time it’s something new and exciting!",
+              "Get a story made just for you by AI \n— every time it’s something new and exciting!",
           image: AppAssets.robot,
           onTap: () {
             if (!context.mounted) return;
-            context.read<StoryProvider>().clearAllStoryFields();
+            context.read<StoryProvider>().clearStoryFields();
             context.pop();
             context.pushNamed(AppRoutes.storyGoalsScreen.name);
           },
@@ -60,7 +60,7 @@ Widget addReadingBottomSheet({required BuildContext context}){
         _OptionCard(
           title: "Add a Book",
           subtitle:
-          "Open your chosen book — continue your reading journey anytime!",
+              "Open your chosen book — continue your reading journey anytime!",
           image: AppAssets.book1,
           // isSelected: selectedIndex == 1,
           onTap: () {
@@ -74,7 +74,7 @@ Widget addReadingBottomSheet({required BuildContext context}){
         _OptionCard(
           title: "Add an eBook",
           subtitle:
-          "Start reading your eBook — pick up right where you left off!",
+              "Start reading your eBook — pick up right where you left off!",
           image: AppAssets.ebook,
           // isSelected: selectedIndex == 2,
           onTap: () {
@@ -87,6 +87,7 @@ Widget addReadingBottomSheet({required BuildContext context}){
     ),
   );
 }
+
 class _OptionCard extends StatelessWidget {
   final String title;
   final String subtitle;

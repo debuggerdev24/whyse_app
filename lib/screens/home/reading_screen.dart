@@ -17,6 +17,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../models/home/story_models/story_model.dart';
 import '../../routes/user_routes.dart';
+import '../../services/base_api_service.dart';
 
 class ReadingScreen extends StatefulWidget {
   final Story? story;
@@ -206,17 +207,26 @@ class _ReadingScreenState extends State<ReadingScreen> {
                               15.h.verticalSpace,
                               //todo story image
                               Consumer<StoryProvider>(
-                                builder: (context, provider, child) =>
-                                    CachedNetworkImage(
-                                      height: 280.h,
-                                      width: double.infinity,
-                                      fit: BoxFit.cover,
-                                      imageUrl: provider.createdStoryImagePath,
-                                      errorWidget: (context, url, error) =>
-                                          imageShimmer(),
-                                      placeholder: (context, url) =>
-                                          imageShimmer(),
-                                    ),
+                                builder: (context, provider, child) {
+                                  if (!provider.isCreateStoryImageLoading &&
+                                      !provider.isCreateStoryLoading) {
+                                    provider.linkImageToStory(
+                                      image: provider.createdStoryImagePath,
+                                    );
+                                  }
+                                  return CachedNetworkImage(
+                                    height: 280.h,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                    imageUrl:
+                                        DioClient.baseUrl +
+                                        provider.createdStoryImagePath,
+                                    errorWidget: (context, url, error) =>
+                                        imageShimmer(),
+                                    placeholder: (context, url) =>
+                                        imageShimmer(),
+                                  );
+                                },
 
                                 //     Image.network(
                                 //   provider.createdStoryImagePath,
@@ -398,6 +408,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
                 onPressed: () async {
                   context.pop(dialogContext);
                   context.goNamed(AppRoutes.homeScreen.name);
+                  context.read<StoryProvider>().clareStoryData();
                 },
                 title: "Yes",
               ),

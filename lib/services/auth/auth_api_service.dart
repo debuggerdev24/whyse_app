@@ -283,7 +283,22 @@ class AuthApiServices {
     return BaseApiHelper.instance.post(EndPoints.verifyToken, data: data);
   }
 
+  Future<Either<ApiException, Map<String, dynamic>>> verifyParentConsent({
+    required Map<String, dynamic> data,
+  }) {
+    return BaseApiHelper.instance.post(
+      EndPoints.verifyParentConsent,
+      data: data,
+    );
+  }
+
   Future<Either<ApiException, Map<String, dynamic>>> resetPassword({
+    required Map<String, dynamic> data,
+  }) {
+    return BaseApiHelper.instance.post(EndPoints.resetPassword, data: data);
+  }
+
+  Future<Either<ApiException, Map<String, dynamic>>> verifyParentEmail({
     required Map<String, dynamic> data,
   }) {
     return BaseApiHelper.instance.post(EndPoints.resetPassword, data: data);
