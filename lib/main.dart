@@ -43,16 +43,18 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   StreamSubscription? _sub;
   final AppLinks _appLinks = AppLinks();
+  late AuthProvider provider;
   bool _isProcessingLink = false; // Prevent duplicate processing
 
   @override
   void initState() {
     super.initState();
     // Delay to ensure router is ready
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    provider= context.read<AuthProvider>();
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
       _handleInitialLink();
       _handleIncomingLinks();
-    });
+    // });
   }
 
   Future<void> _handleInitialLink() async {
@@ -132,9 +134,9 @@ class _MyAppState extends State<MyApp> {
           //todo Navigate after a short delay
           // Future.delayed(const Duration(milliseconds: 100), () {
           // context.pushNamed(AppRoutes.consentStatusScreen.name);
-          context.read<AuthProvider>().verifyConsentRequest(
+          .verifyConsentRequest(
             onSuccess: () {
-              UserAppRoute.goRouter.pushNamed(
+              context.pushNamed(
                 AppRoutes.createAccountScreen.name,
                 extra: true,
               );
