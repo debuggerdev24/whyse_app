@@ -10,7 +10,8 @@ class AppLayout extends StatelessWidget {
   const AppLayout({
     super.key,
     required this.body,
-    this.resizeToAvoidBottomInset, this.appBar,
+    this.resizeToAvoidBottomInset,
+    this.appBar,
   });
 
   @override
@@ -22,7 +23,7 @@ class AppLayout extends StatelessWidget {
       body: ValueListenableBuilder<int>(
         valueListenable: tabIndex,
         builder: (context, value, child) =>
-            FadeInUp(key: ValueKey(value), from: 9.5, child: body),
+            FadeInUp(key: ValueKey(value), from: 10.5, child: body),
       ),
     );
   }

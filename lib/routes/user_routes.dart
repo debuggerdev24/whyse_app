@@ -37,4 +37,5 @@ enum AppRoutes {
   homeScreen,
   customTopicScreen,
   storyReadingGoalScreen,
+  verifyParentConsentScreen,
 }

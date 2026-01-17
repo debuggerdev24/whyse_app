@@ -1,8 +1,8 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SharedPrefs {
-  SharedPrefs._();
-  static final SharedPrefs instance = SharedPrefs._();
+class LocalStorage {
+  LocalStorage._();
+  static final LocalStorage instance = LocalStorage._();
 
   late SharedPreferences prefs;
 

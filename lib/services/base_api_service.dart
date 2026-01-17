@@ -22,17 +22,17 @@ class DioClient {
         sendTimeout: const Duration(seconds: 60),
         headers: {
           "Content-Type": "application/json",
-          if (SharedPrefs.instance.authToken != null)
-            "Authorization": "Bearer ${SharedPrefs.instance.authToken}",
+          if (LocalStorage.instance.authToken != null)
+            "Authorization": "Bearer ${LocalStorage.instance.authToken}",
         },
       ),
     );
 
     Logger.info(
-      "Authorization Token : ${SharedPrefs.instance.authToken.toString()}",
+      "Authorization Token : ${LocalStorage.instance.authToken.toString()}",
     );
     Logger.info(
-      "onBoarding ID : ${SharedPrefs.instance.onboardingId.toString()}",
+      "onBoarding ID : ${LocalStorage.instance.onboardingId.toString()}",
     );
     _dio.interceptors.add(
       PrettyDioLogger(request: true, requestBody: true, requestHeader: true),
@@ -49,7 +49,7 @@ class DioClient {
   }
 
   Future<bool> isTokenValid() async {
-    final token = SharedPrefs.instance.authToken;
+    final token = LocalStorage.instance.authToken;
     return token != null && token.isNotEmpty;
   }
 }

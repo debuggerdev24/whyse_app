@@ -149,8 +149,7 @@ class AppTextField extends StatelessWidget {
           ),
           onChanged: onChanged,
           maxLines: maxLines ?? 1, // Optional: Default to 1
-          autovalidateMode:
-              autoValidateMode, // Forward for real-time validation
+          //todo autovalidateMode: autoValidateMode, // Forward for real-time validation
           onFieldSubmitted: onSubmit,
         ),
       ],

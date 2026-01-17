@@ -121,8 +121,8 @@ class AuthProvider with ChangeNotifier {
       },
       (r) async {
         final data = r['data'];
-        await SharedPrefs.instance.setOnboardingEmail(data['email']);
-        await SharedPrefs.instance.setOnboardingId(data['onboardingId']);
+        await LocalStorage.instance.setOnboardingEmail(data['email']);
+        await LocalStorage.instance.setOnboardingId(data['onboardingId']);
         onSuccess.call();
         signUpEmailCtr.clear();
       },
@@ -199,9 +199,9 @@ class AuthProvider with ChangeNotifier {
   //   }
   // }
 
-  Future<String?> fetchOnboardingStep() async {
+  Future<String?> getOnBoardingProgress() async {
     try {
-      final onboardingId = SharedPrefs.instance.onboardingId;
+      final onboardingId = LocalStorage.instance.onboardingId;
       if (onboardingId == null) return null;
 
       final response = await AuthApiServices().getOnboardingProgress(
@@ -215,46 +215,51 @@ class AuthProvider with ChangeNotifier {
           return data['nextStep'];
         }
 
-        if (data['currentStep'] == 'CREATE_ACCOUNT' &&
+        if (data['currentStep'] == AppConstants.createAccount &&
             data['userProfile'] != null &&
             data['userProfile']['firstName'] != null) {
-          return 'PROFILE_INFO';
+          return AppConstants.profileInfo;
         }
 
-        if (data['currentStep'] == 'PROFILE_INFO' &&
+        if (data['currentStep'] == AppConstants.profileInfo &&
             data['userProfile'] != null &&
             data['userProfile']['country'] != null) {
-          return 'READING_GOAL';
+          return AppConstants.readingGoal;
         }
 
-        if (data['currentStep'] == 'READING_GOAL' &&
+        if (data['currentStep'] == AppConstants.readingGoal &&
             data['userProfile'] != null &&
             data['userProfile']['dailyReadingGoal'] != null) {
-          return 'INTERESTS';
+          return AppConstants.interest;
         }
 
-        if (data['currentStep'] == 'INTERESTS' &&
+        if (data['currentStep'] == AppConstants.interest &&
             ((data['userInterests'] != null &&
                     (data['userInterests'] as List).isNotEmpty) ||
                 (data['userProfile']['interests'] != null &&
                     (data['userProfile']['interests'] as List).isNotEmpty))) {
-          return 'TOPICS';
+          return AppConstants.topics;
         }
 
-        if (data['currentStep'] == 'TOPICS' &&
+        if (data['currentStep'] == AppConstants.topics &&
             ((data['userTopics'] != null &&
                     (data['userTopics'] as List).isNotEmpty) ||
                 (data['userProfile']['topics'] != null &&
                     (data['userProfile']['topics'] as List).isNotEmpty))) {
-          return 'GOALS';
+          return AppConstants.goals;
         }
 
-        if (data['currentStep'] == 'GOALS' &&
+        if (data['currentStep'] == AppConstants.goals &&
             ((data['userGoals'] != null &&
                     (data['userGoals'] as List).isNotEmpty) ||
                 (data['userProfile']['goals'] != null &&
                     (data['userProfile']['goals'] as List).isNotEmpty))) {
-          return 'COMPLETED';
+          return AppConstants.completed;
+        }
+
+        if (data["currentStep"] == AppConstants.consentStatus &&
+            data["consentStatus"] == AppConstants.accepted) {
+          return AppConstants.createAccount;
         }
 
         return data['currentStep'];
@@ -277,7 +282,7 @@ class AuthProvider with ChangeNotifier {
     required Function(String error) onFailed,
   }) async {
     //todo checking onBoarding id null or not
-    final onboardingId = SharedPrefs.instance.onboardingId;
+    final onboardingId = LocalStorage.instance.onboardingId;
     if (onboardingId == null) {
       AppToast.error(context, "Onboarding session not found");
       return;
@@ -299,7 +304,7 @@ class AuthProvider with ChangeNotifier {
         onFailed.call(l.errorMsg);
       },
       (r) async {
-        await SharedPrefs.instance.setAgeCompleted(true);
+        await LocalStorage.instance.setAgeCompleted(true);
         clearCreateAccountFields();
         onSuccess.call();
       },
@@ -324,11 +329,12 @@ class AuthProvider with ChangeNotifier {
   }
 
   // Create Account Properties
-  TextEditingController firstNameController = TextEditingController();
-  TextEditingController lastNameController = TextEditingController();
-  TextEditingController signupEmailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController confirmPasswordController = TextEditingController();
+  TextEditingController firstNameController = TextEditingController(),
+      lastNameController = TextEditingController(),
+      signupEmailController = TextEditingController(),
+      loginPasswordCtr = TextEditingController(),
+      createAccPasswordCtr = TextEditingController(),
+      confirmPasswordController = TextEditingController();
 
   bool isCreateAccountLoading = false;
 
@@ -339,7 +345,7 @@ class AuthProvider with ChangeNotifier {
     final firstName = firstNameController.text.trim();
     final lastName = lastNameController.text.trim();
     final email = signupEmailController.text.trim();
-    final password = passwordController.text.trim();
+    final password = createAccPasswordCtr.text.trim();
     final confirmPassword = confirmPasswordController.text.trim();
 
     if (firstName.isEmpty) {
@@ -378,7 +384,7 @@ class AuthProvider with ChangeNotifier {
       return false;
     }
 
-    final onboardingId = SharedPrefs.instance.onboardingId;
+    final onboardingId = LocalStorage.instance.onboardingId;
     if (onboardingId == null) {
       AppToast.error(context, "Session invalid");
       return false;
@@ -450,7 +456,7 @@ class AuthProvider with ChangeNotifier {
   bool isVerifyEmailLoading = false;
 
   Future<bool> verifyEmail(BuildContext context) async {
-    final onboardingId = SharedPrefs.instance.onboardingId;
+    final onboardingId = LocalStorage.instance.onboardingId;
     final email = signupEmailController.text.trim();
 
     if (onboardingId == null) {
@@ -487,6 +493,7 @@ class AuthProvider with ChangeNotifier {
     } catch (e) {
       isVerifyEmailLoading = false;
       notifyListeners();
+      Logger.info("here");
       AppToast.error(context, e.toString());
       return false;
     }
@@ -499,7 +506,7 @@ class AuthProvider with ChangeNotifier {
     required String country,
     required String preferredLanguage,
   }) async {
-    final onboardingId = SharedPrefs.instance.onboardingId;
+    final onboardingId = LocalStorage.instance.onboardingId;
     if (onboardingId == null) {
       AppToast.error(context, "Session invalid");
       return false;
@@ -545,7 +552,7 @@ class AuthProvider with ChangeNotifier {
     BuildContext context, {
     required int dailyReadingGoal,
   }) async {
-    final onboardingId = SharedPrefs.instance.onboardingId;
+    final onboardingId = LocalStorage.instance.onboardingId;
     if (onboardingId == null) {
       AppToast.error(context, "Session invalid");
       return false;
@@ -618,7 +625,7 @@ class AuthProvider with ChangeNotifier {
     required List<String> interestIds,
     required List<String> customInterests,
   }) async {
-    final onboardingId = SharedPrefs.instance.onboardingId;
+    final onboardingId = LocalStorage.instance.onboardingId;
     if (onboardingId == null) {
       AppToast.error(context, "Session invalid");
       return false;
@@ -694,7 +701,7 @@ class AuthProvider with ChangeNotifier {
     required List<String> topicIds,
     required List<String> customTopics,
   }) async {
-    final onboardingId = SharedPrefs.instance.onboardingId;
+    final onboardingId = LocalStorage.instance.onboardingId;
     if (onboardingId == null) {
       AppToast.error(context, "Session invalid");
       return false;
@@ -764,7 +771,7 @@ class AuthProvider with ChangeNotifier {
     required List<String> goalIds,
     required List<Map<String, String>> customGoals,
   }) async {
-    final onboardingId = SharedPrefs.instance.onboardingId;
+    final onboardingId = LocalStorage.instance.onboardingId;
     if (onboardingId == null) {
       AppToast.error(context, "Session invalid");
       return false;
@@ -807,7 +814,7 @@ class AuthProvider with ChangeNotifier {
 
   Future<bool> loginUser(BuildContext context) async {
     final email = loginEmailCtr.text.trim();
-    final password = passwordController.text.trim();
+    final password = loginPasswordCtr.text.trim();
 
     if (email.isEmpty) {
       AppToast.error(context, "Please enter your email");
@@ -848,7 +855,7 @@ class AuthProvider with ChangeNotifier {
 
             // Extract refresh token
             if (session['refreshToken'] != null) {
-              await SharedPrefs.instance.setRefreshToken(
+              await LocalStorage.instance.setRefreshToken(
                 session['refreshToken'],
               );
             }
@@ -861,7 +868,7 @@ class AuthProvider with ChangeNotifier {
           }
 
           if (token != null) {
-            await SharedPrefs.instance.setToken(token);
+            await LocalStorage.instance.setToken(token);
             // Update the current API instance with the new token immediately
             DioClient.instance.addToken(token);
             debugPrint("Token saved successfully from login: $token");
@@ -870,7 +877,7 @@ class AuthProvider with ChangeNotifier {
           }
 
           if (data['onboardingId'] != null) {
-            await SharedPrefs.instance.setOnboardingId(
+            await LocalStorage.instance.setOnboardingId(
               data['onboardingId'].toString(),
             );
           }
@@ -878,7 +885,7 @@ class AuthProvider with ChangeNotifier {
 
         AppToast.success(context, response['message'] ?? "Login successful");
         loginEmailCtr.clear();
-        passwordController.clear();
+        loginPasswordCtr.clear();
         return true;
       } else {
         // Parse errors array if present
@@ -961,11 +968,11 @@ class AuthProvider with ChangeNotifier {
 
             if (session["accessToken"] != null) {
               accessToken = session["accessToken"];
-              await SharedPrefs.instance.setToken(accessToken!);
+              await LocalStorage.instance.setToken(accessToken!);
             }
 
             if (session["refreshToken"] != null) {
-              await SharedPrefs.instance.setRefreshToken(
+              await LocalStorage.instance.setRefreshToken(
                 session["refreshToken"],
               );
             }
@@ -980,7 +987,7 @@ class AuthProvider with ChangeNotifier {
           }
 
           if (data['onboardingId'] != null) {
-            await SharedPrefs.instance.setOnboardingId(
+            await LocalStorage.instance.setOnboardingId(
               data['onboardingId'].toString(),
             );
           }
@@ -1003,7 +1010,7 @@ class AuthProvider with ChangeNotifier {
   Future<String?> getGoogleSignInIDToken() async {
     try {
       GoogleSignIn googleSignIn = GoogleSignIn(
-        serverClientId: serverClientId,
+        serverClientId: AppConstants.serverClientId,
 
         // "1072520967140-7566tlns04ge757cqiailkl8j405a9am.apps.googleusercontent.com",
         scopes: ["email", "profile"],
@@ -1048,7 +1055,7 @@ class AuthProvider with ChangeNotifier {
     required VoidCallback onSuccess,
     required Function(String error) onFailed,
   }) async {
-    final onboardingId = SharedPrefs.instance.onboardingId;
+    final onboardingId = LocalStorage.instance.onboardingId;
     if (onboardingId == null) {
       AppToast.error(context, "On Boarding Id not found!");
       return;
@@ -1128,7 +1135,7 @@ class AuthProvider with ChangeNotifier {
 
   bool isLogOutLoading = false;
   Future<void> logOutUser({required VoidCallback onSuccess}) async {
-    final token = SharedPrefs.instance.authToken;
+    final token = LocalStorage.instance.authToken;
     Logger.info(token.toString());
     isLogOutLoading = true;
     notifyListeners();
@@ -1142,8 +1149,8 @@ class AuthProvider with ChangeNotifier {
     }
 
     // 1. Clear Local Data Immediately
-    await SharedPrefs.instance.removeTokens();
-    await SharedPrefs.instance.clear();
+    await LocalStorage.instance.removeTokens();
+    await LocalStorage.instance.clear();
 
     clearAllData();
     notifyListeners();
@@ -1156,8 +1163,8 @@ class AuthProvider with ChangeNotifier {
   }
 
   void clearLoginFields() {
-    signUpEmailCtr.clear();
-    passwordController.clear();
+    loginEmailCtr.clear();
+    loginPasswordCtr.clear();
     notifyListeners();
   }
 
@@ -1170,7 +1177,7 @@ class AuthProvider with ChangeNotifier {
     firstNameController.clear();
     lastNameController.clear();
     signupEmailController.clear();
-    passwordController.clear();
+    createAccPasswordCtr.clear();
     confirmPasswordController.clear();
     notifyListeners();
   }
@@ -1180,7 +1187,7 @@ class AuthProvider with ChangeNotifier {
     firstNameController.clear();
     lastNameController.clear();
     signupEmailController.clear();
-    passwordController.clear();
+    createAccPasswordCtr.clear();
     confirmPasswordController.clear();
     age = null;
     selectedDate = null;
@@ -1338,7 +1345,7 @@ class AuthProvider with ChangeNotifier {
     final response = await AuthApiServices().verifyParentConsent(
       data: {
         "token": recoveryToken,
-        "onboardingId": SharedPrefs.instance.onboardingId,
+        "onboardingId": LocalStorage.instance.onboardingId,
         "action": "approve",
       },
     );

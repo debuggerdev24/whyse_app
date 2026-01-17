@@ -88,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           AppTextField(
                             hintText: "Password",
                             obSecureText: _isObscure,
-                            controller: provider.passwordController,
+                            controller: provider.loginPasswordCtr,
                             suffixIcon: Padding(
                               padding: const EdgeInsets.all(13.0),
                               child: GestureDetector(

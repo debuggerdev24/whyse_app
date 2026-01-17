@@ -19,7 +19,7 @@ import 'core/helper/log_helper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SharedPrefs.instance.init();
+  await LocalStorage.instance.init();
   await DioClient.instance.initialize();
   runApp(
     MultiProvider(
@@ -50,24 +50,24 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     // Delay to ensure router is ready
-    provider= context.read<AuthProvider>();
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-      _handleInitialLink();
+    provider = context.read<AuthProvider>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // _handleInitialLink();
       _handleIncomingLinks();
-    // });
+    });
   }
 
-  Future<void> _handleInitialLink() async {
-    try {
-      final initialLink = await _appLinks.getInitialLinkString();
-      if (initialLink != null && !_isProcessingLink) {
-        Logger.info("Initial Link: $initialLink");
-        _handleDeepLink(Uri.parse(initialLink));
-      }
-    } catch (e) {
-      Logger.error("Failed to get initial app link: $e");
-    }
-  }
+  // Future<void> _handleInitialLink() async {
+  //   try {
+  //     final initialLink = await _appLinks.getInitialLinkString();
+  //     if (initialLink != null && !_isProcessingLink) {
+  //       Logger.info("Initial Link: $initialLink");
+  //       _handleDeepLink(Uri.parse(initialLink));
+  //     }
+  //   } catch (e) {
+  //     Logger.error("Failed to get initial app link: $e");
+  //   }
+  // }
 
   void _handleIncomingLinks() {
     Logger.info("Deep Linking initialize");
@@ -102,7 +102,8 @@ class _MyAppState extends State<MyApp> {
       Logger.info("path -> ${uri.path}");
 
       // Password Reset Link
-      if (uri.host == domain && uri.path == forgotPasswordPath) {
+      if (uri.host == AppConstants.domain &&
+          uri.path == AppConstants.forgotPasswordPath) {
         Logger.info("Navigation triggered from verify-reset-password link");
         final token = uri.queryParameters["token"];
 
@@ -123,7 +124,8 @@ class _MyAppState extends State<MyApp> {
       }
 
       //todo ------------------ Parent Consent Link -------------------
-      if (uri.host == domain && uri.path == parentEmailPath) {
+      if (uri.host == AppConstants.domain &&
+          uri.path == AppConstants.parentEmailPath) {
         Logger.info("Navigation triggered from verify-parent-consent link");
         final token = uri.queryParameters["token"];
 
@@ -134,12 +136,20 @@ class _MyAppState extends State<MyApp> {
           //todo Navigate after a short delay
           // Future.delayed(const Duration(milliseconds: 100), () {
           // context.pushNamed(AppRoutes.consentStatusScreen.name);
-          .verifyConsentRequest(
+          provider.verifyConsentRequest(
             onSuccess: () {
-              context.pushNamed(
+              UserAppRoute.goRouter.goNamed(
                 AppRoutes.createAccountScreen.name,
                 extra: true,
               );
+              // AppToast.success(
+              //   context,
+              //   "Parent consent verify successfully.Create account.",
+              // );
+              // context.pushNamed(
+              //   AppRoutes.createAccountScreen.name,
+              //   extra: true,
+              // );
             },
             onFailed: (e) {
               AppToast.error(context, e.errorMsg);
@@ -183,3 +193,7 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
+
+/*
+
+*/

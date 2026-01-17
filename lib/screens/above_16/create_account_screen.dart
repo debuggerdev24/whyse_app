@@ -8,6 +8,7 @@ import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/utils/custom_loader.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
+import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
@@ -31,22 +32,24 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
   @override
   void initState() {
-    Logger.info("CReate Account status${widget.isFromSuccessConsent}");
-    if (widget.isFromSuccessConsent ?? false) {
-      AppToast.success(
-        context,
-        "Parent consent verify successfully.Create account.",
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      Logger.info(
+        "Consent for create account status: ${widget.isFromSuccessConsent ?? false}",
       );
-    }
+      if (widget.isFromSuccessConsent ?? false) {
+        AppToast.success(
+          context,
+          "Parent consent verify successfully. \nCreate your account.",
+        );
+      }
+    });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = context.watch<AuthProvider>();
-    return Scaffold(
+    return AppLayout(
       resizeToAvoidBottomInset: false,
-      backgroundColor: AppColors.backgroundColor,
       body: Consumer<AuthProvider>(
         builder: (context, provider, child) {
           return SafeArea(
@@ -76,8 +79,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         ),
                       ),
                       26.h.verticalSpace,
-
-                      signUpForm(authProvider),
+                      //todo
+                      signUpForm(provider),
 
                       22.h.verticalSpace,
                       //todo agree to policy check box
@@ -180,12 +183,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           text: isEmailSent ? "Verify" : "Next",
                           backgroundColor: AppColors.yellowColor,
                           onTap: () async {
-                            final authProvider = Provider.of<AuthProvider>(
-                              context,
-                              listen: false,
-                            );
                             if (isEmailSent) {
-                              final success = await authProvider.verifyEmail(
+                              final success = await provider.verifyEmail(
                                 context,
                               );
 
@@ -195,7 +194,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                 );
                               }
                             } else {
-                              final success = await authProvider.createAccount(
+                              final success = await provider.createAccount(
                                 context,
                                 isTermsAccepted: acceptedTerms,
                               );
@@ -228,7 +227,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     );
   }
 
-  Column signUpForm(AuthProvider authProvider) {
+  Widget signUpForm(AuthProvider authProvider) {
     return Column(
       spacing: 8.h,
       children: [
@@ -247,7 +246,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         AppTextField(
           hintText: "Password",
           obSecureText: _isPasswordObscure,
-          controller: authProvider.passwordController,
+          controller: authProvider.createAccPasswordCtr,
           suffixIcon: Padding(
             padding: const EdgeInsets.all(13.0),
             child: GestureDetector(

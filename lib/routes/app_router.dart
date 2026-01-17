@@ -42,6 +42,8 @@ class UserAppRoute {
 
   static final GoRouter goRouter = GoRouter(
     navigatorKey: rootNavigatorKey,
+    debugLogDiagnostics: true,
+
     initialLocation: AppRoutes.splashScreen.path,
     routes: [
       ...routes,
@@ -77,6 +79,38 @@ class UserAppRoute {
         return SplashScreen();
       },
     ),
+
+    // GoRoute(
+    //   path: AppRoutes.verifyParentConsentScreen.path,
+    //   name: AppRoutes.verifyParentConsentScreen.name,
+    //   builder: (context, state) {
+    //     final uri = state.uri;
+    //     final token = state.uri.queryParameters["token"];
+    //
+    //     Logger.info("URI -> $uri");
+    //     Logger.info("scheme -> ${uri.scheme}");
+    //     Logger.info("host -> ${uri.host}");
+    //     Logger.info("path -> ${uri.path}");
+    //     if (token != null && token.isNotEmpty) {
+    //       context.read<AuthProvider>().setParentEmailToken = token;
+    //
+    //       //todo Call your API automatically when screen opens
+    //       context.read<AuthProvider>().verifyConsentRequest(
+    //         onSuccess: () {
+    //           context.pushNamed(
+    //             AppRoutes.createAccountScreen.name,
+    //             extra: true,
+    //           );
+    //         },
+    //         onFailed: (e) {
+    //           AppToast.error(context, e.errorMsg);
+    //         },
+    //       );
+    //     }
+    //
+    //     return const ConsentStatusScreen();
+    //   },
+    // ),
     GoRoute(
       path: AppRoutes.loginScreen.path,
       name: AppRoutes.loginScreen.name,
@@ -102,11 +136,13 @@ class UserAppRoute {
       path: AppRoutes.createAccountScreen.path,
       name: AppRoutes.createAccountScreen.name,
       builder: (context, state) {
-        final status = state.extra as bool;
-        return CreateAccountScreen(isFromSuccessConsent: false);
+        final bool status = (state.extra as bool?) ?? false;
+
+        return CreateAccountScreen(isFromSuccessConsent: status);
       },
     ),
-    // Below 16 Routes
+
+    //todo Below 16 Routes
     GoRoute(
       path: AppRoutes.parentEmailScreen.path,
       name: AppRoutes.parentEmailScreen.name,
@@ -118,12 +154,10 @@ class UserAppRoute {
       path: AppRoutes.consentStatusScreen.path,
       name: AppRoutes.consentStatusScreen.name,
       builder: (context, state) {
-        // Optional: Parse extra for testing/demo purposes if we want to toggle state
-        // final bool isAccepted = state.extra as bool? ?? true;
         return ConsentStatusScreen();
       },
     ),
-    // Onboarding Routes
+    //todo Onboarding Routes
     GoRoute(
       path: AppRoutes.profileInfoScreen.path,
       name: AppRoutes.profileInfoScreen.name,

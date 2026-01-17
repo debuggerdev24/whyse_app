@@ -35,7 +35,7 @@ class FieldValidators {
     }
 
     if (!emailPattern.hasMatch(value)) {
-      return "Enter valueid Email.";
+      return "Enter valid Email.";
     }
     return null;
   }
