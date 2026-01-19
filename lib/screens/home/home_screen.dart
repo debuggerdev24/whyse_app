@@ -28,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const PracticeZoneSection(),
             24.h.verticalSpace,
+
             BottomStatsCard(),
             10.h.verticalSpace,
           ],

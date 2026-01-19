@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:redstreakapp/core/constants/shared_pref.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
@@ -11,8 +12,10 @@ import 'package:redstreakapp/services/base_api_service.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/helper/log_helper.dart';
+import '../../models/auth/on_boarding_progress_model.dart';
 import '../../models/home/story_models/generate_story_request.dart';
 import '../../models/home/story_models/story_model.dart';
+import '../../routes/user_routes.dart';
 
 class AuthProvider with ChangeNotifier {
   TextEditingController customGoalTitleCtr = TextEditingController(),
@@ -35,9 +38,67 @@ class AuthProvider with ChangeNotifier {
   DateTime? selectedDate;
   String googleLoginEmail = "", selectedGoalId = "";
 
+  bool acceptedTerms = false;
+  bool isEmailSent = false;
+  bool isPasswordObscure = true;
+  bool isConfirmPasswordObscure = true;
+
+  // -------- TOGGLE FUNCTIONS -------- //
+
+  void toggleAcceptedTerms() {
+    acceptedTerms = !acceptedTerms;
+    notifyListeners();
+  }
+
+  void togglePasswordVisibility() {
+    isPasswordObscure = !isPasswordObscure;
+    notifyListeners();
+  }
+
+  void toggleConfirmPasswordVisibility() {
+    isConfirmPasswordObscure = !isConfirmPasswordObscure;
+    notifyListeners();
+  }
+
+  void setEmailSent(bool value) {
+    isEmailSent = value;
+    notifyListeners();
+  }
+
   set setSendForgotPassLinkStatus(bool value) {
     isSendForgotPassVerification = value;
     notifyListeners();
+  }
+
+  Future<void> handleAccountCreation({required BuildContext context}) async {
+    if (isEmailSent) {
+      isVerifyEmailLoading = true;
+      notifyListeners();
+
+      final success = await verifyEmail(context);
+
+      isVerifyEmailLoading = false;
+      notifyListeners();
+
+      if (success && context.mounted) {
+        context.pushNamed(AppRoutes.profileInfoScreen.name);
+      }
+    } else {
+      isCreateAccountLoading = true;
+      notifyListeners();
+
+      final success = await createAccount(
+        context,
+        isTermsAccepted: acceptedTerms,
+      );
+
+      isCreateAccountLoading = false;
+      notifyListeners();
+
+      if (success) {
+        setEmailSent(true);
+      }
+    }
   }
 
   void updateGoalId(String id) {
@@ -121,8 +182,10 @@ class AuthProvider with ChangeNotifier {
       },
       (r) async {
         final data = r['data'];
-        await LocalStorage.instance.setOnboardingEmail(data['email']);
-        await LocalStorage.instance.setOnboardingId(data['onboardingId']);
+        await LocalStorageService.instance.setOnboardingEmail(data['email']);
+        await LocalStorageService.instance.setOnboardingId(
+          data['onboardingId'],
+        );
         onSuccess.call();
         signUpEmailCtr.clear();
       },
@@ -201,68 +264,71 @@ class AuthProvider with ChangeNotifier {
 
   Future<String?> getOnBoardingProgress() async {
     try {
-      final onboardingId = LocalStorage.instance.onboardingId;
+      final onboardingId = LocalStorageService.instance.onboardingId;
       if (onboardingId == null) return null;
 
       final response = await AuthApiServices().getOnboardingProgress(
         onboardingId: onboardingId,
       );
+
       if (response != null && response['success'] == true) {
-        final data = response['data'];
+        final data = OnBoardingProgressModel.fromJson(response["data"]);
 
-        if (data['nextStep'] != null &&
-            data['nextStep'].toString().isNotEmpty) {
-          return data['nextStep'];
-        }
+        // if (data['nextStep'] != null &&
+        //     data['nextStep'].toString().isNotEmpty) {
+        //   return data['nextStep'];
+        // }
 
-        if (data['currentStep'] == AppConstants.createAccount &&
-            data['userProfile'] != null &&
-            data['userProfile']['firstName'] != null) {
+        if (data.currentStep == AppConstants.createAccount &&
+            data.userProfile != null &&
+            data.userProfile != null) {
           return AppConstants.profileInfo;
         }
 
-        if (data['currentStep'] == AppConstants.profileInfo &&
-            data['userProfile'] != null &&
-            data['userProfile']['country'] != null) {
+        if (data.currentStep == AppConstants.profileInfo &&
+            data.userProfile != null &&
+            data.userProfile!.country != null) {
           return AppConstants.readingGoal;
         }
 
-        if (data['currentStep'] == AppConstants.readingGoal &&
-            data['userProfile'] != null &&
-            data['userProfile']['dailyReadingGoal'] != null) {
+        if (data.currentStep == AppConstants.readingGoal &&
+            data.userProfile != null &&
+            data.userProfile!.dailyReadingGoal != null) {
           return AppConstants.interest;
         }
 
-        if (data['currentStep'] == AppConstants.interest &&
-            ((data['userInterests'] != null &&
-                    (data['userInterests'] as List).isNotEmpty) ||
-                (data['userProfile']['interests'] != null &&
-                    (data['userProfile']['interests'] as List).isNotEmpty))) {
+        if (data.currentStep == AppConstants.interest &&
+            ((data.userInterests != null &&
+                (data.userInterests as List).isNotEmpty))
+        // ||
+        // (data.userProfile. != null &&
+        //     (data['userProfile']['interests'] as List).isNotEmpty)
+        ) {
           return AppConstants.topics;
         }
 
-        if (data['currentStep'] == AppConstants.topics &&
-            ((data['userTopics'] != null &&
-                    (data['userTopics'] as List).isNotEmpty) ||
-                (data['userProfile']['topics'] != null &&
-                    (data['userProfile']['topics'] as List).isNotEmpty))) {
+        if (data.currentStep == AppConstants.topics &&
+            (data.userTopics != null && (data.userTopics as List).isNotEmpty)
+        //     ||
+        //     (data.userTopics['topics'] != null &&
+        //         (data['userProfile']['topics'] as List).isNotEmpty)
+        // )
+        ) {
           return AppConstants.goals;
         }
 
-        if (data['currentStep'] == AppConstants.goals &&
-            ((data['userGoals'] != null &&
-                    (data['userGoals'] as List).isNotEmpty) ||
-                (data['userProfile']['goals'] != null &&
-                    (data['userProfile']['goals'] as List).isNotEmpty))) {
+        if (data.currentStep == AppConstants.goals &&
+            ((data.userGoals != null && (data.userGoals as List).isNotEmpty) ||
+                (data.userProfile!.dailyReadingGoal != null))) {
           return AppConstants.completed;
         }
 
-        if (data["currentStep"] == AppConstants.consentStatus &&
-            data["consentStatus"] == AppConstants.accepted) {
+        if (data.currentStep == AppConstants.consentStatus &&
+            data.consentStatus == AppConstants.accepted) {
           return AppConstants.createAccount;
         }
 
-        return data['currentStep'];
+        return data.currentStep;
       }
       return null;
     } catch (e) {
@@ -282,7 +348,7 @@ class AuthProvider with ChangeNotifier {
     required Function(String error) onFailed,
   }) async {
     //todo checking onBoarding id null or not
-    final onboardingId = LocalStorage.instance.onboardingId;
+    final onboardingId = LocalStorageService.instance.onboardingId;
     if (onboardingId == null) {
       AppToast.error(context, "Onboarding session not found");
       return;
@@ -304,7 +370,7 @@ class AuthProvider with ChangeNotifier {
         onFailed.call(l.errorMsg);
       },
       (r) async {
-        await LocalStorage.instance.setAgeCompleted(true);
+        await LocalStorageService.instance.setAgeCompleted(true);
         clearCreateAccountFields();
         onSuccess.call();
       },
@@ -384,7 +450,7 @@ class AuthProvider with ChangeNotifier {
       return false;
     }
 
-    final onboardingId = LocalStorage.instance.onboardingId;
+    final onboardingId = LocalStorageService.instance.onboardingId;
     if (onboardingId == null) {
       AppToast.error(context, "Session invalid");
       return false;
@@ -456,7 +522,7 @@ class AuthProvider with ChangeNotifier {
   bool isVerifyEmailLoading = false;
 
   Future<bool> verifyEmail(BuildContext context) async {
-    final onboardingId = LocalStorage.instance.onboardingId;
+    final onboardingId = LocalStorageService.instance.onboardingId;
     final email = signupEmailController.text.trim();
 
     if (onboardingId == null) {
@@ -506,7 +572,7 @@ class AuthProvider with ChangeNotifier {
     required String country,
     required String preferredLanguage,
   }) async {
-    final onboardingId = LocalStorage.instance.onboardingId;
+    final onboardingId = LocalStorageService.instance.onboardingId;
     if (onboardingId == null) {
       AppToast.error(context, "Session invalid");
       return false;
@@ -552,7 +618,7 @@ class AuthProvider with ChangeNotifier {
     BuildContext context, {
     required int dailyReadingGoal,
   }) async {
-    final onboardingId = LocalStorage.instance.onboardingId;
+    final onboardingId = LocalStorageService.instance.onboardingId;
     if (onboardingId == null) {
       AppToast.error(context, "Session invalid");
       return false;
@@ -625,7 +691,7 @@ class AuthProvider with ChangeNotifier {
     required List<String> interestIds,
     required List<String> customInterests,
   }) async {
-    final onboardingId = LocalStorage.instance.onboardingId;
+    final onboardingId = LocalStorageService.instance.onboardingId;
     if (onboardingId == null) {
       AppToast.error(context, "Session invalid");
       return false;
@@ -701,7 +767,7 @@ class AuthProvider with ChangeNotifier {
     required List<String> topicIds,
     required List<String> customTopics,
   }) async {
-    final onboardingId = LocalStorage.instance.onboardingId;
+    final onboardingId = LocalStorageService.instance.onboardingId;
     if (onboardingId == null) {
       AppToast.error(context, "Session invalid");
       return false;
@@ -771,7 +837,7 @@ class AuthProvider with ChangeNotifier {
     required List<String> goalIds,
     required List<Map<String, String>> customGoals,
   }) async {
-    final onboardingId = LocalStorage.instance.onboardingId;
+    final onboardingId = LocalStorageService.instance.onboardingId;
     if (onboardingId == null) {
       AppToast.error(context, "Session invalid");
       return false;
@@ -855,7 +921,7 @@ class AuthProvider with ChangeNotifier {
 
             // Extract refresh token
             if (session['refreshToken'] != null) {
-              await LocalStorage.instance.setRefreshToken(
+              await LocalStorageService.instance.saveRefreshToken(
                 session['refreshToken'],
               );
             }
@@ -868,7 +934,7 @@ class AuthProvider with ChangeNotifier {
           }
 
           if (token != null) {
-            await LocalStorage.instance.setToken(token);
+            await LocalStorageService.instance.saveAuthToken(token);
             // Update the current API instance with the new token immediately
             DioClient.instance.addToken(token);
             debugPrint("Token saved successfully from login: $token");
@@ -877,7 +943,7 @@ class AuthProvider with ChangeNotifier {
           }
 
           if (data['onboardingId'] != null) {
-            await LocalStorage.instance.setOnboardingId(
+            await LocalStorageService.instance.setOnboardingId(
               data['onboardingId'].toString(),
             );
           }
@@ -968,11 +1034,11 @@ class AuthProvider with ChangeNotifier {
 
             if (session["accessToken"] != null) {
               accessToken = session["accessToken"];
-              await LocalStorage.instance.setToken(accessToken!);
+              await LocalStorageService.instance.saveAuthToken(accessToken!);
             }
 
             if (session["refreshToken"] != null) {
-              await LocalStorage.instance.setRefreshToken(
+              await LocalStorageService.instance.saveRefreshToken(
                 session["refreshToken"],
               );
             }
@@ -987,7 +1053,7 @@ class AuthProvider with ChangeNotifier {
           }
 
           if (data['onboardingId'] != null) {
-            await LocalStorage.instance.setOnboardingId(
+            await LocalStorageService.instance.setOnboardingId(
               data['onboardingId'].toString(),
             );
           }
@@ -1055,7 +1121,7 @@ class AuthProvider with ChangeNotifier {
     required VoidCallback onSuccess,
     required Function(String error) onFailed,
   }) async {
-    final onboardingId = LocalStorage.instance.onboardingId;
+    final onboardingId = LocalStorageService.instance.onboardingId;
     if (onboardingId == null) {
       AppToast.error(context, "On Boarding Id not found!");
       return;
@@ -1135,7 +1201,7 @@ class AuthProvider with ChangeNotifier {
 
   bool isLogOutLoading = false;
   Future<void> logOutUser({required VoidCallback onSuccess}) async {
-    final token = LocalStorage.instance.authToken;
+    final token = LocalStorageService.instance.authToken;
     Logger.info(token.toString());
     isLogOutLoading = true;
     notifyListeners();
@@ -1149,8 +1215,9 @@ class AuthProvider with ChangeNotifier {
     }
 
     // 1. Clear Local Data Immediately
-    await LocalStorage.instance.removeTokens();
-    await LocalStorage.instance.clear();
+    await LocalStorageService.instance.removeAuthToken();
+    await LocalStorageService.instance.removeRefreshToken();
+    await LocalStorageService.instance.clear();
 
     clearAllData();
     notifyListeners();
@@ -1242,7 +1309,7 @@ class AuthProvider with ChangeNotifier {
                 );
 
                 // Update local object
-                story.images.add(imagePath);
+                // story.image = imagePath;
               }
             }
           } catch (e) {
@@ -1345,7 +1412,7 @@ class AuthProvider with ChangeNotifier {
     final response = await AuthApiServices().verifyParentConsent(
       data: {
         "token": recoveryToken,
-        "onboardingId": LocalStorage.instance.onboardingId,
+        "onboardingId": LocalStorageService.instance.onboardingId,
         "action": "approve",
       },
     );

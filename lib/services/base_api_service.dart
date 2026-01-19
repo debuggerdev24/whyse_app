@@ -9,7 +9,7 @@ class DioClient {
   DioClient._();
   static final _instance = DioClient._();
   static const baseUrl = "https://whyse.com"; //"http://167.172.45.71";
-  static const apiBaseUrl = "$baseUrl/api/v1/";
+  static const apiBaseUrl = "$baseUrl/api/v1";
   static DioClient get instance => _instance;
   late Dio _dio;
 
@@ -22,17 +22,17 @@ class DioClient {
         sendTimeout: const Duration(seconds: 60),
         headers: {
           "Content-Type": "application/json",
-          if (LocalStorage.instance.authToken != null)
-            "Authorization": "Bearer ${LocalStorage.instance.authToken}",
+          if (LocalStorageService.instance.authToken != null)
+            "Authorization": "Bearer ${LocalStorageService.instance.authToken}",
         },
       ),
     );
 
     Logger.info(
-      "Authorization Token : ${LocalStorage.instance.authToken.toString()}",
+      "Authorization Token : ${LocalStorageService.instance.authToken.toString()}",
     );
     Logger.info(
-      "onBoarding ID : ${LocalStorage.instance.onboardingId.toString()}",
+      "onBoarding ID : ${LocalStorageService.instance.onboardingId.toString()}",
     );
     _dio.interceptors.add(
       PrettyDioLogger(request: true, requestBody: true, requestHeader: true),
@@ -45,11 +45,10 @@ class DioClient {
     _dio.options = _dio.options.copyWith(
       headers: {"Authorization": "Bearer $token"},
     );
-    print("Authorization token =======> $token");
   }
 
   Future<bool> isTokenValid() async {
-    final token = LocalStorage.instance.authToken;
+    final token = LocalStorageService.instance.authToken;
     return token != null && token.isNotEmpty;
   }
 }

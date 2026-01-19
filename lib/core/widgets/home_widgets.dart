@@ -13,7 +13,7 @@ import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/custom_shimmer.dart';
 import 'package:redstreakapp/models/home/story_models/story_model.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
-import 'package:redstreakapp/providers/home/home_provider.dart';
+import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:redstreakapp/screens/home/widgets/add_reading_bottom_sheet.dart';
 import 'package:redstreakapp/services/base_api_service.dart';
@@ -305,9 +305,9 @@ class YourPlanSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<HomeProvider>(
+    return Consumer<StoryProvider>(
       builder: (context, provider, child) {
-        if (provider.isLoading) {
+        if (provider.isGetStoryLoading) {
           return _buildShimmerLoading();
         }
 
@@ -494,7 +494,9 @@ class YourPlanSection extends StatelessWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: CachedNetworkImage(
-                        imageUrl: DioClient.baseUrl + recentStory.image!,
+                        imageUrl: (recentStory.image != null)
+                            ? (DioClient.baseUrl + recentStory.image!)
+                            : "https://unsplash.com/s/photos/white-paper",
                         width: 100.w,
                         height: 96.w,
                         fit: BoxFit.cover,

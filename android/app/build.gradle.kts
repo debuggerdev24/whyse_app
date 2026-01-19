@@ -19,7 +19,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.redstreakapp"   // ✅ KEEP ONLY THIS LINE
+        applicationId = "com.whyse.app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

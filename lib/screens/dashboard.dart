@@ -21,33 +21,34 @@ class UserDashBoard extends StatefulWidget {
 }
 
 class _UserDashBoardState extends State<UserDashBoard> {
-
+  late StoryProvider provider;
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      provider = context.read<StoryProvider>();
       callInitApis(context: context);
     });
   }
 
   void callInitApis({required BuildContext context}) {
-    context.read<HomeProvider>().getAllStories();
+    provider.getAllStories();
 
-    context.read<StoryProvider>().getStoryGoals(
+    provider.getStoryGoals(
       onFailed: (error) {
-        AppToast.error(context, error);
+        AppToast.error(context, "Goal $error");
       },
     );
 
-    context.read<StoryProvider>().getStoryInterest(
+    provider.getStoryInterest(
       onFailed: (error) {
-        AppToast.error(context, error);
+        AppToast.error(context, "Interest $error");
       },
     );
 
-    context.read<StoryProvider>().getStoryTopics(
+    provider.getStoryTopics(
       onFailed: (error) {
-        AppToast.error(context, error);
+        AppToast.error(context, "Topic $error");
       },
     );
   }

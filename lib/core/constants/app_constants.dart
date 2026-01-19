@@ -4,8 +4,9 @@ class AppConstants {
   static const String serverClientId =
       "928198076650-04u77ekdg426kkjqq2rusho0k3vcthr0.apps.googleusercontent.com";
   static const String domain = "whyse.com";
-  static const String parentEmailPath = "/verify-parent-consent";
+  static const String parentConsentPath = "/verify-parent-consent";
   static const String forgotPasswordPath = "/verify-recovery";
+  static const String age = "AGE";
   static const String email = "EMAIL";
   static const String parentEmail = "PARENT_EMAIL";
   static const String consentStatus = "CONSENT_STATUS";
@@ -17,4 +18,5 @@ class AppConstants {
   static const String goals = "GOALS";
   static const String completed = "COMPLETED";
   static const String accepted = "ACCEPTED";
+  static const String unAuthorized = "unauthorized";
 }

@@ -34,10 +34,11 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- Password reset link -->
-                <!--                <data-->
-                <!--                    android:host="whyse.com"-->
-                <!--                    android:pathPrefix="/verify-reset-password"-->
-                <!--                    android:scheme="whyseapp" />-->
+                <data
+                    android:host="google.com"
+                    android:scheme="https" />
+
+<!--                    android:pathPrefix="/verify-parent-consent"-->
 
                 <!-- Parent consent link -->
 

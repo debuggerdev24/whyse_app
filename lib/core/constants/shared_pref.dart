@@ -1,8 +1,8 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-class LocalStorage {
-  LocalStorage._();
-  static final LocalStorage instance = LocalStorage._();
+class LocalStorageService {
+  LocalStorageService._();
+  static final LocalStorageService instance = LocalStorageService._();
 
   late SharedPreferences prefs;
 
@@ -15,16 +15,20 @@ class LocalStorage {
   String? get authToken => prefs.getString('token');
   String? get refreshToken => prefs.getString('refresh_token');
 
-  Future<void> setToken(String token) async {
+  Future<void> saveAuthToken(String token) async {
     await prefs.setString("token", token);
   }
 
-  Future<void> setRefreshToken(String token) async {
-    await prefs.setString("refresh_token", token);
+  Future<void> removeAuthToken() async {
+    await prefs.remove("token");
   }
 
-  Future<void> removeTokens() async {
-    Future.wait([prefs.remove("token"), prefs.remove("refresh_token")]);
+  Future<void> removeRefreshToken() async {
+    await prefs.remove("refresh_token");
+  }
+
+  Future<void> saveRefreshToken(String token) async {
+    await prefs.setString("refresh_token", token);
   }
 
   /// ---------------- Onboarding ----------------

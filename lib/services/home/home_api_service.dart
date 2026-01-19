@@ -15,7 +15,6 @@ class HomeApiService {
   }
 
   Future<Either<ApiException, Map<String, dynamic>>> getInterest() async {
-    Logger.info("Called : ${EndPoints.getStoryInterest}");
 
     return await BaseApiHelper.instance.get(EndPoints.getStoryInterest);
   }
@@ -56,5 +55,9 @@ class HomeApiService {
       EndPoints.storeImage(storyId: id),
       data: data,
     );
+  }
+
+  Future<Either<ApiException, Map<String, dynamic>>> getAllStories() async {
+    return BaseApiHelper.instance.get(EndPoints.getAllStories);
   }
 }

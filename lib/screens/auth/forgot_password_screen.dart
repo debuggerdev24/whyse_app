@@ -9,7 +9,6 @@ import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
 import '../../core/constants/app_color.dart';
-import '../../core/helper/log_helper.dart';
 import '../../core/utils/custom_loader.dart';
 import '../../core/utils/de_bouncing.dart';
 import '../../core/widgets/app_textfiled.dart';
@@ -52,24 +51,13 @@ class ForgotPasswordScreen extends StatelessWidget {
                       ),
 
                       Spacer(),
-                      AppFilledButton(
-                        margin: EdgeInsets.only(bottom: 10),
-                        onTap: () {
-                          Logger.info(
-                            "TRecovery Token: ${provider.recoveryToken}",
-                          );
-                        },
-                        text: "check token",
-                      ),
+
                       if (provider.isSendForgotPassVerification)
                         AppOutlinedButton(
                           margin: EdgeInsets.only(bottom: 10),
                           onTap: () {
                             provider.verifyForgotPasswordEmail(
                               onFailed: (error) {
-                                // if(error){
-                                //
-                                // }
                                 AppToast.error(context, error.errorMsg);
                               },
                               onSuccess: () {

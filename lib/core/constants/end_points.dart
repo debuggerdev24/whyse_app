@@ -23,13 +23,15 @@ class EndPoints {
   static const getStoryInterest = "/story-flow/interests";
   static const getStoryTopics = "/story-flow/topics";
   // static String getSearchTopics({required String query}) => "/api/v1/story-flow/topics?search=$query";
-  static const getSearchTopics = "story-flow/topics";
+  static const getSearchTopics = "/story-flow/topics";
+  static const getAllStories = "/story/mobile";
   static const forgotPassword = "/mobile/auth/forgot-password";
   static const resetPassword = "/mobile/auth/reset-password";
   static const createStory = "/story/generateMobileStory";
   static const createStoryImage = "/story/generateMobileStoryImage";
-  static const verifyToken = "/mobile/auth/verify-recovery";
+  static const verifyForgotPassMail = "/mobile/auth/verify-recovery";
   static const verifyParentConsent = "/mobile/auth/parent-consent";
+  static const refreshToken = "/mobile/auth/refresh-token";
 
   static String storeImage({required String storyId}) =>
       "/story/mobile-story/$storyId/store-images";

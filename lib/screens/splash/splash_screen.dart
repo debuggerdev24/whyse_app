@@ -6,8 +6,13 @@ import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/app_constants.dart';
 import 'package:redstreakapp/core/constants/shared_pref.dart';
+import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
+import 'package:redstreakapp/services/base_api_service.dart';
+import 'package:redstreakapp/services/home/home_api_service.dart';
+
+import '../../services/auth/auth_api_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -41,23 +46,68 @@ class _SplashScreenState extends State<SplashScreen>
     Future.delayed(const Duration(seconds: 2), () async {
       if (!mounted) return;
       final authProvider = context.read<AuthProvider>();
-      final step = await authProvider.getOnBoardingProgress(
-        // onFailed: (error) {
-        //   AppToast.error(context, error);
-        // },
-      );
+      final step = await authProvider.getOnBoardingProgress();
+
+      //todo logic to check the access token is expire or not
+      final token = LocalStorageService.instance.authToken;
+      if (token != null && token.isNotEmpty) {
+        final response = await HomeApiService.instance.getAllStories();
+        response.fold(
+          (l) async {
+            if (l.code == "401" &&
+                l.errorMsg.toLowerCase().contains(AppConstants.unAuthorized)) {
+              // AppToast.error(context, "Access token is expired");
+              // AppToast.info(
+              //   context: context,
+              //   message:
+              //       "Refresh token : ${LocalStorageService.instance.refreshToken}",
+              // );
+
+              final result = await AuthApiServices().refreshToken();
+
+              result.fold(
+                (l) async {
+                  AppToast.error(
+                    context,
+                    "Refre. to API failed\n${l.errorMsg}",
+                  );
+                  // if (l.code.toString() == "401") {
+                  //   AppToast.success(context, "Refresh token is expired");
+                  //   await LocalStorageService.instance.removeRefreshToken();
+                  //   await LocalStorageService.instance.removeAuthToken();
+                  //   context.goNamed(AppRoutes.loginScreen.name);
+                  //   return;
+                  // }
+                },
+                (r) {
+                  LocalStorageService.instance.saveAuthToken(
+                    r["session"]["accessToken"],
+                  );
+                  LocalStorageService.instance.saveRefreshToken(
+                    r["session"]["refreshToken"],
+                  );
+                  DioClient.instance.addToken(r["session"]["accessToken"]);
+                  context.goNamed(AppRoutes.homeScreen.name);
+                },
+              );
+            }
+          },
+          (r) {
+            context.goNamed(AppRoutes.homeScreen.name);
+          },
+        );
+      } else {
+        context.goNamed(AppRoutes.loginScreen.name);
+      }
 
       if (!mounted) {
         return;
       }
+
       //todo fetch all the API in init phase of the app.
 
-      if (step == "AGE") {
-        // if (isAgeDone) {
-        //   context.goNamed(UserAppRoutes.createAccountScreen.name);
-        // } else {
+      if (step == AppConstants.age) {
         context.goNamed(AppRoutes.enterAgeScreen.name);
-        // }
       } else if (step == AppConstants.email) {
         context.goNamed(AppRoutes.enterAgeScreen.name);
       } else if (step == AppConstants.parentEmail) {
@@ -77,18 +127,10 @@ class _SplashScreenState extends State<SplashScreen>
       } else if (step == AppConstants.goals) {
         context.goNamed(AppRoutes.goalsScreen.name);
       } else if (step == AppConstants.completed) {
-        if (LocalStorage.instance.authToken != null) {
+        if (LocalStorageService.instance.authToken == null) {
           context.goNamed(AppRoutes.loginScreen.name);
         } else {
           context.goNamed(AppRoutes.homeScreen.name);
-        }
-      } else {
-        // Check if user is already logged in
-        final token = LocalStorage.instance.authToken;
-        if (token != null && token.isNotEmpty) {
-          context.goNamed(AppRoutes.homeScreen.name);
-        } else {
-          context.goNamed(AppRoutes.loginScreen.name);
         }
       }
     });

@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
+import 'package:redstreakapp/core/constants/end_points.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
+import 'package:redstreakapp/services/base_api_service.dart';
 
 import '../../core/enums/app_enums.dart';
 import '../../core/helper/log_helper.dart';
@@ -22,6 +24,9 @@ class StoryProvider extends ChangeNotifier {
   String createdStoryId = "", createdStoryImagePath = "";
   Map<String, dynamic> dataToSendCreateStory = {};
   final allowedDurations = {5, 10, 15, 20, 25, 30, 35, 40, 45};
+  List<Story> _stories = [];
+
+  List<Story> get stories => _stories;
   final List<String> readingDurations = [
     '5 mins',
     '10 mins',
@@ -88,6 +93,27 @@ class StoryProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  bool isGetStoryLoading = false;
+  Future<void> getAllStories() async {
+    isGetStoryLoading = true;
+    notifyListeners();
+
+    final response = await HomeApiService.instance.getAllStories();
+
+    response.fold(
+          (l) {
+        Logger.error(l.errorMsg);
+      },
+          (r) {
+        final data = r['data'] as List;
+        _stories = data.map((e) => Story.fromJson(e)).toList();
+        isGetStoryLoading = false;
+        notifyListeners();
+      },
+    );
+  }
+
 
   bool isGetGoalsLoading = false;
 
@@ -391,4 +417,6 @@ class StoryProvider extends ChangeNotifier {
       Logger.error(l.errorMsg);
     }, (r) {});
   }
+
+
 }

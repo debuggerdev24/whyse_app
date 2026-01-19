@@ -1,22 +1,21 @@
 class Story {
   final String id, title, content;
-  final List<String> images;
-  final String? image; // Single image from get all stories API
   final List<Quiz> quiz;
-  final String? readingTopic, readingLevel, readingSkillFocus;
-  final int? age;
-  final String? language;
-  final String? textType;
-  final int? lessonDuration;
+  final String? readingTopic,
+      readingLevel,
+      readingSkillFocus,
+      language,
+      textType,
+      image,
+      createdAt,
+      updatedAt;
+  final int? lessonDuration, age;
   final List<String>? tags;
-  final String? createdAt; // Added for good measure
-  final String? updatedAt; // Added for good measure
 
   Story({
     required this.id,
     required this.title,
     required this.content,
-    required this.images,
     this.image,
     required this.quiz,
     this.readingTopic,
@@ -36,7 +35,6 @@ class Story {
       id: json['id'] ?? '',
       title: json['title'] ?? '',
       content: json['content'] ?? '',
-      images: json['images'] != null ? List<String>.from(json['images']) : [],
       image: json['image'],
       quiz: json['quiz'] != null
           ? (json['quiz'] as List).map((i) => Quiz.fromJson(i)).toList()

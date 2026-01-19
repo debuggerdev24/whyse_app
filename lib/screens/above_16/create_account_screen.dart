@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
@@ -12,7 +11,6 @@ import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
 
 import '../../core/widgets/custom_toast.dart';
 
@@ -25,11 +23,6 @@ class CreateAccountScreen extends StatefulWidget {
 }
 
 class _CreateAccountScreenState extends State<CreateAccountScreen> {
-  bool acceptedTerms = false;
-  bool isEmailSent = false;
-  bool _isPasswordObscure = true;
-  bool _isConfirmPasswordObscure = true;
-
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -54,7 +47,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         builder: (context, provider, child) {
           return SafeArea(
             bottom: false,
-
             child: Stack(
               children: [
                 Padding(
@@ -87,7 +79,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
                         onTap: () {
-                          setState(() => acceptedTerms = !acceptedTerms);
+                          provider.toggleAcceptedTerms();
                         },
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,11 +93,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                   color: AppColors.black.withValues(alpha: 0.2),
                                   width: 1.5,
                                 ),
-                                color: acceptedTerms
+                                color: provider.acceptedTerms
                                     ? AppColors.yellowColor
                                     : Colors.transparent,
                               ),
-                              child: acceptedTerms
+                              child: provider.acceptedTerms
                                   ? Icon(
                                       Icons.check,
                                       size: 18.w,
@@ -113,7 +105,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                     )
                                   : null,
                             ),
-
                             8.w.horizontalSpace,
                             Expanded(
                               child: RichText(
@@ -121,10 +112,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                 text: TextSpan(
                                   children: [
                                     TextSpan(
-                                      text: "I accept RedStreakApp’s ",
+                                      text: "I accept WhyseApp’s ",
                                       style: AppTextStyles.sfProDisplayMedium(
                                         height: 1.25,
-
                                         fontSize: 14.sp,
                                         color: AppColors.lightblackColor
                                             .withValues(alpha: 0.6),
@@ -143,7 +133,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                       text: " and ",
                                       style: AppTextStyles.sfProDisplayMedium(
                                         height: 1.2,
-
                                         fontSize: 14.sp,
                                         color: AppColors.lightblackColor
                                             .withValues(alpha: 0.6),
@@ -154,7 +143,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                       style: AppTextStyles.sfProDisplayBold(
                                         fontSize: 14.sp,
                                         height: 1.2,
-
                                         decoration: TextDecoration.underline,
                                         color: AppColors.black,
                                       ),
@@ -164,7 +152,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                       style: AppTextStyles.sfProDisplayMedium(
                                         fontSize: 14.sp,
                                         height: 1.2,
-
                                         color: AppColors.lightblackColor
                                             .withValues(alpha: 0.6),
                                       ),
@@ -180,36 +167,37 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       Padding(
                         padding: EdgeInsets.only(bottom: 10.h),
                         child: AppFilledButton(
-                          text: isEmailSent ? "Verify" : "Next",
+                          text: provider.isEmailSent ? "Verify" : "Next",
                           backgroundColor: AppColors.yellowColor,
-                          onTap: () async {
-                            if (isEmailSent) {
-                              final success = await provider.verifyEmail(
-                                context,
-                              );
-
-                              if (success && context.mounted) {
-                                context.pushNamed(
-                                  AppRoutes.profileInfoScreen.name,
-                                );
-                              }
-                            } else {
-                              final success = await provider.createAccount(
-                                context,
-                                isTermsAccepted: acceptedTerms,
-                              );
-                              if (success && context.mounted) {
-                                setState(() {
-                                  isEmailSent = true;
-                                });
-                                // CustomToast.showToastMessage(
-                                //   context,
-                                //   "Please verify your email to continue",
-                                //   true,
-                                // );
-                              }
-                            }
-                          },
+                          // onTap: () async {
+                          //   if (provider.isEmailSent) {
+                          //     final success = await provider.verifyEmail(
+                          //       context,
+                          //     );
+                          //
+                          //     if (success && context.mounted) {
+                          //       context.pushNamed(
+                          //         AppRoutes.profileInfoScreen.name,
+                          //       );
+                          //     }
+                          //   } else {
+                          //     final success = await provider.createAccount(
+                          //       context,
+                          //       isTermsAccepted: provider.acceptedTerms,
+                          //     );
+                          //     if (success && context.mounted) {
+                          //       provider.isEmailSent = true;
+                          //
+                          //       // CustomToast.showToastMessage(
+                          //       //   context,
+                          //       //   "Please verify your email to continue",
+                          //       //   true,
+                          //       // );
+                          //     }
+                          //   }
+                          // },
+                          onTap: () =>
+                              provider.handleAccountCreation(context: context),
                           isLoading: context.watch<AuthProvider>().isLoading,
                         ),
                       ),
@@ -227,35 +215,33 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     );
   }
 
-  Widget signUpForm(AuthProvider authProvider) {
+  Widget signUpForm(AuthProvider provider) {
     return Column(
       spacing: 8.h,
       children: [
         AppTextField(
           hintText: "First Name",
-          controller: authProvider.firstNameController,
+          controller: provider.firstNameController,
         ),
         AppTextField(
           hintText: "Last Name",
-          controller: authProvider.lastNameController,
+          controller: provider.lastNameController,
         ),
         AppTextField(
           hintText: "Email",
-          controller: authProvider.signupEmailController,
+          controller: provider.signupEmailController,
         ),
         AppTextField(
           hintText: "Password",
-          obSecureText: _isPasswordObscure,
-          controller: authProvider.createAccPasswordCtr,
+          obSecureText: provider.isPasswordObscure,
+          controller: provider.createAccPasswordCtr,
           suffixIcon: Padding(
             padding: const EdgeInsets.all(13.0),
             child: GestureDetector(
               onTap: () {
-                setState(() {
-                  _isPasswordObscure = !_isPasswordObscure;
-                });
+                provider.togglePasswordVisibility();
               },
-              child: _isPasswordObscure
+              child: provider.isPasswordObscure
                   ? SvgIcon(
                       AppAssets.password,
                       size: 24.w,
@@ -267,17 +253,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         ),
         AppTextField(
           hintText: "Confirm Password",
-          controller: authProvider.confirmPasswordController,
-          obSecureText: _isConfirmPasswordObscure,
+          controller: provider.confirmPasswordController,
+          obSecureText: provider.isConfirmPasswordObscure,
           suffixIcon: Padding(
             padding: const EdgeInsets.all(13.0),
             child: GestureDetector(
               onTap: () {
-                setState(() {
-                  _isConfirmPasswordObscure = !_isConfirmPasswordObscure;
-                });
+                provider.toggleConfirmPasswordVisibility();
               },
-              child: _isConfirmPasswordObscure
+              child: provider.isConfirmPasswordObscure
                   ? SvgIcon(
                       AppAssets.password,
                       size: 24.w,

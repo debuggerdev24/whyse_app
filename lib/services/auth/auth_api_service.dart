@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:redstreakapp/core/constants/end_points.dart';
+import 'package:redstreakapp/core/constants/shared_pref.dart';
 import 'package:redstreakapp/services/base_api_service.dart';
 
 import '../../models/home/story_models/generate_story_request.dart';
@@ -27,16 +28,6 @@ class AuthApiServices {
       data: data,
     );
   }
-
-  //todo 1st
-  // Future<Either<ApiException, Map<String, dynamic>>> getOnboardingProgress({
-  //   required String onboardingId,
-  // }) async {
-  //   return BaseApiHelper.instance.post(
-  //     EndPoints.onBoardingProgress,
-  //     data: {"identifier": onboardingId},
-  //   );
-  // }
 
   Future<dynamic> getOnboardingProgress({required String onboardingId}) async {
     final res = await _api.post(
@@ -265,12 +256,6 @@ class AuthApiServices {
     return res.data;
   }
 
-  //@override
-  Future<dynamic> getAllStories() async {
-    final res = await _api.get('http://167.172.45.71/api/v1/story/mobile');
-    return res.data;
-  }
-
   Future<Either<ApiException, Map<String, dynamic>>> forgotPassword({
     required Map<String, dynamic> data,
   }) {
@@ -280,7 +265,10 @@ class AuthApiServices {
   Future<Either<ApiException, Map<String, dynamic>>> verifyForgotPasswordEmail({
     required Map<String, dynamic> data,
   }) {
-    return BaseApiHelper.instance.post(EndPoints.verifyToken, data: data);
+    return BaseApiHelper.instance.post(
+      EndPoints.verifyForgotPassMail,
+      data: data,
+    );
   }
 
   Future<Either<ApiException, Map<String, dynamic>>> verifyParentConsent({
@@ -298,9 +286,10 @@ class AuthApiServices {
     return BaseApiHelper.instance.post(EndPoints.resetPassword, data: data);
   }
 
-  Future<Either<ApiException, Map<String, dynamic>>> verifyParentEmail({
-    required Map<String, dynamic> data,
-  }) {
-    return BaseApiHelper.instance.post(EndPoints.resetPassword, data: data);
+  Future<Either<ApiException, Map<String, dynamic>>> refreshToken() {
+    return BaseApiHelper.instance.post(
+      EndPoints.refreshToken,
+      data: {"refreshToken": LocalStorageService.instance.refreshToken},
+    );
   }
 }
