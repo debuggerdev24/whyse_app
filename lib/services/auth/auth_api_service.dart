@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:redstreakapp/core/constants/end_points.dart';
 import 'package:redstreakapp/core/constants/shared_pref.dart';
+import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/services/base_api_service.dart';
 
 import '../../models/home/story_models/generate_story_request.dart';
@@ -216,6 +217,7 @@ class AuthApiServices {
 
   //@override
   Future<dynamic> logOut({required String accessToken}) async {
+    Logger.info("I called");
     final res = await _api.post(
       EndPoints.logOut,
       data: {"accessToken": accessToken},
@@ -289,7 +291,7 @@ class AuthApiServices {
   Future<Either<ApiException, Map<String, dynamic>>> refreshToken() {
     return BaseApiHelper.instance.post(
       EndPoints.refreshToken,
-      data: {"refreshToken": LocalStorageService.instance.refreshToken},
+      data: {"refreshToken": LocalStorageService.instance.getRefreshToken},
     );
   }
 }

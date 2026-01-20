@@ -1,8 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
-import 'package:redstreakapp/core/constants/end_points.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
-import 'package:redstreakapp/services/base_api_service.dart';
 
 import '../../core/enums/app_enums.dart';
 import '../../core/helper/log_helper.dart';
@@ -102,10 +100,10 @@ class StoryProvider extends ChangeNotifier {
     final response = await HomeApiService.instance.getAllStories();
 
     response.fold(
-          (l) {
+      (l) {
         Logger.error(l.errorMsg);
       },
-          (r) {
+      (r) {
         final data = r['data'] as List;
         _stories = data.map((e) => Story.fromJson(e)).toList();
         isGetStoryLoading = false;
@@ -113,7 +111,6 @@ class StoryProvider extends ChangeNotifier {
       },
     );
   }
-
 
   bool isGetGoalsLoading = false;
 
@@ -417,6 +414,4 @@ class StoryProvider extends ChangeNotifier {
       Logger.error(l.errorMsg);
     }, (r) {});
   }
-
-
 }

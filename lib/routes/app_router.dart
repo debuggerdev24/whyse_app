@@ -136,9 +136,9 @@ class UserAppRoute {
       path: AppRoutes.createAccountScreen.path,
       name: AppRoutes.createAccountScreen.name,
       builder: (context, state) {
-        final bool status = (state.extra as bool?) ?? false;
+        final String status = (state.extra as String?) ?? "false";
 
-        return CreateAccountScreen(isFromSuccessConsent: status);
+        return CreateAccountScreen(consentStatus: status);
       },
     ),
 
@@ -279,7 +279,9 @@ class UserAppRoute {
       path: AppRoutes.resetPasswordScreen.path,
       name: AppRoutes.resetPasswordScreen.name,
       builder: (context, state) {
-        return ResetPasswordScreen();
+        final bool status = (state.extra as bool?) ?? false;
+
+        return ResetPasswordScreen(isVerified: status);
       },
     ),
     GoRoute(

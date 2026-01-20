@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/constants/app_constants.dart';
+import 'package:redstreakapp/core/constants/shared_pref.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
@@ -25,8 +25,7 @@ class DeepLinkHandler {
       (String? link) {
         if (link != null && !_isProcessingLink) {
           final uri = Uri.parse(link);
-          Logger.info("Incoming Link: $link");
-          _handleDeepLink(uri, context: context, authProvider: authProvider);
+          _handleDeepLink(uri, context: context, provider: authProvider);
         }
       },
       onError: (err) {
@@ -44,7 +43,7 @@ class DeepLinkHandler {
   void _handleDeepLink(
     Uri uri, {
     required BuildContext context,
-    required AuthProvider authProvider,
+    required AuthProvider provider,
   }) {
     if (_isProcessingLink) {
       Logger.info("Already processing a link, skipping...");
@@ -60,20 +59,49 @@ class DeepLinkHandler {
         "host -> ${uri.host}\n"
         "path -> ${uri.path}",
       );
+      final currentCtx =
+          UserAppRoute.goRouter.routerDelegate.navigatorKey.currentContext;
 
       //todo ---------------- Password Reset ----------------
-      if (uri.host == "google.com") {
+
+      if (uri.path == AppConstants.forgotPasswordPath &&
+          uri.host == AppConstants.domain) {
         Logger.info("Navigation triggered from verify-reset-password link");
 
-        final token = uri.queryParameters["token"];
+        // final token = uri.queryParameters[AppConstants.accessToken];
+        final fragment = uri.fragment;
+        Logger.info("Fragment: $fragment");
+
+        final params = Uri.splitQueryString(fragment);
+        final token = params[AppConstants.accessToken];
 
         if (token != null && token.isNotEmpty) {
-          authProvider.setResetPasswordToken = token;
+          provider.setResetPasswordToken = token;
           Logger.info("Reset Password Token: $token");
-
-          context.pushNamed(AppRoutes.forgotPasswordScreen.name);
+          provider.verifyForgotPasswordEmail(
+            onSuccess: () {
+              UserAppRoute.goRouter.goNamed(
+                AppRoutes.resetPasswordScreen.name,
+                extra: true,
+              );
+              AppToast.success(currentCtx!, "Email verify successfully.");
+            },
+            onFailed: (e) {
+              AppToast.error(context, e.errorMsg);
+            },
+          );
         } else {
-          Logger.error("No token found in password reset link");
+          // AppToast
+
+          if (currentCtx != null) {
+            AppToast.info(
+              context: currentCtx,
+              message:
+                  "Password reset link is invalid or has expired. Please request a new one.",
+            );
+          } else {
+            Logger.error("Root context not available for toast");
+          }
         }
 
         _isProcessingLink = false;
@@ -83,19 +111,27 @@ class DeepLinkHandler {
       //todo ---------------- Parent Consent ----------------
       if (uri.host == AppConstants.domain &&
           uri.path == AppConstants.parentConsentPath) {
-        Logger.info("Navigation triggered from verify-parent-consent link");
-
-        final token = uri.queryParameters["token"];
-
+        //todo if already verify then it wll be return.
+        if (LocalStorageService.instance.getConsentRequestStatus) {
+          AppToast.info(
+            context: currentCtx!,
+            message: "Consent request all ready approved",
+          );
+          return;
+        }
+        final token = uri.queryParameters[AppConstants.token];
         if (token != null && token.isNotEmpty) {
-          authProvider.setParentEmailToken = token;
+          provider.setConsentRequestToken = token;
           Logger.info("Parent Consent Token: $token");
 
-          authProvider.verifyConsentRequest(
+          provider.verifyConsentRequest(
             onSuccess: () {
               UserAppRoute.goRouter.goNamed(
                 AppRoutes.createAccountScreen.name,
-                extra: true,
+                extra: AppConstants.trueSt,
+              );
+              LocalStorageService.instance.saveParentConsentStatus(
+                status: true,
               );
             },
             onFailed: (e) {

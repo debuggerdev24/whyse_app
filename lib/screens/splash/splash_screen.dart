@@ -49,7 +49,7 @@ class _SplashScreenState extends State<SplashScreen>
       final step = await authProvider.getOnBoardingProgress();
 
       //todo logic to check the access token is expire or not
-      final token = LocalStorageService.instance.authToken;
+      final token = LocalStorageService.instance.getAuthToken;
       if (token != null && token.isNotEmpty) {
         final response = await HomeApiService.instance.getAllStories();
         response.fold(
@@ -127,7 +127,7 @@ class _SplashScreenState extends State<SplashScreen>
       } else if (step == AppConstants.goals) {
         context.goNamed(AppRoutes.goalsScreen.name);
       } else if (step == AppConstants.completed) {
-        if (LocalStorageService.instance.authToken == null) {
+        if (LocalStorageService.instance.getAuthToken == null) {
           context.goNamed(AppRoutes.loginScreen.name);
         } else {
           context.goNamed(AppRoutes.homeScreen.name);

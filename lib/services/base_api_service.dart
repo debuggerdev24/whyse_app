@@ -22,14 +22,15 @@ class DioClient {
         sendTimeout: const Duration(seconds: 60),
         headers: {
           "Content-Type": "application/json",
-          if (LocalStorageService.instance.authToken != null)
-            "Authorization": "Bearer ${LocalStorageService.instance.authToken}",
+          if (LocalStorageService.instance.getAuthToken != null)
+            "Authorization":
+                "Bearer ${LocalStorageService.instance.getAuthToken}",
         },
       ),
     );
 
     Logger.info(
-      "Authorization Token : ${LocalStorageService.instance.authToken.toString()}",
+      "Authorization Token : ${LocalStorageService.instance.getAuthToken.toString()}",
     );
     Logger.info(
       "onBoarding ID : ${LocalStorageService.instance.onboardingId.toString()}",
@@ -48,7 +49,7 @@ class DioClient {
   }
 
   Future<bool> isTokenValid() async {
-    final token = LocalStorageService.instance.authToken;
+    final token = LocalStorageService.instance.getAuthToken;
     return token != null && token.isNotEmpty;
   }
 }

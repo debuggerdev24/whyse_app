@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
+import 'package:redstreakapp/core/utils/field_validator.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
 
 import '../../core/constants/app_color.dart';
 import '../../core/utils/custom_loader.dart';
@@ -52,27 +51,27 @@ class ForgotPasswordScreen extends StatelessWidget {
 
                       Spacer(),
 
-                      if (provider.isSendForgotPassVerification)
-                        AppOutlinedButton(
-                          margin: EdgeInsets.only(bottom: 10),
-                          onTap: () {
-                            provider.verifyForgotPasswordEmail(
-                              onFailed: (error) {
-                                AppToast.error(context, error.errorMsg);
-                              },
-                              onSuccess: () {
-                                AppToast.success(
-                                  context,
-                                  "Email verify successfully.",
-                                );
-                                context.pushNamed(
-                                  AppRoutes.resetPasswordScreen.name,
-                                );
-                              },
-                            );
-                          },
-                          text: "Verify Email",
-                        ),
+                      // if (provider.isSendForgotPassVerification)
+                      //   AppOutlinedButton(
+                      //     margin: EdgeInsets.only(bottom: 10),
+                      //     onTap: () {
+                      //       provider.verifyForgotPasswordEmail(
+                      //         onFailed: (error) {
+                      //           AppToast.error(context, error.errorMsg);
+                      //         },
+                      //         onSuccess: () {
+                      //           AppToast.success(
+                      //             context,
+                      //             "Email verify successfully.",
+                      //           );
+                      //           context.pushNamed(
+                      //             AppRoutes.resetPasswordScreen.name,
+                      //           );
+                      //         },
+                      //       );
+                      //     },
+                      //     text: "Verify Email",
+                      //   ),
                       AppFilledButton(
                         margin: EdgeInsets.only(bottom: 20.h),
                         text: (provider.isResendTimerRunning)
@@ -82,13 +81,11 @@ class ForgotPasswordScreen extends StatelessWidget {
                             ? () {}
                             : () {
                                 deBouncer.run(() {
-                                  if (provider.forgotPasswordEmailCtr.text
-                                      .trim()
-                                      .isEmpty) {
-                                    AppToast.error(
-                                      context,
-                                      "Please enter email",
-                                    );
+                                  final error = FieldValidators().email(
+                                    provider.forgotPasswordEmailCtr.text.trim(),
+                                  );
+                                  if (error != null) {
+                                    AppToast.error(context, error);
                                     return;
                                   }
 
@@ -109,7 +106,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (provider.isForgotPasswordLoading ||
+                if (provider.isSendLinkForgotPassLoading ||
                     provider.isVerifyForgotPassMailLoading)
                   FullPageIndicator(),
               ],

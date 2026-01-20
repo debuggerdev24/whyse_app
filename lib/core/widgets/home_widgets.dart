@@ -115,12 +115,12 @@ class HomeHeader extends StatelessWidget {
             actions: [
               myActionButtonTheme(
                 onPressed: () async {
-                  context.pop(dialogContext);
                   await context.read<AuthProvider>().logOutUser(
                     onSuccess: () {
                       context.goNamed(AppRoutes.loginScreen.name);
                     },
                   );
+
                   //    onSuccess: () {
                   //                       AppToast.showSuccess(
                   //

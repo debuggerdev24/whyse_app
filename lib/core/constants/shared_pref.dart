@@ -4,6 +4,10 @@ class LocalStorageService {
   LocalStorageService._();
   static final LocalStorageService instance = LocalStorageService._();
 
+  static const String _tokenKey = "token",
+      _refreshTokenKey = "refresh_token",
+      _consentReqStatusKey = "consent_request_status";
+
   late SharedPreferences prefs;
 
   /// MUST be called before using SharedPrefs
@@ -12,23 +16,29 @@ class LocalStorageService {
   }
 
   /// ---------------- Token ----------------
-  String? get authToken => prefs.getString('token');
-  String? get refreshToken => prefs.getString('refresh_token');
-
-  Future<void> saveAuthToken(String token) async {
-    await prefs.setString("token", token);
-  }
+  String? get getAuthToken => prefs.getString(_tokenKey);
+  String? get getRefreshToken => prefs.getString(_refreshTokenKey);
+  bool get getConsentRequestStatus =>
+      prefs.getBool(_consentReqStatusKey) ?? false;
 
   Future<void> removeAuthToken() async {
-    await prefs.remove("token");
+    await prefs.remove(_tokenKey);
   }
 
   Future<void> removeRefreshToken() async {
-    await prefs.remove("refresh_token");
+    await prefs.remove(_refreshTokenKey);
+  }
+
+  Future<void> saveAuthToken(String token) async {
+    await prefs.setString(token, token);
   }
 
   Future<void> saveRefreshToken(String token) async {
-    await prefs.setString("refresh_token", token);
+    await prefs.setString(_refreshTokenKey, token);
+  }
+
+  Future<void> saveParentConsentStatus({required bool status}) async {
+    await prefs.setBool(_consentReqStatusKey, status);
   }
 
   /// ---------------- Onboarding ----------------
@@ -42,7 +52,7 @@ class LocalStorageService {
     await prefs.setString(_emailKey, email);
   }
 
-  Future<void> setOnboardingId(String id) async {
+  Future<void> saveOnboardingId(String id) async {
     await prefs.setString(_onboardingIdKey, id);
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
+import 'package:redstreakapp/core/constants/app_constants.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/utils/custom_loader.dart';
@@ -15,8 +16,8 @@ import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import '../../core/widgets/custom_toast.dart';
 
 class CreateAccountScreen extends StatefulWidget {
-  final bool? isFromSuccessConsent;
-  const CreateAccountScreen({super.key, this.isFromSuccessConsent});
+  final String? consentStatus;
+  const CreateAccountScreen({super.key, this.consentStatus});
 
   @override
   State<CreateAccountScreen> createState() => _CreateAccountScreenState();
@@ -27,13 +28,14 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       Logger.info(
-        "Consent for create account status: ${widget.isFromSuccessConsent ?? false}",
+        "Consent for create account status: ${widget.consentStatus ?? "null"}",
       );
-      if (widget.isFromSuccessConsent ?? false) {
+      if (widget.consentStatus == AppConstants.trueSt) {
         AppToast.success(
           context,
           "Parent consent verify successfully. \nCreate your account.",
         );
+        return;
       }
     });
     super.initState();
@@ -70,6 +72,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           color: AppColors.black.withValues(alpha: 0.8),
                         ),
                       ),
+
                       26.h.verticalSpace,
                       //todo
                       signUpForm(provider),
@@ -253,7 +256,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         ),
         AppTextField(
           hintText: "Confirm Password",
-          controller: provider.confirmPasswordController,
+          controller: provider.confirmPasswordCtr,
           obSecureText: provider.isConfirmPasswordObscure,
           suffixIcon: Padding(
             padding: const EdgeInsets.all(13.0),

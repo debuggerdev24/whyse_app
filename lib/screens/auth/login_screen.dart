@@ -122,7 +122,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                   AppRoutes.forgotPasswordScreen.name,
                                 );
                                 provider.forgotPasswordEmailCtr.clear();
-                                provider.setSendForgotPassLinkStatus = false;
                               },
                               child: Text(
                                 "Forget Password?",

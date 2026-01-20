@@ -6,12 +6,15 @@ import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/utils/custom_loader.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
+import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/core/widgets/dropdown_textfiled.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
+
+import '../../providers/on_boarding/on_boarding_provider.dart';
 
 class ProfileInfoScreen extends StatefulWidget {
   const ProfileInfoScreen({super.key});
@@ -21,17 +24,13 @@ class ProfileInfoScreen extends StatefulWidget {
 }
 
 class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
-  String? selectedCountry;
-  String? selectedLanguage;
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppLayout(
       resizeToAvoidBottomInset: false,
-      backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
-        child: Consumer<AuthProvider>(
-          builder: (context, provider, child) {
+        child: Consumer2<AuthProvider, OnBoardingProvider>(
+          builder: (context, authProvider, onBoardingProvider, child) {
             return Stack(
               children: [
                 Padding(
@@ -61,12 +60,10 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
 
                       CustomDropDown(
                         hint: "Country",
-                        value: selectedCountry,
+                        value: onBoardingProvider.selectedCountry,
                         items: ["India", "USA", "Canada", "UK"],
                         onChanged: (value) {
-                          setState(() {
-                            selectedCountry = value;
-                          });
+                          onBoardingProvider.setCountry(value);
                         },
                       ),
 
@@ -75,14 +72,13 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                       // Language Dropdown
                       CustomDropDown(
                         hint: "Preferred Reading Language",
-                        value: selectedLanguage,
+                        value: onBoardingProvider.selectedLanguage,
                         items: ["English", "Hindi", "Arabic", "French"],
                         onChanged: (value) {
-                          setState(() {
-                            selectedLanguage = value;
-                          });
+                          onBoardingProvider.setLanguage(value);
                         },
                       ),
+
                       Spacer(),
                       Padding(
                         padding: EdgeInsets.only(bottom: 8.h),
@@ -90,14 +86,14 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                           text: "Next",
                           backgroundColor: AppColors.yellowColor,
                           onTap: () async {
-                            if (selectedCountry == null) {
+                            if (onBoardingProvider.selectedCountry == null) {
                               AppToast.error(
                                 context,
                                 "Please select your country",
                               );
                               return;
                             }
-                            if (selectedLanguage == null) {
+                            if (onBoardingProvider.selectedLanguage == null) {
                               AppToast.error(
                                 context,
                                 "Please select your preferred language",
@@ -105,10 +101,11 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                               return;
                             }
 
-                            final success = await provider.saveProfileInfo(
+                            final success = await authProvider.saveProfileInfo(
                               context,
-                              country: selectedCountry!,
-                              preferredLanguage: selectedLanguage!,
+                              country: onBoardingProvider.selectedCountry!,
+                              preferredLanguage:
+                                  onBoardingProvider.selectedLanguage!,
                             );
 
                             if (success && context.mounted) {
@@ -122,7 +119,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                     ],
                   ),
                 ),
-                if (provider.isSaveProfileLoading) FullPageIndicator(),
+                if (authProvider.isSaveProfileLoading) FullPageIndicator(),
               ],
             );
           },

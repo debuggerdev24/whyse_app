@@ -35,7 +35,7 @@ class FieldValidators {
     }
 
     if (!emailPattern.hasMatch(value)) {
-      return "Enter valid Email.";
+      return "Please enter valid Email";
     }
     return null;
   }

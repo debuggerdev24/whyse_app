@@ -5,9 +5,11 @@ import 'package:redstreakapp/core/constants/shared_pref.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/providers/home/quiz_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
+import 'package:redstreakapp/providers/on_boarding/on_boarding_provider.dart';
 import 'package:redstreakapp/routes/app_router.dart';
 import 'package:redstreakapp/services/base_api_service.dart';
 import 'package:redstreakapp/services/deep_link/deep_link_handler.dart';
+import 'package:toastification/toastification.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,11 +21,15 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => StoryProvider()),
         ChangeNotifierProvider(create: (_) => QuizProvider()),
+        ChangeNotifierProvider(create: (_) => OnBoardingProvider()),
       ],
-      child: const MyApp(),
+      child: ToastificationWrapper(child: const MyApp()),
     ),
   );
 }
+
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});

@@ -45,7 +45,7 @@ class AppToast {
       context: context,
       message: message,
       type: ToastificationType.info,
-      primaryColor: Colors.blue,
+      primaryColor: Colors.blue.shade800,
       icon: Icons.info_outline_rounded,
       durationSeconds: durationSecond,
     );

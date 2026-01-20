@@ -35,10 +35,9 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- Password reset link -->
                 <data
-                    android:host="google.com"
+                    android:host="whyse.com"
+                    android:pathPrefix="/verify-reset-password"
                     android:scheme="https" />
-
-<!--                    android:pathPrefix="/verify-parent-consent"-->
 
                 <!-- Parent consent link -->
 

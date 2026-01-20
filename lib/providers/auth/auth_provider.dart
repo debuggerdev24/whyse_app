@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:redstreakapp/core/constants/shared_pref.dart';
+import 'package:redstreakapp/core/utils/field_validator.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/services/auth/auth_api_service.dart';
 import 'package:redstreakapp/services/base_api_service.dart';
@@ -30,7 +31,6 @@ class AuthProvider with ChangeNotifier {
   bool isLoading = false,
       isStoryCreation = false,
       isCustomGoalSelected = false,
-      isSendForgotPassVerification = false,
       isConsentRequestApproved = false;
 
   int? age;
@@ -65,11 +65,6 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  set setSendForgotPassLinkStatus(bool value) {
-    isSendForgotPassVerification = value;
-    notifyListeners();
-  }
-
   Future<void> handleAccountCreation({required BuildContext context}) async {
     if (isEmailSent) {
       isVerifyEmailLoading = true;
@@ -82,6 +77,9 @@ class AuthProvider with ChangeNotifier {
 
       if (success && context.mounted) {
         context.pushNamed(AppRoutes.profileInfoScreen.name);
+      } else {
+        isEmailSent = false;
+        notifyListeners();
       }
     } else {
       isCreateAccountLoading = true;
@@ -159,15 +157,14 @@ class AuthProvider with ChangeNotifier {
     required VoidCallback onSuccess,
     required Function(String error) onFailed,
   }) async {
-    final email = (signUpEmailCtr.text.isEmpty)
-        ? googleLoginEmail
-        : signUpEmailCtr.text.trim();
+    final email = signUpEmailCtr.text.trim();
     if (email.isEmpty) {
       AppToast.error(context, "Please enter email!");
       return;
     }
-    if (!_isValidEmail(email)) {
-      AppToast.error(context, "Please enter a valid email");
+    final error = FieldValidators().email(email);
+    if (error != null) {
+      AppToast.error(context, error);
       return;
     }
 
@@ -183,7 +180,7 @@ class AuthProvider with ChangeNotifier {
       (r) async {
         final data = r['data'];
         await LocalStorageService.instance.setOnboardingEmail(data['email']);
-        await LocalStorageService.instance.setOnboardingId(
+        await LocalStorageService.instance.saveOnboardingId(
           data['onboardingId'],
         );
         onSuccess.call();
@@ -400,7 +397,7 @@ class AuthProvider with ChangeNotifier {
       signupEmailController = TextEditingController(),
       loginPasswordCtr = TextEditingController(),
       createAccPasswordCtr = TextEditingController(),
-      confirmPasswordController = TextEditingController();
+      confirmPasswordCtr = TextEditingController();
 
   bool isCreateAccountLoading = false;
 
@@ -412,7 +409,7 @@ class AuthProvider with ChangeNotifier {
     final lastName = lastNameController.text.trim();
     final email = signupEmailController.text.trim();
     final password = createAccPasswordCtr.text.trim();
-    final confirmPassword = confirmPasswordController.text.trim();
+    final confirmPassword = confirmPasswordCtr.text.trim();
 
     if (firstName.isEmpty) {
       AppToast.error(context, "Please enter your first name");
@@ -943,7 +940,7 @@ class AuthProvider with ChangeNotifier {
           }
 
           if (data['onboardingId'] != null) {
-            await LocalStorageService.instance.setOnboardingId(
+            await LocalStorageService.instance.saveOnboardingId(
               data['onboardingId'].toString(),
             );
           }
@@ -1053,7 +1050,7 @@ class AuthProvider with ChangeNotifier {
           }
 
           if (data['onboardingId'] != null) {
-            await LocalStorageService.instance.setOnboardingId(
+            await LocalStorageService.instance.saveOnboardingId(
               data['onboardingId'].toString(),
             );
           }
@@ -1153,12 +1150,12 @@ class AuthProvider with ChangeNotifier {
   bool isResendTimerRunning = false;
   Timer? _resendTimer;
 
-  bool isForgotPasswordLoading = false;
+  bool isSendLinkForgotPassLoading = false;
   Future<void> sendLinkForgotPass({
     required Function(String error) onFailed,
     required VoidCallback onSuccess,
   }) async {
-    isForgotPasswordLoading = true;
+    isSendLinkForgotPassLoading = true;
     notifyListeners();
 
     final response = await AuthApiServices().forgotPassword(
@@ -1170,13 +1167,12 @@ class AuthProvider with ChangeNotifier {
       },
       (r) {
         // forgotPasswordEmailCtr.clear();
-        setSendForgotPassLinkStatus = true;
         startResendTimer();
         onSuccess.call();
       },
     );
 
-    isForgotPasswordLoading = false;
+    isSendLinkForgotPassLoading = false;
     notifyListeners();
   }
 
@@ -1201,7 +1197,7 @@ class AuthProvider with ChangeNotifier {
 
   bool isLogOutLoading = false;
   Future<void> logOutUser({required VoidCallback onSuccess}) async {
-    final token = LocalStorageService.instance.authToken;
+    final token = LocalStorageService.instance.getAuthToken;
     Logger.info(token.toString());
     isLogOutLoading = true;
     notifyListeners();
@@ -1218,6 +1214,7 @@ class AuthProvider with ChangeNotifier {
     await LocalStorageService.instance.removeAuthToken();
     await LocalStorageService.instance.removeRefreshToken();
     await LocalStorageService.instance.clear();
+    LocalStorageService.instance.saveParentConsentStatus(status: false);
 
     clearAllData();
     notifyListeners();
@@ -1245,7 +1242,7 @@ class AuthProvider with ChangeNotifier {
     lastNameController.clear();
     signupEmailController.clear();
     createAccPasswordCtr.clear();
-    confirmPasswordController.clear();
+    confirmPasswordCtr.clear();
     notifyListeners();
   }
 
@@ -1255,7 +1252,7 @@ class AuthProvider with ChangeNotifier {
     lastNameController.clear();
     signupEmailController.clear();
     createAccPasswordCtr.clear();
-    confirmPasswordController.clear();
+    confirmPasswordCtr.clear();
     age = null;
     selectedDate = null;
     notifyListeners();
@@ -1361,17 +1358,15 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  String? _resetPasswordToken, _parentEmailToken;
-  String? get recoveryToken => _resetPasswordToken;
-  String? get parentEmailToken => _parentEmailToken;
+  String? _consentRequestToken, _resetPasswordToken;
 
   set setResetPasswordToken(String token) {
     _resetPasswordToken = token;
-    notifyListeners();
+    // notifyListeners();
   }
 
-  set setParentEmailToken(String token) {
-    _resetPasswordToken = token;
+  set setConsentRequestToken(String token) {
+    _consentRequestToken = token;
     notifyListeners();
   }
 
@@ -1384,7 +1379,7 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     final response = await AuthApiServices().verifyForgotPasswordEmail(
-      data: {"accessToken": recoveryToken},
+      data: {"accessToken": _resetPasswordToken},
     );
 
     response.fold(
@@ -1393,7 +1388,7 @@ class AuthProvider with ChangeNotifier {
       },
       (r) {
         onSuccess.call();
-        setSendForgotPassLinkStatus = true;
+        forgotPasswordEmailCtr.clear();
         notifyListeners();
       },
     );
@@ -1411,7 +1406,7 @@ class AuthProvider with ChangeNotifier {
 
     final response = await AuthApiServices().verifyParentConsent(
       data: {
-        "token": recoveryToken,
+        "token": _consentRequestToken,
         "onboardingId": LocalStorageService.instance.onboardingId,
         "action": "approve",
       },
@@ -1441,7 +1436,10 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     final response = await AuthApiServices().resetPassword(
-      data: {"newPassword": newPasswordCtr.text.trim()},
+      data: {
+        "password": newPasswordCtr.text.trim(),
+        "accessToken": _resetPasswordToken,
+      },
     );
 
     response.fold(
@@ -1450,6 +1448,8 @@ class AuthProvider with ChangeNotifier {
       },
       (r) {
         onSuccess.call();
+        newPasswordCtr.clear();
+        resetConfirmPasswordCtr.clear();
       },
     );
     isResetPasswordLoading = false;
