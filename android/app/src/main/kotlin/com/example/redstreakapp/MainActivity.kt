@@ -1,4 +1,4 @@
-package com.redstreakapp
+package com.whyse.app
 
 import io.flutter.embedding.android.FlutterActivity
 

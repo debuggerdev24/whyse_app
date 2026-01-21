@@ -203,7 +203,7 @@ class _AgeEntryScreenState extends State<AgeEntryScreen> {
                                   provider.clearCreateAccountFields();
                                   context.pushNamed(
                                     AppRoutes.createAccountScreen.name,
-                                    extra: false,
+                                    // extra: false,
                                   );
                                 },
                                 onFailed: (error) {

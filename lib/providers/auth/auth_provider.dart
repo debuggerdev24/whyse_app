@@ -8,6 +8,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:redstreakapp/core/constants/shared_pref.dart';
 import 'package:redstreakapp/core/utils/field_validator.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
+import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:redstreakapp/services/auth/auth_api_service.dart';
 import 'package:redstreakapp/services/base_api_service.dart';
 
@@ -16,7 +17,6 @@ import '../../core/helper/log_helper.dart';
 import '../../models/auth/on_boarding_progress_model.dart';
 import '../../models/home/story_models/generate_story_request.dart';
 import '../../models/home/story_models/story_model.dart';
-import '../../routes/user_routes.dart';
 
 class AuthProvider with ChangeNotifier {
   TextEditingController customGoalTitleCtr = TextEditingController(),
@@ -66,37 +66,37 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> handleAccountCreation({required BuildContext context}) async {
-    if (isEmailSent) {
-      isVerifyEmailLoading = true;
-      notifyListeners();
+    // if (isEmailSent) {
+    //   isVerifyEmailLoading = true;
+    //   notifyListeners();
+    //
+    //   final success = await verifyCreateAccEmail(context);
+    //
+    //   isVerifyEmailLoading = false;
+    //   notifyListeners();
+    //
+    //   if (success && context.mounted) {
+    //     context.pushNamed(AppRoutes.profileInfoScreen.name);
+    //   } else {
+    //     isEmailSent = false;
+    //     notifyListeners();
+    //   }
+    // } else {
+    isCreateAccountLoading = true;
+    notifyListeners();
 
-      final success = await verifyEmail(context);
+    final success = await createAccount(
+      context,
+      isTermsAccepted: acceptedTerms,
+    );
 
-      isVerifyEmailLoading = false;
-      notifyListeners();
+    isCreateAccountLoading = false;
+    notifyListeners();
 
-      if (success && context.mounted) {
-        context.pushNamed(AppRoutes.profileInfoScreen.name);
-      } else {
-        isEmailSent = false;
-        notifyListeners();
-      }
-    } else {
-      isCreateAccountLoading = true;
-      notifyListeners();
-
-      final success = await createAccount(
-        context,
-        isTermsAccepted: acceptedTerms,
-      );
-
-      isCreateAccountLoading = false;
-      notifyListeners();
-
-      if (success) {
-        setEmailSent(true);
-      }
+    if (success) {
+      setEmailSent(true);
     }
+    // }
   }
 
   void updateGoalId(String id) {
@@ -518,7 +518,7 @@ class AuthProvider with ChangeNotifier {
 
   bool isVerifyEmailLoading = false;
 
-  Future<bool> verifyEmail(BuildContext context) async {
+  Future<bool> verifyCreateAccEmail(BuildContext context) async {
     final onboardingId = LocalStorageService.instance.onboardingId;
     final email = signupEmailController.text.trim();
 
@@ -544,6 +544,7 @@ class AuthProvider with ChangeNotifier {
           context,
           response['message'] ?? "Email verified successfully",
         );
+        context.pushNamed(AppRoutes.profileInfoScreen.name);
 
         return true;
       } else {
@@ -1072,7 +1073,7 @@ class AuthProvider with ChangeNotifier {
   //todo google login
   Future<String?> getGoogleSignInIDToken() async {
     try {
-      GoogleSignIn googleSignIn = GoogleSignIn(
+      final GoogleSignIn googleSignIn = GoogleSignIn(
         serverClientId: AppConstants.serverClientId,
 
         // "1072520967140-7566tlns04ge757cqiailkl8j405a9am.apps.googleusercontent.com",
@@ -1178,7 +1179,7 @@ class AuthProvider with ChangeNotifier {
 
   void startResendTimer() {
     isResendTimerRunning = true;
-    resendSeconds = 30;
+    resendSeconds = 50;
     notifyListeners();
 
     _resendTimer?.cancel();

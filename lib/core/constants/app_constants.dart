@@ -23,5 +23,8 @@ class AppConstants {
       alreadyVerified = "alreadyVerified",
       accessToken = "access_token",
       token = "token",
+      type = "type",
+      signup = "signup",
+      recovery = "recovery",
       falseSt = "false";
 }

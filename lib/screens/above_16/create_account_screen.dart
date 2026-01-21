@@ -170,7 +170,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       Padding(
                         padding: EdgeInsets.only(bottom: 10.h),
                         child: AppFilledButton(
-                          text: provider.isEmailSent ? "Verify" : "Next",
+                          text: "Next", //provider.isEmailSent ? "Verify" :
                           backgroundColor: AppColors.yellowColor,
                           // onTap: () async {
                           //   if (provider.isEmailSent) {

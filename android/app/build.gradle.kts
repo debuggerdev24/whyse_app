@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.redstreakapp"
+    namespace = "com.whyse.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 

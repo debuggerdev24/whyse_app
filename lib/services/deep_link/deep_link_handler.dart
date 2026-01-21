@@ -54,7 +54,10 @@ class DeepLinkHandler {
 
     try {
       Logger.info(
-        "URI -> $uri\n"
+        "URI -> ${uri}\n"
+        "URI Data-> ${uri.data}\n"
+        "URI query-> ${uri.query}\n"
+        "URI queryParameters-> ${uri.queryParameters}\n"
         "scheme -> ${uri.scheme}\n"
         "host -> ${uri.host}\n"
         "path -> ${uri.path}",
@@ -74,25 +77,27 @@ class DeepLinkHandler {
 
         final params = Uri.splitQueryString(fragment);
         final token = params[AppConstants.accessToken];
+        final type = params[AppConstants.type];
+        Logger.info("Type: $type");
 
-        if (token != null && token.isNotEmpty) {
-          provider.setResetPasswordToken = token;
-          Logger.info("Reset Password Token: $token");
-          provider.verifyForgotPasswordEmail(
-            onSuccess: () {
-              UserAppRoute.goRouter.goNamed(
-                AppRoutes.resetPasswordScreen.name,
-                extra: true,
-              );
-              AppToast.success(currentCtx!, "Email verify successfully.");
-            },
-            onFailed: (e) {
-              AppToast.error(context, e.errorMsg);
-            },
-          );
-        } else {
-          // AppToast
-
+        if (type == AppConstants.recovery) {
+          if (token != null && token.isNotEmpty) {
+            provider.setResetPasswordToken = token;
+            Logger.info("Reset Password Token: $token");
+            provider.verifyForgotPasswordEmail(
+              onSuccess: () {
+                UserAppRoute.goRouter.goNamed(
+                  AppRoutes.resetPasswordScreen.name,
+                  extra: true,
+                );
+                AppToast.success(currentCtx!, "Email verify successfully.");
+              },
+              onFailed: (e) {
+                AppToast.error(context, e.errorMsg);
+              },
+            );
+            return;
+          }
           if (currentCtx != null) {
             AppToast.info(
               context: currentCtx,
@@ -101,6 +106,20 @@ class DeepLinkHandler {
             );
           } else {
             Logger.error("Root context not available for toast");
+          }
+        } else {
+          if (type == AppConstants.signup && token != null) {
+            UserAppRoute.goRouter.goNamed(
+              AppRoutes.createAccountScreen.name,
+              // extra: true,
+            );
+            provider.verifyCreateAccEmail(currentCtx!);
+          } else {
+            AppToast.info(
+              context: currentCtx!,
+              message:
+                  "Confirmation link is invalid or has expired. Please request a new one.",
+            );
           }
         }
 
