@@ -14,7 +14,8 @@ import 'package:toastification/toastification.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await LocalStorageService.instance.init();
-  await DioClient.instance.initialize();
+  DioClient.instance.initialize();
+
   runApp(
     MultiProvider(
       providers: [
@@ -163,5 +164,5 @@ class _MyAppState extends State<MyApp> {
 }
 
 /*
-I am unable to
+
 */

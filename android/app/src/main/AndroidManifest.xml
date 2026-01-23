@@ -8,6 +8,14 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:label="Whyse App">
+
+        <!--Added for the google sign in-->
+        <activity
+            android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"

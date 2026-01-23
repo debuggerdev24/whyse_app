@@ -54,6 +54,7 @@ class _ParentEmailScreenState extends State<ParentEmailScreen> {
                         AppText(
                           text: "Need Parent’s help to Proceed",
                           style: AppTextStyles.sfProDisplayBold(
+                            height: 1.2,
                             fontSize: 40.sp,
                             color: AppColors.black,
                           ),

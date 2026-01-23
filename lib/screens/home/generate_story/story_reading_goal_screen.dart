@@ -82,49 +82,46 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
 
                         SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
-                          child: IntrinsicWidth(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                border: Border.all(
-                                  color: AppColors.black.withValues(alpha: 0.1),
-                                ),
-                                borderRadius: BorderRadius.circular(12.r),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(
+                                color: AppColors.black.withValues(alpha: 0.1),
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: List.generate(
-                                  provider.readingDurations.length,
-                                  (index) {
-                                    final option =
-                                        provider.readingDurations[index];
-                                    final isSelected =
-                                        provider.selectedReadingDuration ==
-                                        option;
-                                    return Row(
-                                      children: [
-                                        _buildOptionButton(
-                                          text: option,
-                                          isSelected: isSelected,
-                                          onTap: (String text) {
-                                            provider.setSelectedReadingDuration =
-                                                text;
-                                          },
-                                        ),
-                                        if (index !=
-                                            provider.readingDurations.length -
-                                                1)
-                                          Container(
-                                            width: 1.w,
-                                            height: 22.h,
-                                            color: Colors.grey.withValues(
-                                              alpha: 0.3,
-                                            ),
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: List.generate(
+                                provider.readingDurations.length,
+                                (index) {
+                                  final option =
+                                      provider.readingDurations[index];
+                                  final isSelected =
+                                      provider.selectedReadingDuration ==
+                                      option;
+                                  return Row(
+                                    children: [
+                                      _buildOptionButton(
+                                        text: option,
+                                        isSelected: isSelected,
+                                        onTap: (String text) {
+                                          provider.setSelectedReadingDuration =
+                                              text;
+                                        },
+                                      ),
+                                      if (index !=
+                                          provider.readingDurations.length - 1)
+                                        Container(
+                                          width: 1.w,
+                                          height: 22.h,
+                                          color: Colors.grey.withValues(
+                                            alpha: 0.3,
                                           ),
-                                      ],
-                                    );
-                                  },
-                                ),
+                                        ),
+                                    ],
+                                  );
+                                },
                               ),
                             ),
                           ),
@@ -228,6 +225,8 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
       onTap: () => onTap.call(text),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(horizontal: 17.w, vertical: 12.h),
+
         decoration: BoxDecoration(
           color: isSelected ? AppColors.teal : Colors.transparent,
           borderRadius: BorderRadius.circular(12.r),

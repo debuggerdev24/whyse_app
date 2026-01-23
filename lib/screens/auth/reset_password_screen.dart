@@ -47,7 +47,7 @@ class ResetPasswordScreen extends StatelessWidget {
                       "Enter new password below to reset.",
                       style: AppTextStyles.textStyle16Semibold,
                     ),
-                    55.h.verticalSpace,
+                    55.verticalSpace,
                     AppTextField(
                       controller: provider.newPasswordCtr,
                       hintText: "New Password",

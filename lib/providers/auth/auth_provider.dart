@@ -14,7 +14,7 @@ import 'package:redstreakapp/services/base_api_service.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/helper/log_helper.dart';
-import '../../models/auth/on_boarding_progress_model.dart';
+import '../../models/auth/on_boarding_progress_model.dart' hide User;
 import '../../models/home/story_models/generate_story_request.dart';
 import '../../models/home/story_models/story_model.dart';
 
@@ -183,7 +183,10 @@ class AuthProvider with ChangeNotifier {
         await LocalStorageService.instance.saveOnboardingId(
           data['onboardingId'],
         );
+        context.pushNamed(AppRoutes.enterAgeScreen.name);
+        // decideFirstScreen(context: context, step: data["currentStep"]);
         onSuccess.call();
+
         signUpEmailCtr.clear();
       },
     );
@@ -394,7 +397,7 @@ class AuthProvider with ChangeNotifier {
   // Create Account Properties
   TextEditingController firstNameController = TextEditingController(),
       lastNameController = TextEditingController(),
-      signupEmailController = TextEditingController(),
+      createAccEmailCtr = TextEditingController(),
       loginPasswordCtr = TextEditingController(),
       createAccPasswordCtr = TextEditingController(),
       confirmPasswordCtr = TextEditingController();
@@ -407,7 +410,7 @@ class AuthProvider with ChangeNotifier {
   }) async {
     final firstName = firstNameController.text.trim();
     final lastName = lastNameController.text.trim();
-    final email = signupEmailController.text.trim();
+    final email = createAccEmailCtr.text.trim();
     final password = createAccPasswordCtr.text.trim();
     final confirmPassword = confirmPasswordCtr.text.trim();
 
@@ -520,7 +523,7 @@ class AuthProvider with ChangeNotifier {
 
   Future<bool> verifyCreateAccEmail(BuildContext context) async {
     final onboardingId = LocalStorageService.instance.onboardingId;
-    final email = signupEmailController.text.trim();
+    final email = createAccEmailCtr.text.trim();
 
     if (onboardingId == null) {
       AppToast.error(context, "Session invalid");
@@ -991,7 +994,7 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> socialLogin({
     required VoidCallback onSuccess,
-    VoidCallback? onNoAccountFound,
+    Function(String error)? onNoAccountFound,
 
     required Function(String error) onFailed,
   }) async {
@@ -1022,7 +1025,7 @@ class AuthProvider with ChangeNotifier {
         if (data != null) {
           String? accessToken;
           if (data["session"] == null && onNoAccountFound != null) {
-            onNoAccountFound.call();
+            onNoAccountFound.call(data["user"]["email"]);
             return;
           }
 
@@ -1046,8 +1049,6 @@ class AuthProvider with ChangeNotifier {
             //todo Update the current API instance with the new token immediately
             DioClient.instance.addToken(accessToken);
             Logger.error("Token saved successfully from login: $accessToken");
-          } else {
-            Logger.error("No access token found in login response!");
           }
 
           if (data['onboardingId'] != null) {
@@ -1055,13 +1056,9 @@ class AuthProvider with ChangeNotifier {
               data['onboardingId'].toString(),
             );
           }
-
-          // if (data['onboardingId'] != null) {
-          //   await SharedPrefs.instance.setOnboardingId(
-          //     data['onboardingId'].toString(),
-          //   );
-          // }
         }
+        signUpEmailCtr.text = data["user"]["email"];
+
         onSuccess.call();
       },
     );
@@ -1071,12 +1068,11 @@ class AuthProvider with ChangeNotifier {
   }
 
   //todo google login
+
   Future<String?> getGoogleSignInIDToken() async {
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn(
         serverClientId: AppConstants.serverClientId,
-
-        // "1072520967140-7566tlns04ge757cqiailkl8j405a9am.apps.googleusercontent.com",
         scopes: ["email", "profile"],
       );
 
@@ -1241,7 +1237,7 @@ class AuthProvider with ChangeNotifier {
   void clearCreateAccountFields() {
     firstNameController.clear();
     lastNameController.clear();
-    signupEmailController.clear();
+    createAccEmailCtr.clear();
     createAccPasswordCtr.clear();
     confirmPasswordCtr.clear();
     notifyListeners();
@@ -1251,7 +1247,7 @@ class AuthProvider with ChangeNotifier {
     signUpEmailCtr.clear();
     firstNameController.clear();
     lastNameController.clear();
-    signupEmailController.clear();
+    createAccEmailCtr.clear();
     createAccPasswordCtr.clear();
     confirmPasswordCtr.clear();
     age = null;
@@ -1455,5 +1451,39 @@ class AuthProvider with ChangeNotifier {
     );
     isResetPasswordLoading = false;
     notifyListeners();
+  }
+
+  void decideFirstScreen({
+    required BuildContext context,
+    required String step,
+  }) {
+    Logger.info("Current Step: $step");
+    if (step == AppConstants.age) {
+      context.goNamed(AppRoutes.enterAgeScreen.name);
+    } else if (step == AppConstants.email) {
+      context.goNamed(AppRoutes.enterAgeScreen.name);
+    } else if (step == AppConstants.parentEmail) {
+      context.goNamed(AppRoutes.parentEmailScreen.name);
+    } else if (step == AppConstants.consentStatus) {
+      context.goNamed(AppRoutes.consentStatusScreen.name);
+    } else if (step == AppConstants.createAccount) {
+      context.goNamed(AppRoutes.createAccountScreen.name);
+    } else if (step == AppConstants.profileInfo) {
+      context.goNamed(AppRoutes.profileInfoScreen.name);
+    } else if (step == AppConstants.readingGoal) {
+      context.goNamed(AppRoutes.readingGoalScreen.name);
+    } else if (step == AppConstants.interest) {
+      context.goNamed(AppRoutes.interestsScreen.name);
+    } else if (step == AppConstants.topics) {
+      context.goNamed(AppRoutes.topicsScreen.name);
+    } else if (step == AppConstants.goals) {
+      context.goNamed(AppRoutes.goalsScreen.name);
+    } else if (step == AppConstants.completed) {
+      if (LocalStorageService.instance.getAuthToken == null) {
+        context.goNamed(AppRoutes.loginScreen.name);
+      } else {
+        context.goNamed(AppRoutes.homeScreen.name);
+      }
+    }
   }
 }

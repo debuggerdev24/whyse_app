@@ -114,15 +114,16 @@ class DeepLinkHandler {
               // extra: true,
             );
             provider.verifyCreateAccEmail(currentCtx!);
-          } else {
+            return;
+          }
+          if (currentCtx != null) {
             AppToast.info(
-              context: currentCtx!,
+              context: currentCtx,
               message:
                   "Confirmation link is invalid or has expired. Please request a new one.",
             );
           }
         }
-
         _isProcessingLink = false;
         return;
       }

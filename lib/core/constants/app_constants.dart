@@ -2,7 +2,8 @@ class AppConstants {
   AppConstants._();
 
   static const String serverClientId =
-      "928198076650-04u77ekdg426kkjqq2rusho0k3vcthr0.apps.googleusercontent.com";
+      "1072520967140-7566tlns04ge757cqiailkl8j405a9am.apps.googleusercontent.com";
+  // "928198076650-04u77ekdg426kkjqq2rusho0k3vcthr0.apps.googleusercontent.com";
   static const String domain = "whyse.com",
       parentConsentPath = "/verify-parent-consent",
       forgotPasswordPath = "/verify-reset-password",

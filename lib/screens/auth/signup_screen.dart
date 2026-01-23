@@ -60,7 +60,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           children: [
                             SvgIcon(AppAssets.welcome),
                             30.h.verticalSpace,
-                  
+
                             AppText(
                               text: 'Welcome to',
                               style: AppTextStyles.sfProDisplayBold(
@@ -75,22 +75,22 @@ class _SignupScreenState extends State<SignupScreen> {
                                 color: AppColors.teal,
                               ),
                             ),
-                  
+
                             15.h.verticalSpace,
                             AppText(
                               text: 'Read. Learn. Grow.',
                               style: AppTextStyles.textStyle16Semibold,
                             ),
-                  
+
                             61.h.verticalSpace,
-                  
+
                             AppTextField(
                               hintText: "Email",
                               controller: provider.signUpEmailCtr,
                             ),
-                  
+
                             32.h.verticalSpace,
-                  
+
                             AppFilledButton(
                               onTap: () async {
                                 deBouncer.run(() async {
@@ -101,11 +101,11 @@ class _SignupScreenState extends State<SignupScreen> {
                                         context,
                                         "Onboarding session started",
                                       );
-                                      context.pushNamed(
-                                        AppRoutes.enterAgeScreen.name,
-                                      );
+                                      // context.pushNamed(
+                                      //   AppRoutes.enterAgeScreen.name,
+                                      // );
                                     },
-                  
+
                                     onFailed: (error) {
                                       AppToast.error(context, error);
                                     },
@@ -114,9 +114,9 @@ class _SignupScreenState extends State<SignupScreen> {
                               },
                               text: "Sign up with Email",
                             ),
-                  
+
                             17.h.verticalSpace,
-                  
+
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -161,9 +161,9 @@ class _SignupScreenState extends State<SignupScreen> {
                             ),
                           ],
                         ),
-                  
+
                         32.h.verticalSpace,
-                  
+
                         _socialButton(
                           label: "Sign up with Google",
                           icon: AppAssets.google,
@@ -177,30 +177,29 @@ class _SignupScreenState extends State<SignupScreen> {
                                       context,
                                       "Sign Up Successfully and Onboarding session started",
                                     );
-                                    context.pushNamed(
-                                      AppRoutes.enterAgeScreen.name,
+                                  },
+
+                                  onFailed: (error) {
+                                    AppToast.error(
+                                      context,
+                                      "Start on boarding error: ${error}",
                                     );
                                   },
-                  
-                                  onFailed: (error) {
-                                    AppToast.error(context, error);
-                                  },
                                 );
-                                // context.goNamed(AppRoutes.enterAgeScreen.name);
                               },
-                  
+
                               onFailed: (error) {
                                 AppToast.error(
                                   context,
-                                  "Failed google login,\nPlease try again",
+                                  "Failed google sign up,\nPlease try again",
                                 );
                               },
                             );
                           },
                         ),
-                  
+
                         12.h.verticalSpace,
-                  
+
                         _socialButton(
                           label: "Sign up with Apple",
                           icon: AppAssets.apple,

@@ -11,6 +11,7 @@ import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/custom_shimmer.dart';
+import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/models/home/story_models/story_model.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
@@ -117,6 +118,7 @@ class HomeHeader extends StatelessWidget {
                 onPressed: () async {
                   await context.read<AuthProvider>().logOutUser(
                     onSuccess: () {
+                      AppToast.success(context, "Log out successfully");
                       context.goNamed(AppRoutes.loginScreen.name);
                     },
                   );

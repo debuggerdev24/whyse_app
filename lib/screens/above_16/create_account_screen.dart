@@ -230,10 +230,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
           hintText: "Last Name",
           controller: provider.lastNameController,
         ),
-        AppTextField(
-          hintText: "Email",
-          controller: provider.signupEmailController,
-        ),
+        AppTextField(hintText: "Email", controller: provider.createAccEmailCtr),
         AppTextField(
           hintText: "Password",
           obSecureText: provider.isPasswordObscure,

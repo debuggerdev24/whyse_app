@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.whyse.app"
+    namespace = "com.whyseapp"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -19,7 +19,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.whyse.app"
+        applicationId = "com.whyseapp"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
