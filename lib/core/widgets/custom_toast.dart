@@ -69,7 +69,7 @@ class AppToast {
           message,
           maxLines: 2,
           style: AppTextStyles.sfProDisplayMedium(
-            fontSize: 17.sp,
+            fontSize: 16.sp,
             color: AppColors.white,
           ),
         ),

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -1073,11 +1074,12 @@ class AuthProvider with ChangeNotifier {
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn(
         serverClientId: AppConstants.serverClientId,
+        clientId: (Platform.isIOS) ? AppConstants.clientIdIos : null,
         scopes: ["email", "profile"],
       );
 
       GoogleSignInAccount? account = await googleSignIn.signIn();
-
+      //
       if (account == null) {
         Logger.error("User cancelled sign-in");
         return null;
@@ -1143,7 +1145,7 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  int resendSeconds = 30;
+  int resendSeconds = 50;
   bool isResendTimerRunning = false;
   Timer? _resendTimer;
 

@@ -199,9 +199,10 @@ class _LoginScreenState extends State<LoginScreen> {
                               context.goNamed(AppRoutes.homeScreen.name);
                             },
                             onNoAccountFound: (email) {
-                              AppToast.error(
-                                context,
-                                "No account found for $email. Please register.",
+                              AppToast.info(
+                                context: context,
+                                message:
+                                    "No account found for $email. Please register.",
                               );
                             },
                             onFailed: (error) {

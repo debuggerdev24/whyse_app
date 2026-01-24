@@ -23,7 +23,7 @@ class DeepLinkHandler {
 
     _sub = _appLinks.stringLinkStream.listen(
       (String? link) {
-        if (link != null && !_isProcessingLink) {
+        if (link != null) {
           final uri = Uri.parse(link);
           _handleDeepLink(uri, context: context, provider: authProvider);
         }
@@ -98,6 +98,12 @@ class DeepLinkHandler {
             );
             return;
           }
+          AppToast.info(
+            context: context,
+            message:
+                "Password reset link is invalid or has expired. Please request a new one.",
+          );
+
           if (currentCtx != null) {
             AppToast.info(
               context: currentCtx,
@@ -114,6 +120,7 @@ class DeepLinkHandler {
               // extra: true,
             );
             provider.verifyCreateAccEmail(currentCtx!);
+
             return;
           }
           if (currentCtx != null) {
@@ -124,7 +131,7 @@ class DeepLinkHandler {
             );
           }
         }
-        _isProcessingLink = false;
+
         return;
       }
 
@@ -162,15 +169,14 @@ class DeepLinkHandler {
           Logger.error("No token found in parent consent link");
         }
 
-        _isProcessingLink = false;
         return;
       }
 
       Logger.info("No matching route found for URI: $uri");
-      _isProcessingLink = false;
     } catch (e, st) {
       Logger.error("Deep link error -> $e\nStackTrace -> $st");
-      _isProcessingLink = false;
+    } finally {
+      _isProcessingLink = false; // ✅ SINGLE PLACE
     }
   }
 }
