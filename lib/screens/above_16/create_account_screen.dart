@@ -75,7 +75,71 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
                       26.h.verticalSpace,
                       //todo
-                      signUpForm(provider),
+                      Column(
+                        spacing: 8.h,
+                        children: [
+                          AppTextField(
+                            hintText: "First Name",
+                            controller: provider.firstNameCtr,
+                          ),
+                          AppTextField(
+                            hintText: "Last Name",
+                            controller: provider.lastNameCtr,
+                          ),
+                          AppTextField(
+                            hintText: "Email",
+                            controller: provider.createAccEmailCtr,
+                          ),
+                          AppTextField(
+                            hintText: "Password",
+                            obSecureText: provider.isPasswordObscure,
+                            controller: provider.createAccPasswordCtr,
+                            suffixIcon: Padding(
+                              padding: const EdgeInsets.all(13.0),
+                              child: GestureDetector(
+                                onTap: () {
+                                  provider.togglePasswordVisibility();
+                                },
+                                child: provider.isPasswordObscure
+                                    ? SvgIcon(
+                                        AppAssets.password,
+                                        size: 24.w,
+                                        color: AppColors.black,
+                                      )
+                                    : SvgIcon(
+                                        AppAssets.eye,
+                                        size: 24.w,
+                                        color: AppColors.black,
+                                      ),
+                              ),
+                            ),
+                          ),
+                          AppTextField(
+                            hintText: "Confirm Password",
+                            controller: provider.confirmPasswordCtr,
+                            obSecureText: provider.isConfirmPasswordObscure,
+                            suffixIcon: Padding(
+                              padding: const EdgeInsets.all(13.0),
+                              child: GestureDetector(
+                                onTap: () {
+                                  provider.toggleConfirmPasswordVisibility();
+                                },
+                                child: provider.isConfirmPasswordObscure
+                                    ? SvgIcon(
+                                        AppAssets.password,
+                                        size: 24.w,
+                                        color: AppColors.black,
+                                      )
+                                    : SvgIcon(
+                                        AppAssets.eye,
+                                        size: 24.w,
+                                        color: AppColors.black,
+                                      ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
 
                       22.h.verticalSpace,
                       //todo agree to policy check box
@@ -222,14 +286,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     return Column(
       spacing: 8.h,
       children: [
-        AppTextField(
-          hintText: "First Name",
-          controller: provider.firstNameController,
-        ),
-        AppTextField(
-          hintText: "Last Name",
-          controller: provider.lastNameController,
-        ),
+        AppTextField(hintText: "First Name", controller: provider.firstNameCtr),
+        AppTextField(hintText: "Last Name", controller: provider.lastNameCtr),
         AppTextField(hintText: "Email", controller: provider.createAccEmailCtr),
         AppTextField(
           hintText: "Password",

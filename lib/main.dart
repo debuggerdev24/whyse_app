@@ -162,3 +162,14 @@ class _MyAppState extends State<MyApp> {
   //   }
   // }
 }
+
+/*
+
+ ============================
+-> Worked on enabled google people API for the gettiong birthdate.
+-> Worked on created the new function to getting birthdate from the google.
+-> Worked on added the new API call of the google people API.
+-> Worked on manage the data passing to in the google sign in to upadte the profile details and save age.
+-> Worked on fix the null regarding issue.
+
+*/

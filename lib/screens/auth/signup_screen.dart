@@ -101,9 +101,9 @@ class _SignupScreenState extends State<SignupScreen> {
                                         context,
                                         "Onboarding session started",
                                       );
-                                      // context.pushNamed(
-                                      //   AppRoutes.enterAgeScreen.name,
-                                      // );
+                                      context.pushNamed(
+                                        AppRoutes.enterAgeScreen.name,
+                                      );
                                     },
 
                                     onFailed: (error) {
@@ -167,16 +167,47 @@ class _SignupScreenState extends State<SignupScreen> {
                         _socialButton(
                           label: "Sign up with Google",
                           icon: AppAssets.google,
-                          onTap: () {
+                          onTap: () async {
+                            final String? idToken = await provider
+                                .getGoogleSignInIDToken();
                             provider.socialLogin(
+                              idTpkon: idToken!,
                               onSuccess: () async {
                                 await provider.startOnboarding(
                                   context: context,
-                                  onSuccess: () {
+                                  onSuccess: () async {
                                     AppToast.success(
                                       context,
                                       "Sign Up Successfully and Onboarding session started",
                                     );
+                                    await provider.saveAge(
+                                      context: context,
+                                      onSuccess: () {
+                                        if (provider.isUnder16) {
+                                          context.pushNamed(
+                                            AppRoutes.parentEmailScreen.name,
+                                          );
+                                          return;
+                                        }
+                                        context.pushNamed(
+                                          AppRoutes.createAccountScreen.name,
+                                        );
+                                        Future.delayed(
+                                          Duration(seconds: 3),
+                                          () {
+                                            AppToast.info(
+                                              context: context,
+                                              message:
+                                                  "Please set your password",
+                                            );
+                                          },
+                                        );
+                                      },
+                                      onFailed: (error) {
+                                        AppToast.success(context, error);
+                                      },
+                                    );
+                                    // context.pushNamed(AppRoutes.enterAgeScreen.name);
                                   },
 
                                   onFailed: (error) {

@@ -37,7 +37,7 @@ class AuthProvider with ChangeNotifier {
   int? age;
   int calculatedAge = 0;
   DateTime? selectedDate;
-  String googleLoginEmail = "", selectedGoalId = "";
+  String googleLoginEmail = "", selectedGoalId = "", googleBirthDate = "";
 
   bool acceptedTerms = false;
   bool isEmailSent = false;
@@ -144,9 +144,6 @@ class AuthProvider with ChangeNotifier {
     age = calculatedAge;
   }
 
-  bool get isAbove16 => true; // Forced to always be true
-  bool get isBelow16 => false; // Forced to always be false
-
   bool _isValidEmail(String email) {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
@@ -184,8 +181,6 @@ class AuthProvider with ChangeNotifier {
         await LocalStorageService.instance.saveOnboardingId(
           data['onboardingId'],
         );
-        context.pushNamed(AppRoutes.enterAgeScreen.name);
-        // decideFirstScreen(context: context, step: data["currentStep"]);
         onSuccess.call();
 
         signUpEmailCtr.clear();
@@ -356,7 +351,7 @@ class AuthProvider with ChangeNotifier {
     }
 
     //todo Calculate age to check if we need to spoof for backend compliance
-    String dateToSend = calculateDateToSend();
+    String? dateToSend = calculateDateToSend();
     Logger.info("dateToSend $dateToSend");
 
     isSaveUserAgeLoading = true;
@@ -364,7 +359,7 @@ class AuthProvider with ChangeNotifier {
 
     final response = await AuthApiServices().saveBirthDate(
       onboardingId: onboardingId,
-      dateOfBirth: dateToSend,
+      dateOfBirth: dateToSend!,
     );
     response.fold(
       (l) {
@@ -372,7 +367,7 @@ class AuthProvider with ChangeNotifier {
       },
       (r) async {
         await LocalStorageService.instance.setAgeCompleted(true);
-        clearCreateAccountFields();
+        // clearCreateAccountFields();
         onSuccess.call();
       },
     );
@@ -381,23 +376,25 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  String calculateDateToSend() {
-    final today = DateTime.now();
-    calculatedAge = today.year - selectedDate!.year;
-    if (today.month < selectedDate!.month ||
-        (today.month == selectedDate!.month && today.day < selectedDate!.day)) {
-      calculatedAge--;
+  String? calculateDateToSend() {
+    if (selectedDate != null) {
+      final today = DateTime.now();
+      calculatedAge = today.year - selectedDate!.year;
+      if (today.month < selectedDate!.month ||
+          (today.month == selectedDate!.month &&
+              today.day < selectedDate!.day)) {
+        calculatedAge--;
+      }
+      String dateToSend =
+          "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
+      return dateToSend;
     }
-    String dateToSend;
-
-    dateToSend =
-        "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
-    return dateToSend;
+    return googleBirthDate;
   }
 
   // Create Account Properties
-  TextEditingController firstNameController = TextEditingController(),
-      lastNameController = TextEditingController(),
+  TextEditingController firstNameCtr = TextEditingController(),
+      lastNameCtr = TextEditingController(),
       createAccEmailCtr = TextEditingController(),
       loginPasswordCtr = TextEditingController(),
       createAccPasswordCtr = TextEditingController(),
@@ -409,8 +406,8 @@ class AuthProvider with ChangeNotifier {
     BuildContext context, {
     required bool isTermsAccepted,
   }) async {
-    final firstName = firstNameController.text.trim();
-    final lastName = lastNameController.text.trim();
+    final firstName = firstNameCtr.text.trim();
+    final lastName = lastNameCtr.text.trim();
     final email = createAccEmailCtr.text.trim();
     final password = createAccPasswordCtr.text.trim();
     final confirmPassword = confirmPasswordCtr.text.trim();
@@ -995,6 +992,7 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> socialLogin({
     required VoidCallback onSuccess,
+    required String idTpkon,
     Function(String error)? onNoAccountFound,
 
     required Function(String error) onFailed,
@@ -1002,7 +1000,6 @@ class AuthProvider with ChangeNotifier {
     isSocialLoginLoading = true;
     notifyListeners();
 
-    final String? idToken = await getGoogleSignInIDToken();
     if (idToken == null) {
       isSocialLoginLoading = false;
       notifyListeners();
@@ -1075,7 +1072,11 @@ class AuthProvider with ChangeNotifier {
       final GoogleSignIn googleSignIn = GoogleSignIn(
         serverClientId: AppConstants.serverClientId,
         clientId: (Platform.isIOS) ? AppConstants.clientIdIos : null,
-        scopes: ["email", "profile"],
+        scopes: [
+          "email",
+          "profile",
+          "https://www.googleapis.com/auth/user.birthday.read",
+        ],
       );
 
       GoogleSignInAccount? account = await googleSignIn.signIn();
@@ -1085,9 +1086,27 @@ class AuthProvider with ChangeNotifier {
         return null;
       }
 
+      final displayName = account.displayName?.trim() ?? "";
+
+      if (displayName.isNotEmpty) {
+        final parts = displayName.split(RegExp(r'\s+'));
+
+        firstNameCtr.text = parts.first;
+        lastNameCtr.text = (parts.length > 1) ? parts.sublist(1).join(" ") : "";
+      } else {
+        firstNameCtr.text = "";
+        lastNameCtr.text = "";
+      }
+
+      createAccEmailCtr.text = account.email;
+
+      Logger.info("createAccEmailCtr: ${createAccEmailCtr.text}");
+      Logger.info("lastNameCtr: ${lastNameCtr.text}");
+
       final auth = await account.authentication;
       googleLoginEmail = account.email;
       Logger.info(account.email);
+      Logger.info("Account: /${account.toString()}");
       Logger.info("access Token: ${auth.accessToken ?? 'NULL'}");
       Logger.info("idToken: /${auth.idToken ?? 'NULL'}");
       Logger.info("\nclose");
@@ -1103,10 +1122,45 @@ class AuthProvider with ChangeNotifier {
         return null;
       }
 
+      await _fetchGoogleBirthday(auth.accessToken!);
+
       return auth.idToken;
     } catch (e) {
       Logger.error("Google Sign In catch error : ${e.toString()}");
       return null;
+    }
+  }
+
+  Future<void> _fetchGoogleBirthday(String accessToken) async {
+    try {
+      final response = await Dio().get(
+        "https://people.googleapis.com/v1/people/me",
+        queryParameters: {"personFields": "birthdays"},
+        options: Options(headers: {"Authorization": "Bearer $accessToken"}),
+      );
+
+      final birthdays = response.data["birthdays"];
+      if (birthdays == null || birthdays.isEmpty) return;
+
+      final date = birthdays.first["date"];
+      if (date == null) return;
+
+      final int day = date["day"];
+      final int month = date["month"];
+      final int year = date["year"];
+      final today = DateTime.now();
+
+      calculatedAge = today.year - year;
+      if (today.month < month || (today.month == month && today.day < day)) {
+        calculatedAge--;
+      }
+
+      googleBirthDate =
+          "$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}";
+      Logger.info("Google Birthdate: $googleBirthDate");
+    } catch (e) {
+      Logger.error("Failed to fetch birthday: $e");
+      return;
     }
   }
 
@@ -1237,8 +1291,8 @@ class AuthProvider with ChangeNotifier {
   }
 
   void clearCreateAccountFields() {
-    firstNameController.clear();
-    lastNameController.clear();
+    firstNameCtr.clear();
+    lastNameCtr.clear();
     createAccEmailCtr.clear();
     createAccPasswordCtr.clear();
     confirmPasswordCtr.clear();
@@ -1247,8 +1301,8 @@ class AuthProvider with ChangeNotifier {
 
   void clearAllData() {
     signUpEmailCtr.clear();
-    firstNameController.clear();
-    lastNameController.clear();
+    firstNameCtr.clear();
+    lastNameCtr.clear();
     createAccEmailCtr.clear();
     createAccPasswordCtr.clear();
     confirmPasswordCtr.clear();

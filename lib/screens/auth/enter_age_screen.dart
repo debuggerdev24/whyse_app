@@ -61,7 +61,6 @@ class _AgeEntryScreenState extends State<AgeEntryScreen> {
                         '${selectedDate.month.toString().padLeft(2, '0')}/'
                         '${selectedDate.day.toString().padLeft(2, '0')}/'
                         '${selectedDate.year}';
-
                     Navigator.pop(context);
                   },
                   child: Text(

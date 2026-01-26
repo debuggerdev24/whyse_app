@@ -87,12 +87,14 @@ class _SplashScreenState extends State<SplashScreen>
       if (!mounted) {
         return;
       }
-      if (step != null) {
-        authProvider.decideFirstScreen(context: context, step: step!);
-        return;
-      } else {
-        context.goNamed(AppRoutes.loginScreen.name);
-      }
+      context.goNamed(AppRoutes.loginScreen.name);
+
+      // if (step != null) {
+      //   authProvider.decideFirstScreen(context: context, step: step!);
+      //   return;
+      // } else {
+      //   context.goNamed(AppRoutes.loginScreen.name);
+      // }
     });
   }
 
