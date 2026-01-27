@@ -47,9 +47,10 @@ class _ReadingGoalScreenState extends State<ReadingGoalScreen> {
                       onBack: () {
                         if (context.canPop()) {
                           context.pop();
-                        } else {
-                          context.goNamed(AppRoutes.profileInfoScreen.name);
+                          return;
                         }
+
+                        context.goNamed(AppRoutes.profileInfoScreen.name);
                       },
                     ),
 

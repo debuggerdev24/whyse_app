@@ -263,8 +263,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           //     }
                           //   }
                           // },
-                          onTap: () =>
-                              provider.handleAccountCreation(context: context),
+                          onTap: () => provider.createAccount(
+                            isTermsAccepted: provider.acceptedTerms,
+                            context: context,
+                          ),
                           isLoading: context.watch<AuthProvider>().isLoading,
                         ),
                       ),

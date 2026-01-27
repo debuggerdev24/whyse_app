@@ -192,8 +192,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       _socialButton(
                         label: "Login with Google",
                         icon: AppAssets.google,
-                        onTap: () {
-                          provider.socialLogin(
+                        onTap: () async {
+                          final idToken = await provider
+                              .getGoogleIDTokenForLogin();
+                          provider.googleLogin(
+                            idToken: idToken!,
                             onSuccess: () {
                               AppToast.success(context, "Login Successfully.");
                               context.goNamed(AppRoutes.homeScreen.name);

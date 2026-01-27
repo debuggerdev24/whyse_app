@@ -1,9 +1,10 @@
 import 'dart:async';
-import 'dart:developer';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:redstreakapp/core/constants/shared_pref.dart';
@@ -16,8 +17,6 @@ import 'package:redstreakapp/services/base_api_service.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/helper/log_helper.dart';
 import '../../models/auth/on_boarding_progress_model.dart' hide User;
-import '../../models/home/story_models/generate_story_request.dart';
-import '../../models/home/story_models/story_model.dart';
 
 class AuthProvider with ChangeNotifier {
   TextEditingController customGoalTitleCtr = TextEditingController(),
@@ -46,8 +45,8 @@ class AuthProvider with ChangeNotifier {
 
   // -------- TOGGLE FUNCTIONS -------- //
 
-  void toggleAcceptedTerms() {
-    acceptedTerms = !acceptedTerms;
+  void toggleAcceptedTerms({bool? value}) {
+    acceptedTerms = value ?? !acceptedTerms;
     notifyListeners();
   }
 
@@ -66,39 +65,38 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> handleAccountCreation({required BuildContext context}) async {
-    // if (isEmailSent) {
-    //   isVerifyEmailLoading = true;
-    //   notifyListeners();
-    //
-    //   final success = await verifyCreateAccEmail(context);
-    //
-    //   isVerifyEmailLoading = false;
-    //   notifyListeners();
-    //
-    //   if (success && context.mounted) {
-    //     context.pushNamed(AppRoutes.profileInfoScreen.name);
-    //   } else {
-    //     isEmailSent = false;
-    //     notifyListeners();
-    //   }
-    // } else {
-    isCreateAccountLoading = true;
-    notifyListeners();
-
-    final success = await createAccount(
-      context,
-      isTermsAccepted: acceptedTerms,
-    );
-
-    isCreateAccountLoading = false;
-    notifyListeners();
-
-    if (success) {
-      setEmailSent(true);
-    }
-    // }
-  }
+  // Future<void> handleAccountCreation({required BuildContext context}) async {
+  //   // if (isEmailSent) {
+  //   //   isVerifyEmailLoading = true;
+  //   //   notifyListeners();
+  //   //
+  //   //   final success = await verifyCreateAccEmail(context);
+  //   //
+  //   //   isVerifyEmailLoading = false;
+  //   //   notifyListeners();
+  //   //
+  //   //   if (success && context.mounted) {
+  //   //     context.pushNamed(AppRoutes.profileInfoScreen.name);
+  //   //   } else {
+  //   //     isEmailSent = false;
+  //   //     notifyListeners();
+  //   //   }
+  //   // } else {
+  //   isCreateAccountLoading = true;
+  //   notifyListeners();
+  //
+  //   final success = await createAccount(
+  //     context,
+  //     isTermsAccepted: acceptedTerms,
+  //   );
+  //
+  //
+  //
+  //   if (success) {
+  //
+  //   }
+  //   // }
+  // }
 
   void updateGoalId(String id) {
     if (selectedGoalId == id) {
@@ -392,6 +390,7 @@ class AuthProvider with ChangeNotifier {
     return googleBirthDate;
   }
 
+  //todo create account
   // Create Account Properties
   TextEditingController firstNameCtr = TextEditingController(),
       lastNameCtr = TextEditingController(),
@@ -401,10 +400,9 @@ class AuthProvider with ChangeNotifier {
       confirmPasswordCtr = TextEditingController();
 
   bool isCreateAccountLoading = false;
-
-  Future<bool> createAccount(
-    BuildContext context, {
+  Future<bool> createAccount({
     required bool isTermsAccepted,
+    required BuildContext context,
   }) async {
     final firstName = firstNameCtr.text.trim();
     final lastName = lastNameCtr.text.trim();
@@ -433,6 +431,7 @@ class AuthProvider with ChangeNotifier {
       AppToast.error(context, "Please enter your password");
       return false;
     }
+
     if (confirmPassword.isEmpty) {
       AppToast.error(context, "Please confirm your password");
       return false;
@@ -474,8 +473,10 @@ class AuthProvider with ChangeNotifier {
         // If success here, it usually means account created OR verified successfully
         AppToast.success(
           context,
-          response['message'] ?? "Account created successfully",
+          response['message'] ??
+              "Verification link sent to your mail, please verify.",
         );
+        setEmailSent(true);
         return true;
       } else {
         if (response['errors'] != null &&
@@ -517,8 +518,8 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  //todo verify account
   bool isVerifyEmailLoading = false;
-
   Future<bool> verifyCreateAccEmail(BuildContext context) async {
     final onboardingId = LocalStorageService.instance.onboardingId;
     final email = createAccEmailCtr.text.trim();
@@ -990,16 +991,13 @@ class AuthProvider with ChangeNotifier {
   //todo social login
   bool isSocialLoginLoading = false;
 
-  Future<void> socialLogin({
+  Future<void> googleSignUp({
     required VoidCallback onSuccess,
-    required String idTpkon,
+    required String? idToken,
     Function(String error)? onNoAccountFound,
 
     required Function(String error) onFailed,
   }) async {
-    isSocialLoginLoading = true;
-    notifyListeners();
-
     if (idToken == null) {
       isSocialLoginLoading = false;
       notifyListeners();
@@ -1011,7 +1009,7 @@ class AuthProvider with ChangeNotifier {
       "idToken": idToken, //YOUR_GOOGLE_ID_TOKEN_HERE
       // "onboardingId": SharedPrefs.instance.onboardingId,
     };
-    final response = await AuthApiServices().socialLogin(data: data);
+    final response = await AuthApiServices().googleSignUp(data: data);
     response.fold(
       (l) {
         onFailed.call(l.errorMsg);
@@ -1019,6 +1017,78 @@ class AuthProvider with ChangeNotifier {
       (r) async {
         final data = r['data'];
         Logger.info("Login Response Data: $data");
+
+        // if (data != null) {
+        //   String? accessToken;
+        //   if (data["session"] == null && onNoAccountFound != null) {
+        //     onNoAccountFound.call(data["user"]["email"]);
+        //     return;
+        //   }
+        //
+        //   //todo Check for nested session object first (as seen in logs)
+        //   if (data['session'] != null) {
+        //     final session = data['session'];
+        //
+        //     if (session["accessToken"] != null) {
+        //       accessToken = session["accessToken"];
+        //       await LocalStorageService.instance.saveAuthToken(accessToken!);
+        //     }
+        //
+        //     if (session["refreshToken"] != null) {
+        //       await LocalStorageService.instance.saveRefreshToken(
+        //         session["refreshToken"],
+        //       );
+        //     }
+        //   }
+        //
+        //   if (accessToken != null) {
+        //     //todo Update the current API instance with the new token immediately
+        //     DioClient.instance.addToken(accessToken);
+        //     Logger.error("Token saved successfully from login: $accessToken");
+        //   }
+        //
+        //   if (data['onboardingId'] != null) {
+        //     await LocalStorageService.instance.saveOnboardingId(
+        //       data['onboardingId'].toString(),
+        //     );
+        //   }
+        // }
+        signUpEmailCtr.text = data["user"]["email"];
+
+        onSuccess.call();
+      },
+    );
+
+    isSocialLoginLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> googleLogin({
+    required VoidCallback onSuccess,
+    required String? idToken,
+    Function(String error)? onNoAccountFound,
+
+    required Function(String error) onFailed,
+  }) async {
+    if (idToken == null) {
+      isSocialLoginLoading = false;
+      notifyListeners();
+      return;
+    }
+
+    final data = {
+      "provider": "google",
+      "idToken": idToken,
+      // "onboardingId": SharedPrefs.instance.onboardingId,
+    };
+    final response = await AuthApiServices().googleSignUp(data: data);
+    response.fold(
+      (l) {
+        onFailed.call(l.errorMsg);
+      },
+      (r) async {
+        final data = r['data'];
+        Logger.info("Google Login Response Data: $data");
 
         if (data != null) {
           String? accessToken;
@@ -1055,7 +1125,7 @@ class AuthProvider with ChangeNotifier {
             );
           }
         }
-        signUpEmailCtr.text = data["user"]["email"];
+        // signUpEmailCtr.text = data["user"]["email"];
 
         onSuccess.call();
       },
@@ -1065,18 +1135,16 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  //todo google login
-
-  Future<String?> getGoogleSignInIDToken() async {
+  //todo google login functions
+  //todo Google Sign-In Platform Exception: com.google.android.gms.common.api.ApiException: 16:
+  Future<String?> getGoogleIDTokenForLogin() async {
     try {
+      isSocialLoginLoading = true;
+      notifyListeners();
       final GoogleSignIn googleSignIn = GoogleSignIn(
         serverClientId: AppConstants.serverClientId,
         clientId: (Platform.isIOS) ? AppConstants.clientIdIos : null,
-        scopes: [
-          "email",
-          "profile",
-          "https://www.googleapis.com/auth/user.birthday.read",
-        ],
+        scopes: ["email", "profile"],
       );
 
       GoogleSignInAccount? account = await googleSignIn.signIn();
@@ -1085,23 +1153,6 @@ class AuthProvider with ChangeNotifier {
         Logger.error("User cancelled sign-in");
         return null;
       }
-
-      final displayName = account.displayName?.trim() ?? "";
-
-      if (displayName.isNotEmpty) {
-        final parts = displayName.split(RegExp(r'\s+'));
-
-        firstNameCtr.text = parts.first;
-        lastNameCtr.text = (parts.length > 1) ? parts.sublist(1).join(" ") : "";
-      } else {
-        firstNameCtr.text = "";
-        lastNameCtr.text = "";
-      }
-
-      createAccEmailCtr.text = account.email;
-
-      Logger.info("createAccEmailCtr: ${createAccEmailCtr.text}");
-      Logger.info("lastNameCtr: ${lastNameCtr.text}");
 
       final auth = await account.authentication;
       googleLoginEmail = account.email;
@@ -1122,8 +1173,6 @@ class AuthProvider with ChangeNotifier {
         return null;
       }
 
-      await _fetchGoogleBirthday(auth.accessToken!);
-
       return auth.idToken;
     } catch (e) {
       Logger.error("Google Sign In catch error : ${e.toString()}");
@@ -1131,41 +1180,189 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  Future<String?> getGoogleIDTokenForSignUp() async {
+    GoogleSignIn? googleSignIn;
+
+    try {
+      isSocialLoginLoading = true;
+      notifyListeners();
+
+      googleSignIn = GoogleSignIn(
+        serverClientId: AppConstants.serverClientId,
+        clientId: (Platform.isIOS) ? AppConstants.clientIdIos : null,
+        scopes: [
+          "email",
+          "profile",
+          "https://www.googleapis.com/auth/user.birthday.read",
+        ],
+      );
+
+      // Critical: Ensure UI thread is ready (prevents deadlock)
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      // Sign in with proper error handling
+      GoogleSignInAccount? account;
+      try {
+        account = await googleSignIn.signIn();
+      } on PlatformException catch (e) {
+        Logger.error("Google Sign-In Platform Exception: ${e.message}");
+        isSocialLoginLoading = false;
+        notifyListeners();
+        return null;
+      }
+
+      if (account == null) {
+        Logger.error("User cancelled sign-in");
+        isSocialLoginLoading = false;
+        notifyListeners();
+        return null;
+      }
+
+      // Parse and set user information
+      final displayName = account.displayName?.trim() ?? "";
+      if (displayName.isNotEmpty) {
+        final parts = displayName.split(RegExp(r'\s+'));
+        firstNameCtr.text = parts.first;
+        lastNameCtr.text = (parts.length > 1) ? parts.sublist(1).join(" ") : "";
+      } else {
+        firstNameCtr.text = "";
+        lastNameCtr.text = "";
+      }
+
+      createAccEmailCtr.text = account.email;
+      googleLoginEmail = account.email;
+
+      Logger.info("Email: ${account.email}");
+      Logger.info("Display Name: $displayName");
+
+      // Get authentication details
+      final auth = await account.authentication;
+
+      Logger.info("Access Token: ${auth.accessToken ?? 'NULL'}");
+      Logger.info("ID Token: ${auth.idToken ?? 'NULL'}");
+
+      // Validate ID token
+      if (auth.idToken == null) {
+        Logger.error(
+          "⚠️ ID Token is NULL - Check serverClientId configuration!",
+        );
+        Logger.error(
+          "Make sure you're using the Web Client ID, not Android Client ID",
+        );
+        isSocialLoginLoading = false;
+        notifyListeners();
+        return null;
+      }
+
+      // Fetch additional user data (birthday)
+      if (auth.accessToken != null) {
+        Logger.info("Birthdate API Calling");
+        await _fetchGoogleBirthday(auth.accessToken!);
+      }
+
+      // Generate password for account creation
+      generateStrongPassword();
+
+      return auth.idToken;
+    } catch (e) {
+      Logger.error("Google Sign In error: ${e.toString()}");
+
+      // Attempt to sign out to clear any stuck state
+      try {
+        await googleSignIn?.signOut();
+      } catch (signOutError) {
+        Logger.error("Sign out error: $signOutError");
+      }
+
+      isSocialLoginLoading = false;
+      notifyListeners();
+      return null;
+    }
+  }
+
+  //todo fetch google birth date
   Future<void> _fetchGoogleBirthday(String accessToken) async {
     try {
-      final response = await Dio().get(
+      final response = await BaseApiHelper.instance.get(
         "https://people.googleapis.com/v1/people/me",
         queryParameters: {"personFields": "birthdays"},
         options: Options(headers: {"Authorization": "Bearer $accessToken"}),
       );
 
-      final birthdays = response.data["birthdays"];
-      if (birthdays == null || birthdays.isEmpty) return;
+      response.fold(
+        (l) {
+          Logger.error("Error while getting birthdate: $e");
+          return;
+        },
+        (r) {
+          Logger.info("Birthdate response: $r");
+          final birthdays = r["birthdays"];
+          if (birthdays == null || birthdays.isEmpty) return;
 
-      final date = birthdays.first["date"];
-      if (date == null) return;
+          final date = birthdays.first["date"];
+          if (date == null) return;
 
-      final int day = date["day"];
-      final int month = date["month"];
-      final int year = date["year"];
-      final today = DateTime.now();
+          final int day = date["day"];
+          final int month = date["month"];
+          final int year = date["year"];
+          final today = DateTime.now();
 
-      calculatedAge = today.year - year;
-      if (today.month < month || (today.month == month && today.day < day)) {
-        calculatedAge--;
-      }
+          calculatedAge = today.year - year;
+          if (today.month < month ||
+              (today.month == month && today.day < day)) {
+            calculatedAge--;
+          }
 
-      googleBirthDate =
-          "$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}";
-      Logger.info("Google Birthdate: $googleBirthDate");
+          googleBirthDate =
+              "$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}";
+          Logger.info("Google Birthdate: $googleBirthDate");
+        },
+      );
     } catch (e) {
       Logger.error("Failed to fetch birthday: $e");
       return;
     }
   }
 
-  bool isSaveParentEmailLoading = false;
+  //todo generate password for google sign up
+  String generateStrongPassword() {
+    const int passwordLength = 14;
 
+    // Character sets based on your email validation pattern
+    const String uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const String lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    const String numbers = '0123456789';
+    const String specialChars = '._%+-'; // From your email regex pattern
+
+    // Combine all character sets
+    const String allChars = uppercase + lowercase + numbers + specialChars;
+
+    final random = Random.secure();
+
+    // Ensure at least one character from each set
+    List<String> password = [
+      uppercase[random.nextInt(uppercase.length)],
+      lowercase[random.nextInt(lowercase.length)],
+      numbers[random.nextInt(numbers.length)],
+      specialChars[random.nextInt(specialChars.length)],
+    ];
+
+    // Fill the rest with random characters
+    for (int i = password.length; i < passwordLength; i++) {
+      password.add(allChars[random.nextInt(allChars.length)]);
+    }
+
+    //todo Shuffle to randomize positions
+    password.shuffle(random);
+
+    Logger.info("Generated PassWord: ${password.join('')}");
+    createAccPasswordCtr.text = password.join('');
+    confirmPasswordCtr.text = password.join('');
+    return password.join('');
+  }
+
+  //todo save parent email
+  bool isSaveParentEmailLoading = false;
   Future<void> saveParentEmail({
     required BuildContext context,
     required VoidCallback onSuccess,
@@ -1311,105 +1508,104 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Story Generation Logic
-  bool isLoadingStory = false;
-
-  Future<Story?> generateStory(
-    BuildContext context, {
-    required GenerateStoryRequest request,
-  }) async {
-    try {
-      isLoadingStory = true;
-      notifyListeners();
-
-      // 1. Generate Story & Image in Parallel
-      // We wrap image generation to ensure it doesn't fail the whole batch if it throws
-      final results = await Future.wait([
-        AuthApiServices().generateMobileStory(request),
-        AuthApiServices().generateStoryImage(request).catchError((e) {
-          log("Image generation error in parallel: $e");
-          return null;
-        }),
-      ]);
-
-      final storyResponse = results[0];
-      final imageResponse = results[1];
-
-      if (storyResponse != null && storyResponse['success'] == true) {
-        log("Story Response: $storyResponse");
-
-        Story? story;
-        if (storyResponse['data'] != null) {
-          story = Story.fromJson(storyResponse['data']);
-        }
-
-        if (story != null) {
-          try {
-            log("Image Response: $imageResponse");
-
-            if (imageResponse != null && imageResponse['success'] == true) {
-              final imageData = imageResponse['data'];
-              if (imageData != null && imageData['imagePath'] != null) {
-                final String imagePath = imageData['imagePath'];
-
-                // 3. Link Image
-                await AuthApiServices().linkImageToStory(
-                  storyId: story.id,
-                  images: [imagePath],
-                );
-
-                // Update local object
-                // story.image = imagePath;
-              }
-            }
-          } catch (e) {
-            log("Image linking failed or timed out: $e");
-          }
-
-          isLoadingStory = false;
-          notifyListeners();
-
-          AppToast.success(
-            context,
-            storyResponse['message'] ?? "Story generated successfully",
-          );
-          return story;
-        }
-
-        isLoadingStory = false;
-        notifyListeners();
-        return null;
-      } else {
-        isLoadingStory = false;
-        notifyListeners();
-        AppToast.error(
-          context,
-          storyResponse?['message'] ?? "Failed to generate story",
-        );
-        return null;
-      }
-    } catch (e) {
-      isLoadingStory = false;
-      notifyListeners();
-
-      if (e is DioException) {
-        final data = e.response?.data;
-        if (data != null &&
-            data['errors'] != null &&
-            (data['errors'] as List).isNotEmpty) {
-          final firstError = data['errors'][0];
-          final msg = firstError['msg'];
-          if (msg != null) {
-            AppToast.error(context, msg);
-            return null;
-          }
-        }
-      }
-
-      AppToast.error(context, e.toString());
-      return null;
-    }
-  }
+  //todo Generate Story
+  // bool isLoadingStory = false;
+  // Future<Story?> generateStory(
+  //   BuildContext context, {
+  //   required GenerateStoryRequest request,
+  // }) async {
+  //   try {
+  //     isLoadingStory = true;
+  //     notifyListeners();
+  //
+  //     // 1. Generate Story & Image in Parallel
+  //     // We wrap image generation to ensure it doesn't fail the whole batch if it throws
+  //     final results = await Future.wait([
+  //       AuthApiServices().generateMobileStory(request),
+  //       AuthApiServices().generateStoryImage(request).catchError((e) {
+  //         Logger.info("Image generation error in parallel: $e");
+  //         return null;
+  //       }),
+  //     ]);
+  //
+  //     final storyResponse = results[0];
+  //     final imageResponse = results[1];
+  //
+  //     if (storyResponse != null && storyResponse['success'] == true) {
+  //       Logger.info("Story Response: $storyResponse");
+  //
+  //       Story? story;
+  //       if (storyResponse['data'] != null) {
+  //         story = Story.fromJson(storyResponse['data']);
+  //       }
+  //
+  //       if (story != null) {
+  //         try {
+  //           Logger.info("Image Response: $imageResponse");
+  //
+  //           if (imageResponse != null && imageResponse['success'] == true) {
+  //             final imageData = imageResponse['data'];
+  //             if (imageData != null && imageData['imagePath'] != null) {
+  //               final String imagePath = imageData['imagePath'];
+  //
+  //               // 3. Link Image
+  //               await AuthApiServices().linkImageToStory(
+  //                 storyId: story.id,
+  //                 images: [imagePath],
+  //               );
+  //
+  //               // Update local object
+  //               // story.image = imagePath;
+  //             }
+  //           }
+  //         } catch (e) {
+  //           Logger.error("Image linking failed or timed out: $e");
+  //         }
+  //
+  //         isLoadingStory = false;
+  //         notifyListeners();
+  //
+  //         AppToast.success(
+  //           context,
+  //           storyResponse['message'] ?? "Story generated successfully",
+  //         );
+  //         return story;
+  //       }
+  //
+  //       isLoadingStory = false;
+  //       notifyListeners();
+  //       return null;
+  //     } else {
+  //       isLoadingStory = false;
+  //       notifyListeners();
+  //       AppToast.error(
+  //         context,
+  //         storyResponse?['message'] ?? "Failed to generate story",
+  //       );
+  //       return null;
+  //     }
+  //   } catch (e) {
+  //     isLoadingStory = false;
+  //     notifyListeners();
+  //
+  //     if (e is DioException) {
+  //       final data = e.response?.data;
+  //       if (data != null &&
+  //           data['errors'] != null &&
+  //           (data['errors'] as List).isNotEmpty) {
+  //         final firstError = data['errors'][0];
+  //         final msg = firstError['msg'];
+  //         if (msg != null) {
+  //           AppToast.error(context, msg);
+  //           return null;
+  //         }
+  //       }
+  //     }
+  //
+  //     AppToast.error(context, e.toString());
+  //     return null;
+  //   }
+  // }
 
   String? _consentRequestToken, _resetPasswordToken;
 
@@ -1540,6 +1736,14 @@ class AuthProvider with ChangeNotifier {
       } else {
         context.goNamed(AppRoutes.homeScreen.name);
       }
+    }
+
+    if (step != AppConstants.completed) {
+      AppToast.info(
+        context: context,
+        durationSecond: 5,
+        message: "Please complete your on boarding session.",
+      );
     }
   }
 }

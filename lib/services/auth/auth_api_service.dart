@@ -198,7 +198,7 @@ class AuthApiServices {
     return res.data;
   }
 
-  Future<Either<ApiException, Map<String, dynamic>>> socialLogin({
+  Future<Either<ApiException, Map<String, dynamic>>> googleSignUp({
     required Map<String, dynamic> data,
   }) async {
     return await BaseApiHelper.instance.post(EndPoints.socialLogin, data: data);

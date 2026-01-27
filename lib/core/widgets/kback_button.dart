@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
+
+import '../../routes/user_routes.dart';
 
 class CustomBackButton extends StatelessWidget {
   final VoidCallback? onTap;
@@ -27,8 +30,10 @@ class CustomBackButton extends StatelessWidget {
             onTap ??
             () {
               if (Navigator.of(context).canPop()) {
-                Navigator.of(context).pop();
+                context.pop();
+                return;
               }
+              context.goNamed(AppRoutes.loginScreen.name);
             },
         child: Row(
           mainAxisSize: MainAxisSize.min,

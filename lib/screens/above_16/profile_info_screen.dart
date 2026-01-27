@@ -26,103 +26,126 @@ class ProfileInfoScreen extends StatefulWidget {
 class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
   @override
   Widget build(BuildContext context) {
-    return AppLayout(
-      resizeToAvoidBottomInset: false,
-      body: SafeArea(
-        child: Consumer2<AuthProvider, OnBoardingProvider>(
-          builder: (context, authProvider, onBoardingProvider, child) {
-            return Stack(
-              children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 24.w,
-                    vertical: 20.h,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const OnboardingHeader(currentStep: 1, totalSteps: 5),
-                      AppText(
-                        text: "Profile Information",
-                        style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
-                      ),
-                      8.h.verticalSpace,
-                      AppText(
-                        text:
-                            "Complete your profile to personalize your reading journey.",
-                        style: AppTextStyles.sfProDisplayMedium(
-                          fontSize: 16.sp,
-                          color: AppColors.black.withValues(alpha: 0.8),
-                        ),
-                      ),
-
-                      20.h.verticalSpace,
-
-                      CustomDropDown(
-                        hint: "Country",
-                        value: onBoardingProvider.selectedCountry,
-                        items: ["India", "USA", "Canada", "UK"],
-                        onChanged: (value) {
-                          onBoardingProvider.setCountry(value);
-                        },
-                      ),
-
-                      20.h.verticalSpace,
-
-                      // Language Dropdown
-                      CustomDropDown(
-                        hint: "Preferred Reading Language",
-                        value: onBoardingProvider.selectedLanguage,
-                        items: ["English", "Hindi", "Arabic", "French"],
-                        onChanged: (value) {
-                          onBoardingProvider.setLanguage(value);
-                        },
-                      ),
-
-                      Spacer(),
-                      Padding(
-                        padding: EdgeInsets.only(bottom: 8.h),
-                        child: AppFilledButton(
-                          text: "Next",
-                          backgroundColor: AppColors.yellowColor,
-                          onTap: () async {
-                            if (onBoardingProvider.selectedCountry == null) {
-                              AppToast.error(
-                                context,
-                                "Please select your country",
-                              );
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        if (context.canPop()) {
+          context.pop();
+          return;
+        }
+        context.goNamed(AppRoutes.loginScreen.name);
+      },
+      child: AppLayout(
+        resizeToAvoidBottomInset: false,
+        body: SafeArea(
+          child: Consumer2<AuthProvider, OnBoardingProvider>(
+            builder: (context, authProvider, onBoardingProvider, child) {
+              return Stack(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 24.w,
+                      vertical: 20.h,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        OnboardingHeader(
+                          currentStep: 1,
+                          totalSteps: 5,
+                          onBack: () {
+                            if (context.canPop()) {
+                              context.pop();
                               return;
                             }
-                            if (onBoardingProvider.selectedLanguage == null) {
-                              AppToast.error(
-                                context,
-                                "Please select your preferred language",
-                              );
-                              return;
-                            }
-
-                            final success = await authProvider.saveProfileInfo(
-                              context,
-                              country: onBoardingProvider.selectedCountry!,
-                              preferredLanguage:
-                                  onBoardingProvider.selectedLanguage!,
-                            );
-
-                            if (success && context.mounted) {
-                              context.pushNamed(
-                                AppRoutes.readingGoalScreen.name,
-                              );
-                            }
+                            context.goNamed(AppRoutes.loginScreen.name);
                           },
                         ),
-                      ),
-                    ],
+                        AppText(
+                          text: "Profile Information",
+                          style: AppTextStyles.sfProDisplayBold(
+                            fontSize: 32.sp,
+                          ),
+                        ),
+                        8.h.verticalSpace,
+                        AppText(
+                          text:
+                              "Complete your profile to personalize your reading journey.",
+                          style: AppTextStyles.sfProDisplayMedium(
+                            fontSize: 16.sp,
+                            color: AppColors.black.withValues(alpha: 0.8),
+                          ),
+                        ),
+
+                        20.h.verticalSpace,
+
+                        CustomDropDown(
+                          hint: "Country",
+                          value: onBoardingProvider.selectedCountry,
+                          items: ["India", "USA", "Canada", "UK"],
+                          onChanged: (value) {
+                            onBoardingProvider.setCountry(value);
+                          },
+                        ),
+
+                        20.h.verticalSpace,
+
+                        // Language Dropdown
+                        CustomDropDown(
+                          hint: "Preferred Reading Language",
+                          value: onBoardingProvider.selectedLanguage,
+                          items: ["English", "Hindi", "Arabic", "French"],
+                          onChanged: (value) {
+                            onBoardingProvider.setLanguage(value);
+                          },
+                        ),
+
+                        Spacer(),
+                        Padding(
+                          padding: EdgeInsets.only(bottom: 8.h),
+                          child: AppFilledButton(
+                            text: "Next",
+                            backgroundColor: AppColors.yellowColor,
+                            onTap: () async {
+                              if (onBoardingProvider.selectedCountry == null) {
+                                AppToast.error(
+                                  context,
+                                  "Please select your country",
+                                );
+                                return;
+                              }
+                              if (onBoardingProvider.selectedLanguage == null) {
+                                AppToast.error(
+                                  context,
+                                  "Please select your preferred language",
+                                );
+                                return;
+                              }
+
+                              final success = await authProvider
+                                  .saveProfileInfo(
+                                    context,
+                                    country:
+                                        onBoardingProvider.selectedCountry!,
+                                    preferredLanguage:
+                                        onBoardingProvider.selectedLanguage!,
+                                  );
+
+                              if (success && context.mounted) {
+                                context.pushNamed(
+                                  AppRoutes.readingGoalScreen.name,
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                if (authProvider.isSaveProfileLoading) FullPageIndicator(),
-              ],
-            );
-          },
+                  if (authProvider.isSaveProfileLoading) FullPageIndicator(),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

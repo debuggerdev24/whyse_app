@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:redstreakapp/core/helper/log_helper.dart';
 
 import '../../core/constants/end_points.dart';
 import '../base_api_service.dart';
@@ -15,7 +14,6 @@ class HomeApiService {
   }
 
   Future<Either<ApiException, Map<String, dynamic>>> getInterest() async {
-
     return await BaseApiHelper.instance.get(EndPoints.getStoryInterest);
   }
 

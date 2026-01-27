@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
-import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 
 ValueNotifier<int> tabIndex = ValueNotifier<int>(0);
@@ -14,7 +13,7 @@ ValueNotifier<int> tabIndex = ValueNotifier<int>(0);
 class UserDashBoard extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
 
-  const UserDashBoard({super.key,required this.navigationShell});
+  const UserDashBoard({super.key, required this.navigationShell});
 
   @override
   State<StatefulWidget> createState() => _UserDashBoardState();
@@ -59,24 +58,22 @@ class _UserDashBoardState extends State<UserDashBoard> {
       valueListenable: tabIndex,
       builder: (context, value, child) => Scaffold(
         body: widget.navigationShell,
-        bottomNavigationBar:  BottomNavigationBar(
+        bottomNavigationBar: BottomNavigationBar(
           currentIndex: value,
           onTap: (index) {
             tabIndex.value = index;
             // todo widget.navigationShell.goBranch(index);
           },
           items: [
-            BottomNavItem(icon: AppAssets.note, isSelected: value == 0,),
+            BottomNavItem(icon: AppAssets.note, isSelected: value == 0),
             BottomNavItem(icon: AppAssets.book, isSelected: value == 1),
             BottomNavItem(icon: AppAssets.dumble, isSelected: value == 2),
             BottomNavItem(icon: AppAssets.star, isSelected: value == 3),
           ],
-
         ),
       ),
     );
   }
-
 }
 
 class BottomNavigationBar extends StatelessWidget {
@@ -109,7 +106,13 @@ class BottomNavigationBar extends StatelessWidget {
       height: 80.w,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: List.generate(items.length, (index) => GestureDetector(onTap: () => onTap.call(index), child: items[index]),)
+        children: List.generate(
+          items.length,
+          (index) => GestureDetector(
+            onTap: () => onTap.call(index),
+            child: items[index],
+          ),
+        ),
       ),
     );
   }

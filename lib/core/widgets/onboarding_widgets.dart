@@ -38,7 +38,7 @@ class OnboardingHeader extends StatelessWidget {
                 opacity: currentStep == 0 ? 0.3 : 1,
                 child: SvgIcon(
                   backIcon,
-                  size: backIconSize.sp, // ✅ flexible
+                  size: backIconSize.sp,
                   color: currentStep == 0 ? Colors.grey : AppColors.black,
                 ),
               ),

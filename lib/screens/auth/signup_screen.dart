@@ -14,6 +14,7 @@ import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
+import '../../core/helper/log_helper.dart';
 import '../../core/widgets/custom_toast.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -168,65 +169,157 @@ class _SignupScreenState extends State<SignupScreen> {
                           label: "Sign up with Google",
                           icon: AppAssets.google,
                           onTap: () async {
-                            final String? idToken = await provider
-                                .getGoogleSignInIDToken();
-                            provider.socialLogin(
-                              idTpkon: idToken!,
-                              onSuccess: () async {
-                                await provider.startOnboarding(
-                                  context: context,
-                                  onSuccess: () async {
-                                    AppToast.success(
-                                      context,
-                                      "Sign Up Successfully and Onboarding session started",
-                                    );
-                                    await provider.saveAge(
-                                      context: context,
-                                      onSuccess: () {
-                                        if (provider.isUnder16) {
-                                          context.pushNamed(
-                                            AppRoutes.parentEmailScreen.name,
-                                          );
-                                          return;
-                                        }
-                                        context.pushNamed(
-                                          AppRoutes.createAccountScreen.name,
-                                        );
-                                        Future.delayed(
-                                          Duration(seconds: 3),
-                                          () {
-                                            AppToast.info(
-                                              context: context,
-                                              message:
-                                                  "Please set your password",
+                            // Prevent multiple taps
+                            if (provider.isSocialLoginLoading) return;
+                            try {
+                              final String? idToken = await provider
+                                  .getGoogleIDTokenForSignUp();
+
+                              // Check if sign-in was cancelled or failed
+                              if (idToken == null) {
+                                if (context.mounted) {
+                                  AppToast.info(
+                                    context: context,
+                                    message: "Google Sign-In cancelled",
+                                  );
+                                }
+                                return;
+                              }
+
+                              if (!context.mounted) return;
+
+                              await provider.googleSignUp(
+                                idToken: idToken,
+                                onSuccess: () async {
+                                  if (!context.mounted) return;
+
+                                  await provider.startOnboarding(
+                                    context: context,
+                                    onSuccess: () async {
+                                      if (!context.mounted) return;
+
+                                      AppToast.success(
+                                        context,
+                                        "Sign Up Successfully and Onboarding session started",
+                                      );
+
+                                      await provider.saveAge(
+                                        context: context,
+                                        onSuccess: () async {
+                                          if (!context.mounted) return;
+                                          if (provider.isUnder16) {
+                                            context.pushNamed(
+                                              AppRoutes.parentEmailScreen.name,
                                             );
-                                          },
-                                        );
-                                      },
-                                      onFailed: (error) {
-                                        AppToast.success(context, error);
-                                      },
-                                    );
-                                    // context.pushNamed(AppRoutes.enterAgeScreen.name);
-                                  },
-
-                                  onFailed: (error) {
-                                    AppToast.error(
-                                      context,
-                                      "Start on boarding error: ${error}",
-                                    );
-                                  },
-                                );
-                              },
-
-                              onFailed: (error) {
+                                            return;
+                                          }
+                                          context.pushNamed(
+                                            AppRoutes.createAccountScreen.name,
+                                          );
+                                          provider.toggleAcceptedTerms(
+                                            value: true,
+                                          );
+                                          await provider.createAccount(
+                                            isTermsAccepted:
+                                                provider.acceptedTerms,
+                                            context: context,
+                                          );
+                                        },
+                                        onFailed: (error) {
+                                          if (!context.mounted) return;
+                                          AppToast.error(context, error);
+                                        },
+                                      );
+                                    },
+                                    onFailed: (error) {
+                                      if (!context.mounted) return;
+                                      AppToast.error(
+                                        context,
+                                        "Start onboarding error: $error",
+                                      );
+                                    },
+                                  );
+                                },
+                                onNoAccountFound: (email) {
+                                  if (!context.mounted) return;
+                                  AppToast.info(
+                                    context: context,
+                                    message:
+                                        "No account found. Creating new account...",
+                                  );
+                                },
+                                onFailed: (error) {
+                                  if (!context.mounted) return;
+                                  AppToast.error(
+                                    context,
+                                    "Google sign-up failed. Please try again.",
+                                  );
+                                },
+                              );
+                            } catch (e) {
+                              Logger.error("Google Sign-In Button Error: $e");
+                              if (context.mounted) {
                                 AppToast.error(
                                   context,
-                                  "Failed google sign up,\nPlease try again",
+                                  "An unexpected error occurred. Please try again.",
                                 );
-                              },
-                            );
+                              }
+                            }
                           },
+                          // onTap: () async {
+                          //   final String? idToken = await provider
+                          //       .getGoogleSignInIDToken();
+                          //   provider.socialLogin(
+                          //     idToken: idToken,
+                          //     onSuccess: () async {
+                          //       await provider.startOnboarding(
+                          //         context: context,
+                          //         onSuccess: () async {
+                          //           AppToast.success(
+                          //             context,
+                          //             "Sign Up Successfully and Onboarding session started",
+                          //           );
+                          //           await provider.saveAge(
+                          //             context: context,
+                          //             onSuccess: () {
+                          //               if (provider.isUnder16) {
+                          //                 context.pushNamed(
+                          //                   AppRoutes.parentEmailScreen.name,
+                          //                 );
+                          //                 return;
+                          //               }
+                          //               context.pushNamed(
+                          //                 AppRoutes.createAccountScreen.name,
+                          //               );
+                          //               provider.toggleAcceptedTerms();
+                          //               provider.createAccount(
+                          //                 isTermsAccepted:
+                          //                     provider.acceptedTerms,
+                          //                 context: context,
+                          //               );
+                          //             },
+                          //             onFailed: (error) {
+                          //               AppToast.success(context, error);
+                          //             },
+                          //           );
+                          //           // context.pushNamed(AppRoutes.enterAgeScreen.name);
+                          //         },
+                          //         onFailed: (error) {
+                          //           AppToast.error(
+                          //             context,
+                          //             "Start on boarding error: ${error}",
+                          //           );
+                          //         },
+                          //       );
+                          //     },
+                          //     onFailed: (error) {
+                          //       AppToast.error(
+                          //         context,
+                          //         "Failed google sign up,\nPlease try again",
+                          //       );
+                          //     },
+                          //   );
+                          // },
                         ),
 
                         12.h.verticalSpace,
