@@ -137,7 +137,8 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
         ),
 
         Divider(thickness: 0, color: AppColors.black.withValues(alpha: 0.1)),
-        10.h.verticalSpace,
+
+        6.verticalSpace,
 
         /// Dropdown Container
         Container(

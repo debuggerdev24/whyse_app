@@ -49,7 +49,6 @@ class _ParentEmailScreenState extends State<ParentEmailScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         CustomBackButton(margin: EdgeInsets.only(top: 20.h)),
-
                         120.h.verticalSpace,
                         AppText(
                           text: "Need Parent’s help to Proceed",

@@ -141,8 +141,8 @@ class _TopicsScreenState extends State<TopicsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       OnboardingHeader(
-                        currentStep: (provider.isStoryCreation) ? 4 : 3,
-                        totalSteps: (provider.isStoryCreation) ? 4 : 5,
+                        currentStep: 4,
+                        totalSteps: 5,
                         onBack: () {
                           if (context.canPop()) {
                             context.pop();
@@ -246,9 +246,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
                           );
 
                           if (success && context.mounted) {
-                            context.pushNamed(
-                                  AppRoutes.goalsScreen.name,
-                            );
+                            context.pushNamed(AppRoutes.goalsScreen.name);
                           }
                         },
                       ),

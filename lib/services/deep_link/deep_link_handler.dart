@@ -153,7 +153,9 @@ class DeepLinkHandler {
           provider.verifyConsentRequest(
             onSuccess: () {
               UserAppRoute.goRouter.goNamed(
-                AppRoutes.createAccountScreen.name,
+                (provider.isUnder16FromGoogle)
+                    ? AppRoutes.profileInfoScreen.name
+                    : AppRoutes.createAccountScreen.name,
                 extra: AppConstants.trueSt,
               );
               LocalStorageService.instance.saveParentConsentStatus(

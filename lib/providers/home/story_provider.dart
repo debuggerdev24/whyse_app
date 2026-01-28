@@ -290,8 +290,6 @@ class StoryProvider extends ChangeNotifier {
       return;
     }
 
-    onStarted.call();
-
     if (selectedReadingDuration.toLowerCase() == AppEnum.custom.name) {
       if (customReadingDurationCtr.text.isEmpty) {
         AppToast.error(context, "Please Enter Minutes");
@@ -313,6 +311,7 @@ class StoryProvider extends ChangeNotifier {
 
     isCreateStoryLoading = true;
     notifyListeners();
+    onStarted.call();
 
     dataToSendCreateStory = {
       "interestIds": selectedInterestIds.toList(),

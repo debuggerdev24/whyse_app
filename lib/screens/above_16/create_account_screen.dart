@@ -266,6 +266,13 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           onTap: () => provider.createAccount(
                             isTermsAccepted: provider.acceptedTerms,
                             context: context,
+
+                            onSuccess: () {
+                              AppToast.success(
+                                context,
+                                "Account created successfully, please verify your mail.",
+                              );
+                            },
                           ),
                           isLoading: context.watch<AuthProvider>().isLoading,
                         ),

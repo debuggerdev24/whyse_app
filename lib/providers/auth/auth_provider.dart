@@ -38,12 +38,18 @@ class AuthProvider with ChangeNotifier {
   DateTime? selectedDate;
   String googleLoginEmail = "", selectedGoalId = "", googleBirthDate = "";
 
-  bool acceptedTerms = false;
-  bool isEmailSent = false;
-  bool isPasswordObscure = true;
-  bool isConfirmPasswordObscure = true;
+  bool acceptedTerms = false,
+      isEmailSent = false,
+      isPasswordObscure = true,
+      isConfirmPasswordObscure = true,
+      _isUnder16FromGoogle = false;
 
   // -------- TOGGLE FUNCTIONS -------- //
+
+  void setIsUnder16FromGoogle({required bool value}) {
+    _isUnder16FromGoogle = value;
+    notifyListeners();
+  }
 
   void toggleAcceptedTerms({bool? value}) {
     acceptedTerms = value ?? !acceptedTerms;
@@ -333,6 +339,7 @@ class AuthProvider with ChangeNotifier {
 
   //todo
   bool get isUnder16 => calculatedAge < 16;
+  bool get isUnder16FromGoogle => _isUnder16FromGoogle;
 
   bool isSaveUserAgeLoading = false;
 
@@ -402,6 +409,7 @@ class AuthProvider with ChangeNotifier {
   bool isCreateAccountLoading = false;
   Future<bool> createAccount({
     required bool isTermsAccepted,
+    VoidCallback? onSuccess,
     required BuildContext context,
   }) async {
     final firstName = firstNameCtr.text.trim();
@@ -468,28 +476,32 @@ class AuthProvider with ChangeNotifier {
 
       isCreateAccountLoading = false;
       notifyListeners();
+      isSocialLoginLoading = false;
+      notifyListeners();
 
       if (response != null && response['success'] == true) {
-        // If success here, it usually means account created OR verified successfully
-        AppToast.success(
-          context,
-          response['message'] ??
-              "Verification link sent to your mail, please verify.",
-        );
         setEmailSent(true);
+        onSuccess!.call();
         return true;
-      } else {
-        if (response['errors'] != null &&
-            (response['errors'] as List).isNotEmpty) {
-          final firstError = response['errors'][0];
-          final msg = firstError['msg'] ?? "Failed to create account";
-          AppToast.error(context, msg);
-        } else {
-          final msg = response['message'] ?? "Failed to create account";
-          AppToast.error(context, msg);
-        }
-        return false;
       }
+      return false;
+
+      // else {
+      //   if (response['errors'] != null &&
+      //       (response['errors'] as List).isNotEmpty) {
+      //     final firstError = response['errors'][0];
+      //     final msg = firstError['msg'] ?? "Failed to create account";
+      //     Logger.info("1Getted error message: $msg");
+      //     final showError = (msg == "Invalid password for existing account")
+      //         ? "An account with this information already exists."
+      //         : msg;
+      //     AppToast.info(context: context, message: showError);
+      //   } else {
+      //     final msg = response['message'] ?? "Failed to create account";
+      //     AppToast.error(context, msg);
+      //   }
+      //   return false;
+      // }
     } catch (e) {
       isCreateAccountLoading = false;
       notifyListeners();
@@ -501,8 +513,14 @@ class AuthProvider with ChangeNotifier {
           // Check for 'errors' list style
           if (data['errors'] != null && (data['errors'] as List).isNotEmpty) {
             final firstError = data['errors'][0];
+
             final msg = firstError['msg'] ?? "An error occurred";
-            AppToast.error(context, msg);
+            final showError = (msg == "Invalid password for existing account")
+                ? "An account with this mail already exists"
+                : msg;
+            Logger.info("2Getted error message: $msg");
+
+            AppToast.info(context: context, message: showError);
             return false;
           }
           // Check for top-level 'message'
@@ -1053,14 +1071,14 @@ class AuthProvider with ChangeNotifier {
         //     );
         //   }
         // }
-        signUpEmailCtr.text = data["user"]["email"];
+        // signUpEmailCtr.text = data["user"]["email"];
+        await LocalStorageService.instance.saveOnboardingId(
+          data["onboarding"]["onboardingId"],
+        );
 
         onSuccess.call();
       },
     );
-
-    isSocialLoginLoading = false;
-    notifyListeners();
   }
 
   Future<void> googleLogin({
@@ -1484,7 +1502,6 @@ class AuthProvider with ChangeNotifier {
 
   void clearSignupFields() {
     signUpEmailCtr.clear();
-    notifyListeners();
   }
 
   void clearCreateAccountFields() {

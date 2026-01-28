@@ -192,53 +192,90 @@ class _SignupScreenState extends State<SignupScreen> {
                                 idToken: idToken,
                                 onSuccess: () async {
                                   if (!context.mounted) return;
-
-                                  await provider.startOnboarding(
+                                  await provider.saveAge(
                                     context: context,
                                     onSuccess: () async {
                                       if (!context.mounted) return;
-
-                                      AppToast.success(
-                                        context,
-                                        "Sign Up Successfully and Onboarding session started",
+                                      if (provider.isUnder16) {
+                                        provider.setIsUnder16FromGoogle(
+                                          value: true,
+                                        );
+                                        context.pushNamed(
+                                          AppRoutes.parentEmailScreen.name,
+                                        );
+                                        return;
+                                      }
+                                      provider.setIsUnder16FromGoogle(
+                                        value: false,
                                       );
 
-                                      await provider.saveAge(
-                                        context: context,
-                                        onSuccess: () async {
-                                          if (!context.mounted) return;
-                                          if (provider.isUnder16) {
-                                            context.pushNamed(
-                                              AppRoutes.parentEmailScreen.name,
-                                            );
-                                            return;
-                                          }
-                                          context.pushNamed(
-                                            AppRoutes.createAccountScreen.name,
-                                          );
-                                          provider.toggleAcceptedTerms(
-                                            value: true,
-                                          );
-                                          await provider.createAccount(
+                                      provider.toggleAcceptedTerms(value: true);
+                                      final success = await provider
+                                          .createAccount(
                                             isTermsAccepted:
                                                 provider.acceptedTerms,
                                             context: context,
                                           );
-                                        },
-                                        onFailed: (error) {
-                                          if (!context.mounted) return;
-                                          AppToast.error(context, error);
-                                        },
-                                      );
+                                      if (success && context.mounted) {
+                                        context.pushNamed(
+                                          AppRoutes.profileInfoScreen.name,
+                                        );
+                                        AppToast.success(
+                                          context,
+                                          "Please complete your on-boarding session",
+                                        );
+                                      }
                                     },
                                     onFailed: (error) {
                                       if (!context.mounted) return;
-                                      AppToast.error(
-                                        context,
-                                        "Start onboarding error: $error",
-                                      );
+                                      AppToast.error(context, error);
                                     },
                                   );
+                                  // await provider.startOnboarding(
+                                  //   context: context,
+                                  //   onSuccess: () async {
+                                  //     if (!context.mounted) return;
+                                  //    await provider.saveAge(
+                                  //                                         context: context,
+                                  //                                         onSuccess: () async {
+                                  //                                           if (!context.mounted) return;
+                                  //                                           if (provider.isUnder16) {
+                                  //                                             context.pushNamed(
+                                  //                                               AppRoutes.parentEmailScreen.name,
+                                  //                                             );
+                                  //                                             return;
+                                  //                                           }
+                                  //
+                                  //                                           provider.toggleAcceptedTerms(
+                                  //                                             value: true,
+                                  //                                           );
+                                  //                                           final success = await provider
+                                  //                                               .createAccount(
+                                  //                                                 isTermsAccepted:
+                                  //                                                     provider.acceptedTerms,
+                                  //                                                 context: context,
+                                  //                                               );
+                                  //                                           if (success && context.mounted) {
+                                  //                                             context.pushNamed(
+                                  //                                               AppRoutes.profileInfoScreen.name,
+                                  //                                             );
+                                  //                                           }
+                                  //                                         },
+                                  //                                         onFailed: (error) {
+                                  //                                           if (!context.mounted) return;
+                                  //                                           AppToast.error(context, error);
+                                  //                                         },
+                                  //                                       );
+                                  //
+                                  //   },
+                                  //   onFailed: (error) {
+                                  //     if (!context.mounted) return;
+                                  //     AppToast.error(
+                                  //       context,
+                                  //       "Start onboarding error: $error",
+                                  //     );
+                                  //   },
+                                  // );
                                 },
                                 onNoAccountFound: (email) {
                                   if (!context.mounted) return;

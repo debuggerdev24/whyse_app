@@ -28,10 +28,6 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
   Widget build(BuildContext context) {
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
-        if (context.canPop()) {
-          context.pop();
-          return;
-        }
         context.goNamed(AppRoutes.loginScreen.name);
       },
       child: AppLayout(
