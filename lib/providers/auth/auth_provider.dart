@@ -481,7 +481,7 @@ class AuthProvider with ChangeNotifier {
 
       if (response != null && response['success'] == true) {
         setEmailSent(true);
-        onSuccess!.call();
+        onSuccess?.call();
         return true;
       }
       return false;
@@ -1006,9 +1006,8 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  //todo social login
+  //todo google sign up
   bool isSocialLoginLoading = false;
-
   Future<void> googleSignUp({
     required VoidCallback onSuccess,
     required String? idToken,
@@ -1081,8 +1080,9 @@ class AuthProvider with ChangeNotifier {
     );
   }
 
+  //todo ------------------> login with google
   Future<void> googleLogin({
-    required VoidCallback onSuccess,
+    required VoidCallback onAccountFound,
     required String? idToken,
     Function(String error)? onNoAccountFound,
 
@@ -1108,44 +1108,43 @@ class AuthProvider with ChangeNotifier {
         final data = r['data'];
         Logger.info("Google Login Response Data: $data");
 
-        if (data != null) {
-          String? accessToken;
-          if (data["session"] == null && onNoAccountFound != null) {
-            onNoAccountFound.call(data["user"]["email"]);
-            return;
-          }
-
-          //todo Check for nested session object first (as seen in logs)
-          if (data['session'] != null) {
-            final session = data['session'];
-
-            if (session["accessToken"] != null) {
-              accessToken = session["accessToken"];
-              await LocalStorageService.instance.saveAuthToken(accessToken!);
-            }
-
-            if (session["refreshToken"] != null) {
-              await LocalStorageService.instance.saveRefreshToken(
-                session["refreshToken"],
-              );
-            }
-          }
-
-          if (accessToken != null) {
-            //todo Update the current API instance with the new token immediately
-            DioClient.instance.addToken(accessToken);
-            Logger.error("Token saved successfully from login: $accessToken");
-          }
-
-          if (data['onboardingId'] != null) {
-            await LocalStorageService.instance.saveOnboardingId(
-              data['onboardingId'].toString(),
-            );
-          }
+        //todo saving onBoarding id.
+        if (data["onboarding"]['onboardingId'] != null) {
+          await LocalStorageService.instance.saveOnboardingId(
+            data["onboarding"]['onboardingId'],
+          );
         }
+
+        // if (data != null) {
+        String? accessToken;
+        if (data["session"] == null) {
+          onNoAccountFound!.call(data["user"]["email"]);
+          return;
+        }
+
+        //todo Check for nested session object first (if account founds)
+        final session = data['session'];
+
+        if (session["accessToken"] != null) {
+          accessToken = session["accessToken"];
+          await LocalStorageService.instance.saveAuthToken(accessToken!);
+        }
+
+        if (session["refreshToken"] != null) {
+          await LocalStorageService.instance.saveRefreshToken(
+            session["refreshToken"],
+          );
+        }
+
+        if (accessToken != null) {
+          //todo Update the current API instance with the new token immediately
+          DioClient.instance.addToken(accessToken);
+          Logger.error("Token saved successfully from login: $accessToken");
+        }
+
         // signUpEmailCtr.text = data["user"]["email"];
 
-        onSuccess.call();
+        onAccountFound.call();
       },
     );
 
@@ -1198,7 +1197,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<String?> getGoogleIDTokenForSignUp() async {
+  Future<String?> getGoogleIDToken() async {
     GoogleSignIn? googleSignIn;
 
     try {

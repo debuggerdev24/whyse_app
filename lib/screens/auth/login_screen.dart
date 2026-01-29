@@ -193,20 +193,115 @@ class _LoginScreenState extends State<LoginScreen> {
                         label: "Login with Google",
                         icon: AppAssets.google,
                         onTap: () async {
-                          final idToken = await provider
-                              .getGoogleIDTokenForLogin();
+                          //todo getting id token
+                          final idToken = await provider.getGoogleIDToken();
+                          if (idToken == null) {
+                            if (context.mounted) {
+                              AppToast.info(
+                                context: context,
+                                message: "You have cancelled Google Sign-In",
+                              );
+                            }
+                            return;
+                          }
                           provider.googleLogin(
-                            idToken: idToken!,
-                            onSuccess: () {
+                            idToken: idToken,
+                            onAccountFound: () {
                               AppToast.success(context, "Login Successfully.");
                               context.goNamed(AppRoutes.homeScreen.name);
                             },
-                            onNoAccountFound: (email) {
-                              AppToast.info(
+                            onNoAccountFound: (error) async {
+                              if (!context.mounted) return;
+                              // AppToast.info(
+                              //   context: context,
+                              //   message:
+                              //       "No account found, we are registering your mail",
+                              // );
+                              await provider.saveAge(
                                 context: context,
-                                message:
-                                    "No account found for $email. Please register.",
+                                onSuccess: () async {
+                                  if (!context.mounted) return;
+                                  if (provider.isUnder16) {
+                                    provider.setIsUnder16FromGoogle(
+                                      value: true,
+                                    );
+                                    context.pushNamed(
+                                      AppRoutes.parentEmailScreen.name,
+                                    );
+                                    return;
+                                  }
+                                  provider.setIsUnder16FromGoogle(value: false);
+
+                                  provider.toggleAcceptedTerms(value: true);
+                                  await provider.createAccount(
+                                    isTermsAccepted: provider.acceptedTerms,
+                                    context: context,
+                                    onSuccess: () {
+                                      context.pushNamed(
+                                        AppRoutes.profileInfoScreen.name,
+                                      );
+                                      // Future.delayed(Duration(seconds: 2), () {
+                                      AppToast.success(
+                                        context,
+                                        "Please complete your on-boarding session",
+                                      );
+                                      // });
+                                    },
+                                  );
+                                },
+                                onFailed: (error) {
+                                  if (!context.mounted) return;
+                                  AppToast.error(
+                                    context,
+                                    "Save Age API Error: $error",
+                                  );
+                                },
                               );
+                              // await provider.startOnboarding(
+                              //   context: context,
+                              //   onSuccess: () async {
+                              //     if (!context.mounted) return;
+                              //    await provider.saveAge(
+                              //                                         context: context,
+                              //                                         onSuccess: () async {
+                              //                                           if (!context.mounted) return;
+                              //                                           if (provider.isUnder16) {
+                              //                                             context.pushNamed(
+                              //                                               AppRoutes.parentEmailScreen.name,
+                              //                                             );
+                              //                                             return;
+                              //                                           }
+                              //
+                              //                                           provider.toggleAcceptedTerms(
+                              //                                             value: true,
+                              //                                           );
+                              //                                           final success = await provider
+                              //                                               .createAccount(
+                              //                                                 isTermsAccepted:
+                              //                                                     provider.acceptedTerms,
+                              //                                                 context: context,
+                              //                                               );
+                              //                                           if (success && context.mounted) {
+                              //                                             context.pushNamed(
+                              //                                               AppRoutes.profileInfoScreen.name,
+                              //                                             );
+                              //                                           }
+                              //                                         },
+                              //                                         onFailed: (error) {
+                              //                                           if (!context.mounted) return;
+                              //                                           AppToast.error(context, error);
+                              //                                         },
+                              //                                       );
+                              //
+                              //   },
+                              //   onFailed: (error) {
+                              //     if (!context.mounted) return;
+                              //     AppToast.error(
+                              //       context,
+                              //       "Start onboarding error: $error",
+                              //     );
+                              //   },
+                              // );
                             },
                             onFailed: (error) {
                               AppToast.error(

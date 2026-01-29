@@ -14,7 +14,6 @@ import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
-import '../../core/helper/log_helper.dart';
 import '../../core/widgets/custom_toast.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -140,232 +139,225 @@ class _SignupScreenState extends State<SignupScreen> {
                             ),
                           ],
                         ),
-                        32.h.verticalSpace,
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Divider(
-                                color: AppColors.black.withValues(alpha: 0.2),
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 12.w),
-                              child: AppText(
-                                text: "OR",
-                                style: AppTextStyles.textStyle14Semibold,
-                              ),
-                            ),
-                            Expanded(
-                              child: Divider(
-                                color: AppColors.black.withValues(alpha: 0.2),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        32.h.verticalSpace,
-
-                        _socialButton(
-                          label: "Sign up with Google",
-                          icon: AppAssets.google,
-                          onTap: () async {
-                            // Prevent multiple taps
-                            if (provider.isSocialLoginLoading) return;
-                            try {
-                              final String? idToken = await provider
-                                  .getGoogleIDTokenForSignUp();
-
-                              // Check if sign-in was cancelled or failed
-                              if (idToken == null) {
-                                if (context.mounted) {
-                                  AppToast.info(
-                                    context: context,
-                                    message: "Google Sign-In cancelled",
-                                  );
-                                }
-                                return;
-                              }
-
-                              if (!context.mounted) return;
-
-                              await provider.googleSignUp(
-                                idToken: idToken,
-                                onSuccess: () async {
-                                  if (!context.mounted) return;
-                                  await provider.saveAge(
-                                    context: context,
-                                    onSuccess: () async {
-                                      if (!context.mounted) return;
-                                      if (provider.isUnder16) {
-                                        provider.setIsUnder16FromGoogle(
-                                          value: true,
-                                        );
-                                        context.pushNamed(
-                                          AppRoutes.parentEmailScreen.name,
-                                        );
-                                        return;
-                                      }
-                                      provider.setIsUnder16FromGoogle(
-                                        value: false,
-                                      );
-
-                                      provider.toggleAcceptedTerms(value: true);
-                                      final success = await provider
-                                          .createAccount(
-                                            isTermsAccepted:
-                                                provider.acceptedTerms,
-                                            context: context,
-                                          );
-                                      if (success && context.mounted) {
-                                        context.pushNamed(
-                                          AppRoutes.profileInfoScreen.name,
-                                        );
-                                        AppToast.success(
-                                          context,
-                                          "Please complete your on-boarding session",
-                                        );
-                                      }
-                                    },
-                                    onFailed: (error) {
-                                      if (!context.mounted) return;
-                                      AppToast.error(context, error);
-                                    },
-                                  );
-                                  // await provider.startOnboarding(
-                                  //   context: context,
-                                  //   onSuccess: () async {
-                                  //     if (!context.mounted) return;
-                                  //    await provider.saveAge(
-                                  //                                         context: context,
-                                  //                                         onSuccess: () async {
-                                  //                                           if (!context.mounted) return;
-                                  //                                           if (provider.isUnder16) {
-                                  //                                             context.pushNamed(
-                                  //                                               AppRoutes.parentEmailScreen.name,
-                                  //                                             );
-                                  //                                             return;
-                                  //                                           }
-                                  //
-                                  //                                           provider.toggleAcceptedTerms(
-                                  //                                             value: true,
-                                  //                                           );
-                                  //                                           final success = await provider
-                                  //                                               .createAccount(
-                                  //                                                 isTermsAccepted:
-                                  //                                                     provider.acceptedTerms,
-                                  //                                                 context: context,
-                                  //                                               );
-                                  //                                           if (success && context.mounted) {
-                                  //                                             context.pushNamed(
-                                  //                                               AppRoutes.profileInfoScreen.name,
-                                  //                                             );
-                                  //                                           }
-                                  //                                         },
-                                  //                                         onFailed: (error) {
-                                  //                                           if (!context.mounted) return;
-                                  //                                           AppToast.error(context, error);
-                                  //                                         },
-                                  //                                       );
-                                  //
-                                  //   },
-                                  //   onFailed: (error) {
-                                  //     if (!context.mounted) return;
-                                  //     AppToast.error(
-                                  //       context,
-                                  //       "Start onboarding error: $error",
-                                  //     );
-                                  //   },
-                                  // );
-                                },
-                                onNoAccountFound: (email) {
-                                  if (!context.mounted) return;
-                                  AppToast.info(
-                                    context: context,
-                                    message:
-                                        "No account found. Creating new account...",
-                                  );
-                                },
-                                onFailed: (error) {
-                                  if (!context.mounted) return;
-                                  AppToast.error(
-                                    context,
-                                    "Google sign-up failed. Please try again.",
-                                  );
-                                },
-                              );
-                            } catch (e) {
-                              Logger.error("Google Sign-In Button Error: $e");
-                              if (context.mounted) {
-                                AppToast.error(
-                                  context,
-                                  "An unexpected error occurred. Please try again.",
-                                );
-                              }
-                            }
-                          },
-                          // onTap: () async {
-                          //   final String? idToken = await provider
-                          //       .getGoogleSignInIDToken();
-                          //   provider.socialLogin(
-                          //     idToken: idToken,
-                          //     onSuccess: () async {
-                          //       await provider.startOnboarding(
-                          //         context: context,
-                          //         onSuccess: () async {
-                          //           AppToast.success(
-                          //             context,
-                          //             "Sign Up Successfully and Onboarding session started",
-                          //           );
-                          //           await provider.saveAge(
-                          //             context: context,
-                          //             onSuccess: () {
-                          //               if (provider.isUnder16) {
-                          //                 context.pushNamed(
-                          //                   AppRoutes.parentEmailScreen.name,
-                          //                 );
-                          //                 return;
-                          //               }
-                          //               context.pushNamed(
-                          //                 AppRoutes.createAccountScreen.name,
-                          //               );
-                          //               provider.toggleAcceptedTerms();
-                          //               provider.createAccount(
-                          //                 isTermsAccepted:
-                          //                     provider.acceptedTerms,
-                          //                 context: context,
-                          //               );
-                          //             },
-                          //             onFailed: (error) {
-                          //               AppToast.success(context, error);
-                          //             },
-                          //           );
-                          //           // context.pushNamed(AppRoutes.enterAgeScreen.name);
-                          //         },
-                          //         onFailed: (error) {
-                          //           AppToast.error(
-                          //             context,
-                          //             "Start on boarding error: ${error}",
-                          //           );
-                          //         },
-                          //       );
-                          //     },
-                          //     onFailed: (error) {
-                          //       AppToast.error(
-                          //         context,
-                          //         "Failed google sign up,\nPlease try again",
-                          //       );
-                          //     },
-                          //   );
-                          // },
-                        ),
-
-                        12.h.verticalSpace,
-
-                        _socialButton(
-                          label: "Sign up with Apple",
-                          icon: AppAssets.apple,
-                          onTap: () {},
-                        ),
+                        // 32.h.verticalSpace,
+                        // Row(
+                        //   children: [
+                        //     Expanded(
+                        //       child: Divider(
+                        //         color: AppColors.black.withValues(alpha: 0.2),
+                        //       ),
+                        //     ),
+                        //     Padding(
+                        //       padding: EdgeInsets.symmetric(horizontal: 12.w),
+                        //       child: AppText(
+                        //         text: "OR",
+                        //         style: AppTextStyles.textStyle14Semibold,
+                        //       ),
+                        //     ),
+                        //     Expanded(
+                        //       child: Divider(
+                        //         color: AppColors.black.withValues(alpha: 0.2),
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
+                        //
+                        // 32.h.verticalSpace,
+                        //
+                        // _socialButton(
+                        //   label: "Sign up with Google",
+                        //   icon: AppAssets.google,
+                        //   onTap: () async {
+                        //     // Prevent multiple taps
+                        //     if (provider.isSocialLoginLoading) return;
+                        //     try {
+                        //       final String? idToken = await provider
+                        //           .getGoogleIDToken();
+                        //
+                        //       // Check if sign-in was cancelled or failed
+                        //       if (idToken == null) {
+                        //         if (context.mounted) {
+                        //           AppToast.info(
+                        //             context: context,
+                        //             message: "Google Sign-In cancelled",
+                        //           );
+                        //         }
+                        //         return;
+                        //       }
+                        //
+                        //       if (!context.mounted) return;
+                        //
+                        //       await provider.googleSignUp(
+                        //         idToken: idToken,
+                        //         onSuccess: () async {
+                        //           if (!context.mounted) return;
+                        //           await provider.saveAge(
+                        //             context: context,
+                        //             onSuccess: () async {
+                        //               if (!context.mounted) return;
+                        //               if (provider.isUnder16) {
+                        //                 provider.setIsUnder16FromGoogle(
+                        //                   value: true,
+                        //                 );
+                        //                 context.pushNamed(
+                        //                   AppRoutes.parentEmailScreen.name,
+                        //                 );
+                        //                 return;
+                        //               }
+                        //               provider.setIsUnder16FromGoogle(
+                        //                 value: false,
+                        //               );
+                        //
+                        //               provider.toggleAcceptedTerms(value: true);
+                        //               final success = await provider
+                        //                   .createAccount(
+                        //                     isTermsAccepted:
+                        //                         provider.acceptedTerms,
+                        //                     context: context,
+                        //                   );
+                        //               if (success && context.mounted) {
+                        //                 context.pushNamed(
+                        //                   AppRoutes.profileInfoScreen.name,
+                        //                 );
+                        //                 AppToast.success(
+                        //                   context,
+                        //                   "Please complete your on-boarding session",
+                        //                 );
+                        //               }
+                        //             },
+                        //             onFailed: (error) {
+                        //               if (!context.mounted) return;
+                        //               AppToast.error(context, error);
+                        //             },
+                        //           );
+                        //           // await provider.startOnboarding(
+                        //           //   context: context,
+                        //           //   onSuccess: () async {
+                        //           //     if (!context.mounted) return;
+                        //           //    await provider.saveAge(
+                        //           //                                         context: context,
+                        //           //                                         onSuccess: () async {
+                        //           //                                           if (!context.mounted) return;
+                        //           //                                           if (provider.isUnder16) {
+                        //           //                                             context.pushNamed(
+                        //           //                                               AppRoutes.parentEmailScreen.name,
+                        //           //                                             );
+                        //           //                                             return;
+                        //           //                                           }
+                        //           //
+                        //           //                                           provider.toggleAcceptedTerms(
+                        //           //                                             value: true,
+                        //           //                                           );
+                        //           //                                           final success = await provider
+                        //           //                                               .createAccount(
+                        //           //                                                 isTermsAccepted:
+                        //           //                                                     provider.acceptedTerms,
+                        //           //                                                 context: context,
+                        //           //                                               );
+                        //           //                                           if (success && context.mounted) {
+                        //           //                                             context.pushNamed(
+                        //           //                                               AppRoutes.profileInfoScreen.name,
+                        //           //                                             );
+                        //           //                                           }
+                        //           //                                         },
+                        //           //                                         onFailed: (error) {
+                        //           //                                           if (!context.mounted) return;
+                        //           //                                           AppToast.error(context, error);
+                        //           //                                         },
+                        //           //                                       );
+                        //           //
+                        //           //   },
+                        //           //   onFailed: (error) {
+                        //           //     if (!context.mounted) return;
+                        //           //     AppToast.error(
+                        //           //       context,
+                        //           //       "Start onboarding error: $error",
+                        //           //     );
+                        //           //   },
+                        //           // );
+                        //         },
+                        //
+                        //         onFailed: (error) {
+                        //           if (!context.mounted) return;
+                        //           AppToast.error(
+                        //             context,
+                        //             "Google sign-up failed. Please try again.",
+                        //           );
+                        //         },
+                        //       );
+                        //     } catch (e) {
+                        //       Logger.error("Google Sign-In Button Error: $e");
+                        //       if (context.mounted) {
+                        //         AppToast.error(
+                        //           context,
+                        //           "An unexpected error occurred. Please try again.",
+                        //         );
+                        //       }
+                        //     }
+                        //   },
+                        //   // onTap: () async {
+                        //   //   final String? idToken = await provider
+                        //   //       .getGoogleSignInIDToken();
+                        //   //   provider.socialLogin(
+                        //   //     idToken: idToken,
+                        //   //     onSuccess: () async {
+                        //   //       await provider.startOnboarding(
+                        //   //         context: context,
+                        //   //         onSuccess: () async {
+                        //   //           AppToast.success(
+                        //   //             context,
+                        //   //             "Sign Up Successfully and Onboarding session started",
+                        //   //           );
+                        //   //           await provider.saveAge(
+                        //   //             context: context,
+                        //   //             onSuccess: () {
+                        //   //               if (provider.isUnder16) {
+                        //   //                 context.pushNamed(
+                        //   //                   AppRoutes.parentEmailScreen.name,
+                        //   //                 );
+                        //   //                 return;
+                        //   //               }
+                        //   //               context.pushNamed(
+                        //   //                 AppRoutes.createAccountScreen.name,
+                        //   //               );
+                        //   //               provider.toggleAcceptedTerms();
+                        //   //               provider.createAccount(
+                        //   //                 isTermsAccepted:
+                        //   //                     provider.acceptedTerms,
+                        //   //                 context: context,
+                        //   //               );
+                        //   //             },
+                        //   //             onFailed: (error) {
+                        //   //               AppToast.success(context, error);
+                        //   //             },
+                        //   //           );
+                        //   //           // context.pushNamed(AppRoutes.enterAgeScreen.name);
+                        //   //         },
+                        //   //         onFailed: (error) {
+                        //   //           AppToast.error(
+                        //   //             context,
+                        //   //             "Start on boarding error: ${error}",
+                        //   //           );
+                        //   //         },
+                        //   //       );
+                        //   //     },
+                        //   //     onFailed: (error) {
+                        //   //       AppToast.error(
+                        //   //         context,
+                        //   //         "Failed google sign up,\nPlease try again",
+                        //   //       );
+                        //   //     },
+                        //   //   );
+                        //   // },
+                        // ),
+                        //
+                        // 12.h.verticalSpace,
+                        //
+                        // _socialButton(
+                        //   label: "Sign up with Apple",
+                        //   icon: AppAssets.apple,
+                        //   onTap: () {},
+                        // ),
                       ],
                     ),
                   ),
