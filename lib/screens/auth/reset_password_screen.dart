@@ -86,7 +86,7 @@ class ResetPasswordScreen extends StatelessWidget {
                         if (passText != confPassText) {
                           return AppToast.error(
                             context,
-                            "Confirm Password should match with new Password!",
+                            "Passwords do not match",
                           );
                         }
                         provider.resetPassword(

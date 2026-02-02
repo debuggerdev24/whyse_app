@@ -36,7 +36,9 @@ class AuthProvider with ChangeNotifier {
   int? age;
   int calculatedAge = 0;
   DateTime? selectedDate;
-  String googleLoginEmail = "", selectedGoalId = "", googleBirthDate = "";
+  final Set<String> selectedGoalIds = {};
+  //selectedGoalId = "",
+  String googleLoginEmail = "", googleBirthDate = "";
 
   bool acceptedTerms = false,
       isEmailSent = false,
@@ -71,50 +73,27 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Future<void> handleAccountCreation({required BuildContext context}) async {
-  //   // if (isEmailSent) {
-  //   //   isVerifyEmailLoading = true;
-  //   //   notifyListeners();
-  //   //
-  //   //   final success = await verifyCreateAccEmail(context);
-  //   //
-  //   //   isVerifyEmailLoading = false;
-  //   //   notifyListeners();
-  //   //
-  //   //   if (success && context.mounted) {
-  //   //     context.pushNamed(AppRoutes.profileInfoScreen.name);
-  //   //   } else {
-  //   //     isEmailSent = false;
-  //   //     notifyListeners();
-  //   //   }
-  //   // } else {
-  //   isCreateAccountLoading = true;
-  //   notifyListeners();
-  //
-  //   final success = await createAccount(
-  //     context,
-  //     isTermsAccepted: acceptedTerms,
-  //   );
-  //
-  //
-  //
-  //   if (success) {
-  //
-  //   }
-  //   // }
-  // }
-
-  void updateGoalId(String id) {
-    if (selectedGoalId == id) {
-      selectedGoalId = "";
-    } else {
+  void toggleGoal(String id) {
+    if (!selectedGoalIds.contains(id)) {
+      selectedGoalIds.add(id);
       isCustomGoalSelected = false;
-      customGoalTitleCtr.clear();
-      customGoalDesCtr.clear();
-      selectedGoalId = id;
+    } else {
+      selectedGoalIds.remove(id);
     }
     notifyListeners();
   }
+
+  // void updateGoalId(String id) {
+  //   if (selectedGoalId == id) {
+  //     selectedGoalId = "";
+  //   } else {
+  //     isCustomGoalSelected = false;
+  //     customGoalTitleCtr.clear();
+  //     customGoalDesCtr.clear();
+  //     selectedGoalId = id;
+  //   }
+  //   notifyListeners();
+  // }
 
   void toggleCustomGoal() {
     isCustomGoalSelected = !isCustomGoalSelected;
@@ -122,7 +101,7 @@ class AuthProvider with ChangeNotifier {
       customGoalTitleCtr.clear();
       customGoalDesCtr.clear();
     } else {
-      selectedGoalId = "";
+      selectedGoalIds.clear();
     }
     notifyListeners();
   }
@@ -475,13 +454,19 @@ class AuthProvider with ChangeNotifier {
       );
 
       isCreateAccountLoading = false;
-      notifyListeners();
       isSocialLoginLoading = false;
       notifyListeners();
 
       if (response != null && response['success'] == true) {
         setEmailSent(true);
         onSuccess?.call();
+
+        LocalStorageService.instance.saveUserMail(
+          mail: createAccEmailCtr.text.trim(),
+        );
+        LocalStorageService.instance.saveUserPass(
+          password: createAccPasswordCtr.text.trim(),
+        );
         return true;
       }
       return false;
@@ -875,11 +860,11 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
 
       if (response != null && response['success'] == true) {
-        AppToast.success(
-          context,
-          response['message'] ?? "Goals saved successfully",
-        );
-        goalIds.clear();
+        // AppToast.success(
+        //   context,
+        //   response['message'] ?? "Goals saved successfully",
+        // );
+        selectedGoalIds.clear();
         customGoals.clear();
         return true;
       } else {
@@ -895,8 +880,8 @@ class AuthProvider with ChangeNotifier {
   }
 
   bool isLoginLoading = false;
-
-  Future<bool> loginUser(BuildContext context) async {
+  //
+  Future<bool> loginWithMail({required BuildContext context}) async {
     final email = loginEmailCtr.text.trim();
     final password = loginPasswordCtr.text.trim();
 
@@ -935,6 +920,8 @@ class AuthProvider with ChangeNotifier {
             // Extract access token
             if (session['accessToken'] != null) {
               token = session['accessToken'];
+              await LocalStorageService.instance.saveAuthToken(token!);
+              Logger.info(LocalStorageService.instance.getAuthToken.toString());
             }
 
             // Extract refresh token
@@ -945,19 +932,20 @@ class AuthProvider with ChangeNotifier {
             }
           }
           // Fallback to flat structure
-          else if (data['accessToken'] != null) {
-            token = data['accessToken'];
-          } else if (data['token'] != null) {
-            token = data['token'];
-          }
+          // else if (data['accessToken'] != null) {
+          //   token = data['accessToken'];
+          // } else if (data['token'] != null) {
+          //   token = data['token'];
+          // }
 
           if (token != null) {
             await LocalStorageService.instance.saveAuthToken(token);
-            // Update the current API instance with the new token immediately
+            Logger.info(LocalStorageService.instance.getAuthToken.toString());
+
             DioClient.instance.addToken(token);
-            debugPrint("Token saved successfully from login: $token");
+            Logger.info("Token saved successfully from login: $token");
           } else {
-            debugPrint("No access token found in login response!");
+            Logger.info("No access token found in login response!");
           }
 
           if (data['onboardingId'] != null) {
@@ -966,7 +954,7 @@ class AuthProvider with ChangeNotifier {
             );
           }
         }
-
+        context.goNamed(AppRoutes.homeScreen.name);
         AppToast.success(context, response['message'] ?? "Login successful");
         loginEmailCtr.clear();
         loginPasswordCtr.clear();
@@ -1081,11 +1069,10 @@ class AuthProvider with ChangeNotifier {
   }
 
   //todo ------------------> login with google
-  Future<void> googleLogin({
-    required VoidCallback onAccountFound,
+  Future<void> loginWithGoogle({
+    VoidCallback? onAccountFound,
     required String? idToken,
     Function(String error)? onNoAccountFound,
-
     required Function(String error) onFailed,
   }) async {
     if (idToken == null) {
@@ -1119,6 +1106,7 @@ class AuthProvider with ChangeNotifier {
         String? accessToken;
         if (data["session"] == null) {
           onNoAccountFound!.call(data["user"]["email"]);
+          LocalStorageService.instance.saveGoogleIdToken(idToken: idToken);
           return;
         }
 
@@ -1142,9 +1130,9 @@ class AuthProvider with ChangeNotifier {
           Logger.error("Token saved successfully from login: $accessToken");
         }
 
-        // signUpEmailCtr.text = data["user"]["email"];
+        //signUpEmailCtr.text = data["user"]["email"];
 
-        onAccountFound.call();
+        onAccountFound?.call();
       },
     );
 
@@ -1709,7 +1697,11 @@ class AuthProvider with ChangeNotifier {
 
     response.fold(
       (l) {
-        onFailed.call(l.errorMsg);
+        if (l.code == "400") {
+          onFailed.call("New password should be different from the old password");
+        } else {
+          onFailed.call(l.errorMsg);
+        }
       },
       (r) {
         onSuccess.call();
@@ -1747,7 +1739,7 @@ class AuthProvider with ChangeNotifier {
     } else if (step == AppConstants.goals) {
       context.goNamed(AppRoutes.goalsScreen.name);
     } else if (step == AppConstants.completed) {
-      if (LocalStorageService.instance.getAuthToken == null) {
+      if (LocalStorageService.instance.getAuthToken!.isEmpty) {
         context.goNamed(AppRoutes.loginScreen.name);
       } else {
         context.goNamed(AppRoutes.homeScreen.name);

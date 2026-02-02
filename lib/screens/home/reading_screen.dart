@@ -112,7 +112,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
                   return Column(
                     children: [
                       //todo Spacer for Header Content
-                      SizedBox(height: 150.h),
+                      160.verticalSpace,
 
                       //todo Header Text Content (Title)
                       Padding(
@@ -125,6 +125,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
                               style: AppTextStyles.sfProDisplayMedium(
                                 fontSize: 14.sp,
                                 color: AppColors.white,
+                                height: 1.2,
                               ),
                             ),
                             Row(
@@ -136,8 +137,9 @@ class _ReadingScreenState extends State<ReadingScreen> {
                                     text: widget.story?.title ?? "Dinosaurs",
                                     overflow: TextOverflow.visible,
                                     style: AppTextStyles.sfProDisplayBold(
-                                      fontSize: 32.sp,
+                                      fontSize: 27.5.sp,
                                       color: Colors.white,
+                                      height: 1.1,
                                     ),
                                   ),
                                 ),
@@ -182,7 +184,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
                         ),
                       ),
 
-                      24.h.verticalSpace,
+                      50.verticalSpace,
 
                       //todo Body Content Container (image and story)
                       Expanded(
@@ -204,7 +206,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
                           child: ListView(
                             padding: EdgeInsets.zero,
                             children: [
-                              15.h.verticalSpace,
+                              5.verticalSpace,
                               //todo story image
                               Consumer<StoryProvider>(
                                 builder: (context, provider, child) {
@@ -215,7 +217,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
                                     );
                                   }
                                   return CachedNetworkImage(
-                                    height: 280.h,
+                                    height: 280,
                                     width: double.infinity,
                                     fit: BoxFit.cover,
                                     imageUrl:
@@ -266,7 +268,8 @@ class _ReadingScreenState extends State<ReadingScreen> {
                                     color: AppColors.black.withValues(
                                       alpha: 0.8,
                                     ),
-                                  ).copyWith(height: 1.8),
+                                  ),
+
                                   children: _buildTextSpans(
                                     _pages[index],
                                     AppTextStyles.sfProDisplayRegular(
@@ -274,12 +277,12 @@ class _ReadingScreenState extends State<ReadingScreen> {
                                       color: AppColors.black.withValues(
                                         alpha: 0.8,
                                       ),
-                                    ).copyWith(height: 1.8),
+                                    ).copyWith(height: 1.37),
                                     AppTextStyles.sfProDisplayBold(
                                       fontSize: 16.sp,
                                       decoration: TextDecoration.underline,
                                       color: AppColors.black,
-                                    ).copyWith(height: 1.6),
+                                    ).copyWith(height: 1.37),
                                   ),
                                 ),
                               ),

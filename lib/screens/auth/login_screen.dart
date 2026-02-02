@@ -132,10 +132,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           32.h.verticalSpace,
                           AppFilledButton(
                             onTap: () async {
-                              final success = await provider.loginUser(context);
-                              if (success && context.mounted) {
-                                context.goNamed(AppRoutes.homeScreen.name);
-                              }
+                              await provider.loginWithMail(context: context);
+                              // if (success && context.mounted) {
+                              //   context.goNamed(AppRoutes.homeScreen.name);
+                              // }
                             },
                             text: "Login with Email",
                           ),
@@ -204,7 +204,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             }
                             return;
                           }
-                          provider.googleLogin(
+                          provider.loginWithGoogle(
                             idToken: idToken,
                             onAccountFound: () {
                               AppToast.success(context, "Login Successfully.");
@@ -212,11 +212,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             },
                             onNoAccountFound: (error) async {
                               if (!context.mounted) return;
-                              // AppToast.info(
-                              //   context: context,
-                              //   message:
-                              //       "No account found, we are registering your mail",
-                              // );
+
                               await provider.saveAge(
                                 context: context,
                                 onSuccess: () async {
@@ -314,7 +310,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
 
                       8.h.verticalSpace,
-                      // Apple Login
+                      //todo Apple Login
                       _socialButton(
                         label: "Login with Apple",
                         icon: AppAssets.apple,

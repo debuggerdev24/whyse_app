@@ -6,7 +6,10 @@ class LocalStorageService {
 
   static const String _tokenKey = "token",
       _refreshTokenKey = "refresh_token",
-      _consentReqStatusKey = "consent_request_status";
+      _consentReqStatusKey = "consent_request_status",
+      _createAccMailKey = "create_acc_mail",
+      _createAccPassKey = "create_acc_pass",
+      _googleIdTokenKey = "google_id_token";
 
   late SharedPreferences prefs;
 
@@ -15,12 +18,17 @@ class LocalStorageService {
     prefs = await SharedPreferences.getInstance();
   }
 
-  /// ---------------- Token ----------------
+  //todo ---------------- Token ----------------
   String? get getAuthToken => prefs.getString(_tokenKey);
   String? get getRefreshToken => prefs.getString(_refreshTokenKey);
   bool get getConsentRequestStatus =>
       prefs.getBool(_consentReqStatusKey) ?? false;
+  String get getGoogleIdToken => prefs.getString(_googleIdTokenKey) ?? "";
+  String get getRegisteredUserMail => prefs.getString(_createAccMailKey) ?? "";
+  String get getRegisteredUserPassword =>
+      prefs.getString(_createAccPassKey) ?? "";
 
+  //todo remove auth data functions
   Future<void> removeAuthToken() async {
     await prefs.remove(_tokenKey);
   }
@@ -29,8 +37,21 @@ class LocalStorageService {
     await prefs.remove(_refreshTokenKey);
   }
 
+  Future<void> removeGoogleIdToken() async {
+    await prefs.remove(_googleIdTokenKey);
+  }
+
+  Future<void> removeRegisteredUserMail() async {
+    await prefs.remove(_createAccMailKey);
+  }
+
+  Future<void> removeRegisteredUserPass() async {
+    await prefs.remove(_createAccPassKey);
+  }
+
+  //todo save auth data functions
   Future<void> saveAuthToken(String token) async {
-    await prefs.setString(token, token);
+    await prefs.setString(_tokenKey, token);
   }
 
   Future<void> saveRefreshToken(String token) async {
@@ -39,6 +60,18 @@ class LocalStorageService {
 
   Future<void> saveParentConsentStatus({required bool status}) async {
     await prefs.setBool(_consentReqStatusKey, status);
+  }
+
+  Future<void> saveGoogleIdToken({required String idToken}) async {
+    await prefs.setString(_googleIdTokenKey, idToken);
+  }
+
+  Future<void> saveUserMail({required String mail}) async {
+    await prefs.setString(_createAccMailKey, mail);
+  }
+
+  Future<void> saveUserPass({required String password}) async {
+    await prefs.setString(_createAccPassKey, password);
   }
 
   /// ---------------- Onboarding ----------------

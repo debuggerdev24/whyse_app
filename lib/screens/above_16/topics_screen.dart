@@ -114,7 +114,8 @@ class _TopicsScreenState extends State<TopicsScreen> {
     if (title.trim().isEmpty) return;
     if (!customTopics.contains(title)) {
       setState(() {
-        customTopics.add(title);
+        customTopics.insert(0, title); //
+        AppToast.success(context, "Topic added successfully");
         selectedCustomTopics.add(title); // Auto-select
       });
       customTopicController.clear();
@@ -128,6 +129,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
 
       // Fixed bottom button
       body: SafeArea(
+        bottom: false,
         child: Consumer<AuthProvider>(
           builder: (context, provider, child) {
             return Stack(
@@ -174,9 +176,11 @@ class _TopicsScreenState extends State<TopicsScreen> {
                         controller: customTopicController,
                         hintText: "Add Topic...",
                         onSubmit: (val) => _addCustomTopic(val),
+                        onTapOutside: () {
+                        _addCustomTopic(customTopicController.text);
+                        },
                       ),
-                      37.h.verticalSpace,
-
+                      20.h.verticalSpace,
                       // Loading State
                       if (provider.isLoadingTopics)
                         const Expanded(
@@ -198,6 +202,18 @@ class _TopicsScreenState extends State<TopicsScreen> {
                                   childAspectRatio: 1.4,
                                 ),
                             children: [
+                              // Custom Topics (shown first)
+                              ...customTopics.map((title) {
+                                return TopicCard(
+                                  label: title,
+                                  assetPath: _getIconForTopic(title),
+                                  isSelected: selectedCustomTopics.contains(
+                                    title,
+                                  ),
+                                  onTap: () => _toggleCustomTopic(title),
+                                );
+                              }),
+
                               // API Topics
                               ...provider.topicsList.map((topic) {
                                 final id = topic['id'];
@@ -209,18 +225,6 @@ class _TopicsScreenState extends State<TopicsScreen> {
                                   onTap: () => _toggleApiTopic(id),
                                 );
                               }),
-
-                              // Custom Topics
-                              ...customTopics.map((title) {
-                                return TopicCard(
-                                  label: title,
-                                  assetPath: _getIconForTopic(title),
-                                  isSelected: selectedCustomTopics.contains(
-                                    title,
-                                  ),
-                                  onTap: () => _toggleCustomTopic(title),
-                                );
-                              }),
                             ],
                           ),
                         ),
@@ -228,6 +232,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
                       AppFilledButton(
                         text: "Next",
                         backgroundColor: AppColors.yellowColor,
+                        margin: EdgeInsets.only(bottom: 8.h, top: 12.h),
 
                         onTap: () async {
                           if (selectedTopicIds.isEmpty &&

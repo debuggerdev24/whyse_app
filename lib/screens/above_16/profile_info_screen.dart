@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
+import 'package:redstreakapp/core/constants/app_constants.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/utils/custom_loader.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
@@ -33,6 +34,8 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
       child: AppLayout(
         resizeToAvoidBottomInset: false,
         body: SafeArea(
+          bottom: false,
+
           child: Consumer2<AuthProvider, OnBoardingProvider>(
             builder: (context, authProvider, onBoardingProvider, child) {
               return Stack(
@@ -77,7 +80,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                         CustomDropDown(
                           hint: "Country",
                           value: onBoardingProvider.selectedCountry,
-                          items: ["India", "USA", "Canada", "UK"],
+                          items: AppConstants.countries,
                           onChanged: (value) {
                             onBoardingProvider.setCountry(value);
                           },
@@ -96,43 +99,39 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                         ),
 
                         Spacer(),
-                        Padding(
-                          padding: EdgeInsets.only(bottom: 8.h),
-                          child: AppFilledButton(
-                            text: "Next",
-                            backgroundColor: AppColors.yellowColor,
-                            onTap: () async {
-                              if (onBoardingProvider.selectedCountry == null) {
-                                AppToast.error(
-                                  context,
-                                  "Please select your country",
-                                );
-                                return;
-                              }
-                              if (onBoardingProvider.selectedLanguage == null) {
-                                AppToast.error(
-                                  context,
-                                  "Please select your preferred language",
-                                );
-                                return;
-                              }
+                        AppFilledButton(
+                          text: "Next",
+                          margin: EdgeInsets.only(bottom: 8),
+                          backgroundColor: AppColors.yellowColor,
+                          onTap: () async {
+                            if (onBoardingProvider.selectedCountry == null) {
+                              AppToast.error(
+                                context,
+                                "Please select your country",
+                              );
+                              return;
+                            }
+                            if (onBoardingProvider.selectedLanguage == null) {
+                              AppToast.error(
+                                context,
+                                "Please select your preferred language",
+                              );
+                              return;
+                            }
 
-                              final success = await authProvider
-                                  .saveProfileInfo(
-                                    context,
-                                    country:
-                                        onBoardingProvider.selectedCountry!,
-                                    preferredLanguage:
-                                        onBoardingProvider.selectedLanguage!,
-                                  );
+                            final success = await authProvider.saveProfileInfo(
+                              context,
+                              country: onBoardingProvider.selectedCountry!,
+                              preferredLanguage:
+                                  onBoardingProvider.selectedLanguage!,
+                            );
 
-                              if (success && context.mounted) {
-                                context.pushNamed(
-                                  AppRoutes.readingGoalScreen.name,
-                                );
-                              }
-                            },
-                          ),
+                            if (success && context.mounted) {
+                              context.pushNamed(
+                                AppRoutes.readingGoalScreen.name,
+                              );
+                            }
+                          },
                         ),
                       ],
                     ),

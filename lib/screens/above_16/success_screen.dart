@@ -6,7 +6,6 @@ import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
-import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
 class SuccessScreen extends StatelessWidget {
@@ -50,15 +49,59 @@ class SuccessScreen extends StatelessWidget {
                 ),
               ),
 
+
               /// ---------- BUTTON AT BOTTOM ----------
               AppFilledButton(
                 text: "Continue",
-                onTap: () {
-                  context.pushNamed(AppRoutes.loginScreen.name);
-                  AppToast.success(
-                    context,
-                    "Register Successfully, Login to your account.",
-                  );
+                onTap: () async {
+                  // if ( context.mounted) {
+                  //           final googleIdToken =
+                  //               LocalStorageService.instance.getGoogleIdToken;
+                  //           final resgisteredUserMail = LocalStorageService
+                  //               .instance
+                  //               .getRegisteredUserMail;
+                  //           if (googleIdToken.isNotEmpty) {
+                  //             await provider.loginWithGoogle(
+                  //               idToken: LocalStorageService
+                  //                   .instance
+                  //                   .getGoogleIdToken,
+                  //               onFailed: (error) {
+                  //                 AppToast.error(context, error);
+                  //               },
+                  //               onAccountFound: () {
+                  //                 context.goNamed(AppRoutes.homeScreen.name);
+                  //                 AppToast.success(
+                  //                   context,
+                  //                   "Login Successfully.",
+                  //                 );
+                  //                 LocalStorageService.instance
+                  //                     .removeGoogleIdToken();
+                  //               },
+                  //             );
+
+                  //             return;
+                  //           }
+
+                  //           if (resgisteredUserMail.isNotEmpty) {
+                  //             provider.loginEmailCtr.text = LocalStorageService
+                  //                 .instance
+                  //                 .getRegisteredUserMail;
+                  //             provider.loginPasswordCtr.text =
+                  //                 LocalStorageService
+                  //                     .instance
+                  //                     .getRegisteredUserPassword;
+                  //             provider.loginWithMail(context: context);
+                  //             return;
+                  //           }
+
+                  //           context.pushNamed(AppRoutes.successScreen.name);
+                  //         }
+
+                  context.pushNamed(AppRoutes.subscriptionScreen.name);
+                    // AppToast.success(
+                    //   context,
+                    //   "Register Successfully, Login to your account.",
+                    // );
                 },
               ),
 

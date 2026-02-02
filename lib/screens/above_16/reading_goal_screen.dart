@@ -32,11 +32,12 @@ class _ReadingGoalScreenState extends State<ReadingGoalScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
+        bottom: false,
         child: Consumer<AuthProvider>(
           builder: (context, provider, child) => Stack(
             children: [
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+                padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 20.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -122,6 +123,7 @@ class _ReadingGoalScreenState extends State<ReadingGoalScreen> {
                     AppFilledButton(
                       text: "Next",
                       backgroundColor: AppColors.yellowColor,
+                      margin: EdgeInsets.only(bottom: 8.h),
                       onTap: () async {
                         int goal = 0;
                         if (selectedOption == "Custom") {

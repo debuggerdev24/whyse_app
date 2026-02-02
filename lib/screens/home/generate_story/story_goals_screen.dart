@@ -202,7 +202,6 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                       final goalDesText = provider.goalDesController.text
                           .trim();
 
-                      List<String> ids = [];
                       List<Map<String, String>> customs = [];
 
                       if (provider.isCustomGoalSelected &&

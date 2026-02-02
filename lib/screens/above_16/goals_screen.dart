@@ -3,9 +3,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
+import 'package:redstreakapp/core/constants/shared_pref.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/utils/custom_loader.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
+import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
@@ -39,8 +41,7 @@ class _GoalScreenState extends State<GoalScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+    return AppLayout(
       body: SafeArea(
         child: Consumer<AuthProvider>(
           builder: (context, provider, child) {
@@ -119,7 +120,8 @@ class _GoalScreenState extends State<GoalScreen> {
                                     spacing: 8.h,
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      if (provider.isCustomGoalSelected)
+                                      if (provider.isCustomGoalSelected &&
+                                          provider.selectedGoalIds.isEmpty)
                                         AppTextField(
                                           controller:
                                               provider.customGoalTitleCtr,
@@ -146,12 +148,13 @@ class _GoalScreenState extends State<GoalScreen> {
                               final title = goal['title'] ?? '';
                               final description = goal['description'] ?? '';
 
-                              final isSelected = provider.selectedGoalId == id;
+                              final isSelected = provider.selectedGoalIds
+                                  .contains(id);
 
                               return GestureDetector(
                                 onTap: () {
-                                  provider.updateGoalId(id);
-                                }, //_onGoalSelected(id),
+                                  provider.toggleGoal(id);
+                                },
                                 child: Container(
                                   padding: EdgeInsets.symmetric(
                                     horizontal: 16.w,
@@ -211,7 +214,7 @@ class _GoalScreenState extends State<GoalScreen> {
                           final customGoalDes = provider.customGoalDesCtr.text
                               .trim();
 
-                          if (provider.selectedGoalId.isEmpty &&
+                          if (provider.selectedGoalIds.isEmpty &&
                               !provider.isCustomGoalSelected) {
                             AppToast.error(
                               context,
@@ -227,15 +230,17 @@ class _GoalScreenState extends State<GoalScreen> {
                                 context,
                                 "Please add goal Description",
                               );
+                              return;
+
                             }
                           }
 
-                          List<String> ids = [];
+                          // List<String> ids = [];
                           List<Map<String, String>> customs = [];
 
-                          if (provider.selectedGoalId.isNotEmpty) {
-                            ids.add(provider.selectedGoalId);
-                          }
+                          // if (provider.selectedGoalIds.isNotEmpty) {
+                          //   ids.add(provider.selectedGoalIds);
+                          // }
                           if (customGoalTitle.isNotEmpty &&
                               customGoalDes.isNotEmpty) {
                             customs.add({
@@ -246,12 +251,14 @@ class _GoalScreenState extends State<GoalScreen> {
 
                           final success = await provider.saveGoals(
                             context,
-                            goalIds: ids,
+                            goalIds: provider.selectedGoalIds.toList(),
                             customGoals: customs,
                           );
 
-                          if (success && context.mounted) {
+
+                          if(success && context.mounted) {
                             context.pushNamed(AppRoutes.successScreen.name);
+                           AppToast.success(context, "Goals saved successfully");
                           }
                         },
                       ),

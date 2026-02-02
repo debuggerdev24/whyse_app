@@ -90,6 +90,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
+        bottom: false,
         child: Consumer<AuthProvider>(
           builder: (context, provider, child) {
             return Stack(
@@ -185,6 +186,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
                         ),
                       AppFilledButton(
                         text: "Next",
+                        margin: EdgeInsets.only(bottom: 8.h, top: 12.h),
                         backgroundColor: AppColors.yellowColor,
 
                         onTap: () async {

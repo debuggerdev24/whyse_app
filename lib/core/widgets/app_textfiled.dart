@@ -36,7 +36,7 @@ class AppTextField extends StatelessWidget {
     this.bottomText,
     this.bottomTextStyle,
     this.readOnly = false,
-    this.onSubmit,
+    this.onSubmit, this.onTapOutside,
   });
 
   final String? labelText;
@@ -69,7 +69,7 @@ class AppTextField extends StatelessWidget {
   final TextStyle? bottomTextStyle;
   final bool readOnly;
   final ValueChanged<String>? onSubmit;
-
+  final Function()? onTapOutside;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -94,6 +94,8 @@ class AppTextField extends StatelessWidget {
           onTap: onTap,
           onTapOutside: (event) {
             FocusScope.of(context).unfocus();
+            onTapOutside?.call();
+            
           },
 
           decoration: InputDecoration(
