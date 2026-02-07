@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +13,6 @@ import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:shimmer/shimmer.dart';
-
 import '../../models/home/story_models/story_model.dart';
 import '../../routes/user_routes.dart';
 import '../../services/base_api_service.dart';
@@ -80,13 +78,10 @@ class _ReadingScreenState extends State<ReadingScreen> {
         body: Stack(
           children: [
             //todo 1. Background Image (Header)
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 300.h,
-              // Approx height
+            Align(
+              alignment: Alignment.topCenter,
               child: Container(
+                height: 210,
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage(
@@ -96,11 +91,11 @@ class _ReadingScreenState extends State<ReadingScreen> {
                   ),
                 ),
               ),
+            
             ),
 
             //todo 2. Main Scrollable Content
-            Positioned.fill(
-              child: PageView.builder(
+            PageView.builder(
                 controller: _pageController,
                 itemCount: _pages.length,
                 onPageChanged: (index) {
@@ -111,12 +106,49 @@ class _ReadingScreenState extends State<ReadingScreen> {
                 itemBuilder: (context, index) {
                   return Column(
                     children: [
-                      //todo Spacer for Header Content
-                      160.verticalSpace,
+                      SafeArea(
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            20.w,
+                            10,20.w, 0,
+                          ),
+                          child: Row(
+                            children: [
+                              GlassIconButton(
+                                onTap: () => showLeaveStoryConfirmation(
+                                  context: context,
+                                ),
+                                child: SvgIcon(
+                                  AppAssets.close,
+                                  color: Colors.white,
+                                  size: 40.sp,
+                                ),
+                              ),
+
+                              Spacer(),
+                              SvgIcon(
+                                AppAssets.font,
+                                color: Colors.white,
+                                size: 40.sp,
+                              ),
+                              12.w.horizontalSpace,
+
+                              GlassIconButton(
+                                onTap: () {},
+                                child: SvgIcon(
+                                  AppAssets.bookmark,
+                                  color: Colors.white,
+                                  size: 40.sp,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
 
                       //todo Header Text Content (Title)
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        padding: EdgeInsets.fromLTRB(24.w, 18, 24.w, 5),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -144,7 +176,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
                                   ),
                                 ),
                                 Padding(
-                                  padding: EdgeInsets.only(bottom: 6.h),
+                                  padding: EdgeInsets.only(left: 8,bottom: 6.h),
                                   child: GestureDetector(
                                     onTap: () {
                                       if (index < _pages.length - 1) {
@@ -183,8 +215,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
                           ],
                         ),
                       ),
-
-                      50.verticalSpace,
+                      
 
                       //todo Body Content Container (image and story)
                       Expanded(
@@ -294,57 +325,15 @@ class _ReadingScreenState extends State<ReadingScreen> {
                   );
                 },
               ),
-            ),
+            
 
             //todo 3. Custom AppBar (Overlay)
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: SafeArea(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 20.w,
-                    vertical: 10.h,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GlassIconButton(
-                        onTap: () =>
-                            showLeaveStoryConfirmation(context: context),
-                        child: SvgIcon(
-                          AppAssets.close,
-                          color: Colors.white,
-                          size: 40.sp,
-                        ),
-                      ),
-
-                      Row(
-                        children: [
-                          SvgIcon(
-                            AppAssets.font,
-                            color: Colors.white,
-                            size: 40.sp,
-                          ),
-                          12.w.horizontalSpace,
-
-                          GlassIconButton(
-                            onTap: () {},
-                            child: SvgIcon(
-                              AppAssets.bookmark,
-                              color: Colors.white,
-                              size: 40.sp,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
+            // Positioned(
+            //   top: 0,
+            //   left: 0,
+            //   right: 0,
+            //   child:
+            // ),
             // 4. Fixed Bottom Button (Only on last page)
             if (_currentIndex == _pages.length - 1)
               Positioned(
