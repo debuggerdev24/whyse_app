@@ -19,7 +19,8 @@ class StoryProvider extends ChangeNotifier {
       customTopicCtr = TextEditingController(),
       customReadingDurationCtr = TextEditingController();
   int _lessonDuration = 0;
-  String createdStoryId = "", createdStoryImagePath = "";
+  String createdStoryId = ""; //, createdStoryImagePath = "";
+  List<String> createdStoryImagePaths = [];
   Map<String, dynamic> dataToSendCreateStory = {};
   final allowedDurations = {5, 10, 15, 20, 25, 30, 35, 40, 45};
   List<Story> _stories = [];
@@ -68,6 +69,7 @@ class StoryProvider extends ChangeNotifier {
   final Set<String> selectedInterestIds = {};
   final Set<String> selectedCustomInterests = {};
   Story? story;
+  int storyPageCount = 0;
 
   //todo goal fields
   List<GoalModel> goalsList = [];
@@ -330,9 +332,6 @@ class StoryProvider extends ChangeNotifier {
       dataToSendCreateStory["goalIds"] = selectedGoalIds.toList();
     }
 
-    //todo create story image
-
-    createStoryImage(onFailed: onCreateImageFailed);
     final response = await HomeApiService.instance.createStory(
       data: dataToSendCreateStory,
     );
@@ -343,8 +342,15 @@ class StoryProvider extends ChangeNotifier {
       },
       (r) {
         createdStoryId = r["data"]["id"];
-
         story = Story.fromJson(r["data"]);
+        storyPageCount = story!.pages!.length;
+
+        // Start fresh and request one image per page
+        createdStoryImagePaths.clear();
+        for (int i = 0; i < storyPageCount; i++) {
+          createStoryImage(onFailed: onCreateImageFailed);
+        }
+
         context.goNamed(AppRoutes.readingScreen.name, extra: story);
       },
     );
@@ -371,8 +377,13 @@ class StoryProvider extends ChangeNotifier {
         onFailed.call(l.errorMsg);
       },
       (r) async {
-        createdStoryImagePath = r["data"]["imagePath"];
+        createdStoryImagePaths.add(r["data"]["imagePath"]);
         Logger.info("createdStoryImagePath${r["data"]["imagePath"]}");
+
+        // for (int i = 0; i < storyPageCount; i++) {
+        // if (createdStoryImagePaths.length == storyPageCount) {
+        //   return;
+        // }
 
         clearStoryFields();
         isCreateStoryImageLoading = false;
@@ -393,7 +404,7 @@ class StoryProvider extends ChangeNotifier {
   }
 
   void clareStoryData() {
-    createdStoryImagePath = "";
+    createdStoryImagePaths.clear();
     createdStoryId = "";
     dataToSendCreateStory = {};
   }

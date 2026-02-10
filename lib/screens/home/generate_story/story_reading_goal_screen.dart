@@ -158,12 +158,9 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                             items: provider.ageRanges,
                             onChanged: (value) {
                               provider.setSelectedAgeRange = value!;
-
-                              // setState(() => _selectedAge = value!);
                             },
                           ),
                           20.h.verticalSpace,
-
                           CustomDropdownField(
                             label: "Language of Learning",
                             hint: "Select language",

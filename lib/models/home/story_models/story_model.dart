@@ -10,7 +10,7 @@ class Story {
       createdAt,
       updatedAt;
   final int? lessonDuration, age;
-  final List<String>? tags;
+  final List<String>? tags,pages;
 
   Story({
     required this.id,
@@ -27,7 +27,7 @@ class Story {
     this.lessonDuration,
     this.tags,
     this.createdAt,
-    this.updatedAt,
+    this.updatedAt, this.pages,
   });
 
   factory Story.fromJson(Map<String, dynamic> json) {
@@ -49,6 +49,9 @@ class Story {
       tags: json['tags'] != null ? List<String>.from(json['tags']) : [],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
+      // Some stories may not have pages in the response
+      pages:
+          json['pages'] != null ? List<String>.from(json['pages']) : [],
     );
   }
 }

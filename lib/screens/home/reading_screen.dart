@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
+import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
@@ -34,6 +35,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
+    //sby34353581
   }
 
   List<String> _pages = [];
@@ -42,12 +44,13 @@ class _ReadingScreenState extends State<ReadingScreen> {
   void initState() {
     super.initState();
     // if (widget.story != null) {
-    final content = widget.story!.content;
-    _pages = content
-        .split('</p>')
-        .where((e) => e.trim().isNotEmpty)
-        .map((e) => _removeAllHtmlTags(e))
-        .toList();
+    final pages = widget.story!.pages;
+    _pages = pages!.map((e) => _removeAllHtmlTags(e)).toList();
+
+    // .split('</p>')
+    // .where((e) => e.trim().isNotEmpty)
+    // .map((e) => _removeAllHtmlTags(e))
+    // .toList();
     // } else {
     //   _pages = [
     //     "Dinosaurs lived a very long time ago, even before people were on Earth. They were animals that came in many sizes. Some dinosaurs were as big as houses, while others were small, almost like chickens.",
@@ -68,6 +71,9 @@ class _ReadingScreenState extends State<ReadingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Logger.info("Pages: ${_pages.length}");
+
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -75,13 +81,13 @@ class _ReadingScreenState extends State<ReadingScreen> {
       },
 
       child: AppLayout(
-        body: Stack(
+        body: Column(
           children: [
-            //todo 1. Background Image (Header)
+            //* 1. Background Image (Header)
             Align(
               alignment: Alignment.topCenter,
               child: Container(
-                height: 210,
+                // height: 210,
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage(
@@ -90,12 +96,123 @@ class _ReadingScreenState extends State<ReadingScreen> {
                     fit: BoxFit.cover,
                   ),
                 ),
+                child: Column(
+                  children: [
+                    SafeArea(
+                      bottom: false,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 18),
+                        child: Row(
+                          children: [
+                            GlassIconButton(
+                              onTap: () =>
+                                  showLeaveStoryConfirmation(context: context),
+                              child: SvgIcon(
+                                AppAssets.close,
+                                color: Colors.white,
+                                size: 40.sp,
+                              ),
+                            ),
+
+                            Spacer(),
+                            SvgIcon(
+                              AppAssets.font,
+                              color: Colors.white,
+                              size: 40.sp,
+                            ),
+                            12.w.horizontalSpace,
+
+                            GlassIconButton(
+                              onTap: () {},
+                              child: SvgIcon(
+                                AppAssets.bookmark,
+                                color: Colors.white,
+                                size: 40.sp,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    //todo Header Text Content (Title)
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(24.w, 40.w, 24.w, 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AppText(
+                            text: "AI Generated Text",
+                            style: AppTextStyles.sfProDisplayMedium(
+                              fontSize: 14.sp,
+                              color: AppColors.white,
+                              height: 1.2,
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Flexible(
+                                child: AppText(
+                                  text: widget.story?.title ?? "Dinosaurs",
+                                  overflow: TextOverflow.visible,
+                                  style: AppTextStyles.sfProDisplayBold(
+                                    fontSize: 27.5.sp,
+                                    color: Colors.white,
+                                    height: 1.1,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.only(left: 8, bottom: 6),
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    // if (index < _pages.length - 1) {
+                                    _pageController.nextPage(
+                                      duration: const Duration(
+                                        milliseconds: 300,
+                                      ),
+                                      curve: Curves.easeInOut,
+                                    );
+                                    // }
+                                  },
+                                  child: Row(
+                                    children: [
+                                      AppText(
+                                        text:
+                                            "${_currentIndex + 1}/${_pages.length}",
+                                        style:
+                                            AppTextStyles.sfProDisplaySemibold(
+                                              fontSize: 14.sp,
+                                              color: Colors.white.withValues(
+                                                alpha: 0.8,
+                                              ),
+                                            ),
+                                      ),
+                                      18.w.horizontalSpace,
+                                      Icon(
+                                        Icons.arrow_forward_ios,
+                                        color: Colors.white,
+                                        size: 14.sp,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            
             ),
 
-            //todo 2. Main Scrollable Content
-            PageView.builder(
+            //* 2. Main Scrollable Content
+            Expanded(
+              child: PageView.builder(
                 controller: _pageController,
                 itemCount: _pages.length,
                 onPageChanged: (index) {
@@ -104,228 +221,118 @@ class _ReadingScreenState extends State<ReadingScreen> {
                   });
                 },
                 itemBuilder: (context, index) {
-                  return Column(
-                    children: [
-                      SafeArea(
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(
-                            20.w,
-                            10,20.w, 0,
-                          ),
-                          child: Row(
-                            children: [
-                              GlassIconButton(
-                                onTap: () => showLeaveStoryConfirmation(
-                                  context: context,
-                                ),
-                                child: SvgIcon(
-                                  AppAssets.close,
-                                  color: Colors.white,
-                                  size: 40.sp,
-                                ),
-                              ),
-
-                              Spacer(),
-                              SvgIcon(
-                                AppAssets.font,
-                                color: Colors.white,
-                                size: 40.sp,
-                              ),
-                              12.w.horizontalSpace,
-
-                              GlassIconButton(
-                                onTap: () {},
-                                child: SvgIcon(
-                                  AppAssets.bookmark,
-                                  color: Colors.white,
-                                  size: 40.sp,
-                                ),
-                              ),
-                            ],
-                          ),
+                  //todo Body Content Container (image and story)
+                  return Container(
+                      margin: EdgeInsets.symmetric(vertical: 5),
+                      padding: EdgeInsets.fromLTRB(24.w, 10, 24.w, 20),
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: AppColors.backgroundColor,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(0),
+                          topRight: Radius.circular(0),
                         ),
                       ),
 
-                      //todo Header Text Content (Title)
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(24.w, 18, 24.w, 5),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            AppText(
-                              text: "AI Generated Text",
-                              style: AppTextStyles.sfProDisplayMedium(
-                                fontSize: 14.sp,
-                                color: AppColors.white,
-                                height: 1.2,
+                      child: ListView(
+                        padding: EdgeInsets.zero,
+                        children: [
+                          5.verticalSpace,
+                          //todo story image
+                          Consumer<StoryProvider>(
+                            builder: (context, provider, child) {
+                              //* Safely access image list to avoid RangeError
+                              final hasImageForIndex =
+                                  provider.createdStoryImagePaths.length >
+                                          index &&
+                                      provider
+                                          .createdStoryImagePaths[index]
+                                          .isNotEmpty;
+                              if (hasImageForIndex &&
+                                  !provider.isCreateStoryImageLoading &&
+                                  !provider.isCreateStoryLoading) {
+                                provider.linkImageToStory(
+                                  image: provider.createdStoryImagePaths[index],
+                                );
+                              }
+
+                              if (!hasImageForIndex) {
+                                //* If we don't have an image for this page yet,
+                                //* just show a shimmer placeholder instead of crashing.
+                                return imageShimmer();
+                              }
+
+                              return CachedNetworkImage(
+                                height: 280,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                imageUrl: DioClient.baseUrl +
+                                    provider.createdStoryImagePaths[index],
+                                errorWidget: (context, url, error) =>
+                                    imageShimmer(),
+                                placeholder: (context, url) => imageShimmer(),
+                              );
+                            },
+
+                            //     Image.network(
+                            //   provider.createdStoryImagePath,
+                            //   // widget.story != null &&
+                            //   //         widget.story!.images.isNotEmpty
+                            //   //     ? "http://167.172.45.71${widget.story!.images.first}"
+                            //   //     : "https://via.placeholder.com/350x150",
+                            //   width: double.infinity,
+                            //   height: 180.h,
+                            //   fit: BoxFit.cover,
+                            //   loadingBuilder:
+                            //       (context, child, loadingProgress) {
+                            //         if (loadingProgress == null) return child;
+                            //         return ShimmerLoading(
+                            //           width: double.infinity,
+                            //           height: 180.h,
+                            //           borderRadius: 0,
+                            //         );
+                            //       },
+                            //   errorBuilder: (context, error, stackTrace) {
+                            //     return Image.asset(
+                            //       AppAssets.pterodactylus,
+                            //       width: double.infinity,
+                            //       height: 180.h,
+                            //       fit: BoxFit.cover,
+                            //     );
+                            //   },
+                            // ),
+                          ),
+                          24.h.verticalSpace,
+                          //todo story content
+                          RichText(
+                            textAlign: TextAlign.justify,
+                            text: TextSpan(
+                              style: AppTextStyles.sfProDisplayRegular(
+                                fontSize: 16.sp,
+                                color: AppColors.black.withValues(alpha: 0.8),
                               ),
+
+                              children: _buildTextSpans(
+                                _pages[index],
+                                AppTextStyles.sfProDisplayRegular(
+                                  fontSize: 16.sp,
+                                  color: AppColors.black.withValues(alpha: 0.8),
+                                ).copyWith(height: 1.37),
+                                AppTextStyles.sfProDisplayBold(
+                                  fontSize: 16.sp,
+                                  decoration: TextDecoration.underline,
+                                  color: AppColors.black,
+                                ).copyWith(height: 1.37),
+                              ),
+
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Flexible(
-                                  child: AppText(
-                                    text: widget.story?.title ?? "Dinosaurs",
-                                    overflow: TextOverflow.visible,
-                                    style: AppTextStyles.sfProDisplayBold(
-                                      fontSize: 27.5.sp,
-                                      color: Colors.white,
-                                      height: 1.1,
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(left: 8,bottom: 6.h),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      if (index < _pages.length - 1) {
-                                        _pageController.nextPage(
-                                          duration: const Duration(
-                                            milliseconds: 300,
-                                          ),
-                                          curve: Curves.easeInOut,
-                                        );
-                                      }
-                                    },
-                                    child: Row(
-                                      children: [
-                                        AppText(
-                                          text: "${index + 1}/${_pages.length}",
-                                          style:
-                                              AppTextStyles.sfProDisplaySemibold(
-                                                fontSize: 14.sp,
-                                                color: Colors.white.withValues(
-                                                  alpha: 0.8,
-                                                ),
-                                              ),
-                                        ),
-                                        18.w.horizontalSpace,
-                                        Icon(
-                                          Icons.arrow_forward_ios,
-                                          color: Colors.white,
-                                          size: 14.sp,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                      
-
-                      //todo Body Content Container (image and story)
-                      Expanded(
-                        child: Container(
-                          margin: EdgeInsets.symmetric(vertical: 5),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 24.w,
-                            vertical: 15.h,
-                          ),
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: AppColors.backgroundColor,
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(0),
-                              topRight: Radius.circular(0),
-                            ),
-                          ),
-
-                          child: ListView(
-                            padding: EdgeInsets.zero,
-                            children: [
-                              5.verticalSpace,
-                              //todo story image
-                              Consumer<StoryProvider>(
-                                builder: (context, provider, child) {
-                                  if (!provider.isCreateStoryImageLoading &&
-                                      !provider.isCreateStoryLoading) {
-                                    provider.linkImageToStory(
-                                      image: provider.createdStoryImagePath,
-                                    );
-                                  }
-                                  return CachedNetworkImage(
-                                    height: 280,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
-                                    imageUrl:
-                                        DioClient.baseUrl +
-                                        provider.createdStoryImagePath,
-                                    errorWidget: (context, url, error) =>
-                                        imageShimmer(),
-                                    placeholder: (context, url) =>
-                                        imageShimmer(),
-                                  );
-                                },
-
-                                //     Image.network(
-                                //   provider.createdStoryImagePath,
-                                //   // widget.story != null &&
-                                //   //         widget.story!.images.isNotEmpty
-                                //   //     ? "http://167.172.45.71${widget.story!.images.first}"
-                                //   //     : "https://via.placeholder.com/350x150",
-                                //   width: double.infinity,
-                                //   height: 180.h,
-                                //   fit: BoxFit.cover,
-                                //   loadingBuilder:
-                                //       (context, child, loadingProgress) {
-                                //         if (loadingProgress == null) return child;
-                                //         return ShimmerLoading(
-                                //           width: double.infinity,
-                                //           height: 180.h,
-                                //           borderRadius: 0,
-                                //         );
-                                //       },
-                                //   errorBuilder: (context, error, stackTrace) {
-                                //     return Image.asset(
-                                //       AppAssets.pterodactylus,
-                                //       width: double.infinity,
-                                //       height: 180.h,
-                                //       fit: BoxFit.cover,
-                                //     );
-                                //   },
-                                // ),
-                              ),
-                              24.h.verticalSpace,
-                              //todo story content
-                              RichText(
-                                textAlign: TextAlign.justify,
-                                text: TextSpan(
-                                  style: AppTextStyles.sfProDisplayRegular(
-                                    fontSize: 16.sp,
-                                    color: AppColors.black.withValues(
-                                      alpha: 0.8,
-                                    ),
-                                  ),
-
-                                  children: _buildTextSpans(
-                                    _pages[index],
-                                    AppTextStyles.sfProDisplayRegular(
-                                      fontSize: 16.sp,
-                                      color: AppColors.black.withValues(
-                                        alpha: 0.8,
-                                      ),
-                                    ).copyWith(height: 1.37),
-                                    AppTextStyles.sfProDisplayBold(
-                                      fontSize: 16.sp,
-                                      decoration: TextDecoration.underline,
-                                      color: AppColors.black,
-                                    ).copyWith(height: 1.37),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
+                    );
                 },
               ),
-            
+            ),
 
             //todo 3. Custom AppBar (Overlay)
             // Positioned(
@@ -336,12 +343,15 @@ class _ReadingScreenState extends State<ReadingScreen> {
             // ),
             // 4. Fixed Bottom Button (Only on last page)
             if (_currentIndex == _pages.length - 1)
-              Positioned(
-                bottom: 30.h,
-                left: 24.w,
-                right: 24.w,
+              Padding(
+                padding: EdgeInsets.only(bottom: 26),
+
+                // bottom: 30.h,
+                // left: 24.w,
+                // right: 24.w,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  spacing: 10.w,
                   children: [
                     AppText(
                       text: "Completed Reading?",
@@ -350,7 +360,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
                         color: AppColors.black.withValues(alpha: 0.6),
                       ),
                     ),
-                    10.h.verticalSpace,
+
                     AppFilledButton(
                       fixedSize: Size(348.w, 42.h),
                       backgroundColor: AppColors.yellowColor,
