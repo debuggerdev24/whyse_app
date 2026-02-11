@@ -54,7 +54,7 @@ class OnboardingHeader extends StatelessWidget {
                       height: 4.h,
                       decoration: BoxDecoration(
                         color: index < currentStep
-                            ? AppColors.yellowColor
+                            ? AppColors.primaryColor
                             : AppColors.lightwhiteColor,
                         borderRadius: BorderRadius.circular(16.r),
                       ),
@@ -71,7 +71,7 @@ class OnboardingHeader extends StatelessWidget {
                   text: "Skip",
                   style: AppTextStyles.sfProDisplayMedium(
                     fontSize: 16.sp,
-                    color: AppColors.yellowColor,
+                    color: AppColors.primaryColor,
                   ),
                 ),
               ),
@@ -176,7 +176,7 @@ class TopicCard extends StatelessWidget {
           ),
 
           border: isSelected
-              ? Border.all(color: AppColors.yellowColor, width: 2)
+              ? Border.all(color: AppColors.primaryColor, width: 2)
               : null,
         ),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 13.h),

@@ -174,7 +174,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                           AppFilledButton(
                             margin: EdgeInsets.only(top: 20.h),
                             text: "Create Story",
-                            backgroundColor: AppColors.yellowColor,
+                            backgroundColor: AppColors.primaryColor,
                             onTap: () {
                               deBouncer.run(() async {
                                 //todo create story

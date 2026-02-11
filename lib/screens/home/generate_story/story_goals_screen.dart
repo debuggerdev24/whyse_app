@@ -34,7 +34,7 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
             final goalsList = provider.goalsList;
 
             return Padding(
-              padding: EdgeInsets.symmetric(horizontal: 25.w, vertical: 20.h),
+              padding: EdgeInsets.fromLTRB(25.w, 10.w, 25.w, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -196,7 +196,7 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
 
                   AppFilledButton(
                     text: "Next",
-                    backgroundColor: AppColors.yellowColor,
+                    backgroundColor: AppColors.primaryColor,
                     onTap: () async {
                       final goalText = provider.goalTitleController.text.trim();
                       final goalDesText = provider.goalDesController.text

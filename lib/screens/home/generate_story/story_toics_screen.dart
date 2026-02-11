@@ -90,7 +90,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
               return Center(child: ApiLoadingIndicator());
             }
             return Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+              padding: EdgeInsets.fromLTRB(24.w, 10.w, 24.w, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -215,8 +215,8 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                   //todo next button
                   AppFilledButton(
                     text: "Next",
-                    backgroundColor: AppColors.yellowColor,
-                    margin: EdgeInsetsGeometry.only(top: 4.3.h),
+                    backgroundColor: AppColors.primaryColor,
+                    margin: EdgeInsetsGeometry.only(top: 4.3.w),
                     onTap: () async {
                       if (provider.selectedTopicId.isEmpty) {
                         AppToast.error(

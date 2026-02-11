@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -30,9 +31,13 @@ class ReadingScreen extends StatefulWidget {
 class _ReadingScreenState extends State<ReadingScreen> {
   final PageController _pageController = PageController();
   int _currentIndex = 0;
+  int _remainingSeconds = 0;
+  bool _timerStarted = false;
+  Timer? _countdownTimer;
 
   @override
   void dispose() {
+    _countdownTimer?.cancel();
     _pageController.dispose();
     super.dispose();
     //sby34353581
@@ -43,20 +48,52 @@ class _ReadingScreenState extends State<ReadingScreen> {
   @override
   void initState() {
     super.initState();
-    // if (widget.story != null) {
     final pages = widget.story!.pages;
     _pages = pages!.map((e) => _removeAllHtmlTags(e)).toList();
 
-    // .split('</p>')
-    // .where((e) => e.trim().isNotEmpty)
-    // .map((e) => _removeAllHtmlTags(e))
-    // .toList();
-    // } else {
-    //   _pages = [
-    //     "Dinosaurs lived a very long time ago, even before people were on Earth. They were animals that came in many sizes. Some dinosaurs were as big as houses, while others were small, almost like chickens.",
-    //     "They lived in many different places, such as forests, swamps, and even deserts. Dinosaurs ruled the Earth for millions of years.",
-    //   ];
-    // }
+    // Set initial duration for display (timer starts after first image loads)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final fromStory = widget.story?.lessonDuration;
+      final fromProvider = context.read<StoryProvider>().lessonDuration;
+      final durationMinutes = (fromStory ?? fromProvider) > 0
+          ? (fromStory ?? fromProvider)
+          : 5;
+      setState(() {
+        if (!_timerStarted) _remainingSeconds = durationMinutes * 60;
+      });
+    });
+  }
+
+  void _startCountdownTimer() {
+    if (_timerStarted) return;
+    _timerStarted = true;
+    final fromStory = widget.story?.lessonDuration;
+    final fromProvider = context.read<StoryProvider>().lessonDuration;
+    final durationMinutes = (fromStory ?? fromProvider) > 0
+        ? (fromStory ?? fromProvider)
+        : 5;
+    setState(() => _remainingSeconds = durationMinutes * 60);
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) {
+        t.cancel();
+        return;
+      }
+      if (_remainingSeconds <= 0) {
+        t.cancel();
+        if (mounted) {
+          context.pushNamed(
+            AppRoutes.startQuizScreen.name,
+            extra: {
+              "quizzes": widget.story?.quiz ?? <Quiz>[],
+              "storyTitle": widget.story?.title ?? "",
+            },
+          );
+        }
+        return;
+      }
+      setState(() => _remainingSeconds--);
+    });
   }
 
   String _removeAllHtmlTags(String htmlText) {
@@ -73,13 +110,11 @@ class _ReadingScreenState extends State<ReadingScreen> {
   Widget build(BuildContext context) {
     Logger.info("Pages: ${_pages.length}");
 
-
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         showLeaveStoryConfirmation(context: context);
       },
-
       child: AppLayout(
         body: Column(
           children: [
@@ -136,69 +171,107 @@ class _ReadingScreenState extends State<ReadingScreen> {
                     ),
                     //todo Header Text Content (Title)
                     Padding(
-                      padding: EdgeInsets.fromLTRB(24.w, 40.w, 24.w, 12),
+                      padding: EdgeInsets.fromLTRB(24.w, 16, 24.w, 12.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          AppText(
-                            text: "AI Generated Text",
-                            style: AppTextStyles.sfProDisplayMedium(
-                              fontSize: 14.sp,
-                              color: AppColors.white,
-                              height: 1.2,
-                            ),
-                          ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.end,
+                            spacing: 11.5,
                             children: [
-                              Flexible(
-                                child: AppText(
-                                  text: widget.story?.title ?? "Dinosaurs",
-                                  overflow: TextOverflow.visible,
-                                  style: AppTextStyles.sfProDisplayBold(
-                                    fontSize: 27.5.sp,
-                                    color: Colors.white,
-                                    height: 1.1,
-                                  ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    AppText(
+                                      text: "AI Generated Text",
+                                      style: AppTextStyles.sfProDisplayMedium(
+                                        fontSize: 14.sp,
+                                        color: AppColors.white,
+                                        height: 1.9,
+                                      ),
+                                    ),
+                                    Flexible(
+                                      child: AppText(
+                                        text: "${widget.story?.title}",
+                                        overflow: TextOverflow.visible,
+                                        style: AppTextStyles.sfProDisplayBold(
+                                          fontSize: 26.sp,
+                                          color: Colors.white,
+                                          height: 1.2,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              Padding(
-                                padding: EdgeInsets.only(left: 8, bottom: 6),
-                                child: GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    // if (index < _pages.length - 1) {
-                                    _pageController.nextPage(
-                                      duration: const Duration(
-                                        milliseconds: 300,
-                                      ),
-                                      curve: Curves.easeInOut,
-                                    );
-                                    // }
-                                  },
-                                  child: Row(
+
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                spacing: 5,
+                                children: [
+                                  //* Story page number
+                                  GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      // if (index < _pages.length - 1) {
+                                      _pageController.nextPage(
+                                        duration: const Duration(
+                                          milliseconds: 300,
+                                        ),
+                                        curve: Curves.easeInOut,
+                                      );
+                                      // }
+                                    },
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      spacing: 6,
+                                      // mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        AppText(
+                                          text:
+                                              "${_currentIndex + 1}/${_pages.length}",
+                                          style:
+                                              AppTextStyles.sfProDisplaySemibold(
+                                                fontSize: 15.sp,
+                                                color: Colors.white.withValues(
+                                                  alpha: 0.8,
+                                                ),
+                                              ),
+                                        ),
+                                        Icon(
+                                          Icons.arrow_forward_ios,
+                                          color: Colors.white,
+                                          size: 15.sp,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  //* countdown timer (top of story image)
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
+                                      Icon(
+                                        Icons.timer_outlined,
+                                        size: 20.sp,
+                                        color: AppColors.white,
+                                      ),
+                                      6.w.horizontalSpace,
                                       AppText(
                                         text:
-                                            "${_currentIndex + 1}/${_pages.length}",
+                                            '${(_remainingSeconds ~/ 60).toString().padLeft(2, '0')}:${(_remainingSeconds % 60).toString().padLeft(2, '0')}',
                                         style:
                                             AppTextStyles.sfProDisplaySemibold(
-                                              fontSize: 14.sp,
-                                              color: Colors.white.withValues(
-                                                alpha: 0.8,
-                                              ),
+                                              fontSize: 18.sp,
+                                              color: AppColors.white,
                                             ),
-                                      ),
-                                      18.w.horizontalSpace,
-                                      Icon(
-                                        Icons.arrow_forward_ios,
-                                        color: Colors.white,
-                                        size: 14.sp,
                                       ),
                                     ],
                                   ),
-                                ),
+                                ],
                               ),
                             ],
                           ),
@@ -223,113 +296,126 @@ class _ReadingScreenState extends State<ReadingScreen> {
                 itemBuilder: (context, index) {
                   //todo Body Content Container (image and story)
                   return Container(
-                      margin: EdgeInsets.symmetric(vertical: 5),
-                      padding: EdgeInsets.fromLTRB(24.w, 10, 24.w, 20),
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: AppColors.backgroundColor,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(0),
-                          topRight: Radius.circular(0),
-                        ),
+                    margin: EdgeInsets.symmetric(vertical: 5),
+                    padding: EdgeInsets.fromLTRB(24.w, 10, 24.w, 0),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: AppColors.backgroundColor,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(0),
+                        topRight: Radius.circular(0),
                       ),
+                    ),
 
-                      child: ListView(
-                        padding: EdgeInsets.zero,
-                        children: [
-                          5.verticalSpace,
-                          //todo story image
-                          Consumer<StoryProvider>(
-                            builder: (context, provider, child) {
-                              //* Safely access image list to avoid RangeError
-                              final hasImageForIndex =
-                                  provider.createdStoryImagePaths.length >
-                                          index &&
-                                      provider
-                                          .createdStoryImagePaths[index]
-                                          .isNotEmpty;
-                              if (hasImageForIndex &&
-                                  !provider.isCreateStoryImageLoading &&
-                                  !provider.isCreateStoryLoading) {
-                                provider.linkImageToStory(
-                                  image: provider.createdStoryImagePaths[index],
-                                );
-                              }
+                    child: ListView(
+                      padding: EdgeInsets.zero,
+                      children: [
+                        5.verticalSpace,
 
-                              if (!hasImageForIndex) {
-                                //* If we don't have an image for this page yet,
-                                //* just show a shimmer placeholder instead of crashing.
-                                return imageShimmer();
-                              }
-
-                              return CachedNetworkImage(
-                                height: 280,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                imageUrl: DioClient.baseUrl +
-                                    provider.createdStoryImagePaths[index],
-                                errorWidget: (context, url, error) =>
-                                    imageShimmer(),
-                                placeholder: (context, url) => imageShimmer(),
+                        //todo story image
+                        Consumer<StoryProvider>(
+                          builder: (context, provider, child) {
+                            //* Safely access image list to avoid RangeError
+                            final hasImageForIndex =
+                                provider.createdStoryImagePaths.length >
+                                    index &&
+                                provider
+                                    .createdStoryImagePaths[index]
+                                    .isNotEmpty;
+                            if (hasImageForIndex &&
+                                provider.isCreateImageFirstTime &&
+                                provider.story != null) {
+                              provider.linkImageToStory(
+                                image: provider.createdStoryImagePaths[0],
                               );
-                            },
+                            }
+                            if (!hasImageForIndex) {
+                              //* If we don't have an image for this page yet,
+                              //* just show a shimmer placeholder instead of crashing.
+                              return imageShimmer();
+                            }
 
-                            //     Image.network(
-                            //   provider.createdStoryImagePath,
-                            //   // widget.story != null &&
-                            //   //         widget.story!.images.isNotEmpty
-                            //   //     ? "http://167.172.45.71${widget.story!.images.first}"
-                            //   //     : "https://via.placeholder.com/350x150",
-                            //   width: double.infinity,
-                            //   height: 180.h,
-                            //   fit: BoxFit.cover,
-                            //   loadingBuilder:
-                            //       (context, child, loadingProgress) {
-                            //         if (loadingProgress == null) return child;
-                            //         return ShimmerLoading(
-                            //           width: double.infinity,
-                            //           height: 180.h,
-                            //           borderRadius: 0,
-                            //         );
-                            //       },
-                            //   errorBuilder: (context, error, stackTrace) {
-                            //     return Image.asset(
-                            //       AppAssets.pterodactylus,
-                            //       width: double.infinity,
-                            //       height: 180.h,
-                            //       fit: BoxFit.cover,
-                            //     );
-                            //   },
-                            // ),
-                          ),
-                          24.h.verticalSpace,
-                          //todo story content
-                          RichText(
-                            textAlign: TextAlign.justify,
-                            text: TextSpan(
-                              style: AppTextStyles.sfProDisplayRegular(
+                            return CachedNetworkImage(
+                              height: 280,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              imageUrl:
+                                  DioClient.baseUrl +
+                                  provider.createdStoryImagePaths[index],
+                              errorWidget: (context, url, error) =>
+                                  imageShimmer(),
+                              placeholder: (context, url) => imageShimmer(),
+                              imageBuilder: index == 0
+                                  ? (context, imageProvider) {
+                                      WidgetsBinding.instance
+                                          .addPostFrameCallback((_) {
+                                            _startCountdownTimer();
+                                          });
+                                      return Image(
+                                        image: imageProvider,
+                                        fit: BoxFit.cover,
+                                        height: 280,
+                                        width: double.infinity,
+                                      );
+                                    }
+                                  : null,
+                            );
+                          },
+                          //     Image.network(
+                          //   provider.createdStoryImagePath,
+                          //   // widget.story != null &&
+                          //   //         widget.story!.images.isNotEmpty
+                          //   //     ? "http://167.172.45.71${widget.story!.images.first}"
+                          //   //     : "https://via.placeholder.com/350x150",
+                          //   width: double.infinity,
+                          //   height: 180.h,
+                          //   fit: BoxFit.cover,
+                          //   loadingBuilder:
+                          //       (context, child, loadingProgress) {
+                          //         if (loadingProgress == null) return child;
+                          //         return ShimmerLoading(
+                          //           width: double.infinity,
+                          //           height: 180.h,
+                          //           borderRadius: 0,
+                          //         );
+                          //       },
+                          //   errorBuilder: (context, error, stackTrace) {
+                          //     return Image.asset(
+                          //       AppAssets.pterodactylus,
+                          //       width: double.infinity,
+                          //       height: 180.h,
+                          //       fit: BoxFit.cover,
+                          //     );
+                          //   },
+                          // ),
+                        ),
+                        24.h.verticalSpace,
+                        //todo story content
+                        RichText(
+                          textAlign: TextAlign.justify,
+                          text: TextSpan(
+                            style: AppTextStyles.sfProDisplayRegular(
+                              fontSize: 16.sp,
+                              color: AppColors.black.withValues(alpha: 0.8),
+                            ),
+
+                            children: _buildTextSpans(
+                              _pages[index],
+                              AppTextStyles.sfProDisplayRegular(
                                 fontSize: 16.sp,
                                 color: AppColors.black.withValues(alpha: 0.8),
-                              ),
-
-                              children: _buildTextSpans(
-                                _pages[index],
-                                AppTextStyles.sfProDisplayRegular(
-                                  fontSize: 16.sp,
-                                  color: AppColors.black.withValues(alpha: 0.8),
-                                ).copyWith(height: 1.37),
-                                AppTextStyles.sfProDisplayBold(
-                                  fontSize: 16.sp,
-                                  decoration: TextDecoration.underline,
-                                  color: AppColors.black,
-                                ).copyWith(height: 1.37),
-                              ),
-
+                              ).copyWith(height: 1.37),
+                              AppTextStyles.sfProDisplayBold(
+                                fontSize: 16.sp,
+                                decoration: TextDecoration.underline,
+                                color: AppColors.black,
+                              ).copyWith(height: 1.37),
                             ),
                           ),
-                        ],
-                      ),
-                    );
+                        ),
+                      ],
+                    ),
+                  );
                 },
               ),
             ),
@@ -343,27 +429,26 @@ class _ReadingScreenState extends State<ReadingScreen> {
             // ),
             // 4. Fixed Bottom Button (Only on last page)
             if (_currentIndex == _pages.length - 1)
-              Padding(
-                padding: EdgeInsets.only(bottom: 26),
+              SafeArea(
+                top: false,
 
                 // bottom: 30.h,
                 // left: 24.w,
                 // right: 24.w,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  spacing: 10.w,
+                  spacing: 8.w,
                   children: [
                     AppText(
                       text: "Completed Reading?",
                       style: AppTextStyles.sfProDisplaySemibold(
-                        fontSize: 12.sp,
+                        fontSize: 14.sp,
                         color: AppColors.black.withValues(alpha: 0.6),
                       ),
                     ),
 
                     AppFilledButton(
-                      fixedSize: Size(348.w, 42.h),
-                      backgroundColor: AppColors.yellowColor,
+                      backgroundColor: AppColors.primaryColor,
                       text: "Take Quiz",
                       onTap: () {
                         context.pushNamed(
@@ -373,18 +458,24 @@ class _ReadingScreenState extends State<ReadingScreen> {
                             "storyTitle": widget.story?.title ?? "",
                           },
                         );
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) => StartQuizScreen(
-                        //       quizzes: widget.story?.quiz ?? [],
-                        //       storyTitle: widget.story?.title ?? "",
-                        //     ),
-                        //   ),
-                        // );
                       },
                     ),
                   ],
+                ),
+              )
+            else
+              SafeArea(
+                top: false,
+                child: AppFilledButton(
+                  backgroundColor: AppColors.primaryColor,
+
+                  text: "Next",
+                  onTap: () {
+                    _pageController.nextPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  },
                 ),
               ),
           ],

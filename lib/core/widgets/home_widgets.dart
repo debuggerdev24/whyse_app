@@ -39,7 +39,7 @@ class HomeHeader extends StatelessWidget {
               SvgIcon(
                 AppAssets.thunder,
                 size: 20.w,
-                color: AppColors.yellowColor,
+                color: AppColors.primaryColor,
               ),
               10.w.horizontalSpace,
               AppText(
@@ -193,7 +193,7 @@ class CalendarStrip extends StatelessWidget {
                 child: Container(
                   height: 4.h,
                   decoration: BoxDecoration(
-                    color: AppColors.yellowColor,
+                    color: AppColors.primaryColor,
                     borderRadius: BorderRadius.circular(2.r),
                   ),
                 ),
@@ -264,7 +264,7 @@ class CalendarStrip extends StatelessWidget {
                       Container(
                         height: 3.w,
                         decoration: BoxDecoration(
-                          color: AppColors.yellowColor,
+                          color: AppColors.primaryColor,
                           borderRadius: BorderRadius.only(
                             bottomRight: Radius.circular(10.r),
                             bottomLeft: Radius.circular(10.r),
@@ -512,13 +512,13 @@ class YourPlanSection extends StatelessWidget {
                         SvgIcon(
                           AppAssets.thunder,
                           size: 16.w,
-                          color: AppColors.yellowColor,
+                          color: AppColors.primaryColor,
                         ),
                         4.w.horizontalSpace,
                         AppText(
                           text: "3",
                           style: AppTextStyles.sfProDisplayBold(
-                            color: AppColors.yellowColor,
+                            color: AppColors.primaryColor,
                             fontSize: 16.sp,
                           ),
                         ),
@@ -689,13 +689,13 @@ class BookCard extends StatelessWidget {
                     SvgIcon(
                       AppAssets.thunder,
                       size: 16.w,
-                      color: AppColors.yellowColor,
+                      color: AppColors.primaryColor,
                     ),
                     4.w.horizontalSpace,
                     AppText(
                       text: "3",
                       style: AppTextStyles.sfProDisplayBold(
-                        color: AppColors.yellowColor,
+                        color: AppColors.primaryColor,
                         fontSize: 16.sp,
                       ),
                     ),
@@ -844,13 +844,13 @@ class PracticeCard extends StatelessWidget {
                   SvgIcon(
                     AppAssets.thunder,
                     size: 16.w,
-                    color: AppColors.yellowColor,
+                    color: AppColors.primaryColor,
                   ),
                   4.w.horizontalSpace,
                   AppText(
                     text: "3",
                     style: AppTextStyles.sfProDisplayBold(
-                      color: AppColors.yellowColor,
+                      color: AppColors.primaryColor,
                       fontSize: 16.sp,
                     ),
                   ),

@@ -102,7 +102,7 @@ class _ParentEmailScreenState extends State<ParentEmailScreen> {
                             }
                           },
                           text: "Send Request",
-                          backgroundColor: AppColors.yellowColor,
+                          backgroundColor: AppColors.primaryColor,
                         ),
 
                         10.h.verticalSpace,

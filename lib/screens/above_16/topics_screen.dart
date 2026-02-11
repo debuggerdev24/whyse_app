@@ -231,7 +231,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
 
                       AppFilledButton(
                         text: "Next",
-                        backgroundColor: AppColors.yellowColor,
+                        backgroundColor: AppColors.primaryColor,
                         margin: EdgeInsets.only(bottom: 8.h, top: 12.h),
 
                         onTap: () async {

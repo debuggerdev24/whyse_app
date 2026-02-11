@@ -42,7 +42,7 @@ class _StoryInterestsScreenState extends State<StoryInterestsScreen> {
         child: Consumer<StoryProvider>(
           builder: (context, provider, child) {
             return Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+              padding: EdgeInsets.fromLTRB(25.w, 10.w, 25.w, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -124,7 +124,8 @@ class _StoryInterestsScreenState extends State<StoryInterestsScreen> {
 
                   AppFilledButton(
                     text: "Next",
-                    backgroundColor: AppColors.yellowColor,
+                    backgroundColor: AppColors.primaryColor,
+                    margin: EdgeInsetsGeometry.only(top: 4.3.w),
                     onTap: () {
                       if (provider.selectedInterestIds.isEmpty &&
                           provider.selectedCustomInterests.isEmpty) {

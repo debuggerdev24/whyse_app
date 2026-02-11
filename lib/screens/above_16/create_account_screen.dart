@@ -161,7 +161,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                   width: 1.5,
                                 ),
                                 color: provider.acceptedTerms
-                                    ? AppColors.yellowColor
+                                    ? AppColors.primaryColor
                                     : Colors.transparent,
                               ),
                               child: provider.acceptedTerms
@@ -235,7 +235,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         padding: EdgeInsets.only(bottom: 10.h),
                         child: AppFilledButton(
                           text: "Next", //provider.isEmailSent ? "Verify" :
-                          backgroundColor: AppColors.yellowColor,
+                          backgroundColor: AppColors.primaryColor,
                           // onTap: () async {
                           //   if (provider.isEmailSent) {
                           //     final success = await provider.verifyEmail(

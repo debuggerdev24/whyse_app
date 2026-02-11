@@ -19,6 +19,8 @@ class StoryProvider extends ChangeNotifier {
       customTopicCtr = TextEditingController(),
       customReadingDurationCtr = TextEditingController();
   int _lessonDuration = 0;
+  int get lessonDuration => _lessonDuration;
+
   String createdStoryId = ""; //, createdStoryImagePath = "";
   List<String> createdStoryImagePaths = [];
   Map<String, dynamic> dataToSendCreateStory = {};
@@ -264,8 +266,7 @@ class StoryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool isCreateStoryLoading = false;
-
+  bool isCreateStoryLoading = false,isCreateImageFirstTime = true;
   //todo create story
   Future<void> createStory({
     required Function(String error) onCreateStoryFailed,
@@ -332,6 +333,12 @@ class StoryProvider extends ChangeNotifier {
       dataToSendCreateStory["goalIds"] = selectedGoalIds.toList();
     }
 
+    //* calling create story image API for first page
+        createdStoryImagePaths.clear();
+
+    isCreateImageFirstTime = true;
+    createStoryImage(onFailed: onCreateImageFailed);
+    
     final response = await HomeApiService.instance.createStory(
       data: dataToSendCreateStory,
     );
@@ -341,16 +348,16 @@ class StoryProvider extends ChangeNotifier {
         onCreateStoryFailed.call(l.errorMsg);
       },
       (r) {
-        createdStoryId = r["data"]["id"];
         story = Story.fromJson(r["data"]);
+        createdStoryId = story!.id;//r["data"]["id"]
+        notifyListeners();
+        
+        //storyId
         storyPageCount = story!.pages!.length;
-
-        // Start fresh and request one image per page
-        createdStoryImagePaths.clear();
-        for (int i = 0; i < storyPageCount; i++) {
+        //* ---------------- Start fresh and request one image per page ----------------
+        for (int i = 1; i < storyPageCount; i++) {
           createStoryImage(onFailed: onCreateImageFailed);
         }
-
         context.goNamed(AppRoutes.readingScreen.name, extra: story);
       },
     );
@@ -365,9 +372,13 @@ class StoryProvider extends ChangeNotifier {
   Future<void> createStoryImage({
     required Function(String error) onFailed,
   }) async {
+    
     isCreateStoryImageLoading = true;
     notifyListeners();
 
+    if(story != null){
+      dataToSendCreateStory["storyId"] = story!.id;
+    }
     final response = await HomeApiService.instance.createStoryImage(
       data: dataToSendCreateStory,
     );
@@ -378,12 +389,9 @@ class StoryProvider extends ChangeNotifier {
       },
       (r) async {
         createdStoryImagePaths.add(r["data"]["imagePath"]);
-        Logger.info("createdStoryImagePath${r["data"]["imagePath"]}");
-
-        // for (int i = 0; i < storyPageCount; i++) {
-        // if (createdStoryImagePaths.length == storyPageCount) {
-        //   return;
-        // }
+        Logger.info("createdStoryImagePath : ${r["data"]["imagePath"]}");
+        Logger.info("createdStoryImagePaths length: ${createdStoryImagePaths.length}");
+        Logger.info("storyPageCount: $storyPageCount");
 
         clearStoryFields();
         isCreateStoryImageLoading = false;
@@ -397,7 +405,7 @@ class StoryProvider extends ChangeNotifier {
     selectedInterestIds.clear();
     selectedTopicId = "";
     customTopicCtr.clear();
-    _lessonDuration = 0;
+    // _lessonDuration = 0;
     _selectedLanguage = "";
     _selectedTextType = "";
     _selectedAgeRange = "";
@@ -422,6 +430,8 @@ class StoryProvider extends ChangeNotifier {
 
     response.fold((l) {
       Logger.error(l.errorMsg);
-    }, (r) {});
+    }, (r) {
+      isCreateImageFirstTime = false;
+    });
   }
 }

@@ -39,12 +39,9 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
   Widget build(BuildContext context) {
     return Consumer<QuizProvider>(
       builder: (context, quiz, _) {
-        final currentQuestion =
-        quiz.questions[quiz.currentQuestionIndex];
-        final options =
-        currentQuestion['options'] as List<String>;
-        final correctIndex =
-        currentQuestion['correctIndex'] as int;
+        final currentQuestion = quiz.questions[quiz.currentQuestionIndex];
+        final options = currentQuestion['options'] as List<String>;
+        final correctIndex = currentQuestion['correctIndex'] as int;
 
         return PopScope(
           canPop: false,
@@ -77,33 +74,31 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                           child: Padding(
                             padding: EdgeInsets.symmetric(horizontal: 4.w),
                             child: Row(
-                              children: List.generate(
-                                quiz.questions.length,
-                                    (index) {
-                                  Color color;
-                                  if (index < quiz.currentQuestionIndex) {
-                                    color = AppColors.yellowColor;
-                                  } else if (index ==
-                                      quiz.currentQuestionIndex) {
-                                    color = AppColors.yellowColor;
-                                  } else {
-                                    color = Colors.grey.withValues(alpha: 0.2);
-                                  }
+                              children: List.generate(quiz.questions.length, (
+                                index,
+                              ) {
+                                Color color;
+                                if (index < quiz.currentQuestionIndex) {
+                                  color = AppColors.primaryColor;
+                                } else if (index == quiz.currentQuestionIndex) {
+                                  color = AppColors.primaryColor;
+                                } else {
+                                  color = Colors.grey.withValues(alpha: 0.2);
+                                }
 
-                                  return Expanded(
-                                    child: Container(
-                                      margin:
-                                      EdgeInsets.symmetric(horizontal: 4.w),
-                                      height: 4.h,
-                                      decoration: BoxDecoration(
-                                        color: color,
-                                        borderRadius:
-                                        BorderRadius.circular(2),
-                                      ),
+                                return Expanded(
+                                  child: Container(
+                                    margin: EdgeInsets.symmetric(
+                                      horizontal: 4.w,
                                     ),
-                                  );
-                                },
-                              ),
+                                    height: 4.h,
+                                    decoration: BoxDecoration(
+                                      color: color,
+                                      borderRadius: BorderRadius.circular(2),
+                                    ),
+                                  ),
+                                );
+                              }),
                             ),
                           ),
                         ),
@@ -126,7 +121,7 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                     /// Options
                     ...List.generate(
                       options.length,
-                          (index) => OptionCard(
+                      (index) => OptionCard(
                         text: options[index],
                         isSelected: quiz.selectedOptionIndex == index,
                         isCorrect: index == correctIndex,
@@ -142,7 +137,7 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                     Center(
                       child: AppText(
                         text:
-                        "${quiz.currentQuestionIndex + 1} / ${quiz.questions.length}",
+                            "${quiz.currentQuestionIndex + 1} / ${quiz.questions.length}",
                         style: AppTextStyles.sfProDisplayRegular(
                           fontSize: 14.sp,
                           color: Colors.grey,
@@ -155,36 +150,35 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                     /// Button
                     quiz.isChecked
                         ? AppFilledButton(
-                      text: "Continue",
-                      onTap: () {
-                        if (quiz.currentQuestionIndex <
-                            quiz.questions.length - 1) {
-                          quiz.continueQuiz();
-                        } else {
-                          context.pushNamed(
-                            AppRoutes.quizCompletedScreen.name,
-                            extra: {
-                              'score': quiz.score,
-                              'total': quiz.questions.length,
-                              'storyTitle': widget.storyTitle,
+                            text: "Continue",
+                            onTap: () {
+                              if (quiz.currentQuestionIndex <
+                                  quiz.questions.length - 1) {
+                                quiz.continueQuiz();
+                              } else {
+                                context.pushNamed(
+                                  AppRoutes.quizCompletedScreen.name,
+                                  extra: {
+                                    'score': quiz.score,
+                                    'total': quiz.questions.length,
+                                    'storyTitle': widget.storyTitle,
+                                  },
+                                );
+                              }
                             },
-                          );
-                        }
-                      },
-                      backgroundColor: Color(0xFF00796B),
-                      fixedSize: Size(348.w, 42.h),
-                    )
+                            backgroundColor: Color(0xFF00796B),
+                            fixedSize: Size(348.w, 42.h),
+                          )
                         : AppFilledButton(
-                      text: "Check",
-                      onTap: quiz.selectedOptionIndex != null
-                          ? quiz.checkAnswer
-                          : () {},
-                      backgroundColor:
-                      quiz.selectedOptionIndex != null
-                          ? AppColors.black
-                          : Colors.grey,
-                      fixedSize: Size(348.w, 42.h),
-                    ),
+                            text: "Check",
+                            onTap: quiz.selectedOptionIndex != null
+                                ? quiz.checkAnswer
+                                : () {},
+                            backgroundColor: quiz.selectedOptionIndex != null
+                                ? AppColors.black
+                                : Colors.grey,
+                            fixedSize: Size(348.w, 42.h),
+                          ),
 
                     24.h.verticalSpace,
                   ],
@@ -196,59 +190,56 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
       },
     );
   }
-
-  void showLeaveQuizConfirmation({required BuildContext context}) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return ZoomIn(
-          child: AlertDialog(
-            backgroundColor: AppColors.backgroundColor,
-            title: Text(
-              "Are you sure you want to quit this quizzes?",
-              style: AppTextStyles.textStyle20Regular,
-            ),
-            actions: [
-              myActionButtonTheme(
-                onPressed: () {
-                  context.pop(dialogContext);
-                  context.goNamed(AppRoutes.homeScreen.name);
-                  context.read<StoryProvider>().clareStoryData();
-                },
-                title: "Yes",
-              ),
-              myActionButtonTheme(
-                onPressed: () {
-                  context.pop();
-                },
-                title: "Cancel",
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget myActionButtonTheme({
-    required VoidCallback onPressed,
-    required String title,
-  }) {
-    return TextButton(
-      onPressed: onPressed,
-      child: Text(
-        title,
-        style: AppTextStyles.sfProDisplayRegular(
-          color: title == "Yes"
-              ? AppColors.redColor
-              : AppColors.black,
-          fontSize: 17.sp,
-        ),
-      ),
-    );
-  }
 }
 
+void showLeaveQuizConfirmation({required BuildContext context}) {
+  showDialog(
+    context: context,
+    builder: (dialogContext) {
+      return ZoomIn(
+        child: AlertDialog(
+          backgroundColor: AppColors.backgroundColor,
+          title: Text(
+            "Are you sure you want to quit this quizzes?",
+            style: AppTextStyles.textStyle20Regular,
+          ),
+          actions: [
+            myActionButtonTheme(
+              onPressed: () {
+                context.pop(dialogContext);
+                context.goNamed(AppRoutes.homeScreen.name);
+                context.read<StoryProvider>().clareStoryData();
+              },
+              title: "Yes",
+            ),
+            myActionButtonTheme(
+              onPressed: () {
+                context.pop();
+              },
+              title: "Cancel",
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+Widget myActionButtonTheme({
+  required VoidCallback onPressed,
+  required String title,
+}) {
+  return TextButton(
+    onPressed: onPressed,
+    child: Text(
+      title,
+      style: AppTextStyles.sfProDisplayRegular(
+        color: title == "Yes" ? AppColors.redColor : AppColors.black,
+        fontSize: 17.sp,
+      ),
+    ),
+  );
+}
 
 // import 'package:animate_do/animate_do.dart';
 // import 'package:flutter/material.dart';
