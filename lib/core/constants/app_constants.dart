@@ -1,11 +1,18 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class AppConstants {
   AppConstants._();
 
-  static const String serverClientId =
-      "1072520967140-7566tlns04ge757cqiailkl8j405a9am.apps.googleusercontent.com";
-  static const String clientIdIos =
-      "1072520967140-6hu941fhtps4i2sjkl1gf31l395j2ia2.apps.googleusercontent.com";
-  // "928198076650-04u77ekdg426kkjqq2rusho0k3vcthr0.apps.googleusercontent.com";
+  static String get serverClientId => dotenv.env['SERVER_CLIENT_ID']!;
+  // ??"1072520967140-7566tlns04ge757cqiailkl8j405a9am.apps.googleusercontent.com";
+  static String get clientIdIos => dotenv.env['CLIENT_ID_IOS']!;
+  // ??
+  // "1072520967140-6hu941fhtps4i2sjkl1gf31l395j2ia2.apps.googleusercontent.com";
+  //*===============================
+  // static const String serverClientId =
+  //     "1072520967140-7566tlns04ge757cqiailkl8j405a9am.apps.googleusercontent.com";
+  // static const String clientIdIos =
+  //     "1072520967140-6hu941fhtps4i2sjkl1gf31l395j2ia2.apps.googleusercontent.com";
   static const String domain = "whyse.com",
       parentConsentPath = "/verify-parent-consent",
       forgotPasswordPath = "/verify-reset-password",
@@ -227,6 +234,5 @@ class AppConstants {
     "Yemen",
     "Zambia",
     "Zimbabwe",
- 
   ];
 }

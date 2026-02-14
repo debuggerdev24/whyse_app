@@ -55,29 +55,35 @@ class _GenerateReadingScreenState extends State<GenerateReadingScreen> {
   String _getIconForTopic(String title) {
     String lower = title.toLowerCase();
 
-    if (lower.contains("space") || lower.contains("planet"))
+    if (lower.contains("space") || lower.contains("planet")) {
       return AppAssets.space;
+    }
     if (lower.contains("invention") ||
         lower.contains("tech") ||
-        lower.contains("science"))
+        lower.contains("science")) {
       return AppAssets.inventions;
+    }
     if (lower.contains("haunted") ||
         lower.contains("ghost") ||
-        lower.contains("horror"))
+        lower.contains("horror")) {
       return AppAssets.hauntedhouse;
+    }
     if (lower.contains("mystery") ||
         lower.contains("detective") ||
-        lower.contains("clue"))
+        lower.contains("clue")) {
       return AppAssets.detativeclue;
+    }
     if (lower.contains("wizard") ||
         lower.contains("magic") ||
-        lower.contains("fantasy"))
+        lower.contains("fantasy")) {
       return AppAssets.wizard;
+    }
     if (lower.contains("dragon") ||
         lower.contains("animal") ||
         lower.contains("creature") ||
-        lower.contains("nature"))
+        lower.contains("nature")) {
       return AppAssets.dargon;
+    }
     List<String> fallbacks = [
       AppAssets.space,
       AppAssets.inventions,
@@ -89,7 +95,7 @@ class _GenerateReadingScreenState extends State<GenerateReadingScreen> {
     return fallbacks[title.hashCode.abs() % fallbacks.length];
   }
 
-  String _selectedSkill = "";
+  final String _selectedSkill = "";
 
   @override
   Widget build(BuildContext context) {

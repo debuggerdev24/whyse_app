@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:redstreakapp/core/constants/shared_pref.dart';
 
@@ -8,8 +9,11 @@ import '../core/helper/log_helper.dart';
 class DioClient {
   DioClient._();
   static final _instance = DioClient._();
-  static const baseUrl = "https://whyse.com"; //"http://167.172.45.71";
-  static const apiBaseUrl = "$baseUrl/api/v1";
+  // static const baseUrl = "https://whyse.com"; //"http://167.172.45.71";
+  // static const apiBaseUrl = "$baseUrl/api/v1";
+  static String get baseUrl =>
+      dotenv.env['BASE_URL']!; //?? 'https://whyse.com';
+  static String get apiBaseUrl => '$baseUrl/api/v1';
   static DioClient get instance => _instance;
   late Dio _dio;
 

@@ -67,7 +67,7 @@ class PlanCard extends StatelessWidget {
                       ),
 
                       10.h.verticalSpace,
-                      ...features.map((e) => _bullet(e)).toList(),
+                      ...features.map((e) => _bullet(e)),
                       Align(
                         alignment: Alignment.bottomRight,
                         child: Padding(

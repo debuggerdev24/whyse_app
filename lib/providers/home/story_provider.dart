@@ -266,7 +266,7 @@ class StoryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool isCreateStoryLoading = false,isCreateImageFirstTime = true;
+  bool isCreateStoryLoading = false, isCreateImageFirstTime = true;
   //todo create story
   Future<void> createStory({
     required Function(String error) onCreateStoryFailed,
@@ -334,11 +334,10 @@ class StoryProvider extends ChangeNotifier {
     }
 
     //* calling create story image API for first page
-        createdStoryImagePaths.clear();
-
+    createdStoryImagePaths.clear();
     isCreateImageFirstTime = true;
     createStoryImage(onFailed: onCreateImageFailed);
-    
+
     final response = await HomeApiService.instance.createStory(
       data: dataToSendCreateStory,
     );
@@ -349,9 +348,9 @@ class StoryProvider extends ChangeNotifier {
       },
       (r) {
         story = Story.fromJson(r["data"]);
-        createdStoryId = story!.id;//r["data"]["id"]
+        createdStoryId = story!.id; //r["data"]["id"]
         notifyListeners();
-        
+
         //storyId
         storyPageCount = story!.pages!.length;
         //* ---------------- Start fresh and request one image per page ----------------
@@ -372,11 +371,10 @@ class StoryProvider extends ChangeNotifier {
   Future<void> createStoryImage({
     required Function(String error) onFailed,
   }) async {
-    
     isCreateStoryImageLoading = true;
     notifyListeners();
 
-    if(story != null){
+    if (story != null) {
       dataToSendCreateStory["storyId"] = story!.id;
     }
     final response = await HomeApiService.instance.createStoryImage(
@@ -388,9 +386,11 @@ class StoryProvider extends ChangeNotifier {
         onFailed.call(l.errorMsg);
       },
       (r) async {
-        createdStoryImagePaths.add(r["data"]["imagePath"]);
+        createdStoryImagePaths.add(r["data"]["imagePath"]);//imagePaths
         Logger.info("createdStoryImagePath : ${r["data"]["imagePath"]}");
-        Logger.info("createdStoryImagePaths length: ${createdStoryImagePaths.length}");
+        Logger.info(
+          "createdStoryImagePaths length: ${createdStoryImagePaths.length}",
+        );
         Logger.info("storyPageCount: $storyPageCount");
 
         clearStoryFields();
@@ -428,10 +428,13 @@ class StoryProvider extends ChangeNotifier {
       },
     );
 
-    response.fold((l) {
-      Logger.error(l.errorMsg);
-    }, (r) {
-      isCreateImageFirstTime = false;
-    });
+    response.fold(
+      (l) {
+        Logger.error(l.errorMsg);
+      },
+      (r) {
+        isCreateImageFirstTime = false;
+      },
+    );
   }
 }

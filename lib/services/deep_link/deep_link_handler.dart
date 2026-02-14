@@ -54,7 +54,7 @@ class DeepLinkHandler {
 
     try {
       Logger.info(
-        "URI -> ${uri}\n"
+        "URI -> $uri\n"
         "URI Data-> ${uri.data}\n"
         "URI query-> ${uri.query}\n"
         "URI queryParameters-> ${uri.queryParameters}\n"

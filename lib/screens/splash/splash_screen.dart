@@ -90,7 +90,7 @@ class _SplashScreenState extends State<SplashScreen>
       // context.goNamed(AppRoutes.loginScreen.name);
 
       if (step != null) {
-        authProvider.decideFirstScreen(context: context, step: step!);
+        authProvider.decideFirstScreen(context: context, step: step);
         return;
       } else {
         context.goNamed(AppRoutes.loginScreen.name);
