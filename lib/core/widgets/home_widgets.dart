@@ -364,7 +364,9 @@ class YourPlanSection extends StatelessWidget {
                   category: story.readingTopic ?? "General",
                   title: story.title,
                   subtitle: "Read for ${story.lessonDuration ?? 10} mins",
-                  imageUrl: "${DioClient.baseUrl}${story.image}",
+                  imageUrl: story.image != null && story.image!.isNotEmpty
+                      ? DioClient.baseUrl + story.image!
+                      : "",
                   reward: "3",
                   onTap: () {
                     context.pushNamed(
@@ -495,16 +497,20 @@ class YourPlanSection extends StatelessWidget {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: CachedNetworkImage(
-                        imageUrl: (recentStory.image != null)
-                            ? (DioClient.baseUrl + recentStory.image!)
-                            : "https://unsplash.com/s/photos/white-paper",
-                        width: 100.w,
-                        height: 96.w,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => _storyImageShimmer(),
-                        errorWidget: (c, e, s) => _storyImageShimmer(),
-                      ),
+                      child: recentStory.image != null && recentStory.image!.isNotEmpty
+                          ? CachedNetworkImage(
+                              imageUrl: DioClient.baseUrl + recentStory.image!,
+                              width: 100.w,
+                              height: 96.w,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => _storyImageShimmer(),
+                              errorWidget: (c, e, s) => _storyImageShimmer(),
+                            )
+                          : SizedBox(
+                              width: 100.w,
+                              height: 96.w,
+                              child: _storyImageShimmer(),
+                            ),
                     ),
                     12.h.verticalSpace,
                     Row(
@@ -674,14 +680,20 @@ class BookCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    width: 100.w,
-                    height: 96.w,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => _storyImageShimmer(),
-                    errorWidget: (c, e, s) => _storyImageShimmer(),
-                  ),
+                  child: imageUrl.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: imageUrl,
+                          width: 100.w,
+                          height: 96.w,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => _storyImageShimmer(),
+                          errorWidget: (c, e, s) => _storyImageShimmer(),
+                        )
+                      : SizedBox(
+                          width: 100.w,
+                          height: 96.w,
+                          child: _storyImageShimmer(),
+                        ),
                 ),
                 20.h.verticalSpace,
                 Row(

@@ -10,17 +10,23 @@ class Logger {
 
   /// Logs an info message in green
   static void info(String message, {String tag = 'INFO'}) {
+    if(kDebugMode) {
     _log('$_green[$tag] $message$_reset');
+    }
   }
 
   /// Logs a warning message in yellow
   static void warning(String message, {String tag = 'WARNING'}) {
-    _log('$_yellow[$tag] $message$_reset');
+    if(kDebugMode) {
+      _log('$_yellow[$tag] $message$_reset');
+    }
   }
 
   /// Logs an error message in red
   static void error(String message, {String tag = 'ERROR'}) {
-    _log('$_red[$tag] $message$_reset');
+    if(kDebugMode) {
+      _log('$_red[$tag] $message$_reset');
+    }
   }
 
   /// Logs a debug message in blue (only in debug mode)
@@ -33,6 +39,8 @@ class Logger {
   /// Prints to console (safe wrapper)
   static void _log(String formattedMessage) {
     // ignore: avoid_print
-    print(formattedMessage);
+    if(kDebugMode) {
+      print(formattedMessage);
+    }
   }
 }

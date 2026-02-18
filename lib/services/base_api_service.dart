@@ -22,8 +22,8 @@ class DioClient {
       BaseOptions(
         baseUrl: apiBaseUrl,
         connectTimeout: const Duration(seconds: 60),
-        receiveTimeout: const Duration(seconds: 120),
-        sendTimeout: const Duration(seconds: 60),
+        receiveTimeout: const Duration(seconds: 180),
+        sendTimeout: const Duration(seconds: 120),
         headers: {
           "Content-Type": "application/json",
           if (LocalStorageService.instance.getAuthToken != null)

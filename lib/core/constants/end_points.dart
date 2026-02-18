@@ -27,8 +27,9 @@ class EndPoints {
   static const getAllStories = "/story/mobile";
   static const forgotPassword = "/mobile/auth/forgot-password";
   static const resetPassword = "/mobile/auth/reset-password";
-  static const createStory = "/story/generateMobileStory";
-  static const createStoryImage = "/story/generateMobileStoryImage";
+  static const createStoryIdea = "/story/ideas/generate-mobile";
+  static const createStory = "/story/generate-from-idea";
+  static const createStoryImage = "/story/generate-story-image";
   static const verifyForgotPassMail = "/mobile/auth/verify-recovery";
   static const verifyParentConsent = "/mobile/auth/parent-consent";
   static const refreshToken = "/mobile/auth/refresh-token";

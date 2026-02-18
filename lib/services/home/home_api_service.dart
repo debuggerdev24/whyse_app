@@ -30,6 +30,15 @@ class HomeApiService {
     );
   }
 
+  Future<Either<ApiException, Map<String, dynamic>>> createStoryIdea({
+    required Map<String, dynamic> data,
+  }) async {
+    return await BaseApiHelper.instance.post(
+      EndPoints.createStoryIdea,
+      data: data,
+    );
+  }
+
   Future<Either<ApiException, Map<String, dynamic>>> createStory({
     required Map<String, dynamic> data,
   }) async {

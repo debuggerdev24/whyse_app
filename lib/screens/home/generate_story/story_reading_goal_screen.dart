@@ -170,6 +170,15 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                               // setState(() => _selectedLanguage = value!);
                             },
                           ),
+                          20.h.verticalSpace,
+                          CustomDropdownField(
+                            label: "Number of Stories",
+                            hint: "Select number of stories",
+                            items: ["1", "2", "3", "4", "5"],
+                            onChanged: (value) {
+                              provider.setNoOfStories = value!;
+                            },
+                          ),
 
                           AppFilledButton(
                             margin: EdgeInsets.only(top: 20.h),

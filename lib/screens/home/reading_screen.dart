@@ -111,10 +111,10 @@ class _ReadingScreenState extends State<ReadingScreen> {
     Logger.info("Pages: ${_pages.length}");
 
     return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        showLeaveStoryConfirmation(context: context);
-      },
+      // canPop: false,
+      // onPopInvokedWithResult: (didPop, result) {
+      //   showLeaveStoryConfirmation(context: context);
+      // },
       child: AppLayout(
         body: Column(
           children: [
@@ -316,22 +316,25 @@ class _ReadingScreenState extends State<ReadingScreen> {
                         Consumer<StoryProvider>(
                           builder: (context, provider, child) {
                             //* Safely access image list to avoid RangeError
-                            final hasImageForIndex =
-                                provider.createdStoryImagePaths.length >
-                                    index &&
-                                provider
-                                    .createdStoryImagePaths[index]
-                                    .isNotEmpty;
-                            if (hasImageForIndex &&
-                                provider.isCreateImageFirstTime &&
-                                provider.story != null) {
-                              provider.linkImageToStory(
-                                image: provider.createdStoryImagePaths[0],
-                              );
+                            // final hasImageForIndex =
+                            //     provider.createdStoryImagePaths.length >
+                            //         index &&
+                            //     provider
+                            //         .createdStoryImagePaths[index]
+                            //         .isNotEmpty;
+                            if (provider.createdStoryImagePaths.isEmpty) {
+                              return imageShimmer();
                             }
-                            if (!hasImageForIndex) {
-                              //* If we don't have an image for this page yet,
-                              //* just show a shimmer placeholder instead of crashing.
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              provider.linkImageToStory(
+                                image: provider.createdStoryImagePaths.first,
+                              );
+                            });
+                            final imageIndex = index >= provider.createdStoryImagePaths.length
+                                ? provider.createdStoryImagePaths.length - 1
+                                : index;
+                            final imagePath = provider.createdStoryImagePaths[imageIndex];
+                            if (imagePath.isEmpty) {
                               return imageShimmer();
                             }
 
@@ -339,9 +342,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
                               height: 280,
                               width: double.infinity,
                               fit: BoxFit.cover,
-                              imageUrl:
-                                  DioClient.baseUrl +
-                                  provider.createdStoryImagePaths[index],
+                              imageUrl: DioClient.baseUrl + imagePath,
                               errorWidget: (context, url, error) =>
                                   imageShimmer(),
                               placeholder: (context, url) => imageShimmer(),
@@ -448,6 +449,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
                     ),
 
                     AppFilledButton(
+                      margin: EdgeInsets.only(bottom: 20.w),
                       backgroundColor: AppColors.primaryColor,
                       text: "Take Quiz",
                       onTap: () {
@@ -464,19 +466,17 @@ class _ReadingScreenState extends State<ReadingScreen> {
                 ),
               )
             else
-              SafeArea(
-                top: false,
-                child: AppFilledButton(
-                  backgroundColor: AppColors.primaryColor,
-
-                  text: "Next",
-                  onTap: () {
-                    _pageController.nextPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  },
-                ),
+              AppFilledButton(
+                margin: EdgeInsets.only(bottom: 20.w),
+                backgroundColor: AppColors.primaryColor,
+              
+                text: "See Next Page",
+                onTap: () {
+                  _pageController.nextPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
               ),
           ],
         ),

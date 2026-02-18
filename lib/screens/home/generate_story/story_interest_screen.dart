@@ -124,8 +124,9 @@ class _StoryInterestsScreenState extends State<StoryInterestsScreen> {
 
                   AppFilledButton(
                     text: "Next",
+                    margin: EdgeInsets.only(bottom: 18.w,top: 4.3.w),
                     backgroundColor: AppColors.primaryColor,
-                    margin: EdgeInsetsGeometry.only(top: 4.3.w),
+                    
                     onTap: () {
                       if (provider.selectedInterestIds.isEmpty &&
                           provider.selectedCustomInterests.isEmpty) {

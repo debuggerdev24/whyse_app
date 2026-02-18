@@ -21,7 +21,7 @@ import 'package:redstreakapp/screens/home/generate_reading_screen.dart';
 import 'package:redstreakapp/screens/home/generate_story/custom_story_topic_screen.dart';
 import 'package:redstreakapp/screens/home/generate_story/story_goals_screen.dart';
 import 'package:redstreakapp/screens/home/generate_story/story_reading_goal_screen.dart';
-import 'package:redstreakapp/screens/home/generate_story/story_toics_screen.dart';
+import 'package:redstreakapp/screens/home/generate_story/story_topics_screen.dart';
 import 'package:redstreakapp/screens/home/home_screen.dart';
 import 'package:redstreakapp/screens/home/quiz_completed_screen.dart';
 import 'package:redstreakapp/screens/home/quiz_question_screen.dart';

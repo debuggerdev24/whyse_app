@@ -213,10 +213,11 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                     ),
 
                   //todo next button
+
                   AppFilledButton(
                     text: "Next",
                     backgroundColor: AppColors.primaryColor,
-                    margin: EdgeInsetsGeometry.only(top: 4.3.w),
+                    margin: EdgeInsetsGeometry.only(top: 4.3.w,bottom: 18.w),
                     onTap: () async {
                       if (provider.selectedTopicId.isEmpty) {
                         AppToast.error(
@@ -226,9 +227,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                         return;
                       }
                       provider.setSelectedReadingDuration = "5 mins";
-
-                      context.pushNamed(AppRoutes.storyReadingGoalScreen.name);
-
+context.pushNamed(AppRoutes.storyReadingGoalScreen.name);
                       // final success = await provider.saveTopics(
                       //   context,
                       //   topicIds: selectedTopicIds.toList(),
