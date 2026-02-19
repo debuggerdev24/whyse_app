@@ -12,9 +12,9 @@ import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
-import '../../models/home/story_models/story_model.dart';
-import '../../providers/home/quiz_provider.dart';
-import '../../providers/home/story_provider.dart';
+import '../../../models/home/story_models/story_model.dart';
+import '../../../providers/home/quiz_provider.dart';
+import '../../../providers/home/story_provider.dart';
 
 class QuizQuestionScreen extends StatefulWidget {
   final List<Quiz>? quizzes;
@@ -207,8 +207,13 @@ void showLeaveQuizConfirmation({required BuildContext context}) {
             myActionButtonTheme(
               onPressed: () {
                 context.pop(dialogContext);
-                context.goNamed(AppRoutes.homeScreen.name);
-                context.read<StoryProvider>().clareStoryData();
+                final prov = context.read<StoryProvider>();
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  prov.clareStoryData();
+                  if (context.mounted) {
+                    context.goNamed(AppRoutes.homeScreen.name);
+                  }
+                });
               },
               title: "Yes",
             ),

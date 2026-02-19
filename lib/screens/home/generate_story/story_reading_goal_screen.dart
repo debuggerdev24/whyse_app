@@ -193,7 +193,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                                       AppToast.info(
                                         context: context,
                                         message: "It can take few seconds",
-                                        durationSecond: 4,
+                                        durationSecond: 3,
                                       );
                                     });
                                   },

@@ -160,13 +160,12 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                               children: [
                                 //todo  API Topics
                                 ...provider.topicsList.map((topic) {
-                                  final id = topic.id;
                                   final title = topic.title;
                                   return TopicCard(
                                     label: title,
                                     assetPath: _getIconForTopic(title),
-                                    isSelected: provider.selectedTopicId == id,
-                                    onTap: () => provider.toggleApiTopic(id),
+                                    isSelected: provider.selectedTopic == title,
+                                    onTap: () => provider.toggleApiTopic(title),
                                   );
                                 }),
                               ],
@@ -187,16 +186,14 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                         children: [
                           //todo  API Topics
                           ...provider.searchedTopicsList.map((topic) {
-                            final id = topic.id;
                             final title = topic.title;
                             return TopicCard(
                               label: title,
                               assetPath: _getIconForTopic(title),
-                              isSelected: provider.selectedTopicId == id,
-                              onTap: () => provider.toggleApiTopic(id),
+                              isSelected: provider.selectedTopic == title,
+                              onTap: () => provider.toggleApiTopic(title),
                             );
                           }),
-
                         ],
                       ),
                     )
@@ -213,13 +210,12 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                     ),
 
                   //todo next button
-
                   AppFilledButton(
                     text: "Next",
                     backgroundColor: AppColors.primaryColor,
-                    margin: EdgeInsetsGeometry.only(top: 4.3.w,bottom: 18.w),
+                    margin: EdgeInsetsGeometry.only(top: 4.3.w, bottom: 18.w),
                     onTap: () async {
-                      if (provider.selectedTopicId.isEmpty) {
+                      if (provider.selectedTopic.isEmpty) {
                         AppToast.error(
                           context,
                           "Please select at least one topic",
@@ -227,7 +223,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                         return;
                       }
                       provider.setSelectedReadingDuration = "5 mins";
-context.pushNamed(AppRoutes.storyReadingGoalScreen.name);
+                      context.pushNamed(AppRoutes.storyReadingGoalScreen.name);
                       // final success = await provider.saveTopics(
                       //   context,
                       //   topicIds: selectedTopicIds.toList(),

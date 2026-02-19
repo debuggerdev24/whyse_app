@@ -54,7 +54,7 @@ class HomeApiService {
     );
   }
 
-  Future<Either<ApiException, Map<String, dynamic>>> storeImage({
+  Future<Either<ApiException, Map<String, dynamic>>> linkeIMageToStory({
     required String id,
     required Map<String, dynamic> data,
   }) async {

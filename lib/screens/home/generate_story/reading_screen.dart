@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
+
 import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -9,15 +10,16 @@ import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
-import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../models/home/story_models/story_model.dart';
-import '../../routes/user_routes.dart';
-import '../../services/base_api_service.dart';
+
+import '../../../core/helper/log_helper.dart';
+import '../../../models/home/story_models/story_model.dart';
+import '../../../routes/user_routes.dart';
+import '../../../services/base_api_service.dart';
 
 class ReadingScreen extends StatefulWidget {
   final Story? story;
@@ -108,7 +110,9 @@ class _ReadingScreenState extends State<ReadingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Logger.info("Pages: ${_pages.length}");
+    Logger.info(
+      "Pages: ${_pages.length} for current story index: ${context.read<StoryProvider>().currentStoryIndex}",
+    );
 
     return PopScope(
       // canPop: false,
@@ -322,18 +326,22 @@ class _ReadingScreenState extends State<ReadingScreen> {
                             //     provider
                             //         .createdStoryImagePaths[index]
                             //         .isNotEmpty;
-                            if (provider.createdStoryImagePaths.isEmpty) {
+                            if (provider.createdStoryImages.isEmpty) {
                               return imageShimmer();
                             }
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              provider.linkImageToStory(
-                                image: provider.createdStoryImagePaths.first,
-                              );
-                            });
-                            final imageIndex = index >= provider.createdStoryImagePaths.length
-                                ? provider.createdStoryImagePaths.length - 1
-                                : index;
-                            final imagePath = provider.createdStoryImagePaths[imageIndex];
+                            final storyIndex = provider.currentStoryIndex.clamp(
+                              0,
+                              provider.createdStoryImages.length - 1,
+                            );
+                            final images = provider
+                                .createdStoryImages[storyIndex]["images"];
+                            if (images == null || images.isEmpty) {
+                              return imageShimmer();
+                            }
+                            // final imageIndex = index >= images.length
+                            //     ? images.length - 1
+                            //     : index;
+                            final imagePath = images[index];
                             if (imagePath.isEmpty) {
                               return imageShimmer();
                             }
@@ -460,6 +468,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
                             "storyTitle": widget.story?.title ?? "",
                           },
                         );
+                        _currentIndex = 0;
                       },
                     ),
                   ],
@@ -469,7 +478,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
               AppFilledButton(
                 margin: EdgeInsets.only(bottom: 20.w),
                 backgroundColor: AppColors.primaryColor,
-              
+
                 text: "See Next Page",
                 onTap: () {
                   _pageController.nextPage(
@@ -498,10 +507,15 @@ class _ReadingScreenState extends State<ReadingScreen> {
             ),
             actions: [
               myActionButtonTheme(
-                onPressed: () async {
+                onPressed: () {
                   context.pop(dialogContext);
-                  context.goNamed(AppRoutes.homeScreen.name);
-                  context.read<StoryProvider>().clareStoryData();
+                  final prov = context.read<StoryProvider>();
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    prov.clareStoryData();
+                    if (context.mounted) {
+                      context.goNamed(AppRoutes.homeScreen.name);
+                    }
+                  });
                 },
                 title: "Yes",
               ),

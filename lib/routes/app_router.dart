@@ -23,10 +23,10 @@ import 'package:redstreakapp/screens/home/generate_story/story_goals_screen.dart
 import 'package:redstreakapp/screens/home/generate_story/story_reading_goal_screen.dart';
 import 'package:redstreakapp/screens/home/generate_story/story_topics_screen.dart';
 import 'package:redstreakapp/screens/home/home_screen.dart';
-import 'package:redstreakapp/screens/home/quiz_completed_screen.dart';
-import 'package:redstreakapp/screens/home/quiz_question_screen.dart';
-import 'package:redstreakapp/screens/home/reading_screen.dart';
-import 'package:redstreakapp/screens/home/start_quiz_screen.dart';
+import 'package:redstreakapp/screens/home/quiz/quiz_completed_screen.dart';
+import 'package:redstreakapp/screens/home/quiz/quiz_question_screen.dart';
+import 'package:redstreakapp/screens/home/generate_story/reading_screen.dart';
+import 'package:redstreakapp/screens/home/quiz/start_quiz_screen.dart';
 
 import '../models/home/story_models/story_model.dart';
 import '../screens/below_16/consent_status_screen.dart';

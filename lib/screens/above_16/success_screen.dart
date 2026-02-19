@@ -48,9 +48,7 @@ class SuccessScreen extends StatelessWidget {
                   ),
                 ),
               ),
-
-
-              /// ---------- BUTTON AT BOTTOM ----------
+              // ---------- BUTTON AT BOTTOM ----------
               AppFilledButton(
                 text: "Continue",
                 onTap: () async {
@@ -78,10 +76,8 @@ class SuccessScreen extends StatelessWidget {
                   //                     .removeGoogleIdToken();
                   //               },
                   //             );
-
                   //             return;
                   //           }
-
                   //           if (resgisteredUserMail.isNotEmpty) {
                   //             provider.loginEmailCtr.text = LocalStorageService
                   //                 .instance
@@ -93,20 +89,17 @@ class SuccessScreen extends StatelessWidget {
                   //             provider.loginWithMail(context: context);
                   //             return;
                   //           }
-
                   //           context.pushNamed(AppRoutes.successScreen.name);
                   //         }
-
                   context.pushNamed(AppRoutes.subscriptionScreen.name);
-                    // AppToast.success(
-                    //   context,
-                    //   "Register Successfully, Login to your account.",
-                    // );
+                  // AppToast.success(
+                  //   context,
+                  //   "Register Successfully, Login to your account.",
+                  // );
                 },
               ),
-
               10.h.verticalSpace,
-            ],
+            ], 
           ),
         ),
       ),
