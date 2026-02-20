@@ -19,10 +19,10 @@ import 'package:shimmer/shimmer.dart';
 import '../../../core/helper/log_helper.dart';
 import '../../../models/home/story_models/story_model.dart';
 import '../../../routes/user_routes.dart';
-import '../../../services/base_api_service.dart';
+import '../../../core/network/base_api_service.dart';
 
 class ReadingScreen extends StatefulWidget {
-  final Story? story;
+  final StoryModel? story;
 
   const ReadingScreen({super.key, this.story});
 
@@ -32,7 +32,7 @@ class ReadingScreen extends StatefulWidget {
 
 class _ReadingScreenState extends State<ReadingScreen> {
   final PageController _pageController = PageController();
-  int _currentIndex = 0;
+  int _currentPageIndex = 0;
   int _remainingSeconds = 0;
   bool _timerStarted = false;
   Timer? _countdownTimer;
@@ -50,8 +50,8 @@ class _ReadingScreenState extends State<ReadingScreen> {
   @override
   void initState() {
     super.initState();
-    final pages = widget.story!.pages;
-    _pages = pages!.map((e) => _removeAllHtmlTags(e)).toList();
+    final pages = widget.story?.pages;
+    _pages = pages != null ? pages.map((e) => _removeAllHtmlTags(e)).toList() : [];
 
     // Set initial duration for display (timer starts after first image loads)
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -87,7 +87,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
           context.pushNamed(
             AppRoutes.startQuizScreen.name,
             extra: {
-              "quizzes": widget.story?.quiz ?? <Quiz>[],
+              "quizzes": widget.story?.quiz ?? <StoryQuiz>[],
               "storyTitle": widget.story?.title ?? "",
             },
           );
@@ -110,9 +110,26 @@ class _ReadingScreenState extends State<ReadingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Logger.info(
-      "Pages: ${_pages.length} for current story index: ${context.read<StoryProvider>().currentStoryIndex}",
-    );
+    if (widget.story == null) {
+      return AppLayout(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AppText(
+                text: 'Story could not be loaded.',
+                style: AppTextStyles.sfProDisplayMedium(fontSize: 16.sp),
+              ),
+              16.h.verticalSpace,
+              TextButton(
+                onPressed: () => context.pop(),
+                child: const Text('Go back'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return PopScope(
       // canPop: false,
@@ -237,7 +254,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
                                       children: [
                                         AppText(
                                           text:
-                                              "${_currentIndex + 1}/${_pages.length}",
+                                              "${_currentPageIndex + 1}/${_pages.length}",
                                           style:
                                               AppTextStyles.sfProDisplaySemibold(
                                                 fontSize: 15.sp,
@@ -294,7 +311,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
                 itemCount: _pages.length,
                 onPageChanged: (index) {
                   setState(() {
-                    _currentIndex = index;
+                    _currentPageIndex = index;
                   });
                 },
                 itemBuilder: (context, index) {
@@ -437,7 +454,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
             //   child:
             // ),
             // 4. Fixed Bottom Button (Only on last page)
-            if (_currentIndex == _pages.length - 1)
+            if (_currentPageIndex == _pages.length - 1)
               SafeArea(
                 top: false,
 
@@ -464,11 +481,11 @@ class _ReadingScreenState extends State<ReadingScreen> {
                         context.pushNamed(
                           AppRoutes.startQuizScreen.name,
                           extra: {
-                            "quizzes": widget.story?.quiz ?? <Quiz>[],
+                            "quizzes": widget.story?.quiz ?? <StoryQuiz>[],
                             "storyTitle": widget.story?.title ?? "",
                           },
                         );
-                        _currentIndex = 0;
+                        _currentPageIndex = 0;
                       },
                     ),
                   ],

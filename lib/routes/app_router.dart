@@ -1,39 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/extensions/routes_extensions.dart';
+import 'package:redstreakapp/features/home/story_history_screen.dart';
+import 'package:redstreakapp/features/home/story_summary_screen.dart';
+import 'package:redstreakapp/models/home/story_models/story_history_model.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
-import 'package:redstreakapp/screens/above_16/create_account_screen.dart';
-import 'package:redstreakapp/screens/above_16/goals_screen.dart';
-import 'package:redstreakapp/screens/above_16/interests_screen.dart';
-import 'package:redstreakapp/screens/above_16/profile_info_screen.dart';
-import 'package:redstreakapp/screens/above_16/reading_goal_screen.dart';
-import 'package:redstreakapp/screens/above_16/subscription_screen.dart';
-import 'package:redstreakapp/screens/above_16/success_screen.dart';
-import 'package:redstreakapp/screens/above_16/topics_screen.dart';
-import 'package:redstreakapp/screens/above_16/what_intrest_screen.dart';
-import 'package:redstreakapp/screens/auth/enter_age_screen.dart';
-import 'package:redstreakapp/screens/auth/forgot_password_screen.dart';
-import 'package:redstreakapp/screens/auth/login_screen.dart';
-import 'package:redstreakapp/screens/auth/reset_password_screen.dart';
-import 'package:redstreakapp/screens/auth/signup_screen.dart';
-import 'package:redstreakapp/screens/auth/verify_mail_screen.dart';
-import 'package:redstreakapp/screens/home/generate_reading_screen.dart';
-import 'package:redstreakapp/screens/home/generate_story/custom_story_topic_screen.dart';
-import 'package:redstreakapp/screens/home/generate_story/story_goals_screen.dart';
-import 'package:redstreakapp/screens/home/generate_story/story_reading_goal_screen.dart';
-import 'package:redstreakapp/screens/home/generate_story/story_topics_screen.dart';
-import 'package:redstreakapp/screens/home/home_screen.dart';
-import 'package:redstreakapp/screens/home/quiz/quiz_completed_screen.dart';
-import 'package:redstreakapp/screens/home/quiz/quiz_question_screen.dart';
-import 'package:redstreakapp/screens/home/generate_story/reading_screen.dart';
-import 'package:redstreakapp/screens/home/quiz/start_quiz_screen.dart';
+import 'package:redstreakapp/features/above_16/create_account_screen.dart';
+import 'package:redstreakapp/features/above_16/goals_screen.dart';
+import 'package:redstreakapp/features/above_16/interests_screen.dart';
+import 'package:redstreakapp/features/above_16/profile_info_screen.dart';
+import 'package:redstreakapp/features/above_16/reading_goal_screen.dart';
+import 'package:redstreakapp/features/above_16/subscription_screen.dart';
+import 'package:redstreakapp/features/above_16/success_screen.dart';
+import 'package:redstreakapp/features/above_16/topics_screen.dart';
+import 'package:redstreakapp/features/above_16/what_intrest_screen.dart';
+import 'package:redstreakapp/features/auth/enter_age_screen.dart';
+import 'package:redstreakapp/features/auth/forgot_password_screen.dart';
+import 'package:redstreakapp/features/auth/login_screen.dart';
+import 'package:redstreakapp/features/auth/reset_password_screen.dart';
+import 'package:redstreakapp/features/auth/signup_screen.dart';
+import 'package:redstreakapp/features/auth/verify_mail_screen.dart';
+import 'package:redstreakapp/features/home/generate_reading_screen.dart';
+import 'package:redstreakapp/features/home/generate_story/custom_story_topic_screen.dart';
+import 'package:redstreakapp/features/home/generate_story/story_goals_screen.dart';
+import 'package:redstreakapp/features/home/generate_story/story_reading_goal_screen.dart';
+import 'package:redstreakapp/features/home/generate_story/story_topics_screen.dart';
+import 'package:redstreakapp/features/home/home_screen.dart';
+import 'package:redstreakapp/features/home/quiz/quiz_completed_screen.dart';
+import 'package:redstreakapp/features/home/quiz/quiz_question_screen.dart';
+import 'package:redstreakapp/features/home/generate_story/reading_screen.dart';
+import 'package:redstreakapp/features/home/quiz/start_quiz_screen.dart';
 
 import '../models/home/story_models/story_model.dart';
-import '../screens/below_16/consent_status_screen.dart';
-import '../screens/below_16/parent_email_screen.dart';
-import '../screens/dashboard.dart';
-import '../screens/home/generate_story/story_interest_screen.dart';
-import '../screens/splash/splash_screen.dart';
+import '../features/below_16/consent_status_screen.dart';
+import '../features/below_16/parent_email_screen.dart';
+import '../features/dashboard.dart';
+import '../features/home/generate_story/story_interest_screen.dart';
+import '../features/splash/splash_screen.dart';
 
 class UserAppRoute {
   static final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -80,7 +83,6 @@ class UserAppRoute {
       },
     ),
 
-    // GoRoute(
     //   path: AppRoutes.verifyParentConsentScreen.path,
     //   name: AppRoutes.verifyParentConsentScreen.name,
     //   builder: (context, state) {
@@ -212,8 +214,16 @@ class UserAppRoute {
       path: AppRoutes.readingScreen.path,
       name: AppRoutes.readingScreen.name,
       builder: (context, state) {
-        final story = state.extra as Story?;
+        final story = state.extra as StoryModel?;
         return ReadingScreen(story: story);
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.createdStoryReadingScreen.path,
+      name: AppRoutes.createdStoryReadingScreen.name,
+      builder: (context, state) {
+        final story = state.extra as StoryHistoryModel?;
+        return StoryHistoryScreen(story: story);
       },
     ),
     GoRoute(
@@ -223,7 +233,7 @@ class UserAppRoute {
         final extra = state.extra as Map<String, dynamic>? ?? {};
 
         return StartQuizScreen(
-          quizzes: (extra["quizzes"] as List<Quiz>? ?? []),
+          quizzes: (extra["quizzes"] as List<StoryQuiz>? ?? []),
           storyTitle: extra["storyTitle"] as String? ?? "",
         );
       },
@@ -234,7 +244,7 @@ class UserAppRoute {
       name: AppRoutes.quizQuestionScreen.name,
       builder: (context, state) {
         final extra = state.extra as Map<String, dynamic>?;
-        final quizzes = extra?['quizzes'] as List<Quiz>? ?? [];
+        final quizzes = extra?['quizzes'] as List<StoryQuiz>? ?? [];
         final storyTitle = extra?['storyTitle'] as String? ?? "";
         return QuizQuestionScreen(quizzes: quizzes, storyTitle: storyTitle);
       },
@@ -324,6 +334,13 @@ class UserAppRoute {
       name: AppRoutes.goalsScreen.name,
       builder: (context, state) {
         return GoalScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.createdStorySummaryScreen.path,
+      name: AppRoutes.createdStorySummaryScreen.name,
+      builder: (context, state) {
+        return CreatedStorySummaryScreen();
       },
     ),
   ];

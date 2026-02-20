@@ -7,12 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:redstreakapp/core/constants/shared_pref.dart';
+import 'package:redstreakapp/core/utils/shared_pref.dart';
 import 'package:redstreakapp/core/utils/field_validator.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:redstreakapp/services/auth/auth_api_service.dart';
-import 'package:redstreakapp/services/base_api_service.dart';
+import 'package:redstreakapp/core/network/base_api_service.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/helper/log_helper.dart';

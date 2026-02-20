@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
+import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 
 ValueNotifier<int> tabIndex = ValueNotifier<int>(0);
@@ -20,32 +21,35 @@ class UserDashBoard extends StatefulWidget {
 }
 
 class _UserDashBoardState extends State<UserDashBoard> {
-  late StoryProvider provider;
+  late StoryProvider storyProvider;
+  late HomeProvider homeProvider;
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      provider = context.read<StoryProvider>();
+      storyProvider = context.read<StoryProvider>();
+      homeProvider = context.read<HomeProvider>();
       callInitApis(context: context);
     });
   }
 
   void callInitApis({required BuildContext context}) {
-    provider.getAllStories();
+    homeProvider.getHomeScreenTopics();
+    storyProvider.getAllStories();
 
-    provider.getStoryGoals(
+    storyProvider.getStoryGoals(
       onFailed: (error) {
         AppToast.error(context, "Goal $error");
       },
     );
 
-    provider.getStoryInterest(
+    storyProvider.getStoryInterest(
       onFailed: (error) {
         AppToast.error(context, "Interest $error");
       },
     );
 
-    provider.getStoryTopics(
+    storyProvider.getStoryTopics(
       onFailed: (error) {
         AppToast.error(context, "Topic $error");
       },

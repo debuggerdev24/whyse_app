@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:redstreakapp/core/constants/app_constants.dart';
-import 'package:redstreakapp/core/constants/shared_pref.dart';
+import 'package:redstreakapp/core/utils/shared_pref.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';

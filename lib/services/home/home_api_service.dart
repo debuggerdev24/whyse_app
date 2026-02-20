@@ -1,70 +1,19 @@
 import 'package:dartz/dartz.dart';
-
-import '../../core/constants/end_points.dart';
-import '../base_api_service.dart';
+import 'package:redstreakapp/core/network/end_points.dart';
+import 'package:redstreakapp/core/network/base_api_service.dart';
 
 class HomeApiService {
   HomeApiService._();
-
   static final HomeApiService _instance = HomeApiService._();
-  static HomeApiService instance = _instance;
-
-  Future<Either<ApiException, Map<String, dynamic>>> getGoals() async {
-    return await BaseApiHelper.instance.get(EndPoints.getStoryGoals);
+  static HomeApiService get instance => _instance;
+  Future<Either<ApiException, Map<String, dynamic>>> getHomeScreenTopics() async {
+    return await BaseApiHelper.instance.get(EndPoints.getHomeScreenTopics);
   }
 
-  Future<Either<ApiException, Map<String, dynamic>>> getInterest() async {
-    return await BaseApiHelper.instance.get(EndPoints.getStoryInterest);
+  Future<Either<ApiException, Map<String, dynamic>>> getStoryIdeasByTopicId({required String topicId}) async {
+    return await BaseApiHelper.instance.get(EndPoints.getStoryIdeasByTopicId(topicId: topicId));
   }
-
-  Future<Either<ApiException, Map<String, dynamic>>> getTopics() async {
-    return await BaseApiHelper.instance.get(EndPoints.getStoryTopics);
-  }
-
-  Future<Either<ApiException, Map<String, dynamic>>> getSearchedTopics({
-    required Map<String, dynamic> queryParams,
-  }) async {
-    return await BaseApiHelper.instance.get(
-      EndPoints.getSearchTopics,
-      queryParameters: queryParams,
-    );
-  }
-
-  Future<Either<ApiException, Map<String, dynamic>>> createStoryIdea({
-    required Map<String, dynamic> data,
-  }) async {
-    return await BaseApiHelper.instance.post(
-      EndPoints.createStoryIdea,
-      data: data,
-    );
-  }
-
-  Future<Either<ApiException, Map<String, dynamic>>> createStory({
-    required Map<String, dynamic> data,
-  }) async {
-    return await BaseApiHelper.instance.post(EndPoints.createStory, data: data);
-  }
-
-  Future<Either<ApiException, Map<String, dynamic>>> createStoryImage({
-    required Map<String, dynamic> data,
-  }) async {
-    return await BaseApiHelper.instance.post(
-      EndPoints.createStoryImage,
-      data: data,
-    );
-  }
-
-  Future<Either<ApiException, Map<String, dynamic>>> linkeIMageToStory({
-    required String id,
-    required Map<String, dynamic> data,
-  }) async {
-    return await BaseApiHelper.instance.post(
-      EndPoints.storeImage(storyId: id),
-      data: data,
-    );
-  }
-
-  Future<Either<ApiException, Map<String, dynamic>>> getAllStories() async {
-    return BaseApiHelper.instance.get(EndPoints.getAllStories);
+  Future<Either<ApiException, Map<String, dynamic>>> getStoryByStoryId({required String storyIdea}) async {
+    return await BaseApiHelper.instance.get(EndPoints.getStoryByStoryIdea(storyIdea: storyIdea));
   }
 }

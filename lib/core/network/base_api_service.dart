@@ -2,9 +2,9 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
-import 'package:redstreakapp/core/constants/shared_pref.dart';
+import 'package:redstreakapp/core/utils/shared_pref.dart';
 
-import '../core/helper/log_helper.dart';
+import '../helper/log_helper.dart';
 
 class DioClient {
   DioClient._();

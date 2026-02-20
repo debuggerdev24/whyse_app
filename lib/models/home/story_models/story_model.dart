@@ -1,6 +1,6 @@
-class Story {
+class StoryModel {
   final String id, title, content;
-  final List<Quiz> quiz;
+  final List<StoryQuiz> quiz;
   final String? readingTopic,
       readingLevel,
       readingSkillFocus,
@@ -12,7 +12,7 @@ class Story {
   final int? lessonDuration, age;
   final List<String>? tags,pages;
 
-  Story({
+  StoryModel({
     required this.id,
     required this.title,
     required this.content,
@@ -30,14 +30,14 @@ class Story {
     this.updatedAt, this.pages,
   });
 
-  factory Story.fromJson(Map<String, dynamic> json) {
-    return Story(
+  factory StoryModel.fromJson(Map<String, dynamic> json) {
+    return StoryModel(
       id: json['id'] ?? '',
       title: json['title'] ?? '',
       content: json['content'] ?? '',
       image: json['image'],
       quiz: json['quiz'] != null
-          ? (json['quiz'] as List).map((i) => Quiz.fromJson(i)).toList()
+          ? (json['quiz'] as List).map((i) => StoryQuiz.fromJson(i)).toList()
           : [],
       readingTopic: json['readingTopic'],
       readingLevel: json['readingLevel'],
@@ -56,14 +56,14 @@ class Story {
   }
 }
 
-class Quiz {
+class StoryQuiz {
   final String question;
   final List<String> options;
   final String answer;
   final int correctAnswer;
   final String questionType;
 
-  Quiz({
+  StoryQuiz({
     required this.question,
     required this.options,
     required this.answer,
@@ -71,8 +71,8 @@ class Quiz {
     required this.questionType,
   });
 
-  factory Quiz.fromJson(Map<String, dynamic> json) {
-    return Quiz(
+  factory StoryQuiz.fromJson(Map<String, dynamic> json) {
+    return StoryQuiz(
       question: json['question'] ?? '',
       options: json['options'] != null
           ? List<String>.from(json['options'])

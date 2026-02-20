@@ -5,12 +5,12 @@ import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/app_constants.dart';
-import 'package:redstreakapp/core/constants/shared_pref.dart';
+import 'package:redstreakapp/core/utils/shared_pref.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
-import 'package:redstreakapp/services/base_api_service.dart';
-import 'package:redstreakapp/services/home/home_api_service.dart';
+import 'package:redstreakapp/core/network/base_api_service.dart';
+import 'package:redstreakapp/services/home/story_api_service.dart';
 
 import '../../services/auth/auth_api_service.dart';
 
@@ -54,7 +54,7 @@ class _SplashScreenState extends State<SplashScreen>
       //todo logic to check the access token is expire or not
       final token = LocalStorageService.instance.getAuthToken;
       if (token != null && token.isNotEmpty) {
-        final response = await HomeApiService.instance.getAllStories();
+        final response = await StoryApiService.instance.getAllStories();
         response.fold(
           (l) async {
             if (l.code == "401" &&

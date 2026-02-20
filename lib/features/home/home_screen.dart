@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/home_widgets.dart';
+import 'package:redstreakapp/features/home/generate_story/story_topics_screen.dart';
+import 'package:redstreakapp/features/home/widgets/story_section.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,18 +21,15 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
           children: [
             const HomeHeader(),
-            24.h.verticalSpace,
+            24.w.verticalSpace,
             const CalendarStrip(),
-            24.h.verticalSpace,
-            const YourPlanSection(),
-
-            24.h.verticalSpace,
-
+            24.w.verticalSpace,
+            const StoryTopicsSection(),
+            24.w.verticalSpace,
             const PracticeZoneSection(),
-            24.h.verticalSpace,
-
+            24.w.verticalSpace,
             BottomStatsCard(),
-            10.h.verticalSpace,
+            10.w.verticalSpace,
           ],
         ),
       ),

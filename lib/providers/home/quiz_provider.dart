@@ -9,7 +9,7 @@ class QuizProvider extends ChangeNotifier {
 
   List<Map<String, dynamic>> questions = [];
 
-  void initQuiz(List<Quiz> quizzes) {
+  void initQuiz(List<StoryQuiz> quizzes) {
     questions = quizzes
         .map(
           (q) => {

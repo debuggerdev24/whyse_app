@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:redstreakapp/core/constants/end_points.dart';
-import 'package:redstreakapp/core/constants/shared_pref.dart';
+import 'package:redstreakapp/core/network/end_points.dart';
+import 'package:redstreakapp/core/utils/shared_pref.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
-import 'package:redstreakapp/services/base_api_service.dart';
+import 'package:redstreakapp/core/network/base_api_service.dart';
 
 import '../../models/home/story_models/generate_story_request.dart';
 

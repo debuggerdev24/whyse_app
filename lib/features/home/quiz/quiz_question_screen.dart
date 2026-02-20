@@ -17,7 +17,7 @@ import '../../../providers/home/quiz_provider.dart';
 import '../../../providers/home/story_provider.dart';
 
 class QuizQuestionScreen extends StatefulWidget {
-  final List<Quiz>? quizzes;
+  final List<StoryQuiz>? quizzes;
   final String? storyTitle;
 
   const QuizQuestionScreen({super.key, this.quizzes, this.storyTitle});

@@ -9,7 +9,7 @@ import '../../models/home/interest_model.dart';
 import '../../models/home/story_models/story_model.dart';
 import '../../models/home/topic_model.dart';
 import '../../routes/user_routes.dart';
-import '../../services/home/home_api_service.dart';
+import '../../services/home/story_api_service.dart';
 
 class StoryProvider extends ChangeNotifier {
   TextEditingController goalTitleController = TextEditingController(),
@@ -33,10 +33,10 @@ class StoryProvider extends ChangeNotifier {
   List<Map<String, List<String>>> createdStoryImages = [];
   Map<String, dynamic> dataToSendCreateStory = {};
   final allowedDurations = {5, 10, 15, 20, 25, 30, 35, 40, 45};
-  List<Story> _stories = [];
+  List<StoryModel> _stories = [];
   List<String> storyIdeas = [];
 
-  List<Story> get stories => _stories;
+  List<StoryModel> get stories => _stories;
   final List<String> readingDurations = [
     '5 mins',
     '10 mins',
@@ -114,7 +114,7 @@ class StoryProvider extends ChangeNotifier {
     isGetStoryLoading = true;
     notifyListeners();
 
-    final response = await HomeApiService.instance.getAllStories();
+    final response = await StoryApiService.instance.getAllStories();
 
     response.fold(
       (l) {
@@ -122,7 +122,7 @@ class StoryProvider extends ChangeNotifier {
       },
       (r) {
         final data = r['data'] as List;
-        _stories = data.map((e) => Story.fromJson(e)).toList();
+        _stories = data.map((e) => StoryModel.fromJson(e)).toList();
         isGetStoryLoading = false;
         notifyListeners();
       },
@@ -135,7 +135,7 @@ class StoryProvider extends ChangeNotifier {
     isGetGoalsLoading = true;
     notifyListeners();
 
-    final response = await HomeApiService.instance.getGoals();
+    final response = await StoryApiService.instance.getGoals();
     response.fold(
       (l) {
         onFailed.call(l.errorMsg);
@@ -160,7 +160,7 @@ class StoryProvider extends ChangeNotifier {
     isGetInterestLoading = true;
     notifyListeners();
 
-    final response = await HomeApiService.instance.getInterest();
+    final response = await StoryApiService.instance.getInterest();
     response.fold(
       (l) {
         onFailed.call(l.errorMsg);
@@ -214,7 +214,7 @@ class StoryProvider extends ChangeNotifier {
     isGetTopicsLoading = true;
     notifyListeners();
 
-    final response = await HomeApiService.instance.getTopics();
+    final response = await StoryApiService.instance.getTopics();
     response.fold(
       (l) {
         onFailed.call(l.errorMsg);
@@ -239,7 +239,7 @@ class StoryProvider extends ChangeNotifier {
     isGetSearchedTopicsLoading = true;
     notifyListeners();
 
-    final response = await HomeApiService.instance.getSearchedTopics(
+    final response = await StoryApiService.instance.getSearchedTopics(
       queryParams: {"search": searchTopicCtr.text.trim()},
     );
     response.fold(
@@ -351,7 +351,7 @@ class StoryProvider extends ChangeNotifier {
     //* create story idea
     stories.clear();
     storyIdeas.clear();
-    final response = await HomeApiService.instance.createStoryIdea(
+    final response = await StoryApiService.instance.createStoryIdea(
       data: dataToSendCreateStory,
     );
 
@@ -370,7 +370,7 @@ class StoryProvider extends ChangeNotifier {
         Logger.info("Story Ideas length: ${storyIdeas.length}");
 
         // for (var storyIdea in storyIdeas) {
-        final response = await HomeApiService.instance.createStory(
+        final response = await StoryApiService.instance.createStory(
           data: {"storyIdeaId": storyIdeas.first},
         );
         response.fold(
@@ -378,7 +378,7 @@ class StoryProvider extends ChangeNotifier {
             onCreateStoryFailed.call(l.errorMsg);
           },
           (r) {
-            final story = Story.fromJson(r["data"]);
+            final story = StoryModel.fromJson(r["data"]);
 
             stories.add(story);
 
@@ -401,7 +401,7 @@ class StoryProvider extends ChangeNotifier {
         );
         for (var storyIdea in storyIdeas) {
           if (storyIdea == storyIdeas.first) continue;
-          final response = await HomeApiService.instance.createStory(
+          final response = await StoryApiService.instance.createStory(
             data: {"storyIdeaId": storyIdea},
           );
           // Logger.info("i: $i");
@@ -414,11 +414,11 @@ class StoryProvider extends ChangeNotifier {
               onCreateStoryFailed.call(l.errorMsg);
             },
             (r) async {
-              final story = Story.fromJson(r["data"]);
+              final story = StoryModel.fromJson(r["data"]);
               stories.add(story);
               // createStoryImage(onFailed: onCreateImageFailed, storyid: story.id, pageCount: story.pages!.length);
 
-              final response = await HomeApiService.instance.createStoryImage(
+              final response = await StoryApiService.instance.createStoryImage(
                 data: {"storyId": story.id, "imageCount": story.pages!.length},
               );
 
@@ -455,7 +455,7 @@ class StoryProvider extends ChangeNotifier {
     isCreateStoryImageLoading = true;
     notifyListeners();
     createdStoryImages.clear();
-    final response = await HomeApiService.instance.createStoryImage(
+    final response = await StoryApiService.instance.createStoryImage(
       data: {"storyId": storyid, "imageCount": pageCount},
     );
 
@@ -504,7 +504,7 @@ class StoryProvider extends ChangeNotifier {
     //todo calling connect image to story API
     Logger.info("Link image : $image");
 
-    final response = await HomeApiService.instance.linkeIMageToStory(
+    final response = await StoryApiService.instance.linkeIMageToStory(
       id: stories.first.id,
       data: {
         "images": [image],
