@@ -1,6 +1,7 @@
 class StoryModel {
   final String id, title, content;
   final List<StoryQuiz> quiz;
+  final List<StoryPages> pages;
   final String? readingTopic,
       readingLevel,
       readingSkillFocus,
@@ -10,7 +11,7 @@ class StoryModel {
       createdAt,
       updatedAt;
   final int? lessonDuration, age;
-  final List<String>? tags,pages;
+  final List<String>? tags;
 
   StoryModel({
     required this.id,
@@ -27,7 +28,7 @@ class StoryModel {
     this.lessonDuration,
     this.tags,
     this.createdAt,
-    this.updatedAt, this.pages,
+    this.updatedAt, required this.pages,
   });
 
   factory StoryModel.fromJson(Map<String, dynamic> json) {
@@ -51,7 +52,7 @@ class StoryModel {
       updatedAt: json['updatedAt'],
       // Some stories may not have pages in the response
       pages:
-          json['pages'] != null ? List<String>.from(json['pages']) : [],
+          json['pages'] != null ? (json['pages'] as List).map((i) => StoryPages.fromJson(i)).toList() : [],
     );
   }
 }
@@ -82,4 +83,42 @@ class StoryQuiz {
       questionType: json['questionType'] ?? '',
     );
   }
+}
+
+
+class StoryPages {
+    int pageIndex;
+    String text;
+    String primaryEntity;
+    String imageUrl;
+    String imageSource;
+    String license;
+    String attribution;
+    String sourcePageUrl;
+    bool needsReview;
+
+    StoryPages({
+        required this.pageIndex,
+        required this.text,
+        required this.primaryEntity,
+        required this.imageUrl,
+        required this.imageSource,
+        required this.license,
+        required this.attribution,
+        required this.sourcePageUrl,
+        required this.needsReview,
+    });
+
+    factory StoryPages.fromJson(Map<String, dynamic> json) => StoryPages(
+        pageIndex: json["pageIndex"],
+        text: json["text"],
+        primaryEntity: json["primaryEntity"],
+        imageUrl: json["imageUrl"],
+        imageSource: json["imageSource"],
+        license: json["license"],
+        attribution: json["attribution"],
+        sourcePageUrl: json["sourcePageUrl"],
+        needsReview: json["needsReview"],
+    );
+
 }

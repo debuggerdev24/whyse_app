@@ -90,7 +90,12 @@ class _StoryHistoryScreenState extends State<StoryHistoryScreen> {
               "quizzes": widget.story?.quiz ?? <Quiz>[],
               "storyTitle": widget.story?.title ?? "",
             },
-          );
+          ).then((_) {
+            if (mounted) {
+              setState(() => _currentPageIndex = 0);
+              _pageController.jumpToPage(0);
+            }
+          });
         }
         return;
       }
@@ -484,8 +489,12 @@ class _StoryHistoryScreenState extends State<StoryHistoryScreen> {
                             "quizzes": widget.story?.quiz ?? <Quiz>[],
                             "storyTitle": widget.story?.title ?? "",
                           },
-                        );
-                        _currentPageIndex = 0;
+                        ).then((_) {
+                          if (mounted) {
+                            setState(() => _currentPageIndex = 0);
+                            _pageController.jumpToPage(0);
+                          }
+                        });
                       },
                     ),
                   ],

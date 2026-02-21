@@ -165,6 +165,7 @@ class QuizCompletedScreen extends StatelessWidget {
                             );
                             provider.setCurrentStoryIndex =
                                 provider.currentStoryIndex + 1;
+                            provider.resetStoryPageIndex();
                           },
                           backgroundColor: AppColors.teal,
                           fixedSize: Size(348, 42.h),

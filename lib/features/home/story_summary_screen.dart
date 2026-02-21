@@ -25,7 +25,7 @@ class CreatedStorySummaryScreen extends StatelessWidget {
           }
           final story = provider.storySummary!;
           return Stack(
-            children: [
+            children:[
               SafeArea(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

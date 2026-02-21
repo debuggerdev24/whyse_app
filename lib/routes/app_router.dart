@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/extensions/routes_extensions.dart';
-import 'package:redstreakapp/features/home/story_history_screen.dart';
-import 'package:redstreakapp/features/home/story_summary_screen.dart';
-import 'package:redstreakapp/models/home/story_models/story_history_model.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:redstreakapp/features/above_16/create_account_screen.dart';
 import 'package:redstreakapp/features/above_16/goals_screen.dart';
 import 'package:redstreakapp/features/above_16/interests_screen.dart';
@@ -22,21 +18,25 @@ import 'package:redstreakapp/features/auth/signup_screen.dart';
 import 'package:redstreakapp/features/auth/verify_mail_screen.dart';
 import 'package:redstreakapp/features/home/generate_reading_screen.dart';
 import 'package:redstreakapp/features/home/generate_story/custom_story_topic_screen.dart';
+import 'package:redstreakapp/features/home/generate_story/reading_screen.dart';
 import 'package:redstreakapp/features/home/generate_story/story_goals_screen.dart';
 import 'package:redstreakapp/features/home/generate_story/story_reading_goal_screen.dart';
 import 'package:redstreakapp/features/home/generate_story/story_topics_screen.dart';
 import 'package:redstreakapp/features/home/home_screen.dart';
 import 'package:redstreakapp/features/home/quiz/quiz_completed_screen.dart';
 import 'package:redstreakapp/features/home/quiz/quiz_question_screen.dart';
-import 'package:redstreakapp/features/home/generate_story/reading_screen.dart';
 import 'package:redstreakapp/features/home/quiz/start_quiz_screen.dart';
+import 'package:redstreakapp/features/home/story_history_screen.dart';
+import 'package:redstreakapp/features/home/story_summary_screen.dart';
+import 'package:redstreakapp/models/home/story_models/story_history_model.dart';
+import 'package:redstreakapp/routes/user_routes.dart';
 
-import '../models/home/story_models/story_model.dart';
 import '../features/below_16/consent_status_screen.dart';
 import '../features/below_16/parent_email_screen.dart';
 import '../features/dashboard.dart';
 import '../features/home/generate_story/story_interest_screen.dart';
 import '../features/splash/splash_screen.dart';
+import '../models/home/story_models/story_model.dart';
 
 class UserAppRoute {
   static final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -45,7 +45,6 @@ class UserAppRoute {
 
   static final GoRouter goRouter = GoRouter(
     navigatorKey: rootNavigatorKey,
-    debugLogDiagnostics: true,
 
     initialLocation: AppRoutes.splashScreen.path,
     routes: [

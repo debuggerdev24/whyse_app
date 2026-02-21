@@ -22,11 +22,23 @@ class StoryProvider extends ChangeNotifier {
       _noOfStories = 0,
       _currentStoryIndex = 0,
       detector = 0;
+  int _currentStoryPageIndex = 0;
   int get lessonDuration => _lessonDuration;
   int get noOfStories => _noOfStories;
   int get currentStoryIndex => _currentStoryIndex;
+  int get currentStoryPageIndex => _currentStoryPageIndex;
   set setCurrentStoryIndex(int value) {
     _currentStoryIndex = value;
+    notifyListeners();
+  }
+
+  void setCurrentStoryPageIndex(int value) {
+    _currentStoryPageIndex = value;
+    notifyListeners();
+  }
+
+  void resetStoryPageIndex() {
+    _currentStoryPageIndex = 0;
     notifyListeners();
   }
 
@@ -179,7 +191,6 @@ class StoryProvider extends ChangeNotifier {
 
   void addCustomInterest(String name) {
     if (name.trim().isEmpty) return;
-
     if (!customInterestsList.contains(name)) {
       customInterestsList.add(name);
       selectedCustomInterests.add(name);
@@ -366,7 +377,6 @@ class StoryProvider extends ChangeNotifier {
         storyIdeas = (r["data"]["storyIdeas"] as List)
             .map((e) => e["id"].toString())
             .toList();
-
         Logger.info("Story Ideas length: ${storyIdeas.length}");
 
         // for (var storyIdea in storyIdeas) {
@@ -382,19 +392,17 @@ class StoryProvider extends ChangeNotifier {
 
             stories.add(story);
 
-            createStoryImage(
-              onFailed: onCreateImageFailed,
-              storyid: story.id,
-              pageCount: story.pages!.length,
-            );
+          //todo if in the future we want to create story images from the AI, we can uncomment this
+            // createStoryImage(
+            //   onFailed: onCreateImageFailed,
+            //   storyid: story.id,
+            //   pageCount: story.pages!.length,
+            // );
             isCreateStoryLoading = false;
             notifyListeners();
-
-            final ctx = context;
-            final storyToPush = stories.first;
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (ctx.mounted) {
-                ctx.pushNamed(AppRoutes.readingScreen.name, extra: storyToPush);
+              if (context.mounted) {
+                context.pushNamed(AppRoutes.readingScreen.name, extra: stories.first);
               }
             });
           },
@@ -521,5 +529,3 @@ class StoryProvider extends ChangeNotifier {
     );
   }
 }
-
-//

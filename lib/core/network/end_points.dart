@@ -35,7 +35,6 @@ class EndPoints {
   static const refreshToken = "/mobile/auth/refresh-token";
   static const getHomeScreenTopics = "/story/topics?page=1&limit=10&createdBy=self";
   static String storeImage({required String storyId}) => "/story/mobile-story/$storyId/store-images";
-
   static String getStoryIdeasByTopicId({required String topicId}) => "/story/topics/$topicId/story-ideas?sortOrder=asc&sortOrder=asc";
   static String getStoryByStoryIdea({required String storyIdea}) => "/story/ideas/$storyIdea/story";
 

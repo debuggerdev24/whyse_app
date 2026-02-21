@@ -16,10 +16,9 @@ import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../core/helper/log_helper.dart';
+import '../../../core/network/base_api_service.dart';
 import '../../../models/home/story_models/story_model.dart';
 import '../../../routes/user_routes.dart';
-import '../../../core/network/base_api_service.dart';
 
 class ReadingScreen extends StatefulWidget {
   final StoryModel? story;
@@ -31,8 +30,7 @@ class ReadingScreen extends StatefulWidget {
 }
 
 class _ReadingScreenState extends State<ReadingScreen> {
-  final PageController _pageController = PageController();
-  int _currentPageIndex = 0;
+  PageController _pageController = PageController();
   int _remainingSeconds = 0;
   bool _timerStarted = false;
   Timer? _countdownTimer;
@@ -45,22 +43,25 @@ class _ReadingScreenState extends State<ReadingScreen> {
     //sby34353581
   }
 
-  List<String> _pages = [];
+  // List<String> _pages = [];
 
   @override
   void initState() {
     super.initState();
-    final pages = widget.story?.pages;
-    _pages = pages != null ? pages.map((e) => _removeAllHtmlTags(e)).toList() : [];
-
-    // Set initial duration for display (timer starts after first image loads)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      final provider = context.read<StoryProvider>();
+
+      // Reset page index in provider immediately so build reads 0 from the start
+      provider.resetStoryPageIndex();
+      _pageController.jumpToPage(0);
+
       final fromStory = widget.story?.lessonDuration;
-      final fromProvider = context.read<StoryProvider>().lessonDuration;
+      final fromProvider = provider.lessonDuration;
       final durationMinutes = (fromStory ?? fromProvider) > 0
           ? (fromStory ?? fromProvider)
           : 5;
+
       setState(() {
         if (!_timerStarted) _remainingSeconds = durationMinutes * 60;
       });
@@ -90,7 +91,12 @@ class _ReadingScreenState extends State<ReadingScreen> {
               "quizzes": widget.story?.quiz ?? <StoryQuiz>[],
               "storyTitle": widget.story?.title ?? "",
             },
-          );
+          ).then((_) {
+            if (mounted) {
+              context.read<StoryProvider>().resetStoryPageIndex();
+              _pageController.jumpToPage(0);
+            }
+          });
         }
         return;
       }
@@ -110,7 +116,9 @@ class _ReadingScreenState extends State<ReadingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.story == null) {
+    final currentPageIndex = context.watch<StoryProvider>().currentStoryPageIndex;
+    final story = widget.story;
+    if (story == null) {
       return AppLayout(
         body: Center(
           child: Column(
@@ -254,7 +262,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
                                       children: [
                                         AppText(
                                           text:
-                                              "${_currentPageIndex + 1}/${_pages.length}",
+                                              "${currentPageIndex + 1}/${story.pages.length}",
                                           style:
                                               AppTextStyles.sfProDisplaySemibold(
                                                 fontSize: 15.sp,
@@ -308,13 +316,12 @@ class _ReadingScreenState extends State<ReadingScreen> {
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
-                itemCount: _pages.length,
+                itemCount: story.pages.length,
                 onPageChanged: (index) {
-                  setState(() {
-                    _currentPageIndex = index;
-                  });
+                  context.read<StoryProvider>().setCurrentStoryPageIndex(index);
                 },
                 itemBuilder: (context, index) {
+                  final page = story.pages[index];
                   //todo Body Content Container (image and story)
                   return Container(
                     margin: EdgeInsets.symmetric(vertical: 5),
@@ -332,89 +339,86 @@ class _ReadingScreenState extends State<ReadingScreen> {
                       padding: EdgeInsets.zero,
                       children: [
                         5.verticalSpace,
-
-                        //todo story image
-                        Consumer<StoryProvider>(
-                          builder: (context, provider, child) {
-                            //* Safely access image list to avoid RangeError
-                            // final hasImageForIndex =
-                            //     provider.createdStoryImagePaths.length >
-                            //         index &&
-                            //     provider
-                            //         .createdStoryImagePaths[index]
-                            //         .isNotEmpty;
-                            if (provider.createdStoryImages.isEmpty) {
-                              return imageShimmer();
-                            }
-                            final storyIndex = provider.currentStoryIndex.clamp(
-                              0,
-                              provider.createdStoryImages.length - 1,
-                            );
-                            final images = provider
-                                .createdStoryImages[storyIndex]["images"];
-                            if (images == null || images.isEmpty) {
-                              return imageShimmer();
-                            }
-                            // final imageIndex = index >= images.length
-                            //     ? images.length - 1
-                            //     : index;
-                            final imagePath = images[index];
-                            if (imagePath.isEmpty) {
-                              return imageShimmer();
-                            }
-
-                            return CachedNetworkImage(
-                              height: 280,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                              imageUrl: DioClient.baseUrl + imagePath,
-                              errorWidget: (context, url, error) =>
-                                  imageShimmer(),
-                              placeholder: (context, url) => imageShimmer(),
-                              imageBuilder: index == 0
-                                  ? (context, imageProvider) {
-                                      WidgetsBinding.instance
-                                          .addPostFrameCallback((_) {
-                                            _startCountdownTimer();
-                                          });
-                                      return Image(
-                                        image: imageProvider,
-                                        fit: BoxFit.cover,
-                                        height: 280,
-                                        width: double.infinity,
-                                      );
-                                    }
-                                  : null,
-                            );
-                          },
-                          //     Image.network(
-                          //   provider.createdStoryImagePath,
-                          //   // widget.story != null &&
-                          //   //         widget.story!.images.isNotEmpty
-                          //   //     ? "http://167.172.45.71${widget.story!.images.first}"
-                          //   //     : "https://via.placeholder.com/350x150",
-                          //   width: double.infinity,
-                          //   height: 180.h,
-                          //   fit: BoxFit.cover,
-                          //   loadingBuilder:
-                          //       (context, child, loadingProgress) {
-                          //         if (loadingProgress == null) return child;
-                          //         return ShimmerLoading(
-                          //           width: double.infinity,
-                          //           height: 180.h,
-                          //           borderRadius: 0,
-                          //         );
-                          //       },
-                          //   errorBuilder: (context, error, stackTrace) {
-                          //     return Image.asset(
-                          //       AppAssets.pterodactylus,
-                          //       width: double.infinity,
-                          //       height: 180.h,
-                          //       fit: BoxFit.cover,
-                          //     );
-                          //   },
-                          // ),
+                        CachedNetworkImage(
+                          height: 280,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          imageUrl: (page.imageUrl.startsWith("https"))
+                              ? page.imageUrl
+                              : DioClient.baseUrl + page.imageUrl,
+                          errorWidget: (context, url, error) => imageShimmer(),
+                          placeholder: (context, url) => imageShimmer(),
+                          imageBuilder: index == 0
+                              ? (context, imageProvider) {
+                                  WidgetsBinding.instance.addPostFrameCallback((
+                                    _,
+                                  ) {
+                                    _startCountdownTimer();
+                                  });
+                                  return Image(
+                                    image: imageProvider,
+                                    fit: BoxFit.cover,
+                                    height: 280,
+                                    width: double.infinity,
+                                  );
+                                }
+                              : null,
                         ),
+                        //todo story image ai base images logic
+                        // Consumer<StoryProvider>(
+                        //   builder: (context, provider, child) {
+                        //     //* Safely access image list to avoid RangeError
+                        //     // final hasImageForIndex =
+                        //     //     provider.createdStoryImagePaths.length >
+                        //     //         index &&
+                        //     //     provider
+                        //     //         .createdStoryImagePaths[index]
+                        //     //         .isNotEmpty;
+                        //     if (provider.createdStoryImages.isEmpty) {
+                        //       return imageShimmer();
+                        //     }
+                        //     final storyIndex = provider.currentStoryIndex.clamp(
+                        //       0,
+                        //       provider.createdStoryImages.length - 1,
+                        //     );
+                        //     final images = provider
+                        //         .createdStoryImages[storyIndex]["images"];
+                        //     if (images == null || images.isEmpty) {
+                        //       return imageShimmer();
+                        //     }
+                        //     // final imageIndex = index >= images.length
+                        //     //     ? images.length - 1
+                        //     //     : index;
+                        //     final imagePath = images[index];
+                        //     if (imagePath.isEmpty) {
+                        //       return imageShimmer();
+                        //     }
+
+                        //     return CachedNetworkImage(
+                        //       height: 280,
+                        //       width: double.infinity,
+                        //       fit: BoxFit.cover,
+                        //       imageUrl: DioClient.baseUrl + imagePath,
+                        //       errorWidget: (context, url, error) =>
+                        //           imageShimmer(),
+                        //       placeholder: (context, url) => imageShimmer(),
+                        //       imageBuilder: index == 0
+                        //           ? (context, imageProvider) {
+                        //               WidgetsBinding.instance
+                        //                   .addPostFrameCallback((_) {
+                        //                     _startCountdownTimer();
+                        //                   });
+                        //               return Image(
+                        //                 image: imageProvider,
+                        //                 fit: BoxFit.cover,
+                        //                 height: 280,
+                        //                 width: double.infinity,
+                        //               );
+                        //             }
+                        //           : null,
+                        //     );
+                        //   },
+                        //   ),
                         24.h.verticalSpace,
                         //todo story content
                         RichText(
@@ -426,7 +430,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
                             ),
 
                             children: _buildTextSpans(
-                              _pages[index],
+                              story.pages[index].text,
                               AppTextStyles.sfProDisplayRegular(
                                 fontSize: 16.sp,
                                 color: AppColors.black.withValues(alpha: 0.8),
@@ -454,7 +458,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
             //   child:
             // ),
             // 4. Fixed Bottom Button (Only on last page)
-            if (_currentPageIndex == _pages.length - 1)
+            if (currentPageIndex == story.pages.length - 1)
               SafeArea(
                 top: false,
 
@@ -484,8 +488,12 @@ class _ReadingScreenState extends State<ReadingScreen> {
                             "quizzes": widget.story?.quiz ?? <StoryQuiz>[],
                             "storyTitle": widget.story?.title ?? "",
                           },
-                        );
-                        _currentPageIndex = 0;
+                        ).then((_) {
+                          if (mounted) {
+                            context.read<StoryProvider>().resetStoryPageIndex();
+                            _pageController.jumpToPage(0);
+                          }
+                        });
                       },
                     ),
                   ],
