@@ -68,7 +68,6 @@ class StoryProvider extends ChangeNotifier {
 
   set setNoOfStories(String value) {
     _noOfStories = int.parse(value);
-
     notifyListeners();
   }
 
@@ -427,7 +426,7 @@ class StoryProvider extends ChangeNotifier {
               // createStoryImage(onFailed: onCreateImageFailed, storyid: story.id, pageCount: story.pages!.length);
 
               final response = await StoryApiService.instance.createStoryImage(
-                data: {"storyId": story.id, "imageCount": story.pages!.length},
+                data: {"storyId": story.id, "imageCount": story.pages.length},
               );
 
               response.fold(
@@ -443,7 +442,7 @@ class StoryProvider extends ChangeNotifier {
                   Logger.info(
                     "createdStoryImagePaths length: ${createdStoryImages.length}",
                   );
-                  Logger.info("storyPage length: ${story.pages!.length}}");
+                  Logger.info("storyPage length: ${story.pages.length}}");
                 },
               );
             },

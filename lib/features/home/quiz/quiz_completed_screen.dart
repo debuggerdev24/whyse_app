@@ -44,6 +44,7 @@ class QuizCompletedScreen extends StatelessWidget {
       },
 
       child: PopScope(
+        canPop: false,
         onPopInvokedWithResult: (didPop, result) {
           if (didPop) return;
 
@@ -152,27 +153,29 @@ class QuizCompletedScreen extends StatelessWidget {
                       ),
                       Spacer(flex: 2),
         
-                      if (provider.stories.length-1 > provider.currentStoryIndex)
+                      if (provider.stories.length - 1 > provider.currentStoryIndex)
                         AppFilledButton(
                           text: "See Next Story",
                           onTap: () {
-                            final nextStory =
-                                provider.stories[provider.currentStoryIndex];
+                            final nextIndex = provider.currentStoryIndex + 1;
+                            provider.setCurrentStoryIndex = nextIndex;
+                            Logger.info("Next Index: $nextIndex");
+                            Logger.info("Current Story Index: ${provider.currentStoryIndex}");
+                            Logger.info("Stories Length: ${provider.stories.length}");
+                            final nextStory = provider.stories[nextIndex];
+
                             if (!context.mounted) return;
                             context.goNamed(
                               AppRoutes.readingScreen.name,
                               extra: nextStory,
                             );
-                            provider.setCurrentStoryIndex =
-                                provider.currentStoryIndex + 1;
-                            provider.resetStoryPageIndex();
                           },
                           backgroundColor: AppColors.teal,
                           fixedSize: Size(348, 42.h),
                         )
                       else
                         AppFilledButton(
-                          text: "Continue",
+                          text: "Home",
                           onTap: () async {
                             // context.read<HomeProvider>().getAllStories();
                             if (!context.mounted) return;

@@ -13,24 +13,25 @@ import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
+import 'package:redstreakapp/models/home/story_models/readable_story.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:shimmer/shimmer.dart';
-
+import '../../../core/helper/log_helper.dart';
 import '../../../core/network/base_api_service.dart';
 import '../../../models/home/story_models/story_model.dart';
 import '../../../routes/user_routes.dart';
 
 class ReadingScreen extends StatefulWidget {
-  final StoryModel? story;
+  final IReadableStory story;
 
-  const ReadingScreen({super.key, this.story});
+  const ReadingScreen({super.key, required this.story});
 
   @override
   State<ReadingScreen> createState() => _ReadingScreenState();
 }
 
 class _ReadingScreenState extends State<ReadingScreen> {
-  PageController _pageController = PageController();
+  final PageController _pageController = PageController();
   int _remainingSeconds = 0;
   bool _timerStarted = false;
   Timer? _countdownTimer;
@@ -40,30 +41,40 @@ class _ReadingScreenState extends State<ReadingScreen> {
     _countdownTimer?.cancel();
     _pageController.dispose();
     super.dispose();
-    //sby34353581
   }
-
-  // List<String> _pages = [];
 
   @override
   void initState() {
     super.initState();
+    _initForStory();
+  }
+
+  @override
+  void didUpdateWidget(ReadingScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.story.id != widget.story.id) {
+      _timerStarted = false;
+      _countdownTimer?.cancel();
+      _countdownTimer = null;
+      _pageController.jumpToPage(0);
+      _initForStory();
+    }
+  }
+
+  void _initForStory() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final provider = context.read<StoryProvider>();
-
-      // Reset page index in provider immediately so build reads 0 from the start
       provider.resetStoryPageIndex();
-      _pageController.jumpToPage(0);
 
-      final fromStory = widget.story?.lessonDuration;
+      final fromStory = widget.story.lessonDuration ?? 0;
       final fromProvider = provider.lessonDuration;
-      final durationMinutes = (fromStory ?? fromProvider) > 0
-          ? (fromStory ?? fromProvider)
+      final durationMinutes = (fromStory > 0 ? fromStory : fromProvider) > 0
+          ? (fromStory > 0 ? fromStory : fromProvider)
           : 5;
 
       setState(() {
-        if (!_timerStarted) _remainingSeconds = durationMinutes * 60;
+        _remainingSeconds = durationMinutes * 60;
       });
     });
   }
@@ -71,7 +82,8 @@ class _ReadingScreenState extends State<ReadingScreen> {
   void _startCountdownTimer() {
     if (_timerStarted) return;
     _timerStarted = true;
-    final fromStory = widget.story?.lessonDuration;
+
+    final fromStory = widget.story.lessonDuration;
     final fromProvider = context.read<StoryProvider>().lessonDuration;
     final durationMinutes = (fromStory ?? fromProvider) > 0
         ? (fromStory ?? fromProvider)
@@ -85,18 +97,24 @@ class _ReadingScreenState extends State<ReadingScreen> {
       if (_remainingSeconds <= 0) {
         t.cancel();
         if (mounted) {
+          context.read<StoryProvider>().resetStoryPageIndex();
+          _pageController.jumpToPage(0);
           context.pushNamed(
             AppRoutes.startQuizScreen.name,
             extra: {
-              "quizzes": widget.story?.quiz ?? <StoryQuiz>[],
-              "storyTitle": widget.story?.title ?? "",
+              "quizzes": widget.story.quiz ?? <StoryQuiz>[],
+              "storyTitle": widget.story.title ?? "",
             },
-          ).then((_) {
-            if (mounted) {
-              context.read<StoryProvider>().resetStoryPageIndex();
-              _pageController.jumpToPage(0);
-            }
-          });
+          );
+          // context.read<StoryProvider>().resetStoryPageIndex();
+          // _pageController.jumpToPage(0);
+          // context.pushNamed(
+          //   AppRoutes.startQuizScreen.name,
+          //   extra: {
+          //     "quizzes": widget.story.quiz ?? <StoryQuiz>[],
+          //     "storyTitle": widget.story.title ?? "",
+          //   },
+          // );
         }
         return;
       }
@@ -104,46 +122,16 @@ class _ReadingScreenState extends State<ReadingScreen> {
     });
   }
 
-  String _removeAllHtmlTags(String htmlText) {
-    // Replace bold tags with * for markdown-style bolding
-    String processedText = htmlText
-        .replaceAll(RegExp(r'<(strong|b)>', caseSensitive: false), '*')
-        .replaceAll(RegExp(r'</(strong|b)>', caseSensitive: false), '*');
-
-    RegExp exp = RegExp(r"<[^>]*>", multiLine: true, caseSensitive: true);
-    return processedText.replaceAll(exp, '').trim();
-  }
-
   @override
   Widget build(BuildContext context) {
-    final currentPageIndex = context.watch<StoryProvider>().currentStoryPageIndex;
-    final story = widget.story;
-    if (story == null) {
-      return AppLayout(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              AppText(
-                text: 'Story could not be loaded.',
-                style: AppTextStyles.sfProDisplayMedium(fontSize: 16.sp),
-              ),
-              16.h.verticalSpace,
-              TextButton(
-                onPressed: () => context.pop(),
-                child: const Text('Go back'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
+    final provider = context.watch<StoryProvider>();
 
     return PopScope(
-      // canPop: false,
-      // onPopInvokedWithResult: (didPop, result) {
-      //   showLeaveStoryConfirmation(context: context);
-      // },
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        showLeaveStoryConfirmation(context: context);
+      },
       child: AppLayout(
         body: Column(
           children: [
@@ -200,40 +188,27 @@ class _ReadingScreenState extends State<ReadingScreen> {
                     ),
                     //todo Header Text Content (Title)
                     Padding(
-                      padding: EdgeInsets.fromLTRB(24.w, 16, 24.w, 12.w),
+                      padding: EdgeInsets.fromLTRB(22.w, 0, 22.w, 12.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             spacing: 11.5,
                             children: [
                               Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    AppText(
-                                      text: "AI Generated Text",
-                                      style: AppTextStyles.sfProDisplayMedium(
-                                        fontSize: 14.sp,
-                                        color: AppColors.white,
-                                        height: 1.9,
-                                      ),
+                                child: Padding(
+                                  padding: EdgeInsets.only(top: 4),
+                                  child: AppText(
+                                    text: widget.story.title,
+                                    overflow: TextOverflow.visible,
+                                    style: AppTextStyles.sfProDisplayBold(
+                                      fontSize: 22.sp,
+                                      color: Colors.white,
+                                      height: 1.2,
                                     ),
-                                    Flexible(
-                                      child: AppText(
-                                        text: "${widget.story?.title}",
-                                        overflow: TextOverflow.visible,
-                                        style: AppTextStyles.sfProDisplayBold(
-                                          fontSize: 26.sp,
-                                          color: Colors.white,
-                                          height: 1.2,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 ),
                               ),
 
@@ -242,6 +217,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 spacing: 5,
                                 children: [
+                                  8.w.verticalSpace,
                                   //* Story page number
                                   GestureDetector(
                                     behavior: HitTestBehavior.opaque,
@@ -262,7 +238,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
                                       children: [
                                         AppText(
                                           text:
-                                              "${currentPageIndex + 1}/${story.pages.length}",
+                                              "${provider.currentStoryPageIndex + 1}/${widget.story.pages.length}",
                                           style:
                                               AppTextStyles.sfProDisplaySemibold(
                                                 fontSize: 15.sp,
@@ -316,12 +292,16 @@ class _ReadingScreenState extends State<ReadingScreen> {
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
-                itemCount: story.pages.length,
+                itemCount: widget.story.pages.length,
                 onPageChanged: (index) {
+                  Logger.info(
+                    "Image $index: ${widget.story.pages[index].imageUrl}",
+                  );
+
                   context.read<StoryProvider>().setCurrentStoryPageIndex(index);
                 },
                 itemBuilder: (context, index) {
-                  final page = story.pages[index];
+                  final page = widget.story.pages[index];
                   //todo Body Content Container (image and story)
                   return Container(
                     margin: EdgeInsets.symmetric(vertical: 5),
@@ -339,30 +319,10 @@ class _ReadingScreenState extends State<ReadingScreen> {
                       padding: EdgeInsets.zero,
                       children: [
                         5.verticalSpace,
-                        CachedNetworkImage(
-                          height: 280,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          imageUrl: (page.imageUrl.startsWith("https"))
-                              ? page.imageUrl
-                              : DioClient.baseUrl + page.imageUrl,
-                          errorWidget: (context, url, error) => imageShimmer(),
-                          placeholder: (context, url) => imageShimmer(),
-                          imageBuilder: index == 0
-                              ? (context, imageProvider) {
-                                  WidgetsBinding.instance.addPostFrameCallback((
-                                    _,
-                                  ) {
-                                    _startCountdownTimer();
-                                  });
-                                  return Image(
-                                    image: imageProvider,
-                                    fit: BoxFit.cover,
-                                    height: 280,
-                                    width: double.infinity,
-                                  );
-                                }
-                              : null,
+                        _StoryImage(
+                          imageUrl: page.imageUrl,
+                          isFirstPage: index == 0,
+                          onFirstImageLoaded: _startCountdownTimer,
                         ),
                         //todo story image ai base images logic
                         // Consumer<StoryProvider>(
@@ -430,7 +390,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
                             ),
 
                             children: _buildTextSpans(
-                              story.pages[index].text,
+                              widget.story.pages[index].text,
                               AppTextStyles.sfProDisplayRegular(
                                 fontSize: 16.sp,
                                 color: AppColors.black.withValues(alpha: 0.8),
@@ -458,7 +418,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
             //   child:
             // ),
             // 4. Fixed Bottom Button (Only on last page)
-            if (currentPageIndex == story.pages.length - 1)
+            if (provider.currentStoryPageIndex == widget.story.pages.length - 1)
               SafeArea(
                 top: false,
 
@@ -482,18 +442,23 @@ class _ReadingScreenState extends State<ReadingScreen> {
                       backgroundColor: AppColors.primaryColor,
                       text: "Take Quiz",
                       onTap: () {
+                        // provider.setCurrentStoryIndex =
+                        //         provider.currentStoryIndex + 1;
+
                         context.pushNamed(
                           AppRoutes.startQuizScreen.name,
                           extra: {
-                            "quizzes": widget.story?.quiz ?? <StoryQuiz>[],
-                            "storyTitle": widget.story?.title ?? "",
+                            "quizzes": widget.story.quiz ?? <StoryQuiz>[],
+                            "storyTitle": widget.story.title ?? "",
                           },
-                        ).then((_) {
-                          if (mounted) {
-                            context.read<StoryProvider>().resetStoryPageIndex();
-                            _pageController.jumpToPage(0);
-                          }
-                        });
+                        );
+                        context.read<StoryProvider>().resetStoryPageIndex();
+                        _pageController.jumpToPage(0);
+                        //     .then((_) {
+                        //   if (mounted) {
+                        //
+                        //   }
+                        // });
                       },
                     ),
                   ],
@@ -533,20 +498,15 @@ class _ReadingScreenState extends State<ReadingScreen> {
             actions: [
               myActionButtonTheme(
                 onPressed: () {
-                  context.pop(dialogContext);
-                  final prov = context.read<StoryProvider>();
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    prov.clareStoryData();
-                    if (context.mounted) {
-                      context.goNamed(AppRoutes.homeScreen.name);
-                    }
-                  });
+                  Navigator.of(dialogContext).pop();
+                  context.read<StoryProvider>().clareStoryData();
+                  context.goNamed(AppRoutes.homeScreen.name);
                 },
                 title: "Yes",
               ),
               myActionButtonTheme(
                 onPressed: () {
-                  context.pop();
+                  Navigator.of(dialogContext).pop();
                 },
                 title: "Cancel",
               ),
@@ -592,11 +552,6 @@ class _ReadingScreenState extends State<ReadingScreen> {
     TextStyle normalStyle,
     TextStyle boldStyle,
   ) {
-    if (widget.story != null) {
-      // If using our stripped HTML content which might still have some markers or need processing
-      // For now, let's just return the text as is if we don't have our * markers
-      // But typically we stripped tags.
-    }
     List<TextSpan> spans = [];
     List<String> parts = text.split('*');
 
@@ -608,6 +563,131 @@ class _ReadingScreenState extends State<ReadingScreen> {
       }
     }
     return spans;
+  }
+}
+
+/// Resolves and displays a story page image with retry on error.
+class _StoryImage extends StatefulWidget {
+  final String imageUrl;
+  final bool isFirstPage;
+  final VoidCallback? onFirstImageLoaded;
+
+  const _StoryImage({
+    required this.imageUrl,
+    required this.isFirstPage,
+    this.onFirstImageLoaded,
+  });
+
+  @override
+  State<_StoryImage> createState() => _StoryImageState();
+}
+
+class _StoryImageState extends State<_StoryImage> {
+  int _retryKey = 0;
+
+  String get _resolvedUrl {
+    final url = widget.imageUrl.trim();
+    if (url.isEmpty) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return DioClient.baseUrl + url;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final url = _resolvedUrl;
+
+    if (url.isEmpty) {
+      return _buildErrorWidget();
+    }
+
+    return CachedNetworkImage(
+      key: ValueKey('$url-$_retryKey'),
+      height: 280,
+      width: double.infinity,
+      fit: BoxFit.cover,
+      imageUrl: url,
+      httpHeaders: const {
+        'User-Agent': 'Mozilla/5.0 (compatible; FlutterApp/1.0)',
+      },
+      placeholder: (context, url) => _buildShimmer(),
+      errorWidget: (context, url, error) => _buildErrorWidget(),
+      imageBuilder: widget.isFirstPage
+          ? (context, imageProvider) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                widget.onFirstImageLoaded?.call();
+              });
+              return Image(
+                image: imageProvider,
+                fit: BoxFit.cover,
+                height: 280,
+                width: double.infinity,
+              );
+            }
+          : null,
+    );
+  }
+
+  Widget _buildShimmer() {
+    return Shimmer.fromColors(
+      baseColor: AppColors.shimmerBaseColor,
+      highlightColor: AppColors.shimmerHighlightColor,
+      child: Container(
+        height: 280,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(15.r),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorWidget() {
+    return Container(
+      height: 280,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(15.r),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.image_not_supported_outlined,
+            size: 40,
+            color: Colors.grey[500],
+          ),
+          8.verticalSpace,
+          Text(
+            'Image could not load',
+            style: TextStyle(color: Colors.grey[600], fontSize: 13),
+          ),
+          8.verticalSpace,
+          GestureDetector(
+            onTap: () {
+              CachedNetworkImage.evictFromCache(widget.imageUrl);
+              setState(() => _retryKey++);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.teal,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                'Retry',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

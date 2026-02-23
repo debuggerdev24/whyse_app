@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/home_widgets.dart';
-import 'package:redstreakapp/features/home/generate_story/story_topics_screen.dart';
 import 'package:redstreakapp/features/home/widgets/story_section.dart';
 
 class HomeScreen extends StatefulWidget {

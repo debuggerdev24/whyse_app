@@ -1,4 +1,6 @@
-class StoryModel {
+import 'package:redstreakapp/models/home/story_models/readable_story.dart';
+
+class StoryModel implements IReadableStory {
   final String id, title, content;
   final List<StoryQuiz> quiz;
   final List<StoryPages> pages;
@@ -110,15 +112,15 @@ class StoryPages {
     });
 
     factory StoryPages.fromJson(Map<String, dynamic> json) => StoryPages(
-        pageIndex: json["pageIndex"],
-        text: json["text"],
-        primaryEntity: json["primaryEntity"],
-        imageUrl: json["imageUrl"],
-        imageSource: json["imageSource"],
-        license: json["license"],
-        attribution: json["attribution"],
-        sourcePageUrl: json["sourcePageUrl"],
-        needsReview: json["needsReview"],
+        pageIndex: json["pageIndex"] ?? 0,
+        text: json["text"] ?? '',
+        primaryEntity: json["primaryEntity"] ?? '',
+        imageUrl: json["imageUrl"] ?? '',
+        imageSource: json["imageSource"] ?? '',
+        license: json["license"] ?? '',
+        attribution: json["attribution"] ?? '',
+        sourcePageUrl: json["sourcePageUrl"] ?? '',
+        needsReview: json["needsReview"] ?? false,
     );
 
 }

@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/models/home/story_models/story_history_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_topics.dart';
-import 'package:redstreakapp/models/home/story_models/story_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_summary_model.dart';
 import 'package:redstreakapp/services/home/home_api_service.dart';
 
 class HomeProvider extends ChangeNotifier {
   List<CreatedStoryTopicsModel>? topicsList;
 
-  StorySummaryModel? storySummary;
+  StoryIdeaModel? storySummary;
   StoryHistoryModel? story;
   
 
@@ -43,7 +42,7 @@ class HomeProvider extends ChangeNotifier {
         Logger.error(l.errorMsg);
       },
       (r) {
-        storySummary = StorySummaryModel.fromJson(r["data"]);
+        storySummary = StoryIdeaModel.fromJson(r["data"]);
         notifyListeners();
       },
     );

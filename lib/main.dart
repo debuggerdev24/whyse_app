@@ -33,7 +33,8 @@ void main() async {
 
 /*
 todo update
-============================
 
+============================
+when I generating multiple story for the topic at that time I'm getting some of same images for that's all stories please check this
 ============================
 */

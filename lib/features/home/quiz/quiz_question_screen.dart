@@ -156,7 +156,7 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                                   quiz.questions.length - 1) {
                                 quiz.continueQuiz();
                               } else {
-                                context.pushNamed(
+                                context.goNamed(
                                   AppRoutes.quizCompletedScreen.name,
                                   extra: {
                                     'score': quiz.score,

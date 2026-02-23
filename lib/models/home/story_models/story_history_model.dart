@@ -1,11 +1,14 @@
-class StoryHistoryModel {
+import 'package:redstreakapp/models/home/story_models/readable_story.dart';
+import 'package:redstreakapp/models/home/story_models/story_model.dart';
+
+class StoryHistoryModel implements IReadableStory {
     String id;
     String title;
     String content;
-    List<String> pages;
+    List<StoryPages> pages;
     int pageCount;
     List<String> images;
-    List<Quiz> quiz;
+    List<StoryQuiz> quiz;
     Metadata metadata;
     DateTime createdAt;
     DateTime updatedAt;
@@ -23,31 +26,24 @@ class StoryHistoryModel {
         required this.updatedAt,
     });
 
+    /// Satisfies [IReadableStory] — delegates to [metadata.lessonDuration].
+    @override
+    int? get lessonDuration => metadata.lessonDuration;
+
     factory StoryHistoryModel.fromJson(Map<String, dynamic> json) => StoryHistoryModel(
         id: json["id"],
         title: json["title"],
         content: json["content"],
-        pages: List<String>.from(json["pages"].map((x) => x)),
+        pages: (json["pages"] as List).map((e) => StoryPages.fromJson(e),).toList(),
+
         pageCount: json["pageCount"],
         images: List<String>.from(json["images"].map((x) => x)),
-        quiz: List<Quiz>.from(json["quiz"].map((x) => Quiz.fromJson(x))),
+        quiz: List<StoryQuiz>.from(json["quiz"].map((x) => StoryQuiz.fromJson(x))),
         metadata: Metadata.fromJson(json["metadata"]),
         createdAt: DateTime.parse(json["createdAt"]),
         updatedAt: DateTime.parse(json["updatedAt"]),
     );
 
-    Map<String, dynamic> toJson() => {
-        "id": id,
-        "title": title,
-        "content": content,
-        "pages": List<dynamic>.from(pages.map((x) => x)),
-        "pageCount": pageCount,
-        "images": List<dynamic>.from(images.map((x) => x)),
-        "quiz": List<dynamic>.from(quiz.map((x) => x.toJson())),
-        "metadata": metadata.toJson(),
-        "createdAt": createdAt.toIso8601String(),
-        "updatedAt": updatedAt.toIso8601String(),
-    };
 }
 
 class Metadata {
@@ -87,49 +83,5 @@ class Metadata {
         tags: List<String>.from(json["tags"].map((x) => x)),
         isPublic: json["isPublic"],
     );
-
-    Map<String, dynamic> toJson() => {
-        "readingTopic": readingTopic,
-        "readingLevel": readingLevel,
-        "readingSkillFocus": readingSkillFocus,
-        "age": age,
-        "language": language,
-        "textType": textType,
-        "lessonDuration": lessonDuration,
-        "lessonContentInstructions": lessonContentInstructions,
-        "tags": List<dynamic>.from(tags.map((x) => x)),
-        "isPublic": isPublic,
-    };
 }
 
-class Quiz {
-    String answer;
-    List<String> options;
-    String question;
-    String questionType;
-    int correctAnswer;
-
-    Quiz({
-        required this.answer,
-        required this.options,
-        required this.question,
-        required this.questionType,
-        required this.correctAnswer,
-    });
-
-    factory Quiz.fromJson(Map<String, dynamic> json) => Quiz(
-        answer: json["answer"],
-        options: List<String>.from(json["options"].map((x) => x)),
-        question: json["question"],
-        questionType: json["questionType"],
-        correctAnswer: json["correctAnswer"],
-    );
-
-    Map<String, dynamic> toJson() => {
-        "answer": answer,
-        "options": List<dynamic>.from(options.map((x) => x)),
-        "question": question,
-        "questionType": questionType,
-        "correctAnswer": correctAnswer,
-    };
-}

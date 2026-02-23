@@ -93,7 +93,7 @@ class _ReadingGoalScreenState extends State<ReadingGoalScreen> {
                               if (index != options.length - 1)
                                 Container(
                                   width: 1.w,
-                                  height: 22.h,
+                                  height: 22.w,
                                   color: Colors.grey.withValues(alpha: 0.3),
                                 ),
                             ],

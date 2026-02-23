@@ -189,11 +189,11 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                                 //todo create story
                                 await provider.createStory(
                                   onStarted: () {
-                                    Future.delayed(Duration(seconds: 3), () {
+                                    Future.delayed(Duration(seconds: 2), () {
                                       AppToast.info(
                                         context: context,
                                         message: "It can take few seconds",
-                                        durationSecond: 3,
+                                        durationSecond: 2,
                                       );
                                     });
                                   },

@@ -1,11 +1,11 @@
-class StorySummaryModel {
+class StoryIdeaModel {
     String topicId;
     String topicTitle;
     String topicType;
     bool isOwnTopic;
     List<StoryIdea> storyIdeas;
 
-    StorySummaryModel({
+    StoryIdeaModel({
         required this.topicId,
         required this.topicTitle,
         required this.topicType,
@@ -13,7 +13,7 @@ class StorySummaryModel {
         required this.storyIdeas,
     });
 
-    factory StorySummaryModel.fromJson(Map<String, dynamic> json) => StorySummaryModel(
+    factory StoryIdeaModel.fromJson(Map<String, dynamic> json) => StoryIdeaModel(
         topicId: json["topicId"],
         topicTitle: json["topicTitle"],
         topicType: json["topicType"],

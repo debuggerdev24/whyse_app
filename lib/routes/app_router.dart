@@ -26,15 +26,14 @@ import 'package:redstreakapp/features/home/home_screen.dart';
 import 'package:redstreakapp/features/home/quiz/quiz_completed_screen.dart';
 import 'package:redstreakapp/features/home/quiz/quiz_question_screen.dart';
 import 'package:redstreakapp/features/home/quiz/start_quiz_screen.dart';
-import 'package:redstreakapp/features/home/story_history_screen.dart';
-import 'package:redstreakapp/features/home/story_summary_screen.dart';
-import 'package:redstreakapp/models/home/story_models/story_history_model.dart';
+import 'package:redstreakapp/models/home/story_models/readable_story.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
 import '../features/below_16/consent_status_screen.dart';
 import '../features/below_16/parent_email_screen.dart';
 import '../features/dashboard.dart';
 import '../features/home/generate_story/story_interest_screen.dart';
+import '../features/home/story_ideas_screen.dart';
 import '../features/splash/splash_screen.dart';
 import '../models/home/story_models/story_model.dart';
 
@@ -213,18 +212,18 @@ class UserAppRoute {
       path: AppRoutes.readingScreen.path,
       name: AppRoutes.readingScreen.name,
       builder: (context, state) {
-        final story = state.extra as StoryModel?;
+        final story = state.extra as IReadableStory;
         return ReadingScreen(story: story);
       },
     ),
-    GoRoute(
-      path: AppRoutes.createdStoryReadingScreen.path,
-      name: AppRoutes.createdStoryReadingScreen.name,
-      builder: (context, state) {
-        final story = state.extra as StoryHistoryModel?;
-        return StoryHistoryScreen(story: story);
-      },
-    ),
+    // GoRoute(
+    //   path: AppRoutes.createdStoryReadingScreen.path,
+    //   name: AppRoutes.createdStoryReadingScreen.name,
+    //   builder: (context, state) {
+    //     final story = state.extra as StoryHistoryModel?;
+    //     return StoryHistoryScreen(story: story);
+    //   },
+    // ),
     GoRoute(
       path: AppRoutes.startQuizScreen.path,
       name: AppRoutes.startQuizScreen.name,

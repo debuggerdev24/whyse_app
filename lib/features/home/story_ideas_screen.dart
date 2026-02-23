@@ -8,6 +8,8 @@ import 'package:redstreakapp/core/utils/custom_loader.dart';
 import 'package:redstreakapp/core/utils/date_formatter.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
+import 'package:redstreakapp/core/widgets/custom_shimmer.dart';
+import 'package:redstreakapp/features/home/widgets/home_section_shimmers.dart';
 import 'package:redstreakapp/models/home/story_models/story_summary_model.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
@@ -21,7 +23,20 @@ class CreatedStorySummaryScreen extends StatelessWidget {
       body: Consumer<HomeProvider>(
         builder: (context, provider, child) {
           if (provider.storySummary == null) {
-            return const Center(child: CircularProgressIndicator());
+            return SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  18.w.verticalSpace,
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 18.w),
+                    child: ShimmerLoading(width: 180.w, height: 22.h, borderRadius: 8),
+                  ),
+                  15.h.verticalSpace,
+                  Expanded(child: HomeSectionShimmer.storyIdeaShimmer()),
+                ],
+              ),
+            );
           }
           final story = provider.storySummary!;
           return Stack(
@@ -53,25 +68,18 @@ class CreatedStorySummaryScreen extends StatelessWidget {
                             provider.getStoryByIdea(
                               storyIdea: story.storyIdeas[index].id,
                               onSuccess: (story) {
-                                context.pushNamed(AppRoutes.createdStoryReadingScreen.name, extra: story);
+                                context.pushNamed(
+                                  AppRoutes.readingScreen.name,
+                                  extra: story,
+                                );
                               },
                             );
                           },
-                          // ...List.generate(
-                          //   story.storyIdeas.length,
-                          //   (index) => _StoryCard(
-                          //     story: story.storyIdeas[index],
-                          //     onTap: () {
-                          //       provider.getStoryByIdea(
-                          //         storyIdea: story.storyIdeas[index].id,
-                          //       );
-                          //       context.pushNamed(AppRoutes.readingScreen.name);
-                          //     },
-                          //   ),
-                          // ),
+
                         ),
                       ),
                     ),
+                    10.w.verticalSpace,
                   ],
                 ),
               ),
