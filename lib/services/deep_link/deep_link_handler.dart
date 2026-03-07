@@ -120,7 +120,6 @@ class DeepLinkHandler {
               // extra: true,
             );
             provider.verifyCreateAccEmail(currentCtx!);
-
             return;
           }
           if (currentCtx != null) {

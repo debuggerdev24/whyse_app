@@ -30,7 +30,7 @@ class StoryApiService {
     );
   }
 
-  Future<Either<ApiException, Map<String, dynamic>>> createStoryIdea({
+  Future<Either<ApiException, Map<String, dynamic>>> createStoryIdeas({
     required Map<String, dynamic> data,
   }) async {
     return await BaseApiHelper.instance.post(

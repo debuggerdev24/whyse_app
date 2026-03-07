@@ -29,26 +29,7 @@ class StoryTopicsSection extends StatelessWidget {
 
         //todo ---------------- EMPTY STATE ----------------
         if (provider.topicsList!.isEmpty) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              AppText(
-                text: "Your Story Topics",
-                style: AppTextStyles.sfProDisplaySemibold(fontSize: 20.sp),
-              ),
-              16.h.verticalSpace,
-              Center(
-                child: AppText(
-                  text: "No stories available",
-                  style: AppTextStyles.textStyle14Regular,
-                ),
-              ),
-              24.h.verticalSpace,
-              //todo ✅ ALWAYS SHOW BUTTON
-              _addNewReadingButton(context),
-            ],
-          );
+          return buildEmptyState(context);
         }
         //todo ---------------- DATA AVAILABLE ----------------
         final recentStory = provider.topicsList!.first;
@@ -102,6 +83,29 @@ class StoryTopicsSection extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+
+  Column buildEmptyState(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        AppText(
+          text: "Your Story Topics",
+          style: AppTextStyles.sfProDisplaySemibold(fontSize: 20.sp),
+        ),
+        16.h.verticalSpace,
+        Center(
+          child: AppText(
+            text: "No stories available",
+            style: AppTextStyles.textStyle14Regular,
+          ),
+        ),
+        24.h.verticalSpace,
+        //todo ✅ ALWAYS SHOW BUTTON
+        _addNewReadingButton(context),
+      ],
     );
   }
 
@@ -350,31 +354,27 @@ class _StoryCardState extends State<StoryCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // AppText(
-                //   text: story.topic,
-                //   style: AppTextStyles.sfProDisplaySemibold(
-                //     fontSize: 14.sp,
-                //     color: AppColors.teal,
-                //   ),
-                // ),
-                // 4.w.verticalSpace,
                 AppText(
                   text: story.topic,
                   style: AppTextStyles.sfProDisplayBold(fontSize: 20.sp),
                   maxLines: 1,
                 ),
-                _learningGoalExpanded
+                
+                Row(
+                  spacing: 10.w,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _learningGoalExpanded
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          AppText(
-                            text: story.learningGoal,
-                            style: textStyle,
-                          ),
+                          AppText(text: story.learningGoal, style: textStyle),
                           GestureDetector(
-                            onTap: () => setState(() => _learningGoalExpanded = false),
+                            onTap: () =>
+                                setState(() => _learningGoalExpanded = false),
                             child: Padding(
-                              padding: EdgeInsets.only(top: 2.h),
+                              padding: EdgeInsets.only(top: 2.w),
                               child: AppText(
                                 text: 'See less',
                                 style: textStyle.copyWith(
@@ -387,19 +387,21 @@ class _StoryCardState extends State<StoryCard> {
                         ],
                       )
                     : Row(
+                      
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Expanded(
                             child: AppText(
                               text: story.learningGoal,
                               style: textStyle,
-                              maxLines: 3,
+                              maxLines: 6,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           if (story.learningGoal.length > 80)
                             GestureDetector(
-                              onTap: () => setState(() => _learningGoalExpanded = true),
+                              onTap: () =>
+                                  setState(() => _learningGoalExpanded = true),
                               child: Padding(
                                 padding: EdgeInsets.only(left: 4.w),
                                 child: AppText(
@@ -413,13 +415,36 @@ class _StoryCardState extends State<StoryCard> {
                             ),
                         ],
                       ),
-      
-                16.w.verticalSpace,
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: 5.w),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: story.thumbnailUrl.isNotEmpty
+                            ? CachedNetworkImage(
+                                imageUrl: story.thumbnailUrl,
+                                width: 100.w,
+                                height: 96.w,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) =>
+                                    _storyImageShimmer(),
+                                errorWidget: (c, e, s) => _storyImageShimmer(),
+                              )
+                            : SizedBox(
+                                width: 100.w,
+                                height: 96.w,
+                                child: _storyImageShimmer(),
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
                 GestureDetector(
                   onTap: onTap,
                   child: Container(
+                    margin: EdgeInsets.only(top: 10.w),
                     width: double.infinity,
-                    padding: EdgeInsets.symmetric(vertical: 14.h),
+                    padding: EdgeInsets.symmetric(vertical: 11.w),
                     decoration: BoxDecoration(
                       color: AppColors.teal,
                       borderRadius: BorderRadius.circular(30),
@@ -428,7 +453,7 @@ class _StoryCardState extends State<StoryCard> {
                     child: AppText(
                       text: "See Stories",
                       style: AppTextStyles.sfProDisplayBold(
-                        fontSize: 15.sp,
+                        fontSize: 14.sp,
                         color: AppColors.white,
                       ),
                     ),
@@ -437,45 +462,45 @@ class _StoryCardState extends State<StoryCard> {
               ],
             ),
           ),
-          // Column(
-          //   children: [
-          //     ClipRRect(
-          //       borderRadius: BorderRadius.circular(8),
-          //       child: imageUrl.isNotEmpty
-          //           ? CachedNetworkImage(
-          //               imageUrl: imageUrl,
-          //               width: 100.w,
-          //               height: 96.w,
-          //               fit: BoxFit.cover,
-          //               placeholder: (context, url) => _storyImageShimmer(),
-          //               errorWidget: (c, e, s) => _storyImageShimmer(),
-          //             )
-          //           : SizedBox(
-          //               width: 100.w,
-          //               height: 96.w,
-          //               child: _storyImageShimmer(),
-          //             ),
-          //     ),
-          //     20.h.verticalSpace,
-          //     Row(
-          //       children: [
-          //         SvgIcon(
-          //           AppAssets.thunder,
-          //           size: 16.w,
-          //           color: AppColors.primaryColor,
-          //         ),
-          //         4.w.horizontalSpace,
-          //         AppText(
-          //           text: "3",
-          //           style: AppTextStyles.sfProDisplayBold(
-          //             color: AppColors.primaryColor,
-          //             fontSize: 16.sp,
-          //           ),
-          //         ),
-          //       ],
-          //     ),
-          //   ],
-          // ),
+          Column(
+            children: [
+              // ClipRRect(
+              //   borderRadius: BorderRadius.circular(8),
+              //   child: story.thumbnailUrl.isNotEmpty
+              //       ? CachedNetworkImage(
+              //           imageUrl: story.thumbnailUrl,
+              //           width: 100.w,
+              //           height: 96.w,
+              //           fit: BoxFit.cover,
+              //           placeholder: (context, url) => _storyImageShimmer(),
+              //           errorWidget: (c, e, s) => _storyImageShimmer(),
+              //         )
+              //       : SizedBox(
+              //           width: 100.w,
+              //           height: 96.w,
+              //           child: _storyImageShimmer(),
+              //         ),
+              // ),
+              // 20.h.verticalSpace,
+              // Row(
+              //   children: [
+              //     SvgIcon(
+              //       AppAssets.thunder,
+              //       size: 16.w,
+              //       color: AppColors.primaryColor,
+              //     ),
+              //     4.w.horizontalSpace,
+              //     AppText(
+              //       text: "3",
+              //       style: AppTextStyles.sfProDisplayBold(
+              //         color: AppColors.primaryColor,
+              //         fontSize: 16.sp,
+              //       ),
+              //     ),
+              //   ],
+              // ),
+            ],
+          ),
         ],
       ),
     );
@@ -489,4 +514,3 @@ Shimmer _storyImageShimmer() {
     child: Container(color: Colors.grey, width: 96.w, height: 96.w),
   );
 }
-

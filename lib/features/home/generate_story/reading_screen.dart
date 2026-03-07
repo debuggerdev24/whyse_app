@@ -125,7 +125,6 @@ class _ReadingScreenState extends State<ReadingScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<StoryProvider>();
-
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {

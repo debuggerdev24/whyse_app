@@ -30,7 +30,11 @@ class CreatedStorySummaryScreen extends StatelessWidget {
                   18.w.verticalSpace,
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 18.w),
-                    child: ShimmerLoading(width: 180.w, height: 22.h, borderRadius: 8),
+                    child: ShimmerLoading(
+                      width: 180.w,
+                      height: 22.h,
+                      borderRadius: 8,
+                    ),
                   ),
                   15.h.verticalSpace,
                   Expanded(child: HomeSectionShimmer.storyIdeaShimmer()),
@@ -40,7 +44,7 @@ class CreatedStorySummaryScreen extends StatelessWidget {
           }
           final story = provider.storySummary!;
           return Stack(
-            children:[
+            children: [
               SafeArea(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,7 +79,7 @@ class CreatedStorySummaryScreen extends StatelessWidget {
                               },
                             );
                           },
-
+                 
                         ),
                       ),
                     ),
@@ -94,9 +98,9 @@ class CreatedStorySummaryScreen extends StatelessWidget {
 
 class _StoryCard extends StatefulWidget {
   final StoryIdea story;
-  final VoidCallback? onTap;
+  final VoidCallback onTap;
 
-  const _StoryCard({required this.story, this.onTap});
+  const _StoryCard({required this.story, required this.onTap});
 
   @override
   State<_StoryCard> createState() => _StoryCardState();
@@ -120,11 +124,7 @@ class _StoryCardState extends State<_StoryCard> {
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () {
-        if (onTap != null) {
-          onTap();
-        }
-      },
+      onTap: onTap,
       child: Container(
         padding: EdgeInsets.all(16.w),
         margin: EdgeInsets.symmetric(horizontal: 18.w),
@@ -149,12 +149,26 @@ class _StoryCardState extends State<_StoryCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AppText(
-                      text: "Title: ${story.storyTitle}",
-                      style: AppTextStyles.sfProDisplaySemibold(
-                        fontSize: 18.sp,
-                        color: AppColors.teal,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        AppText(
+                          text: "Title: ${story.storyTitle}",
+                          style: AppTextStyles.sfProDisplaySemibold(
+                            fontSize: 18.sp,
+                            color: AppColors.teal,
+                          ),
+                        ),
+                        // GestureDetector(
+                        //   behavior: HitTestBehavior.opaque,
+                        //   onTap:onDelete,
+                        //   child: Icon(
+                        //     Icons.delete,
+                        //     // size: 18.sp,
+                        //     color: Colors.red,
+                        //   ),
+                        // ),
+                      ],
                     ),
                     4.w.verticalSpace,
                     AppText(

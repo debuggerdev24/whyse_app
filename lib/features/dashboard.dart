@@ -35,7 +35,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
 
   void callInitApis({required BuildContext context}) {
     homeProvider.getHomeScreenTopics();
-    storyProvider.getAllStories();
+    // storyProvider.getAllStories();
 
     storyProvider.getStoryGoals(
       onFailed: (error) {

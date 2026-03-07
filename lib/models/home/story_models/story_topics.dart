@@ -1,5 +1,5 @@
 class CreatedStoryTopicsModel {
-    String id,topic,learningGoal,type,updatedAt,createdOn,createdBy;
+    String id,topic,learningGoal,type,updatedAt,createdOn,createdBy,thumbnailUrl;
     List<String> interests;
     int noOfStories,noOfStoriesGenerated;
     bool isOwnTopic;
@@ -17,6 +17,7 @@ class CreatedStoryTopicsModel {
         required this.isOwnTopic,
         required this.createdOn,
         required this.updatedAt,
+        required this.thumbnailUrl,
     });
 
     factory CreatedStoryTopicsModel.fromJson(Map<String, dynamic> json) => CreatedStoryTopicsModel(
@@ -31,5 +32,6 @@ class CreatedStoryTopicsModel {
         isOwnTopic: json["isOwnTopic"],
         createdOn: json["createdOn"],
         updatedAt: json["updatedAt"],
+        thumbnailUrl: json["thumbnailUrl"],
     );
 }

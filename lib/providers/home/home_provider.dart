@@ -7,10 +7,9 @@ import 'package:redstreakapp/services/home/home_api_service.dart';
 
 class HomeProvider extends ChangeNotifier {
   List<CreatedStoryTopicsModel>? topicsList;
-
+  // String? topicId;
   StoryIdeaModel? storySummary;
   StoryHistoryModel? story;
-  
 
   Future<void> getHomeScreenTopics() async {
     topicsList = null;
@@ -42,6 +41,7 @@ class HomeProvider extends ChangeNotifier {
         Logger.error(l.errorMsg);
       },
       (r) {
+        // this.topicId = topicId;
         storySummary = StoryIdeaModel.fromJson(r["data"]);
         notifyListeners();
       },
@@ -65,10 +65,25 @@ bool isGettingStoryLoading = false;
         story = StoryHistoryModel.fromJson(data);
         
         // Logger.info("Story: ${story.image}");
+
         onSuccess.call(story!);
         isGettingStoryLoading = false;
         notifyListeners();
       },
     );
   }
+  // Future<void> deleteStory({required String storyIdea}) async {
+  //   final response = await HomeApiService.instance.deleteStory(
+  //     storyIdea: storyIdea,
+  //   );
+  //   response.fold(
+  //     (l) {
+  //       Logger.error(l.errorMsg);
+  //     },
+  //     (r) {
+  //       Logger.info(r.toString());
+  //       getStoryIdeasByTopicId(topicId: topicId!);
+  //     },
+  //   );
+  // }
 }

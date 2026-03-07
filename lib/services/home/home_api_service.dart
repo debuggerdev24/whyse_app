@@ -16,4 +16,7 @@ class HomeApiService {
   Future<Either<ApiException, Map<String, dynamic>>> getStoryByStoryId({required String storyIdea}) async {
     return await BaseApiHelper.instance.get(EndPoints.getStoryByStoryIdea(storyIdea: storyIdea));
   }
+  Future<Either<ApiException, Map<String, dynamic>>> deleteStory({required String storyIdea}) async {
+    return await BaseApiHelper.instance.delete(EndPoints.deleteStory(storyIdea: storyIdea));
+  }
 }

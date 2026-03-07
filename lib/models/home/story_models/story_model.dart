@@ -48,13 +48,11 @@ class StoryModel implements IReadableStory {
       age: json['age'],
       language: json['language'],
       textType: json['textType'],
-      lessonDuration: json['lessonDuration'],
+      lessonDuration: int.parse(json['lessonDuration']),
       tags: json['tags'] != null ? List<String>.from(json['tags']) : [],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
-      // Some stories may not have pages in the response
-      pages:
-          json['pages'] != null ? (json['pages'] as List).map((i) => StoryPages.fromJson(i)).toList() : [],
+      pages: json['pages'] != null ? (json['pages'] as List).map((i) => StoryPages.fromJson(i)).toList() : [],
     );
   }
 }

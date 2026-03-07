@@ -20,6 +20,7 @@ import 'package:redstreakapp/features/home/generate_reading_screen.dart';
 import 'package:redstreakapp/features/home/generate_story/custom_story_topic_screen.dart';
 import 'package:redstreakapp/features/home/generate_story/reading_screen.dart';
 import 'package:redstreakapp/features/home/generate_story/story_goals_screen.dart';
+import 'package:redstreakapp/features/home/generate_story/story_ideas_screen.dart';
 import 'package:redstreakapp/features/home/generate_story/story_reading_goal_screen.dart';
 import 'package:redstreakapp/features/home/generate_story/story_topics_screen.dart';
 import 'package:redstreakapp/features/home/home_screen.dart';
@@ -339,6 +340,13 @@ class UserAppRoute {
       name: AppRoutes.createdStorySummaryScreen.name,
       builder: (context, state) {
         return CreatedStorySummaryScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.storyIdeasScreen.path,
+      name: AppRoutes.storyIdeasScreen.name,
+      builder: (context, state) {
+        return StoryIdeasScreen();
       },
     ),
   ];

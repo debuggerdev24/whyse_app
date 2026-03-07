@@ -85,7 +85,8 @@ class AppOutlinedButton extends StatelessWidget {
   const AppOutlinedButton({
     super.key,
     required this.onTap,
-    required this.text,
+    this.text,
+    this.child,
     this.textStyle,
     this.borderColor,
     this.foregroundColor,
@@ -101,8 +102,8 @@ class AppOutlinedButton extends StatelessWidget {
   });
 
   final VoidCallback? onTap;
-  final String text;
-  final Widget? icon;
+  final String? text;
+  final Widget? icon, child;
 
   final Color? borderColor;
   final Color? foregroundColor;
@@ -145,8 +146,8 @@ class AppOutlinedButton extends StatelessWidget {
                   color: foregroundColor ?? AppColors.black,
                 ),
               )
-            : Text(
-                text,
+            : child ?? Text(
+                text ?? '',
                 style:
                     textStyle ??
                     AppTextStyles.sfProDisplaySemibold(
