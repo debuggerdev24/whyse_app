@@ -19,10 +19,7 @@ class StoryProvider extends ChangeNotifier {
       searchTopicCtr = TextEditingController(),
       customTopicCtr = TextEditingController(),
       customReadingDurationCtr = TextEditingController();
-  int _lessonDuration = 0,
-      _noOfStories = 0,
-      _currentStoryIndex = 0,
-      detector = 0;
+  int _lessonDuration = 0, _noOfStories = 0, _currentStoryIndex = 0;
   int _currentStoryPageIndex = 0;
   int get lessonDuration => _lessonDuration;
   int get noOfStories => _noOfStories;
@@ -290,6 +287,36 @@ class StoryProvider extends ChangeNotifier {
 
   bool isCreateStoryLoading = false;
 
+  bool isGenerateSingleStoryLoading = false;
+
+  Future<void> generateSingleStory({
+    required String storyIdeaId,
+    required BuildContext context,
+    required VoidCallback onSuccess,
+  }) async {
+    isGenerateSingleStoryLoading = true;
+    notifyListeners();
+
+    final createResponse = await StoryApiService.instance.createStory(
+      data: {"storyIdeaId": storyIdeaId},
+    );
+
+    createResponse.fold(
+      (l) {
+        isGenerateSingleStoryLoading = false;
+        notifyListeners();
+        if (context.mounted) AppToast.error(context, l.errorMsg);
+      },
+      (r) {
+        final story = StoryModel.fromJson(r["data"]);
+        stories.add(story);
+        isGenerateSingleStoryLoading = false;
+        notifyListeners();
+        onSuccess();
+      },
+    );
+  }
+
   bool isGenerateStoryIdeasLoading = false;
 
   void setGenerateStoryIdeasLoading(bool value) {
@@ -301,29 +328,43 @@ class StoryProvider extends ChangeNotifier {
     required VoidCallback onStarted,
     required Function(String error) onFailed,
     required BuildContext context,
+    bool forceRegenerate = false,
+    String? topicId,
   }) async {
-    if (!_validateCreateStoryInput(context)) return;
+    if (!forceRegenerate && !_validateCreateStoryInput(context)) return;
     isGenerateStoryIdeasLoading = true;
+    _currentStoryIndex = 0;
+    _currentStoryPageIndex = 0;
+    stories.clear();
+    storyIdea = null;
     notifyListeners();
     Future.delayed(Duration(seconds: 2), () {
       onStarted.call();
     });
 
-    dataToSendCreateStory = {
-      "interestIds": selectedInterestIds.toList(),
-      (selectedTopic.isEmpty) ? "LessonContentInstructions" : "ReadingTopic":
-          (selectedTopic.isEmpty) ? customTopicCtr.text.trim() : selectedTopic,
-      "LessonDuration": _lessonDuration,
-      "Language": _selectedLanguage,
-      "TextType": _selectedTextType,
-      "ReadingSkillFocus": "Phonics",
-      "Age": _selectedAgeRange,
-      "readingLevel": "CEFR A2",
-      "NoOfStories": _noOfStories,
-    };
+    if (forceRegenerate) {
+      dataToSendCreateStory = {...dataToSendCreateStory};
+      dataToSendCreateStory["forceRegenerate"] = true;
+      if (topicId != null && topicId.isNotEmpty) {
+        dataToSendCreateStory["topicId"] = topicId;
+      }
+    } else {
+      dataToSendCreateStory = {
+        "interestIds": selectedInterestIds.toList(),
+        (selectedTopic.isEmpty) ? "LessonContentInstructions" : "ReadingTopic":
+            (selectedTopic.isEmpty) ? customTopicCtr.text.trim() : selectedTopic,
+        "LessonDuration": _lessonDuration,
+        "Language": _selectedLanguage,
+        "TextType": _selectedTextType,
+        "ReadingSkillFocus": "Phonics",
+        "Age": _selectedAgeRange,
+        "readingLevel": "CEFR A2",
+        "NoOfStories": _noOfStories,
+      };
 
-    if (selectedGoalIds.isNotEmpty) {
-      dataToSendCreateStory["goalIds"] = selectedGoalIds.toList();
+      if (selectedGoalIds.isNotEmpty) {
+        dataToSendCreateStory["goalIds"] = selectedGoalIds.toList();
+      }
     }
 
     final response = await StoryApiService.instance.createStoryIdeas(
@@ -346,6 +387,12 @@ class StoryProvider extends ChangeNotifier {
           return;
         }
 
+        if (storyIdea!.storyIdeas.length > _noOfStories) {
+          storyIdea!.storyIdeas = storyIdea!.storyIdeas
+              .take(_noOfStories)
+              .toList();
+        }
+
         final createResponse = await StoryApiService.instance.createStory(
           data: {"storyIdeaId": storyIdea!.storyIdeas.first.id},
         );
@@ -356,12 +403,13 @@ class StoryProvider extends ChangeNotifier {
             notifyListeners();
             onFailed.call(l.errorMsg);
           },
-          (r) {
+          (r) async {
             final story = StoryModel.fromJson(r["data"]);
             stories.add(story);
+            _currentStoryIndex = 0;
+            _currentStoryPageIndex = 0;
             isGenerateStoryIdeasLoading = false;
             notifyListeners();
-            // Already on story ideas screen (pushed from reading goal before calling createStoryIdeas).
           },
         );
       },
@@ -377,29 +425,9 @@ class StoryProvider extends ChangeNotifier {
     notifyListeners();
     // onStarted.call();
 
-    dataToSendCreateStory = {
-      "interestIds": selectedInterestIds.toList(),
-      (selectedTopic.isEmpty) ? "LessonContentInstructions" : "ReadingTopic":
-          (selectedTopic.isEmpty) ? customTopicCtr.text.trim() : selectedTopic,
-      "LessonDuration": _lessonDuration,
-      "Language": _selectedLanguage,
-      "TextType": _selectedTextType,
-      "ReadingSkillFocus": "Phonics",
-      "Age": _selectedAgeRange,
-      "readingLevel": "CEFR A2",
-      "NoOfStories": _noOfStories,
-    };
-    //* adding goalIds
-    if (selectedGoalIds.isNotEmpty) {
-      dataToSendCreateStory["goalIds"] = selectedGoalIds.toList();
-    }
-
-    //* create story idea
-    stories.clear();
     final response = await StoryApiService.instance.createStoryIdeas(
       data: dataToSendCreateStory,
     );
-
 
     response.fold(
       (l) {
@@ -408,12 +436,25 @@ class StoryProvider extends ChangeNotifier {
         }
       },
       (r) async {
+        storyIdea = StoryIdeasModel.fromJson(r["data"]);
+        if (storyIdea!.storyIdeas.isEmpty) {
+          if (context.mounted)
+            AppToast.error(context, "No story ideas returned");
+          return;
+        }
+
+        if (storyIdea!.storyIdeas.length > _noOfStories) {
+          storyIdea!.storyIdeas = storyIdea!.storyIdeas
+              .take(_noOfStories)
+              .toList();
+        }
+
         Logger.info(
-          "Story Ideas length: ${(r["data"]["storyIdeas"] as List).length.toString()}",
+          "Story Ideas length: ${storyIdea!.storyIdeas.length.toString()}",
         );
 
         final response = await StoryApiService.instance.createStory(
-          data: {"storyIdeaId": storyIdea!.storyIdeas.first},
+          data: {"storyIdeaId": storyIdea!.storyIdeas.first.id},
         );
         response.fold(
           (l) {
@@ -424,11 +465,6 @@ class StoryProvider extends ChangeNotifier {
           (r) {
             final story = StoryModel.fromJson(r["data"]);
             stories.add(story);
-            // createStoryImage(
-            //   onFailed: onCreateImageFailed,
-            //   storyid: story.id,
-            //   pageCount: story.pages!.length,
-            // );
 
             if (context.mounted) {
               context.pushNamed(AppRoutes.storyIdeasScreen.name);
@@ -437,48 +473,6 @@ class StoryProvider extends ChangeNotifier {
             }
           },
         );
-        // for (var storyIdea in storyIdeas) {
-        //   if (storyIdea == storyIdeas.first) continue;
-        //   final response = await StoryApiService.instance.createStory(
-        //     data: {"storyIdeaId": storyIdea},
-        //   );
-        //   // Logger.info("i: $i");
-        //   Logger.info("len: ${storyIdeas.length}");
-        //   ++detector;
-
-        //   Logger.info("Detector: $detector");
-        //   response.fold(
-        //     (l) {
-        //       AppToast.error(context, l.errorMsg);
-        //     },
-        //     (r) async {
-        //       final story = StoryModel.fromJson(r["data"]);
-        //       stories.add(story);
-        //       // createStoryImage(onFailed: onCreateImageFailed, storyid: story.id, pageCount: story.pages!.length);
-
-        //       final response = await StoryApiService.instance.createStoryImage(
-        //         data: {"storyId": story.id, "imageCount": story.pages.length},
-        //       );
-
-        //       response.fold(
-        //         (l) {
-        //           AppToast.error(context, l.errorMsg);
-        //         },
-        //         (r) async {
-        //           Logger.info(
-        //             "createdStoryImagePath : ${r["data"]["imagePaths"].toString()}",
-        //           );
-        //           final images = List<String>.from(r["data"]["imagePaths"]);
-        //           createdStoryImages.add({"images": images});
-        //           Logger.info(
-        //             "createdStoryImagePaths length: ${createdStoryImages.length}",
-        //           );
-        //           Logger.info("storyPage length: ${story.pages.length}}");
-        //         },
-        //       );
-        //     },
-        //   );
-        // }
       },
     );
     isGenerateStoryIdeasLoading = false;

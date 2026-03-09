@@ -153,40 +153,45 @@ class QuizCompletedScreen extends StatelessWidget {
                       ),
                       Spacer(flex: 2),
         
-                      if (provider.stories.length - 1 > provider.currentStoryIndex)
+                      if ((provider.storyIdea?.storyIdeas.length ?? provider.stories.length) - 1 > provider.currentStoryIndex)
                         AppFilledButton(
                           text: "See Next Story",
                           onTap: () {
                             final nextIndex = provider.currentStoryIndex + 1;
-                            provider.setCurrentStoryIndex = nextIndex;
-                            Logger.info("Next Index: $nextIndex");
-                            Logger.info("Current Story Index: ${provider.currentStoryIndex}");
-                            Logger.info("Stories Length: ${provider.stories.length}");
-                            final nextStory = provider.stories[nextIndex];
-
-                            if (!context.mounted) return;
-                            context.goNamed(
-                              AppRoutes.readingScreen.name,
-                              extra: nextStory,
-                            );
+                            
+                            if (nextIndex < provider.stories.length) {
+                              provider.setCurrentStoryIndex = nextIndex;
+                              if (!context.mounted) return;
+                              context.goNamed(AppRoutes.storyIdeasScreen.name);
+                            } else if (provider.storyIdea != null && nextIndex < provider.storyIdea!.storyIdeas.length) {
+                              final nextIdeaId = provider.storyIdea!.storyIdeas[nextIndex].id;
+                              provider.setCurrentStoryIndex = nextIndex;
+                              provider.generateSingleStory(
+                                storyIdeaId: nextIdeaId,
+                                context: context,
+                                onSuccess: () {},
+                              );
+                              if (!context.mounted) return;
+                              context.goNamed(AppRoutes.storyIdeasScreen.name);
+                            }
                           },
                           backgroundColor: AppColors.teal,
                           fixedSize: Size(348, 42.h),
                         )
                       else
+                      //
                         AppFilledButton(
                           text: "Home",
                           onTap: () async {
-                            // context.read<HomeProvider>().getAllStories();
                             if (!context.mounted) return;
                             context.goNamed(AppRoutes.homeScreen.name);
                             context.read<StoryProvider>().clareStoryData();
                             provider.setCurrentStoryIndex = 0;
                           },
                           backgroundColor: AppColors.teal,
-                          fixedSize: Size(348, 42.h),
+                          fixedSize: Size(348, 42.w),
                         ),
-                      40.h.verticalSpace,
+                      40.w.verticalSpace,
                     ],
                   ),
                 ),

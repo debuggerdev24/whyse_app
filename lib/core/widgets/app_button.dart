@@ -44,7 +44,6 @@ class AppFilledButton extends StatelessWidget {
     return Padding(
       padding: margin ?? EdgeInsetsGeometry.zero,
       child: ElevatedButton.icon(
-        
         onPressed: onTap,
 
         style: ElevatedButton.styleFrom(
@@ -99,6 +98,7 @@ class AppOutlinedButton extends StatelessWidget {
     this.isVisible = true,
     this.margin,
     this.borderWidth = 1.5,
+    this.padding,
   });
 
   final VoidCallback? onTap;
@@ -107,7 +107,7 @@ class AppOutlinedButton extends StatelessWidget {
 
   final Color? borderColor;
   final Color? foregroundColor;
-
+  final EdgeInsetsGeometry? padding;
   final AppButtonWidthType? type;
   final bool? isLoading;
   final double? radius, elevation, borderWidth;
@@ -120,41 +120,47 @@ class AppOutlinedButton extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!isVisible) return const SizedBox.shrink();
 
-    return Padding(
-      padding: margin ?? EdgeInsets.zero,
-      child: OutlinedButton.icon(
-        onPressed: onTap,
-        style: OutlinedButton.styleFrom(
-          fixedSize: fixedSize ?? Size(354.w, 50.h),
-          foregroundColor: foregroundColor ?? AppColors.black,
-          side: BorderSide(
-            color: borderColor ?? AppColors.black,
-            width: borderWidth ?? 1.5,
+    return SizedBox(
+      width: double.infinity,
+      child: Padding(
+        padding: margin ?? EdgeInsets.zero,
+        child: OutlinedButton.icon(
+          onPressed: onTap,
+          style: OutlinedButton.styleFrom(
+            
+            padding: padding ?? EdgeInsets.symmetric(vertical: 16.w),
+            // fixedSize: fixedSize ?? padding ?? Size(354.w, 50.w),
+            foregroundColor: foregroundColor ?? AppColors.black,
+            side: BorderSide(
+              color: borderColor ?? AppColors.black,
+              width: borderWidth ?? 1.5,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(radius!.r),
+            ),
+            splashFactory: NoSplash.splashFactory,
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(radius!.r),
-          ),
-          splashFactory: NoSplash.splashFactory,
-        ),
-        icon: isLoading ?? false ? const SizedBox() : icon ?? const SizedBox(),
-        label: isLoading ?? false
-            ? SizedBox(
-                height: 25.h,
-                width: 20.w,
-                child: CircularProgressIndicator(
-                  strokeWidth: 4.r,
-                  color: foregroundColor ?? AppColors.black,
-                ),
-              )
-            : child ?? Text(
-                text ?? '',
-                style:
-                    textStyle ??
-                    AppTextStyles.sfProDisplaySemibold(
-                      fontSize: 16.sp,
-                      color: foregroundColor ?? AppColors.black,
+          icon: isLoading ?? false ? const SizedBox() : icon ?? const SizedBox(),
+          label: isLoading ?? false
+              ? SizedBox(
+                  height: 25.h,
+                  width: 20.w,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 4.r,
+                    color: foregroundColor ?? AppColors.black,
+                  ),
+                )
+              : child ??
+                    Text(
+                      text ?? '',
+                      style:
+                          textStyle ??
+                          AppTextStyles.sfProDisplaySemibold(
+                            fontSize: 16.sp,
+                            color: foregroundColor ?? AppColors.black,
+                          ),
                     ),
-              ),
+        ),
       ),
     );
   }

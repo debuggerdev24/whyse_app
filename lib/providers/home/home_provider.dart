@@ -19,12 +19,26 @@ class HomeProvider extends ChangeNotifier {
     response.fold(
       (l) {
         Logger.error(l.errorMsg);
+        topicsList = [];
       },
       (r) {
-        final data = r["data"];
-        topicsList = (data as List)
-            .map((e) => CreatedStoryTopicsModel.fromJson(e))
-            .toList();
+        try {
+          final data = r["data"];
+          if (data is List) {
+            topicsList = data
+                .map((e) => CreatedStoryTopicsModel.fromJson(e))
+                .toList();
+          } else if (data is Map && data.containsKey("topics")) {
+            topicsList = (data["topics"] as List)
+                .map((e) => CreatedStoryTopicsModel.fromJson(e))
+                .toList();
+          } else {
+            topicsList = [];
+          }
+        } catch (e, stack) {
+          Logger.error("Error parsing topics: $e\n$stack");
+          topicsList = [];
+        }
       },
     );
     notifyListeners();

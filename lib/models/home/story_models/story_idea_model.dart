@@ -89,7 +89,7 @@ class Topic {
         learningGoal: json["learningGoal"],
         interests: List<Interest>.from(json["interests"].map((x) => Interest.fromJson(x))),
         createdAt: DateTime.parse(json["createdAt"]),
-        thumbnailUrl: json["thumbnailUrl"],
+        thumbnailUrl: json["thumbnailUrl"] ?? "",
     );
 
     Map<String, dynamic> toJson() => {

@@ -23,6 +23,71 @@ class HomeSectionShimmer {
   static Widget generateStoryIdeasScreenShimmer() {
     return const _GenerateStoryIdeasScreenShimmer();
   }
+
+  static Widget storyReadingScreenShimmer() {
+    return Shimmer.fromColors(
+      baseColor: AppColors.shimmerBaseColor,
+      highlightColor: AppColors.shimmerHighlightColor,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Hero placeholder (story viewer area)
+          _ShimmerBox(
+            width: double.infinity,
+            height: 240.w,
+            radius: 0,
+          ),
+          //* Story content block below hero: title + meta + nav buttons
+          Container(
+            padding: EdgeInsets.fromLTRB(20.w, 12.w, 20.w, 12.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _ShimmerBox(width: double.infinity, height: 26.h, radius: 6),
+                SizedBox(height: 12.w),
+                Row(
+                  children: [
+                    _ShimmerBox(width: 80.w, height: 16.h, radius: 5),
+                    SizedBox(width: 16.w),
+                    _ShimmerBox(width: 70.w, height: 16.h, radius: 5),
+                    const Spacer(),
+                    _ShimmerBox(width: 90.w, height: 16.h, radius: 5),
+                  ],
+                ),
+                16.w.verticalSpace,
+                Row(
+                  children: [
+                    Expanded(
+                      child: _ShimmerBox(
+                        width: double.infinity,
+                        height: 48.h,
+                        radius: 12,
+                      ),
+                    ),
+                    SizedBox(width: 16.w),
+                    Expanded(
+                      child: _ShimmerBox(
+                        width: double.infinity,
+                        height: 48.h,
+                        radius: 12,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20.w),
+                _ShimmerBox(width: double.infinity, height: 16.h, radius: 4),
+                SizedBox(height: 8.w),
+                _ShimmerBox(width: double.infinity, height: 16.h, radius: 4),
+                SizedBox(height: 8.w),
+                _ShimmerBox(width: 250.w, height: 16.h, radius: 4),
+         
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 /// Shimmer layout matching generate_story StoryIdeasScreen UI.
@@ -31,8 +96,6 @@ class _GenerateStoryIdeasScreenShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    
     return Shimmer.fromColors(
       baseColor: AppColors.shimmerBaseColor,
       highlightColor: AppColors.shimmerHighlightColor,
@@ -43,27 +106,31 @@ class _GenerateStoryIdeasScreenShimmer extends StatelessWidget {
             // Hero placeholder (story viewer area)
             _ShimmerBox(
               width: double.infinity,
-              height: 108.w,
-
+              height: 240.w,
               radius: 0,
             ),
-            // Story content block below hero: title + meta + nav buttons
+            //* Story content block below hero: title + meta + nav buttons
             Container(
-              color: AppColors.backgroundColor,
               padding: EdgeInsets.fromLTRB(20.w, 12.w, 20.w, 12.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _ShimmerBox(width: double.infinity, height: 22.h, radius: 6),
+                  _ShimmerBox(width: 150.w, height: 26.h, radius: 6),
                   SizedBox(height: 8.w),
                   Row(
                     children: [
-                      _ShimmerBox(width: 80.w, height: 14.h, radius: 5),
-                      SizedBox(width: 12.w),
-                      _ShimmerBox(width: 70.w, height: 14.h, radius: 5),
+                      _ShimmerBox(width: 100.w, height: 20.h, radius: 5),
+                      const Spacer(),
+                      _ShimmerBox(width: 80.w, height: 20.h, radius: 5),
                     ],
                   ),
-                  SizedBox(height: 14.w),
+                  SizedBox(height: 20.w),
+                  _ShimmerBox(width: double.infinity, height: 16.h, radius: 4),
+                  SizedBox(height: 6.w),
+                  _ShimmerBox(width: double.infinity, height: 16.h, radius: 4),
+                  SizedBox(height: 6.w),
+                  _ShimmerBox(width: 200.w, height: 16.h, radius: 4),
+                  SizedBox(height: 20.w),
                   Row(
                     children: [
                       Expanded(
@@ -73,15 +140,21 @@ class _GenerateStoryIdeasScreenShimmer extends StatelessWidget {
                           radius: 12,
                         ),
                       ),
-                      SizedBox(width: 12.w),
-                      _ShimmerBox(width: 80.w, height: 44.h, radius: 12),
+                      SizedBox(width: 16.w),
+                      Expanded(
+                        child: _ShimmerBox(
+                          width: double.infinity,
+                          height: 44.h,
+                          radius: 12,
+                        ),
+                      ),
                     ],
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 10.w),
-            // Topic section: title, chips, Start Reading/More, Ideas tab
+            10.w.verticalSpace,
+            //* Topic section: title, chips, Start Reading/More, Ideas tab
             Padding(
               padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 16.w),
               child: Column(
@@ -92,7 +165,7 @@ class _GenerateStoryIdeasScreenShimmer extends StatelessWidget {
                     height: 24.h,
                     radius: 6,
                   ),
-                  SizedBox(height: 8.w),
+                  8.w.verticalSpace,
                   Row(
                     children: [
                       _ShimmerBox(width: 72.w, height: 16.h, radius: 5),

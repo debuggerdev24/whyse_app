@@ -26,6 +26,6 @@ class AppColors {
   static const Color indicatorColor = Color(0xff030C09);
 
 
-  static const Color shimmerBaseColor = Color(0xFFE2E4E8);
+  static const Color shimmerBaseColor = Color.fromARGB(255, 202, 205, 209);
   static const Color shimmerHighlightColor = Color(0xFFFBFCFF);
 }

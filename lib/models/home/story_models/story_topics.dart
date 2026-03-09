@@ -21,17 +21,17 @@ class CreatedStoryTopicsModel {
     });
 
     factory CreatedStoryTopicsModel.fromJson(Map<String, dynamic> json) => CreatedStoryTopicsModel(
-        id: json["id"],
-        topic: json["topic"],
-        learningGoal: json["learningGoal"],
-        type: json["type"],
-        interests: List<String>.from(json["interests"].map((x) => x)),
-        noOfStories: json["noOfStories"],
-        noOfStoriesGenerated: json["noOfStoriesGenerated"],
-        createdBy: json["createdBy"],
-        isOwnTopic: json["isOwnTopic"],
-        createdOn: json["createdOn"],
-        updatedAt: json["updatedAt"],
-        thumbnailUrl: json["thumbnailUrl"],
+        id: json["id"]?.toString() ?? "",
+        topic: json["topic"]?.toString() ?? "",
+        learningGoal: json["learningGoal"]?.toString() ?? "",
+        type: json["type"]?.toString() ?? "",
+        interests: json["interests"] == null ? [] : List<String>.from(json["interests"].map((x) => x.toString())),
+        noOfStories: json["noOfStories"] ?? 0,
+        noOfStoriesGenerated: json["noOfStoriesGenerated"] ?? 0,
+        createdBy: json["createdBy"]?.toString() ?? "",
+        isOwnTopic: json["isOwnTopic"] ?? false,
+        createdOn: json["createdOn"]?.toString() ?? "",
+        updatedAt: json["updatedAt"]?.toString() ?? "",
+        thumbnailUrl: json["thumbnailUrl"]?.toString() ?? "",
     );
 }

@@ -37,7 +37,5 @@ class EndPoints {
   static String storeImage({required String storyId}) => "/story/mobile-story/$storyId/store-images";
   static String getStoryIdeasByTopicId({required String topicId}) => "/story/topics/$topicId/story-ideas?sortOrder=asc&sortOrder=asc";
   static String getStoryByStoryIdea({required String storyIdea}) => "/story/ideas/$storyIdea/story";
-  static String deleteStory({required String storyIdea}) => "/story/ideas/$storyIdea";
-
-  
+  static String browseAllTopics({required String storyIdea}) => "/story/topics?page=1&limit=20&createdBy=all";
 }
