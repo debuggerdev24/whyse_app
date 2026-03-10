@@ -33,9 +33,11 @@ class EndPoints {
   static const verifyForgotPassMail = "/mobile/auth/verify-recovery";
   static const verifyParentConsent = "/mobile/auth/parent-consent";
   static const refreshToken = "/mobile/auth/refresh-token";
-  static const getHomeScreenTopics = "/story/topics?page=1&limit=10&createdBy=self";
+  static String getMyTopics({int page = 1}) =>
+      "/story/topics?page=$page&limit=20&createdBy=self";
+  static const browseAllTopics = "/story/topics";
   static String storeImage({required String storyId}) => "/story/mobile-story/$storyId/store-images";
-  static String getStoryIdeasByTopicId({required String topicId}) => "/story/topics/$topicId/story-ideas?sortOrder=asc&sortOrder=asc";
+  static String addOrRemoveToMyList({required String topicId}) => "/story/topics/$topicId/toggle-list";
+  static String getStoryIdeasByTopicId({required String topicId}) => "/story/topics/$topicId/story-ideas";
   static String getStoryByStoryIdea({required String storyIdea}) => "/story/ideas/$storyIdea/story";
-  static String browseAllTopics({required String storyIdea}) => "/story/topics?page=1&limit=20&createdBy=all";
 }

@@ -192,8 +192,8 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                               onStarted: () {
                                 AppToast.info(
                                   context: context,
-                                  message: "It can take few seconds",
-                                  durationSecond: 2,
+                                  message: "It can take few seconds, Please wait.",
+                                  durationSecond: 4,
                                 );
                               },
                               onFailed: (error) {

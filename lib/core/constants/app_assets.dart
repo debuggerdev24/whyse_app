@@ -42,6 +42,7 @@ class AppAssets {
   static const disable = "$_iconPath/disable.svg";
   static const canceloption = "$_iconPath/canceloption.svg";
   static const correctoption = "$_iconPath/correct.svg";
+  static const searchIcon = "$_iconPath/searchIcons.svg";
 
   static const font = "$_iconPath/font.svg";
 

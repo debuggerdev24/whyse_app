@@ -323,7 +323,7 @@ class BaseApiHelper {
         }
         return 'Invalid request (400)';
       } else if (e.response?.statusCode == 401) {
-        return 'Unauthorized. Please log in again.';
+        return "Something went wrong. Please restart again.";//'Unauthorized. Please log in again.';
       }
       return data[1] ?? 'Unexpected server response';
     }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/home_widgets.dart';
-import 'package:redstreakapp/features/home/widgets/story_section.dart';
+import 'package:redstreakapp/screens/home/widgets/story_section.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,7 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return AppLayout(
       body: SafeArea(
         child: ListView(
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.w),
           children: [
             const HomeHeader(),
             24.w.verticalSpace,

@@ -3,16 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
-import 'package:redstreakapp/core/widgets/custom_shimmer.dart';
 import 'package:redstreakapp/models/home/story_models/story_topics.dart';
 
 import 'package:redstreakapp/providers/home/home_provider.dart';
-import 'package:redstreakapp/features/home/widgets/add_reading_bottom_sheet.dart';
+import 'package:redstreakapp/screens/home/widgets/add_reading_bottom_sheet.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -300,13 +298,57 @@ Widget _buildShimmerLoading() {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      ShimmerLoading(width: 120.w, height: 20.h),
+      Shimmer.fromColors(
+        baseColor: AppColors.shimmerBaseColor,
+        highlightColor: AppColors.shimmerHighlightColor,
+        child: Container(
+          width: 120.w,
+          height: 20.h,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+        ),
+      ),
       16.h.verticalSpace,
-      ShimmerLoading(width: double.infinity, height: 180.h, borderRadius: 20),
+      Shimmer.fromColors(
+        baseColor: AppColors.shimmerBaseColor,
+        highlightColor: AppColors.shimmerHighlightColor,
+        child: Container(
+          width: double.infinity,
+          height: 180.w,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+        ),
+      ),
       24.h.verticalSpace,
-      ShimmerLoading(width: double.infinity, height: 120.h, borderRadius: 20),
+      Shimmer.fromColors(
+        baseColor: AppColors.shimmerBaseColor,
+        highlightColor: AppColors.shimmerHighlightColor,
+        child: Container(
+          width: double.infinity,
+          height: 120.h,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+        ),
+      ),
       16.h.verticalSpace,
-      ShimmerLoading(width: double.infinity, height: 120.h, borderRadius: 20),
+      Shimmer.fromColors(
+        baseColor: AppColors.shimmerBaseColor,
+        highlightColor: AppColors.shimmerHighlightColor,
+        child: Container(
+          width: double.infinity,
+          height: 120.h,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+        ),
+      ),
     ],
   );
 }

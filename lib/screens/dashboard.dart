@@ -8,6 +8,7 @@ import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
+import 'package:redstreakapp/routes/app_router.dart';
 
 ValueNotifier<int> tabIndex = ValueNotifier<int>(0);
 
@@ -34,7 +35,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
   }
 
   void callInitApis({required BuildContext context}) {
-    homeProvider.getHomeScreenTopics();
+    homeProvider.getMyTopics();
     // storyProvider.getAllStories();
 
     storyProvider.getStoryGoals(
@@ -61,18 +62,36 @@ class _UserDashBoardState extends State<UserDashBoard> {
     return ValueListenableBuilder<int>(
       valueListenable: tabIndex,
       builder: (context, value, child) => Scaffold(
+        backgroundColor: AppColors.backgroundColor,
         body: widget.navigationShell,
         bottomNavigationBar: BottomNavigationBar(
-          currentIndex: value,
+          currentIndex: tabIndex.value,
           onTap: (index) {
             tabIndex.value = index;
-            // todo widget.navigationShell.goBranch(index);
+            UserAppRoute.indexedStackNavigationShell?.goBranch(index);
           },
           items: [
-            BottomNavItem(icon: AppAssets.note, isSelected: value == 0),
-            BottomNavItem(icon: AppAssets.book, isSelected: value == 1),
-            BottomNavItem(icon: AppAssets.dumble, isSelected: value == 2),
-            BottomNavItem(icon: AppAssets.star, isSelected: value == 3),
+            BottomNavItem(
+              icon: AppAssets.note,
+              isSelected: value == 0,
+              index: 0,
+              
+            ),
+            BottomNavItem(
+              icon: AppAssets.searchIcon,
+              isSelected: value == 1,
+              index: 1,
+            ),
+            BottomNavItem(
+              icon: AppAssets.dumble,
+              isSelected: value == 2,
+              index: 2,
+            ),
+            BottomNavItem(
+              icon: AppAssets.star,
+              isSelected: value == 3,
+              index: 3,
+            ),
           ],
         ),
       ),
@@ -127,10 +146,13 @@ class BottomNavItem extends StatelessWidget {
     super.key,
     required this.icon,
     required this.isSelected,
+    required this.index,
+
   });
 
   final String icon;
   final bool isSelected;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
@@ -139,15 +161,15 @@ class BottomNavItem extends StatelessWidget {
         : AppColors.darkGrey.withValues(alpha: 0.3);
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 12.h),
-      child: Column(
-        children: [
-          SvgPicture.asset(
-            icon,
-            width: 32.w,
-            colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-          ),
-        ],
+      padding: EdgeInsets.only(
+        left: index == 0 ? 30.w : 0,
+        right: index == 3 ? 30.w : 0,
+      ),
+      child: SvgPicture.asset(
+        icon,
+        width: (index == 1) ? 40.w : 32.w,
+        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+        theme: SvgTheme(currentColor: color),
       ),
     );
   }

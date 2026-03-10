@@ -1,7 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
-import 'package:redstreakapp/features/dashboard.dart';
+import 'package:redstreakapp/screens/dashboard.dart';
 
 class AppLayout extends StatelessWidget {
   final Widget body;

@@ -3,6 +3,8 @@ class StoryIdeaModel {
     String topicTitle;
     String topicType;
     bool isOwnTopic;
+    String topicLearningGoal;
+    String topicThumbnailUrl;
     List<StoryIdea> storyIdeas;
 
     StoryIdeaModel({
@@ -10,15 +12,27 @@ class StoryIdeaModel {
         required this.topicTitle,
         required this.topicType,
         required this.isOwnTopic,
+        required this.topicLearningGoal,
+        required this.topicThumbnailUrl,
         required this.storyIdeas,
     });
 
     factory StoryIdeaModel.fromJson(Map<String, dynamic> json) => StoryIdeaModel(
-        topicId: json["topicId"],
-        topicTitle: json["topicTitle"],
-        topicType: json["topicType"],
-        isOwnTopic: json["isOwnTopic"],
-        storyIdeas: List<StoryIdea>.from(json["storyIdeas"].map((x) => StoryIdea.fromJson(x))),
+        topicId: json["topicId"]?.toString() ?? "",
+        topicTitle: json["topicTitle"]?.toString() ?? "",
+        topicType: json["topicType"]?.toString() ?? "",
+        isOwnTopic: json["isOwnTopic"] == true,
+        topicLearningGoal: json["topicLearningGoal"]?.toString() ??
+            json["learningGoal"]?.toString() ??
+            "",
+        topicThumbnailUrl: json["topicThumbnailUrl"]?.toString() ??
+            json["thumbnailUrl"]?.toString() ??
+            "",
+        storyIdeas: json["storyIdeas"] == null
+            ? []
+            : List<StoryIdea>.from(
+                json["storyIdeas"].map((x) => StoryIdea.fromJson(x)),
+              ),
     );
 }
 
@@ -26,10 +40,10 @@ class StoryIdea {
     String id;
     String storyTitle;
     String description;
+    String thumbnailUrl;
     int sequenceIndex;
     String grade;
     List<String> tags;
-    String level;
     String age;
     String language,topic,topicType,source,createdOn,updatedAt;
     bool isGenerated;
@@ -39,10 +53,10 @@ class StoryIdea {
         required this.id,
         required this.storyTitle,
         required this.description,
+        required this.thumbnailUrl,
         required this.sequenceIndex,
         required this.grade,
         required this.tags,
-        required this.level,
         required this.age,
         required this.language,
         required this.topic,
@@ -55,22 +69,26 @@ class StoryIdea {
     });
 
     factory StoryIdea.fromJson(Map<String, dynamic> json) => StoryIdea(
-        id: json["id"],
-        storyTitle: json["storyTitle"],
-        description: json["description"],
-        sequenceIndex: json["sequenceIndex"],
-        grade: json["grade"],
-        tags: List<String>.from(json["tags"].map((x) => x)),
-        level: json["level"],
-        age: json["age"],
-        language: json["language"],
-        topic: json["topic"],
-        topicType: json["topicType"],
-        source: json["source"],
-        isGenerated: json["isGenerated"],
-        hasStory: json["hasStory"],
-        createdOn: json["createdOn"],
-        updatedAt: json["updatedAt"],
+        id: json["id"]?.toString() ?? "",
+        storyTitle: json["storyTitle"]?.toString() ?? "",
+        description: json["description"]?.toString() ?? "",
+        thumbnailUrl: json["thumbnailUrl"]?.toString() ?? "",
+        sequenceIndex: json["sequenceIndex"] is int
+            ? json["sequenceIndex"] as int
+            : int.tryParse(json["sequenceIndex"]?.toString() ?? "") ?? 0,
+        grade: json["grade"]?.toString() ?? "",
+        tags: json["tags"] == null
+            ? []
+            : List<String>.from(json["tags"].map((x) => x.toString())),
+        age: json["age"]?.toString() ?? "",
+        language: json["language"]?.toString() ?? "",
+        topic: json["topic"]?.toString() ?? "",
+        topicType: json["topicType"]?.toString() ?? "",
+        source: json["source"]?.toString() ?? "",
+        isGenerated: json["isGenerated"] == true,
+        hasStory: json["hasStory"] == true,
+        createdOn: json["createdOn"]?.toString() ?? "",
+        updatedAt: json["updatedAt"]?.toString() ?? "",
     );
 }
 

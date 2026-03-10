@@ -6,15 +6,22 @@ import 'package:redstreakapp/models/home/story_models/story_summary_model.dart';
 import 'package:redstreakapp/services/home/home_api_service.dart';
 
 class HomeProvider extends ChangeNotifier {
+  static const int storyIdeasPageLimit = 20;
   List<CreatedStoryTopicsModel>? topicsList;
   // String? topicId;
   StoryIdeaModel? storySummary;
   StoryHistoryModel? story;
+  bool isStoryIdeasLoading = false;
+  bool isStoryIdeasLoadingMore = false;
+  bool hasMoreStoryIdeas = true;
+  String? storyIdeasError;
+  String? activeStoryIdeasTopicId;
+  int _storyIdeasCurrentPage = 1;
 
-  Future<void> getHomeScreenTopics() async {
+  Future<void> getMyTopics() async {
     topicsList = null;
     notifyListeners();
-    final response = await HomeApiService.instance.getHomeScreenTopics();
+    final response = await HomeApiService.instance.getMyTopics();
 
     response.fold(
       (l) {
@@ -44,22 +51,68 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> getStoryIdeasByTopicId({required String topicId}) async {
-    storySummary = null;
-    notifyListeners();
+  Future<void> getStoryIdeasByTopicId({
+    required String topicId,
+    bool loadMore = false,
+  }) async {
+    if (loadMore) {
+      if (isStoryIdeasLoading ||
+          isStoryIdeasLoadingMore ||
+          !hasMoreStoryIdeas ||
+          activeStoryIdeasTopicId != topicId) {
+        return;
+      }
+      isStoryIdeasLoadingMore = true;
+      notifyListeners();
+    } else {
+      activeStoryIdeasTopicId = topicId;
+      storySummary = null;
+      storyIdeasError = null;
+      hasMoreStoryIdeas = true;
+      _storyIdeasCurrentPage = 1;
+      isStoryIdeasLoading = true;
+      notifyListeners();
+    }
+
+    final int pageToLoad = loadMore ? _storyIdeasCurrentPage + 1 : 1;
     final response = await HomeApiService.instance.getStoryIdeasByTopicId(
       topicId: topicId,
+      page: pageToLoad,
+      limit: storyIdeasPageLimit,
     );
     response.fold(
       (l) {
         Logger.error(l.errorMsg);
+        if (!loadMore) {
+          storyIdeasError = l.errorMsg;
+          storySummary = null;
+          hasMoreStoryIdeas = false;
+        }
       },
       (r) {
-        // this.topicId = topicId;
-        storySummary = StoryIdeaModel.fromJson(r["data"]);
-        notifyListeners();
+        final incomingSummary = StoryIdeaModel.fromJson(r["data"]);
+        if (loadMore && storySummary != null) {
+          final existingIds = storySummary!.storyIdeas
+              .map((story) => story.id)
+              .toSet();
+          final nextStories = incomingSummary.storyIdeas
+              .where((story) => !existingIds.contains(story.id))
+              .toList();
+          storySummary!.storyIdeas.addAll(nextStories);
+        } else {
+          storySummary = incomingSummary;
+        }
+        activeStoryIdeasTopicId = topicId;
+        storyIdeasError = null;
+        _storyIdeasCurrentPage = pageToLoad;
+        hasMoreStoryIdeas =
+            incomingSummary.storyIdeas.length >= storyIdeasPageLimit;
       },
     );
+
+    isStoryIdeasLoading = false;
+    isStoryIdeasLoadingMore = false;
+    notifyListeners();
   }
 
 bool isGettingStoryLoading = false;
@@ -73,6 +126,8 @@ bool isGettingStoryLoading = false;
     response.fold(
       (l) {
         Logger.error(l.errorMsg);
+        isGettingStoryLoading = false;
+        notifyListeners();
       },
       (r) {
         final data = r["data"]["story"];

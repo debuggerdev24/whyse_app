@@ -15,14 +15,16 @@ import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
-import 'package:redstreakapp/features/home/widgets/home_section_shimmers.dart';
+import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
+import 'package:redstreakapp/routes/app_router.dart';
 import 'package:redstreakapp/models/home/story_models/story_idea_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_model.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
+import 'package:redstreakapp/screens/dashboard.dart';
 
-class StoryIdeasScreen extends StatelessWidget {
-  const StoryIdeasScreen({super.key});
+class StoryReadingScreen extends StatelessWidget {
+  const StoryReadingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -52,8 +54,11 @@ class StoryIdeasScreen extends StatelessWidget {
               final story = hasStory
                   ? provider.stories[provider.currentStoryIndex]
                   : null;
+              final shouldShowFullScreenShimmer =
+                  provider.isGenerateStoryIdeasLoading ||
+                  (provider.isGenerateSingleStoryLoading && story == null);
 
-              if (provider.isGenerateStoryIdeasLoading) {
+              if (shouldShowFullScreenShimmer) {
                 return HomeSectionShimmer.generateStoryIdeasScreenShimmer();
               }
               if (isEmpty) {
@@ -89,10 +94,10 @@ class StoryIdeasScreen extends StatelessWidget {
                               lessonDuration: durationMinutes > 0
                                   ? durationMinutes
                                   : provider.lessonDuration,
-                            )
-                          else if (provider.currentStoryIndex < ideas.length)
-                            HomeSectionShimmer.storyReadingScreenShimmer(),
+                            ),
 
+                          // else if ()
+                          //   HomeSectionShimmer.storyReadingScreenShimmer(),
                           16.w.verticalSpace,
                           //* Story Ideas list
                           Padding(
@@ -207,7 +212,7 @@ class StoryIdeasScreen extends StatelessWidget {
           child: AlertDialog(
             backgroundColor: AppColors.white,
             title: Text(
-              "Are you sure you want to quit this story and read the new story?",
+              "Are you sure you want to quit this story?",
               style: AppTextStyles
                   .textStyle20Regular, //regular(color: AppColors.black, fontSize: 19.sp),
             ),
@@ -215,6 +220,12 @@ class StoryIdeasScreen extends StatelessWidget {
               myActionButtonTheme(
                 onPressed: () {
                   dialogContext.pop();
+                  if (context.mounted) {
+                    AppToast.info(
+                      context: context,
+                      message: "Generating new story",
+                    );
+                  }
                   final provider = context.read<StoryProvider>();
                   provider.createStoryIdeas(
                     context: context,
@@ -233,8 +244,16 @@ class StoryIdeasScreen extends StatelessWidget {
               myActionButtonTheme(
                 onPressed: () {
                   Navigator.of(dialogContext).pop();
+                  final provider = context.read<StoryProvider>();
+                  provider.clareStoryData();
+                  provider.clearStoryFields();
+                  provider.resetStoryPageIndex();
+                  provider.setCurrentStoryIndex = 0;
+                  tabIndex.value = 0;
+                  UserAppRoute.indexedStackNavigationShell?.goBranch(0);
+                  UserAppRoute.goRouter.goNamed(AppRoutes.homeScreen.name);
                 },
-                title: "Cancel",
+                title: "Home",
               ),
             ],
           ),
@@ -803,7 +822,7 @@ class _StoryPage extends StatelessWidget {
                 ),
               ),
               12.w.verticalSpace,
-                if (onPrevPage != null || onNextPage != null)
+              if (onPrevPage != null || onNextPage != null)
                 Row(
                   children: [
                     if (onPrevPage != null)
@@ -836,7 +855,7 @@ class _StoryPage extends StatelessWidget {
                           ),
                         ),
                       ),
-                    
+                    if (onPrevPage != null && onNextPage != null) 12.w.horizontalSpace,
                     if (onNextPage != null)
                       Expanded(
                         child: AppOutlinedButton(
@@ -869,7 +888,7 @@ class _StoryPage extends StatelessWidget {
                       ),
                   ],
                 ),
-                
+
               hasStartedReading
                   ? AppOutlinedButton(
                       margin: EdgeInsets.only(top: 10.w),
@@ -892,8 +911,6 @@ class _StoryPage extends StatelessWidget {
                       backgroundColor: AppColors.teal,
                       onTap: onStartReading,
                     ),
-
-            
 
               if (isLastPage) ...[
                 20.w.verticalSpace,
@@ -1000,7 +1017,7 @@ class _StoryImage extends StatelessWidget {
   }
 
   static Widget _loadingProgress(double h, double? progress) {
-    final value = progress != null ? progress.clamp(0.0, 1.0) : null;
+    final value = progress?.clamp(0.0, 1.0);
     final percent = value != null ? (value * 100).round() : null;
     return Container(
       height: h,

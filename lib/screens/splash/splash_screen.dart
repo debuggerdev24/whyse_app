@@ -57,8 +57,9 @@ class _SplashScreenState extends State<SplashScreen>
         final response = await StoryApiService.instance.getAllStories();
         response.fold(
           (l) async {
-            if (l.code == "401" &&
-                l.errorMsg.toLowerCase().contains(AppConstants.unAuthorized)) {
+            if (l.code == "401" 
+            // &&    l.errorMsg.toLowerCase().contains(AppConstants.unAuthorized)
+            ) {
               final result = await AuthApiServices().refreshToken();
 
               result.fold(
