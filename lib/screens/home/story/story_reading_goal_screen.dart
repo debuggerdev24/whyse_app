@@ -63,11 +63,12 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                       AppText(
                         text: "Set Your Daily Reading Goal",
                         style: AppTextStyles.sfProDisplayBold(
+                          height: 1.2,
                           fontSize: 32.sp,
                         ),
                       ),
               
-                      8.h.verticalSpace,
+                      6.w.verticalSpace,
               
                       AppText(
                         text:

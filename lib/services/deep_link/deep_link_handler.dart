@@ -63,7 +63,7 @@ class DeepLinkHandler {
         "path -> ${uri.path}",
       );
       final currentCtx =
-          UserAppRoute.goRouter.routerDelegate.navigatorKey.currentContext;
+          AppRouter.goRouter.routerDelegate.navigatorKey.currentContext;
 
       //todo ---------------- Password Reset ----------------
 
@@ -86,7 +86,7 @@ class DeepLinkHandler {
             Logger.info("Reset Password Token: $token");
             provider.verifyForgotPasswordEmail(
               onSuccess: () {
-                UserAppRoute.goRouter.goNamed(
+                AppRouter.goRouter.goNamed(
                   AppRoutes.resetPasswordScreen.name,
                   extra: true,
                 );
@@ -115,7 +115,7 @@ class DeepLinkHandler {
           }
         } else {
           if (type == AppConstants.signup && token != null) {
-            UserAppRoute.goRouter.goNamed(
+            AppRouter.goRouter.goNamed(
               AppRoutes.createAccountScreen.name,
               // extra: true,
             );
@@ -151,7 +151,7 @@ class DeepLinkHandler {
 
           provider.verifyConsentRequest(
             onSuccess: () {
-              UserAppRoute.goRouter.goNamed(
+              AppRouter.goRouter.goNamed(
                 (provider.isUnder16FromGoogle)
                     ? AppRoutes.profileInfoScreen.name
                     : AppRoutes.createAccountScreen.name,

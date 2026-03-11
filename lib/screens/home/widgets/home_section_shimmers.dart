@@ -39,27 +39,9 @@ class HomeSectionShimmer {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Hero image area with "Page x of y" badge overlay (matches story_reading_screen)
-          Stack(
-            alignment: Alignment.bottomLeft,
-            children: [
-              _ShimmerBox(
-                width: double.infinity,
-                height: 280.w,
-                radius: 0,
-              ),
-              Positioned(
-                left: 12.w,
-                bottom: 12.w,
-                child: _ShimmerBox(
-                  width: 72.w,
-                  height: 28.w,
-                  radius: 8,
-                ),
-              ),
-            ],
-          ),
-          // Title, meta, page label, body, and single Start button (matches real UI)
+          //* Hero image area with "Page x of y" badge overlay (matches story_reading_screen)
+          _ShimmerBox(width: double.infinity, height: 280.w, radius: 0),
+          //* Title, meta, page label, body, and single Start button (matches real UI)
           Padding(
             padding: EdgeInsets.fromLTRB(16.w, 14.w, 16.w, 0),
             child: Column(
@@ -86,6 +68,7 @@ class HomeSectionShimmer {
               ],
             ),
           ),
+          Spacer(),
           Padding(
             padding: EdgeInsets.fromLTRB(16.w, 8.w, 16.w, 20.w),
             child: _ShimmerBox(
@@ -114,11 +97,7 @@ class _GenerateStoryIdeasScreenShimmer extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Hero placeholder (story viewer area)
-            _ShimmerBox(
-              width: double.infinity,
-              height: 240.w,
-              radius: 0,
-            ),
+            _ShimmerBox(width: double.infinity, height: 240.w, radius: 0),
             //* Story content block below hero: title + meta + nav buttons
             Container(
               padding: EdgeInsets.fromLTRB(20.w, 12.w, 20.w, 12.w),
@@ -170,11 +149,7 @@ class _GenerateStoryIdeasScreenShimmer extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _ShimmerBox(
-                    width: 180.w,
-                    height: 24.h,
-                    radius: 6,
-                  ),
+                  _ShimmerBox(width: 180.w, height: 24.h, radius: 6),
                   8.w.verticalSpace,
                   Row(
                     children: [
@@ -206,7 +181,10 @@ class _GenerateStoryIdeasScreenShimmer extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Column(
-                children: List.generate(4, (_) => const _StoryIdeaTileShimmer()),
+                children: List.generate(
+                  4,
+                  (_) => const _StoryIdeaTileShimmer(),
+                ),
               ),
             ),
             SizedBox(height: 24.w),
@@ -342,11 +320,7 @@ class _StoryIdeaCardShimmer extends StatelessWidget {
             16.h.verticalSpace,
 
             // ── "Read Story" button ──
-            _ShimmerBox(
-              width: double.infinity,
-              height: 46.h,
-              radius: 30,
-            ),
+            _ShimmerBox(width: double.infinity, height: 46.h, radius: 30),
           ],
         ),
       ),

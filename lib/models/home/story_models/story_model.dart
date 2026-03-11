@@ -1,6 +1,5 @@
-import 'package:redstreakapp/models/home/story_models/readable_story.dart';
 
-class StoryModel implements IReadableStory {
+class StoryModel {
   final String id, title, content;
   final List<StoryQuiz> quiz;
   final List<StoryPages> pages;

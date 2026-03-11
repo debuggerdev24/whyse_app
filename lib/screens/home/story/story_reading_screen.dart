@@ -12,7 +12,7 @@ import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
-import 'package:redstreakapp/models/home/story_models/readable_story.dart';
+import 'package:redstreakapp/models/home/story_models/story_history_model.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
@@ -20,92 +20,34 @@ import 'package:shimmer/shimmer.dart';
 import '../../../core/helper/log_helper.dart';
 import '../../../core/network/base_api_service.dart';
 import '../../../routes/user_routes.dart';
+import '../../../routes/app_router.dart';
+import '../../../screens/dashboard.dart';
 
 class CreatedStoryReadingScreen extends StatefulWidget {
-  final IReadableStory story;
+  final StoryHistoryModel? initialStory;
+  final String? storyIdeaId;
 
-  const CreatedStoryReadingScreen({super.key, required this.story});
+  const CreatedStoryReadingScreen({
+    super.key,
+    this.initialStory,
+    this.storyIdeaId,
+  });
 
   @override
   State<CreatedStoryReadingScreen> createState() =>
       _CreatedStoryReadingScreenState();
 }
 
-class CreatedStoryReadingLoader extends StatefulWidget {
-  final String storyIdeaId;
-
-  const CreatedStoryReadingLoader({super.key, required this.storyIdeaId});
-
-  @override
-  State<CreatedStoryReadingLoader> createState() =>
-      _CreatedStoryReadingLoaderState();
-}
-
-class _CreatedStoryReadingLoaderState extends State<CreatedStoryReadingLoader> {
-  bool _fetchStarted = false;
-
-  void _fetchStory() {
-    if (_fetchStarted) return;
-    _fetchStarted = true;
-    context.read<HomeProvider>().getStoryByIdea(
-      storyIdea: widget.storyIdeaId,
-      onSuccess: (_) {},
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) => _fetchStory());
-
-    return AppLayout(
-      body: Consumer<HomeProvider>(
-        builder: (context, provider, _) {
-          if (provider.story != null) {
-            return CreatedStoryReadingScreen(story: provider.story!);
-          }
-          if (provider.isGettingStoryLoading) {
-            return HomeSectionShimmer.storyReadingScreenShimmer();
-          }
-          return Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error_outline_rounded,
-                    size: 48.sp,
-                    color: AppColors.black.withValues(alpha: 0.5),
-                  ),
-                  16.w.verticalSpace,
-                  AppText(
-                    text: "Could not load story. Please try again.",
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.sfProDisplayMedium(
-                      fontSize: 16.sp,
-                      color: AppColors.black.withValues(alpha: 0.7),
-                    ),
-                  ),
-                  24.w.verticalSpace,
-                  TextButton(
-                    onPressed: () => context.pop(),
-                    child: const Text("Go back"),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
 class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
   final PageController _pageController = PageController();
   int _remainingSeconds = 0;
   bool _timerStarted = false;
+  bool _isTimerRunning = false;
   Timer? _countdownTimer;
+  bool _fetchStarted = false;
+  StoryHistoryModel? _story;
+
+  StoryHistoryModel? get _activeStory => _story ?? context.read<HomeProvider>().story;
 
   @override
   void dispose() {
@@ -117,28 +59,56 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
   @override
   void initState() {
     super.initState();
+    _story = widget.initialStory;
     _initForStory();
+    _fetchStoryIfNeeded();
   }
 
   @override
   void didUpdateWidget(CreatedStoryReadingScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.story.id != widget.story.id) {
+    final oldStoryId = oldWidget.initialStory?.id ?? oldWidget.storyIdeaId;
+    final newStoryId = widget.initialStory?.id ?? widget.storyIdeaId;
+    if (oldStoryId != newStoryId) {
+      _story = widget.initialStory;
+      _fetchStarted = false;
       _timerStarted = false;
+      _isTimerRunning = false;
       _countdownTimer?.cancel();
       _countdownTimer = null;
       _pageController.jumpToPage(0);
       _initForStory();
+      _fetchStoryIfNeeded();
     }
   }
 
+  void _fetchStoryIfNeeded() {
+    if (_story != null || widget.storyIdeaId == null || _fetchStarted) return;
+    _fetchStarted = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<HomeProvider>().getStoryByIdea(
+        storyIdea: widget.storyIdeaId!,
+        onSuccess: (story) {
+          if (!mounted) return;
+          setState(() {
+            _story = story;
+          });
+          _initForStory();
+        },
+      );
+    });
+  }
+
   void _initForStory() {
+    final activeStory = _activeStory;
+    if (activeStory == null) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final provider = context.read<StoryProvider>();
       provider.resetStoryPageIndex();
 
-      final fromStory = widget.story.lessonDuration ?? 0;
+      final fromStory = activeStory.lessonDuration ?? 0;
       final fromProvider = provider.lessonDuration;
       final durationMinutes = (fromStory > 0 ? fromStory : fromProvider) > 0
           ? (fromStory > 0 ? fromStory : fromProvider)
@@ -146,20 +116,27 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
 
       setState(() {
         _remainingSeconds = durationMinutes * 60;
+        _timerStarted = false;
+        _isTimerRunning = false;
       });
     });
   }
 
   void _startCountdownTimer() {
     if (_timerStarted) return;
-    _timerStarted = true;
 
-    final fromStory = widget.story.lessonDuration;
+    final activeStory = _activeStory;
+    if (activeStory == null) return;
+    final fromStory = activeStory.lessonDuration;
     final fromProvider = context.read<StoryProvider>().lessonDuration;
     final durationMinutes = (fromStory ?? fromProvider) > 0
         ? (fromStory ?? fromProvider)
         : 5;
-    setState(() => _remainingSeconds = durationMinutes * 60);
+    setState(() {
+      _timerStarted = true;
+      _isTimerRunning = true;
+      _remainingSeconds = durationMinutes * 60;
+    });
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) {
         t.cancel();
@@ -167,25 +144,12 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
       }
       if (_remainingSeconds <= 0) {
         t.cancel();
+        _countdownTimer = null;
         if (mounted) {
-          context.read<StoryProvider>().resetStoryPageIndex();
-          _pageController.jumpToPage(0);
-          context.pushNamed(
-            AppRoutes.startQuizScreen.name,
-            extra: {
-              "quizzes": widget.story.quiz,
-              "storyTitle": widget.story.title,
-            },
-          );
-          // context.read<StoryProvider>().resetStoryPageIndex();
-          // _pageController.jumpToPage(0);
-          // context.pushNamed(
-          //   AppRoutes.startQuizScreen.name,
-          //   extra: {
-          //     "quizzes": widget.story.quiz ?? <StoryQuiz>[],
-          //     "storyTitle": widget.story.title ?? "",
-          //   },
-          // );
+          setState(() {
+            _isTimerRunning = false;
+          });
+          _openQuiz(activeStory);
         }
         return;
       }
@@ -193,16 +157,106 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
     });
   }
 
+  void _pauseCountdownTimer() {
+    _countdownTimer?.cancel();
+    _countdownTimer = null;
+    if (!mounted) return;
+    setState(() {
+      _isTimerRunning = false;
+    });
+  }
+
+  void _resumeCountdownTimer() {
+    if (_isTimerRunning || _remainingSeconds <= 0) return;
+
+    final activeStory = _activeStory;
+    if (activeStory == null) return;
+
+    setState(() {
+      _isTimerRunning = true;
+    });
+
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) {
+        t.cancel();
+        return;
+      }
+      if (_remainingSeconds <= 0) {
+        t.cancel();
+        _countdownTimer = null;
+        if (mounted) {
+          setState(() {
+            _isTimerRunning = false;
+          });
+          _openQuiz(activeStory);
+        }
+        return;
+      }
+      setState(() => _remainingSeconds--);
+    });
+  }
+
+  void _openQuiz(StoryHistoryModel activeStory) {
+    context.read<StoryProvider>().resetStoryPageIndex();
+    _pageController.jumpToPage(0);
+    context.pushNamed(
+      AppRoutes.startQuizScreen.name,
+      extra: {
+        "quizzes": activeStory.quiz,
+        "storyTitle": activeStory.title,
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final homeProvider = context.watch<HomeProvider>();
     final provider = context.watch<StoryProvider>();
-    final totalPages = widget.story.pages.length;
+    final activeStory = _story ?? homeProvider.story;
+
+    if (activeStory == null) {
+      return AppLayout(
+        body: homeProvider.isGettingStoryLoading
+            ? HomeSectionShimmer.storyReadingScreenShimmer()
+            : Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24.w),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline_rounded,
+                        size: 48.sp,
+                        color: AppColors.black.withValues(alpha: 0.5),
+                      ),
+                      16.w.verticalSpace,
+                      AppText(
+                        text: "Could not load story. Please try again.",
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.sfProDisplayMedium(
+                          fontSize: 16.sp,
+                          color: AppColors.black.withValues(alpha: 0.7),
+                        ),
+                      ),
+                      24.w.verticalSpace,
+                      TextButton(
+                        onPressed: () => context.pop(),
+                        child: const Text("Go back"),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+      );
+    }
+
+    final totalPages = activeStory.pages.length;
     final currentPageIndex = provider.currentStoryPageIndex.clamp(
       0,
       totalPages - 1,
     );
     final durationMinutes = (() {
-      final fromStory = widget.story.lessonDuration ?? 0;
+      final fromStory = activeStory.lessonDuration ?? 0;
       final fromProvider = provider.lessonDuration;
       return (fromStory > 0 ? fromStory : fromProvider) > 0
           ? (fromStory > 0 ? fromStory : fromProvider)
@@ -210,6 +264,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
     })();
     final isLastPage = currentPageIndex == totalPages - 1;
     final hasPreviousPage = currentPageIndex > 0;
+    final showReadingControls = _timerStarted && !isLastPage;
 
     return PopScope(
       canPop: false,
@@ -228,14 +283,14 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                   itemCount: totalPages,
                   onPageChanged: (index) {
                     Logger.info(
-                      "Image $index: ${widget.story.pages[index].imageUrl}",
+                      "Image $index: ${activeStory.pages[index].imageUrl}",
                     );
                     context.read<StoryProvider>().setCurrentStoryPageIndex(
                       index,
                     );
                   },
                   itemBuilder: (context, index) {
-                    final page = widget.story.pages[index];
+                    final page = activeStory.pages[index];
                     return ListView(
                       padding: EdgeInsets.zero,
                       children: [
@@ -244,6 +299,9 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                             _StoryImage(
                               imageUrl: page.imageUrl,
                               isFirstPage: index == 0,
+                              onClose: () {
+                                showLeaveStoryConfirmation(context: context);
+                              },
                             ),
                             Positioned(
                               left: 12.w,
@@ -274,7 +332,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               AppText(
-                                text: widget.story.title,
+                                text: activeStory.title,
                                 style: AppTextStyles.sfProDisplayBold(
                                   fontSize: 28.sp,
                                   height: 1.15,
@@ -319,6 +377,17 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                                       ),
                                     ),
                                   ),
+                                  if (_timerStarted) ...[
+                                    const Spacer(),
+                                    AppText(
+                                      text:
+                                          "Time left: ${_formatDuration(_remainingSeconds)}",
+                                      style: AppTextStyles.sfProDisplaySemibold(
+                                        fontSize: 16.sp,
+                                        color: AppColors.teal,
+                                      ),
+                                    ),
+                                  ],
                                 ],
                               ),
                               12.w.verticalSpace,
@@ -367,29 +436,58 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                 top: false,
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(16.w, 8.w, 16.w, 20.w),
-                  child: !_timerStarted
-                      ? AppFilledButton(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (!_timerStarted)
+                        AppFilledButton(
                           backgroundColor: AppColors.teal,
                           text: "Start",
                           onTap: _startCountdownTimer,
                         )
-                      : isLastPage
-                      ? AppFilledButton(
+                      else if (!_isTimerRunning)
+                        AppOutlinedButton(
+                          onTap: _resumeCountdownTimer,
+                          borderColor: AppColors.teal,
+                          textStyle: AppTextStyles.sfProDisplaySemibold(
+                            fontSize: 14.sp,
+                            color: AppColors.teal,
+                          ),
+                          child: AppText(
+                            text: "Resume",
+                            style: AppTextStyles.sfProDisplaySemibold(
+                              fontSize: 14.sp,
+                              color: AppColors.teal,
+                            ),
+                          ),
+                        )
+                      else if (showReadingControls)
+                        AppOutlinedButton(
+                          onTap: _pauseCountdownTimer,
+                          borderColor: AppColors.teal,
+                          textStyle: AppTextStyles.sfProDisplaySemibold(
+                            fontSize: 14.sp,
+                            color: AppColors.teal,
+                          ),
+                          child: AppText(
+                            text: "Stop",
+                            style: AppTextStyles.sfProDisplaySemibold(
+                              fontSize: 14.sp,
+                              color: AppColors.teal,
+                            ),
+                          ),
+                        )
+                      else
+                        AppFilledButton(
                           backgroundColor: AppColors.teal,
                           text: "Take Quiz",
                           onTap: () {
-                            context.pushNamed(
-                              AppRoutes.startQuizScreen.name,
-                              extra: {
-                                "quizzes": widget.story.quiz,
-                                "storyTitle": widget.story.title,
-                              },
-                            );
-                            context.read<StoryProvider>().resetStoryPageIndex();
-                            _pageController.jumpToPage(0);
+                            _openQuiz(activeStory);
                           },
-                        )
-                      : Row(
+                        ),
+                      if (showReadingControls) ...[
+                        12.h.verticalSpace,
+                        Row(
                           children: [
                             Expanded(
                               child: AppOutlinedButton(
@@ -453,6 +551,9 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                             ),
                           ],
                         ),
+                      ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -471,23 +572,28 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
             backgroundColor: AppColors.backgroundColor,
             title: Text(
               "Are you sure you want to quit this story?",
-              style: AppTextStyles
-                  .textStyle20Regular, //regular(color: AppColors.black, fontSize: 19.sp),
+              style: AppTextStyles.textStyle20Regular,
             ),
             actions: [
               myActionButtonTheme(
                 onPressed: () {
-                  Navigator.of(dialogContext).pop();
-                  context.read<StoryProvider>().clareStoryData();
-                  context.goNamed(AppRoutes.homeScreen.name);
+                  dialogContext.pop();
+                  final provider = context.read<StoryProvider>();
+                  provider.clareStoryData();
+                  provider.clearStoryFields();
+                  provider.resetStoryPageIndex();
+                  provider.setCurrentStoryIndex = 0;
+                  context.pop();
+                  // AppRouter.indexedStackNavigationShell?.goBranch(1);
+                  // AppRouter.goRouter.goNamed(AppRoutes.searchScreen.name);
                 },
-                title: "Home",
+                title: "Quit",
               ),
               myActionButtonTheme(
                 onPressed: () {
                   Navigator.of(dialogContext).pop();
                 },
-                title: "Continue",
+                title: "Cancel",
               ),
             ],
           ),
@@ -505,7 +611,9 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
       child: Text(
         title,
         style: AppTextStyles.sfProDisplayRegular(
-          color: (title == "Home") ? AppColors.redColor : AppColors.black,
+          color: (title == "Home" || title == "Quit")
+              ? AppColors.redColor
+              : AppColors.black,
           fontSize: 17.sp,
         ),
       ),
@@ -531,8 +639,15 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
     TextStyle normalStyle,
     TextStyle boldStyle,
   ) {
+    String processedText = text
+        .replaceAll(RegExp(r'<(strong|b)>', caseSensitive: false), '*')
+        .replaceAll(RegExp(r'</(strong|b)>', caseSensitive: false), '*');
+
+    final exp = RegExp(r"<[^>]*>", multiLine: true, caseSensitive: true);
+    processedText = processedText.replaceAll(exp, '');
+
     List<TextSpan> spans = [];
-    List<String> parts = text.split('*');
+    List<String> parts = processedText.split('*');
 
     for (int i = 0; i < parts.length; i++) {
       if (i % 2 == 1) {
@@ -543,14 +658,26 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
     }
     return spans;
   }
+
+  String _formatDuration(int totalSeconds) {
+    final safeSeconds = totalSeconds.clamp(0, 999 * 60);
+    final minutes = safeSeconds ~/ 60;
+    final seconds = safeSeconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
 }
 
 /// Resolves and displays a story page image with retry on error.
 class _StoryImage extends StatefulWidget {
   final String imageUrl;
   final bool isFirstPage;
+  final VoidCallback onClose;
 
-  const _StoryImage({required this.imageUrl, required this.isFirstPage});
+  const _StoryImage({
+    required this.imageUrl,
+    required this.isFirstPage,
+    required this.onClose,
+  });
 
   @override
   State<_StoryImage> createState() => _StoryImageState();
@@ -576,7 +703,7 @@ class _StoryImageState extends State<_StoryImage> {
 
     return CachedNetworkImage(
       key: ValueKey('$url-$_retryKey'),
-      height: 280,
+      height: 270.w,
       width: double.infinity,
       fit: BoxFit.cover,
       imageUrl: url,
@@ -585,11 +712,28 @@ class _StoryImageState extends State<_StoryImage> {
       },
       placeholder: (context, url) => _buildShimmer(),
       errorWidget: (context, url, error) => _buildErrorWidget(),
-      imageBuilder: (context, imageProvider) => Image(
-        image: imageProvider,
-        fit: BoxFit.cover,
-        height: 280,
-        width: double.infinity,
+      imageBuilder: (context, imageProvider) => Stack(
+        fit: StackFit.expand,
+        children: [
+          Image(
+            image: imageProvider,
+            fit: BoxFit.cover,
+            height: 280,
+            width: double.infinity,
+          ),
+          Positioned(
+            top: 12.w,
+            left: 12.w,
+            child: GlassIconButton(
+              onTap: widget.onClose,
+              child: Icon(
+                Icons.close_rounded,
+                size: 18.sp,
+                color: AppColors.white,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

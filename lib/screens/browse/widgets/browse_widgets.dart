@@ -266,7 +266,7 @@ class PosterTopicCard extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24.r),
         child: Stack(
-          children: [
+          children:[
             Positioned.fill(child: TopicArt(topic: topic)),
             Positioned.fill(
               child: DecoratedBox(
@@ -318,7 +318,7 @@ class PosterTopicCard extends StatelessWidget {
                     runSpacing: 8.h,
                     children: [
                       GlassChip(
-                        label: topic.generatedCountLabel,
+                        label: topic.storiesCountLabel,
                         textColor: AppColors.white,
                       ),
                       if (topic.interests.isNotEmpty)

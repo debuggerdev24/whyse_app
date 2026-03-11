@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -79,6 +80,10 @@ class StoryReadingScreen extends StatelessWidget {
                       999,
                     )
                   : 0;
+              final currentStoryIdeaId =
+                  provider.currentStoryIndex < ideas.length
+                  ? ideas[provider.currentStoryIndex].id
+                  : '';
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -91,9 +96,13 @@ class StoryReadingScreen extends StatelessWidget {
                           if (story != null)
                             _StoryViewer(
                               story: story,
+                              storyIdeaId: currentStoryIdeaId,
                               lessonDuration: durationMinutes > 0
                                   ? durationMinutes
                                   : provider.lessonDuration,
+                              onCloseStory: () {
+                                showLeaveStoryConfirmation(context: context);
+                              },
                             ),
 
                           // else if ()
@@ -213,47 +222,29 @@ class StoryReadingScreen extends StatelessWidget {
             backgroundColor: AppColors.white,
             title: Text(
               "Are you sure you want to quit this story?",
-              style: AppTextStyles
-                  .textStyle20Regular, //regular(color: AppColors.black, fontSize: 19.sp),
+              style: AppTextStyles.textStyle20Regular,
             ),
             actions: [
               myActionButtonTheme(
                 onPressed: () {
                   dialogContext.pop();
-                  if (context.mounted) {
-                    AppToast.info(
-                      context: context,
-                      message: "Generating new story",
-                    );
-                  }
-                  final provider = context.read<StoryProvider>();
-                  provider.createStoryIdeas(
-                    context: context,
-                    onStarted: () {},
-                    onFailed: (error) {
-                      if (context.mounted) {
-                        AppToast.error(context, error);
-                      }
-                    },
-                    forceRegenerate: true,
-                    topicId: provider.storyIdea?.topic.id,
-                  );
-                },
-                title: "Yes",
-              ),
-              myActionButtonTheme(
-                onPressed: () {
-                  Navigator.of(dialogContext).pop();
                   final provider = context.read<StoryProvider>();
                   provider.clareStoryData();
                   provider.clearStoryFields();
                   provider.resetStoryPageIndex();
                   provider.setCurrentStoryIndex = 0;
-                  tabIndex.value = 0;
-                  UserAppRoute.indexedStackNavigationShell?.goBranch(0);
-                  UserAppRoute.goRouter.goNamed(AppRoutes.homeScreen.name);
+                  tabIndex.value = 1;
+                  AppRouter.indexedStackNavigationShell?.goBranch(1);
+                  AppRouter.goRouter.goNamed(AppRoutes.searchScreen.name);
                 },
-                title: "Home",
+                title: "Quit",
+              ),
+              myActionButtonTheme(
+                onPressed: () {
+                  
+                  Navigator.of(dialogContext).pop();
+                },
+                title: "Cancel",
               ),
             ],
           ),
@@ -271,7 +262,7 @@ class StoryReadingScreen extends StatelessWidget {
       child: Text(
         title,
         style: AppTextStyles.sfProDisplayRegular(
-          color: (title == "Yes") ? AppColors.redColor : AppColors.black,
+          color: (title == "Yes" || title == "Quit") ? AppColors.redColor : AppColors.black,
           fontSize: 17.sp,
         ),
       ),
@@ -295,7 +286,7 @@ class _ReadingTimerText extends StatelessWidget {
     return AppText(
       text: 'Time left: ${_formatDuration(remainingSeconds)}',
       style: AppTextStyles.sfProDisplaySemibold(
-        fontSize: 14.sp,
+        fontSize: 16.sp,
         color: AppColors.teal,
       ),
     );
@@ -431,44 +422,6 @@ class _StoryIdeaTile extends StatelessWidget {
               ),
 
               5.w.horizontalSpace,
-              //* Action Icons
-              Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  GestureDetector(
-                    onTap: () {},
-                    child: Icon(
-                      Icons.info_outline,
-                      size: 22.sp,
-                      color: AppColors.black.withValues(alpha: 0.5),
-                    ),
-
-                    // constraints: BoxConstraints(minWidth: 36.w, minHeight: 36.h),
-                  ),
-
-                  GestureDetector(
-                    onTap: isGenerating ? null : onTap,
-                    child: isGenerating
-                        ? SizedBox(
-                            width: 24.sp,
-                            height: 24.sp,
-                            child: CircularProgressIndicator(
-                              color: AppColors.teal,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : Icon(
-                            Icons.play_circle_outline,
-                            size: 28.sp,
-                            color: AppColors.teal,
-                          ),
-                    // padding: EdgeInsets.zero,
-                    // constraints: BoxConstraints(minWidth: 36.w, minHeight: 36.h),
-                  ),
-                ],
-              ),
             ],
           ),
         ),
@@ -488,14 +441,22 @@ class _StoryIdeaTile extends StatelessWidget {
       ),
     );
   }
+
 }
 
 //* story viewer: fixed hero image per page, scrollable content below, Start Quiz on last page.
 class _StoryViewer extends StatefulWidget {
   final StoryModel story;
+  final String storyIdeaId;
   final int lessonDuration;
+  final VoidCallback onCloseStory;
 
-  const _StoryViewer({required this.story, required this.lessonDuration});
+  const _StoryViewer({
+    required this.story,
+    required this.storyIdeaId,
+    required this.lessonDuration,
+    required this.onCloseStory,
+  });
 
   @override
   State<_StoryViewer> createState() => _StoryViewerState();
@@ -623,7 +584,9 @@ class _StoryViewerState extends State<_StoryViewer> {
           pageIndex: index,
           totalPages: pages.length,
           storyTitle: widget.story.title,
+          storyIdeaId: widget.storyIdeaId,
           lessonDuration: widget.lessonDuration,
+          onCloseStory: widget.onCloseStory,
           remainingSeconds: _remainingSeconds,
           hasStartedReading: _hasStartedReading,
           isTimerRunning: _isTimerRunning,
@@ -664,7 +627,9 @@ class _StoryPage extends StatelessWidget {
   final int pageIndex;
   final int totalPages;
   final String storyTitle;
+  final String storyIdeaId;
   final int lessonDuration;
+  final VoidCallback onCloseStory;
   final int remainingSeconds;
   final bool hasStartedReading;
   final bool isTimerRunning;
@@ -682,7 +647,9 @@ class _StoryPage extends StatelessWidget {
     required this.pageIndex,
     required this.totalPages,
     required this.storyTitle,
+    required this.storyIdeaId,
     required this.lessonDuration,
+    required this.onCloseStory,
     required this.remainingSeconds,
     required this.hasStartedReading,
     required this.isTimerRunning,
@@ -709,7 +676,7 @@ class _StoryPage extends StatelessWidget {
     TextStyle boldStyle,
   ) {
     String processedText = text
-        .replaceAll(RegExp(r'<(strong|b)>', caseSensitive: false), '*')
+        .replaceAll(RegExp(r'<(strong|b|p)>', caseSensitive: false), '*')
         .replaceAll(RegExp(r'</(strong|b)>', caseSensitive: false), '*');
 
     RegExp exp = RegExp(r"<[^>]*>", multiLine: true, caseSensitive: true);
@@ -730,6 +697,9 @@ class _StoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<StoryProvider>();
+    final isMarkingAsRead = provider.isMarkingStoryAsRead(storyIdeaId);
+    final isMarkedAsRead = provider.isStoryMarkedAsRead(storyIdeaId);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -738,8 +708,9 @@ class _StoryPage extends StatelessWidget {
         _StoryImage(
           imageUrl: _resolveImageUrl(page.imageUrl),
           //*image height
-          height: 240.w,
+          height: 270.w,
           pageLabel: 'Page ${pageIndex + 1} of $totalPages',
+          onClose: onCloseStory,
         ),
         Container(
           color: AppColors.backgroundColor,
@@ -942,6 +913,41 @@ class _StoryPage extends StatelessWidget {
                         ),
                       ),
                       16.w.verticalSpace,
+                      
+                      SizedBox(
+                        width: double.infinity,
+                        child: AppOutlinedButton(
+                          onTap: isMarkedAsRead || isMarkingAsRead
+                              ? null
+                              : () {
+                                  context.read<StoryProvider>().markStoryAsRead(
+                                    storyIdeaId: storyIdeaId,
+                                    context: context,
+                                  );
+                                },
+                          borderColor: isMarkedAsRead
+                              ? AppColors.teal.withValues(alpha: 0.35)
+                              : AppColors.teal,
+                          textStyle: AppTextStyles.sfProDisplaySemibold(
+                            fontSize: 14.sp,
+                            color: isMarkedAsRead
+                                ? AppColors.teal.withValues(alpha: 0.5)
+                                : AppColors.teal,
+                          ),
+                          isLoading: isMarkingAsRead,
+                          foregroundColor: AppColors.teal,
+                          child: AppText(
+                            text: isMarkedAsRead ? 'Marked as Read' : 'Mark as Read',
+                            style: AppTextStyles.sfProDisplaySemibold(
+                              fontSize: 14.sp,
+                              color: isMarkedAsRead
+                                  ? AppColors.teal.withValues(alpha: 0.5)
+                                  : AppColors.teal,
+                            ),
+                          ),
+                        ),
+                      ),
+                      12.w.verticalSpace,
                       SizedBox(
                         width: double.infinity,
                         child: AppFilledButton(
@@ -966,11 +972,13 @@ class _StoryImage extends StatelessWidget {
   final String imageUrl;
   final double height;
   final String pageLabel;
+  final VoidCallback onClose;
 
   const _StoryImage({
     required this.imageUrl,
     required this.height,
     required this.pageLabel,
+    required this.onClose,
   });
 
   @override
@@ -985,32 +993,56 @@ class _StoryImage extends StatelessWidget {
             CachedNetworkImage(
               imageUrl: imageUrl,
               fit: BoxFit.cover,
+              height: height,
+              width: double.infinity,
               progressIndicatorBuilder: (_, __, progress) =>
                   _loadingProgress(height, progress.progress),
               errorWidget: (_, __, ___) => _placeholder(height),
+              imageBuilder: (context, imageProvider) => Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image(
+                    image: imageProvider,
+                    fit: BoxFit.cover,
+                    height: height,
+                    width: double.infinity,
+                  ),
+                  Positioned(
+                    top: 12.w,
+                    left: 12.w,
+                    child: GlassIconButton(
+                      onTap: onClose,
+                      child: Icon(
+                        Icons.close_rounded,
+                        size: 18.sp,
+                        color: AppColors.white,
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Container(
+                      margin: EdgeInsets.all(10.w),
+                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                      decoration: BoxDecoration(
+                        color: AppColors.backgroundColor.withValues(alpha: 0.9),
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                      child: AppText(
+                        text: pageLabel,
+                        style: AppTextStyles.sfProDisplayMedium(
+                          fontSize: 12.sp,
+                          color: AppColors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             )
           else
             _placeholder(height),
 
-          //* Page label (e.g. “Page 1 of 3”)
-          Align(
-            alignment: AlignmentGeometry.bottomLeft,
-            child: Container(
-              margin: EdgeInsets.all(10.w),
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-              decoration: BoxDecoration(
-                color: AppColors.backgroundColor.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(4.r),
-              ),
-              child: AppText(
-                text: pageLabel,
-                style: AppTextStyles.sfProDisplayMedium(
-                  fontSize: 12.sp,
-                  color: AppColors.black,
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -1059,6 +1091,44 @@ class _StoryImage extends StatelessWidget {
         Icons.image_not_supported_outlined,
         size: 48,
         color: AppColors.black.withValues(alpha: 0.3),
+      ),
+    );
+  }
+}
+
+class GlassIconButton extends StatelessWidget {
+  final Widget child;
+  final VoidCallback onTap;
+  final double size;
+  final BorderRadius borderRadius;
+
+  const GlassIconButton({
+    super.key,
+    required this.child,
+    required this.onTap,
+    this.size = 36,
+    this.borderRadius = const BorderRadius.all(Radius.circular(18)),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: borderRadius,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+        child: InkWell(
+          onTap: onTap,
+          child: Container(
+            height: size,
+            width: size,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.35),
+              borderRadius: borderRadius,
+            ),
+            child: child,
+          ),
+        ),
       ),
     );
   }

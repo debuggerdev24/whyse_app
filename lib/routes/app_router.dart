@@ -22,13 +22,14 @@ import 'package:redstreakapp/screens/home/story/custom_story_topic_screen.dart';
 import 'package:redstreakapp/screens/home/story/story_reading_screen.dart';
 import 'package:redstreakapp/screens/home/story/story_goals_screen.dart';
 import 'package:redstreakapp/screens/home/story/story_series_screen.dart';
+import 'package:redstreakapp/screens/home/story/random_story_series_screen.dart';
 import 'package:redstreakapp/screens/home/story/story_reading_goal_screen.dart';
 import 'package:redstreakapp/screens/home/story/story_topics_screen.dart';
 import 'package:redstreakapp/screens/home/home_screen.dart';
 import 'package:redstreakapp/screens/home/quiz/quiz_completed_screen.dart';
 import 'package:redstreakapp/screens/home/quiz/quiz_question_screen.dart';
 import 'package:redstreakapp/screens/home/quiz/start_quiz_screen.dart';
-import 'package:redstreakapp/models/home/story_models/readable_story.dart';
+import 'package:redstreakapp/models/home/story_models/story_history_model.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
 import '../screens/below_16/consent_status_screen.dart';
@@ -39,7 +40,7 @@ import '../screens/home/story_ideas_screen.dart';
 import '../screens/splash/splash_screen.dart';
 import '../models/home/story_models/story_model.dart';
 
-class UserAppRoute {
+class AppRouter {
   static final rootNavigatorKey = GlobalKey<NavigatorState>();
 
   static StatefulNavigationShell? indexedStackNavigationShell;
@@ -224,8 +225,16 @@ class UserAppRoute {
       path: AppRoutes.readingScreen.path,
       name: AppRoutes.readingScreen.name,
       builder: (context, state) {
-        final story = state.extra as IReadableStory;
-        return CreatedStoryReadingScreen(story: story);
+        final extra = state.extra;
+        if (extra is StoryHistoryModel) {
+          return CreatedStoryReadingScreen(initialStory: extra);
+        }
+        if (extra is Map && extra["storyIdeaId"] != null) {
+          return CreatedStoryReadingScreen(
+            storyIdeaId: extra["storyIdeaId"] as String,
+          );
+        }
+        return const SizedBox.shrink();
       },
     ),
     GoRoute(
@@ -233,11 +242,11 @@ class UserAppRoute {
       name: AppRoutes.createdStoryReadingScreen.name,
       builder: (context, state) {
         final extra = state.extra;
-        if (extra is IReadableStory) {
-          return CreatedStoryReadingScreen(story: extra);
+        if (extra is StoryHistoryModel) {
+          return CreatedStoryReadingScreen(initialStory: extra);
         }
         if (extra is Map && extra["storyIdeaId"] != null) {
-          return CreatedStoryReadingLoader(
+          return CreatedStoryReadingScreen(
             storyIdeaId: extra["storyIdeaId"] as String,
           );
         }
@@ -358,7 +367,8 @@ class UserAppRoute {
       path: AppRoutes.createdStorySummaryScreen.path,
       name: AppRoutes.createdStorySummaryScreen.name,
       builder: (context, state) {
-        return CreatedStorySummaryScreen();
+        final topicId = state.extra as String?;
+        return CreatedStorySummaryScreen(topicId: topicId);
       },
     ),
     GoRoute(
@@ -366,6 +376,14 @@ class UserAppRoute {
       name: AppRoutes.storyIdeasScreen.name,
       builder: (context, state) {
         return StoryReadingScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.randomStorySeriesScreen.path,
+      name: AppRoutes.randomStorySeriesScreen.name,
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>?;
+        return RandomTopicReadingScreen(progressResponse: extra ?? {});
       },
     ),
   ];

@@ -13,7 +13,9 @@ import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
 import 'package:redstreakapp/screens/home/widgets/story_ideas_widgets.dart';
 
 class CreatedStorySummaryScreen extends StatefulWidget {
-  const CreatedStorySummaryScreen({super.key});
+  const CreatedStorySummaryScreen({super.key, this.topicId});
+
+  final String? topicId;
 
   @override
   State<CreatedStorySummaryScreen> createState() =>
@@ -27,6 +29,14 @@ class _CreatedStorySummaryScreenState extends State<CreatedStorySummaryScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    final topicId = widget.topicId;
+    if (topicId != null && topicId.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          context.read<HomeProvider>().getStoryIdeasByTopicId(topicId: topicId);
+        }
+      });
+    }
   }
 
   @override
@@ -103,9 +113,9 @@ class _CreatedStorySummaryScreenState extends State<CreatedStorySummaryScreen> {
                           ),
                         ),
                       ),
-                      14.h.verticalSpace,
+                      14.w.verticalSpace,
                       StoryIdeasHeaderCard(summary: summary),
-                      20.h.verticalSpace,
+                      20.w.verticalSpace,
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 20.w),
                         child: AppText(

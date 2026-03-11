@@ -1,13 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
+import 'package:redstreakapp/models/home/browse_topic_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_history_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_topics.dart';
 import 'package:redstreakapp/models/home/story_models/story_summary_model.dart';
 import 'package:redstreakapp/services/home/home_api_service.dart';
 
+class ToggleTopicListResult {
+  final bool isInMyList;
+  final String topicTitle;
+  final String? message;
+
+  const ToggleTopicListResult({
+    required this.isInMyList,
+    required this.topicTitle,
+    this.message,
+  });
+}
+
 class HomeProvider extends ChangeNotifier {
   static const int storyIdeasPageLimit = 20;
+  static const int topicsPageLimit = 20;
+
   List<CreatedStoryTopicsModel>? topicsList;
+  bool isTopicsLoading = false;
+  bool isTopicsLoadingMore = false;
+  bool hasMoreTopics = true;
+  int _topicsCurrentPage = 1;
+
   // String? topicId;
   StoryIdeaModel? storySummary;
   StoryHistoryModel? story;
@@ -17,14 +37,23 @@ class HomeProvider extends ChangeNotifier {
   String? storyIdeasError;
   String? activeStoryIdeasTopicId;
   int _storyIdeasCurrentPage = 1;
+  final Set<String> _togglingTopicIds = <String>{};
+
+  bool isTopicListToggling(String topicId) => _togglingTopicIds.contains(topicId);
 
   Future<void> getMyTopics() async {
+    if (isTopicsLoading) return;
+    isTopicsLoading = true;
     topicsList = null;
+    hasMoreTopics = true;
+    _topicsCurrentPage = 1;
     notifyListeners();
-    final response = await HomeApiService.instance.getMyTopics();
 
+    final response = await HomeApiService.instance.getMyTopics(page: 1);
+
+    isTopicsLoading = false;
     response.fold(
-      (l) {
+      (l){
         Logger.error(l.errorMsg);
         topicsList = [];
       },
@@ -42,9 +71,58 @@ class HomeProvider extends ChangeNotifier {
           } else {
             topicsList = [];
           }
+          hasMoreTopics = (topicsList?.length ?? 0) >= topicsPageLimit;
         } catch (e, stack) {
           Logger.error("Error parsing topics: $e\n$stack");
           topicsList = [];
+        }
+      },
+    );
+    notifyListeners();
+  }
+
+  Future<void> getMyTopicsLoadMore() async {
+    if (isTopicsLoading ||
+        isTopicsLoadingMore ||
+        !hasMoreTopics ||
+        topicsList == null ||
+        topicsList!.isEmpty) return;
+
+    isTopicsLoadingMore = true;
+    notifyListeners();
+
+    final nextPage = _topicsCurrentPage + 1;
+    final response = await HomeApiService.instance.getMyTopics(page: nextPage);
+
+    isTopicsLoadingMore = false;
+    response.fold(
+      (l) {
+        Logger.error(l.errorMsg);
+        hasMoreTopics = false;
+      },
+      (r) {
+        try {
+          final data = r["data"];
+          List<CreatedStoryTopicsModel>? nextList;
+          if (data is List) {
+            nextList = data
+                .map((e) => CreatedStoryTopicsModel.fromJson(e))
+                .toList();
+          } else if (data is Map && data.containsKey("topics")) {
+            nextList = (data["topics"] as List)
+                .map((e) => CreatedStoryTopicsModel.fromJson(e))
+                .toList();
+          }
+          if (nextList != null && nextList.isNotEmpty) {
+            topicsList = [...(topicsList ?? []), ...nextList];
+            _topicsCurrentPage = nextPage;
+            hasMoreTopics = nextList.length >= topicsPageLimit;
+          } else {
+            hasMoreTopics = false;
+          }
+        } catch (e, stack) {
+          Logger.error("Error parsing topics loadMore: $e\n$stack");
+          hasMoreTopics = false;
         }
       },
     );
@@ -155,4 +233,67 @@ bool isGettingStoryLoading = false;
   //     },
   //   );
   // }
+
+  Future<ToggleTopicListResult?> toggleTopicList({
+    required BrowseTopicModel topic,
+    required Function(String error) onFailed,
+  }) async {
+    if (!topic.canManageMyList || _togglingTopicIds.contains(topic.id)) {
+      return null;
+    }
+
+    _togglingTopicIds.add(topic.id);
+    notifyListeners();
+
+    final response = await HomeApiService.instance.toggleTopicList(
+      topicId: topic.id,
+    );
+
+    return response.fold(
+      (error) {
+        _togglingTopicIds.remove(topic.id);
+        notifyListeners();
+        onFailed.call(error.errorMsg);
+        return null;
+      },
+      (result) async {
+        final data = result["data"] is Map
+            ? Map<String, dynamic>.from(result["data"] as Map)
+            : <String, dynamic>{};
+        final bool isInMyList = data["isInMyList"] == true;
+        final String topicTitle =
+            data["topicTitle"]?.toString().trim().isNotEmpty == true
+            ? data["topicTitle"].toString()
+            : topic.topic;
+
+        _togglingTopicIds.remove(topic.id);
+        notifyListeners();
+        await getMyTopics();
+
+        return ToggleTopicListResult(
+          isInMyList: isInMyList,
+          topicTitle: topicTitle,
+          message: result["message"]?.toString(),
+        );
+      },
+    );
+  }
+
+  void clearSessionData() {
+    topicsList = null;
+    isTopicsLoading = false;
+    isTopicsLoadingMore = false;
+    hasMoreTopics = true;
+    _topicsCurrentPage = 1;
+    storySummary = null;
+    story = null;
+    isStoryIdeasLoading = false;
+    isStoryIdeasLoadingMore = false;
+    hasMoreStoryIdeas = true;
+    storyIdeasError = null;
+    activeStoryIdeasTopicId = null;
+    _storyIdeasCurrentPage = 1;
+    isGettingStoryLoading = false;
+    notifyListeners();
+  }
 }

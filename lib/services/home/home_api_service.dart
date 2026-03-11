@@ -58,4 +58,12 @@ class HomeApiService {
       EndPoints.addOrRemoveToMyList(topicId: topicId),
     );
   }
+
+  Future<Either<ApiException, Map<String, dynamic>>> getTopicProgress({
+    required String topicId,
+  }) async {
+    return await BaseApiHelper.instance.get(
+      EndPoints.topicProgress(topicId: topicId),
+    );
+  }
 }

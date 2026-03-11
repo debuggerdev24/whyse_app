@@ -67,4 +67,10 @@ class StoryApiService {
   Future<Either<ApiException, Map<String, dynamic>>> getAllStories() async {
     return BaseApiHelper.instance.get(EndPoints.getAllStories);
   }
+
+  Future<Either<ApiException, Map<String, dynamic>>> markAsRead({
+    required String storyIdeaId,
+  }) async {
+    return BaseApiHelper.instance.post(EndPoints.markAsRead(storyIdeaId: storyIdeaId));
+  }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/models/home/story_models/story_idea_model.dart';
+import 'package:redstreakapp/models/home/topic_progress_model.dart';
 import '../../core/enums/app_enums.dart';
 import '../../core/helper/log_helper.dart';
 import '../../models/home/goal_model.dart';
@@ -288,14 +289,31 @@ class StoryProvider extends ChangeNotifier {
   bool isCreateStoryLoading = false;
 
   bool isGenerateSingleStoryLoading = false;
+  final Set<String> _markingReadStoryIdeaIds = {};
+  final Set<String> _markedReadStoryIdeaIds = {};
+
+  bool isMarkingStoryAsRead(String storyIdeaId) =>
+      _markingReadStoryIdeaIds.contains(storyIdeaId);
+
+  bool isStoryMarkedAsRead(String storyIdeaId) =>
+      _markedReadStoryIdeaIds.contains(storyIdeaId);
 
   Future<void> generateSingleStory({
     required String storyIdeaId,
     required BuildContext context,
     required VoidCallback onSuccess,
+    int? insertAtIndex,
+    bool showToast = true,
   }) async {
     isGenerateSingleStoryLoading = true;
     notifyListeners();
+    if (showToast && context.mounted) {
+      AppToast.info(
+        context: context,
+        durationSecond: 4,
+        message: "It can take few seconds to generate the story",
+      );
+    }
 
     final createResponse = await StoryApiService.instance.createStory(
       data: {"storyIdeaId": storyIdeaId},
@@ -309,12 +327,110 @@ class StoryProvider extends ChangeNotifier {
       },
       (r) {
         final story = StoryModel.fromJson(r["data"]);
-        stories.add(story);
+        if (insertAtIndex != null && insertAtIndex >= 0) {
+          _addStoryAtIndex(story, insertAtIndex);
+          _currentStoryIndex = insertAtIndex;
+        } else {
+          _stories.add(story);
+        }
         isGenerateSingleStoryLoading = false;
         notifyListeners();
         onSuccess();
       },
     );
+  }
+
+  static StoryModel _placeholderStory() => StoryModel(
+        id: '',
+        title: '',
+        content: '',
+        quiz: [],
+        pages: [],
+        lessonDuration: 0,
+      );
+
+  Future<void> markStoryAsRead({
+    required String storyIdeaId,
+    required BuildContext context,
+  }) async {
+    if (storyIdeaId.trim().isEmpty ||
+        _markingReadStoryIdeaIds.contains(storyIdeaId) ||
+        _markedReadStoryIdeaIds.contains(storyIdeaId)) {
+      return;
+    }
+
+    _markingReadStoryIdeaIds.add(storyIdeaId);
+    notifyListeners();
+
+    final response = await StoryApiService.instance.markAsRead(
+      storyIdeaId: storyIdeaId,
+    );
+
+    response.fold(
+      (l) {
+        _markingReadStoryIdeaIds.remove(storyIdeaId);
+        notifyListeners();
+        if (context.mounted) {
+          AppToast.error(context, l.errorMsg);
+        }
+      },
+      (r) {
+        _markingReadStoryIdeaIds.remove(storyIdeaId);
+        _markedReadStoryIdeaIds.add(storyIdeaId);
+        notifyListeners();
+        if (context.mounted) {
+          AppToast.success(context, "Story marked as read successfully");
+        }
+      },
+    );
+  }
+
+  void _addStoryAtIndex(StoryModel story, int index) {
+    while (_stories.length <= index) {
+      _stories.add(_placeholderStory());
+    }
+    _stories[index] = story;
+  }
+
+  /// Sets storyIdea and state from topic progress (e.g. from Browse). Clears stories and sets current index.
+  void setFromTopicProgress(TopicProgressModel progress) {
+    final t = progress.topic;
+    final topic = Topic(
+      id: t.id,
+      title: t.title,
+      learningGoal: t.learningGoal,
+      interests: [],
+      createdAt: DateTime.now(),
+      thumbnailUrl: t.thumbnailUrl,
+    );
+    final storyIdeas = progress.readings
+        .map((r) => StoryIdea(
+              id: r.storyIdeaId,
+              title: r.title,
+              description: "",
+              thumbnailUrl: r.thumbnailUrl ?? "",
+              createdAt: DateTime.now(),
+              sequenceIndex: r.priority,
+            ))
+        .toList();
+    storyIdea = StoryIdeasModel(
+      promptType: "progress",
+      grade: null,
+      mustIncludeWords: null,
+      topic: topic,
+      storyIdeas: storyIdeas,
+    );
+    _stories = [];
+    _currentStoryIndex = 0;
+    _currentStoryPageIndex = 0;
+    notifyListeners();
+  }
+
+  /// Index of a reading item by storyIdeaId in current storyIdea.
+  int indexOfReadingByStoryIdeaId(String storyIdeaId) {
+    if (storyIdea == null) return -1;
+    final idx = storyIdea!.storyIdeas.indexWhere((s) => s.id == storyIdeaId);
+    return idx;
   }
 
   bool isGenerateStoryIdeasLoading = false;
@@ -469,7 +585,7 @@ class StoryProvider extends ChangeNotifier {
             if (context.mounted) {
               context.pushNamed(AppRoutes.storyIdeasScreen.name);
             } else {
-              UserAppRoute.goRouter.pushNamed(AppRoutes.storyIdeasScreen.name);
+              AppRouter.goRouter.pushNamed(AppRoutes.storyIdeasScreen.name);
             }
           },
         );
@@ -532,6 +648,20 @@ class StoryProvider extends ChangeNotifier {
     stories.clear();
     storyIdea = null;
     dataToSendCreateStory = {};
+    _markingReadStoryIdeaIds.clear();
+    _markedReadStoryIdeaIds.clear();
+  }
+
+  void clearSessionData() {
+    isCreateStoryLoading = false;
+    isGenerateSingleStoryLoading = false;
+    isGenerateStoryIdeasLoading = false;
+    isCreateStoryImageLoading = false;
+    _currentStoryIndex = 0;
+    _currentStoryPageIndex = 0;
+    clareStoryData();
+    clearStoryFields();
+    notifyListeners();
   }
 
   bool _validateCreateStoryInput(BuildContext context) {

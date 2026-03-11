@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+import 'package:redstreakapp/core/auth/session_expiry_notifier.dart';
+import 'package:redstreakapp/core/network/end_points.dart';
 import 'package:redstreakapp/core/utils/shared_pref.dart';
 
 import '../helper/log_helper.dart';
@@ -16,6 +20,8 @@ class DioClient {
   static String get apiBaseUrl => '$baseUrl/api/v1';
   static DioClient get instance => _instance;
   late Dio _dio;
+  Completer<String?>? _refreshCompleter;
+  bool _isHandlingSessionExpiry = false;
 
   initialize() {
     _dio = Dio(
@@ -26,9 +32,6 @@ class DioClient {
         sendTimeout: const Duration(seconds: 120),
         headers: {
           "Content-Type": "application/json",
-          if (LocalStorageService.instance.getAuthToken != null)
-            "Authorization":
-                "Bearer ${LocalStorageService.instance.getAuthToken}",
         },
       ),
     );
@@ -37,7 +40,49 @@ class DioClient {
       "Authorization Token : ${LocalStorageService.instance.getAuthToken.toString()}",
     );
     Logger.info(
+      "Authorization Token : ${LocalStorageService.instance.getRefreshToken.toString()}",
+    );
+    Logger.info(
       "onBoarding ID : ${LocalStorageService.instance.onboardingId.toString()}",
+    );
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          final token = LocalStorageService.instance.getAuthToken;
+          options.headers["Content-Type"] = "application/json";
+          if (token != null && token.isNotEmpty) {
+            options.headers["Authorization"] = "Bearer $token";
+          } else {
+            options.headers.remove("Authorization");
+          }
+          handler.next(options);
+        },
+        onError: (error, handler) async {
+          if (!_shouldHandleUnauthorized(error)) {
+            handler.next(error);
+            return;
+          }
+
+          final refreshedToken = await _refreshAccessToken();
+          if (refreshedToken == null || refreshedToken.isEmpty) {
+            await _handleSessionExpiry();
+            handler.next(error);
+            return;
+          }
+
+          try {
+            final response = await _retryRequest(
+              requestOptions: error.requestOptions,
+              accessToken: refreshedToken,
+            );
+            handler.resolve(response);
+          } on DioException catch (retryError) {
+            handler.next(retryError);
+          } catch (_) {
+            handler.next(error);
+          }
+        },
+      ),
     );
     _dio.interceptors.add(
       PrettyDioLogger(request: true, requestBody: true, requestHeader: true),
@@ -47,14 +92,127 @@ class DioClient {
   Dio get dio => _dio;
 
   addToken(String token) {
-    _dio.options = _dio.options.copyWith(
-      headers: {"Authorization": "Bearer $token"},
-    );
+    _isHandlingSessionExpiry = false;
+    _dio.options.headers["Authorization"] = "Bearer $token";
+  }
+
+  void clearToken() {
+    _dio.options.headers.remove("Authorization");
   }
 
   Future<bool> isTokenValid() async {
     final token = LocalStorageService.instance.getAuthToken;
     return token != null && token.isNotEmpty;
+  }
+
+  bool _shouldHandleUnauthorized(DioException error) {
+    final statusCode = error.response?.statusCode;
+    final requestOptions = error.requestOptions;
+    final path = requestOptions.path;
+
+    if (statusCode != 401) return false;
+    if (requestOptions.extra["skipAuthRefresh"] == true) return false;
+    if (requestOptions.extra["hasRetried"] == true) return false;
+    if (path == EndPoints.refreshToken) return false;
+    if (path.startsWith("/mobile/auth/")) return false;
+
+    return true;
+  }
+
+  Future<String?> _refreshAccessToken() async {
+    if (_refreshCompleter != null) {
+      return _refreshCompleter!.future;
+    }
+
+    _refreshCompleter = Completer<String?>();
+    final refreshToken = LocalStorageService.instance.getRefreshToken;
+
+    if (refreshToken == null || refreshToken.isEmpty) {
+      _refreshCompleter!.complete(null);
+      final future = _refreshCompleter!.future;
+      future.whenComplete(() => _refreshCompleter = null);
+      return future;
+    }
+
+    final refreshDio = Dio(
+      BaseOptions(
+        baseUrl: apiBaseUrl,
+        connectTimeout: const Duration(seconds: 60),
+        receiveTimeout: const Duration(seconds: 180),
+        sendTimeout: const Duration(seconds: 120),
+        headers: {"Content-Type": "application/json"},
+      ),
+    );
+
+    try {
+      final response = await refreshDio.post(
+        EndPoints.refreshToken,
+        data: {"refreshToken": refreshToken},
+      );
+      final session = response.data["session"] as Map<String, dynamic>?;
+      final accessToken = session?["accessToken"]?.toString();
+      final nextRefreshToken = session?["refreshToken"]?.toString();
+
+      if (accessToken == null || accessToken.isEmpty) {
+        _refreshCompleter!.complete(null);
+      } else {
+        await LocalStorageService.instance.saveAuthToken(accessToken);
+        if (nextRefreshToken != null && nextRefreshToken.isNotEmpty) {
+          await LocalStorageService.instance.saveRefreshToken(nextRefreshToken);
+        }
+        addToken(accessToken);
+        _refreshCompleter!.complete(accessToken);
+      }
+    } catch (e, stack) {
+      Logger.error("Refresh token failed: $e\n$stack");
+      _refreshCompleter!.complete(null);
+    }
+
+    final future = _refreshCompleter!.future;
+    future.whenComplete(() => _refreshCompleter = null);
+    return future;
+  }
+
+  Future<Response<dynamic>> _retryRequest({
+    required RequestOptions requestOptions,
+    required String accessToken,
+  }) {
+    final options = Options(
+      method: requestOptions.method,
+      headers: {
+        ...requestOptions.headers,
+        "Authorization": "Bearer $accessToken",
+      },
+      responseType: requestOptions.responseType,
+      contentType: requestOptions.contentType,
+      sendTimeout: requestOptions.sendTimeout,
+      receiveTimeout: requestOptions.receiveTimeout,
+      extra: {...requestOptions.extra, "hasRetried": true},
+      followRedirects: requestOptions.followRedirects,
+      receiveDataWhenStatusError: requestOptions.receiveDataWhenStatusError,
+      validateStatus: requestOptions.validateStatus,
+      listFormat: requestOptions.listFormat,
+    );
+
+    return _dio.request<dynamic>(
+      requestOptions.path,
+      data: requestOptions.data,
+      queryParameters: requestOptions.queryParameters,
+      cancelToken: requestOptions.cancelToken,
+      options: options,
+      onReceiveProgress: requestOptions.onReceiveProgress,
+      onSendProgress: requestOptions.onSendProgress,
+    );
+  }
+
+  Future<void> _handleSessionExpiry() async {
+    if (_isHandlingSessionExpiry) return;
+    _isHandlingSessionExpiry = true;
+
+    await LocalStorageService.instance.removeAuthToken();
+    await LocalStorageService.instance.removeRefreshToken();
+    clearToken();
+    SessionExpiryNotifier.instance.notifySessionExpired();
   }
 }
 

@@ -155,21 +155,22 @@ class StoryIdeaEpisodeCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 118.w,
+          
+          Flexible(
+            flex: 2,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(18.r),
                   child: SizedBox(
-                    height: 120.w,
+                    width: double.infinity,
+                    height: 150.w,
                     child: _StoryIdeasArtwork(
                       imageUrl: imageUrl,
                       title: story.storyTitle,
                     ),
                   ),
-
                 ),
                 10.w.verticalSpace,
                 AppText(
@@ -184,6 +185,7 @@ class StoryIdeaEpisodeCard extends StatelessWidget {
           ),
           14.w.horizontalSpace,
           Expanded(
+            flex: 3,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

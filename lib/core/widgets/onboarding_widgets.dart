@@ -79,7 +79,7 @@ class OnboardingHeader extends StatelessWidget {
           ],
         ),
 
-        25.h.verticalSpace,
+        18.w.verticalSpace,
       ],
     );
   }

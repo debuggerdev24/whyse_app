@@ -68,7 +68,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
           currentIndex: tabIndex.value,
           onTap: (index) {
             tabIndex.value = index;
-            UserAppRoute.indexedStackNavigationShell?.goBranch(index);
+            AppRouter.indexedStackNavigationShell?.goBranch(index);
           },
           items: [
             BottomNavItem(

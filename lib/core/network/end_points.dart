@@ -36,8 +36,14 @@ class EndPoints {
   static String getMyTopics({int page = 1}) =>
       "/story/topics?page=$page&limit=20&createdBy=self";
   static const browseAllTopics = "/story/topics";
-  static String storeImage({required String storyId}) => "/story/mobile-story/$storyId/store-images";
-  static String addOrRemoveToMyList({required String topicId}) => "/story/topics/$topicId/toggle-list";
-  static String getStoryIdeasByTopicId({required String topicId}) => "/story/topics/$topicId/story-ideas";
-  static String getStoryByStoryIdea({required String storyIdea}) => "/story/ideas/$storyIdea/story";
+  static String storeImage({required String storyId}) =>
+      "/story/mobile-story/$storyId/store-images";
+  static String addOrRemoveToMyList({required String topicId}) =>
+      "/story/topics/$topicId/toggle-list";
+  static String getStoryIdeasByTopicId({required String topicId}) =>
+      "/story/topics/$topicId/story-ideas";
+  static String getStoryByStoryIdea({required String storyIdea}) =>
+      "/story/ideas/$storyIdea/story";
+  static String topicProgress({required String topicId}) => "/story/topics/$topicId/progress";
+  static String markAsRead({required String storyIdeaId}) => "/story/ideas/$storyIdeaId/mark-read";
 }

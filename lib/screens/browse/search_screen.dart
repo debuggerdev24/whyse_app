@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/utils/de_bouncing.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
+import 'package:redstreakapp/core/utils/custom_loader.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/models/home/browse_topic_model.dart';
+import 'package:redstreakapp/providers/home/home_provider.dart';
+import 'package:redstreakapp/routes/app_router.dart';
+import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:redstreakapp/screens/dashboard.dart';
 import 'package:redstreakapp/screens/browse/widgets/browse_widgets.dart';
 import 'package:redstreakapp/services/home/home_api_service.dart';
@@ -31,9 +37,9 @@ class _SearchScreenState extends State<SearchScreen> {
   bool _hasMore = true;
   String? _errorMessage;
   String _selectedInterest = _allFilter;
-  final Set<String> _togglingTopicIds = <String>{};
   int _currentPage = 1;
   int _requestId = 0;
+  bool _isLoadingProgress = false;
 
   List<String> get _interestFilters {
     final interests =
@@ -227,207 +233,259 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Future<void> _toggleTopicList(BrowseTopicModel topic) async {
-    if (!topic.canManageMyList || _togglingTopicIds.contains(topic.id)) return;
-
-    setState(() {
-      _togglingTopicIds.add(topic.id);
-    });
-
-    final response = await HomeApiService.instance.toggleTopicList(
+  Future<void> _openTopicProgress(BrowseTopicModel topic) async {
+    if (_isLoadingProgress) return;
+    setState(() => _isLoadingProgress = true);
+    final response = await HomeApiService.instance.getTopicProgress(
       topicId: topic.id,
     );
-
     if (!mounted) return;
-
+    setState(() => _isLoadingProgress = false);
     response.fold(
       (error) {
-        setState(() {
-          _togglingTopicIds.remove(topic.id);
-        });
         AppToast.error(context, error.errorMsg);
       },
       (result) {
-        final data = result["data"] is Map
-            ? Map<String, dynamic>.from(result["data"] as Map)
-            : <String, dynamic>{};
-        final bool isInMyList = data["isInMyList"] == true;
-        final String topicTitle =
-            data["topicTitle"]?.toString().trim().isNotEmpty == true
-            ? data["topicTitle"].toString()
-            : topic.topic;
-
-        setState(() {
-          _togglingTopicIds.remove(topic.id);
-          _topics = _topics.map((item) {
-            if (item.id != topic.id) return item;
-            return item.copyWith(isInMyList: isInMyList);
-          }).toList();
-        });
-
-        if (isInMyList) {
-          final String message =
-              result["message"]?.toString().trim().isNotEmpty == true
-              ? result["message"].toString()
-              : '"$topicTitle" added to My List';
-          AppToast.success(context, message);
-        } else {
-          AppToast.info(
-            context: context,
-            message: '"$topicTitle" removed from My List',
-          );
+        final data = result["data"] ?? result;
+        final readings = data["readings"];
+        final list = readings is List ? readings : <dynamic>[];
+        if (list.isEmpty) {
+          AppToast.info(context: context, message: "No readings found");
+          // _showNoReadingsPopup();
+          return;
         }
+        context.pushNamed(
+          AppRoutes.randomStorySeriesScreen.name,
+          extra: result,
+        );
       },
     );
   }
 
+  void _showNoReadingsPopup() {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.backgroundColor,
+        title: AppText(
+          text: "No readings found",
+          style: AppTextStyles.sfProDisplayBold(fontSize: 18.sp),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(
+              "OK",
+              style: AppTextStyles.sfProDisplayRegular(
+                color: AppColors.black,
+                fontSize: 17.sp,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleTopicListToggle(BrowseTopicModel topic) async {
+    final result = await context.read<HomeProvider>().toggleTopicList(
+      topic: topic,
+      onFailed: (error) {
+        if (mounted) {
+          AppToast.error(context, error);
+        }
+      },
+    );
+
+    if (!mounted || result == null) return;
+
+    setState(() {
+      _topics = _topics.map((item) {
+        if (item.id != topic.id) return item;
+        return item.copyWith(isInMyList: result.isInMyList);
+      }).toList();
+    });
+
+    if (result.isInMyList) {
+      final message = result.message?.trim().isNotEmpty == true
+          ? result.message!
+          : '"${result.topicTitle}" added to My List';
+      AppToast.success(context, message);
+    } else {
+      AppToast.info(
+        context: context,
+        message: '"${result.topicTitle}" removed from My List',
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final homeProvider = context.watch<HomeProvider>();
     final visibleTopics = _visibleTopics;
 
-    return AppLayout(
-      body: SafeArea(
-        child: RefreshIndicator(
-          color: AppColors.teal,
-          backgroundColor: AppColors.white,
-          onRefresh: () => _fetchTopics(showLoader: false, reset: true),
-          child: ListView(
-            controller: _scrollController,
-            physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics(),
-            ),
-            padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 20.h),
-            children: [
-              // Browse hero header hidden for now.
-              // BrowseSearchHeroHeader(isSearching: _isSearching),
-              // 20.h.verticalSpace,
-              BrowseSearchField(
-                controller: _searchController,
-                onChanged: _onSearchChanged,
-              ),
-              18.h.verticalSpace,
-              if (_isLoading)
-                const BrowseSearchShimmer()
-              else if (_errorMessage != null && _topics.isEmpty)
-                BrowseErrorState(onRetry: _fetchTopics)
-              else ...[
-                // if (_interestFilters.length > 1) ...[
-                //   AppText(
-                //     text: "Browse by interest",
-                //     style: AppTextStyles.sfProDisplaySemibold(fontSize: 16.sp),
-                //   ),
-                //   14.w.verticalSpace,
-                // Wrap(
-                //   spacing: 10.w,
-                //   runSpacing: 10.h,
-                //   children: _interestFilters.map((interest) {
-                //     final bool isSelected = interest == _selectedInterest;
-                //     return GestureDetector(
-                //       onTap: () {
-                //         setState(() {
-                //           _selectedInterest = interest;
-                //         });
-                //       },
-                //       child: AnimatedContainer(
-                //         duration: const Duration(milliseconds: 180),
-                //         padding: EdgeInsets.symmetric(
-                //           horizontal: 16.w,
-                //           vertical: 10.h,
-                //         ),
-                //         decoration: BoxDecoration(
-                //           color: isSelected
-                //               ? AppColors.teal
-                //               : AppColors.white,
-                //           borderRadius: BorderRadius.circular(999),
-                //           border: Border.all(
-                //             color: isSelected
-                //                 ? AppColors.teal
-                //                 : AppColors.black.withValues(alpha: 0.09),
-                //           ),
-                //         ),
-                //         child: AppText(
-                //           text: interest,
-                //           style: AppTextStyles.sfProDisplaySemibold(
-                //             fontSize: 13.sp,
-                //             color: isSelected
-                //                 ? AppColors.white
-                //                 : AppColors.black.withValues(alpha: 0.75),
-                //           ),
-                //         ),
-                //       ),
-                //     );
-                //   }).toList(),
-                // ),
-                // 22.h.verticalSpace,
-                // ],
-                if (visibleTopics.isEmpty)
-                  BrowseEmptyState(query: _searchController.text.trim())
-                else ...[
-                  AppText(
-                    text: _isSearching
-                        ? 'Results for "${_searchController.text.trim()}"'
-                        : "Featured right now",
-                    style: AppTextStyles.sfProDisplayBold(fontSize: 22.sp),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          tabIndex.value = 0;
+          AppRouter.indexedStackNavigationShell?.goBranch(0);
+        }
+      },
+      child: Stack(
+        children: [
+          AppLayout(
+            body: SafeArea(
+              child: RefreshIndicator(
+                color: AppColors.teal,
+                backgroundColor: AppColors.white,
+                onRefresh: () => _fetchTopics(showLoader: false, reset: true),
+                child: ListView(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
                   ),
-                  14.h.verticalSpace,
-                  FeaturedTopicCard(
-                    topic: visibleTopics.first,
-                    onTap: () => _showTopicDetails(visibleTopics.first),
-                    onToggleMyList: visibleTopics.first.canManageMyList
-                        ? () => _toggleTopicList(visibleTopics.first)
-                        : null,
-                    isToggleLoading: _togglingTopicIds.contains(
-                      visibleTopics.first.id,
+                  padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 20.h),
+                  children: [
+                    // Browse hero header hidden for now.
+                    // BrowseSearchHeroHeader(isSearching: _isSearching),
+                    // 20.h.verticalSpace,
+                    BrowseSearchField(
+                      controller: _searchController,
+                      onChanged: _onSearchChanged,
                     ),
-                  ),
-                  if (visibleTopics.length > 1) ...[
-                    24.h.verticalSpace,
-                    AppText(
-                      text: "More to explore",
-                      style: AppTextStyles.sfProDisplaySemibold(
-                        fontSize: 18.sp,
-                      ),
-                    ),
-                    14.h.verticalSpace,
-                    GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 14.w,
-                        mainAxisSpacing: 14.h,
-                        childAspectRatio: 0.75,
-                      ),
-                      itemCount:
-                          (visibleTopics.length - 1) +
-                          (((visibleTopics.length - 1).isOdd && _hasMore)
-                              ? 1
-                              : 0),
-                      itemBuilder: (context, index) {
-                        if (index >= visibleTopics.length - 1) {
-                          return const BrowsePosterShimmerTile();
-                        }
-                        final topic = visibleTopics[index + 1];
-                        return PosterTopicCard(
-                          topic: topic,
-                          onTap: () => _showTopicDetails(topic),
-                          onToggleMyList: topic.canManageMyList
-                              ? () => _toggleTopicList(topic)
+                    18.h.verticalSpace,
+                    if (_isLoading)
+                      const BrowseSearchShimmer()
+                    else if (_errorMessage != null && _topics.isEmpty)
+                      BrowseErrorState(onRetry: _fetchTopics)
+                    else ...[
+                      // if (_interestFilters.length > 1) ...[
+                      //   AppText(
+                      //     text: "Browse by interest",
+                      //     style: AppTextStyles.sfProDisplaySemibold(fontSize: 16.sp),
+                      //   ),
+                      //   14.w.verticalSpace,
+                      // Wrap(
+                      //   spacing: 10.w,
+                      //   runSpacing: 10.h,
+                      //   children: _interestFilters.map((interest) {
+                      //     final bool isSelected = interest == _selectedInterest;
+                      //     return GestureDetector(
+                      //       onTap: () {
+                      //         setState(() {
+                      //           _selectedInterest = interest;
+                      //         });
+                      //       },
+                      //       child: AnimatedContainer(
+                      //         duration: const Duration(milliseconds: 180),
+                      //         padding: EdgeInsets.symmetric(
+                      //           horizontal: 16.w,
+                      //           vertical: 10.h,
+                      //         ),
+                      //         decoration: BoxDecoration(
+                      //           color: isSelected
+                      //               ? AppColors.teal
+                      //               : AppColors.white,
+                      //           borderRadius: BorderRadius.circular(999),
+                      //           border: Border.all(
+                      //             color: isSelected
+                      //                 ? AppColors.teal
+                      //                 : AppColors.black.withValues(alpha: 0.09),
+                      //           ),
+                      //         ),
+                      //         child: AppText(
+                      //           text: interest,
+                      //           style: AppTextStyles.sfProDisplaySemibold(
+                      //             fontSize: 13.sp,
+                      //             color: isSelected
+                      //                 ? AppColors.white
+                      //                 : AppColors.black.withValues(alpha: 0.75),
+                      //           ),
+                      //         ),
+                      //       ),
+                      //     );
+                      //   }).toList(),
+                      // ),
+                      // 22.h.verticalSpace,
+                      // ],
+                      if (visibleTopics.isEmpty)
+                        BrowseEmptyState(query: _searchController.text.trim())
+                      else ...[
+                        AppText(
+                          text: _isSearching
+                              ? 'Results for "${_searchController.text.trim()}"'
+                              : "Featured right now",
+                          style: AppTextStyles.sfProDisplayBold(
+                            fontSize: 22.sp,
+                          ),
+                        ),
+                        14.h.verticalSpace,
+                        FeaturedTopicCard(
+                          topic: visibleTopics.first,
+                          onTap: () => _openTopicProgress(visibleTopics.first),
+                          onToggleMyList: visibleTopics.first.canManageMyList
+                              ? () =>
+                                    _handleTopicListToggle(visibleTopics.first)
                               : null,
-                          isToggleLoading: _togglingTopicIds.contains(topic.id),
-                        );
-                      },
-                    ),
+                          isToggleLoading: homeProvider.isTopicListToggling(
+                            visibleTopics.first.id,
+                          ),
+                        ),
+                        if (visibleTopics.length > 1) ...[
+                          24.h.verticalSpace,
+                          AppText(
+                            text: "More to explore",
+                            style: AppTextStyles.sfProDisplaySemibold(
+                              fontSize: 18.sp,
+                            ),
+                          ),
+                          14.w.verticalSpace,
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing: 14.w,
+                                  mainAxisSpacing: 14.w,
+                                  childAspectRatio: 0.75,
+                                ),
+                            itemCount:
+                                (visibleTopics.length - 1) +
+                                (((visibleTopics.length - 1).isOdd && _hasMore)
+                                    ? 1
+                                    : 0),
+                            itemBuilder: (context, index) {
+                              if (index >= visibleTopics.length - 1) {
+                                return const BrowsePosterShimmerTile();
+                              }
+                              final topic = visibleTopics[index + 1];
+                              return PosterTopicCard(
+                                topic: topic,
+                                onTap: () => _openTopicProgress(topic),
+                                onToggleMyList: topic.canManageMyList
+                                    ? () => _handleTopicListToggle(topic)
+                                    : null,
+                                isToggleLoading: homeProvider
+                                    .isTopicListToggling(topic.id),
+                              );
+                            },
+                          ),
+                        ],
+                        if (_isLoadingMore) ...[
+                          20.h.verticalSpace,
+                          const BrowsePaginationShimmer(),
+                        ],
+                      ],
+                    ],
                   ],
-                  if (_isLoadingMore) ...[
-                    20.h.verticalSpace,
-                    const BrowsePaginationShimmer(),
-                  ],
-                ],
-              ],
-            ],
+                ),
+              ),
+            ),
           ),
-        ),
+          if (_isLoadingProgress) const FullPageIndicator(),
+        ],
       ),
     );
   }

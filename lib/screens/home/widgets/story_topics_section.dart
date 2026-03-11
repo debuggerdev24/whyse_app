@@ -14,73 +14,125 @@ import 'package:redstreakapp/screens/home/widgets/add_reading_bottom_sheet.dart'
 import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:shimmer/shimmer.dart';
 
-class StoryTopicsSection extends StatelessWidget {
+class StoryTopicsSection extends StatefulWidget {
   const StoryTopicsSection({super.key});
+
+  @override
+  State<StoryTopicsSection> createState() => _StoryTopicsSectionState();
+}
+
+class _StoryTopicsSectionState extends State<StoryTopicsSection> {
+  final ScrollController _horizontalScrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _horizontalScrollController.addListener(_onHorizontalScroll);
+  }
+
+  @override
+  void dispose() {
+    _horizontalScrollController
+      ..removeListener(_onHorizontalScroll)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _onHorizontalScroll() {
+    final provider = context.read<HomeProvider>();
+    if (provider.isTopicsLoadingMore ||
+        !provider.hasMoreTopics ||
+        provider.topicsList == null ||
+        provider.topicsList!.isEmpty) return;
+    if (!_horizontalScrollController.hasClients) return;
+    final pos = _horizontalScrollController.position;
+    if (pos.pixels >= pos.maxScrollExtent - 200) {
+      provider.getMyTopicsLoadMore();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<HomeProvider>(
       builder: (context, provider, child) {
-        if (provider.topicsList == null) {
+        if (provider.topicsList == null && provider.isTopicsLoading) {
           return _buildShimmerLoading();
         }
 
-        //todo ---------------- EMPTY STATE ----------------
-        if (provider.topicsList!.isEmpty) {
+        if (provider.topicsList != null && provider.topicsList!.isEmpty) {
           return buildEmptyState(context);
         }
-        //todo ---------------- DATA AVAILABLE ----------------
-        final recentStory = provider.topicsList!.first;
-        final otherStories = provider.topicsList!
-            .skip(1)
-            .take(provider.topicsList!.length)
-            .toList();
+
+        final list = provider.topicsList ?? [];
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            //todo ----------- TODAY'S READING CARD -----------
-            StoryCard(
-              story: recentStory,
-              onTap: () {
-                context.pushNamed(AppRoutes.createdStorySummaryScreen.name);
-                provider.getStoryIdeasByTopicId(topicId: recentStory.id);
-              },
-            ),
-            // todayReadingCard(
-            //   context: context,
-            //   recentStory: recentStory,
-            //   onTap: () {
-            //     context.pushNamed(AppRoutes.createdStorySummaryScreen.name);
-            //     provider.getStoryIdeasByTopicId(topicId: recentStory.id);
-            //   },
-            // ),
-            16.w.verticalSpace,
-            //todo ALWAYS SHOW BUTTON
-            _addNewReadingButton(context),
-
-            24.w.verticalSpace,
-
-            //todo ----------- OTHER STORIES -----------
-            ...otherStories.map(
-              (story) => Padding(
-                padding: EdgeInsets.only(bottom: 16.h),
-                child: StoryCard(
-                  story: story,
-                  onTap: () {
-                    context.pushNamed(AppRoutes.createdStorySummaryScreen.name);
-
-                    provider.getStoryIdeasByTopicId(topicId: story.id);
-                    // context.pushNamed(
-                    //   AppRoutes.readingScreen.name,
-                    //   extra: story,
-                    // );
-                  },
-                ),
+            Padding(
+              padding: EdgeInsets.only(left: 4.w, bottom: 12.h),
+              child: AppText(
+                text: "Your Story Topics",
+                style: AppTextStyles.sfProDisplayBold(fontSize: 20.sp),
               ),
             ),
+            SizedBox(
+              height: 200.w,
+              child: ListView.builder(
+                controller: _horizontalScrollController,
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                clipBehavior: Clip.none,
+                itemCount: list.length + (provider.hasMoreTopics ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index == list.length) {
+                    return _buildLoadMoreTile(provider);
+                  }
+                  final story = list[index];
+                  return Padding(
+                    padding: EdgeInsets.only(right: 12.w),
+                    child: NetflixStyleTopicCard(
+                      story: story,
+                      onTap: () {
+                        context.pushNamed(
+                          AppRoutes.createdStorySummaryScreen.name,
+                          extra: story.id,
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+            10.w.verticalSpace,
+            _addNewReadingButton(context),
           ],
         );
       },
+    );
+  }
+
+  Widget _buildLoadMoreTile(HomeProvider provider) {
+    return Padding(
+      padding: EdgeInsets.only(right: 12.w),
+      child: GestureDetector(
+        onTap: provider.hasMoreTopics && !provider.isTopicsLoadingMore
+            ? () => provider.getMyTopicsLoadMore()
+            : null,
+        child: Container(
+          width: 120.w,
+          decoration: BoxDecoration(
+            color: AppColors.black.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+          alignment: Alignment.center,
+          child: AppText(
+            text: provider.isTopicsLoadingMore ? "Loading..." : "More",
+            style: AppTextStyles.sfProDisplayMedium(
+              fontSize: 14.sp,
+              color: AppColors.black.withValues(alpha: 0.6),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -268,6 +320,7 @@ class StoryTopicsSection extends StatelessWidget {
       onTap: () {
         showModalBottomSheet(
           context: context,
+          useRootNavigator: true,
           backgroundColor: Colors.transparent,
           isScrollControlled: true,
           builder: (sheetContext) =>
@@ -276,7 +329,7 @@ class StoryTopicsSection extends StatelessWidget {
       },
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.symmetric(vertical: 14.h),
+        padding: EdgeInsets.symmetric(vertical: 14.w),
         decoration: BoxDecoration(
           color: AppColors.extealighttealcolor,
           borderRadius: BorderRadius.circular(30),
@@ -302,7 +355,7 @@ Widget _buildShimmerLoading() {
         baseColor: AppColors.shimmerBaseColor,
         highlightColor: AppColors.shimmerHighlightColor,
         child: Container(
-          width: 120.w,
+          width: 160.w,
           height: 20.h,
           decoration: BoxDecoration(
             color: Colors.white,
@@ -350,6 +403,76 @@ Widget _buildShimmerLoading() {
         ),
       ),
     ],
+  );
+}
+
+/// Compact card for Netflix-style horizontal row (poster + title).
+class NetflixStyleTopicCard extends StatelessWidget {
+  const NetflixStyleTopicCard({
+    super.key,
+    required this.story,
+    required this.onTap,
+  });
+
+  final CreatedStoryTopicsModel story;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: SizedBox(
+        width: 120.w,
+        height: 200.h,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12.r),
+              child: story.thumbnailUrl.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: story.thumbnailUrl,
+                      width: 120.w,
+                      height: 160.h,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => _netflixCardShimmer(),
+                      errorWidget: (_, __, ___) => _netflixCardShimmer(),
+                    )
+                  : SizedBox(
+                      width: 120.w,
+                      height: 160.h,
+                      child: _netflixCardShimmer(),
+                    ),
+            ),
+            8.h.verticalSpace,
+            Expanded(
+              child: AppText(
+                text: story.topic,
+                style: AppTextStyles.sfProDisplaySemibold(
+                  fontSize: 13.sp,
+                  color: AppColors.black,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+Shimmer _netflixCardShimmer() {
+  return Shimmer.fromColors(
+    baseColor: AppColors.shimmerBaseColor,
+    highlightColor: AppColors.shimmerHighlightColor,
+    child: Container(
+      width: 120.w,
+      height: 160.h,
+      color: Colors.grey,
+    ),
   );
 }
 
@@ -407,6 +530,7 @@ class _StoryCardState extends State<StoryCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
+                      // flex: 3,
                       child: _learningGoalExpanded
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -458,25 +582,26 @@ class _StoryCardState extends State<StoryCard> {
                         ],
                       ),
                     ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 5.w),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: story.thumbnailUrl.isNotEmpty
-                            ? CachedNetworkImage(
-                                imageUrl: story.thumbnailUrl,
-                                width: 100.w,
-                                height: 96.w,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) =>
-                                    _storyImageShimmer(),
-                                errorWidget: (c, e, s) => _storyImageShimmer(),
-                              )
-                            : SizedBox(
-                                width: 100.w,
-                                height: 96.w,
-                                child: _storyImageShimmer(),
-                              ),
+                    Flexible(
+                      flex: 2,
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 5.w),
+                        child: AspectRatio(
+                          aspectRatio: 1.05,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: story.thumbnailUrl.isNotEmpty
+                                ? CachedNetworkImage(
+                                    imageUrl: story.thumbnailUrl,
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) =>
+                                        _storyImageShimmer(),
+                                    errorWidget: (c, e, s) =>
+                                        _storyImageShimmer(),
+                                  )
+                                : _storyImageShimmer(),
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -553,6 +678,10 @@ Shimmer _storyImageShimmer() {
   return Shimmer.fromColors(
     baseColor: AppColors.shimmerBaseColor,
     highlightColor: AppColors.shimmerHighlightColor,
-    child: Container(color: Colors.grey, width: 96.w, height: 96.w),
+    child: Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: Colors.grey,
+    ),
   );
 }
