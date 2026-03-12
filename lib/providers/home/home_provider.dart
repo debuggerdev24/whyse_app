@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
+import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/models/home/browse_topic_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_history_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_topics.dart';
 import 'package:redstreakapp/models/home/story_models/story_summary_model.dart';
 import 'package:redstreakapp/services/home/home_api_service.dart';
+import 'package:redstreakapp/services/home/story_api_service.dart';
 
 class ToggleTopicListResult {
   final bool isInMyList;
@@ -39,7 +41,8 @@ class HomeProvider extends ChangeNotifier {
   int _storyIdeasCurrentPage = 1;
   final Set<String> _togglingTopicIds = <String>{};
 
-  bool isTopicListToggling(String topicId) => _togglingTopicIds.contains(topicId);
+  bool isTopicListToggling(String topicId) =>
+      _togglingTopicIds.contains(topicId);
 
   Future<void> getMyTopics() async {
     if (isTopicsLoading) return;
@@ -53,7 +56,7 @@ class HomeProvider extends ChangeNotifier {
 
     isTopicsLoading = false;
     response.fold(
-      (l){
+      (l) {
         Logger.error(l.errorMsg);
         topicsList = [];
       },
@@ -86,7 +89,8 @@ class HomeProvider extends ChangeNotifier {
         isTopicsLoadingMore ||
         !hasMoreTopics ||
         topicsList == null ||
-        topicsList!.isEmpty) return;
+        topicsList!.isEmpty)
+      return;
 
     isTopicsLoadingMore = true;
     notifyListeners();
@@ -193,8 +197,13 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-bool isGettingStoryLoading = false;
-  Future<void> getStoryByIdea({required String storyIdea,required Function(StoryHistoryModel story) onSuccess}) async {
+  bool isGettingStoryLoading = false;
+  Future<void> getStoryByIdea({
+    required BuildContext context,
+    required String storyIdea,
+    required Function(StoryHistoryModel story) onSuccess,
+    void Function()? onStoryNotGenerated,
+  }) async {
     story = null;
     isGettingStoryLoading = true;
     notifyListeners();
@@ -207,12 +216,66 @@ bool isGettingStoryLoading = false;
         isGettingStoryLoading = false;
         notifyListeners();
       },
-      (r) {
-        final data = r["data"]["story"];
-        story = StoryHistoryModel.fromJson(data);
-        
-        // Logger.info("Story: ${story.image}");
-
+      (r) async {
+        final data = r["data"] is Map ? r["data"] as Map : null;
+        final storyData = data?["story"];
+        final storyIdeaMap = data?["storyIdea"] is Map
+            ? data!["storyIdea"] as Map
+            : null;
+        final isGenerated =
+            storyIdeaMap != null && storyIdeaMap["isGenerated"] == true;
+        if (storyData == null || !isGenerated) {
+          
+          AppToast.info(
+            context: context,
+            durationSecond: 3,
+            message: "It can take few seconds to generate the story.",
+          );
+          final createResponse = await StoryApiService.instance.createStory(
+            data: {"storyIdeaId": storyIdea},
+          );
+          createResponse.fold(
+            (_) {
+              isGettingStoryLoading = false;
+              notifyListeners();
+              onStoryNotGenerated?.call();
+            },
+            (_) async {
+              final retryResponse = await HomeApiService.instance
+                  .getStoryByStoryId(storyIdea: storyIdea);
+              retryResponse.fold(
+                (__) {
+                  isGettingStoryLoading = false;
+                  notifyListeners();
+                  onStoryNotGenerated?.call();
+                },
+                (rr) {
+                  final retryData = rr["data"] is Map
+                      ? rr["data"]["story"]
+                      : null;
+                  final retryGenerated =
+                      rr["data"] is Map &&
+                      (rr["data"]["storyIdea"] is Map) &&
+                      rr["data"]["storyIdea"]["isGenerated"] == true;
+                  if (retryData != null && retryGenerated) {
+                    story = StoryHistoryModel.fromJson(
+                      Map<String, dynamic>.from(retryData as Map),
+                    );
+                    onSuccess.call(story!);
+                  } else {
+                    onStoryNotGenerated?.call();
+                  }
+                  isGettingStoryLoading = false;
+                  notifyListeners();
+                },
+              );
+            },
+          );
+          return;
+        }
+        story = StoryHistoryModel.fromJson(
+          Map<String, dynamic>.from(storyData as Map),
+        );
         onSuccess.call(story!);
         isGettingStoryLoading = false;
         notifyListeners();

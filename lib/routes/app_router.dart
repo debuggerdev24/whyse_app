@@ -36,7 +36,8 @@ import '../screens/below_16/consent_status_screen.dart';
 import '../screens/below_16/parent_email_screen.dart';
 import '../screens/dashboard.dart';
 import '../screens/home/story/story_interest_screen.dart';
-import '../screens/home/story_ideas_screen.dart';
+import '../screens/home/story/ideas_list_screen.dart';
+import '../screens/home/my_story_ideas_screen.dart';
 import '../screens/splash/splash_screen.dart';
 import '../models/home/story_models/story_model.dart';
 
@@ -375,7 +376,14 @@ class AppRouter {
       path: AppRoutes.storyIdeasScreen.path,
       name: AppRoutes.storyIdeasScreen.name,
       builder: (context, state) {
-        return StoryReadingScreen();
+        return const IdeasListScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.storySeriesScreen.path,
+      name: AppRoutes.storySeriesScreen.name,
+      builder: (context, state) {
+        return const StoryReadingScreen();
       },
     ),
     GoRoute(

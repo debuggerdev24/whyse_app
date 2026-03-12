@@ -12,6 +12,7 @@ import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
+import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/models/home/story_models/story_history_model.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
@@ -20,8 +21,6 @@ import 'package:shimmer/shimmer.dart';
 import '../../../core/helper/log_helper.dart';
 import '../../../core/network/base_api_service.dart';
 import '../../../routes/user_routes.dart';
-import '../../../routes/app_router.dart';
-import '../../../screens/dashboard.dart';
 
 class CreatedStoryReadingScreen extends StatefulWidget {
   final StoryHistoryModel? initialStory;
@@ -45,6 +44,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
   bool _isTimerRunning = false;
   Timer? _countdownTimer;
   bool _fetchStarted = false;
+  bool _storyNotGenerated = false;
   StoryHistoryModel? _story;
 
   StoryHistoryModel? get _activeStory => _story ?? context.read<HomeProvider>().story;
@@ -72,6 +72,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
     if (oldStoryId != newStoryId) {
       _story = widget.initialStory;
       _fetchStarted = false;
+      _storyNotGenerated = false;
       _timerStarted = false;
       _isTimerRunning = false;
       _countdownTimer?.cancel();
@@ -87,14 +88,21 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
     _fetchStarted = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+     
       context.read<HomeProvider>().getStoryByIdea(
+        context: context,
         storyIdea: widget.storyIdeaId!,
         onSuccess: (story) {
           if (!mounted) return;
           setState(() {
             _story = story;
+            _storyNotGenerated = false;
           });
           _initForStory();
+        },
+        onStoryNotGenerated: () {
+          if (!mounted) return;
+          setState(() => _storyNotGenerated = true);
         },
       );
     });
@@ -215,9 +223,16 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
     final activeStory = _story ?? homeProvider.story;
 
     if (activeStory == null) {
+      final isCreatingOrFetching = homeProvider.isGettingStoryLoading ||
+          provider.isGenerateSingleStoryLoading;
       return AppLayout(
-        body: homeProvider.isGettingStoryLoading
-            ? HomeSectionShimmer.storyReadingScreenShimmer()
+        body: isCreatingOrFetching
+            ? Container(
+                width: double.infinity,
+                height: double.infinity,
+                color: AppColors.backgroundColor,
+                child: HomeSectionShimmer.storyReadingScreenShimmer(),
+              )
             : Center(
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -225,13 +240,17 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        Icons.error_outline_rounded,
+                        _storyNotGenerated
+                            ? Icons.auto_stories_outlined
+                            : Icons.error_outline_rounded,
                         size: 48.sp,
                         color: AppColors.black.withValues(alpha: 0.5),
                       ),
                       16.w.verticalSpace,
                       AppText(
-                        text: "Could not load story. Please try again.",
+                        text: _storyNotGenerated
+                            ? "Story not created yet.\nThe author hasn't generated this story."
+                            : "Could not load story. Please try again.",
                         textAlign: TextAlign.center,
                         style: AppTextStyles.sfProDisplayMedium(
                           fontSize: 16.sp,
@@ -832,6 +851,7 @@ class GlassIconButton extends StatelessWidget {
               color: Colors.black.withValues(alpha: 0.35),
               borderRadius: borderRadius,
             ),
+
             child: child,
           ),
         ),

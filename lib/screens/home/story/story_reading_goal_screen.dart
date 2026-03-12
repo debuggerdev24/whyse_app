@@ -202,6 +202,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                                 AppToast.error(context, error);
                               },
                               context: context,
+                              onlyIdeas: true,
                             );
                           });
                         },

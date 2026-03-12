@@ -32,6 +32,12 @@ class HomeSectionShimmer {
     return const StoryIdeasLoadMoreShimmer();
   }
 
+  /// Shimmer for [IdeasListScreen] while story ideas are loading.
+  /// Matches: header "Pick a story" + topic + list of idea cards (image 16:9, title, description, button).
+  static Widget ideasListScreenShimmer() {
+    return const _IdeasListScreenShimmer();
+  }
+
   static Widget storyReadingScreenShimmer() {
     return Shimmer.fromColors(
       baseColor: AppColors.shimmerBaseColor,
@@ -75,6 +81,76 @@ class HomeSectionShimmer {
               width: double.infinity,
               height: 52.w,
               radius: 999,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Shimmer for IdeasListScreen: header + topic + idea card placeholders.
+class _IdeasListScreenShimmer extends StatelessWidget {
+  const _IdeasListScreenShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: AppColors.shimmerBaseColor,
+      highlightColor: AppColors.shimmerHighlightColor,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            16.h.verticalSpace,
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
+              child: _ShimmerBox(width: 180.w, height: 26.h, radius: 6),
+            ),
+            8.h.verticalSpace,
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
+              child: _ShimmerBox(width: 140.w, height: 18.h, radius: 5),
+            ),
+            20.h.verticalSpace,
+            ...List.generate(4, (_) => const _IdeasListCardShimmer()),
+            24.h.verticalSpace,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _IdeasListCardShimmer extends StatelessWidget {
+  const _IdeasListCardShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 16.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _ShimmerBox(
+            width: double.infinity,
+            height: 200.w,
+            radius: 0,
+          ),
+          Container(
+            padding: EdgeInsets.all(16.w),
+            color: AppColors.white,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _ShimmerBox(width: double.infinity, height: 20.h, radius: 6),
+                8.h.verticalSpace,
+                _ShimmerBox(width: double.infinity, height: 14.h, radius: 4),
+                8.h.verticalSpace,
+                _ShimmerBox(width: 120.w, height: 12.h, radius: 4),
+                14.h.verticalSpace,
+                _ShimmerBox(width: double.infinity, height: 44.h, radius: 999),
+              ],
             ),
           ),
         ],

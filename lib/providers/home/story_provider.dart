@@ -289,6 +289,13 @@ class StoryProvider extends ChangeNotifier {
   bool isCreateStoryLoading = false;
 
   bool isGenerateSingleStoryLoading = false;
+  /// Call before navigating to story series so the destination shows shimmer immediately (no close icon).
+  void beginGenerateSingleStoryLoading() {
+    isGenerateSingleStoryLoading = true;
+    notifyListeners();
+  }
+  /// Set when createStory API fails (e.g. receiveTimeout). Cleared when retrying.
+  String? generateStoryError;
   final Set<String> _markingReadStoryIdeaIds = {};
   final Set<String> _markedReadStoryIdeaIds = {};
 
@@ -304,23 +311,31 @@ class StoryProvider extends ChangeNotifier {
     required VoidCallback onSuccess,
     int? insertAtIndex,
     bool showToast = true,
+    bool forceRegenerate = false,
   }) async {
+    generateStoryError = null;
     isGenerateSingleStoryLoading = true;
     notifyListeners();
     if (showToast && context.mounted) {
       AppToast.info(
         context: context,
-        durationSecond: 4,
+        durationSecond: 3,
         message: "It can take few seconds to generate the story",
       );
     }
 
+    final payload = <String, dynamic>{
+      ...dataToSendCreateStory,
+      "storyIdeaId": storyIdeaId,
+      if (forceRegenerate) "forceRegenerate": true,
+    };
     final createResponse = await StoryApiService.instance.createStory(
-      data: {"storyIdeaId": storyIdeaId},
+      data: payload,
     );
 
     createResponse.fold(
       (l) {
+        generateStoryError = l.errorMsg;
         isGenerateSingleStoryLoading = false;
         notifyListeners();
         if (context.mounted) AppToast.error(context, l.errorMsg);
@@ -423,6 +438,7 @@ class StoryProvider extends ChangeNotifier {
     _stories = [];
     _currentStoryIndex = 0;
     _currentStoryPageIndex = 0;
+    if (_lessonDuration <= 0) _lessonDuration = 5;
     notifyListeners();
   }
 
@@ -446,6 +462,7 @@ class StoryProvider extends ChangeNotifier {
     required BuildContext context,
     bool forceRegenerate = false,
     String? topicId,
+    bool onlyIdeas = false,
   }) async {
     if (!forceRegenerate && !_validateCreateStoryInput(context)) return;
     isGenerateStoryIdeasLoading = true;
@@ -507,6 +524,12 @@ class StoryProvider extends ChangeNotifier {
           storyIdea!.storyIdeas = storyIdea!.storyIdeas
               .take(_noOfStories)
               .toList();
+        }
+
+        if (onlyIdeas) {
+          isGenerateStoryIdeasLoading = false;
+          notifyListeners();
+          return;
         }
 
         final createResponse = await StoryApiService.instance.createStory(

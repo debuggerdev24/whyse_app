@@ -28,9 +28,11 @@ class HomeApiService {
       },
     );
   }
+  
   Future<Either<ApiException, Map<String, dynamic>>> getStoryByStoryId({required String storyIdea}) async {
     return await BaseApiHelper.instance.get(EndPoints.getStoryByStoryIdea(storyIdea: storyIdea));
   }
+  
   //*browse
   Future<Either<ApiException, Map<String, dynamic>>> browseAllTopics({
     String search = "",

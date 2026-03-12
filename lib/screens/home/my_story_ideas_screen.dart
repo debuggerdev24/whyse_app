@@ -131,9 +131,10 @@ class _CreatedStorySummaryScreenState extends State<CreatedStorySummaryScreen> {
                           index: index + 1,
                           topicImageUrl: summary.topicThumbnailUrl,
                           onTap: () {
+                            // Reading screen will call getStoryByIdea first: if generated shows story, else generates then shows
                             context.pushNamed(
                               AppRoutes.createdStoryReadingScreen.name,
-                              extra: {"storyIdeaId": storyIdea.id},
+                              extra: <String, dynamic>{"storyIdeaId": storyIdea.id},
                             );
                           },
                         );
@@ -145,7 +146,6 @@ class _CreatedStorySummaryScreenState extends State<CreatedStorySummaryScreen> {
                     ],
                   ),
                 ),
-                if (provider.isGettingStoryLoading) FullPageIndicator(),
               ],
             );
           },

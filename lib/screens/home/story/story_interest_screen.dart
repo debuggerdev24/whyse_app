@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -39,6 +41,7 @@ class _StoryInterestsScreenState extends State<StoryInterestsScreen> {
   Widget build(BuildContext context) {
     return AppLayout(
       body: SafeArea(
+        bottom: (Platform.isIOS) ? false : true,
         child: Consumer<StoryProvider>(
           builder: (context, provider, child) {
             return Padding(

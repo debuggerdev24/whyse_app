@@ -57,10 +57,78 @@ class StoryReadingScreen extends StatelessWidget {
                   : null;
               final shouldShowFullScreenShimmer =
                   provider.isGenerateStoryIdeasLoading ||
-                  (provider.isGenerateSingleStoryLoading && story == null);
+                  provider.isGenerateSingleStoryLoading;
 
               if (shouldShowFullScreenShimmer) {
-                return HomeSectionShimmer.generateStoryIdeasScreenShimmer();
+                return Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  color: AppColors.backgroundColor,
+                  child: HomeSectionShimmer.generateStoryIdeasScreenShimmer(),
+                );
+              }
+              if (provider.generateStoryError != null && !isEmpty) {
+                final currentIndex = provider.currentStoryIndex;
+                final currentIdeaId = currentIndex < ideas.length
+                    ? ideas[currentIndex].id
+                    : null;
+                return Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24.w),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline_rounded,
+                          size: 56.sp,
+                          color: AppColors.black.withValues(alpha: 0.4),
+                        ),
+                        20.h.verticalSpace,
+                        AppText(
+                          text: "Something went wrong. Please try again.",
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.sfProDisplayMedium(
+                            fontSize: 16.sp,
+                            color: AppColors.black.withValues(alpha: 0.8),
+                          ),
+                        ),
+                        28.h.verticalSpace,
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: currentIdeaId == null
+                                ? null
+                                : () {
+                                    provider.generateSingleStory(
+                                      storyIdeaId: currentIdeaId,
+                                      context: context,
+                                      onSuccess: () {},
+                                      showToast: true,
+                                      insertAtIndex: currentIndex,
+                                    );
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.teal,
+                              foregroundColor: AppColors.white,
+                              padding: EdgeInsets.symmetric(vertical: 14.h),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: Text(
+                              "Try again",
+                              style: AppTextStyles.sfProDisplaySemibold(
+                                fontSize: 16.sp,
+                                color: AppColors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
               }
               if (isEmpty) {
                 return Center(
@@ -93,7 +161,7 @@ class StoryReadingScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (story != null)
+if (story != null)
                             _StoryViewer(
                               story: story,
                               storyIdeaId: currentStoryIdeaId,
@@ -122,6 +190,19 @@ class StoryReadingScreen extends StatelessWidget {
                                     color: AppColors.black,
                                   ),
                                 ),
+                                if (storyIdea.topic.learningGoal.trim().isNotEmpty) ...[
+                                  8.w.verticalSpace,
+                                  AppText(
+                                    text: storyIdea.topic.learningGoal,
+                                    style: AppTextStyles.sfProDisplayRegular(
+                                      fontSize: 14.sp,
+                                      color: AppColors.black
+                                          .withValues(alpha: 0.7),
+                                    ),
+                                    maxLines: 4,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                                 8.w.verticalSpace,
                                 Row(
                                   children: [
@@ -132,7 +213,8 @@ class StoryReadingScreen extends StatelessWidget {
                                     12.w.horizontalSpace,
                                     _MetaChip(
                                       icon: Icons.access_time,
-                                      label: "${provider.lessonDuration} mins",
+                                      label:
+                                          "${provider.lessonDuration > 0 ? provider.lessonDuration : 5} mins",
                                     ),
                                   ],
                                 ),
@@ -214,6 +296,15 @@ class StoryReadingScreen extends StatelessWidget {
   }
 
   void showLeaveStoryConfirmation({required BuildContext context}) {
+    final provider = context.read<StoryProvider>();
+    final fromTopicProgress =
+        provider.storyIdea?.promptType == "progress";
+
+    if (fromTopicProgress) {
+      context.pop();
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (dialogContext) {
@@ -221,29 +312,19 @@ class StoryReadingScreen extends StatelessWidget {
           child: AlertDialog(
             backgroundColor: AppColors.white,
             title: Text(
-              "Are you sure you want to quit this story?",
+              "Are you sure you want to quit?",
               style: AppTextStyles.textStyle20Regular,
             ),
             actions: [
               myActionButtonTheme(
                 onPressed: () {
-                  dialogContext.pop();
-                  final provider = context.read<StoryProvider>();
-                  provider.clareStoryData();
-                  provider.clearStoryFields();
-                  provider.resetStoryPageIndex();
-                  provider.setCurrentStoryIndex = 0;
-                  tabIndex.value = 1;
-                  AppRouter.indexedStackNavigationShell?.goBranch(1);
-                  AppRouter.goRouter.goNamed(AppRoutes.searchScreen.name);
+                  Navigator.of(dialogContext).pop();
+                  context.pop();
                 },
                 title: "Quit",
               ),
               myActionButtonTheme(
-                onPressed: () {
-                  
-                  Navigator.of(dialogContext).pop();
-                },
+                onPressed: () => Navigator.of(dialogContext).pop(),
                 title: "Cancel",
               ),
             ],

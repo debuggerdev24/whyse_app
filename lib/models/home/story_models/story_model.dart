@@ -1,3 +1,4 @@
+import 'package:redstreakapp/core/utils/text_utils.dart';
 
 class StoryModel {
   final String id, title, content;
@@ -35,8 +36,8 @@ class StoryModel {
   factory StoryModel.fromJson(Map<String, dynamic> json) {
     return StoryModel(
       id: json['id'] ?? '',
-      title: json['title'] ?? '',
-      content: json['content'] ?? '',
+      title: stripHtml(json['title']?.toString() ?? ''),
+      content: stripHtml(json['content']?.toString() ?? ''),
       image: json['image'],
       quiz: json['quiz'] != null
           ? (json['quiz'] as List).map((i) => StoryQuiz.fromJson(i)).toList()
@@ -73,11 +74,11 @@ class StoryQuiz {
 
   factory StoryQuiz.fromJson(Map<String, dynamic> json) {
     return StoryQuiz(
-      question: json['question'] ?? '',
+      question: stripHtml(json['question']?.toString() ?? ''),
       options: json['options'] != null
-          ? List<String>.from(json['options'])
+          ? (json['options'] as List).map((e) => stripHtml(e?.toString() ?? '')).toList()
           : [],
-      answer: json['answer'] ?? '',
+      answer: stripHtml(json['answer']?.toString() ?? ''),
       correctAnswer: json['correctAnswer'] ?? 0,
       questionType: json['questionType'] ?? '',
     );
@@ -108,16 +109,28 @@ class StoryPages {
         required this.needsReview,
     });
 
-    factory StoryPages.fromJson(Map<String, dynamic> json) => StoryPages(
-        pageIndex: json["pageIndex"] ?? 0,
-        text: json["text"] ?? '',
-        primaryEntity: json["primaryEntity"] ?? '',
-        imageUrl: json["imageUrl"] ?? '',
-        imageSource: json["imageSource"] ?? '',
-        license: json["license"] ?? '',
-        attribution: json["attribution"] ?? '',
-        sourcePageUrl: json["sourcePageUrl"] ?? '',
-        needsReview: json["needsReview"] ?? false,
-    );
+    factory StoryPages.fromJson(Map<String, dynamic> json) {
+      final pageIndexRaw = json["pageIndex"];
+      final pageIndex = pageIndexRaw is int
+          ? pageIndexRaw
+          : (pageIndexRaw is num ? pageIndexRaw.toInt() : int.tryParse(pageIndexRaw?.toString() ?? '0') ?? 0);
+      return StoryPages(
+        pageIndex: pageIndex,
+        text: stripHtml(json["text"]?.toString() ?? ''),
+        primaryEntity: json["primaryEntity"]?.toString() ?? '',
+        imageUrl: json["imageUrl"]?.toString() ?? '',
+        imageSource: json["imageSource"]?.toString() ?? '',
+        license: json["license"]?.toString() ?? '',
+        attribution: json["attribution"]?.toString() ?? '',
+        sourcePageUrl: json["sourcePageUrl"]?.toString() ?? '',
+        needsReview: json["needsReview"] == true,
+      );
+    }
 
+}
+
+
+String stripHtml(String? text) {
+  if (text == null || text.isEmpty) return text ?? '';
+  return text.replaceAll(RegExp(r'<[^>]*>'), '').trim();
 }

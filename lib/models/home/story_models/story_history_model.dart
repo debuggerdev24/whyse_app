@@ -1,3 +1,4 @@
+import 'package:redstreakapp/core/utils/text_utils.dart';
 import 'package:redstreakapp/models/home/story_models/readable_story.dart';
 import 'package:redstreakapp/models/home/story_models/story_model.dart';
 
@@ -32,8 +33,8 @@ class StoryHistoryModel implements IReadableStory {
 
     factory StoryHistoryModel.fromJson(Map<String, dynamic> json) => StoryHistoryModel(
         id: json["id"],
-        title: json["title"],
-        content: json["content"],
+        title: stripHtml(json["title"]?.toString() ?? ''),
+        content: stripHtml(json["content"]?.toString() ?? ''),
         pages: (json["pages"] as List).map((e) => StoryPages.fromJson(e),).toList(),
 
         pageCount: json["pageCount"],

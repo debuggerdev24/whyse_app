@@ -71,7 +71,7 @@ class DeepLinkHandler {
           uri.host == AppConstants.domain) {
         Logger.info("Navigation triggered from verify-reset-password link");
 
-        // final token = uri.queryParameters[AppConstants.accessToken];
+        
         final fragment = uri.fragment;
         Logger.info("Fragment: $fragment");
 

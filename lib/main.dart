@@ -36,11 +36,7 @@ void main() async {
   );
 }
 /*
-todo update prompt
+Client update – keep each line 1–1.5 lines, start with "Worked on".
 
-crect a client update like this on whatever you have done today in simple,easy understood language and remove the smaller task. length should be 1-1.5 line no need to more descibe just explain in som shortest 1 to 1.5 line
 
-============================
-
-============================
 */

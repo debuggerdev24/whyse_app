@@ -164,7 +164,7 @@ class QuizCompletedScreen extends StatelessWidget {
                             if (nextIndex < provider.stories.length) {
                               provider.setCurrentStoryIndex = nextIndex;
                               if (!context.mounted) return;
-                              context.goNamed(AppRoutes.storyIdeasScreen.name);
+                              context.goNamed(AppRoutes.storySeriesScreen.name);
                             } else if (provider.storyIdea != null && nextIndex < provider.storyIdea!.storyIdeas.length) {
                               final nextIdeaId = provider.storyIdea!.storyIdeas[nextIndex].id;
                               provider.setCurrentStoryIndex = nextIndex;
@@ -174,7 +174,7 @@ class QuizCompletedScreen extends StatelessWidget {
                                 onSuccess: () {},
                               );
                               if (!context.mounted) return;
-                              context.goNamed(AppRoutes.storyIdeasScreen.name);
+                              context.goNamed(AppRoutes.storySeriesScreen.name);
                             }
                           },
                           backgroundColor: AppColors.teal,

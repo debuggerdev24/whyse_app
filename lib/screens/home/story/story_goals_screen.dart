@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -196,7 +198,7 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
 
                   AppFilledButton(
                     text: "Next",
-                    margin: EdgeInsets.only(bottom: 18.w),
+                    margin: EdgeInsets.only(bottom: (Platform.isIOS) ? 0.w : 18.w),
                     backgroundColor: AppColors.primaryColor,
                     onTap: () async {
                       final goalText = provider.goalTitleController.text.trim();
