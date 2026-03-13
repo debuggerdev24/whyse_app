@@ -193,7 +193,14 @@ class _RandomTopicReadingScreenState extends State<RandomTopicReadingScreen> {
           ),
           16.w.verticalSpace,
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.goNamed(AppRoutes.homeScreen.name);
+                tabIndex.value = 0;
+              }
+            },
             child: const Text("Go back"),
           ),
         ],

@@ -35,8 +35,7 @@ class StartQuizScreen extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: AppColors.backgroundColor,
           leading: IconButton(
-            onPressed: () {
-              
+            onPressed: () {  
               // context.pop();
               showLeaveQuizConfirmation(context: context);
             },

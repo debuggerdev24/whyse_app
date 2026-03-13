@@ -448,7 +448,7 @@ class StoryProvider extends ChangeNotifier {
     return idx;
   }
 
-  bool isGenerateStoryIdeasLoading = false;
+  bool isGenerateStoryIdeasLoading = true;
 
   void setGenerateStoryIdeasLoading(bool value) {
     isGenerateStoryIdeasLoading = value;
@@ -456,7 +456,6 @@ class StoryProvider extends ChangeNotifier {
   }
 
   Future<void> createStoryIdeas({
-    required VoidCallback onStarted,
     required Function(String error) onFailed,
     required BuildContext context,
     bool forceRegenerate = false,
@@ -470,9 +469,7 @@ class StoryProvider extends ChangeNotifier {
     stories.clear();
     storyIdea = null;
     notifyListeners();
-    Future.delayed(Duration(seconds: 2), () {
-      onStarted.call();
-    });
+    
 
     if (forceRegenerate) {
       dataToSendCreateStory = {...dataToSendCreateStory};

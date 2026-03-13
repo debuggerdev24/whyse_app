@@ -36,5 +36,12 @@ void main() async {
   );
 }
 /*
-Client update – keep each line 1–1.5 lines, start with "Worked on".
+
+-> Fixed quit confirmation on system back so the leave dialog shows once using GoRoute onExit.
+-> Updated the generating-story leave flow with “Quit and generate new one?” and Yes to regenerate or Cancel to continue.
+-> Updated the random/topic-progress leave flow with “Are you sure you want to quit?” and Quit/Cancel options.
+-> Removed the duplicate close (X) button on the random story series screen so only one close icon shows.
+-> Hid the Ideas chip, label, and list when there is only one idea; shown when there are two or more.
+-> Fixed story switching so scrolling resets to the top and the current story is visible when switching back.
+https://whyse.com/story?id=5c8cee08-a658-44e5-9ef7-d87494991097
 */

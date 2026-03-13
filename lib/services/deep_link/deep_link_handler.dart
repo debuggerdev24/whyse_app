@@ -9,6 +9,7 @@ import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/routes/app_router.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
+import 'package:redstreakapp/screens/home/story/story_series_screen.dart';
 
 class DeepLinkHandler {
   final AppLinks _appLinks = AppLinks();
@@ -169,6 +170,24 @@ class DeepLinkHandler {
           Logger.error("No token found in parent consent link");
         }
 
+        return;
+      }
+
+      // ---------------- Story idea (share link) ----------------
+      
+      if (uri.host == AppConstants.domain &&
+          uri.path == AppConstants.storyIdeaPath) {
+        final storyIdeaId = uri.queryParameters[AppConstants.storyIdeaIdParam];
+        if (storyIdeaId != null && storyIdeaId.trim().isNotEmpty) {
+          Logger.info("Story deep link -> storyIdeaId: $storyIdeaId");
+          StoryReadingScreen.skipLeaveDialogForDeepLink = true;
+          AppRouter.goRouter.goNamed(
+            AppRoutes.createdStoryReadingScreen.name,
+            extra: <String, dynamic>{"storyIdeaId": storyIdeaId.trim()},
+          );
+          return;
+        }
+        Logger.error("Story link missing id parameter: $uri");
         return;
       }
 

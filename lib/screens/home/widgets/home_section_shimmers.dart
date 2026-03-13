@@ -129,31 +129,38 @@ class _IdeasListCardShimmer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 16.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _ShimmerBox(
-            width: double.infinity,
-            height: 200.w,
-            radius: 0,
-          ),
-          Container(
-            padding: EdgeInsets.all(16.w),
-            color: AppColors.white,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _ShimmerBox(width: double.infinity, height: 20.h, radius: 6),
-                8.h.verticalSpace,
-                _ShimmerBox(width: double.infinity, height: 14.h, radius: 4),
-                8.h.verticalSpace,
-                _ShimmerBox(width: 120.w, height: 12.h, radius: 4),
-                14.h.verticalSpace,
-                _ShimmerBox(width: double.infinity, height: 44.h, radius: 999),
-              ],
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24.r),
+          color: AppColors.shimmerBaseColor,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _ShimmerBox(
+              width: double.infinity,
+              height: 200.w,
+              radius: 0,
             ),
-          ),
-        ],
+            Container(
+              padding: EdgeInsets.all(16.w),
+              color: AppColors.white,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _ShimmerBox(width: double.infinity, height: 20.h, radius: 6),
+                  8.h.verticalSpace,
+                  _ShimmerBox(width: double.infinity, height: 14.h, radius: 4),
+                  8.h.verticalSpace,
+                  _ShimmerBox(width: 120.w, height: 12.h, radius: 4),
+                  14.h.verticalSpace,
+                  _ShimmerBox(width: double.infinity, height: 44.h, radius: 999),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

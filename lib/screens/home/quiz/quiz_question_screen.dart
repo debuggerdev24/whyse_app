@@ -43,146 +43,140 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
         final options = currentQuestion['options'] as List<String>;
         final correctIndex = currentQuestion['correctIndex'] as int;
 
-        return PopScope(
-          canPop: false,
-          onPopInvokedWithResult: (didPop, result) {
-            showLeaveQuizConfirmation(context: context);
-          },
-          child: AppLayout(
-            body: SafeArea(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 27.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    16.h.verticalSpace,
-
-                    /// Top Bar
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        GestureDetector(
-                          onTap: () =>
-                              showLeaveQuizConfirmation(context: context),
-                          child: SvgIcon(
-                            AppAssets.disable,
-                            color: Colors.black,
-                            size: 30.sp,
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 4.w),
-                            child: Row(
-                              children: List.generate(quiz.questions.length, (
-                                index,
-                              ) {
-                                Color color;
-                                if (index < quiz.currentQuestionIndex) {
-                                  color = AppColors.primaryColor;
-                                } else if (index == quiz.currentQuestionIndex) {
-                                  color = AppColors.primaryColor;
-                                } else {
-                                  color = Colors.grey.withValues(alpha: 0.2);
-                                }
-
-                                return Expanded(
-                                  child: Container(
-                                    margin: EdgeInsets.symmetric(
-                                      horizontal: 4.w,
-                                    ),
-                                    height: 4.h,
-                                    decoration: BoxDecoration(
-                                      color: color,
-                                      borderRadius: BorderRadius.circular(2),
-                                    ),
-                                  ),
-                                );
-                              }),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    19.h.verticalSpace,
-
-                    /// Question
-                    AppText(
-                      text: currentQuestion['question'],
-                      style: AppTextStyles.sfProDisplayBold(
-                        fontSize: 32.sp,
-                        color: AppColors.black,
-                      ).copyWith(height: 1.2),
-                    ),
-
-                    31.h.verticalSpace,
-
-                    /// Options
-                    ...List.generate(
-                      options.length,
-                      (index) => OptionCard(
-                        text: options[index],
-                        isSelected: quiz.selectedOptionIndex == index,
-                        isCorrect: index == correctIndex,
-                        isChecked: quiz.isChecked,
-                        onTap: !quiz.isChecked
-                            ? () => quiz.selectOption(index)
-                            : null,
-                      ),
-                    ),
-
-                    Spacer(),
-
-                    Center(
-                      child: AppText(
-                        text:
-                            "${quiz.currentQuestionIndex + 1} / ${quiz.questions.length}",
-                        style: AppTextStyles.sfProDisplayRegular(
-                          fontSize: 14.sp,
-                          color: Colors.grey,
+        return AppLayout(
+          body: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 27.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  16.h.verticalSpace,
+        
+                  /// Top Bar
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        onTap: () =>
+                            showLeaveQuizConfirmation(context: context),
+                        child: SvgIcon(
+                          AppAssets.disable,
+                          color: Colors.black,
+                          size: 30.sp,
                         ),
                       ),
-                    ),
-
-                    16.h.verticalSpace,
-
-                    /// Button
-                    quiz.isChecked
-                        ? AppFilledButton(
-                            text: "Continue",
-                            onTap: () {
-                              if (quiz.currentQuestionIndex <
-                                  quiz.questions.length - 1) {
-                                quiz.continueQuiz();
+                      Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 4.w),
+                          child: Row(
+                            children: List.generate(quiz.questions.length, (
+                              index,
+                            ) {
+                              Color color;
+                              if (index < quiz.currentQuestionIndex) {
+                                color = AppColors.primaryColor;
+                              } else if (index == quiz.currentQuestionIndex) {
+                                color = AppColors.primaryColor;
                               } else {
-                                context.goNamed(
-                                  AppRoutes.quizCompletedScreen.name,
-                                  extra: {
-                                    'score': quiz.score,
-                                    'total': quiz.questions.length,
-                                    'storyTitle': widget.storyTitle,
-                                  },
-                                );
+                                color = Colors.grey.withValues(alpha: 0.2);
                               }
-                            },
-                            backgroundColor: Color(0xFF00796B),
-                            fixedSize: Size(348.w, 42.h),
-                          )
-                        : AppFilledButton(
-                            text: "Check",
-                            onTap: quiz.selectedOptionIndex != null
-                                ? quiz.checkAnswer
-                                : () {},
-                            backgroundColor: quiz.selectedOptionIndex != null
-                                ? AppColors.black
-                                : Colors.grey,
-                            fixedSize: Size(348.w, 42.h),
+        
+                              return Expanded(
+                                child: Container(
+                                  margin: EdgeInsets.symmetric(
+                                    horizontal: 4.w,
+                                  ),
+                                  height: 4.h,
+                                  decoration: BoxDecoration(
+                                    color: color,
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                              );
+                            }),
                           ),
-
-                    24.h.verticalSpace,
-                  ],
-                ),
+                        ),
+                      ),
+                    ],
+                  ),
+        
+                  19.h.verticalSpace,
+        
+                  /// Question
+                  AppText(
+                    text: currentQuestion['question'],
+                    style: AppTextStyles.sfProDisplayBold(
+                      fontSize: 32.sp,
+                      color: AppColors.black,
+                    ).copyWith(height: 1.2),
+                  ),
+        
+                  31.h.verticalSpace,
+        
+                  /// Options
+                  ...List.generate(
+                    options.length,
+                    (index) => OptionCard(
+                      text: options[index],
+                      isSelected: quiz.selectedOptionIndex == index,
+                      isCorrect: index == correctIndex,
+                      isChecked: quiz.isChecked,
+                      onTap: !quiz.isChecked
+                          ? () => quiz.selectOption(index)
+                          : null,
+                    ),
+                  ),
+        
+                  Spacer(),
+        
+                  Center(
+                    child: AppText(
+                      text:
+                          "${quiz.currentQuestionIndex + 1} / ${quiz.questions.length}",
+                      style: AppTextStyles.sfProDisplayRegular(
+                        fontSize: 14.sp,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+        
+                  16.h.verticalSpace,
+        
+                  /// Button
+                  quiz.isChecked
+                      ? AppFilledButton(
+                          text: "Continue",
+                          onTap: () {
+                            if (quiz.currentQuestionIndex <
+                                quiz.questions.length - 1) {
+                              quiz.continueQuiz();
+                            } else {
+                              context.goNamed(
+                                AppRoutes.quizCompletedScreen.name,
+                                extra: {
+                                  'score': quiz.score,
+                                  'total': quiz.questions.length,
+                                  'storyTitle': widget.storyTitle,
+                                },
+                              );
+                            }
+                          },
+                          backgroundColor: Color(0xFF00796B),
+                          fixedSize: Size(348.w, 42.h),
+                        )
+                      : AppFilledButton(
+                          text: "Check",
+                          onTap: quiz.selectedOptionIndex != null
+                              ? quiz.checkAnswer
+                              : () {},
+                          backgroundColor: quiz.selectedOptionIndex != null
+                              ? AppColors.black
+                              : Colors.grey,
+                          fixedSize: Size(348.w, 42.h),
+                        ),
+        
+                  24.h.verticalSpace,
+                ],
               ),
             ),
           ),

@@ -179,7 +179,7 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                                     ),
                                   ),
                                   if (goal.description.isNotEmpty) ...[
-                                    3.h.verticalSpace,
+                                    3.w.verticalSpace,
                                     AppText(
                                       text: goal.description,
                                       style: AppTextStyles.sfProDisplayRegular(

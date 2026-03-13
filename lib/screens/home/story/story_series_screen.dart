@@ -15,245 +15,251 @@ import 'package:redstreakapp/core/utils/date_formatter.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
+import 'package:redstreakapp/core/utils/share_helper.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
+import 'package:redstreakapp/screens/dashboard.dart';
 import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
 import 'package:redstreakapp/models/home/story_models/story_idea_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_model.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
+import 'package:redstreakapp/routes/app_router.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
 class StoryReadingScreen extends StatelessWidget {
   const StoryReadingScreen({super.key});
 
+  /// When true, [shouldAllowPop] returns true without showing the leave dialog.
+  /// Set by deep link handler when opening a story link so the new story opens instead of the dialog.
+  static bool skipLeaveDialogForDeepLink = false;
+
   @override
   Widget build(BuildContext context) {
-    // System back is handled by GoRoute.onExit (app_router) to avoid double dialog.
     return AppLayout(
       body: SafeArea(
-          child: Consumer<StoryProvider>(
-            builder: (context, provider, child) {
-              Logger.info("${provider.lessonDuration}");
-              if (!context.mounted) return const SizedBox.shrink();
-              final storyIdea = provider.storyIdea;
-              final isEmpty = storyIdea == null || storyIdea.storyIdeas.isEmpty;
-              final ideas = storyIdea?.storyIdeas ?? [];
-              final topicTitle =
-                  (storyIdea != null && storyIdea.topic.title.isNotEmpty)
-                  ? storyIdea.topic.title
-                  : "Your Story Ideas";
+        child: Consumer<StoryProvider>(
+          builder: (context, provider, child) {
+            Logger.info("${provider.lessonDuration}");
+            if (!context.mounted) return const SizedBox.shrink();
+            final storyIdea = provider.storyIdea;
+            final isEmpty = storyIdea == null || storyIdea.storyIdeas.isEmpty;
+            final ideas = storyIdea?.storyIdeas ?? [];
+            final topicTitle =
+                (storyIdea != null && storyIdea.topic.title.isNotEmpty)
+                ? storyIdea.topic.title
+                : "Your Story Ideas";
 
-              final hasStory =
-                  provider.stories.isNotEmpty &&
-                  provider.currentStoryIndex < provider.stories.length &&
-                  provider.stories[provider.currentStoryIndex].pages.isNotEmpty;
-              final story = hasStory
-                  ? provider.stories[provider.currentStoryIndex]
+            final hasStory =
+                provider.stories.isNotEmpty &&
+                provider.currentStoryIndex < provider.stories.length &&
+                provider.stories[provider.currentStoryIndex].pages.isNotEmpty;
+            final story = hasStory
+                ? provider.stories[provider.currentStoryIndex]
+                : null;
+            final shouldShowFullScreenShimmer =
+                provider.isGenerateStoryIdeasLoading ||
+                provider.isGenerateSingleStoryLoading;
+
+            if (shouldShowFullScreenShimmer) {
+              return Container(
+                width: double.infinity,
+                height: double.infinity,
+                color: AppColors.backgroundColor,
+                child: HomeSectionShimmer.generateStoryIdeasScreenShimmer(),
+              );
+            }
+            if (provider.generateStoryError != null && !isEmpty) {
+              final currentIndex = provider.currentStoryIndex;
+              final currentIdeaId = currentIndex < ideas.length
+                  ? ideas[currentIndex].id
                   : null;
-              final shouldShowFullScreenShimmer =
-                  provider.isGenerateStoryIdeasLoading ||
-                  provider.isGenerateSingleStoryLoading;
+              return Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24.w),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline_rounded,
+                        size: 56.sp,
+                        color: AppColors.black.withValues(alpha: 0.4),
+                      ),
+                      20.h.verticalSpace,
+                      AppText(
+                        text: "Something went wrong. Please try again.",
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.sfProDisplayMedium(
+                          fontSize: 16.sp,
+                          color: AppColors.black.withValues(alpha: 0.8),
+                        ),
+                      ),
+                      28.w.verticalSpace,
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: currentIdeaId == null
+                              ? null
+                              : () {
+                                  provider.generateSingleStory(
+                                    storyIdeaId: currentIdeaId,
+                                    context: context,
+                                    onSuccess: () {},
+                                    showToast: true,
+                                    insertAtIndex: currentIndex,
+                                  );
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.teal,
+                            foregroundColor: AppColors.white,
+                            padding: EdgeInsets.symmetric(vertical: 14.h),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            "Try again",
+                            style: AppTextStyles.sfProDisplaySemibold(
+                              fontSize: 16.sp,
+                              color: AppColors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+            if (isEmpty) {
+              return Center(
+                child: AppText(
+                  text: "No story ideas yet",
+                  style: AppTextStyles.sfProDisplayMedium(
+                    fontSize: 16.sp,
+                    color: AppColors.black.withValues(alpha: 0.6),
+                  ),
+                ),
+              );
+            }
 
-              if (shouldShowFullScreenShimmer) {
-                return Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  color: AppColors.backgroundColor,
-                  child: HomeSectionShimmer.generateStoryIdeasScreenShimmer(),
-                );
-              }
-              if (provider.generateStoryError != null && !isEmpty) {
-                final currentIndex = provider.currentStoryIndex;
-                final currentIdeaId = currentIndex < ideas.length
-                    ? ideas[currentIndex].id
-                    : null;
-                return Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24.w),
+            final durationMinutes = story != null
+                ? (story.lessonDuration ?? provider.lessonDuration).clamp(
+                    1,
+                    999,
+                  )
+                : 0;
+            final displayMins = story != null
+                ? (story.lessonDuration ?? provider.lessonDuration)
+                : provider.lessonDuration;
+            final displayMinsLabel = displayMins > 0 ? displayMins : 5;
+            final currentStoryIdeaId = provider.currentStoryIndex < ideas.length
+                ? ideas[provider.currentStoryIndex].id
+                : '';
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    key: ValueKey('story_index_${provider.currentStoryIndex}'),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.error_outline_rounded,
-                          size: 56.sp,
-                          color: AppColors.black.withValues(alpha: 0.4),
-                        ),
-                        20.h.verticalSpace,
-                        AppText(
-                          text: "Something went wrong. Please try again.",
-                          textAlign: TextAlign.center,
-                          style: AppTextStyles.sfProDisplayMedium(
-                            fontSize: 16.sp,
-                            color: AppColors.black.withValues(alpha: 0.8),
+                        if (story != null)
+                          _StoryViewer(
+                            story: story,
+                            storyIdeaId: currentStoryIdeaId,
+                            lessonDuration: durationMinutes > 0
+                                ? durationMinutes
+                                : provider.lessonDuration,
+                            onCloseStory: () {
+                              showLeaveStoryConfirmation(context: context);
+                            },
                           ),
-                        ),
-                        28.h.verticalSpace,
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: currentIdeaId == null
-                                ? null
-                                : () {
-                                    provider.generateSingleStory(
-                                      storyIdeaId: currentIdeaId,
-                                      context: context,
-                                      onSuccess: () {},
-                                      showToast: true,
-                                      insertAtIndex: currentIndex,
-                                    );
-                                  },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.teal,
-                              foregroundColor: AppColors.white,
-                              padding: EdgeInsets.symmetric(vertical: 14.h),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.r),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: Text(
-                              "Try again",
-                              style: AppTextStyles.sfProDisplaySemibold(
-                                fontSize: 16.sp,
-                                color: AppColors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }
-              if (isEmpty) {
-                return Center(
-                  child: AppText(
-                    text: "No story ideas yet",
-                    style: AppTextStyles.sfProDisplayMedium(
-                      fontSize: 16.sp,
-                      color: AppColors.black.withValues(alpha: 0.6),
-                    ),
-                  ),
-                );
-              }
 
-              final durationMinutes = story != null
-                  ? (story.lessonDuration ?? provider.lessonDuration).clamp(
-                      1,
-                      999,
-                    )
-                  : 0;
-              final displayMins = story != null
-                  ? (story.lessonDuration ?? provider.lessonDuration)
-                  : provider.lessonDuration;
-              final displayMinsLabel = displayMins > 0 ? displayMins : 5;
-              final currentStoryIdeaId =
-                  provider.currentStoryIndex < ideas.length
-                  ? ideas[provider.currentStoryIndex].id
-                  : '';
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      key: ValueKey('story_index_${provider.currentStoryIndex}'),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (story != null)
-                            _StoryViewer(
-                              story: story,
-                              storyIdeaId: currentStoryIdeaId,
-                              lessonDuration: durationMinutes > 0
-                                  ? durationMinutes
-                                  : provider.lessonDuration,
-                              onCloseStory: () {
-                                showLeaveStoryConfirmation(context: context);
-                              },
-                            ),
-
-                          // else if ()
-                          //   HomeSectionShimmer.storyReadingScreenShimmer(),
-                          16.w.verticalSpace,
-                          //* Story Ideas list
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(24.w, 0.w, 24.w, 16.w),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                AppText(
-                                  text: topicTitle,
-                                  style: AppTextStyles.sfProDisplayBold(
-                                    fontSize: 24.sp,
-                                    height: 0,
-                                    color: AppColors.black,
-                                  ),
+                        // else if ()
+                        //   HomeSectionShimmer.storyReadingScreenShimmer(),
+                        16.w.verticalSpace,
+                        //* Story Ideas list
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(24.w, 0.w, 24.w, 16.w),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              AppText(
+                                text: topicTitle,
+                                style: AppTextStyles.sfProDisplayBold(
+                                  fontSize: 24.sp,
+                                  height: 0,
+                                  color: AppColors.black,
                                 ),
-                                if (storyIdea.topic.learningGoal
-                                    .trim()
-                                    .isNotEmpty) ...[
-                                  8.w.verticalSpace,
-                                  AppText(
-                                    text: storyIdea.topic.learningGoal,
-                                    style: AppTextStyles.sfProDisplayRegular(
-                                      fontSize: 14.sp,
-                                      color: AppColors.black.withValues(
-                                        alpha: 0.7,
-                                      ),
-                                    ),
-                                    maxLines: 4,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
+                              ),
+                              if (storyIdea.topic.learningGoal
+                                  .trim()
+                                  .isNotEmpty) ...[
                                 8.w.verticalSpace,
+                                AppText(
+                                  text: storyIdea.topic.learningGoal,
+                                  style: AppTextStyles.sfProDisplayRegular(
+                                    fontSize: 14.sp,
+                                    color: AppColors.black.withValues(
+                                      alpha: 0.7,
+                                    ),
+                                  ),
+                                  maxLines: 4,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                              8.w.verticalSpace,
+                              if (ideas.length > 1)
                                 Row(
                                   children: [
-                                    if (ideas.length > 1)
-                                      _MetaChip(
-                                        icon: Icons.menu_book_outlined,
-                                        label: "${ideas.length} Ideas",
-                                      ),
-                                    if (ideas.length > 1) 12.w.horizontalSpace,
+                                    _MetaChip(
+                                      icon: Icons.menu_book_outlined,
+                                      label: "${ideas.length} Ideas",
+                                    ),
+                                    // if (ideas.length > 1)
+                                    12.w.horizontalSpace,
                                     _MetaChip(
                                       icon: Icons.access_time,
                                       label: "$displayMinsLabel mins",
                                     ),
                                   ],
                                 ),
-                                if (ideas.length > 1) ...[
-                                  9.w.verticalSpace,
-                                  Row(
-                                    children: [
-                                      Container(
-                                        padding: EdgeInsets.only(bottom: 4.h),
-                                        decoration: BoxDecoration(
-                                          border: Border(
-                                            bottom: BorderSide(
-                                              color: AppColors.teal,
-                                              width: 2,
-                                            ),
+                              if (ideas.length > 1) ...[
+                                9.w.verticalSpace,
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.only(bottom: 4.h),
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                          bottom: BorderSide(
+                                            color: AppColors.teal,
+                                            width: 2,
                                           ),
                                         ),
-                                        child: AppText(
-                                          text: "Ideas",
-                                          style:
-                                              AppTextStyles.sfProDisplaySemibold(
-                                                fontSize: 16.sp,
-                                                color: AppColors.teal,
-                                              ),
-                                        ),
                                       ),
-                                    ],
-                                  ),
-                                ],
+                                      child: AppText(
+                                        text: "Ideas",
+                                        style:
+                                            AppTextStyles.sfProDisplaySemibold(
+                                              fontSize: 16.sp,
+                                              color: AppColors.teal,
+                                            ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ],
-                            ),
+                            ],
                           ),
-                          if (ideas.length > 1)
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 24.w),
-                              child: Column(
-                                children: List.generate(ideas.length, (index) {
+                        ),
+                        if (ideas.length > 1)
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 24.w),
+                            child: Column(
+                              children: List.generate(ideas.length, (index) {
                                 if (index == provider.currentStoryIndex) {
                                   return const SizedBox.shrink();
                                 }
@@ -286,21 +292,25 @@ class StoryReadingScreen extends StatelessWidget {
                               }),
                             ),
                           ),
-                          SizedBox(height: 24.w),
-                        ],
-                      ),
+                        SizedBox(height: 24.w),
+                      ],
                     ),
                   ),
-                ],
-              );
-            },
-          ),
+                ),
+              ],
+            );
+          },
         ),
+      ),
     );
   }
 
   /// Returns true to allow route pop, false to stay. Used by GoRoute.onExit (system back).
   static Future<bool> shouldAllowPop(BuildContext context) async {
+    if (skipLeaveDialogForDeepLink) {
+      skipLeaveDialogForDeepLink = false;
+      return true;
+    }
     final provider = context.read<StoryProvider>();
     final fromTopicProgress = provider.storyIdea?.promptType == "progress";
 
@@ -397,13 +407,19 @@ class StoryReadingScreen extends StatelessWidget {
               actions: [
                 myActionButtonTheme(
                   onPressed: () {
-                    Navigator.of(dialogContext).pop();
-                    context.pop();
+                    dialogContext.pop();
+                    if (!context.mounted) return;
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.goNamed(AppRoutes.homeScreen.name);
+                      tabIndex.value = 0;
+                    }
                   },
                   title: "Quit",
                 ),
                 myActionButtonTheme(
-                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  onPressed: () => dialogContext.pop(),
                   title: "Cancel",
                 ),
               ],
@@ -918,6 +934,10 @@ class _StoryPage extends StatelessWidget {
           height: 270.w,
           pageLabel: 'Page ${pageIndex + 1} of $totalPages',
           onClose: onCloseStory,
+          onShare: () => shareStoryIdeaLink(
+            storyIdeaId: storyIdeaId,
+            storyTitle: storyTitle,
+          ),
         ),
         Container(
           color: AppColors.backgroundColor,
@@ -1183,12 +1203,14 @@ class _StoryImage extends StatelessWidget {
   final double height;
   final String pageLabel;
   final VoidCallback onClose;
+  final VoidCallback? onShare;
 
   const _StoryImage({
     required this.imageUrl,
     required this.height,
     required this.pageLabel,
     required this.onClose,
+    this.onShare,
   });
 
   @override
@@ -1229,6 +1251,19 @@ class _StoryImage extends StatelessWidget {
                       ),
                     ),
                   ),
+                  if (onShare != null)
+                    Positioned(
+                      top: 12.w,
+                      right: 12.w,
+                      child: GlassIconButton(
+                        onTap: onShare!,
+                        child: Icon(
+                          Icons.share_outlined,
+                          size: 18.sp,
+                          color: AppColors.white,
+                        ),
+                      ),
+                    ),
                   Align(
                     alignment: Alignment.bottomLeft,
                     child: Container(

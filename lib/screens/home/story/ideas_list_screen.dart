@@ -78,7 +78,7 @@ class IdeasListScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              16.h.verticalSpace,
+              16.w.verticalSpace,
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 24.w),
                 child: AppText(
@@ -89,7 +89,7 @@ class IdeasListScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              8.h.verticalSpace,
+              
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 24.w),
                 child: AppText(

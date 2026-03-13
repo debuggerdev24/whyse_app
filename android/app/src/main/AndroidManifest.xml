@@ -49,9 +49,15 @@
 
                 <!-- Parent consent link -->
 
+                    <data
+                        android:host="whyse.com"
+                        android:pathPrefix="/verify-parent-consent"
+                        android:scheme="https" />
+
+                <!-- Story idea link -->
                 <data
                     android:host="whyse.com"
-                    android:pathPrefix="/verify-parent-consent"
+                    android:pathPrefix="/story"
                     android:scheme="https" />
             </intent-filter>
 

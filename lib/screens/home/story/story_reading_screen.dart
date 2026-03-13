@@ -12,10 +12,10 @@ import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
-import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/models/home/story_models/story_history_model.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
+import 'package:redstreakapp/routes/app_router.dart';
 import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../core/helper/log_helper.dart';
@@ -61,7 +61,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
     super.initState();
     _story = widget.initialStory;
     _initForStory();
-    _fetchStoryIfNeeded();
+    _fetchStory();
   }
 
   @override
@@ -79,11 +79,11 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
       _countdownTimer = null;
       _pageController.jumpToPage(0);
       _initForStory();
-      _fetchStoryIfNeeded();
+      _fetchStory();
     }
   }
 
-  void _fetchStoryIfNeeded() {
+  void _fetchStory() {
     if (_story != null || widget.storyIdeaId == null || _fetchStarted) return;
     _fetchStarted = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -259,7 +259,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                       ),
                       24.w.verticalSpace,
                       TextButton(
-                        onPressed: () => context.pop(),
+                        onPressed: () => _leaveStoryAndNavigate(context),
                         child: const Text("Go back"),
                       ),
                     ],
@@ -582,6 +582,21 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
     );
   }
 
+  //* Leaves the story (clears provider) and navigates back. Safe when opened via
+  //* deep link (nothing to pop) or in-app (pop).
+  void _leaveStoryAndNavigate(BuildContext context) {
+    final provider = context.read<StoryProvider>();
+    provider.clareStoryData();
+    provider.clearStoryFields();
+    provider.resetStoryPageIndex();
+    provider.setCurrentStoryIndex = 0;
+    if (AppRouter.goRouter.canPop()) {
+      context.pop();
+    } else {
+      AppRouter.goRouter.goNamed(AppRoutes.homeScreen.name);
+    }
+  }
+
   void showLeaveStoryConfirmation({required BuildContext context}) {
     showDialog(
       context: context,
@@ -597,20 +612,13 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
               myActionButtonTheme(
                 onPressed: () {
                   dialogContext.pop();
-                  final provider = context.read<StoryProvider>();
-                  provider.clareStoryData();
-                  provider.clearStoryFields();
-                  provider.resetStoryPageIndex();
-                  provider.setCurrentStoryIndex = 0;
-                  context.pop();
-                  // AppRouter.indexedStackNavigationShell?.goBranch(1);
-                  // AppRouter.goRouter.goNamed(AppRoutes.searchScreen.name);
+                  _leaveStoryAndNavigate(context);
                 },
                 title: "Quit",
               ),
               myActionButtonTheme(
                 onPressed: () {
-                  Navigator.of(dialogContext).pop();
+                  dialogContext.pop();
                 },
                 title: "Cancel",
               ),

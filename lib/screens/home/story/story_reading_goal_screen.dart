@@ -190,13 +190,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                                   AppRoutes.storyIdeasScreen.name,
                                 );
                                 await provider.createStoryIdeas(
-                              onStarted: () {
-                                AppToast.info(
-                                  context: context,
-                                  message: "It can take few seconds, Please wait.",
-                                  durationSecond: 4,
-                                );
-                              },
+                             
                               onFailed: (error) {
                                 Logger.error(error);
                                 AppToast.error(context, error);

@@ -16,6 +16,8 @@ class AppConstants {
   static const String domain = "whyse.com",
       parentConsentPath = "/verify-parent-consent",
       forgotPasswordPath = "/verify-reset-password",
+      storyIdeaPath = "/story",
+      storyIdeaIdParam = "id",
       age = "AGE",
       email = "EMAIL",
       parentEmail = "PARENT_EMAIL",

@@ -122,6 +122,7 @@ class StoryIdeaEpisodeCard extends StatelessWidget {
   final int index;
   final String topicImageUrl;
   final VoidCallback onTap;
+  final VoidCallback? onShare;
 
   const StoryIdeaEpisodeCard({
     super.key,
@@ -129,6 +130,7 @@ class StoryIdeaEpisodeCard extends StatelessWidget {
     required this.index,
     required this.topicImageUrl,
     required this.onTap,
+    this.onShare,
   });
 
   @override
@@ -189,15 +191,37 @@ class StoryIdeaEpisodeCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AppText(
-                  text: story.storyTitle,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.sfProDisplayBold(
-                    fontSize: 18.sp,
-                    height: 1.2,
-                    color: AppColors.black,
-                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: AppText(
+                        text: story.storyTitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.sfProDisplayBold(
+                          fontSize: 18.sp,
+                          height: 1.2,
+                          color: AppColors.black,
+                        ),
+                      ),
+                    ),
+                    if (onShare != null) ...[
+                      8.w.horizontalSpace,
+                      GestureDetector(
+                        onTap: onShare,
+                        behavior: HitTestBehavior.opaque,
+                        child: Padding(
+                          padding: EdgeInsets.all(4.w),
+                          child: Icon(
+                            Icons.share_outlined,
+                            size: 22.sp,
+                            color: AppColors.teal,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
                 8.h.verticalSpace,
                 AppText(
