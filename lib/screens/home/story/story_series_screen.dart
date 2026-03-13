@@ -17,25 +17,19 @@ import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
-import 'package:redstreakapp/routes/app_router.dart';
 import 'package:redstreakapp/models/home/story_models/story_idea_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_model.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
-import 'package:redstreakapp/screens/dashboard.dart';
 
 class StoryReadingScreen extends StatelessWidget {
   const StoryReadingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        showLeaveStoryConfirmation(context: context);
-      },
-      child: AppLayout(
-        body: SafeArea(
+    // System back is handled by GoRoute.onExit (app_router) to avoid double dialog.
+    return AppLayout(
+      body: SafeArea(
           child: Consumer<StoryProvider>(
             builder: (context, provider, child) {
               Logger.info("${provider.lessonDuration}");
@@ -148,6 +142,10 @@ class StoryReadingScreen extends StatelessWidget {
                       999,
                     )
                   : 0;
+              final displayMins = story != null
+                  ? (story.lessonDuration ?? provider.lessonDuration)
+                  : provider.lessonDuration;
+              final displayMinsLabel = displayMins > 0 ? displayMins : 5;
               final currentStoryIdeaId =
                   provider.currentStoryIndex < ideas.length
                   ? ideas[provider.currentStoryIndex].id
@@ -158,10 +156,11 @@ class StoryReadingScreen extends StatelessWidget {
                 children: [
                   Expanded(
                     child: SingleChildScrollView(
+                      key: ValueKey('story_index_${provider.currentStoryIndex}'),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-if (story != null)
+                          if (story != null)
                             _StoryViewer(
                               story: story,
                               storyIdeaId: currentStoryIdeaId,
@@ -190,14 +189,17 @@ if (story != null)
                                     color: AppColors.black,
                                   ),
                                 ),
-                                if (storyIdea.topic.learningGoal.trim().isNotEmpty) ...[
+                                if (storyIdea.topic.learningGoal
+                                    .trim()
+                                    .isNotEmpty) ...[
                                   8.w.verticalSpace,
                                   AppText(
                                     text: storyIdea.topic.learningGoal,
                                     style: AppTextStyles.sfProDisplayRegular(
                                       fontSize: 14.sp,
-                                      color: AppColors.black
-                                          .withValues(alpha: 0.7),
+                                      color: AppColors.black.withValues(
+                                        alpha: 0.7,
+                                      ),
                                     ),
                                     maxLines: 4,
                                     overflow: TextOverflow.ellipsis,
@@ -206,49 +208,52 @@ if (story != null)
                                 8.w.verticalSpace,
                                 Row(
                                   children: [
-                                    _MetaChip(
-                                      icon: Icons.menu_book_outlined,
-                                      label: "${ideas.length} Ideas",
-                                    ),
-                                    12.w.horizontalSpace,
+                                    if (ideas.length > 1)
+                                      _MetaChip(
+                                        icon: Icons.menu_book_outlined,
+                                        label: "${ideas.length} Ideas",
+                                      ),
+                                    if (ideas.length > 1) 12.w.horizontalSpace,
                                     _MetaChip(
                                       icon: Icons.access_time,
-                                      label:
-                                          "${provider.lessonDuration > 0 ? provider.lessonDuration : 5} mins",
+                                      label: "$displayMinsLabel mins",
                                     ),
                                   ],
                                 ),
-                                9.w.verticalSpace,
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: EdgeInsets.only(bottom: 4.h),
-                                      decoration: BoxDecoration(
-                                        border: Border(
-                                          bottom: BorderSide(
-                                            color: AppColors.teal,
-                                            width: 2,
+                                if (ideas.length > 1) ...[
+                                  9.w.verticalSpace,
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.only(bottom: 4.h),
+                                        decoration: BoxDecoration(
+                                          border: Border(
+                                            bottom: BorderSide(
+                                              color: AppColors.teal,
+                                              width: 2,
+                                            ),
                                           ),
                                         ),
+                                        child: AppText(
+                                          text: "Ideas",
+                                          style:
+                                              AppTextStyles.sfProDisplaySemibold(
+                                                fontSize: 16.sp,
+                                                color: AppColors.teal,
+                                              ),
+                                        ),
                                       ),
-                                      child: AppText(
-                                        text: "Ideas",
-                                        style:
-                                            AppTextStyles.sfProDisplaySemibold(
-                                              fontSize: 16.sp,
-                                              color: AppColors.teal,
-                                            ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                    ],
+                                  ),
+                                ],
                               ],
                             ),
                           ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 24.w),
-                            child: Column(
-                              children: List.generate(ideas.length, (index) {
+                          if (ideas.length > 1)
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 24.w),
+                              child: Column(
+                                children: List.generate(ideas.length, (index) {
                                 if (index == provider.currentStoryIndex) {
                                   return const SizedBox.shrink();
                                 }
@@ -291,37 +296,157 @@ if (story != null)
             },
           ),
         ),
-      ),
     );
   }
 
-  void showLeaveStoryConfirmation({required BuildContext context}) {
+  /// Returns true to allow route pop, false to stay. Used by GoRoute.onExit (system back).
+  static Future<bool> shouldAllowPop(BuildContext context) async {
     final provider = context.read<StoryProvider>();
-    final fromTopicProgress =
-        provider.storyIdea?.promptType == "progress";
+    final fromTopicProgress = provider.storyIdea?.promptType == "progress";
 
     if (fromTopicProgress) {
-      context.pop();
-      return;
+      final quit = await showDialog<bool>(
+        context: context,
+        useRootNavigator: true,
+        builder: (dialogContext) {
+          return ZoomIn(
+            child: AlertDialog(
+              backgroundColor: AppColors.white,
+              title: Text(
+                "Are you sure you want to quit?",
+                style: AppTextStyles.textStyle20Regular,
+              ),
+              actions: [
+                StoryReadingScreen.myActionButtonTheme(
+                  onPressed: () => Navigator.of(dialogContext).pop(true),
+                  title: "Quit",
+                ),
+                StoryReadingScreen.myActionButtonTheme(
+                  onPressed: () => Navigator.of(dialogContext).pop(false),
+                  title: "Cancel",
+                ),
+              ],
+            ),
+          );
+        },
+      );
+      return quit ?? false;
     }
 
-    showDialog(
+    // From "generating story" flow: quit and generate new, or cancel.
+    final action = await showDialog<String>(
       context: context,
+      useRootNavigator: true,
       builder: (dialogContext) {
         return ZoomIn(
           child: AlertDialog(
             backgroundColor: AppColors.white,
             title: Text(
-              "Are you sure you want to quit?",
+              "Are you sure you want to quit the story and generate a new one?",
+              style: AppTextStyles.textStyle20Regular,
+            ),
+            actions: [
+              StoryReadingScreen.myActionButtonTheme(
+                onPressed: () => Navigator.of(dialogContext).pop('generate'),
+                title: "Yes",
+              ),
+              StoryReadingScreen.myActionButtonTheme(
+                onPressed: () => Navigator.of(dialogContext).pop('cancel'),
+                title: "Cancel",
+              ),
+            ],
+          ),
+        );
+      },
+    );
+    if (action == 'generate' && context.mounted) {
+      final p = context.read<StoryProvider>();
+      final ideas = p.storyIdea?.storyIdeas ?? [];
+      final idx = p.currentStoryIndex;
+      if (idx >= 0 && idx < ideas.length) {
+        p.beginGenerateSingleStoryLoading();
+        p.generateSingleStory(
+          storyIdeaId: ideas[idx].id,
+          context: context,
+          insertAtIndex: idx,
+          forceRegenerate: true,
+          showToast: true,
+          onSuccess: () {},
+        );
+      }
+    }
+    return false; // never pop from back in "generating" flow
+  }
+
+  void showLeaveStoryConfirmation({required BuildContext context}) {
+    final provider = context.read<StoryProvider>();
+    final fromTopicProgress = provider.storyIdea?.promptType == "progress";
+
+    if (fromTopicProgress) {
+      showDialog(
+        context: context,
+        useRootNavigator: true,
+        builder: (dialogContext) {
+          return ZoomIn(
+            child: AlertDialog(
+              backgroundColor: AppColors.white,
+              title: Text(
+                "Are you sure you want to quit?",
+                style: AppTextStyles.textStyle20Regular,
+              ),
+              actions: [
+                myActionButtonTheme(
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                    context.pop();
+                  },
+                  title: "Quit",
+                ),
+                myActionButtonTheme(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  title: "Cancel",
+                ),
+              ],
+            ),
+          );
+        },
+      );
+      return;
+    }
+
+    // From "generating story" flow: quit and generate new, or cancel.
+    showDialog(
+      context: context,
+      useRootNavigator: true,
+      builder: (dialogContext) {
+        return ZoomIn(
+          child: AlertDialog(
+            backgroundColor: AppColors.white,
+            title: Text(
+              "Are you sure you want to quit the story and generate a new one?",
               style: AppTextStyles.textStyle20Regular,
             ),
             actions: [
               myActionButtonTheme(
                 onPressed: () {
                   Navigator.of(dialogContext).pop();
-                  context.pop();
+                  if (!context.mounted) return;
+                  final p = context.read<StoryProvider>();
+                  final ideas = p.storyIdea?.storyIdeas ?? [];
+                  final idx = p.currentStoryIndex;
+                  if (idx >= 0 && idx < ideas.length) {
+                    p.beginGenerateSingleStoryLoading();
+                    p.generateSingleStory(
+                      storyIdeaId: ideas[idx].id,
+                      context: context,
+                      insertAtIndex: idx,
+                      forceRegenerate: true,
+                      showToast: true,
+                      onSuccess: () {},
+                    );
+                  }
                 },
-                title: "Quit",
+                title: "Yes",
               ),
               myActionButtonTheme(
                 onPressed: () => Navigator.of(dialogContext).pop(),
@@ -334,7 +459,7 @@ if (story != null)
     );
   }
 
-  Widget myActionButtonTheme({
+  static Widget myActionButtonTheme({
     required VoidCallback onPressed,
     required String title,
   }) {
@@ -343,7 +468,9 @@ if (story != null)
       child: Text(
         title,
         style: AppTextStyles.sfProDisplayRegular(
-          color: (title == "Yes" || title == "Quit") ? AppColors.redColor : AppColors.black,
+          color: (title == "Yes" || title == "Quit")
+              ? AppColors.redColor
+              : AppColors.black,
           fontSize: 17.sp,
         ),
       ),
@@ -480,7 +607,7 @@ class _StoryIdeaTile extends StatelessWidget {
                         ),
                       ],
                     ),
-                    4.h.verticalSpace,
+                    4.w.verticalSpace,
                     AppText(
                       text: idea.description,
                       style: AppTextStyles.sfProDisplayRegular(
@@ -522,7 +649,6 @@ class _StoryIdeaTile extends StatelessWidget {
       ),
     );
   }
-
 }
 
 //* story viewer: fixed hero image per page, scrollable content below, Start Quiz on last page.
@@ -907,7 +1033,8 @@ class _StoryPage extends StatelessWidget {
                           ),
                         ),
                       ),
-                    if (onPrevPage != null && onNextPage != null) 12.w.horizontalSpace,
+                    if (onPrevPage != null && onNextPage != null)
+                      12.w.horizontalSpace,
                     if (onNextPage != null)
                       Expanded(
                         child: AppOutlinedButton(
@@ -994,7 +1121,7 @@ class _StoryPage extends StatelessWidget {
                         ),
                       ),
                       16.w.verticalSpace,
-                      
+
                       SizedBox(
                         width: double.infinity,
                         child: AppOutlinedButton(
@@ -1018,7 +1145,9 @@ class _StoryPage extends StatelessWidget {
                           isLoading: isMarkingAsRead,
                           foregroundColor: AppColors.teal,
                           child: AppText(
-                            text: isMarkedAsRead ? 'Marked as Read' : 'Mark as Read',
+                            text: isMarkedAsRead
+                                ? 'Marked as Read'
+                                : 'Mark as Read',
                             style: AppTextStyles.sfProDisplaySemibold(
                               fontSize: 14.sp,
                               color: isMarkedAsRead
@@ -1104,7 +1233,10 @@ class _StoryImage extends StatelessWidget {
                     alignment: Alignment.bottomLeft,
                     child: Container(
                       margin: EdgeInsets.all(10.w),
-                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10.w,
+                        vertical: 4.h,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.backgroundColor.withValues(alpha: 0.9),
                         borderRadius: BorderRadius.circular(4.r),
@@ -1123,7 +1255,6 @@ class _StoryImage extends StatelessWidget {
             )
           else
             _placeholder(height),
-
         ],
       ),
     );

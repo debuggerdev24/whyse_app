@@ -606,7 +606,8 @@ class GlassChip extends StatelessWidget {
         border: Border.all(color: AppColors.white.withValues(alpha: 0.12)),
       ),
       child: AppText(
-        text: label,
+        text: '${label.split(' ')[0]} Stories',
+
         style: AppTextStyles.sfProDisplaySemibold(
           fontSize: 12.sp,
           color: textColor,

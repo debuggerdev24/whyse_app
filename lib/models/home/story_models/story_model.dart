@@ -1,4 +1,4 @@
-import 'package:redstreakapp/core/utils/text_utils.dart';
+
 
 class StoryModel {
   final String id, title, content;
@@ -48,7 +48,7 @@ class StoryModel {
       age: json['age'],
       language: json['language'],
       textType: json['textType'],
-      lessonDuration: int.parse(json['lessonDuration']),
+      lessonDuration: int.tryParse(json['lessonDuration']?.toString() ?? ''),
       tags: json['tags'] != null ? List<String>.from(json['tags']) : [],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],

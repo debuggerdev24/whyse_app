@@ -247,27 +247,6 @@ class _RandomTopicReadingScreenState extends State<RandomTopicReadingScreen> {
     return const StoryReadingScreen();
   }
 
-  /// Show close icon only when story content is visible, not on shimmer/loading.
-  bool _shouldShowLocalCloseButton(StoryProvider provider) {
-    if (_progress == null) return false;
-
-    final hasReadings = _progress!.readings.isNotEmpty;
-    final waitingForResumeAnswer = hasReadings && _choseResume == null;
-    if (waitingForResumeAnswer) return false;
-
-    final isGeneratingResume =
-        _choseResume == true && provider.isGenerateSingleStoryLoading;
-    if (isGeneratingResume) return false;
-
-    final needFirstStory =
-        (_choseResume == false || !_progress!.hasResume) &&
-        (provider.storyIdea?.storyIdeas.isNotEmpty ?? false) &&
-        provider.stories.isEmpty;
-    if (needFirstStory) return false;
-
-    return true;
-  }
-
   void showLeaveStoryConfirmation({required BuildContext context}) {
     showDialog(
       context: context,
@@ -319,9 +298,6 @@ class _RandomTopicReadingScreenState extends State<RandomTopicReadingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<StoryProvider>();
-    final showLocalCloseButton = _shouldShowLocalCloseButton(provider);
-
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -330,26 +306,7 @@ class _RandomTopicReadingScreenState extends State<RandomTopicReadingScreen> {
       },
       child: AppLayout(
         body: SafeArea(
-          child: Stack(
-            children: [
-              _buildBody(context),
-              if (showLocalCloseButton)
-                Positioned(
-                  top: 12.w,
-                  left: 12.w,
-                  child: GlassIconButton(
-                    onTap: () {
-                      showLeaveStoryConfirmation(context: context);
-                    },
-                    child: Icon(
-                      Icons.close_rounded,
-                      size: 18.sp,
-                      color: AppColors.white,
-                    ),
-                  ),
-                ),
-            ],
-          ),
+          child: _buildBody(context),
         ),
       ),
     );

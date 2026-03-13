@@ -133,7 +133,7 @@ class IdeasListScreen extends StatelessWidget {
   ) {
     if (provider.isGenerateSingleStoryLoading) return;
     provider.setCurrentStoryIndex = listIndex;
-    provider.beginGenerateSingleStoryLoading();
+    // provider.beginGenerateSingleStoryLoading();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!context.mounted) return;
       context.pushNamed(AppRoutes.storySeriesScreen.name);

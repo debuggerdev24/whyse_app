@@ -289,13 +289,13 @@ class StoryProvider extends ChangeNotifier {
   bool isCreateStoryLoading = false;
 
   bool isGenerateSingleStoryLoading = false;
+  /// Set when createStory API fails (e.g. receiveTimeout). Cleared when retrying.
+  String? generateStoryError;
   /// Call before navigating to story series so the destination shows shimmer immediately (no close icon).
   void beginGenerateSingleStoryLoading() {
     isGenerateSingleStoryLoading = true;
     notifyListeners();
   }
-  /// Set when createStory API fails (e.g. receiveTimeout). Cleared when retrying.
-  String? generateStoryError;
   final Set<String> _markingReadStoryIdeaIds = {};
   final Set<String> _markedReadStoryIdeaIds = {};
 
@@ -325,7 +325,7 @@ class StoryProvider extends ChangeNotifier {
     }
 
     final payload = <String, dynamic>{
-      ...dataToSendCreateStory,
+      // ...dataToSendCreateStory,
       "storyIdeaId": storyIdeaId,
       if (forceRegenerate) "forceRegenerate": true,
     };
@@ -438,7 +438,6 @@ class StoryProvider extends ChangeNotifier {
     _stories = [];
     _currentStoryIndex = 0;
     _currentStoryPageIndex = 0;
-    if (_lessonDuration <= 0) _lessonDuration = 5;
     notifyListeners();
   }
 

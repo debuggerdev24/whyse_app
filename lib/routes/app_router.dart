@@ -382,6 +382,9 @@ class AppRouter {
     GoRoute(
       path: AppRoutes.storySeriesScreen.path,
       name: AppRoutes.storySeriesScreen.name,
+      onExit: (context, state) async {
+        return StoryReadingScreen.shouldAllowPop(context);
+      },
       builder: (context, state) {
         return const StoryReadingScreen();
       },
