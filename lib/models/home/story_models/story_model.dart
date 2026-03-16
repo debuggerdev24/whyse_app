@@ -126,7 +126,6 @@ class StoryPages {
         needsReview: json["needsReview"] == true,
       );
     }
-
 }
 
 

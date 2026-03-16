@@ -71,11 +71,11 @@ class _CreatedStorySummaryScreenState extends State<CreatedStorySummaryScreen> {
         child: Consumer<HomeProvider>(
           builder: (context, provider, child) {
             final summary = provider.storySummary;
-        
+
             if (provider.isStoryIdeasLoading) {
               return HomeSectionShimmer.createdStoryIdeasLoadingShimmer();
             }
-        
+
             if (summary == null) {
               return Center(
                 child: Padding(
@@ -91,11 +91,11 @@ class _CreatedStorySummaryScreenState extends State<CreatedStorySummaryScreen> {
                 ),
               );
             }
-        
+
             if (summary.storyIdeas.isEmpty) {
               return const SafeArea(child: StoryIdeasEmptyState());
             }
-        
+
             return Stack(
               children: [
                 SafeArea(
@@ -106,11 +106,24 @@ class _CreatedStorySummaryScreenState extends State<CreatedStorySummaryScreen> {
                     children: [
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 20.w),
-                        child: AppText(
-                          text: "Stories for ${summary.topicTitle}",
-                          style: AppTextStyles.sfProDisplaySemibold(
-                            fontSize: 18.sp,
-                          ),
+                        child: Row(
+                          children: [
+                            InkWell(
+                              onTap: () => context.pop(),
+                              child: Icon(
+                                Icons.arrow_back_ios_new_outlined,
+                                size: 20.sp,
+                                // color: AppColors.white,
+                              ),
+                            ),
+                            12.w.horizontalSpace,
+                            AppText(
+                              text: "Stories for ${summary.topicTitle}",
+                              style: AppTextStyles.sfProDisplaySemibold(
+                                fontSize: 18.sp,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       14.w.verticalSpace,
@@ -120,7 +133,9 @@ class _CreatedStorySummaryScreenState extends State<CreatedStorySummaryScreen> {
                         padding: EdgeInsets.symmetric(horizontal: 20.w),
                         child: AppText(
                           text: "Stories",
-                          style: AppTextStyles.sfProDisplayBold(fontSize: 22.sp),
+                          style: AppTextStyles.sfProDisplayBold(
+                            fontSize: 22.sp,
+                          ),
                         ),
                       ),
                       8.w.verticalSpace,
@@ -134,7 +149,9 @@ class _CreatedStorySummaryScreenState extends State<CreatedStorySummaryScreen> {
                             // Reading screen will call getStoryByIdea first: if generated shows story, else generates then shows
                             context.pushNamed(
                               AppRoutes.createdStoryReadingScreen.name,
-                              extra: <String, dynamic>{"storyIdeaId": storyIdea.id},
+                              extra: <String, dynamic>{
+                                "storyIdeaId": storyIdea.id,
+                              },
                             );
                           },
                           onShare: () => shareStoryIdeaLink(

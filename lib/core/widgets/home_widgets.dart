@@ -13,54 +13,44 @@ import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
-
+import 'package:redstreakapp/routes/app_router.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
-
+import 'package:redstreakapp/screens/dashboard.dart';
 
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
+
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Row(
-            children: [
-              SvgIcon(
-                AppAssets.thunder,
-                size: 20.w,
-                color: AppColors.primaryColor,
-              ),
-              10.w.horizontalSpace,
-              AppText(
-                text: "2",
-                style: AppTextStyles.sfProDisplaySemibold(
-                  fontSize: 16.sp,
-                  color: AppColors.black,
-                ),
-              ),
-            ],
-          ),
+        // Logo / app icon (Netflix-style left)
+        SvgIcon(
+          AppAssets.note,
+          size: 28.w,
+          color: AppColors.teal,
         ),
-
-        // Title
+        // Center title
         AppText(
-          text: "Your Plan",
-          style: AppTextStyles.sfProDisplaySemibold(fontSize: 20.sp),
+          text: "Story Topics",
+          style: AppTextStyles.sfProDisplayBold(fontSize: 18.sp),
         ),
-
-        // Notification & Profile
+        // Search + Profile (Netflix-style right)
         Row(
           children: [
-            SvgIcon(AppAssets.notification, size: 24.w),
-            12.w.horizontalSpace,
+            GestureDetector(
+              onTap: () {
+                tabIndex.value = 1;
+                AppRouter.indexedStackNavigationShell?.goBranch(1);
+              },
+              child: Padding(
+                padding: EdgeInsets.all(8.w),
+                child: SvgIcon(AppAssets.searchIcon, size: 24.w),
+              ),
+            ),
+            4.w.horizontalSpace,
             GestureDetector(
               onTap: () {
                 showLogOutConfirmationDialog(context: context);

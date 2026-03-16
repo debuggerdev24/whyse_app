@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -22,7 +23,6 @@ import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
 import 'package:redstreakapp/models/home/story_models/story_idea_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_model.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
-import 'package:redstreakapp/routes/app_router.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 
 class StoryReadingScreen extends StatelessWidget {
@@ -174,6 +174,9 @@ class StoryReadingScreen extends StatelessWidget {
                                 : provider.lessonDuration,
                             onCloseStory: () {
                               showLeaveStoryConfirmation(context: context);
+                            },
+                            onHome: () {
+                              showHomeConfirmation(context: context);
                             },
                           ),
 
@@ -465,11 +468,39 @@ class StoryReadingScreen extends StatelessWidget {
                 title: "Yes",
               ),
               myActionButtonTheme(
-                onPressed: () => Navigator.of(dialogContext).pop(),
+                onPressed: () => dialogContext.pop(),
                 title: "Cancel",
               ),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  void showHomeConfirmation({required BuildContext context}) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppColors.white,
+          title: Text(
+            "Are you sure you want to go to home?",
+            style: AppTextStyles.textStyle20Regular,
+          ),
+          actions: [
+            myActionButtonTheme(
+              onPressed: () {
+                dialogContext.pop();
+                context.goNamed(AppRoutes.homeScreen.name);
+              },
+              title: "Yes",
+            ),
+            myActionButtonTheme(
+              onPressed: () => dialogContext.pop(),
+              title: "Cancel",
+            ),
+          ],
         );
       },
     );
@@ -673,12 +704,13 @@ class _StoryViewer extends StatefulWidget {
   final String storyIdeaId;
   final int lessonDuration;
   final VoidCallback onCloseStory;
-
+  final VoidCallback onHome;
   const _StoryViewer({
     required this.story,
     required this.storyIdeaId,
     required this.lessonDuration,
     required this.onCloseStory,
+    required this.onHome,
   });
 
   @override
@@ -800,6 +832,7 @@ class _StoryViewerState extends State<_StoryViewer> {
     final isLastPage = index == pages.length - 1;
     return Column(
       mainAxisSize: MainAxisSize.min,
+
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _StoryPage(
@@ -819,6 +852,7 @@ class _StoryViewerState extends State<_StoryViewer> {
           onStartReading: _handleStartReading,
           onResumeReading: _handleResumeReading,
           onStopReading: _handleStopReading,
+          onHome: widget.onHome,
           onPrevPage: !_hasStartedReading || isFirstPage
               ? null
               : () {
@@ -864,7 +898,7 @@ class _StoryPage extends StatelessWidget {
   final VoidCallback onStopReading;
   final VoidCallback? onPrevPage;
   final VoidCallback? onNextPage;
-
+  final VoidCallback onHome;
   const _StoryPage({
     required this.page,
     required this.pageIndex,
@@ -884,6 +918,7 @@ class _StoryPage extends StatelessWidget {
     required this.onStopReading,
     this.onPrevPage,
     this.onNextPage,
+    required this.onHome,
   });
 
   static String _resolveImageUrl(String url) {
@@ -930,14 +965,11 @@ class _StoryPage extends StatelessWidget {
         //* Fixed hero image (Netflix-style “video” area)
         _StoryImage(
           imageUrl: _resolveImageUrl(page.imageUrl),
+          onHome: onHome,
           //*image height
           height: 270.w,
           pageLabel: 'Page ${pageIndex + 1} of $totalPages',
           onClose: onCloseStory,
-          onShare: () => shareStoryIdeaLink(
-            storyIdeaId: storyIdeaId,
-            storyTitle: storyTitle,
-          ),
         ),
         Container(
           color: AppColors.backgroundColor,
@@ -946,12 +978,35 @@ class _StoryPage extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              AppText(
-                text: storyTitle,
-                style: AppTextStyles.sfProDisplayBold(
-                  fontSize: 22.sp,
-                  color: AppColors.black,
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: AppText(
+                      text: storyTitle,
+                      style: AppTextStyles.sfProDisplayBold(
+                        fontSize: 22.sp,
+                        color: AppColors.black,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  GestureDetector(
+                    onTap: () => shareStoryIdeaLink(
+                      storyIdeaId: storyIdeaId,
+                      storyTitle: storyTitle,
+                    ),
+                    behavior: HitTestBehavior.opaque,
+                    child: Padding(
+                      padding: EdgeInsets.all(4.w),
+                      child: Icon(
+                        Icons.share_outlined,
+                        size: 24.sp,
+                        color: AppColors.teal,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               8.w.verticalSpace,
               //* Page and duration meta info
@@ -1203,14 +1258,13 @@ class _StoryImage extends StatelessWidget {
   final double height;
   final String pageLabel;
   final VoidCallback onClose;
-  final VoidCallback? onShare;
-
+  final VoidCallback onHome;
   const _StoryImage({
     required this.imageUrl,
     required this.height,
     required this.pageLabel,
     required this.onClose,
-    this.onShare,
+    required this.onHome,
   });
 
   @override
@@ -1241,36 +1295,36 @@ class _StoryImage extends StatelessWidget {
                   ),
                   Positioned(
                     top: 12.w,
-                    left: 12.w,
-                    child: GlassIconButton(
-                      onTap: onClose,
-                      child: Icon(
-                        Icons.close_rounded,
-                        size: 18.sp,
-                        color: AppColors.white,
-                      ),
+                    right: 12.w,
+                    child: Row(
+                      spacing: 10.w,
+                      children: [
+                        GlassIconButton(
+                          onTap: onHome,
+                          child: Icon(
+                            Icons.home_rounded,
+                            size: 18.sp,
+                            color: AppColors.white,
+                          ),
+                        ),
+                        GlassIconButton(
+                          onTap: onClose,
+                          child: Icon(
+                            Icons.close_rounded,
+                            size: 18.sp,
+                            color: AppColors.white,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  if (onShare != null)
-                    Positioned(
-                      top: 12.w,
-                      right: 12.w,
-                      child: GlassIconButton(
-                        onTap: onShare!,
-                        child: Icon(
-                          Icons.share_outlined,
-                          size: 18.sp,
-                          color: AppColors.white,
-                        ),
-                      ),
-                    ),
                   Align(
                     alignment: Alignment.bottomLeft,
                     child: Container(
                       margin: EdgeInsets.all(10.w),
                       padding: EdgeInsets.symmetric(
                         horizontal: 10.w,
-                        vertical: 4.h,
+                        vertical: 4.w,
                       ),
                       decoration: BoxDecoration(
                         color: AppColors.backgroundColor.withValues(alpha: 0.9),
@@ -1353,8 +1407,8 @@ class GlassIconButton extends StatelessWidget {
     super.key,
     required this.child,
     required this.onTap,
-    this.size = 36,
-    this.borderRadius = const BorderRadius.all(Radius.circular(18)),
+    this.size = 28,
+    this.borderRadius = const BorderRadius.all(Radius.circular(14)),
   });
 
   @override
@@ -1366,8 +1420,9 @@ class GlassIconButton extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           child: Container(
-            height: size,
-            width: size,
+            // height: size,
+            // width: size,
+            padding: EdgeInsets.all(6),
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: Colors.black.withValues(alpha: 0.35),

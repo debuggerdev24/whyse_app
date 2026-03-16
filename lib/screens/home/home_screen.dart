@@ -20,7 +20,8 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.w),
           children: [
             const HomeHeader(),
-            24.w.verticalSpace,
+            20.w.verticalSpace,
+            
             const CalendarStrip(),
             24.w.verticalSpace,
             const StoryTopicsSection(),
@@ -35,7 +36,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
-/*
-
-*/

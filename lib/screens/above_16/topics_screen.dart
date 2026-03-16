@@ -23,7 +23,7 @@ class TopicsScreen extends StatefulWidget {
 }
 
 class _TopicsScreenState extends State<TopicsScreen> {
-  // Local state for custom topics
+  //* Local state for custom topics
   final List<String> customTopics = [];
   final TextEditingController customTopicController = TextEditingController();
   final Set<String> selectedTopicIds = {};
@@ -31,7 +31,6 @@ class _TopicsScreenState extends State<TopicsScreen> {
   String _getIconForTopic(String title) {
     String lower = title.toLowerCase();
 
-    // Direct Mappings
     if (lower.contains("space") || lower.contains("planet")) {
       return AppAssets.space;
     }

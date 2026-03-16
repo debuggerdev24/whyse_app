@@ -342,6 +342,20 @@ class HomeProvider extends ChangeNotifier {
     );
   }
 
+  Future<void> getTopicProgress({
+    required String topicId,
+    void Function(String errorMsg)? onFailed,
+    required void Function(Map<String, dynamic> result) onSuccess,
+  }) async {
+    final response = await HomeApiService.instance.getTopicProgress(
+      topicId: topicId,
+    );
+    response.fold(
+      (error) => onFailed?.call(error.errorMsg),
+      (result) => onSuccess(result),
+    );
+  }
+
   void clearSessionData() {
     topicsList = null;
     isTopicsLoading = false;

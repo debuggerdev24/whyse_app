@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
@@ -154,6 +156,25 @@ class TopicCard extends StatelessWidget {
     required this.onTap,
   });
 
+  static bool _isNetworkUrl(String path) {
+    final p = path.trim();
+    return p.startsWith('http://') || p.startsWith('https://');
+  }
+
+  Widget _buildShimmerPlaceholder() {
+    return Shimmer.fromColors(
+      baseColor: AppColors.shimmerBaseColor,
+      highlightColor: AppColors.shimmerHighlightColor,
+      child: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          color: AppColors.shimmerBaseColor,
+          borderRadius: BorderRadius.circular(20.r),
+        ),
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -163,30 +184,51 @@ class TopicCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.5), // soft black
-              blurRadius: 18, // more blur = smooth shadow
+              color: Colors.black.withValues(alpha: 0.5),
+              blurRadius: 18,
               spreadRadius: -1,
-              offset: const Offset(0, 8), // pushed downward
+              offset: const Offset(0, 8),
             ),
           ],
-
-          image: DecorationImage(
-            image: AssetImage(assetPath),
-            fit: BoxFit.cover,
-          ),
-
           border: isSelected
               ? Border.all(color: AppColors.primaryColor, width: 2)
               : null,
         ),
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 13.h),
-        child: AppText(
-          text: label,
-          style: AppTextStyles.sfProDisplayBold(
-            fontSize: 14.sp,
-            color: Colors.white,
-            letterSpacing: 0.2,
-          ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (_isNetworkUrl(assetPath))
+              CachedNetworkImage(
+                imageUrl: assetPath,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+                placeholder: (_, __) => _buildShimmerPlaceholder(),
+                errorWidget: (_, __, ___) => _buildShimmerPlaceholder(),
+              )
+            else
+              Image.asset(
+                assetPath,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+                errorBuilder: (_, __, ___) => _buildShimmerPlaceholder(),
+              ),
+            Positioned(
+              left: 16.w,
+              right: 16.w,
+              bottom: 13.h,
+              child: AppText(
+                text: label,
+                style: AppTextStyles.sfProDisplayBold(
+                  fontSize: 14.sp,
+                  color: Colors.white,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

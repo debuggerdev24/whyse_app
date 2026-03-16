@@ -1,13 +1,9 @@
 class TopicModel {
-  String id;
-  String title;
-  String learningGoal;
+  String id,title,learningGoal;
   dynamic adminPromptId;
-  String userId;
-  String type;
+  String userId,type,thumbnailUrl;
   List<dynamic> interestIds;
-  DateTime createdAt;
-  DateTime updatedAt;
+  DateTime createdAt,updatedAt;
 
   TopicModel({
     required this.id,
@@ -19,6 +15,7 @@ class TopicModel {
     required this.interestIds,
     required this.createdAt,
     required this.updatedAt,
+    required this.thumbnailUrl,
   });
 
   factory TopicModel.fromJson(Map<String, dynamic> json) => TopicModel(
@@ -31,6 +28,7 @@ class TopicModel {
     interestIds: List<dynamic>.from(json["interestIds"].map((x) => x)),
     createdAt: DateTime.parse(json["createdAt"]),
     updatedAt: DateTime.parse(json["updatedAt"]),
+    thumbnailUrl: json["thumbnailUrl"],
   );
 }
 

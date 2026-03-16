@@ -180,7 +180,7 @@ class FeaturedTopicCard extends StatelessWidget {
                       ),
                     ),
                     if (onToggleMyList != null) ...[
-                      10.h.verticalSpace,
+                      10.w.verticalSpace,
                       TopicListToggleButton(
                         isInMyList: topic.isInMyList,
                         isLoading: isToggleLoading,
@@ -208,7 +208,7 @@ class FeaturedTopicCard extends StatelessWidget {
                         color: AppColors.white,
                       ),
                     ),
-                    10.h.verticalSpace,
+                    10.w.verticalSpace,
                     AppText(
                       text: topic.learningGoal,
                       maxLines: 3,
@@ -219,7 +219,7 @@ class FeaturedTopicCard extends StatelessWidget {
                         color: AppColors.white.withValues(alpha: 0.84),
                       ),
                     ),
-                    14.h.verticalSpace,
+                    14.w.verticalSpace,
                     Wrap(
                       spacing: 8.w,
                       runSpacing: 8.h,
@@ -312,7 +312,7 @@ class PosterTopicCard extends StatelessWidget {
                       color: AppColors.white,
                     ),
                   ),
-                  10.h.verticalSpace,
+                  10.w.verticalSpace,
                   Wrap(
                     spacing: 8.w,
                     runSpacing: 8.h,
@@ -332,6 +332,99 @@ class PosterTopicCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Vertical-list row: thumbnail + title + play (Netflix-style search result row).
+class SearchResultRowCard extends StatelessWidget {
+  final BrowseTopicModel topic;
+  final VoidCallback onTap;
+  final VoidCallback? onToggleMyList;
+  final bool isToggleLoading;
+
+  const SearchResultRowCard({
+    super.key,
+    required this.topic,
+    required this.onTap,
+    this.onToggleMyList,
+    this.isToggleLoading = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16.r),
+        splashColor: AppColors.teal.withValues(alpha: 0.08),
+        highlightColor: AppColors.teal.withValues(alpha: 0.04),
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 10.h),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Thumbnail
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12.r),
+                child: SizedBox(
+                  width: 112.w,
+                  height: 84.h,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      TopicArt(topic: topic),
+                      if (onToggleMyList != null)
+                        Positioned(
+                          top: 6.h,
+                          right: 6.w,
+                          child: TopicListToggleButton(
+                            isInMyList: topic.isInMyList,
+                            isLoading: isToggleLoading,
+                            onTap: onToggleMyList!,
+                            compact: true,
+                            darkMode: true,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              14.w.horizontalSpace,
+              // Title
+              Expanded(
+                child: AppText(
+                  text: topic.topic,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.sfProDisplaySemibold(
+                    fontSize: 16.sp,
+                  ),
+                ),
+              ),
+              12.w.horizontalSpace,
+              // Play button
+              Container(
+                width: 44.r,
+                height: 44.r,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppColors.black.withValues(alpha: 0.2),
+                    width: 1.5,
+                  ),
+                ),
+                child: Icon(
+                  Icons.play_arrow_rounded,
+                  size: 28.sp,
+                  color: AppColors.black,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -367,12 +460,12 @@ class BrowseTopicDetailsSheet extends StatelessWidget {
                 ),
               ),
             ),
-            18.h.verticalSpace,
+            18.w.verticalSpace,
             AppText(
               text: topic.topic,
               style: AppTextStyles.sfProDisplayBold(fontSize: 24.sp),
             ),
-            8.h.verticalSpace,
+            8.w.verticalSpace,
             AppText(
               text: topic.learningGoal,
               style: AppTextStyles.sfProDisplayMedium(
@@ -381,7 +474,7 @@ class BrowseTopicDetailsSheet extends StatelessWidget {
                 color: AppColors.black.withValues(alpha: 0.78),
               ),
             ),
-            18.h.verticalSpace,
+            18.w.verticalSpace,
             Wrap(
               spacing: 10.w,
               runSpacing: 10.h,
@@ -392,12 +485,12 @@ class BrowseTopicDetailsSheet extends StatelessWidget {
               ],
             ),
             if (topic.interests.isNotEmpty) ...[
-              18.h.verticalSpace,
+              18.w.verticalSpace,
               AppText(
                 text: "Categories",
                 style: AppTextStyles.sfProDisplaySemibold(fontSize: 16.sp),
               ),
-              10.h.verticalSpace,
+              10.w.verticalSpace,
               Wrap(
                 spacing: 8.w,
                 runSpacing: 8.h,
@@ -685,12 +778,12 @@ class BrowseEmptyState extends StatelessWidget {
             size: 44.sp,
             color: AppColors.teal,
           ),
-          14.h.verticalSpace,
+          14.w.verticalSpace,
           AppText(
             text: "No topics found",
             style: AppTextStyles.sfProDisplayBold(fontSize: 20.sp),
           ),
-          8.h.verticalSpace,
+          8.w.verticalSpace,
           AppText(
             text: query.isEmpty
                 ? "There are no topics to show right now. Pull to refresh and try again."
@@ -728,12 +821,12 @@ class BrowseErrorState extends StatelessWidget {
             size: 42.sp,
             color: AppColors.primaryColor,
           ),
-          14.h.verticalSpace,
+          14.w.verticalSpace,
           AppText(
             text: "Something went wrong",
             style: AppTextStyles.sfProDisplayBold(fontSize: 20.sp),
           ),
-          8.h.verticalSpace,
+          8.w.verticalSpace,
           AppText(
             text: "Please check your connection and try again.",
             textAlign: TextAlign.center,
@@ -743,7 +836,7 @@ class BrowseErrorState extends StatelessWidget {
               color: AppColors.black.withValues(alpha: 0.65),
             ),
           ),
-          18.h.verticalSpace,
+          18.w.verticalSpace,
           GestureDetector(
             onTap: () => onRetry(),
             child: Container(
@@ -776,7 +869,7 @@ class BrowseSearchShimmer extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const _BrowseShimmerBox(width: 130, height: 18, borderRadius: 999),
-        12.h.verticalSpace,
+        12.w.verticalSpace,
         Wrap(
           spacing: 10.w,
           runSpacing: 10.h,
@@ -786,15 +879,15 @@ class BrowseSearchShimmer extends StatelessWidget {
             _BrowseShimmerBox(width: 96, height: 36, borderRadius: 999),
           ],
         ),
-        20.h.verticalSpace,
+        20.w.verticalSpace,
         _BrowseShimmerBox(
           width: double.infinity,
           height: 310.h,
           borderRadius: 28,
         ),
-        24.h.verticalSpace,
+        24.w.verticalSpace,
         const _BrowseShimmerBox(width: 142, height: 18, borderRadius: 999),
-        14.h.verticalSpace,
+        14.w.verticalSpace,
         SizedBox(
           height: 248.h,
           child: Row(

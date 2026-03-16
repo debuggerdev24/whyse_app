@@ -15,6 +15,7 @@ import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
+import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:shimmer/shimmer.dart';
@@ -27,6 +28,40 @@ class StoryTopicsScreen extends StatefulWidget {
 }
 
 class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final home = context.read<HomeProvider>();
+      if (home.topicsList == null && !home.isTopicsLoading) {
+        home.getMyTopics();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_onScroll)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final home = context.read<HomeProvider>();
+    if (home.isTopicsLoadingMore ||
+        !home.hasMoreTopics ||
+        home.topicsList == null ||
+        home.topicsList!.isEmpty) return;
+    if (!_scrollController.hasClients) return;
+    final pos = _scrollController.position;
+    if (pos.pixels >= pos.maxScrollExtent - 200) {
+      home.getMyTopicsLoadMore();
+    }
+  }
   String _getIconForTopic(String title) {
     String lower = title.toLowerCase();
 
@@ -87,17 +122,16 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
       resizeToAvoidBottomInset: false,
       body: SafeArea(
         bottom: (Platform.isIOS) ? false : true,
-        child: Consumer<StoryProvider>(
-          builder: (context, provider, child) {
-            if (provider.isGetTopicsLoading) {
-              return Center(child: ApiLoadingIndicator());
-            }
+        child: Consumer2<StoryProvider, HomeProvider>(
+          builder: (context, storyProvider, homeProvider, child) {
+            final searchEmpty = storyProvider.searchTopicCtr.text.trim().isEmpty;
+            final showHomeTopics = searchEmpty && !storyProvider.isGetSearchedTopicsLoading;
+
             return Padding(
               padding: EdgeInsets.fromLTRB(24.w, 10.w, 24.w, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  //todo progress step
                   OnboardingHeader(
                     currentStep: 3,
                     totalSteps: 4,
@@ -109,7 +143,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                       }
                     },
                     onSkip: () {
-                      provider.toggleApiTopic("");
+                      storyProvider.toggleApiTopic("");
                       context.pushNamed(AppRoutes.customTopicScreen.name);
                     },
                   ),
@@ -129,15 +163,13 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                       color: AppColors.black.withValues(alpha: 0.8),
                     ),
                   ),
-
-                  //todo Custom Topic Input
-                  18.h.verticalSpace,
+                  18.w.verticalSpace,
                   AppTextField(
-                    controller: provider.searchTopicCtr,
+                    controller: storyProvider.searchTopicCtr,
                     hintText: "Search Topic...",
                     onChanged: (value) {
                       deBouncer.run(() {
-                        provider.getSearchedStoryTopics(
+                        storyProvider.getSearchedStoryTopics(
                           onFailed: (error) {
                             AppToast.error(context, error);
                           },
@@ -146,92 +178,116 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                     },
                   ),
                   18.h.verticalSpace,
-                  if (provider.searchTopicCtr.text.trim().isEmpty &&
-                      !provider.isGetSearchedTopicsLoading)
+                  if (showHomeTopics) ...[
                     Expanded(
-                      child: (provider.isGetTopicsLoading)
+                      child: homeProvider.topicsList == null &&
+                              homeProvider.isTopicsLoading
                           ? Center(child: ApiLoadingIndicator())
-                          : GridView(
-                              padding: EdgeInsets.zero,
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
+                          : (homeProvider.topicsList == null ||
+                                  homeProvider.topicsList!.isEmpty)
+                              ? Padding(
+                                  padding: EdgeInsets.only(top: 50.h),
+                                  child: Align(
+                                    alignment: Alignment.topCenter,
+                                    child: Text("No topics available"),
+                                  ),
+                                )
+                              : GridView.builder(
+                                  controller: _scrollController,
+                                  padding: EdgeInsets.zero,
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 2,
                                     crossAxisSpacing: 20.w,
                                     mainAxisSpacing: 25.h,
                                     childAspectRatio: 1.4,
                                   ),
-                              children: [
-                                //todo  API Topics
-                                ...provider.topicsList.map((topic) {
-                                  final title = topic.title;
-                                  return TopicCard(
-                                    label: title,
-                                    assetPath: _getIconForTopic(title),
-                                    isSelected: provider.selectedTopic == title,
-                                    onTap: () => provider.toggleApiTopic(title),
-                                  );
-                                }),
-                              ],
-                            ),
-                    )
-                  else if (provider.isGetSearchedTopicsLoading)
+                                  itemCount: (homeProvider.topicsList!.length) +
+                                      (homeProvider.hasMoreTopics ? 1 : 0),
+                                  itemBuilder: (context, index) {
+                                    final list = homeProvider.topicsList!;
+                                    if (index >= list.length) {
+                                      return Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.all(16.w),
+                                          child: homeProvider.isTopicsLoadingMore
+                                              ? ApiLoadingIndicator()
+                                              : const SizedBox.shrink(),
+                                        ),
+                                      );
+                                    }
+                                    final topic = list[index];
+                                    final title = topic.topic;
+                                    final thumb = topic.thumbnailUrl
+                                        .trim()
+                                        .isNotEmpty
+                                        ? topic.thumbnailUrl
+                                        : null;
+                                    return TopicCard(
+                                      label: title,
+                                      assetPath: thumb ?? _getIconForTopic(title),
+                                      isSelected:
+                                          storyProvider.selectedTopic == title,
+                                      onTap: () =>
+                                          storyProvider.toggleApiTopic(title),
+                                    );
+                                  },
+                                ),
+                    ),
+                  ] else if (storyProvider.isGetSearchedTopicsLoading)
                     Expanded(child: _shimmer())
-                  else if (provider.searchedTopicsList.isNotEmpty)
+                  else if (storyProvider.searchedTopicsList.isNotEmpty)
                     Expanded(
                       child: GridView(
                         padding: EdgeInsets.zero,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        gridDelegate:
+                            SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           crossAxisSpacing: 20.w,
                           mainAxisSpacing: 25.h,
                           childAspectRatio: 1.4,
                         ),
                         children: [
-                          //todo  API Topics
-                          ...provider.searchedTopicsList.map((topic) {
+                          ...storyProvider.searchedTopicsList.map((topic) {
                             final title = topic.title;
                             return TopicCard(
                               label: title,
                               assetPath: _getIconForTopic(title),
-                              isSelected: provider.selectedTopic == title,
-                              onTap: () => provider.toggleApiTopic(title),
+                              isSelected:
+                                  storyProvider.selectedTopic == title,
+                              onTap: () =>
+                                  storyProvider.toggleApiTopic(title),
                             );
                           }),
                         ],
                       ),
                     )
-                  else if (provider.searchedTopicsList.isEmpty &&
-                      provider.searchTopicCtr.text.trim().isNotEmpty)
+                  else if (storyProvider.searchedTopicsList.isEmpty &&
+                      storyProvider.searchTopicCtr.text.trim().isNotEmpty)
                     Expanded(
                       child: Padding(
-                        padding: EdgeInsetsGeometry.only(top: 50.h),
+                        padding: EdgeInsets.only(top: 50.h),
                         child: Align(
-                          alignment: AlignmentGeometry.topCenter,
+                          alignment: Alignment.topCenter,
                           child: Text("No Topics Found!"),
                         ),
                       ),
                     ),
 
-                  //todo next button
                   AppFilledButton(
                     text: "Next",
                     backgroundColor: AppColors.primaryColor,
-                    margin: EdgeInsetsGeometry.only(top: 4.3.w, bottom: 18.w),
+                    margin: EdgeInsets.only(top: 4.3.w, bottom: 18.w),
                     onTap: () async {
-                      if (provider.selectedTopic.isEmpty) {
+                      if (storyProvider.selectedTopic.isEmpty) {
                         AppToast.error(
                           context,
                           "Please select at least one topic",
                         );
                         return;
                       }
-                      provider.setSelectedReadingDuration = "5 mins";
+                      storyProvider.setSelectedReadingDuration = "5 mins";
                       context.pushNamed(AppRoutes.storyReadingGoalScreen.name);
-                      // final success = await provider.saveTopics(
-                      //   context,
-                      //   topicIds: selectedTopicIds.toList(),
-                      //   customTopics: selectedCustomTopics.toList(),
-                      // );
                     },
                   ),
                 ],

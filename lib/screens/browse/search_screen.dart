@@ -15,6 +15,7 @@ import 'package:redstreakapp/routes/app_router.dart';
 import 'package:redstreakapp/routes/user_routes.dart';
 import 'package:redstreakapp/screens/dashboard.dart';
 import 'package:redstreakapp/screens/browse/widgets/browse_widgets.dart';
+import 'package:redstreakapp/screens/browse/widgets/search_section_shimmers.dart';
 import 'package:redstreakapp/services/home/home_api_service.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -50,7 +51,7 @@ class _SearchScreenState extends State<SearchScreen> {
             .toList()
           ..sort();
 
-    return [_allFilter, ...interests];
+     return [_allFilter, ...interests];
   }
 
   List<BrowseTopicModel> get _visibleTopics {
@@ -61,7 +62,6 @@ class _SearchScreenState extends State<SearchScreen> {
         .where((topic) => topic.interests.contains(_selectedInterest))
         .toList();
   }
-
   bool get _isSearching => _searchController.text.trim().isNotEmpty;
 
   @override
@@ -251,7 +251,6 @@ class _SearchScreenState extends State<SearchScreen> {
         final list = readings is List ? readings : <dynamic>[];
         if (list.isEmpty) {
           AppToast.info(context: context, message: "No readings found");
-          // _showNoReadingsPopup();
           return;
         }
         context.pushNamed(
@@ -317,6 +316,7 @@ class _SearchScreenState extends State<SearchScreen> {
         message: '"${result.topicTitle}" removed from My List',
       );
     }
+
   }
 
   @override
@@ -345,139 +345,73 @@ class _SearchScreenState extends State<SearchScreen> {
                   physics: const AlwaysScrollableScrollPhysics(
                     parent: BouncingScrollPhysics(),
                   ),
-                  padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 20.h),
+                  padding: EdgeInsets.fromLTRB(16.w, 14.h, 20.w, 20.h),
                   children: [
-                    // Browse hero header hidden for now.
-                    // BrowseSearchHeroHeader(isSearching: _isSearching),
-                    // 20.h.verticalSpace,
-                    BrowseSearchField(
-                      controller: _searchController,
-                      onChanged: _onSearchChanged,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      spacing: 12,
+                      children: [
+                        InkWell(
+                          onTap: () {
+                            tabIndex.value = 0;
+                            AppRouter.indexedStackNavigationShell?.goBranch(0);
+                          },
+                          child: Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            size: 22.sp,
+                            color: AppColors.black,
+                          ),
+                          
+                          
+                        ),
+                        
+                        Expanded(
+                          child: BrowseSearchField(
+                            controller: _searchController,
+                            onChanged: _onSearchChanged,
+                          ),
+                        ),
+                      ],
                     ),
-                    18.h.verticalSpace,
+                    24.w.verticalSpace,
                     if (_isLoading)
-                      const BrowseSearchShimmer()
+                      const SearchResultListShimmer()
                     else if (_errorMessage != null && _topics.isEmpty)
                       BrowseErrorState(onRetry: _fetchTopics)
+                    else if (visibleTopics.isEmpty)
+                      BrowseEmptyState(query: _searchController.text.trim())
                     else ...[
-                      // if (_interestFilters.length > 1) ...[
-                      //   AppText(
-                      //     text: "Browse by interest",
-                      //     style: AppTextStyles.sfProDisplaySemibold(fontSize: 16.sp),
-                      //   ),
-                      //   14.w.verticalSpace,
-                      // Wrap(
-                      //   spacing: 10.w,
-                      //   runSpacing: 10.h,
-                      //   children: _interestFilters.map((interest) {
-                      //     final bool isSelected = interest == _selectedInterest;
-                      //     return GestureDetector(
-                      //       onTap: () {
-                      //         setState(() {
-                      //           _selectedInterest = interest;
-                      //         });
-                      //       },
-                      //       child: AnimatedContainer(
-                      //         duration: const Duration(milliseconds: 180),
-                      //         padding: EdgeInsets.symmetric(
-                      //           horizontal: 16.w,
-                      //           vertical: 10.h,
-                      //         ),
-                      //         decoration: BoxDecoration(
-                      //           color: isSelected
-                      //               ? AppColors.teal
-                      //               : AppColors.white,
-                      //           borderRadius: BorderRadius.circular(999),
-                      //           border: Border.all(
-                      //             color: isSelected
-                      //                 ? AppColors.teal
-                      //                 : AppColors.black.withValues(alpha: 0.09),
-                      //           ),
-                      //         ),
-                      //         child: AppText(
-                      //           text: interest,
-                      //           style: AppTextStyles.sfProDisplaySemibold(
-                      //             fontSize: 13.sp,
-                      //             color: isSelected
-                      //                 ? AppColors.white
-                      //                 : AppColors.black.withValues(alpha: 0.75),
-                      //           ),
-                      //         ),
-                      //       ),
-                      //     );
-                      //   }).toList(),
-                      // ),
-                      // 22.h.verticalSpace,
-                      // ],
-                      if (visibleTopics.isEmpty)
-                        BrowseEmptyState(query: _searchController.text.trim())
-                      else ...[
-                        AppText(
-                          text: _isSearching
-                              ? 'Results for "${_searchController.text.trim()}"'
-                              : "Featured right now",
-                          style: AppTextStyles.sfProDisplayBold(
-                            fontSize: 22.sp,
-                          ),
+                      AppText(
+                        text: _isSearching
+                            ? 'Results for "${_searchController.text.trim()}"'
+                            : "Recommended for you",
+                        style: AppTextStyles.sfProDisplayBold(
+                          fontSize: 22.sp,
+                          height: 1.2,
                         ),
-                        14.h.verticalSpace,
-                        FeaturedTopicCard(
-                          topic: visibleTopics.first,
-                          onTap: () => _openTopicProgress(visibleTopics.first),
-                          onToggleMyList: visibleTopics.first.canManageMyList
-                              ? () =>
-                                    _handleTopicListToggle(visibleTopics.first)
-                              : null,
-                          isToggleLoading: homeProvider.isTopicListToggling(
-                            visibleTopics.first.id,
-                          ),
-                        ),
-                        if (visibleTopics.length > 1) ...[
-                          24.h.verticalSpace,
-                          AppText(
-                            text: "More to explore",
-                            style: AppTextStyles.sfProDisplaySemibold(
-                              fontSize: 18.sp,
-                            ),
-                          ),
-                          14.w.verticalSpace,
-                          GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  crossAxisSpacing: 14.w,
-                                  mainAxisSpacing: 14.w,
-                                  childAspectRatio: 0.75,
-                                ),
-                            itemCount:
-                                (visibleTopics.length - 1) +
-                                (((visibleTopics.length - 1).isOdd && _hasMore)
-                                    ? 1
-                                    : 0),
-                            itemBuilder: (context, index) {
-                              if (index >= visibleTopics.length - 1) {
-                                return const BrowsePosterShimmerTile();
-                              }
-                              final topic = visibleTopics[index + 1];
-                              return PosterTopicCard(
-                                topic: topic,
-                                onTap: () => _openTopicProgress(topic),
-                                onToggleMyList: topic.canManageMyList
-                                    ? () => _handleTopicListToggle(topic)
-                                    : null,
-                                isToggleLoading: homeProvider
-                                    .isTopicListToggling(topic.id),
-                              );
-                            },
-                          ),
-                        ],
-                        if (_isLoadingMore) ...[
-                          20.h.verticalSpace,
-                          const BrowsePaginationShimmer(),
-                        ],
+                      ),
+                      18.w.verticalSpace,
+                      ...List.generate(
+                        visibleTopics.length,
+                        (index) {
+                          final topic = visibleTopics[index];
+                          return SearchResultRowCard(
+                            topic: topic,
+                            onTap: () => _openTopicProgress(topic),
+                            onToggleMyList: topic.canManageMyList
+                                ? () => _handleTopicListToggle(topic)
+                                : null,
+                            isToggleLoading: homeProvider
+                                .isTopicListToggling(topic.id),
+                          );
+                        },
+                      ),
+                      if (_isLoadingMore) ...[
+                        16.w.verticalSpace,
+                        const SearchResultRowShimmer(),
+                        const SearchResultRowShimmer(),
                       ],
+                      24.w.verticalSpace,
                     ],
                   ],
                 ),

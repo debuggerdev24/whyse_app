@@ -56,9 +56,8 @@ class StoryProvider extends ChangeNotifier {
   ];
   final List<String> ageRanges = ["6-8", "9-11", "12-14", "15-17", "18+"];
 
-  //todo topics field
+  //* topics field
   String _selectedTextType = "", _selectedAgeRange = "", _selectedLanguage = "";
-
   List<TopicModel> topicsList = [];
   List<SearchTopicModel> searchedTopicsList = [];
   final List<String> customTopics = [];
@@ -90,7 +89,7 @@ class StoryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  //todo interest field
+  //* interest field
   List<InterestModel> interestsList = [];
   final List<String> customInterestsList = [];
   final Set<String> selectedInterestIds = {};
@@ -230,7 +229,6 @@ class StoryProvider extends ChangeNotifier {
       },
       (r) {
         final data = r["data"]["topics"];
-
         topicsList = (data as List).map((e) => TopicModel.fromJson(e)).toList();
         notifyListeners();
       },
