@@ -14,7 +14,7 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text.dart';
 import '../../../core/widgets/onboarding_widgets.dart';
 import '../../../providers/home/story_provider.dart';
-import '../../../routes/user_routes.dart';
+import '../../../core/routes/user_routes.dart';
 
 class StoryGoalsScreen extends StatefulWidget {
   const StoryGoalsScreen({super.key});

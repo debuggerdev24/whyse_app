@@ -30,16 +30,17 @@ import 'package:redstreakapp/screens/home/quiz/quiz_completed_screen.dart';
 import 'package:redstreakapp/screens/home/quiz/quiz_question_screen.dart';
 import 'package:redstreakapp/screens/home/quiz/start_quiz_screen.dart';
 import 'package:redstreakapp/models/home/story_models/story_history_model.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
+import 'package:redstreakapp/core/routes/user_routes.dart';
+import 'package:redstreakapp/screens/practice/practice_zone.dart';
 
-import '../screens/below_16/consent_status_screen.dart';
-import '../screens/below_16/parent_email_screen.dart';
-import '../screens/dashboard.dart';
-import '../screens/home/story/story_interest_screen.dart';
-import '../screens/home/story/ideas_list_screen.dart';
-import '../screens/home/my_story_ideas_screen.dart';
-import '../screens/splash/splash_screen.dart';
-import '../models/home/story_models/story_model.dart';
+import '../../screens/below_16/consent_status_screen.dart';
+import '../../screens/below_16/parent_email_screen.dart';
+import '../../screens/dashboard.dart';
+import '../../screens/home/story/story_interest_screen.dart';
+import '../../screens/home/story/ideas_list_screen.dart';
+import '../../screens/home/my_story_ideas_screen.dart';
+import '../../screens/splash/splash_screen.dart';
+import '../../models/home/story_models/story_model.dart';
 
 class AppRouter {
   static final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -78,6 +79,15 @@ class AppRouter {
                 path: AppRoutes.searchScreen.path,
                 name: AppRoutes.searchScreen.name,
                 builder: (context, state) => SearchScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.practiceZoneScreen.path,
+                name: AppRoutes.practiceZoneScreen.name,
+                builder: (context, state) => PracticeZoneSection(),
               ),
             ],
           ),
@@ -259,7 +269,6 @@ class AppRouter {
       name: AppRoutes.startQuizScreen.name,
       builder: (context, state) {
         final extra = state.extra as Map<String, dynamic>? ?? {};
-
         return StartQuizScreen(
           quizzes: (extra["quizzes"] as List<StoryQuiz>? ?? []),
           storyTitle: extra["storyTitle"] as String? ?? "",
@@ -318,7 +327,6 @@ class AppRouter {
       name: AppRoutes.resetPasswordScreen.name,
       builder: (context, state) {
         final bool status = (state.extra as bool?) ?? false;
-
         return ResetPasswordScreen(isVerified: status);
       },
     ),

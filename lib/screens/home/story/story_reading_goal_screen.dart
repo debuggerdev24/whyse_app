@@ -15,7 +15,7 @@ import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
+import 'package:redstreakapp/core/routes/user_routes.dart';
 
 import '../../../core/widgets/dropdown_textfiled.dart';
 import '../../../models/home/story_models/story_enums.dart';
@@ -31,6 +31,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
   @override
   Widget build(BuildContext context) {
     final pr = context.read<StoryProvider>();
+    
     return PopScope(
       canPop: pr.isCreateStoryImageLoading || pr.isCreateStoryLoading
           ? false
@@ -187,19 +188,30 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                               deBouncer.run(() async {
                                 provider.setGenerateStoryIdeasLoading(true);
                                 context.pushNamed(
-                                  AppRoutes.storyIdeasScreen.name,
+                                  AppRoutes.storySeriesScreen.name,
                                 );
                                 await provider.createStoryIdeas(
-                             
-                              onFailed: (error) {
-                                Logger.error(error);
-                                AppToast.error(context, error);
-                              },
-                              context: context,
-                              onlyIdeas: true,
-                            );
-                          });
-                        },
+                                  onFailed: (error) {
+                                    Logger.error(error);
+                                    AppToast.error(context, error);
+                                  },
+                                  context: context,
+                                  onlyIdeas: true,
+                                );
+                                if (context.mounted &&
+                                    provider.storyIdea != null &&
+                                    provider.storyIdea!.storyIdeas.isNotEmpty) {
+                                  provider.generateSingleStory(
+                                    storyIdeaId:
+                                        provider.storyIdea!.storyIdeas.first.id,
+                                    context: context,
+                                    insertAtIndex: 0,
+                                    onSuccess: () {},
+                                    showToast: true,
+                                  );
+                                }
+                              });
+                            },
                       ),
                     ],
                   ),

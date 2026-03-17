@@ -15,12 +15,12 @@ import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/models/home/story_models/story_history_model.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
-import 'package:redstreakapp/routes/app_router.dart';
+import 'package:redstreakapp/core/routes/app_router.dart';
 import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../core/helper/log_helper.dart';
 import '../../../core/network/base_api_service.dart';
-import '../../../routes/user_routes.dart';
+import '../../../core/routes/user_routes.dart';
 
 class CreatedStoryReadingScreen extends StatefulWidget {
   final StoryHistoryModel? initialStory;

@@ -2,13 +2,16 @@ import 'dart:async';
 
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_constants.dart';
 import 'package:redstreakapp/core/utils/shared_pref.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
-import 'package:redstreakapp/routes/app_router.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
+import 'package:redstreakapp/providers/home/home_provider.dart';
+import 'package:redstreakapp/providers/home/story_provider.dart';
+import 'package:redstreakapp/core/routes/app_router.dart';
+import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/screens/home/story/story_series_screen.dart';
 
 class DeepLinkHandler {
@@ -173,13 +176,27 @@ class DeepLinkHandler {
         return;
       }
 
-      // ---------------- Story idea (share link) ----------------
-      
+      // ---------------- Story / topic (share link) ----------------
+      // Prefer topicId: fetch ideas by topic, set story series state, show story series screen and generate first story.
       if (uri.host == AppConstants.domain &&
-          uri.path == AppConstants.storyIdeaPath) {
+          uri.path == AppConstants.storyPath) {
+        final topicId = uri.queryParameters[AppConstants.topicIdParam];
         final storyIdeaId = uri.queryParameters[AppConstants.storyIdeaIdParam];
+
+        if (topicId != null && topicId.trim().isNotEmpty) {
+          Logger.info("Story deep link -> topicId: $topicId");
+          if (currentCtx != null) {
+            _openStorySeriesByTopicId(
+              context: currentCtx,
+              topicId: topicId.trim(),
+            );
+          }
+          return;
+        }
+
+        // Fallback: legacy link with story idea id only -> open single story reading screen.
         if (storyIdeaId != null && storyIdeaId.trim().isNotEmpty) {
-          Logger.info("Story deep link -> storyIdeaId: $storyIdeaId");
+          Logger.info("Story deep link (legacy) -> storyIdeaId: $storyIdeaId");
           StoryReadingScreen.skipLeaveDialogForDeepLink = true;
           AppRouter.goRouter.goNamed(
             AppRoutes.createdStoryReadingScreen.name,
@@ -187,7 +204,8 @@ class DeepLinkHandler {
           );
           return;
         }
-        Logger.error("Story link missing id parameter: $uri");
+
+        Logger.error("Story link missing topicId or id parameter: $uri");
         return;
       }
 
@@ -197,5 +215,40 @@ class DeepLinkHandler {
     } finally {
       _isProcessingLink = false; // ✅ SINGLE PLACE
     }
+  }
+
+  /// Fetches story ideas by topicId, sets StoryProvider for series screen, then navigates and triggers first story generation.
+  Future<void> _openStorySeriesByTopicId({
+    required BuildContext context,
+    required String topicId,
+  }) async {
+    final homeProvider = context.read<HomeProvider>();
+    final storyProvider = context.read<StoryProvider>();
+
+    await homeProvider.getStoryIdeasByTopicId(topicId: topicId);
+
+    if (!context.mounted) return;
+    final summary = homeProvider.storySummary;
+    if (summary == null ||
+        summary.storyIdeas.isEmpty ||
+        summary.topicId != topicId) {
+      Logger.error(
+        "Deep link: no story ideas for topicId $topicId or topic mismatch",
+      );
+      if (context.mounted) {
+        AppToast.error(
+          context,
+          "Could not load stories for this topic.",
+        );
+      }
+      return;
+    }
+
+    storyProvider.setFromStorySummary(summary);
+    StoryReadingScreen.skipLeaveDialogForDeepLink = true;
+    StoryReadingScreen.deepLinkNeedsFirstStory = true;
+
+    if (!context.mounted) return;
+    AppRouter.goRouter.goNamed(AppRoutes.storySeriesScreen.name);
   }
 }

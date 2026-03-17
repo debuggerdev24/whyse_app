@@ -10,7 +10,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:redstreakapp/core/utils/shared_pref.dart';
 import 'package:redstreakapp/core/utils/field_validator.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
+import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/services/auth/auth_api_service.dart';
 import 'package:redstreakapp/core/network/base_api_service.dart';
 
@@ -738,12 +738,12 @@ class AuthProvider with ChangeNotifier {
   bool isLoadingTopics = false;
   List<dynamic> topicsList = [];
 
-  Future<void> fetchDefaultTopics(BuildContext context) async {
+  Future<void> fetchDefaultTopics(BuildContext context, {String? search}) async {
     try {
       isLoadingTopics = true;
       notifyListeners();
 
-      final response = await AuthApiServices().getDefaultTopics();
+      final response = await AuthApiServices().getDefaultTopics(search: search);
 
       isLoadingTopics = false;
       notifyListeners();

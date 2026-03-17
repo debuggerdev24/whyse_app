@@ -9,7 +9,7 @@ import 'package:redstreakapp/providers/auth/auth_provider.dart';
 
 import '../../core/constants/app_color.dart';
 import '../../core/constants/text_style.dart';
-import '../../routes/user_routes.dart';
+import '../../core/routes/user_routes.dart';
 
 class VerifyOtpScreen extends StatelessWidget {
   const VerifyOtpScreen({super.key});

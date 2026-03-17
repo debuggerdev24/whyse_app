@@ -12,8 +12,8 @@ import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
-import 'package:redstreakapp/routes/app_router.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
+import 'package:redstreakapp/core/routes/app_router.dart';
+import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/screens/home/quiz/quiz_question_screen.dart';
 
 import '../../../providers/home/story_provider.dart';

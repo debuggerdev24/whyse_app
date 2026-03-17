@@ -7,7 +7,7 @@ import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
+import 'package:redstreakapp/core/routes/user_routes.dart';
 
 class WhatInterestScreen extends StatefulWidget {
   const WhatInterestScreen({super.key});

@@ -144,14 +144,14 @@ class SelectionOption extends StatelessWidget {
 
 class TopicCard extends StatelessWidget {
   final String label;
-  final String assetPath;
+  final String imagePath;
   final bool isSelected;
   final VoidCallback onTap;
 
   const TopicCard({
     super.key,
     required this.label,
-    required this.assetPath,
+    required this.imagePath,
     required this.isSelected,
     required this.onTap,
   });
@@ -198,9 +198,17 @@ class TopicCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            if (_isNetworkUrl(assetPath))
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+            ),
+            if(_isNetworkUrl(imagePath))
               CachedNetworkImage(
-                imageUrl: assetPath,
+                imageUrl: imagePath,
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,
@@ -209,7 +217,7 @@ class TopicCard extends StatelessWidget {
               )
             else
               Image.asset(
-                assetPath,
+                imagePath,
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,

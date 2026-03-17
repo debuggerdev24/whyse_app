@@ -6,8 +6,8 @@ import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
-import 'package:redstreakapp/routes/app_router.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
+import 'package:redstreakapp/core/routes/app_router.dart';
+import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/services/deep_link/deep_link_handler.dart';
 
 class WhyseApp extends StatefulWidget {

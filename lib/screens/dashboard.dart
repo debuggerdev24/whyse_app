@@ -8,7 +8,7 @@ import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
-import 'package:redstreakapp/routes/app_router.dart';
+import 'package:redstreakapp/core/routes/app_router.dart';
 
 ValueNotifier<int> tabIndex = ValueNotifier<int>(0);
 
@@ -75,7 +75,6 @@ class _UserDashBoardState extends State<UserDashBoard> {
               icon: AppAssets.note,
               isSelected: value == 0,
               index: 0,
-              
             ),
             BottomNavItem(
               icon: AppAssets.searchIcon,

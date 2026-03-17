@@ -7,10 +7,10 @@ import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
-import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
+import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/core/utils/share_helper.dart';
-import 'package:redstreakapp/screens/home/widgets/story_ideas_widgets.dart';
+import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
+import 'package:redstreakapp/screens/home/widgets/story_ideas_widget.dart';
 
 class CreatedStorySummaryScreen extends StatefulWidget {
   const CreatedStorySummaryScreen({super.key, this.topicId});
@@ -95,7 +95,6 @@ class _CreatedStorySummaryScreenState extends State<CreatedStorySummaryScreen> {
             if (summary.storyIdeas.isEmpty) {
               return const SafeArea(child: StoryIdeasEmptyState());
             }
-
             return Stack(
               children: [
                 SafeArea(

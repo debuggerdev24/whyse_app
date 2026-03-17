@@ -2,6 +2,8 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/models/home/story_models/story_idea_model.dart';
+import 'package:redstreakapp/models/home/story_models/story_summary_model.dart'
+    hide StoryIdea;
 import 'package:redstreakapp/models/home/topic_progress_model.dart';
 import '../../core/enums/app_enums.dart';
 import '../../core/helper/log_helper.dart';
@@ -9,8 +11,8 @@ import '../../models/home/goal_model.dart';
 import '../../models/home/interest_model.dart';
 import '../../models/home/story_models/story_model.dart';
 import '../../models/home/topic_model.dart';
-import '../../routes/app_router.dart';
-import '../../routes/user_routes.dart';
+import '../../core/routes/app_router.dart';
+import '../../core/routes/user_routes.dart';
 import '../../services/home/story_api_service.dart';
 
 class StoryProvider extends ChangeNotifier {
@@ -61,7 +63,7 @@ class StoryProvider extends ChangeNotifier {
   List<TopicModel> topicsList = [];
   List<SearchTopicModel> searchedTopicsList = [];
   final List<String> customTopics = [];
-  String selectedTopic = "", selectedReadingDuration = "5 mins";
+  String selectedTopicId = "", selectedTopicTitle = "", selectedReadingDuration = "5 mins";
   final Set<String> selectedCustomTopics = {};
 
   set setNoOfStories(String value) {
@@ -266,12 +268,13 @@ class StoryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleApiTopic(String id) {
-    if (selectedTopic == id) {
-      selectedTopic == "";
+  void toggleApiTopic(String id, String title) {
+    if (selectedTopicId == id) {
+      selectedTopicId == "";
     } else {
-      selectedTopic = id;
+      selectedTopicId = id;
     }
+    selectedTopicTitle = title;
     notifyListeners();
   }
 
@@ -405,6 +408,39 @@ class StoryProvider extends ChangeNotifier {
     _stories[index] = story;
   }
 
+  /// Sets storyIdea and state from getStoryIdeasByTopicId response (e.g. deep link by topicId). Clears stories and sets current index.
+  void setFromStorySummary(StoryIdeaModel summary) {
+    final topic = Topic(
+      id: summary.topicId,
+      title: summary.topicTitle,
+      learningGoal: summary.topicLearningGoal,
+      interests: [],
+      createdAt: DateTime.now(),
+      thumbnailUrl: summary.topicThumbnailUrl,
+    );
+    final storyIdeas = summary.storyIdeas
+        .map((s) => StoryIdea(
+              id: s.id,
+              title: s.storyTitle,
+              description: s.description,
+              thumbnailUrl: s.thumbnailUrl,
+              createdAt: DateTime.tryParse(s.createdOn) ?? DateTime.now(),
+              sequenceIndex: s.sequenceIndex,
+            ))
+        .toList();
+    storyIdea = StoryIdeasModel(
+      promptType: "topic",
+      grade: null,
+      mustIncludeWords: null,
+      topic: topic,
+      storyIdeas: storyIdeas,
+    );
+    _stories = [];
+    _currentStoryIndex = 0;
+    _currentStoryPageIndex = 0;
+    notifyListeners();
+  }
+
   /// Sets storyIdea and state from topic progress (e.g. from Browse). Clears stories and sets current index.
   void setFromTopicProgress(TopicProgressModel progress) {
     final t = progress.topic;
@@ -478,8 +514,8 @@ class StoryProvider extends ChangeNotifier {
     } else {
       dataToSendCreateStory = {
         "interestIds": selectedInterestIds.toList(),
-        (selectedTopic.isEmpty) ? "LessonContentInstructions" : "ReadingTopic":
-            (selectedTopic.isEmpty) ? customTopicCtr.text.trim() : selectedTopic,
+        (selectedTopicId.isEmpty) ? "LessonContentInstructions" : "ReadingTopic":
+            (selectedTopicId.isEmpty) ? customTopicCtr.text.trim() : selectedTopicTitle,
         "LessonDuration": _lessonDuration,
         "Language": _selectedLanguage,
         "TextType": _selectedTextType,
@@ -652,7 +688,7 @@ class StoryProvider extends ChangeNotifier {
   void clearStoryFields() {
     selectedGoalIds.clear();
     selectedInterestIds.clear();
-    selectedTopic = "";
+    selectedTopicId = "";
     customTopicCtr.clear();
     // _lessonDuration = 0;
     _selectedLanguage = "";

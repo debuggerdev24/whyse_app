@@ -15,7 +15,7 @@ import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import '../../core/utils/shared_pref.dart';
 import '../../core/widgets/custom_toast.dart';
 import '../../core/widgets/kback_button.dart';
-import '../../routes/user_routes.dart';
+import '../../core/routes/user_routes.dart';
 
 class ParentEmailScreen extends StatefulWidget {
   const ParentEmailScreen({super.key});

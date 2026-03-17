@@ -10,7 +10,7 @@ import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
+import 'package:redstreakapp/core/routes/user_routes.dart';
 
 import '../../../models/home/story_models/story_model.dart';
 import '../../../providers/home/quiz_provider.dart';

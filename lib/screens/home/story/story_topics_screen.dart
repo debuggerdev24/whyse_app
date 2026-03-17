@@ -17,7 +17,7 @@ import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
+import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:shimmer/shimmer.dart';
 
 class StoryTopicsScreen extends StatefulWidget {
@@ -143,7 +143,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                       }
                     },
                     onSkip: () {
-                      storyProvider.toggleApiTopic("");
+                      storyProvider.toggleApiTopic("", "");
                       context.pushNamed(AppRoutes.customTopicScreen.name);
                     },
                   ),
@@ -154,7 +154,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                       fontSize: 32.sp,
                     ),
                   ),
-                  10.h.verticalSpace,
+                  10.w.verticalSpace,
                   AppText(
                     text:
                         "Here are some topics we think you'll love based on your interests. You can pick the ones that excite you the most!",
@@ -218,6 +218,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                                     }
                                     final topic = list[index];
                                     final title = topic.topic;
+                                    final id = topic.id;
                                     final thumb = topic.thumbnailUrl
                                         .trim()
                                         .isNotEmpty
@@ -225,11 +226,11 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                                         : null;
                                     return TopicCard(
                                       label: title,
-                                      assetPath: thumb ?? _getIconForTopic(title),
+                                      imagePath: thumb ?? _getIconForTopic(title),
                                       isSelected:
-                                          storyProvider.selectedTopic == title,
+                                          storyProvider.selectedTopicId == id,
                                       onTap: () =>
-                                          storyProvider.toggleApiTopic(title),
+                                          storyProvider.toggleApiTopic(id, title),
                                     );
                                   },
                                 ),
@@ -252,11 +253,11 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                             final title = topic.title;
                             return TopicCard(
                               label: title,
-                              assetPath: _getIconForTopic(title),
+                              imagePath: _getIconForTopic(title),
                               isSelected:
-                                  storyProvider.selectedTopic == title,
+                                  storyProvider.selectedTopicId == topic.id,
                               onTap: () =>
-                                  storyProvider.toggleApiTopic(title),
+                                  storyProvider.toggleApiTopic(topic.id, title),
                             );
                           }),
                         ],
@@ -279,7 +280,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                     backgroundColor: AppColors.primaryColor,
                     margin: EdgeInsets.only(top: 4.3.w, bottom: 18.w),
                     onTap: () async {
-                      if (storyProvider.selectedTopic.isEmpty) {
+                      if (storyProvider.selectedTopicId.isEmpty) {
                         AppToast.error(
                           context,
                           "Please select at least one topic",

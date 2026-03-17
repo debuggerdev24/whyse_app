@@ -206,21 +206,21 @@ class StoryIdeaEpisodeCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (onShare != null) ...[
-                      8.w.horizontalSpace,
-                      GestureDetector(
-                        onTap: onShare,
-                        behavior: HitTestBehavior.opaque,
-                        child: Padding(
-                          padding: EdgeInsets.all(4.w),
-                          child: Icon(
-                            Icons.share_outlined,
-                            size: 22.sp,
-                            color: AppColors.teal,
-                          ),
-                        ),
-                      ),
-                    ],
+                    // if (onShare != null) ...[
+                    //   8.w.horizontalSpace,
+                    //   GestureDetector(
+                    //     onTap: onShare,
+                    //     behavior: HitTestBehavior.opaque,
+                    //     child: Padding(
+                    //       padding: EdgeInsets.all(4.w),
+                    //       child: Icon(
+                    //         Icons.share_outlined,
+                    //         size: 22.sp,
+                    //         color: AppColors.teal,
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ],
                   ],
                 ),
                 8.h.verticalSpace,

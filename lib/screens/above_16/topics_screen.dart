@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +8,7 @@ import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/utils/custom_loader.dart';
+import 'package:redstreakapp/core/utils/de_bouncing.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
@@ -13,7 +16,7 @@ import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
+import 'package:redstreakapp/core/routes/user_routes.dart';
 
 class TopicsScreen extends StatefulWidget {
   const TopicsScreen({super.key});
@@ -26,60 +29,18 @@ class _TopicsScreenState extends State<TopicsScreen> {
   //* Local state for custom topics
   final List<String> customTopics = [];
   final TextEditingController customTopicController = TextEditingController();
+  final TextEditingController searchController = TextEditingController();
   final Set<String> selectedTopicIds = {};
   final Set<String> selectedCustomTopics = {};
-  String _getIconForTopic(String title) {
-    String lower = title.toLowerCase();
 
-    if (lower.contains("space") || lower.contains("planet")) {
-      return AppAssets.space;
-    }
-    if (lower.contains("invention") ||
-        lower.contains("tech") ||
-        lower.contains("science")) {
-      return AppAssets.inventions;
-    }
-    if (lower.contains("haunted") ||
-        lower.contains("ghost") ||
-        lower.contains("horror")) {
-      return AppAssets.hauntedhouse;
-    }
-    if (lower.contains("mystery") ||
-        lower.contains("detective") ||
-        lower.contains("clue")) {
-      return AppAssets.detativeclue;
-    }
-    if (lower.contains("wizard") ||
-        lower.contains("magic") ||
-        lower.contains("fantasy")) {
-      return AppAssets.wizard;
-    }
-    if (lower.contains("dragon") ||
-        lower.contains("animal") ||
-        lower.contains("creature") ||
-        lower.contains("nature")) {
-      return AppAssets.dargon;
-    }
 
-    // Looser Mappings for other known categories
-    if (lower.contains("comic") || lower.contains("fun")) {
-      return AppAssets.wizard;
-    }
-    if (lower.contains("history")) return AppAssets.hauntedhouse;
-    if (lower.contains("adventure")) return AppAssets.space;
-
-    // Rotation fallback for any other topics to ensure variety
-    List<String> fallbacks = [
-      AppAssets.space,
-      AppAssets.inventions,
-      AppAssets.hauntedhouse,
-      AppAssets.detativeclue,
-      AppAssets.wizard,
-      AppAssets.dargon,
-    ];
-    // Use hash code to consistently return the same random image for the same title
-    return fallbacks[title.hashCode.abs() % fallbacks.length];
+  void _removeCustomTopic(String title) {
+    setState(() {
+      customTopics.remove(title);
+      selectedCustomTopics.remove(title);
+    });
   }
+
 
   @override
   void initState() {
@@ -87,6 +48,23 @@ class _TopicsScreenState extends State<TopicsScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AuthProvider>().fetchDefaultTopics(context);
     });
+  }
+
+  @override
+  void dispose() {
+
+    searchController.dispose();
+    customTopicController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+      if (!mounted) return;
+      final query = value.trim();
+      context.read<AuthProvider>().fetchDefaultTopics(
+            context,
+            search: query.isEmpty ? null : query,
+          );
   }
 
   void _toggleApiTopic(String id) {
@@ -101,6 +79,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
 
   void _toggleCustomTopic(String title) {
     setState(() {
+
       if (selectedCustomTopics.contains(title)) {
         selectedCustomTopics.remove(title);
       } else {
@@ -136,7 +115,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: 24.w,
-                    vertical: 20.h,
+                    vertical: 20.w
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,13 +131,12 @@ class _TopicsScreenState extends State<TopicsScreen> {
                           }
                         },
                       ),
-
                       AppText(
                         text: "Choose Your Favorite Topics",
                         style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
                       ),
 
-                      10.h.verticalSpace,
+                      10.w.verticalSpace,
 
                       AppText(
                         text:
@@ -169,7 +147,25 @@ class _TopicsScreenState extends State<TopicsScreen> {
                         ),
                       ),
 
-                      18.h.verticalSpace,
+                      16.h.verticalSpace,
+                      // Search topics (filters API list)
+                      AppTextField(
+                        controller: searchController,
+                        hintText: "Search topics...",
+                        prefixIcon: Padding(
+                          padding: EdgeInsets.only(left: 14.w, right: 10.w),
+                          child: SvgIcon(
+                            AppAssets.searchIcon,
+                            size: 20.w,
+                            color: AppColors.teal,
+                          ),
+                        ),
+                        onChanged: (value) => deBouncer.run(() {
+                          _onSearchChanged(value);
+                        },),
+                      ),
+                      
+                      14.w.verticalSpace,
                       // Custom Topic Input
                       AppTextField(
                         controller: customTopicController,
@@ -201,25 +197,12 @@ class _TopicsScreenState extends State<TopicsScreen> {
                                   childAspectRatio: 1.4,
                                 ),
                             children: [
-                              // Custom Topics (shown first)
-                              ...customTopics.map((title) {
-                                return TopicCard(
-                                  label: title,
-                                  assetPath: _getIconForTopic(title),
-                                  isSelected: selectedCustomTopics.contains(
-                                    title,
-                                  ),
-                                  onTap: () => _toggleCustomTopic(title),
-                                );
-                              }),
-
-                              // API Topics
+                              // API topics only (with images from API)
                               ...provider.topicsList.map((topic) {
                                 final id = topic['id'];
-                                final title = topic['title'];
                                 return TopicCard(
-                                  label: title,
-                                  assetPath: _getIconForTopic(title),
+                                  label: topic['title'],
+                                  imagePath: topic["thumbnailUrl"],
                                   isSelected: selectedTopicIds.contains(id),
                                   onTap: () => _toggleApiTopic(id),
                                 );
@@ -227,7 +210,28 @@ class _TopicsScreenState extends State<TopicsScreen> {
                             ],
                           ),
                         ),
-
+                      // Custom-added topics: text-only, horizontal scroll, removable
+                      if (customTopics.isNotEmpty) ...[
+                        12.h.verticalSpace,
+                        SizedBox(
+                          height: 44.h,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            padding: EdgeInsets.only(right: 24.w),
+                            itemCount: customTopics.length,
+                            separatorBuilder: (_, __) => SizedBox(width: 10.w),
+                            itemBuilder: (context, index) {
+                              final title = customTopics[index];
+                              return _CustomTopicChip(
+                                label: title,
+                                isSelected: selectedCustomTopics.contains(title),
+                                onTap: () => _toggleCustomTopic(title),
+                                onRemove: () => _removeCustomTopic(title),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                       AppFilledButton(
                         text: "Next",
                         backgroundColor: AppColors.primaryColor,
@@ -261,6 +265,73 @@ class _TopicsScreenState extends State<TopicsScreen> {
               ],
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+/// Text-only chip for custom topics: label, optional selection state, tap to toggle, X to remove.
+class _CustomTopicChip extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final VoidCallback onRemove;
+
+  const _CustomTopicChip({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? AppColors.teal.withValues(alpha: 0.12)
+                : AppColors.black.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: isSelected
+                  ? AppColors.teal
+                  : AppColors.black.withValues(alpha: 0.12),
+              width: 1.2,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AppText(
+                text: label,
+                style: AppTextStyles.sfProDisplaySemibold(
+                  fontSize: 14.sp,
+                  color: isSelected
+                      ? AppColors.teal
+                      : AppColors.black.withValues(alpha: 0.85),
+                ),
+              ),
+              8.w.horizontalSpace,
+              GestureDetector(
+                onTap: onRemove,
+                behavior: HitTestBehavior.opaque,
+                child: Icon(
+                  Icons.close_rounded,
+                  size: 18.sp,
+                  color: isSelected
+                      ? AppColors.teal
+                      : AppColors.black.withValues(alpha: 0.5),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

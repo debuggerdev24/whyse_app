@@ -141,8 +141,11 @@ class AuthApiServices {
   }
 
   //@override
-  Future<dynamic> getDefaultTopics() async {
-    final res = await _api.get(EndPoints.getDefaultTopics);
+  Future<dynamic> getDefaultTopics({String? search}) async {
+    final path = search != null && search.isNotEmpty
+        ? EndPoints.getDefaultTopicsWithSearch(search)
+        : EndPoints.getDefaultTopics;
+    final res = await _api.get(path);
     return res.data;
   }
 

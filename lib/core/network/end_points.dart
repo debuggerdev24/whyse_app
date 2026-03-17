@@ -6,6 +6,8 @@ class EndPoints {
   static const onBoardingProgress = "/mobile/auth/onboarding-progress";
   static const getDefaultInterest = "/mobile/auth/default-interests";
   static const getDefaultTopics = "/mobile/auth/default-topics";
+  static String getDefaultTopicsWithSearch(String search) =>
+      "$getDefaultTopics?search=${Uri.encodeComponent(search)}";
   static const getDefaultGoals = "/mobile/auth/default-goals";
   static const saveGoals = "/mobile/auth/save-goals";
   static const saveParentEmail = "/mobile/auth/save-parent-email";

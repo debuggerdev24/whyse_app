@@ -3,7 +3,6 @@ import 'dart:ui';
 
 import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -23,7 +22,8 @@ import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
 import 'package:redstreakapp/models/home/story_models/story_idea_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_model.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
-import 'package:redstreakapp/routes/user_routes.dart';
+import 'package:redstreakapp/core/routes/app_router.dart';
+import 'package:redstreakapp/core/routes/user_routes.dart';
 
 class StoryReadingScreen extends StatelessWidget {
   const StoryReadingScreen({super.key});
@@ -31,6 +31,12 @@ class StoryReadingScreen extends StatelessWidget {
   /// When true, [shouldAllowPop] returns true without showing the leave dialog.
   /// Set by deep link handler when opening a story link so the new story opens instead of the dialog.
   static bool skipLeaveDialogForDeepLink = false;
+
+  /// When true, [shouldAllowPop] returns true without showing any dialog (e.g. user chose "Go to home").
+  static bool skipLeaveDialogForHome = false;
+
+  /// Set by deep link handler when opening by topicId; triggers auto-generation of first story once.
+  static bool deepLinkNeedsFirstStory = false;
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +49,25 @@ class StoryReadingScreen extends StatelessWidget {
             final storyIdea = provider.storyIdea;
             final isEmpty = storyIdea == null || storyIdea.storyIdeas.isEmpty;
             final ideas = storyIdea?.storyIdeas ?? [];
+
+            // Deep link by topicId: auto-generate first story once when we have ideas but no stories yet.
+            if (!isEmpty &&
+                provider.stories.isEmpty &&
+                provider.currentStoryIndex == 0 &&
+                StoryReadingScreen.deepLinkNeedsFirstStory) {
+              StoryReadingScreen.deepLinkNeedsFirstStory = false;
+              final firstIdeaId = ideas.first.id;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!context.mounted) return;
+                provider.generateSingleStory(
+                  storyIdeaId: firstIdeaId,
+                  context: context,
+                  onSuccess: () {},
+                  showToast: true,
+                  insertAtIndex: 0,
+                );
+              });
+            }
             final topicTitle =
                 (storyIdea != null && storyIdea.topic.title.isNotEmpty)
                 ? storyIdea.topic.title
@@ -169,6 +194,8 @@ class StoryReadingScreen extends StatelessWidget {
                           _StoryViewer(
                             story: story,
                             storyIdeaId: currentStoryIdeaId,
+                            topicId: storyIdea.topic.id,
+                            topicTitle: storyIdea.topic.title,
                             lessonDuration: durationMinutes > 0
                                 ? durationMinutes
                                 : provider.lessonDuration,
@@ -212,6 +239,10 @@ class StoryReadingScreen extends StatelessWidget {
                                   maxLines: 4,
                                   overflow: TextOverflow.ellipsis,
                                 ),
+                              ],
+                              if (storyIdea.topic.interests.isNotEmpty) ...[
+                                12.w.verticalSpace,
+                                _TagsSection(interests: storyIdea.topic.interests),
                               ],
                               8.w.verticalSpace,
                               if (ideas.length > 1)
@@ -308,10 +339,15 @@ class StoryReadingScreen extends StatelessWidget {
     );
   }
 
+
   /// Returns true to allow route pop, false to stay. Used by GoRoute.onExit (system back).
   static Future<bool> shouldAllowPop(BuildContext context) async {
     if (skipLeaveDialogForDeepLink) {
       skipLeaveDialogForDeepLink = false;
+      return true;
+    }
+    if (skipLeaveDialogForHome) {
+      skipLeaveDialogForHome = false;
       return true;
     }
     final provider = context.read<StoryProvider>();
@@ -492,7 +528,10 @@ class StoryReadingScreen extends StatelessWidget {
             myActionButtonTheme(
               onPressed: () {
                 dialogContext.pop();
+                StoryReadingScreen.skipLeaveDialogForHome = true;
                 context.goNamed(AppRoutes.homeScreen.name);
+                tabIndex.value = 0;
+                AppRouter.indexedStackNavigationShell?.goBranch(0);
               },
               title: "Yes",
             ),
@@ -543,6 +582,63 @@ class _ReadingTimerText extends StatelessWidget {
       style: AppTextStyles.sfProDisplaySemibold(
         fontSize: 16.sp,
         color: AppColors.teal,
+      ),
+    );
+  }
+}
+
+/// Horizontal scrollable tags (topic interests) for attractive search/discovery UI.
+class _TagsSection extends StatelessWidget {
+  final List<Interest> interests;
+
+  const _TagsSection({required this.interests});
+
+  @override
+  Widget build(BuildContext context) {
+    if (interests.isEmpty) return const SizedBox.shrink();
+    return SizedBox(
+      height: 36.w,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.only(right: 24.w),
+        itemCount: interests.length,
+        separatorBuilder: (_, __) => SizedBox(width: 10.w),
+        itemBuilder: (context, index) {
+          final interest = interests[index];
+          final name = interest.name.trim();
+          if (name.isEmpty) return const SizedBox.shrink();
+          return _TagChip(label: name);
+        },
+      ),
+    );
+  }
+}
+
+class _TagChip extends StatelessWidget {
+  final String label;
+
+  const _TagChip({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.w
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.teal.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: AppColors.teal.withValues(alpha: 0.35),
+          width: 1,
+        ),
+      ),
+      alignment: Alignment.center,
+      child: AppText(
+        text: label,
+        style: AppTextStyles.sfProDisplaySemibold(
+          fontSize: 13.sp,
+          color: AppColors.teal,
+        ),
       ),
     );
   }
@@ -702,12 +798,16 @@ class _StoryIdeaTile extends StatelessWidget {
 class _StoryViewer extends StatefulWidget {
   final StoryModel story;
   final String storyIdeaId;
+  final String topicId;
+  final String topicTitle;
   final int lessonDuration;
   final VoidCallback onCloseStory;
   final VoidCallback onHome;
   const _StoryViewer({
     required this.story,
     required this.storyIdeaId,
+    required this.topicId,
+    required this.topicTitle,
     required this.lessonDuration,
     required this.onCloseStory,
     required this.onHome,
@@ -841,6 +941,8 @@ class _StoryViewerState extends State<_StoryViewer> {
           totalPages: pages.length,
           storyTitle: widget.story.title,
           storyIdeaId: widget.storyIdeaId,
+          topicId: widget.topicId,
+          topicTitle: widget.topicTitle,
           lessonDuration: widget.lessonDuration,
           onCloseStory: widget.onCloseStory,
           remainingSeconds: _remainingSeconds,
@@ -885,6 +987,8 @@ class _StoryPage extends StatelessWidget {
   final int totalPages;
   final String storyTitle;
   final String storyIdeaId;
+  final String topicId;
+  final String topicTitle;
   final int lessonDuration;
   final VoidCallback onCloseStory;
   final int remainingSeconds;
@@ -905,6 +1009,8 @@ class _StoryPage extends StatelessWidget {
     required this.totalPages,
     required this.storyTitle,
     required this.storyIdeaId,
+    required this.topicId,
+    required this.topicTitle,
     required this.lessonDuration,
     required this.onCloseStory,
     required this.remainingSeconds,
@@ -990,11 +1096,10 @@ class _StoryPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(width: 12.w),
+                  12.w.horizontalSpace,
                   GestureDetector(
-                    onTap: () => shareStoryIdeaLink(
-                      storyIdeaId: storyIdeaId,
-                      storyTitle: storyTitle,
+                    onTap: () => shareTopicLink(
+                      topicId: topicId,
                     ),
                     behavior: HitTestBehavior.opaque,
                     child: Padding(
@@ -1043,7 +1148,7 @@ class _StoryPage extends StatelessWidget {
                   if (hasStartedReading)
                     _ReadingTimerText(remainingSeconds: remainingSeconds),
                 ],
-              ),
+              ),      
               10.w.verticalSpace,
               //* Page number
               AppText(
