@@ -71,7 +71,6 @@ class _StoryTopicsSectionState extends State<StoryTopicsSection> {
         if (provider.topicsList != null && provider.topicsList!.isEmpty) {
           return buildEmptyState(context);
         }
-
         final list = provider.topicsList ?? [];
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,13 +108,14 @@ class _StoryTopicsSectionState extends State<StoryTopicsSection> {
                   StoryCard(
                     story: list.first,
                     onTap: () {
+                      provider.getStoryIdeasByTopicId(topicId: list.first.id);
                       context.pushNamed(
                         AppRoutes.createdStorySummaryScreen.name,
                         extra: list.first.id,
                       );
                     },
                   ),
-                  16.h.verticalSpace,
+                  16.w.verticalSpace,
                   _addNewReadingButton(context),
                   if (list.length > 1) ...[
                     16.h.verticalSpace,
@@ -123,9 +123,10 @@ class _StoryTopicsSectionState extends State<StoryTopicsSection> {
                       StoryCard(
                         story: list[i],
                         onTap: () {
+                          provider.getStoryIdeasByTopicId(topicId: list[i].id);
                           context.pushNamed(
                             AppRoutes.createdStorySummaryScreen.name,
-                            extra: list[i].id,
+                            // extra: list[i].id,
                           );
                         },
                       ),
@@ -416,62 +417,166 @@ Widget _buildShimmerLoading() {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
+      // Section title placeholder ("Your Story Topics")
+      Padding(
+        padding: EdgeInsets.only(left: 4.w, bottom: 12.w),
+        child: Shimmer.fromColors(
+          baseColor: AppColors.shimmerBaseColor,
+          highlightColor: AppColors.shimmerHighlightColor,
+          child: Container(
+            width: 200.w,
+            height: 22.sp,
+            decoration: BoxDecoration(
+              color: AppColors.shimmerBaseColor,
+              borderRadius: BorderRadius.circular(6.r),
+            ),
+          ),
+        ),
+      ),
+      _StoryCardShimmer(),
+      16.w.verticalSpace,
+      // "Add New Reading" button placeholder
       Shimmer.fromColors(
         baseColor: AppColors.shimmerBaseColor,
         highlightColor: AppColors.shimmerHighlightColor,
         child: Container(
           width: double.infinity,
-          height: 200.w,
+          padding: EdgeInsets.symmetric(vertical: 14.w),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16.r),
+            color: AppColors.shimmerBaseColor,
+            borderRadius: BorderRadius.circular(30.r),
           ),
         ),
       ),
+      16.h.verticalSpace,
+      _StoryCardShimmer(),
       16.w.verticalSpace,
-      Shimmer.fromColors(
-        baseColor: AppColors.shimmerBaseColor,
-        highlightColor: AppColors.shimmerHighlightColor,
-        child: Container(
-          width: 160.w,
-          height: 24.w,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-        ),
-      ),
-      12.w.verticalSpace,
-      LayoutBuilder(
-        builder: (context, constraints) {
-          const int crossAxisCount = 3;
-          final gap = 12.w;
-          final itemWidth =
-              (constraints.maxWidth - gap * (crossAxisCount - 1)) /
-              crossAxisCount;
-          return Wrap(
-            spacing: gap,
-            runSpacing: gap,
-            children: List.generate(
-              6,
-              (_) => Shimmer.fromColors(
-                baseColor: AppColors.shimmerBaseColor,
-                highlightColor: AppColors.shimmerHighlightColor,
-                child: Container(
-                  width: itemWidth,
-                  height: 200.w,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
+      _StoryCardShimmer(),
     ],
   );
+}
+
+/// Shimmer placeholder matching [StoryCard] layout (title + share area, description lines, date, See Stories button, thumbnail on right).
+class _StoryCardShimmer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: AppColors.shimmerBaseColor,
+      highlightColor: AppColors.shimmerHighlightColor,
+      child: Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title row (title + share icon area)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 20.sp,
+                          decoration: BoxDecoration(
+                            color: AppColors.shimmerBaseColor,
+                            borderRadius: BorderRadius.circular(6.r),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 30.w, height: 22.sp),
+                    ],
+                  ),
+                  8.w.verticalSpace,
+                  // Description lines
+                  Container(
+                    width: double.infinity,
+                    height: 14.sp,
+                    decoration: BoxDecoration(
+                      color: AppColors.shimmerBaseColor,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                  ),
+                  6.w.verticalSpace,
+                  Container(
+                    width: double.infinity,
+                    height: 14.sp,
+                    decoration: BoxDecoration(
+                      color: AppColors.shimmerBaseColor,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                  ),
+                  6.w.verticalSpace,
+                  Container(
+                    width: 120.w,
+                    height: 14.sp,
+                    decoration: BoxDecoration(
+                      color: AppColors.shimmerBaseColor,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                  ),
+                  8.w.verticalSpace,
+                  // Date line (calendar + text)
+                  Row(
+                    children: [
+                      Container(
+                        width: 12.sp,
+                        height: 12.sp,
+                        decoration: BoxDecoration(
+                          color: AppColors.shimmerBaseColor,
+                          borderRadius: BorderRadius.circular(2.r),
+                        ),
+                      ),
+                      4.w.horizontalSpace,
+                      Container(
+                        width: 100.w,
+                        height: 11.sp,
+                        decoration: BoxDecoration(
+                          color: AppColors.shimmerBaseColor,
+                          borderRadius: BorderRadius.circular(4.r),
+                        ),
+                      ),
+                    ],
+                  ),
+                  16.h.verticalSpace,
+                  // "See Stories" button
+                  Container(
+                    width: double.infinity,
+                    height: 48.h,
+                    decoration: BoxDecoration(
+                      color: AppColors.shimmerBaseColor,
+                      borderRadius: BorderRadius.circular(30.r),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            10.w.horizontalSpace,
+            // Thumbnail
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12.r),
+              child: Container(
+                width: 108.w,
+                height: 100.w,
+                color: AppColors.shimmerBaseColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// Featured main topic card (Netflix-style hero: large poster + title + tags + actions).
@@ -784,10 +889,7 @@ class _StoryCardState extends State<StoryCard> {
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          AppText(
-                            text: story.learningGoal,
-                            style: textStyle,
-                          ),
+                          AppText(text: story.learningGoal, style: textStyle),
                           GestureDetector(
                             onTap: () =>
                                 setState(() => _learningGoalExpanded = false),
@@ -833,7 +935,8 @@ class _StoryCardState extends State<StoryCard> {
                         ],
                       ),
 
-                if (story.createdOn.isNotEmpty || story.updatedAt.isNotEmpty) ...[
+                if (story.createdOn.isNotEmpty ||
+                    story.updatedAt.isNotEmpty) ...[
                   8.h.verticalSpace,
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -850,17 +953,21 @@ class _StoryCardState extends State<StoryCard> {
                             4.w.horizontalSpace,
                             Expanded(
                               child: AppText(
-                                text: "Created: ${DateFormatter.formatDateTime(story.createdOn)}",
+                                text:
+                                    "Created: ${DateFormatter.formatDateTime(story.createdOn)}",
                                 style: AppTextStyles.sfProDisplayRegular(
                                   fontSize: 11.sp,
-                                  color: AppColors.black.withValues(alpha: 0.55),
+                                  color: AppColors.black.withValues(
+                                    alpha: 0.55,
+                                  ),
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
                         ),
-                      if (story.createdOn.isNotEmpty && story.updatedAt.isNotEmpty)
+                      if (story.createdOn.isNotEmpty &&
+                          story.updatedAt.isNotEmpty)
                         4.w.verticalSpace,
                       // if (story.updatedAt.isNotEmpty)
                       //   Row(

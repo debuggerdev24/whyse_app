@@ -255,7 +255,7 @@ class _SearchScreenState extends State<SearchScreen> {
         }
         context.pushNamed(
           AppRoutes.randomStorySeriesScreen.name,
-          extra: result,
+          extra: {"progress": result, "searchTopic": topic.toJson()},
         );
       },
     );
@@ -395,12 +395,14 @@ class _SearchScreenState extends State<SearchScreen> {
                         visibleTopics.length,
                         (index) {
                           final topic = visibleTopics[index];
+                          final isInMyList = homeProvider
+                                  .topicIsInMyListOverride(topic.id) ??
+                              topic.isInMyList;
+                          final topicWithSync = topic.copyWith(isInMyList: isInMyList);
                           return SearchResultRowCard(
-                            topic: topic,
-                            onTap: () => _openTopicProgress(topic),
-                            onToggleMyList: topic.canManageMyList
-                                ? () => _handleTopicListToggle(topic)
-                                : null,
+                            topic: topicWithSync,
+                            onTap: () => _openTopicProgress(topicWithSync),
+                            onToggleMyList: () => _handleTopicListToggle(topicWithSync),
                             isToggleLoading: homeProvider
                                 .isTopicListToggling(topic.id),
                           );

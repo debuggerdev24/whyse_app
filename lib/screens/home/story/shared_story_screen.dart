@@ -12,32 +12,39 @@ import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/core/utils/date_formatter.dart';
+import 'package:redstreakapp/core/utils/de_bouncing.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/utils/share_helper.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
-import 'package:redstreakapp/providers/home/home_provider.dart';
-import 'package:redstreakapp/screens/browse/widgets/browse_widgets.dart';
 import 'package:redstreakapp/screens/dashboard.dart';
 import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
 import 'package:redstreakapp/models/home/story_models/story_idea_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_model.dart';
+import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/core/routes/app_router.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 
-class StoryReadingScreen extends StatefulWidget {
-  const StoryReadingScreen({super.key});
+/// Screen for viewing shared topic (from link). Uses getStoryByIdea (fetch only), no generate-from-idea API.
+class SharedStoryScreen extends StatefulWidget {
+  const SharedStoryScreen({super.key});
 
-  /// When true, [shouldAllowPop] returns true without showing the leave dialog. Used by other flows (e.g. created story).
+  /// When true, [shouldAllowPop] returns true without showing the leave dialog. Set by deep link handler.
   static bool skipLeaveDialogForDeepLink = false;
 
   /// When true, [shouldAllowPop] returns true without showing any dialog (e.g. user chose "Go to home").
   static bool skipLeaveDialogForHome = false;
 
-  /// Guard: first-story generation already scheduled this session (avoids setState during build).
+  /// Guard: first-story fetch already scheduled (avoids setState during build).
   static bool _firstStoryLoadScheduled = false;
+
+  /// Call before navigating to this screen from a deep link so the first story is always fetched (resets guard).
+  static void prepareForDeepLink() {
+    skipLeaveDialogForDeepLink = true;
+    _firstStoryLoadScheduled = false;
+  }
 
   /// Returns true to allow route pop, false to stay. Used by GoRoute.onExit (system back).
   static Future<bool> shouldAllowPop(BuildContext context) async {
@@ -49,40 +56,7 @@ class StoryReadingScreen extends StatefulWidget {
       skipLeaveDialogForHome = false;
       return true;
     }
-    final provider = context.read<StoryProvider>();
-    final fromTopicProgress = provider.storyIdea?.promptType == "progress";
-
-    if (fromTopicProgress) {
-      final quit = await showDialog<bool>(
-        context: context,
-        useRootNavigator: true,
-        builder: (dialogContext) {
-          return ZoomIn(
-            child: AlertDialog(
-              backgroundColor: AppColors.white,
-              title: Text(
-                "Are you sure you want to quit?",
-                style: AppTextStyles.textStyle20Regular,
-              ),
-              actions: [
-                StoryReadingScreen.myActionButtonTheme(
-                  onPressed: () => Navigator.of(dialogContext).pop(true),
-                  title: "Quit",
-                ),
-                StoryReadingScreen.myActionButtonTheme(
-                  onPressed: () => Navigator.of(dialogContext).pop(false),
-                  title: "Cancel",
-                ),
-              ],
-            ),
-          );
-        },
-      );
-      return quit ?? false;
-    }
-
-    // From "generating story" flow: quit and generate new, or cancel.
-    final action = await showDialog<String>(
+    final quit = await showDialog<bool>(
       context: context,
       useRootNavigator: true,
       builder: (dialogContext) {
@@ -90,16 +64,16 @@ class StoryReadingScreen extends StatefulWidget {
           child: AlertDialog(
             backgroundColor: AppColors.white,
             title: Text(
-              "Are you sure you want to quit the story and generate a new one?",
+              "Are you sure you want to quit?",
               style: AppTextStyles.textStyle20Regular,
             ),
             actions: [
-              StoryReadingScreen.myActionButtonTheme(
-                onPressed: () => Navigator.of(dialogContext).pop('generate'),
-                title: "Yes",
+              SharedStoryScreen.myActionButtonTheme(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                title: "Quit",
               ),
-              StoryReadingScreen.myActionButtonTheme(
-                onPressed: () => Navigator.of(dialogContext).pop('cancel'),
+              SharedStoryScreen.myActionButtonTheme(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
                 title: "Cancel",
               ),
             ],
@@ -107,22 +81,7 @@ class StoryReadingScreen extends StatefulWidget {
         );
       },
     );
-    if (action == 'generate' && context.mounted) {
-      final p = context.read<StoryProvider>();
-      final ideas = p.storyIdea?.storyIdeas ?? [];
-      final idx = p.currentStoryIndex;
-      if (idx >= 0 && idx < ideas.length) {
-        p.generateSingleStory(
-          storyIdeaId: ideas[idx].id,
-          context: context,
-          insertAtIndex: idx,
-          forceRegenerate: true,
-          showToast: true,
-          onSuccess: () {},
-        );
-      }
-    }
-    return false; // never pop from back in "generating" flow
+    return quit ?? false;
   }
 
   static Widget myActionButtonTheme({
@@ -144,13 +103,13 @@ class StoryReadingScreen extends StatefulWidget {
   }
 
   @override
-  State<StoryReadingScreen> createState() => _StoryReadingScreenState();
+  State<SharedStoryScreen> createState() => _SharedStoryScreenState();
 }
 
-class _StoryReadingScreenState extends State<StoryReadingScreen> {
+class _SharedStoryScreenState extends State<SharedStoryScreen> {
   @override
   void dispose() {
-    StoryReadingScreen._firstStoryLoadScheduled = false;
+    SharedStoryScreen._firstStoryLoadScheduled = false;
     super.dispose();
   }
 
@@ -158,29 +117,31 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
   Widget build(BuildContext context) {
     return AppLayout(
       body: SafeArea(
-        child: Consumer<StoryProvider>(
-          builder: (context, provider, child) {
+        child: Consumer2<StoryProvider, HomeProvider>(
+          builder: (context, provider, homeProvider, child) {
             Logger.info("${provider.lessonDuration}");
             if (!context.mounted) return const SizedBox.shrink();
             final storyIdea = provider.storyIdea;
             final isEmpty = storyIdea == null || storyIdea.storyIdeas.isEmpty;
             final ideas = storyIdea?.storyIdeas ?? [];
 
-            // First story: generate via API (generating flow only). Defer to avoid setState during build.
+            // First story: fetch by idea only (no generate API). Defer to avoid setState during build.
             if (!isEmpty &&
                 provider.stories.isEmpty &&
                 provider.currentStoryIndex == 0 &&
-                !StoryReadingScreen._firstStoryLoadScheduled) {
-              StoryReadingScreen._firstStoryLoadScheduled = true;
+                !SharedStoryScreen._firstStoryLoadScheduled) {
+              SharedStoryScreen._firstStoryLoadScheduled = true;
               final firstIdeaId = ideas.first.id;
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (!context.mounted) return;
-                provider.generateSingleStory(
-                  storyIdeaId: firstIdeaId,
+                homeProvider.getStoryByIdea(
                   context: context,
-                  onSuccess: () {},
-                  showToast: true,
-                  insertAtIndex: 0,
+                  storyIdea: firstIdeaId,
+                  fetchOnly: true,
+                  onSuccess: (story) {
+                    if (context.mounted) provider.addStoryFromHistory(story, 0);
+                  },
+                  onStoryNotGenerated: () {},
                 );
               });
             }
@@ -198,7 +159,8 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
                 : null;
             final shouldShowFullScreenShimmer =
                 provider.isGenerateStoryIdeasLoading ||
-                provider.isGenerateSingleStoryLoading;
+                provider.isGenerateSingleStoryLoading ||
+                homeProvider.isGettingStoryLoading;
 
             if (shouldShowFullScreenShimmer) {
               return Container(
@@ -210,9 +172,9 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
             }
             if (provider.generateStoryError != null && !isEmpty) {
               final currentIndex = provider.currentStoryIndex;
-              final currentIdeaId = currentIndex < ideas.length
-                  ? ideas[currentIndex].id
-                  : null;
+              final currentIdea = currentIndex < ideas.length ? ideas[currentIndex] : null;
+              final currentIdeaId = currentIdea?.id;
+              final isNotGenerated = currentIdea?.isGenerated == false;
               return Center(
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -226,7 +188,9 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
                       ),
                       20.h.verticalSpace,
                       AppText(
-                        text: "Something went wrong. Please try again.",
+                        text: isNotGenerated
+                            ? "Story not generated yet."
+                            : "Something went wrong. Please try again.",
                         textAlign: TextAlign.center,
                         style: AppTextStyles.sfProDisplayMedium(
                           fontSize: 16.sp,
@@ -237,15 +201,17 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: currentIdeaId == null
+                          onPressed: (currentIdeaId == null || isNotGenerated)
                               ? null
                               : () {
-                                  provider.generateSingleStory(
-                                    storyIdeaId: currentIdeaId,
+                                  homeProvider.getStoryByIdea(
                                     context: context,
-                                    onSuccess: () {},
-                                    showToast: true,
-                                    insertAtIndex: currentIndex,
+                                    storyIdea: currentIdeaId,
+                                    fetchOnly: true,
+                                    onSuccess: (story) {
+                                      if (context.mounted) provider.addStoryFromHistory(story, currentIndex);
+                                    },
+                                    onStoryNotGenerated: () {},
                                   );
                                 },
                           style: ElevatedButton.styleFrom(
@@ -358,9 +324,7 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
                               ],
                               if (storyIdea.topic.interests.isNotEmpty) ...[
                                 12.w.verticalSpace,
-                                _TagsSection(
-                                  interests: storyIdea.topic.interests,
-                                ),
+                                _TagsSection(interests: storyIdea.topic.interests),
                               ],
                               8.w.verticalSpace,
                               if (ideas.length > 1)
@@ -420,26 +384,41 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
                                   idea: ideas[index],
                                   index: index + 1,
                                   onTap: () {
-                                    provider.setCurrentStoryIndex = index;
-                                    if (index < provider.stories.length) {
-                                      // Already have story at this index, just viewing.
-                                    } else {
-                                      provider.generateSingleStory(
-                                        storyIdeaId: ideas[index].id,
-                                        context: context,
-                                        onSuccess: () {},
-                                        insertAtIndex: index,
-                                      );
+                                   deBouncer.run(() {
+                                     if (index < provider.stories.length) {
+                                      provider.setCurrentStoryIndex = index;
+                                      return;
                                     }
+                                    if (!ideas[index].isGenerated) {
+                                      AppToast.info(
+                                        context: context,
+                                        message: "Story not generated yet.",
+                                      );
+                                      return;
+                                    }
+                                    provider.setCurrentStoryIndex = index;
+                                    homeProvider.getStoryByIdea(
+                                      context: context,
+                                      storyIdea: ideas[index].id,
+                                      fetchOnly: true,
+                                      onSuccess: (story) {
+                                        if (context.mounted) provider.addStoryFromHistory(story, index);
+                                      },
+                                      onStoryNotGenerated: () {
+                                        if (context.mounted) AppToast.info(context: context, message: "Story not available yet.");
+                                      },
+                                    );
+                                   });
                                   },
                                   isGenerating:
-                                      provider.isGenerateSingleStoryLoading &&
+                                      homeProvider.isGettingStoryLoading &&
                                       index == provider.currentStoryIndex,
                                 );
                               }),
                             ),
                           ),
-                        20.w.verticalSpace
+
+                        24.w.verticalSpace
                       ],
                     ),
                   ),
@@ -449,53 +428,11 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
           },
         ),
       ),
-
     );
   }
 
+
   void showLeaveStoryConfirmation({required BuildContext context}) {
-    final provider = context.read<StoryProvider>();
-    final fromTopicProgress = provider.storyIdea?.promptType == "progress";
-
-    if (fromTopicProgress) {
-      showDialog(
-        context: context,
-        useRootNavigator: true,
-        builder: (dialogContext) {
-          return ZoomIn(
-            child: AlertDialog(
-              backgroundColor: AppColors.white,
-              title: Text(
-                "Are you sure you want to quit?",
-                style: AppTextStyles.textStyle20Regular,
-              ),
-              actions: [
-                StoryReadingScreen.myActionButtonTheme(
-                  onPressed: () {
-                    dialogContext.pop();
-                    if (!context.mounted) return;
-                    if (context.canPop()) {
-                      context.pop();
-                    } else {
-                      context.goNamed(AppRoutes.homeScreen.name);
-                      tabIndex.value = 0;
-                    }
-                  },
-                  title: "Quit",
-                ),
-                StoryReadingScreen.myActionButtonTheme(
-                  onPressed: () => dialogContext.pop(),
-                  title: "Cancel",
-                ),
-              ],
-            ),
-          );
-        },
-      );
-      return;
-    }
-
-    // From "generating story" flow: quit and generate new, or cancel.
     showDialog(
       context: context,
       useRootNavigator: true,
@@ -504,32 +441,24 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
           child: AlertDialog(
             backgroundColor: AppColors.white,
             title: Text(
-              "Are you sure you want to quit the story and generate a new one?",
+              "Are you sure you want to quit?",
               style: AppTextStyles.textStyle20Regular,
             ),
             actions: [
-              StoryReadingScreen.myActionButtonTheme(
+              SharedStoryScreen.myActionButtonTheme(
                 onPressed: () {
-                  Navigator.of(dialogContext).pop();
+                  dialogContext.pop();
                   if (!context.mounted) return;
-                  final p = context.read<StoryProvider>();
-                  final ideas = p.storyIdea?.storyIdeas ?? [];
-                  final idx = p.currentStoryIndex;
-                  if (idx >= 0 && idx < ideas.length) {
-                    // p.beginGenerateSingleStoryLoading();
-                    p.generateSingleStory(
-                      storyIdeaId: ideas[idx].id,
-                      context: context,
-                      insertAtIndex: idx,
-                      forceRegenerate: true,
-                      showToast: true,
-                      onSuccess: () {},
-                    );
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.goNamed(AppRoutes.homeScreen.name);
+                    tabIndex.value = 0;
                   }
                 },
-                title: "Yes",
+                title: "Quit",
               ),
-              StoryReadingScreen.myActionButtonTheme(
+              SharedStoryScreen.myActionButtonTheme(
                 onPressed: () => dialogContext.pop(),
                 title: "Cancel",
               ),
@@ -551,17 +480,17 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
             style: AppTextStyles.textStyle20Regular,
           ),
           actions: [
-            StoryReadingScreen.myActionButtonTheme(
+            SharedStoryScreen.myActionButtonTheme(
               onPressed: () {
                 dialogContext.pop();
-                StoryReadingScreen.skipLeaveDialogForHome = true;
+                SharedStoryScreen.skipLeaveDialogForHome = true;
                 context.goNamed(AppRoutes.homeScreen.name);
                 tabIndex.value = 0;
                 AppRouter.indexedStackNavigationShell?.goBranch(0);
               },
               title: "Yes",
             ),
-            StoryReadingScreen.myActionButtonTheme(
+            SharedStoryScreen.myActionButtonTheme(
               onPressed: () => dialogContext.pop(),
               title: "Cancel",
             ),
@@ -630,7 +559,8 @@ class _TagChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.w),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.w
+      ),
       decoration: BoxDecoration(
         color: AppColors.teal.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
@@ -700,6 +630,7 @@ class _StoryIdeaTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final showLock = !idea.isGenerated;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
@@ -709,20 +640,39 @@ class _StoryIdeaTile extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              //* Thumbnail
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8.r),
-                child: _imageUrl.isNotEmpty
-                    ? CachedNetworkImage(
-                        imageUrl: _imageUrl,
-                        width: 120.w,
-                        height: 80.h,
-                        fit: BoxFit.cover,
-                        placeholder: (_, __) => _buildThumbnailPlaceholder(),
-                        errorWidget: (_, __, ___) =>
-                            _buildThumbnailPlaceholder(),
-                      )
-                    : _buildThumbnailPlaceholder(),
+              //* Thumbnail (with lock overlay when not generated)
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8.r),
+                    child: _imageUrl.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: _imageUrl,
+                            width: 120.w,
+                            height: 80.h,
+                            fit: BoxFit.cover,
+                            placeholder: (_, __) => _buildThumbnailPlaceholder(),
+                            errorWidget: (_, __, ___) =>
+                                _buildThumbnailPlaceholder(),
+                          )
+                        : _buildThumbnailPlaceholder(),
+                  ),
+                  if (showLock)
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8.r),
+                          color: AppColors.black.withValues(alpha: 0.4),
+                        ),
+                        child: Icon(
+                          Icons.lock_outline_rounded,
+                          size: 28.sp,
+                          color: AppColors.white,
+                        ),
+                      ),
+                    ),
+                ],
               ),
               14.w.horizontalSpace,
 
@@ -745,14 +695,28 @@ class _StoryIdeaTile extends StatelessWidget {
                           ),
                         ),
                         Expanded(
-                          child: AppText(
-                            text: idea.title,
-                            style: AppTextStyles.sfProDisplaySemibold(
-                              fontSize: 15.sp,
-                              color: AppColors.black,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: AppText(
+                                  text: idea.title,
+                                  style: AppTextStyles.sfProDisplaySemibold(
+                                    fontSize: 15.sp,
+                                    color: AppColors.black,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (showLock) ...[
+                                6.w.horizontalSpace,
+                                Icon(
+                                  Icons.lock_outline_rounded,
+                                  size: 18.sp,
+                                  color: AppColors.black.withValues(alpha: 0.45),
+                                ),
+                              ],
+                            ],
                           ),
                         ),
                       ],
@@ -1069,12 +1033,8 @@ class _StoryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<StoryProvider>();
-    final homeProvider = context.watch<HomeProvider>();
     final isMarkingAsRead = provider.isMarkingStoryAsRead(storyIdeaId);
     final isMarkedAsRead = provider.isStoryMarkedAsRead(storyIdeaId);
-    final topicFromSearch = provider.topicFromSearch;
-    final showMyListToggle = topicFromSearch != null;
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1102,45 +1062,16 @@ class _StoryPage extends StatelessWidget {
                     child: AppText(
                       text: storyTitle,
                       style: AppTextStyles.sfProDisplayBold(
-                        height: 1.15,
                         fontSize: 22.sp,
                         color: AppColors.black,
                       ),
                     ),
                   ),
-                  if (showMyListToggle) ...[
-                    TopicListToggleButton(
-                      isInMyList: topicFromSearch.isInMyList,
-                      isLoading: homeProvider.isTopicListToggling(topicFromSearch.id),
-                      onTap: () async {
-                        
-                        final result = await homeProvider.toggleTopicList(
-                          topic: topicFromSearch,
-                          onFailed: (err) {
-                            if (context.mounted) {
-                              AppToast.error(context, err);
-                            }
-                          },
-                        );
-                        if (result != null && context.mounted) {
-                          provider.updateTopicFromSearchIsInMyList(
-                            result.isInMyList,
-                          );
-                          AppToast.success(
-                            context,
-                            result.isInMyList
-                                ? '"${result.topicTitle}" added to My List'
-                                : '"${result.topicTitle}" removed from My List',
-                          );
-                        }
-                      },
-                      compact: true,
-                    ),
-                    8.w.horizontalSpace,
-                  ],
-                  // 12.w.horizontalSpace,
+                  12.w.horizontalSpace,
                   GestureDetector(
-                    onTap: () => shareTopicLink(topicId: topicId),
+                    onTap: () => shareTopicLink(
+                      topicId: topicId,
+                    ),
                     behavior: HitTestBehavior.opaque,
                     child: Padding(
                       padding: EdgeInsets.all(4.w),
@@ -1188,7 +1119,7 @@ class _StoryPage extends StatelessWidget {
                   if (hasStartedReading)
                     _ReadingTimerText(remainingSeconds: remainingSeconds),
                 ],
-              ),
+              ),      
               10.w.verticalSpace,
               //* Page number
               AppText(
@@ -1380,6 +1311,7 @@ class _StoryPage extends StatelessWidget {
                       12.w.verticalSpace,
                       Row(
                         children: [
+                        
                           if (onPrevPage != null)
                             Expanded(
                               child: AppOutlinedButton(
@@ -1428,37 +1360,18 @@ class _StoryPage extends StatelessWidget {
                                       ),
                                       actions: [
                                         TextButton(
-                                          onPressed: () => Navigator.of(
-                                            dialogContext,
-                                          ).pop(false),
-                                          child: Text(
-                                            "Cancel",
-                                            style:
-                                                AppTextStyles.sfProDisplayRegular(
-                                                  fontSize: 17.sp,
-                                                  color: AppColors.black,
-                                                ),
-                                          ),
+                                          onPressed: () => Navigator.of(dialogContext).pop(false),
+                                          child: Text("Cancel", style: AppTextStyles.sfProDisplayRegular(fontSize: 17.sp, color: AppColors.black)),
                                         ),
                                         TextButton(
-                                          onPressed: () => Navigator.of(
-                                            dialogContext,
-                                          ).pop(true),
-                                          child: Text(
-                                            "Yes",
-                                            style:
-                                                AppTextStyles.sfProDisplayRegular(
-                                                  fontSize: 17.sp,
-                                                  color: AppColors.redColor,
-                                                ),
-                                          ),
+                                          onPressed: () => Navigator.of(dialogContext).pop(true),
+                                          child: Text("Yes", style: AppTextStyles.sfProDisplayRegular(fontSize: 17.sp, color: AppColors.redColor)),
                                         ),
                                       ],
                                     ),
                                   ),
                                 );
-                                if (confirm == true && context.mounted)
-                                  onStartQuiz();
+                                if (confirm == true && context.mounted) onStartQuiz();
                               },
                             ),
                           ),

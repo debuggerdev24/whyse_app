@@ -56,7 +56,7 @@ class BrowseTopicModel {
           : int.tryParse(json["noOfStoriesGenerated"]?.toString() ?? "") ?? 0,
       createdBy: json["createdBy"]?.toString() ?? "",
       isOwnTopic: json["isOwnTopic"] == true,
-      isInMyList: json["isInMyList"] == true,
+      isInMyList: json["isInMyList"],
       createdOn: DateTime.tryParse(json["createdOn"]?.toString() ?? ""),
       updatedAt: DateTime.tryParse(json["updatedAt"]?.toString() ?? ""),
       thumbnailUrl: json["thumbnailUrl"]?.toString() ?? "",
@@ -66,6 +66,25 @@ class BrowseTopicModel {
       thumbnailSearchEntity: json["thumbnailSearchEntity"]?.toString() ?? "",
     );
   }
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "topic": topic,
+        "learningGoal": learningGoal,
+        "type": type,
+        "interests": interests,
+        "noOfStories": noOfStories,
+        "noOfStoriesGenerated": noOfStoriesGenerated,
+        "createdBy": createdBy,
+        "isOwnTopic": isOwnTopic,
+        "isInMyList": isInMyList,
+        "createdOn": createdOn?.toIso8601String(),
+        "updatedAt": updatedAt?.toIso8601String(),
+        "thumbnailUrl": thumbnailUrl,
+        "thumbnailSource": thumbnailSource,
+        "thumbnailLicense": thumbnailLicense,
+        "thumbnailAttribution": thumbnailAttribution,
+        "thumbnailSearchEntity": thumbnailSearchEntity,
+      };
 
   String get creatorLabel {
     if (isOwnTopic) return "My Topic";
@@ -79,7 +98,7 @@ class BrowseTopicModel {
 
   bool get hasThumbnail => thumbnailUrl.trim().isNotEmpty;
 
-  bool get canManageMyList => createdBy.toLowerCase() != "self";
+  // bool get canManageMyList => createdBy.toLowerCase() != "self";
 
   BrowseTopicModel copyWith({
     String? id,

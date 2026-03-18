@@ -496,12 +496,122 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                             ),
                           ),
                         )
-                      else
+
+                      else if (isLastPage) ...[
+                        Row(
+                          children: [
+                            Expanded(
+                              child: AppOutlinedButton(
+                                onTap: hasPreviousPage
+                                    ? () {
+                                        _pageController.previousPage(
+                                          duration: const Duration(
+                                            milliseconds: 300,
+                                          ),
+                                          curve: Curves.easeInOut,
+                                        );
+                                      }
+                                    : null,
+                                borderColor: AppColors.teal,
+                                textStyle: AppTextStyles.sfProDisplaySemibold(
+                                  fontSize: 14.sp,
+                                  color: hasPreviousPage
+                                      ? AppColors.teal
+                                      : AppColors.teal.withValues(alpha: 0.35),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.arrow_back_ios_new_rounded,
+                                      size: 16.sp,
+                                      color: hasPreviousPage
+                                          ? AppColors.teal
+                                          : AppColors.teal.withValues(
+                                              alpha: 0.35,
+                                            ),
+                                    ),
+                                    4.w.horizontalSpace,
+                                    AppText(
+                                      text: "Previous",
+                                      style: AppTextStyles.sfProDisplaySemibold(
+                                        fontSize: 14.sp,
+                                        color: hasPreviousPage
+                                            ? AppColors.teal
+                                            : AppColors.teal.withValues(
+                                                alpha: 0.35,
+                                              ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            12.w.horizontalSpace,
+                            
+                            Expanded(
+                              child: AppFilledButton(
+                                backgroundColor: AppColors.teal,
+                                text: "Take Quiz",
+                                onTap: () async {
+                                  final confirm = await showDialog<bool>(
+                                    context: context,
+                                    useRootNavigator: true,
+                                    builder: (dialogContext) => ZoomIn(
+                                      child: AlertDialog(
+                                        backgroundColor: AppColors.white,
+                                        title: Text(
+                                          "Are you sure you want to start quiz or want to read?",
+                                          style: AppTextStyles.textStyle20Regular,
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.of(dialogContext).pop(false),
+                                            child: Text("Cancel", style: AppTextStyles.sfProDisplayRegular(fontSize: 17.sp, color: AppColors.black)),
+                                          ),
+                                          TextButton(
+                                            onPressed: () => Navigator.of(dialogContext).pop(true),
+                                            child: Text("Yes", style: AppTextStyles.sfProDisplayRegular(fontSize: 17.sp, color: AppColors.redColor)),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                  if (confirm == true && context.mounted) _openQuiz(activeStory);
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ] else
                         AppFilledButton(
                           backgroundColor: AppColors.teal,
                           text: "Take Quiz",
-                          onTap: () {
-                            _openQuiz(activeStory);
+                          onTap: () async {
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              useRootNavigator: true,
+                              builder: (dialogContext) => ZoomIn(
+                                child: AlertDialog(
+                                  backgroundColor: AppColors.white,
+                                  title: Text(
+                                    "Are you sure you want to start quiz or want to read?",
+                                    style: AppTextStyles.textStyle20Regular,
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.of(dialogContext).pop(false),
+                                      child: Text("Cancel", style: AppTextStyles.sfProDisplayRegular(fontSize: 17.sp, color: AppColors.black)),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => Navigator.of(dialogContext).pop(true),
+                                      child: Text("Yes", style: AppTextStyles.sfProDisplayRegular(fontSize: 17.sp, color: AppColors.redColor)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                            if (confirm == true && context.mounted) _openQuiz(activeStory);
                           },
                         ),
                       if (showReadingControls) ...[

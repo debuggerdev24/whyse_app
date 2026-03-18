@@ -12,10 +12,6 @@ import 'package:redstreakapp/providers/on_boarding/on_boarding_provider.dart';
 import 'package:redstreakapp/whyse_app.dart';
 import 'package:toastification/toastification.dart';
 
-// ---------------------------------------------------------------------------
-// Update (recent)
-// ---------------------------------------------------------------------------
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");

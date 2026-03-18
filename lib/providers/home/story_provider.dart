@@ -1,14 +1,20 @@
+import 'dart:async';
+
+import 'package:dartz/dartz.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
+import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/models/home/story_models/story_idea_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_summary_model.dart'
     hide StoryIdea;
+import 'package:redstreakapp/models/home/browse_topic_model.dart';
 import 'package:redstreakapp/models/home/topic_progress_model.dart';
 import '../../core/enums/app_enums.dart';
 import '../../core/helper/log_helper.dart';
 import '../../models/home/goal_model.dart';
 import '../../models/home/interest_model.dart';
+import '../../models/home/story_models/story_history_model.dart';
 import '../../models/home/story_models/story_model.dart';
 import '../../models/home/topic_model.dart';
 import '../../core/routes/app_router.dart';
@@ -48,6 +54,26 @@ class StoryProvider extends ChangeNotifier {
   final allowedDurations = {5, 10, 15, 20, 25, 30, 35, 40, 45};
   List<StoryModel> _stories = [];
   StoryIdeasModel? storyIdea;
+
+  /// Set when entering story from search; used to show add/remove from my list toggle.
+  BrowseTopicModel? _topicFromSearch;
+  BrowseTopicModel? get topicFromSearch => _topicFromSearch;
+
+  void setTopicFromSearch(BrowseTopicModel? topic) {
+    _topicFromSearch = topic;
+    notifyListeners();
+  }
+
+  void clearTopicFromSearch() {
+    _topicFromSearch = null;
+    notifyListeners();
+  }
+
+  void updateTopicFromSearchIsInMyList(bool isInMyList) {
+    if (_topicFromSearch == null) return;
+    _topicFromSearch = _topicFromSearch!.copyWith(isInMyList: isInMyList);
+    notifyListeners();
+  }
 
   List<StoryModel> get stories => _stories;
   final List<String> readingDurations = [
@@ -293,10 +319,9 @@ class StoryProvider extends ChangeNotifier {
   /// Set when createStory API fails (e.g. receiveTimeout). Cleared when retrying.
   String? generateStoryError;
   /// Call before navigating to story series so the destination shows shimmer immediately (no close icon).
-  void beginGenerateSingleStoryLoading() {
-    isGenerateSingleStoryLoading = true;
-    notifyListeners();
-  }
+  // void beginGenerateSingleStoryLoading() {
+    
+  // }
   final Set<String> _markingReadStoryIdeaIds = {};
   final Set<String> _markedReadStoryIdeaIds = {};
 
@@ -305,6 +330,8 @@ class StoryProvider extends ChangeNotifier {
 
   bool isStoryMarkedAsRead(String storyIdeaId) =>
       _markedReadStoryIdeaIds.contains(storyIdeaId);
+
+  static const Duration _generateStoryTimeout = Duration(minutes: 1);
 
   Future<void> generateSingleStory({
     required String storyIdeaId,
@@ -326,34 +353,87 @@ class StoryProvider extends ChangeNotifier {
     }
 
     final payload = <String, dynamic>{
-      // ...dataToSendCreateStory,
       "storyIdeaId": storyIdeaId,
       if (forceRegenerate) "forceRegenerate": true,
     };
-    final createResponse = await StoryApiService.instance.createStory(
-      data: payload,
-    );
 
-    createResponse.fold(
-      (l) {
-        generateStoryError = l.errorMsg;
+    void applyResult(Either<ApiException, Map<String, dynamic>> createResponse) {
+      createResponse.fold(
+        (l) {
+          generateStoryError = l.errorMsg;
+          isGenerateSingleStoryLoading = false;
+          notifyListeners();
+          if (context.mounted) AppToast.error(context, l.errorMsg);
+        },
+        (r) {
+          final data = r["data"];
+          if (data == null || data is! Map) {
+            generateStoryError = "Invalid story response";
+            isGenerateSingleStoryLoading = false;
+            notifyListeners();
+            return;
+          }
+          final story = StoryModel.fromJson(Map<String, dynamic>.from(data));
+          if (insertAtIndex != null && insertAtIndex >= 0) {
+            _addStoryAtIndex(story, insertAtIndex);
+            _currentStoryIndex = insertAtIndex;
+          } else {
+            _stories.add(story);
+          }
+          isGenerateSingleStoryLoading = false;
+          notifyListeners();
+          onSuccess();
+        },
+      );
+    }
+
+    try {
+      final createResponse = await StoryApiService.instance
+          .createStory(data: payload)
+          .timeout(
+        _generateStoryTimeout,
+        onTimeout: () => throw TimeoutException("Story generation took longer than 1 minute"),
+      );
+      applyResult(createResponse);
+    } on TimeoutException {
+      if (!context.mounted) return;
+      AppToast.info(
+        context: context,
+        message: "Taking too long, retrying...",
+      );
+      final retryPayload = <String, dynamic>{
+        "storyIdeaId": storyIdeaId,
+        "forceRegenerate": true,
+      };
+      try {
+        final retryResponse = await StoryApiService.instance
+            .createStory(data: retryPayload)
+            .timeout(
+              _generateStoryTimeout,
+              onTimeout: () => throw TimeoutException("Retry also timed out"),
+            );
+        applyResult(retryResponse);
+      } on TimeoutException {
+        generateStoryError = "Story generation is taking too long. Please try again.";
         isGenerateSingleStoryLoading = false;
         notifyListeners();
-        if (context.mounted) AppToast.error(context, l.errorMsg);
-      },
-      (r) {
-        final story = StoryModel.fromJson(r["data"]);
-        if (insertAtIndex != null && insertAtIndex >= 0) {
-          _addStoryAtIndex(story, insertAtIndex);
-          _currentStoryIndex = insertAtIndex;
-        } else {
-          _stories.add(story);
+        if (context.mounted) {
+          AppToast.error(context, "Story generation is taking too long. Please try again.");
         }
+      } catch (e, st) {
+        Logger.error("Generate story retry error: $e\n$st");
+        generateStoryError = e.toString();
         isGenerateSingleStoryLoading = false;
         notifyListeners();
-        onSuccess();
-      },
-    );
+        if (context.mounted) AppToast.error(context, "Something went wrong. Please try again.");
+      }
+    } catch (e, st) {
+      Logger.error("Generate story error: $e\n$st");
+      generateStoryError = e.toString();
+      isGenerateSingleStoryLoading = false;
+      notifyListeners();
+      if (context.mounted) AppToast.error(context, "Something went wrong. Please try again.");
+    }
   }
 
   static StoryModel _placeholderStory() => StoryModel(
@@ -426,6 +506,7 @@ class StoryProvider extends ChangeNotifier {
               thumbnailUrl: s.thumbnailUrl,
               createdAt: DateTime.tryParse(s.createdOn) ?? DateTime.now(),
               sequenceIndex: s.sequenceIndex,
+              isGenerated: s.isGenerated,
             ))
         .toList();
     storyIdea = StoryIdeasModel(
@@ -438,6 +519,31 @@ class StoryProvider extends ChangeNotifier {
     _stories = [];
     _currentStoryIndex = 0;
     _currentStoryPageIndex = 0;
+    notifyListeners();
+  }
+
+  /// Converts [StoryHistoryModel] (from getStoryByStoryIdea) to [StoryModel] and adds at [index]. Used when opening from deep link (fetch only).
+  void addStoryFromHistory(StoryHistoryModel h, int index) {
+    final m = StoryModel(
+      id: h.id,
+      title: h.title,
+      content: h.content,
+      image: null,
+      quiz: h.quiz,
+      pages: h.pages,
+      lessonDuration: h.lessonDuration,
+      readingTopic: h.metadata.readingTopic,
+      readingLevel: h.metadata.readingLevel,
+      readingSkillFocus: h.metadata.readingSkillFocus,
+      age: h.metadata.age,
+      language: h.metadata.language,
+      textType: h.metadata.textType,
+      tags: h.metadata.tags,
+      createdAt: h.createdAt.toIso8601String(),
+      updatedAt: h.updatedAt.toIso8601String(),
+    );
+    _addStoryAtIndex(m, index);
+    _currentStoryIndex = index;
     notifyListeners();
   }
 
@@ -482,7 +588,7 @@ class StoryProvider extends ChangeNotifier {
     return idx;
   }
 
-  bool isGenerateStoryIdeasLoading = true;
+  bool isGenerateStoryIdeasLoading = false;
 
   void setGenerateStoryIdeasLoading(bool value) {
     isGenerateStoryIdeasLoading = value;
@@ -562,6 +668,7 @@ class StoryProvider extends ChangeNotifier {
           return;
         }
 
+        //*the main story creation function
         final createResponse = await StoryApiService.instance.createStory(
           data: {"storyIdeaId": storyIdea!.storyIdeas.first.id},
         );
@@ -578,6 +685,7 @@ class StoryProvider extends ChangeNotifier {
             _currentStoryIndex = 0;
             _currentStoryPageIndex = 0;
             isGenerateStoryIdeasLoading = false;
+            
             notifyListeners();
           },
         );

@@ -41,8 +41,17 @@ class HomeProvider extends ChangeNotifier {
   int _storyIdeasCurrentPage = 1;
   final Set<String> _togglingTopicIds = <String>{};
 
+  /// Cache of isInMyList after toggle so search list and story screen stay in sync.
+  final Map<String, bool> _topicIsInMyListOverrides = <String, bool>{};
+
   bool isTopicListToggling(String topicId) =>
       _togglingTopicIds.contains(topicId);
+
+  /// Use when displaying topic in list; falls back to topic.isInMyList if not overridden.
+  bool? topicIsInMyListOverride(String topicId) =>
+      _topicIsInMyListOverrides.containsKey(topicId)
+          ? _topicIsInMyListOverrides[topicId]
+          : null;
 
   Future<void> getMyTopics() async {
     if (isTopicsLoading) return;
@@ -203,6 +212,7 @@ class HomeProvider extends ChangeNotifier {
     required String storyIdea,
     required Function(StoryHistoryModel story) onSuccess,
     void Function()? onStoryNotGenerated,
+    bool fetchOnly = false,
   }) async {
     story = null;
     isGettingStoryLoading = true;
@@ -225,7 +235,12 @@ class HomeProvider extends ChangeNotifier {
         final isGenerated =
             storyIdeaMap != null && storyIdeaMap["isGenerated"] == true;
         if (storyData == null || !isGenerated) {
-          
+          if (fetchOnly) {
+            isGettingStoryLoading = false;
+            notifyListeners();
+            onStoryNotGenerated?.call();
+            return;
+          }
           AppToast.info(
             context: context,
             durationSecond: 3,
@@ -301,7 +316,7 @@ class HomeProvider extends ChangeNotifier {
     required BrowseTopicModel topic,
     required Function(String error) onFailed,
   }) async {
-    if (!topic.canManageMyList || _togglingTopicIds.contains(topic.id)) {
+    if ( _togglingTopicIds.contains(topic.id)) {
       return null;
     }
 
@@ -330,6 +345,7 @@ class HomeProvider extends ChangeNotifier {
             : topic.topic;
 
         _togglingTopicIds.remove(topic.id);
+        _topicIsInMyListOverrides[topic.id] = isInMyList;
         notifyListeners();
         await getMyTopics();
 

@@ -10,6 +10,7 @@ import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/core/routes/app_router.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/screens/dashboard.dart';
+  import 'package:redstreakapp/models/home/browse_topic_model.dart';
 import 'package:redstreakapp/models/home/topic_progress_model.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/screens/home/story/story_series_screen.dart';
@@ -17,10 +18,12 @@ import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
 
 class RandomTopicReadingScreen extends StatefulWidget {
   final Map<String, dynamic> progressResponse;
+  final BrowseTopicModel? searchTopic;
 
   const RandomTopicReadingScreen({
     super.key,
     required this.progressResponse,
+    this.searchTopic,
   });
 
   @override
@@ -32,14 +35,27 @@ class _RandomTopicReadingScreenState extends State<RandomTopicReadingScreen> {
   TopicProgressModel? _progress;
   bool _dialogShown = false;
   bool? _choseResume;
+  
   bool _initialized = false;
   bool _providerSet = false;
   bool _firstStoryGenerationStarted = false;
+  StoryProvider? _storyProviderForDispose;
 
   @override
   void initState() {
     super.initState();
     _parseProgress();
+    if (widget.searchTopic != null) {
+      final p = context.read<StoryProvider>();
+      _storyProviderForDispose = p;
+      p.setTopicFromSearch(widget.searchTopic);
+    }
+  }
+
+  @override
+  void dispose() {
+    _storyProviderForDispose?.clearTopicFromSearch();
+    super.dispose();
   }
 
   void _parseProgress() {

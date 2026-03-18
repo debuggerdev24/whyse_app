@@ -367,30 +367,14 @@ class SearchResultRowCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Thumbnail
+
+              // Thumbnail (no overlay)
               ClipRRect(
                 borderRadius: BorderRadius.circular(12.r),
                 child: SizedBox(
                   width: 112.w,
                   height: 84.h,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      TopicArt(topic: topic),
-                      if (onToggleMyList != null)
-                        Positioned(
-                          top: 6.h,
-                          right: 6.w,
-                          child: TopicListToggleButton(
-                            isInMyList: topic.isInMyList,
-                            isLoading: isToggleLoading,
-                            onTap: onToggleMyList!,
-                            compact: true,
-                            darkMode: true,
-                          ),
-                        ),
-                    ],
-                  ),
+                  child: TopicArt(topic: topic),
                 ),
               ),
               14.w.horizontalSpace,
@@ -405,6 +389,17 @@ class SearchResultRowCard extends StatelessWidget {
                   ),
                 ),
               ),
+              // Add to list button (off the image, always visible)
+              if (onToggleMyList != null) ...[
+                10.w.horizontalSpace,
+                TopicListToggleButton(
+                  isInMyList: topic.isInMyList,
+                  isLoading: isToggleLoading,
+                  onTap: onToggleMyList!,
+                  compact: true,
+                  darkMode: false,
+                ),
+              ],
               12.w.horizontalSpace,
               // Play button
               Container(
@@ -631,6 +626,7 @@ class TopicListToggleButton extends StatelessWidget {
         : AppColors.black;
 
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: isLoading ? null : onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),

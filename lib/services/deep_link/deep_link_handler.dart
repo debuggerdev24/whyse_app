@@ -12,6 +12,7 @@ import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/core/routes/app_router.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
+import 'package:redstreakapp/screens/home/story/shared_story_screen.dart';
 import 'package:redstreakapp/screens/home/story/story_series_screen.dart';
 
 class DeepLinkHandler {
@@ -245,10 +246,9 @@ class DeepLinkHandler {
     }
 
     storyProvider.setFromStorySummary(summary);
-    StoryReadingScreen.skipLeaveDialogForDeepLink = true;
-    StoryReadingScreen.deepLinkNeedsFirstStory = true;
+    SharedStoryScreen.prepareForDeepLink();
 
     if (!context.mounted) return;
-    AppRouter.goRouter.goNamed(AppRoutes.storySeriesScreen.name);
+    AppRouter.goRouter.goNamed(AppRoutes.sharedStoryScreen.name);
   }
 }

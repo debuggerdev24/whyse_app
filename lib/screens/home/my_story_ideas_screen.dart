@@ -12,31 +12,31 @@ import 'package:redstreakapp/core/utils/share_helper.dart';
 import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
 import 'package:redstreakapp/screens/home/widgets/story_ideas_widget.dart';
 
-class CreatedStorySummaryScreen extends StatefulWidget {
-  const CreatedStorySummaryScreen({super.key, this.topicId});
+class MyStoryIdeasScreen extends StatefulWidget {
+  const MyStoryIdeasScreen({super.key});
 
-  final String? topicId;
+
 
   @override
-  State<CreatedStorySummaryScreen> createState() =>
-      _CreatedStorySummaryScreenState();
+  State<MyStoryIdeasScreen> createState() =>
+      _MyStoryIdeasScreenState();
 }
 
-class _CreatedStorySummaryScreenState extends State<CreatedStorySummaryScreen> {
+class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    final topicId = widget.topicId;
-    if (topicId != null && topicId.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          context.read<HomeProvider>().getStoryIdeasByTopicId(topicId: topicId);
-        }
-      });
-    }
+    // final topicId = widget.topicId;
+    // if (topicId != null && topicId.isNotEmpty) {
+    //   WidgetsBinding.instance.addPostFrameCallback((_) {
+    //     if (mounted) {
+    //       // context.read<HomeProvider>().
+    //     }
+    //   });
+    // }
   }
 
   @override

@@ -31,7 +31,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
   @override
   Widget build(BuildContext context) {
     final pr = context.read<StoryProvider>();
-    
+
     return PopScope(
       canPop: pr.isCreateStoryImageLoading || pr.isCreateStoryLoading
           ? false
@@ -43,10 +43,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
           child: Consumer<StoryProvider>(
             builder: (context, provider, child) {
               return Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 24.w,
-                  vertical: 20.h,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,7 +56,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                           context.pop();
                         },
                       ),
-              
+
                       /// TITLE
                       AppText(
                         text: "Set Your Daily Reading Goal",
@@ -68,9 +65,9 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                           fontSize: 32.sp,
                         ),
                       ),
-              
+
                       6.w.verticalSpace,
-              
+
                       AppText(
                         text:
                             "Choose how much time you want to read \neach day to keep your streak alive and earn rewards.",
@@ -79,9 +76,9 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                           color: AppColors.black.withValues(alpha: 0.8),
                         ),
                       ),
-              
+
                       18.h.verticalSpace,
-              
+
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Container(
@@ -97,11 +94,9 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                             children: List.generate(
                               provider.readingDurations.length,
                               (index) {
-                                final option =
-                                    provider.readingDurations[index];
+                                final option = provider.readingDurations[index];
                                 final isSelected =
-                                    provider.selectedReadingDuration ==
-                                    option;
+                                    provider.selectedReadingDuration == option;
                                 return Row(
                                   children: [
                                     _buildOptionButton(
@@ -113,8 +108,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                                       },
                                     ),
                                     if (index !=
-                                        provider.readingDurations.length -
-                                            1)
+                                        provider.readingDurations.length - 1)
                                       Container(
                                         width: 1.w,
                                         height: 22.h,
@@ -141,7 +135,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                           ],
                         ),
                       ],
-              
+
                       25.h.verticalSpace,
                       CustomDropdownField(
                         label: "Text Type",
@@ -179,39 +173,38 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                           provider.setNoOfStories = value!;
                         },
                       ),
-              
+
                       AppFilledButton(
                         margin: EdgeInsets.only(top: 20.h),
                         text: "Generate",
                         backgroundColor: AppColors.primaryColor,
-                            onTap: () {
-                              deBouncer.run(() async {
-                                provider.setGenerateStoryIdeasLoading(true);
-                                context.pushNamed(
-                                  AppRoutes.storySeriesScreen.name,
-                                );
-                                await provider.createStoryIdeas(
-                                  onFailed: (error) {
-                                    Logger.error(error);
-                                    AppToast.error(context, error);
-                                  },
-                                  context: context,
-                                  onlyIdeas: true,
-                                );
-                                if (context.mounted &&
-                                    provider.storyIdea != null &&
-                                    provider.storyIdea!.storyIdeas.isNotEmpty) {
-                                  provider.generateSingleStory(
-                                    storyIdeaId:
-                                        provider.storyIdea!.storyIdeas.first.id,
-                                    context: context,
-                                    insertAtIndex: 0,
-                                    onSuccess: () {},
-                                    showToast: true,
-                                  );
-                                }
-                              });
-                            },
+                        onTap: () {
+                          deBouncer.run(() async {
+                            provider.setGenerateStoryIdeasLoading(true);
+                            await provider.createStoryIdeas(
+                              onFailed: (error) {
+                                Logger.error(error);
+                                AppToast.error(context, error);
+                              },
+                              context: context,
+                              onlyIdeas: true,
+                            );
+                            context.pushNamed(AppRoutes.storySeriesScreen.name);
+
+                            // if (context.mounted &&
+                            //     provider.storyIdea != null &&
+                            //     provider.storyIdea!.storyIdeas.isNotEmpty) {
+                            //   provider.generateSingleStory(
+                            //     storyIdeaId:
+                            //         provider.storyIdea!.storyIdeas.first.id,
+                            //     context: context,
+                            //     insertAtIndex: 0,
+                            //     onSuccess: () {},
+                            //     showToast: true,
+                            //   );
+                            // }
+                          });
+                        },
                       ),
                     ],
                   ),

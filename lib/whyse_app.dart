@@ -51,8 +51,8 @@ class _WhyseAppState extends State<WhyseApp> {
     context.read<HomeProvider>().clearSessionData();
     context.read<StoryProvider>().clearSessionData();
 
-    final rootContext = AppRouter.rootNavigatorKey.currentContext ?? context;
-    AppToast.error(rootContext, "Session expired. Please log in again", 3);
+    // final rootContext = AppRouter.rootNavigatorKey.currentContext ?? context;
+    // AppToast.error(rootContext, "Session expired. Please log in again", 3);
     AppRouter.goRouter.goNamed(AppRoutes.loginScreen.name);
     SessionExpiryNotifier.instance.reset();
   }

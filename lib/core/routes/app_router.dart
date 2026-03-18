@@ -22,6 +22,7 @@ import 'package:redstreakapp/screens/home/story/custom_story_topic_screen.dart';
 import 'package:redstreakapp/screens/home/story/story_reading_screen.dart';
 import 'package:redstreakapp/screens/home/story/story_goals_screen.dart';
 import 'package:redstreakapp/screens/home/story/story_series_screen.dart';
+import 'package:redstreakapp/screens/home/story/shared_story_screen.dart';
 import 'package:redstreakapp/screens/home/story/random_story_series_screen.dart';
 import 'package:redstreakapp/screens/home/story/story_reading_goal_screen.dart';
 import 'package:redstreakapp/screens/home/story/story_topics_screen.dart';
@@ -29,6 +30,7 @@ import 'package:redstreakapp/screens/home/home_screen.dart';
 import 'package:redstreakapp/screens/home/quiz/quiz_completed_screen.dart';
 import 'package:redstreakapp/screens/home/quiz/quiz_question_screen.dart';
 import 'package:redstreakapp/screens/home/quiz/start_quiz_screen.dart';
+import 'package:redstreakapp/models/home/browse_topic_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_history_model.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/screens/practice/practice_zone.dart';
@@ -376,8 +378,7 @@ class AppRouter {
       path: AppRoutes.createdStorySummaryScreen.path,
       name: AppRoutes.createdStorySummaryScreen.name,
       builder: (context, state) {
-        final topicId = state.extra as String?;
-        return CreatedStorySummaryScreen(topicId: topicId);
+        return MyStoryIdeasScreen();
       },
     ),
     GoRoute(
@@ -398,11 +399,38 @@ class AppRouter {
       },
     ),
     GoRoute(
+      path: AppRoutes.sharedStoryScreen.path,
+      name: AppRoutes.sharedStoryScreen.name,
+      onExit: (context, state) async {
+        return SharedStoryScreen.shouldAllowPop(context);
+      },
+      builder: (context, state) {
+        return const SharedStoryScreen();
+      },
+    ),
+    GoRoute(
       path: AppRoutes.randomStorySeriesScreen.path,
       name: AppRoutes.randomStorySeriesScreen.name,
       builder: (context, state) {
-        final extra = state.extra as Map<String, dynamic>?;
-        return RandomTopicReadingScreen(progressResponse: extra ?? {});
+        final extra = state.extra;
+        final isFromSearch = extra is Map && extra["progress"] != null;
+        final progressResponse =
+            isFromSearch ? (extra["progress"] as Map<String, dynamic>) : (extra as Map<String, dynamic>? ?? {});
+        BrowseTopicModel? searchTopic;
+        if (isFromSearch && extra["searchTopic"] != null) {
+          try {
+            final map = extra["searchTopic"];
+            searchTopic = map is Map
+                ? BrowseTopicModel.fromJson(Map<String, dynamic>.from(map))
+                : null;
+          } catch (_) {
+            searchTopic = null;
+          }
+        }
+        return RandomTopicReadingScreen(
+          progressResponse: progressResponse,
+          searchTopic: searchTopic,
+        );
       },
     ),
   ];

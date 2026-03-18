@@ -37,6 +37,8 @@ class StoryIdea {
     dynamic thumbnailUrl;
     DateTime createdAt;
     int sequenceIndex;
+    /// When false, story is not generated yet (e.g. shared link). UI can show lock icon.
+    bool isGenerated;
 
     StoryIdea({
         required this.id,
@@ -45,6 +47,7 @@ class StoryIdea {
         required this.thumbnailUrl,
         required this.createdAt,
         required this.sequenceIndex,
+        this.isGenerated = true,
     });
 
     factory StoryIdea.fromJson(Map<String, dynamic> json) => StoryIdea(
@@ -54,6 +57,7 @@ class StoryIdea {
         thumbnailUrl: json["thumbnailUrl"],
         createdAt: DateTime.parse(json["createdAt"]),
         sequenceIndex: json["sequenceIndex"],
+        isGenerated: json["isGenerated"] != false,
     );
 
     Map<String, dynamic> toJson() => {
@@ -63,6 +67,7 @@ class StoryIdea {
         "thumbnailUrl": thumbnailUrl,
         "createdAt": createdAt.toIso8601String(),
         "sequenceIndex": sequenceIndex,
+        "isGenerated": isGenerated,
     };
 }
 
