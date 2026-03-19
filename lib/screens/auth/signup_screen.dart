@@ -54,12 +54,12 @@ class _SignupScreenState extends State<SignupScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        88.h.verticalSpace,
+                        88.w.verticalSpace,
 
                         Column(
                           children: [
                             SvgIcon(AppAssets.welcome),
-                            30.h.verticalSpace,
+                            30.w.verticalSpace,
 
                             AppText(
                               text: 'Welcome to',
@@ -76,20 +76,20 @@ class _SignupScreenState extends State<SignupScreen> {
                               ),
                             ),
 
-                            15.h.verticalSpace,
+                            15.w.verticalSpace,
                             AppText(
                               text: 'Read. Learn. Grow.',
                               style: AppTextStyles.textStyle16Semibold,
                             ),
 
-                            61.h.verticalSpace,
+                            61.w.verticalSpace,
 
                             AppTextField(
                               hintText: "Email",
                               controller: provider.signUpEmailCtr,
                             ),
 
-                            32.h.verticalSpace,
+                            32.w.verticalSpace,
 
                             AppFilledButton(
                               onTap: () async {
@@ -115,7 +115,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               text: "Sign up with Email",
                             ),
 
-                            17.h.verticalSpace,
+                            17.w.verticalSpace,
 
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -139,7 +139,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             ),
                           ],
                         ),
-                        // 32.h.verticalSpace,
+                        // 32.w.verticalSpace,
                         // Row(
                         //   children: [
                         //     Expanded(
@@ -162,7 +162,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         //   ],
                         // ),
                         //
-                        // 32.h.verticalSpace,
+                        // 32.w.verticalSpace,
                         //
                         // _socialButton(
                         //   label: "Sign up with Google",
@@ -351,7 +351,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         //   // },
                         // ),
                         //
-                        // 12.h.verticalSpace,
+                        // 12.w.verticalSpace,
                         //
                         // _socialButton(
                         //   label: "Sign up with Apple",

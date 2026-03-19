@@ -26,7 +26,7 @@ class VerifyOtpScreen extends StatelessWidget {
                   padding: EdgeInsetsGeometry.symmetric(horizontal: 24.w),
                   child: Column(
                     children: [
-                      26.h.verticalSpace,
+                      26.w.verticalSpace,
                       Text(
                         "Verify OTP",
                         style: AppTextStyles.sfProDisplayBold(
@@ -34,13 +34,13 @@ class VerifyOtpScreen extends StatelessWidget {
                           color: AppColors.teal,
                         ),
                       ),
-                      28.h.verticalSpace,
+                      28.w.verticalSpace,
                       Text(
                         textAlign: TextAlign.center,
                         "Enter the OTP received on your registered email address to reset password.",
                         style: AppTextStyles.textStyle16Semibold,
                       ),
-                      28.h.verticalSpace,
+                      28.w.verticalSpace,
                       Pinput(
                         controller: provider.otpCtr,
                         length: 4,

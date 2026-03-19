@@ -32,7 +32,7 @@ class ResetPasswordScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    26.h.verticalSpace,
+                    26.w.verticalSpace,
 
                     Text(
                       "Reset Password",
@@ -41,7 +41,7 @@ class ResetPasswordScreen extends StatelessWidget {
                         color: AppColors.teal,
                       ),
                     ),
-                    15.h.verticalSpace,
+                    15.w.verticalSpace,
                     Text(
                       textAlign: TextAlign.center,
                       "Enter new password below to reset.",
@@ -52,7 +52,7 @@ class ResetPasswordScreen extends StatelessWidget {
                       controller: provider.newPasswordCtr,
                       hintText: "New Password",
                     ),
-                    15.h.verticalSpace,
+                    15.w.verticalSpace,
                     AppTextField(
                       controller: provider.resetConfirmPasswordCtr,
                       hintText: "Confirm Password",

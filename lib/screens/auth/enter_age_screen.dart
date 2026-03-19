@@ -120,7 +120,7 @@ class _AgeEntryScreenState extends State<AgeEntryScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       CustomBackButton(margin: EdgeInsets.only(top: 20.h)),
-                      // 30.h.verticalSpace,
+                      // 30.w.verticalSpace,
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -132,14 +132,14 @@ class _AgeEntryScreenState extends State<AgeEntryScreen> {
                             ),
                           ),
 
-                          12.h.verticalSpace,
+                          12.w.verticalSpace,
 
                           AppText(
                             text: 'Enter your Date of Birth',
                             style: AppTextStyles.textStyle16Medium,
                           ),
 
-                          18.h.verticalSpace,
+                          18.w.verticalSpace,
 
                           // Cupertino Picker Trigger
                           GestureDetector(

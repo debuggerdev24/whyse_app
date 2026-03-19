@@ -94,7 +94,7 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                       style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
                     ),
                   ),
-                  10.h.verticalSpace,
+                  10.w.verticalSpace,
                   AppText(
                     text:
                         "Choose what motivates you most — we'll help you reach it.",
@@ -104,7 +104,7 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                     ),
                   ),
 
-                  18.h.verticalSpace,
+                  18.w.verticalSpace,
 
                   if (provider.isGetGoalsLoading)
                     const Expanded(child: ApiLoadingIndicator())
@@ -112,7 +112,7 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                     Expanded(
                       child: ListView.separated(
                         itemCount: provider.goalsList.length, //+1
-                        separatorBuilder: (context, index) => 8.h.verticalSpace,
+                        separatorBuilder: (context, index) => 8.w.verticalSpace,
                         itemBuilder: (context, index) {
                           // todo Custom Goal Field at the bottom
                           // if (index == goalsList.length) {

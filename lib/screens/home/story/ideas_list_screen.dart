@@ -100,7 +100,7 @@ class IdeasListScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              20.h.verticalSpace,
+              20.w.verticalSpace,
             ],
           ),
         ),
@@ -119,7 +119,7 @@ class IdeasListScreen extends StatelessWidget {
           ),
         ),
         SliverToBoxAdapter(
-          child: 24.h.verticalSpace,
+          child: 24.w.verticalSpace,
         ),
       ],
     );
@@ -140,7 +140,6 @@ class IdeasListScreen extends StatelessWidget {
       provider.generateSingleStory(
         storyIdeaId: idea.id,
         context: context,
-        onSuccess: () {},
         showToast: true,
         insertAtIndex: listIndex,
       );
@@ -210,13 +209,13 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            80.h.verticalSpace,
+            80.w.verticalSpace,
             Icon(
               Icons.auto_stories_outlined,
               size: 72.sp,
               color: AppColors.black.withValues(alpha: 0.2),
             ),
-            24.h.verticalSpace,
+            24.w.verticalSpace,
             AppText(
               text: "No story ideas yet",
               textAlign: TextAlign.center,
@@ -225,7 +224,7 @@ class _EmptyState extends StatelessWidget {
                 color: AppColors.black,
               ),
             ),
-            12.h.verticalSpace,
+            12.w.verticalSpace,
             AppText(
               text: "Go back and generate ideas from your reading goal.",
               textAlign: TextAlign.center,
@@ -234,7 +233,7 @@ class _EmptyState extends StatelessWidget {
                 color: AppColors.black.withValues(alpha: 0.6),
               ),
             ),
-            32.h.verticalSpace,
+            32.w.verticalSpace,
             TextButton(
               onPressed: onBack,
               child: Text(
@@ -377,7 +376,7 @@ class _IdeaCard extends StatelessWidget {
                         color: AppColors.black,
                       ),
                     ),
-                    8.h.verticalSpace,
+                    8.w.verticalSpace,
                     if (idea.description.trim().isNotEmpty)
                       AppText(
                         text: idea.description,
@@ -388,7 +387,7 @@ class _IdeaCard extends StatelessWidget {
                           color: AppColors.black.withValues(alpha: 0.65),
                         ),
                       ),
-                    8.h.verticalSpace,
+                    8.w.verticalSpace,
                     AppText(
                       text: DateFormatter.formatDateTimeFrom(idea.createdAt),
                       style: AppTextStyles.sfProDisplayRegular(
@@ -396,7 +395,7 @@ class _IdeaCard extends StatelessWidget {
                         color: AppColors.black.withValues(alpha: 0.45),
                       ),
                     ),
-                    14.h.verticalSpace,
+                    14.w.verticalSpace,
                     Material(
                       color: AppColors.teal,
                       borderRadius: BorderRadius.circular(999),

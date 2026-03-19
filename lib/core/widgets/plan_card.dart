@@ -55,7 +55,7 @@ class PlanCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      22.h.verticalSpace,
+                      22.w.verticalSpace,
 
                       // TITLE
                       Padding(
@@ -66,7 +66,7 @@ class PlanCard extends StatelessWidget {
                         ),
                       ),
 
-                      10.h.verticalSpace,
+                      10.w.verticalSpace,
                       ...features.map((e) => _bullet(e)),
                       Align(
                         alignment: Alignment.bottomRight,

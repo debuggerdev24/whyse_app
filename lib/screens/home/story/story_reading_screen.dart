@@ -615,7 +615,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                           },
                         ),
                       if (showReadingControls) ...[
-                        12.h.verticalSpace,
+                        12.w.verticalSpace,
                         Row(
                           children: [
                             Expanded(

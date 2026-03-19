@@ -6,20 +6,15 @@ import 'package:shimmer/shimmer.dart';
 class HomeSectionShimmer {
   HomeSectionShimmer._();
 
-  /// Shimmer placeholder matching the [_StoryCard] layout in
-  /// [CreatedStorySummaryScreen]. Shows 3 skeleton cards by default.
   static Widget storyIdeaShimmer({int itemCount = 3}) {
     return ListView.separated(
       padding: EdgeInsets.only(bottom: 10.h),
       itemCount: itemCount,
-      separatorBuilder: (_, __) => 18.h.verticalSpace,
+      separatorBuilder: (_, __) => 18.w.verticalSpace,
       itemBuilder: (_, __) => const _StoryIdeaCardShimmer(),
     );
   }
 
-  /// Shimmer for [StoryIdeasScreen] (generate_story) when opening from
-  /// reading goal Generate flow. Matches hero + topic title + chips +
-  /// Start Reading/More + Ideas tab + idea tiles list.
   static Widget generateStoryIdeasScreenShimmer() {
     return const _GenerateStoryIdeasScreenShimmer();
   }
@@ -32,8 +27,6 @@ class HomeSectionShimmer {
     return const StoryIdeasLoadMoreShimmer();
   }
 
-  /// Shimmer for [IdeasListScreen] while story ideas are loading.
-  /// Matches: header "Pick a story" + topic + list of idea cards (image 16:9, title, description, button).
   static Widget ideasListScreenShimmer() {
     return const _IdeasListScreenShimmer();
   }
@@ -45,9 +38,7 @@ class HomeSectionShimmer {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          //* Hero image area with "Page x of y" badge overlay (matches story_reading_screen)
           _ShimmerBox(width: double.infinity, height: 280.w, radius: 0),
-          //* Title, meta, page label, body, and single Start button (matches real UI)
           Padding(
             padding: EdgeInsets.fromLTRB(16.w, 14.w, 16.w, 0),
             child: Column(
@@ -89,7 +80,6 @@ class HomeSectionShimmer {
   }
 }
 
-/// Shimmer for IdeasListScreen: header + topic + idea card placeholders.
 class _IdeasListScreenShimmer extends StatelessWidget {
   const _IdeasListScreenShimmer();
 
@@ -102,19 +92,19 @@ class _IdeasListScreenShimmer extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            16.h.verticalSpace,
+            16.w.verticalSpace,
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: _ShimmerBox(width: 180.w, height: 26.h, radius: 6),
             ),
-            8.h.verticalSpace,
+            8.w.verticalSpace,
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: _ShimmerBox(width: 140.w, height: 18.h, radius: 5),
             ),
-            20.h.verticalSpace,
+            20.w.verticalSpace,
             ...List.generate(4, (_) => const _IdeasListCardShimmer()),
-            24.h.verticalSpace,
+            24.w.verticalSpace,
           ],
         ),
       ),
@@ -150,11 +140,11 @@ class _IdeasListCardShimmer extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _ShimmerBox(width: double.infinity, height: 20.h, radius: 6),
-                  8.h.verticalSpace,
+                  8.w.verticalSpace,
                   _ShimmerBox(width: double.infinity, height: 14.h, radius: 4),
-                  8.h.verticalSpace,
+                  8.w.verticalSpace,
                   _ShimmerBox(width: 120.w, height: 12.h, radius: 4),
-                  14.h.verticalSpace,
+                  14.w.verticalSpace,
                   _ShimmerBox(width: double.infinity, height: 44.h, radius: 999),
                 ],
               ),
@@ -166,7 +156,6 @@ class _IdeasListCardShimmer extends StatelessWidget {
   }
 }
 
-/// Shimmer layout matching generate_story StoryIdeasScreen UI.
 class _GenerateStoryIdeasScreenShimmer extends StatelessWidget {
   const _GenerateStoryIdeasScreenShimmer();
 
@@ -179,98 +168,42 @@ class _GenerateStoryIdeasScreenShimmer extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Hero placeholder (story viewer area)
-            _ShimmerBox(width: double.infinity, height: 240.w, radius: 0),
-            //* Story content block below hero: title + meta + nav buttons
-            Container(
-              padding: EdgeInsets.fromLTRB(20.w, 12.w, 20.w, 12.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _ShimmerBox(width: 150.w, height: 26.h, radius: 6),
-                  SizedBox(height: 8.w),
-                  Row(
-                    children: [
-                      _ShimmerBox(width: 100.w, height: 20.h, radius: 5),
-                      const Spacer(),
-                      _ShimmerBox(width: 80.w, height: 20.h, radius: 5),
-                    ],
-                  ),
-                  SizedBox(height: 20.w),
-                  _ShimmerBox(width: double.infinity, height: 16.h, radius: 4),
-                  SizedBox(height: 6.w),
-                  _ShimmerBox(width: double.infinity, height: 16.h, radius: 4),
-                  SizedBox(height: 6.w),
-                  _ShimmerBox(width: 200.w, height: 16.h, radius: 4),
-                  SizedBox(height: 20.w),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _ShimmerBox(
-                          width: double.infinity,
-                          height: 44.h,
-                          radius: 12,
-                        ),
-                      ),
-                      SizedBox(width: 16.w),
-                      Expanded(
-                        child: _ShimmerBox(
-                          width: double.infinity,
-                          height: 44.h,
-                          radius: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            10.w.verticalSpace,
-            //* Topic section: title, chips, Start Reading/More, Ideas tab
+            _ShimmerBox(width: double.infinity, height: 280.w, radius: 0),
+            16.w.verticalSpace,
             Padding(
-              padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 16.w),
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _ShimmerBox(width: 180.w, height: 24.h, radius: 6),
+                  _ShimmerBox(width: 220.w, height: 28.h, radius: 8),
+                  12.w.verticalSpace,
+                  _ShimmerBox(width: double.infinity, height: 14.h, radius: 6),
                   8.w.verticalSpace,
+                  _ShimmerBox(width: 260.w, height: 14.h, radius: 6),
+                  16.w.verticalSpace,
                   Row(
                     children: [
-                      _ShimmerBox(width: 72.w, height: 16.h, radius: 5),
-                      SizedBox(width: 12.w),
-                      _ShimmerBox(width: 64.w, height: 16.h, radius: 5),
+                      _ShimmerBox(width: 72.w, height: 28.h, radius: 8),
+                      12.w.horizontalSpace,
+                      _ShimmerBox(width: 64.w, height: 28.h, radius: 8),
                     ],
                   ),
-                  SizedBox(height: 20.w),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _ShimmerBox(
-                          width: double.infinity,
-                          height: 48.h,
-                          radius: 12,
-                        ),
-                      ),
-                      SizedBox(width: 12.w),
-                      _ShimmerBox(width: 90.w, height: 44.h, radius: 12),
-                    ],
-                  ),
-                  SizedBox(height: 20.h),
-                  _ShimmerBox(width: 56.w, height: 20.h, radius: 4),
+                  20.w.verticalSpace,
+                  _ShimmerBox(width: 56.w, height: 18.h, radius: 6),
+                  12.w.verticalSpace,
                 ],
               ),
             ),
-            // Idea tiles list
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Column(
                 children: List.generate(
-                  4,
+                  3,
                   (_) => const _StoryIdeaTileShimmer(),
                 ),
               ),
             ),
-            SizedBox(height: 24.w),
+            24.w.verticalSpace,
           ],
         ),
       ),
@@ -278,7 +211,6 @@ class _GenerateStoryIdeasScreenShimmer extends StatelessWidget {
   }
 }
 
-/// Single idea row: thumb + content + icons (matches _StoryIdeaTile).
 class _StoryIdeaTileShimmer extends StatelessWidget {
   const _StoryIdeaTileShimmer();
 
@@ -342,26 +274,20 @@ class _StoryIdeaCardShimmer extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Title: "Title: The Secret Garden Quest" ──
-            // Full-width, teal, ~20sp bold
             _ShimmerBox(width: double.infinity, height: 20.h, radius: 6),
 
-            8.h.verticalSpace,
+            8.w.verticalSpace,
 
-            // ── "Description:" label ──
             _ShimmerBox(width: 100.w, height: 14.h, radius: 5),
 
-            6.h.verticalSpace,
+            6.w.verticalSpace,
 
-            // ── Description body line 1 (full width) ──
             _ShimmerBox(width: double.infinity, height: 14.h, radius: 5),
-            5.h.verticalSpace,
+            5.w.verticalSpace,
 
-            // ── Description body line 2 (full width) ──
             _ShimmerBox(width: double.infinity, height: 14.h, radius: 5),
-            5.h.verticalSpace,
+            5.w.verticalSpace,
 
-            // ── Description body line 3 + "See more" stub ──
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -373,14 +299,12 @@ class _StoryIdeaCardShimmer extends StatelessWidget {
                   ),
                 ),
                 10.w.horizontalSpace,
-                // "See more" pill
                 _ShimmerBox(width: 58.w, height: 14.h, radius: 5),
               ],
             ),
 
-            12.h.verticalSpace,
+            12.w.verticalSpace,
 
-            // ── Created row: clock icon + date text ──
             Row(
               children: [
                 _ShimmerBox(width: 13.w, height: 13.w, radius: 13),
@@ -389,9 +313,8 @@ class _StoryIdeaCardShimmer extends StatelessWidget {
               ],
             ),
 
-            5.h.verticalSpace,
+            5.w.verticalSpace,
 
-            // ── Updated row: pencil icon + date text ──
             Row(
               children: [
                 _ShimmerBox(width: 13.w, height: 13.w, radius: 4),
@@ -400,9 +323,8 @@ class _StoryIdeaCardShimmer extends StatelessWidget {
               ],
             ),
 
-            16.h.verticalSpace,
+            16.w.verticalSpace,
 
-            // ── "Read Story" button ──
             _ShimmerBox(width: double.infinity, height: 46.h, radius: 30),
           ],
         ),
@@ -451,7 +373,7 @@ class StoryIdeasLoadingShimmer extends StatelessWidget {
             borderRadius: 28,
           ),
         ),
-        20.h.verticalSpace,
+        20.w.verticalSpace,
         ...List.generate(3, (_) => const StoryIdeaEpisodeShimmer()),
       ],
     );
@@ -500,25 +422,25 @@ class StoryIdeaEpisodeShimmer extends StatelessWidget {
                   height: 12,
                   borderRadius: 999,
                 ),
-                10.h.verticalSpace,
+                10.w.verticalSpace,
                 const _StoryIdeasShimmerBox(
                   width: double.infinity,
                   height: 16,
                   borderRadius: 6,
                 ),
-                6.h.verticalSpace,
+                6.w.verticalSpace,
                 const _StoryIdeasShimmerBox(
                   width: double.infinity,
                   height: 14,
                   borderRadius: 6,
                 ),
-                6.h.verticalSpace,
+                6.w.verticalSpace,
                 const _StoryIdeasShimmerBox(
                   width: 170,
                   height: 14,
                   borderRadius: 6,
                 ),
-                10.h.verticalSpace,
+                10.w.verticalSpace,
                 Row(
                   children: const [
                     Expanded(
@@ -530,7 +452,7 @@ class StoryIdeaEpisodeShimmer extends StatelessWidget {
                     ),
                   ],
                 ),
-                12.h.verticalSpace,
+                12.w.verticalSpace,
                 const _StoryIdeasShimmerBox(
                   width: double.infinity,
                   height: 42,

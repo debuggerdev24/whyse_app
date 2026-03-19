@@ -6,18 +6,15 @@ import 'package:shimmer/shimmer.dart';
 class SearchSectionShimmer {
   SearchSectionShimmer._();
 
-  /// Single row shimmer for [SearchScreen] vertical list (thumbnail + title + play).
   static Widget searchResultRowShimmer() {
     return const SearchResultRowShimmer();
   }
 
-  /// Vertical list of row shimmers for [SearchScreen] loading state.
   static Widget searchResultListShimmer({int itemCount = 8}) {
     return SearchResultListShimmer(itemCount: itemCount);
   }
 }
 
-/// Single row shimmer for [SearchScreen] vertical list (thumbnail + title + play).
 class SearchResultRowShimmer extends StatelessWidget {
   const SearchResultRowShimmer({super.key});
 
@@ -73,7 +70,6 @@ class SearchResultRowShimmer extends StatelessWidget {
   }
 }
 
-/// Vertical list of [SearchResultRowShimmer] for [SearchScreen] loading state.
 class SearchResultListShimmer extends StatelessWidget {
   final int itemCount;
 

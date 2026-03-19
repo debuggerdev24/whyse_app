@@ -65,7 +65,7 @@ class _StoryInterestsScreenState extends State<StoryInterestsScreen> {
                     text: "Pick Your Interests",
                     style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
                   ),
-                  10.h.verticalSpace,
+                  10.w.verticalSpace,
                   AppText(
                     text:
                         "Choose topics you love to personalize your reading journey.",
@@ -75,7 +75,7 @@ class _StoryInterestsScreenState extends State<StoryInterestsScreen> {
                     ),
                   ),
 
-                  20.h.verticalSpace,
+                  20.w.verticalSpace,
 
                   // Loading State
                   if (provider.isGetInterestLoading)
@@ -120,7 +120,7 @@ class _StoryInterestsScreenState extends State<StoryInterestsScreen> {
                           //     },
                           //   ),
                           // ),
-                          // 16.h.verticalSpace,
+                          // 16.w.verticalSpace,
                         ],
                       ),
                     ),

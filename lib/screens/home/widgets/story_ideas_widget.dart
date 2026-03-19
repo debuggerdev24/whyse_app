@@ -68,7 +68,7 @@ class StoryIdeasHeaderCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                78.h.verticalSpace,
+                78.w.verticalSpace,
                 AppText(
                   text: summary.topicTitle,
                   maxLines: 2,
@@ -79,7 +79,7 @@ class StoryIdeasHeaderCard extends StatelessWidget {
                     color: AppColors.white,
                   ),
                 ),
-                10.h.verticalSpace,
+                10.w.verticalSpace,
                 if (summary.topicLearningGoal.trim().isNotEmpty)
                   AppText(
                     text: summary.topicLearningGoal,
@@ -91,7 +91,7 @@ class StoryIdeasHeaderCard extends StatelessWidget {
                       color: AppColors.white.withValues(alpha: 0.84),
                     ),
                   ),
-                14.h.verticalSpace,
+                14.w.verticalSpace,
                 Wrap(
                   spacing: 10.w,
                   runSpacing: 10.h,
@@ -223,7 +223,7 @@ class StoryIdeaEpisodeCard extends StatelessWidget {
                     // ],
                   ],
                 ),
-                8.h.verticalSpace,
+                8.w.verticalSpace,
                 AppText(
                   text: story.description,
                   maxLines: 4,
@@ -234,7 +234,7 @@ class StoryIdeaEpisodeCard extends StatelessWidget {
                     color: AppColors.black.withValues(alpha: 0.68),
                   ),
                 ),
-                10.h.verticalSpace,
+                10.w.verticalSpace,
                 Wrap(
                   spacing: 8.w,
                   runSpacing: 8.h,
@@ -250,7 +250,7 @@ class StoryIdeaEpisodeCard extends StatelessWidget {
                       ),
                   ],
                 ),
-                14.h.verticalSpace,
+                14.w.verticalSpace,
                 GestureDetector(
                   onTap: onTap,
                   child: Container(
@@ -297,12 +297,12 @@ class StoryIdeasEmptyState extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.theaters_outlined, color: AppColors.teal, size: 42.sp),
-            14.h.verticalSpace,
+            14.w.verticalSpace,
             AppText(
               text: "No stories found",
               style: AppTextStyles.sfProDisplayBold(fontSize: 20.sp),
             ),
-            8.h.verticalSpace,
+            8.w.verticalSpace,
             AppText(
               text:
                   "Story ideas will appear here once this topic has episodes ready to read.",

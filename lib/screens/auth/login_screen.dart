@@ -54,10 +54,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      88.h.verticalSpace,
+                      88.w.verticalSpace,
 
                       SvgIcon(AppAssets.welcome),
-                      36.h.verticalSpace,
+                      36.w.verticalSpace,
 
                       AppText(
                         text: 'Welcome Back!',
@@ -66,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: AppColors.teal,
                         ),
                       ),
-                      15.h.verticalSpace,
+                      15.w.verticalSpace,
                       AppText(
                         text: 'Login',
                         style: AppTextStyles.sfProDisplaySemibold(
@@ -75,8 +75,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
 
-                      37.h.verticalSpace,
-                      8.h.verticalSpace,
+                      37.w.verticalSpace,
+                      8.w.verticalSpace,
 
                       Column(
                         children: [
@@ -84,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             hintText: "Email",
                             controller: provider.loginEmailCtr,
                           ),
-                          8.h.verticalSpace,
+                          8.w.verticalSpace,
                           AppTextField(
                             hintText: "Password",
                             obSecureText: _isObscure,
@@ -111,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                           ),
-                          10.h.verticalSpace,
+                          10.w.verticalSpace,
 
                           Align(
                             alignment: AlignmentGeometry.centerRight,
@@ -129,7 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                           ),
-                          32.h.verticalSpace,
+                          32.w.verticalSpace,
                           AppFilledButton(
                             onTap: () async {
                               await provider.loginWithMail(context: context);
@@ -141,7 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-                      17.h.verticalSpace,
+                      17.w.verticalSpace,
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -162,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                       ),
 
-                      36.h.verticalSpace,
+                      36.w.verticalSpace,
 
                       // ---- OR Divider ----
                       Row(
@@ -187,7 +187,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                       ),
 
-                      32.h.verticalSpace,
+                      32.w.verticalSpace,
                       //todo Google Login
                       _socialButton(
                         label: "Login with Google",
@@ -309,7 +309,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                       ),
 
-                      8.h.verticalSpace,
+                      8.w.verticalSpace,
                       //todo Apple Login
                       _socialButton(
                         label: "Login with Apple",

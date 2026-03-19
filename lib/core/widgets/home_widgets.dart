@@ -169,7 +169,7 @@ class CalendarStrip extends StatelessWidget {
           text: "Weekly goal",
           style: AppTextStyles.sfProDisplayBold(fontSize: 12.sp),
         ),
-        5.h.verticalSpace,
+        5.w.verticalSpace,
 
         SizedBox(
           width: double.infinity,
@@ -208,7 +208,7 @@ class CalendarStrip extends StatelessWidget {
           ),
         ),
 
-        6.h.verticalSpace,
+        6.w.verticalSpace,
         AppText(
           text: "1/3 Exercises",
           style: AppTextStyles.sfProDisplayBold(
@@ -216,7 +216,7 @@ class CalendarStrip extends StatelessWidget {
             color: AppColors.black.withValues(alpha: 0.4),
           ),
         ),
-        13.h.verticalSpace,
+        13.w.verticalSpace,
         SizedBox(
           height: 76.h,
           child: ListView.separated(
@@ -257,7 +257,7 @@ class CalendarStrip extends StatelessWidget {
                           ),
                         ),
                       ),
-                    6.h.verticalSpace,
+                    6.w.verticalSpace,
                     AppText(
                       text: days[index],
                       style: AppTextStyles.sfProDisplaySemibold(
@@ -265,7 +265,7 @@ class CalendarStrip extends StatelessWidget {
                         color: AppColors.black.withValues(alpha: 0.4),
                       ),
                     ),
-                    4.h.verticalSpace,
+                    4.w.verticalSpace,
                     AppText(
                       text: dates[index],
                       style: AppTextStyles.sfProDisplayBold(
@@ -274,7 +274,7 @@ class CalendarStrip extends StatelessWidget {
                       ),
                     ),
                     if (isChecked) ...[
-                      4.h.verticalSpace,
+                      4.w.verticalSpace,
                       SvgPicture.asset(AppAssets.check1),
                     ],
                   ],
@@ -326,7 +326,7 @@ class BottomStatsCard extends StatelessWidget {
               ),
             ],
           ),
-          12.h.verticalSpace,
+          12.w.verticalSpace,
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -345,7 +345,7 @@ class BottomStatsCard extends StatelessWidget {
               ),
             ],
           ),
-          8.h.verticalSpace,
+          8.w.verticalSpace,
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(

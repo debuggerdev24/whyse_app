@@ -18,7 +18,7 @@ import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/utils/share_helper.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
-import 'package:redstreakapp/screens/browse/widgets/browse_widgets.dart';
+import 'package:redstreakapp/screens/search/widgets/search_widgets.dart';
 import 'package:redstreakapp/screens/dashboard.dart';
 import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
 import 'package:redstreakapp/models/home/story_models/story_idea_model.dart';
@@ -28,13 +28,25 @@ import 'package:redstreakapp/core/routes/app_router.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 
 class StoryReadingScreen extends StatefulWidget {
-  const StoryReadingScreen({super.key});
+  final bool showAddToMyList;
+  final bool showResumeStartOverChoice;
+  final int? topicProgressPercent;
 
-  /// When true, [shouldAllowPop] returns true without showing the leave dialog. Used by other flows (e.g. created story).
+  const StoryReadingScreen({
+    super.key,
+    this.showAddToMyList = false,
+    this.showResumeStartOverChoice = true,
+    this.topicProgressPercent,
+  });
+
+  // When true, [shouldAllowPop] returns true without showing the leave dialog. Used by other flows (e.g. created story).
   static bool skipLeaveDialogForDeepLink = false;
 
-  /// When true, [shouldAllowPop] returns true without showing any dialog (e.g. user chose "Go to home").
+  // When true, [shouldAllowPop] returns true without showing any dialog (e.g. user chose "Go to home").
   static bool skipLeaveDialogForHome = false;
+
+  /// When true, PopScope allows pop without showing quit dialog (e.g. user chose "Generate entire series again").
+  static bool skipLeaveDialogForRegenerate = false;
 
   /// Guard: first-story generation already scheduled this session (avoids setState during build).
   static bool _firstStoryLoadScheduled = false;
@@ -81,8 +93,7 @@ class StoryReadingScreen extends StatefulWidget {
       return quit ?? false;
     }
 
-    // From "generating story" flow: quit and generate new, or cancel.
-    final action = await showDialog<String>(
+    final quit = await showDialog<bool>(
       context: context,
       useRootNavigator: true,
       builder: (dialogContext) {
@@ -90,16 +101,16 @@ class StoryReadingScreen extends StatefulWidget {
           child: AlertDialog(
             backgroundColor: AppColors.white,
             title: Text(
-              "Are you sure you want to quit the story and generate a new one?",
+              "Are you sure you want to quit?",
               style: AppTextStyles.textStyle20Regular,
             ),
             actions: [
               StoryReadingScreen.myActionButtonTheme(
-                onPressed: () => Navigator.of(dialogContext).pop('generate'),
-                title: "Yes",
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                title: "Quit",
               ),
               StoryReadingScreen.myActionButtonTheme(
-                onPressed: () => Navigator.of(dialogContext).pop('cancel'),
+                onPressed: () => Navigator.of(dialogContext).pop(false),
                 title: "Cancel",
               ),
             ],
@@ -107,22 +118,7 @@ class StoryReadingScreen extends StatefulWidget {
         );
       },
     );
-    if (action == 'generate' && context.mounted) {
-      final p = context.read<StoryProvider>();
-      final ideas = p.storyIdea?.storyIdeas ?? [];
-      final idx = p.currentStoryIndex;
-      if (idx >= 0 && idx < ideas.length) {
-        p.generateSingleStory(
-          storyIdeaId: ideas[idx].id,
-          context: context,
-          insertAtIndex: idx,
-          forceRegenerate: true,
-          showToast: true,
-          onSuccess: () {},
-        );
-      }
-    }
-    return false; // never pop from back in "generating" flow
+    return quit ?? false;
   }
 
   static Widget myActionButtonTheme({
@@ -151,248 +147,365 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
   @override
   void dispose() {
     StoryReadingScreen._firstStoryLoadScheduled = false;
+    StoryReadingScreen.skipLeaveDialogForRegenerate = false;
     super.dispose();
+  }
+
+  void _showRegenerateOptionsSheet({
+    required BuildContext context,
+    required StoryProvider provider,
+    required String currentStoryIdeaId,
+    required int currentIndex,
+  }) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: EdgeInsets.fromLTRB(
+          24.w,
+          20.h,
+          24.w,
+          24.h + MediaQuery.paddingOf(ctx).bottom,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundColor,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppText(
+              text: "Regenerate",
+              style: AppTextStyles.sfProDisplayBold(
+                fontSize: 20.sp,
+                color: AppColors.black,
+              ),
+            ),
+            16.w.verticalSpace,
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: AppText(
+                text: "Generate this again",
+                style: AppTextStyles.sfProDisplayMedium(
+                  fontSize: 16.sp,
+                  color: AppColors.black,
+                ),
+              ),
+              subtitle: AppText(
+                text: "Regenerate the current story only",
+                style: AppTextStyles.sfProDisplayRegular(
+                  fontSize: 13.sp,
+                  color: AppColors.black.withValues(alpha: 0.6),
+                ),
+              ),
+              onTap: () {
+                ctx.pop();
+                provider.generateSingleStory(
+                  storyIdeaId: currentStoryIdeaId,
+                  context: context,
+                  insertAtIndex: currentIndex,
+                  showToast: true,
+                );
+              },
+            ),
+            8.w.verticalSpace,
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: AppText(
+                text: "Generate the entire series again",
+                style: AppTextStyles.sfProDisplayMedium(
+                  fontSize: 16.sp,
+                  color: AppColors.black,
+                ),
+              ),
+              subtitle: AppText(
+                text: "Start from goals and create a new series",
+                style: AppTextStyles.sfProDisplayRegular(
+                  fontSize: 13.sp,
+                  color: AppColors.black.withValues(alpha: 0.6),
+                ),
+              ),
+              onTap: () {
+                ctx.pop();
+                final topicId = provider.storyIdea?.topic.id;
+                if (topicId == null || topicId.isEmpty) return;
+                provider.setForceRegenerateTopicId(topicId);
+                provider.clearStoryFields();
+                StoryReadingScreen.skipLeaveDialogForRegenerate = true;
+                setState(() {});
+                // if (context.mounted) {
+                context.pushNamed(AppRoutes.storyGoalsScreen.name);
+                // }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return AppLayout(
-      body: SafeArea(
-        child: Consumer<StoryProvider>(
-          builder: (context, provider, child) {
-            Logger.info("${provider.lessonDuration}");
-            if (!context.mounted) return const SizedBox.shrink();
-            final storyIdea = provider.storyIdea;
-            final isEmpty = storyIdea == null || storyIdea.storyIdeas.isEmpty;
-            final ideas = storyIdea?.storyIdeas ?? [];
+    return PopScope(
+      // canPop: StoryReadingScreen.skipLeaveDialogForRegenerate,
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        showLeaveStoryConfirmation(context: context);
+      },
+      child: AppLayout(
+        body: SafeArea(
+          child: Consumer<StoryProvider>(
+            builder: (context, provider, child) {
+              Logger.info("${provider.lessonDuration}");
+              if (!context.mounted) return const SizedBox.shrink();
+              final storyIdea = provider.storyIdea;
+              final isEmpty = storyIdea == null || storyIdea.storyIdeas.isEmpty;
+              final ideas = storyIdea?.storyIdeas ?? [];
 
-            // First story: generate via API (generating flow only). Defer to avoid setState during build.
-            if (!isEmpty &&
-                provider.stories.isEmpty &&
-                provider.currentStoryIndex == 0 &&
-                !StoryReadingScreen._firstStoryLoadScheduled) {
-              StoryReadingScreen._firstStoryLoadScheduled = true;
-              final firstIdeaId = ideas.first.id;
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (!context.mounted) return;
-                provider.generateSingleStory(
-                  storyIdeaId: firstIdeaId,
-                  context: context,
-                  onSuccess: () {},
-                  showToast: true,
-                  insertAtIndex: 0,
-                );
-              });
-            }
-            final topicTitle =
-                (storyIdea != null && storyIdea.topic.title.isNotEmpty)
-                ? storyIdea.topic.title
-                : "Your Story Ideas";
+              // First story: generate via API (generating flow only). Defer to avoid setState during build.
+              if (!isEmpty &&
+                  provider.stories.isEmpty &&
+                  provider.currentStoryIndex == 0 &&
+                  !StoryReadingScreen._firstStoryLoadScheduled) {
+                StoryReadingScreen._firstStoryLoadScheduled = true;
+                final firstIdeaId = ideas.first.id;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!context.mounted) return;
+                  provider.generateSingleStory(
+                    storyIdeaId: firstIdeaId,
+                    context: context,
+                    showToast: true,
+                    insertAtIndex: 0,
+                  );
+                });
+              }
+              final topicTitle =
+                  (storyIdea != null && storyIdea.topic.title.isNotEmpty)
+                  ? storyIdea.topic.title
+                  : "Your Story Ideas";
 
-            final hasStory =
-                provider.stories.isNotEmpty &&
-                provider.currentStoryIndex < provider.stories.length &&
-                provider.stories[provider.currentStoryIndex].pages.isNotEmpty;
-            final story = hasStory
-                ? provider.stories[provider.currentStoryIndex]
-                : null;
-            final shouldShowFullScreenShimmer =
-                provider.isGenerateStoryIdeasLoading ||
-                provider.isGenerateSingleStoryLoading;
-
-            if (shouldShowFullScreenShimmer) {
-              return Container(
-                width: double.infinity,
-                height: double.infinity,
-                color: AppColors.backgroundColor,
-                child: HomeSectionShimmer.generateStoryIdeasScreenShimmer(),
-              );
-            }
-            if (provider.generateStoryError != null && !isEmpty) {
-              final currentIndex = provider.currentStoryIndex;
-              final currentIdeaId = currentIndex < ideas.length
-                  ? ideas[currentIndex].id
+              final hasStory =
+                  provider.stories.isNotEmpty &&
+                  provider.currentStoryIndex < provider.stories.length &&
+                  provider.stories[provider.currentStoryIndex].pages.isNotEmpty;
+              final story = hasStory
+                  ? provider.stories[provider.currentStoryIndex]
                   : null;
-              return Center(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24.w),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline_rounded,
-                        size: 56.sp,
-                        color: AppColors.black.withValues(alpha: 0.4),
-                      ),
-                      20.h.verticalSpace,
-                      AppText(
-                        text: "Something went wrong. Please try again.",
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.sfProDisplayMedium(
-                          fontSize: 16.sp,
-                          color: AppColors.black.withValues(alpha: 0.8),
-                        ),
-                      ),
-                      28.w.verticalSpace,
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: currentIdeaId == null
-                              ? null
-                              : () {
-                                  provider.generateSingleStory(
-                                    storyIdeaId: currentIdeaId,
-                                    context: context,
-                                    onSuccess: () {},
-                                    showToast: true,
-                                    insertAtIndex: currentIndex,
-                                  );
-                                },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.teal,
-                            foregroundColor: AppColors.white,
-                            padding: EdgeInsets.symmetric(vertical: 14.h),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.r),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: Text(
-                            "Try again",
-                            style: AppTextStyles.sfProDisplaySemibold(
-                              fontSize: 16.sp,
-                              color: AppColors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-            if (isEmpty) {
-              return Center(
-                child: AppText(
-                  text: "No story ideas yet",
-                  style: AppTextStyles.sfProDisplayMedium(
-                    fontSize: 16.sp,
-                    color: AppColors.black.withValues(alpha: 0.6),
-                  ),
-                ),
-              );
-            }
+              final shouldShowFullScreenShimmer =
+                  provider.isGenerateStoryIdeasLoading ||
+                  provider.isGenerateSingleStoryLoading;
 
-            final durationMinutes = story != null
-                ? (story.lessonDuration ?? provider.lessonDuration).clamp(
-                    1,
-                    999,
-                  )
-                : 0;
-            final displayMins = story != null
-                ? (story.lessonDuration ?? provider.lessonDuration)
-                : provider.lessonDuration;
-            final displayMinsLabel = displayMins > 0 ? displayMins : 5;
-            final currentStoryIdeaId = provider.currentStoryIndex < ideas.length
-                ? ideas[provider.currentStoryIndex].id
-                : '';
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    key: ValueKey('story_index_${provider.currentStoryIndex}'),
+              if (shouldShowFullScreenShimmer) {
+                return Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  color: AppColors.backgroundColor,
+                  child: HomeSectionShimmer.generateStoryIdeasScreenShimmer(),
+                );
+              }
+              if (provider.generateStoryError != null && !isEmpty) {
+                final currentIndex = provider.currentStoryIndex;
+                final currentIdeaId = currentIndex < ideas.length
+                    ? ideas[currentIndex].id
+                    : null;
+                return Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24.w),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        if (story != null)
-                          _StoryViewer(
-                            story: story,
-                            storyIdeaId: currentStoryIdeaId,
-                            topicId: storyIdea.topic.id,
-                            topicTitle: storyIdea.topic.title,
-                            lessonDuration: durationMinutes > 0
-                                ? durationMinutes
-                                : provider.lessonDuration,
-                            onCloseStory: () {
-                              showLeaveStoryConfirmation(context: context);
-                            },
-                            onHome: () {
-                              showHomeConfirmation(context: context);
-                            },
+                        Icon(
+                          Icons.error_outline_rounded,
+                          size: 56.sp,
+                          color: AppColors.black.withValues(alpha: 0.4),
+                        ),
+                        20.w.verticalSpace,
+                        AppText(
+                          text: "Something went wrong. Please try again.",
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.sfProDisplayMedium(
+                            fontSize: 16.sp,
+                            color: AppColors.black.withValues(alpha: 0.8),
                           ),
-
-                        // else if ()
-                        //   HomeSectionShimmer.storyReadingScreenShimmer(),
-                        16.w.verticalSpace,
-                        //* Story Ideas list
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(24.w, 0.w, 24.w, 16.w),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              AppText(
-                                text: topicTitle,
-                                style: AppTextStyles.sfProDisplayBold(
-                                  fontSize: 24.sp,
-                                  height: 0,
-                                  color: AppColors.black,
-                                ),
+                        ),
+                        28.w.verticalSpace,
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: currentIdeaId == null
+                                ? null
+                                : () {
+                                    provider.generateSingleStory(
+                                      storyIdeaId: currentIdeaId,
+                                      context: context,
+                                      showToast: true,
+                                      insertAtIndex: currentIndex,
+                                    );
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.teal,
+                              foregroundColor: AppColors.white,
+                              padding: EdgeInsets.symmetric(vertical: 14.h),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.r),
                               ),
-                              if (storyIdea.topic.learningGoal
-                                  .trim()
-                                  .isNotEmpty) ...[
-                                8.w.verticalSpace,
-                                AppText(
-                                  text: storyIdea.topic.learningGoal,
-                                  style: AppTextStyles.sfProDisplayRegular(
-                                    fontSize: 14.sp,
-                                    color: AppColors.black.withValues(
-                                      alpha: 0.7,
-                                    ),
+                              elevation: 0,
+                            ),
+                            child: Text(
+                              "Try again",
+                              style: AppTextStyles.sfProDisplaySemibold(
+                                fontSize: 16.sp,
+                                color: AppColors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+              if (isEmpty) {
+                return Center(
+                  child: AppText(
+                    text: "No story ideas yet",
+                    style: AppTextStyles.sfProDisplayMedium(
+                      fontSize: 16.sp,
+                      color: AppColors.black.withValues(alpha: 0.6),
+                    ),
+                  ),
+                );
+              }
+
+              final durationMinutes = story != null
+                  ? (story.lessonDuration ?? provider.lessonDuration).clamp(
+                      1,
+                      999,
+                    )
+                  : 0;
+              final displayMins = story != null
+                  ? (story.lessonDuration ?? provider.lessonDuration)
+                  : provider.lessonDuration;
+              final displayMinsLabel = displayMins > 0 ? displayMins : 5;
+              final currentStoryIdeaId =
+                  provider.currentStoryIndex < ideas.length
+                  ? ideas[provider.currentStoryIndex].id
+                  : '';
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      key: ValueKey(
+                        'story_index_${provider.currentStoryIndex}',
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (story != null)
+                            _StoryViewer(
+                              key: widget.showAddToMyList
+                                  ? const ValueKey<String>(
+                                      'random_flow_story_viewer',
+                                    )
+                                  : null,
+                              story: story,
+                              storyIdeaId: currentStoryIdeaId,
+                              topicId: storyIdea.topic.id,
+                              topicTitle: storyIdea.topic.title,
+                              lessonDuration: durationMinutes > 0
+                                  ? durationMinutes
+                                  : provider.lessonDuration,
+                              showAddToMyList: widget.showAddToMyList,
+                              showResumeStartOverChoice:
+                                  widget.showResumeStartOverChoice,
+                              onStartOver:
+                                  widget.showAddToMyList &&
+                                      widget.showResumeStartOverChoice
+                                  ? () {
+                                      provider.fetchSingleStoryByIdea(
+                                        storyIdeaId: currentStoryIdeaId,
+                                        context: context,
+
+                                        insertAtIndex:
+                                            provider.currentStoryIndex,
+                                        showToast: true,
+                                      );
+                                    }
+                                  : null,
+                              onCloseStory: () {
+                                showLeaveStoryConfirmation(context: context);
+                              },
+                              onHome: () {
+                                showHomeConfirmation(context: context);
+                              },
+                              onRegenerateTap: !widget.showAddToMyList
+                                  ? () {
+                                      _showRegenerateOptionsSheet(
+                                        context: context,
+                                        provider: provider,
+                                        currentStoryIdeaId: currentStoryIdeaId,
+                                        currentIndex:
+                                            provider.currentStoryIndex,
+                                      );
+                                    }
+                                  : null,
+                            ),
+
+                          16.w.verticalSpace,
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(24.w, 0.w, 24.w, 20.w),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (widget.topicProgressPercent != null) ...[
+                                  _TopicProgressBar(
+                                    percent: (widget.topicProgressPercent!)
+                                        .clamp(0, 100),
+                                    segmentCount: ideas.length > 0
+                                        ? ideas.length
+                                        : 1,
                                   ),
-                                  maxLines: 4,
-                                  overflow: TextOverflow.ellipsis,
+                                  16.w.verticalSpace,
+                                ],
+                                AppText(
+                                  text: topicTitle,
+                                  style: AppTextStyles.sfProDisplayBold(
+                                    fontSize: 24.sp,
+                                    height: 0,
+                                    color: AppColors.black,
+                                  ),
                                 ),
-                              ],
-                              if (storyIdea.topic.interests.isNotEmpty) ...[
-                                12.w.verticalSpace,
-                                _TagsSection(
-                                  interests: storyIdea.topic.interests,
-                                ),
-                              ],
-                              8.w.verticalSpace,
-                              if (ideas.length > 1)
-                                Row(
-                                  children: [
-                                    _MetaChip(
-                                      icon: Icons.menu_book_outlined,
-                                      label: "${ideas.length} Ideas",
-                                    ),
-                                    // if (ideas.length > 1)
-                                    12.w.horizontalSpace,
-                                    _MetaChip(
-                                      icon: Icons.access_time,
-                                      label: "$displayMinsLabel mins",
-                                    ),
-                                  ],
-                                ),
-                              if (ideas.length > 1) ...[
-                                9.w.verticalSpace,
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: EdgeInsets.only(bottom: 4.h),
-                                      decoration: BoxDecoration(
-                                        border: Border(
-                                          bottom: BorderSide(
-                                            color: AppColors.teal,
-                                            width: 2,
-                                          ),
-                                        ),
+                                if (storyIdea.topic.learningGoal
+                                    .trim()
+                                    .isNotEmpty) ...[
+                                  8.w.verticalSpace,
+                                  AppText(
+                                    text: storyIdea.topic.learningGoal,
+                                    style: AppTextStyles.sfProDisplayRegular(
+                                      fontSize: 14.sp,
+                                      color: AppColors.black.withValues(
+                                        alpha: 0.7,
                                       ),
-                                      child: AppText(
+                                    ),
+                                    maxLines: 4,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                                if (storyIdea.topic.interests.isNotEmpty) ...[
+                                  10.w.verticalSpace,
+                                  _TagsSection(
+                                    interests: storyIdea.topic.interests,
+                                  ),
+                                ],
+                                if (ideas.length > 1) ...[
+                                  14.w.verticalSpace,
+                                  Row(
+                                    children: [
+                                      AppText(
                                         text: "Ideas",
                                         style:
                                             AppTextStyles.sfProDisplaySemibold(
@@ -400,56 +513,87 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
                                               color: AppColors.teal,
                                             ),
                                       ),
-                                    ),
-                                  ],
-                                ),
+                                      8.w.horizontalSpace,
+                                      AppText(
+                                        text: "·",
+                                        style:
+                                            AppTextStyles.sfProDisplayRegular(
+                                              fontSize: 14.sp,
+                                              color: AppColors.black.withValues(
+                                                alpha: 0.4,
+                                              ),
+                                            ),
+                                      ),
+                                      8.w.horizontalSpace,
+                                      AppText(
+                                        text: "${ideas.length} stories",
+                                        style:
+                                            AppTextStyles.sfProDisplayRegular(
+                                              fontSize: 14.sp,
+                                              color: AppColors.black.withValues(
+                                                alpha: 0.6,
+                                              ),
+                                            ),
+                                      ),
+                                      12.w.horizontalSpace,
+                                      AppText(
+                                        text: "$displayMinsLabel mins",
+                                        style:
+                                            AppTextStyles.sfProDisplayRegular(
+                                              fontSize: 14.sp,
+                                              color: AppColors.black.withValues(
+                                                alpha: 0.6,
+                                              ),
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ],
-                            ],
-                          ),
-                        ),
-                        if (ideas.length > 1)
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 24.w),
-                            child: Column(
-                              children: List.generate(ideas.length, (index) {
-                                if (index == provider.currentStoryIndex) {
-                                  return const SizedBox.shrink();
-                                }
-                                return _StoryIdeaTile(
-                                  topicImageUrl: storyIdea.topic.thumbnailUrl,
-                                  idea: ideas[index],
-                                  index: index + 1,
-                                  onTap: () {
-                                    provider.setCurrentStoryIndex = index;
-                                    if (index < provider.stories.length) {
-                                      // Already have story at this index, just viewing.
-                                    } else {
-                                      provider.generateSingleStory(
-                                        storyIdeaId: ideas[index].id,
-                                        context: context,
-                                        onSuccess: () {},
-                                        insertAtIndex: index,
-                                      );
-                                    }
-                                  },
-                                  isGenerating:
-                                      provider.isGenerateSingleStoryLoading &&
-                                      index == provider.currentStoryIndex,
-                                );
-                              }),
                             ),
                           ),
-                        20.w.verticalSpace
-                      ],
+                          if (ideas.length > 1)
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 24.w),
+                              child: Column(
+                                children: List.generate(ideas.length, (index) {
+                                  if (index == provider.currentStoryIndex) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  return _StoryIdeaTile(
+                                    topicImageUrl: storyIdea.topic.thumbnailUrl,
+                                    idea: ideas[index],
+                                    index: index + 1,
+                                    onTap: () {
+                                      provider.setCurrentStoryIndex = index;
+                                      if (index < provider.stories.length) {
+                                        // Already have story at this index, just viewing.
+                                      } else {
+                                        provider.generateSingleStory(
+                                          storyIdeaId: ideas[index].id,
+                                          context: context,
+                                          insertAtIndex: index,
+                                        );
+                                      }
+                                    },
+                                    isGenerating:
+                                        provider.isGenerateSingleStoryLoading &&
+                                        index == provider.currentStoryIndex,
+                                  );
+                                }),
+                              ),
+                            ),
+                          24.w.verticalSpace,
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
         ),
       ),
-
     );
   }
 
@@ -495,7 +639,6 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
       return;
     }
 
-    // From "generating story" flow: quit and generate new, or cancel.
     showDialog(
       context: context,
       useRootNavigator: true,
@@ -504,30 +647,22 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
           child: AlertDialog(
             backgroundColor: AppColors.white,
             title: Text(
-              "Are you sure you want to quit the story and generate a new one?",
+              "Are you sure you want to quit?",
               style: AppTextStyles.textStyle20Regular,
             ),
             actions: [
               StoryReadingScreen.myActionButtonTheme(
                 onPressed: () {
-                  Navigator.of(dialogContext).pop();
+                  dialogContext.pop();
                   if (!context.mounted) return;
-                  final p = context.read<StoryProvider>();
-                  final ideas = p.storyIdea?.storyIdeas ?? [];
-                  final idx = p.currentStoryIndex;
-                  if (idx >= 0 && idx < ideas.length) {
-                    // p.beginGenerateSingleStoryLoading();
-                    p.generateSingleStory(
-                      storyIdeaId: ideas[idx].id,
-                      context: context,
-                      insertAtIndex: idx,
-                      forceRegenerate: true,
-                      showToast: true,
-                      onSuccess: () {},
-                    );
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.goNamed(AppRoutes.homeScreen.name);
+                    tabIndex.value = 0;
                   }
                 },
-                title: "Yes",
+                title: "Quit",
               ),
               StoryReadingScreen.myActionButtonTheme(
                 onPressed: () => dialogContext.pop(),
@@ -595,6 +730,88 @@ class _ReadingTimerText extends StatelessWidget {
   }
 }
 
+
+/// Segmented progress bar above topic title. Number of segments = number of ideas; fills segment by segment.
+class _TopicProgressBar extends StatelessWidget {
+  final int percent;
+  final int segmentCount;
+
+  const _TopicProgressBar({
+    required this.percent,
+    required this.segmentCount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final p = percent.clamp(0, 100);
+    final segments = segmentCount.clamp(1, 32);
+    final filledCount = ((p / 100) * segments).round().clamp(0, segments);
+    final isComplete = p >= 100;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Row(
+                children: List.generate(segments, (i) {
+                  final filled = i < filledCount;
+                  return Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        right: i < segments - 1 ? 4.w : 0,
+                      ),
+                      child: Container(
+                        height: 8.h,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4.r),
+                          color: filled
+                              ? AppColors.teal
+                              : AppColors.teal.withValues(alpha: 0.2),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+            12.w.horizontalSpace,
+            AppText(
+              text: '$percent%',
+              style: AppTextStyles.sfProDisplaySemibold(
+                fontSize: 14.sp,
+                color: AppColors.teal,
+              ),
+            ),
+          ],
+        ),
+        6.w.verticalSpace,
+        AppText(
+          
+          text: 'Topic progress',
+          style: AppTextStyles.sfProDisplayRegular(
+            fontSize: 12.sp,
+            color: AppColors.black.withValues(alpha: 0.5),
+          ).copyWith(height: 0),
+          
+        ),
+        if (isComplete) ...[
+          8.w.verticalSpace,
+          AppText(
+            text: 'You have completed the topic.',
+            style: AppTextStyles.sfProDisplaySemibold(
+              fontSize: 14.sp,
+              color: AppColors.teal,
+
+            ).copyWith(height: 1),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
 /// Horizontal scrollable tags (topic interests) for attractive search/discovery UI.
 class _TagsSection extends StatelessWidget {
   final List<Interest> interests;
@@ -647,31 +864,6 @@ class _TagChip extends StatelessWidget {
           color: AppColors.teal,
         ),
       ),
-    );
-  }
-}
-
-class _MetaChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-
-  const _MetaChip({required this.icon, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 16.sp, color: AppColors.black.withValues(alpha: 0.5)),
-        6.w.horizontalSpace,
-        AppText(
-          text: label,
-          style: AppTextStyles.sfProDisplayMedium(
-            fontSize: 13.sp,
-            color: AppColors.black.withValues(alpha: 0.6),
-          ),
-        ),
-      ],
     );
   }
 }
@@ -767,7 +959,7 @@ class _StoryIdeaTile extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    6.h.verticalSpace,
+                    6.w.verticalSpace,
                     AppText(
                       text: DateFormatter.formatDateTimeFrom(idea.createdAt),
                       style: AppTextStyles.sfProDisplayRegular(
@@ -808,16 +1000,25 @@ class _StoryViewer extends StatefulWidget {
   final String topicId;
   final String topicTitle;
   final int lessonDuration;
+  final bool showAddToMyList;
+  final bool showResumeStartOverChoice;
+  final VoidCallback? onStartOver;
   final VoidCallback onCloseStory;
   final VoidCallback onHome;
+  final VoidCallback? onRegenerateTap;
   const _StoryViewer({
+    super.key,
     required this.story,
     required this.storyIdeaId,
     required this.topicId,
     required this.topicTitle,
     required this.lessonDuration,
+    this.showAddToMyList = false,
+    this.showResumeStartOverChoice = true,
+    this.onStartOver,
     required this.onCloseStory,
     required this.onHome,
+    this.onRegenerateTap,
   });
 
   @override
@@ -831,6 +1032,9 @@ class _StoryViewerState extends State<_StoryViewer> {
   bool _hasStartedReading = false;
   bool _isTimerRunning = false;
 
+  /// After user taps Resume or Start over, hide those two buttons and show only Start.
+  bool _hideResumeStartOverButtons = false;
+
   int get _initialSeconds => (widget.lessonDuration.clamp(1, 999)) * 60;
 
   @override
@@ -842,8 +1046,15 @@ class _StoryViewerState extends State<_StoryViewer> {
   @override
   void didUpdateWidget(covariant _StoryViewer oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.story.id != widget.story.id ||
-        oldWidget.lessonDuration != widget.lessonDuration) {
+    final storyChanged =
+        oldWidget.story.id != widget.story.id ||
+        oldWidget.story != widget.story;
+    if (storyChanged) {
+      _currentPageIndex = 0;
+      _resetReadingSession();
+      // After Start over (re-fetched story): hide Resume/Start over buttons.
+      _hideResumeStartOverButtons = true;
+    } else if (oldWidget.lessonDuration != widget.lessonDuration) {
       _currentPageIndex = 0;
       _resetReadingSession();
     }
@@ -951,6 +1162,14 @@ class _StoryViewerState extends State<_StoryViewer> {
           topicId: widget.topicId,
           topicTitle: widget.topicTitle,
           lessonDuration: widget.lessonDuration,
+          showAddToMyList: widget.showAddToMyList,
+          onRegenerateTap: widget.onRegenerateTap,
+          showResumeStartOverButtons:
+              widget.showAddToMyList &&
+              widget.showResumeStartOverChoice &&
+              widget.onStartOver != null &&
+              !_hideResumeStartOverButtons,
+          onStartOver: widget.onStartOver,
           onCloseStory: widget.onCloseStory,
           remainingSeconds: _remainingSeconds,
           hasStartedReading: _hasStartedReading,
@@ -958,10 +1177,25 @@ class _StoryViewerState extends State<_StoryViewer> {
           isLastPage: isLastPage,
           quiz: widget.story.quiz,
           onStartQuiz: _openQuiz,
-          onStartReading: _handleStartReading,
+          onStartReading: () {
+            if (widget.showAddToMyList &&
+                widget.showResumeStartOverChoice &&
+                widget.onStartOver != null &&
+                !_hideResumeStartOverButtons) {
+              setState(() => _hideResumeStartOverButtons = true);
+            }
+            _handleStartReading();
+          },
           onResumeReading: _handleResumeReading,
           onStopReading: _handleStopReading,
           onHome: widget.onHome,
+          onStartOverTap:
+              widget.onStartOver == null || !widget.showResumeStartOverChoice
+              ? null
+              : () {
+                  setState(() => _hideResumeStartOverButtons = true);
+                  widget.onStartOver!();
+                },
           onPrevPage: !_hasStartedReading || isFirstPage
               ? null
               : () {
@@ -997,6 +1231,10 @@ class _StoryPage extends StatelessWidget {
   final String topicId;
   final String topicTitle;
   final int lessonDuration;
+  final bool showAddToMyList;
+  final bool showResumeStartOverButtons;
+  final VoidCallback? onStartOver;
+  final VoidCallback? onStartOverTap;
   final VoidCallback onCloseStory;
   final int remainingSeconds;
   final bool hasStartedReading;
@@ -1010,6 +1248,7 @@ class _StoryPage extends StatelessWidget {
   final VoidCallback? onPrevPage;
   final VoidCallback? onNextPage;
   final VoidCallback onHome;
+  final VoidCallback? onRegenerateTap;
   const _StoryPage({
     required this.page,
     required this.pageIndex,
@@ -1019,6 +1258,11 @@ class _StoryPage extends StatelessWidget {
     required this.topicId,
     required this.topicTitle,
     required this.lessonDuration,
+    this.showAddToMyList = false,
+    this.onRegenerateTap,
+    this.showResumeStartOverButtons = false,
+    this.onStartOver,
+    this.onStartOverTap,
     required this.onCloseStory,
     required this.remainingSeconds,
     required this.hasStartedReading,
@@ -1073,7 +1317,7 @@ class _StoryPage extends StatelessWidget {
     final isMarkingAsRead = provider.isMarkingStoryAsRead(storyIdeaId);
     final isMarkedAsRead = provider.isStoryMarkedAsRead(storyIdeaId);
     final topicFromSearch = provider.topicFromSearch;
-    final showMyListToggle = topicFromSearch != null;
+    final showMyListToggle = showAddToMyList && topicFromSearch != null;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -1096,7 +1340,7 @@ class _StoryPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(
                     child: AppText(
@@ -1111,9 +1355,10 @@ class _StoryPage extends StatelessWidget {
                   if (showMyListToggle) ...[
                     TopicListToggleButton(
                       isInMyList: topicFromSearch.isInMyList,
-                      isLoading: homeProvider.isTopicListToggling(topicFromSearch.id),
+                      isLoading: homeProvider.isTopicListToggling(
+                        topicFromSearch.id,
+                      ),
                       onTap: () async {
-                        
                         final result = await homeProvider.toggleTopicList(
                           topic: topicFromSearch,
                           onFailed: (err) {
@@ -1138,7 +1383,6 @@ class _StoryPage extends StatelessWidget {
                     ),
                     8.w.horizontalSpace,
                   ],
-                  // 12.w.horizontalSpace,
                   GestureDetector(
                     onTap: () => shareTopicLink(topicId: topicId),
                     behavior: HitTestBehavior.opaque,
@@ -1151,6 +1395,17 @@ class _StoryPage extends StatelessWidget {
                       ),
                     ),
                   ),
+                  4.w.horizontalSpace,
+                  if (!showMyListToggle && onRegenerateTap != null)
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: onRegenerateTap!,
+                      child: Icon(
+                        Icons.more_vert_rounded,
+                        size: 28.w,
+                        color: AppColors.teal,
+                      ),
+                    ),
                 ],
               ),
               8.w.verticalSpace,
@@ -1305,6 +1560,36 @@ class _StoryPage extends StatelessWidget {
                         ),
                       ),
                     )
+                  : showResumeStartOverButtons && onStartOverTap != null
+                  ? Row(
+                      children: [
+                        Expanded(
+                          child: AppOutlinedButton(
+                            onTap: onStartReading,
+                            borderColor: AppColors.teal,
+                            textStyle: AppTextStyles.sfProDisplaySemibold(
+                              fontSize: 14.sp,
+                              color: AppColors.teal,
+                            ),
+                            child: AppText(
+                              text: 'Resume',
+                              style: AppTextStyles.sfProDisplaySemibold(
+                                fontSize: 14.sp,
+                                color: AppColors.teal,
+                              ),
+                            ),
+                          ),
+                        ),
+                        12.w.horizontalSpace,
+                        Expanded(
+                          child: AppFilledButton(
+                            text: 'Start over',
+                            backgroundColor: AppColors.teal,
+                            onTap: onStartOverTap!,
+                          ),
+                        ),
+                      ],
+                    )
                   : AppFilledButton(
                       text: 'Start',
                       backgroundColor: AppColors.teal,
@@ -1378,91 +1663,54 @@ class _StoryPage extends StatelessWidget {
                         ),
                       ),
                       12.w.verticalSpace,
-                      Row(
-                        children: [
-                          if (onPrevPage != null)
-                            Expanded(
-                              child: AppOutlinedButton(
-                                onTap: onPrevPage,
-                                borderColor: AppColors.teal,
-                                textStyle: AppTextStyles.sfProDisplaySemibold(
-                                  fontSize: 14.sp,
-                                  color: AppColors.teal,
+                      AppFilledButton(
+                        text: 'Start Quiz',
+                        backgroundColor: AppColors.teal,
+                        onTap: () async {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            useRootNavigator: true,
+                            builder: (dialogContext) => ZoomIn(
+                              child: AlertDialog(
+                                backgroundColor: AppColors.white,
+                                title: Text(
+                                  "Are you sure you want to start quiz or want to read?",
+                                  style: AppTextStyles.textStyle20Regular,
                                 ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  spacing: 4.w,
-                                  children: [
-                                    Icon(
-                                      Icons.arrow_back_ios,
-                                      size: 16.sp,
-                                      color: AppColors.teal,
-                                    ),
-                                    AppText(
-                                      text: 'Previous',
-                                      style: AppTextStyles.sfProDisplaySemibold(
-                                        fontSize: 14.sp,
-                                        color: AppColors.teal,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          if (onPrevPage != null) 12.w.horizontalSpace,
-                          Expanded(
-                            child: AppFilledButton(
-                              text: 'Start Quiz',
-                              backgroundColor: AppColors.teal,
-                              onTap: () async {
-                                final confirm = await showDialog<bool>(
-                                  context: context,
-                                  useRootNavigator: true,
-                                  builder: (dialogContext) => ZoomIn(
-                                    child: AlertDialog(
-                                      backgroundColor: AppColors.white,
-                                      title: Text(
-                                        "Are you sure you want to start quiz or want to read?",
-                                        style: AppTextStyles.textStyle20Regular,
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.of(
-                                            dialogContext,
-                                          ).pop(false),
-                                          child: Text(
-                                            "Cancel",
-                                            style:
-                                                AppTextStyles.sfProDisplayRegular(
-                                                  fontSize: 17.sp,
-                                                  color: AppColors.black,
-                                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(
+                                      dialogContext,
+                                    ).pop(false),
+                                    child: Text(
+                                      "Cancel",
+                                      style:
+                                          AppTextStyles.sfProDisplayRegular(
+                                            fontSize: 17.sp,
+                                            color: AppColors.black,
                                           ),
-                                        ),
-                                        TextButton(
-                                          onPressed: () => Navigator.of(
-                                            dialogContext,
-                                          ).pop(true),
-                                          child: Text(
-                                            "Yes",
-                                            style:
-                                                AppTextStyles.sfProDisplayRegular(
-                                                  fontSize: 17.sp,
-                                                  color: AppColors.redColor,
-                                                ),
-                                          ),
-                                        ),
-                                      ],
                                     ),
                                   ),
-                                );
-                                if (confirm == true && context.mounted)
-                                  onStartQuiz();
-                              },
+                                  TextButton(
+                                    onPressed: () => Navigator.of(
+                                      dialogContext,
+                                    ).pop(true),
+                                    child: Text(
+                                      "Yes",
+                                      style:
+                                          AppTextStyles.sfProDisplayRegular(
+                                            fontSize: 17.sp,
+                                            color: AppColors.redColor,
+                                          ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          );
+                          if (confirm == true && context.mounted)
+                            onStartQuiz();
+                        },
                       ),
                     ],
                   ),
@@ -1593,7 +1841,7 @@ class _StoryImage extends StatelessWidget {
                 valueColor: AlwaysStoppedAnimation<Color>(AppColors.teal),
               ),
             ),
-            12.h.verticalSpace,
+            12.w.verticalSpace,
             AppText(
               text: percent != null ? '$percent%' : 'Loading...',
               style: AppTextStyles.sfProDisplayMedium(

@@ -29,7 +29,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      26.h.verticalSpace,
+                      26.w.verticalSpace,
                       Text(
                         "Forgot Password",
                         style: AppTextStyles.sfProDisplayBold(
@@ -37,13 +37,13 @@ class ForgotPasswordScreen extends StatelessWidget {
                           color: AppColors.teal,
                         ),
                       ),
-                      28.h.verticalSpace,
+                      28.w.verticalSpace,
                       Text(
                         textAlign: TextAlign.center,
                         "We will send you a link to the email address you signed up with.",
                         style: AppTextStyles.textStyle16Semibold,
                       ),
-                      26.h.verticalSpace,
+                      26.w.verticalSpace,
                       AppTextField(
                         controller: provider.forgotPasswordEmailCtr,
                         hintText: "Email",

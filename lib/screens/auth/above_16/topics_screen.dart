@@ -1,4 +1,3 @@
-import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -147,7 +146,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
                         ),
                       ),
 
-                      16.h.verticalSpace,
+                      16.w.verticalSpace,
                       // Search topics (filters API list)
                       AppTextField(
                         controller: searchController,
@@ -175,7 +174,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
                         _addCustomTopic(customTopicController.text);
                         },
                       ),
-                      20.h.verticalSpace,
+                      20.w.verticalSpace,
                       // Loading State
                       if (provider.isLoadingTopics)
                         const Expanded(
@@ -212,7 +211,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
                         ),
                       // Custom-added topics: text-only, horizontal scroll, removable
                       if (customTopics.isNotEmpty) ...[
-                        12.h.verticalSpace,
+                        12.w.verticalSpace,
                         SizedBox(
                           height: 44.h,
                           child: ListView.separated(

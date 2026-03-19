@@ -12,10 +12,10 @@ import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 
-import '../../core/utils/shared_pref.dart';
-import '../../core/widgets/custom_toast.dart';
-import '../../core/widgets/kback_button.dart';
-import '../../core/routes/user_routes.dart';
+import '../../../core/utils/shared_pref.dart';
+import '../../../core/widgets/custom_toast.dart';
+import '../../../core/widgets/kback_button.dart';
+import '../../../core/routes/user_routes.dart';
 
 class ParentEmailScreen extends StatefulWidget {
   const ParentEmailScreen({super.key});
@@ -49,7 +49,7 @@ class _ParentEmailScreenState extends State<ParentEmailScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         CustomBackButton(margin: EdgeInsets.only(top: 20.h)),
-                        120.h.verticalSpace,
+                        120.w.verticalSpace,
                         AppText(
                           text: "Need Parent’s help to Proceed",
                           style: AppTextStyles.sfProDisplayBold(
@@ -58,7 +58,7 @@ class _ParentEmailScreenState extends State<ParentEmailScreen> {
                             color: AppColors.black,
                           ),
                         ),
-                        13.h.verticalSpace,
+                        13.w.verticalSpace,
                         AppText(
                           text: "Enter your Parent’s email to proceed.",
                           style: AppTextStyles.sfProDisplayMedium(
@@ -66,7 +66,7 @@ class _ParentEmailScreenState extends State<ParentEmailScreen> {
                             color: AppColors.black,
                           ),
                         ),
-                        18.h.verticalSpace,
+                        18.w.verticalSpace,
                         AppTextField(
                           controller: provider.parentEmailCtr,
                           hintText: "Email",
@@ -105,7 +105,7 @@ class _ParentEmailScreenState extends State<ParentEmailScreen> {
                           backgroundColor: AppColors.primaryColor,
                         ),
 
-                        10.h.verticalSpace,
+                        10.w.verticalSpace,
                       ],
                     ),
                   ),

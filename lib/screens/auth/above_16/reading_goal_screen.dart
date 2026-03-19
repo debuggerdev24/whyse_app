@@ -61,7 +61,7 @@ class _ReadingGoalScreenState extends State<ReadingGoalScreen> {
                       style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
                     ),
 
-                    8.h.verticalSpace,
+                    8.w.verticalSpace,
 
                     AppText(
                       text:
@@ -72,7 +72,7 @@ class _ReadingGoalScreenState extends State<ReadingGoalScreen> {
                       ),
                     ),
 
-                    18.h.verticalSpace,
+                    18.w.verticalSpace,
 
                     Container(
                       decoration: BoxDecoration(
@@ -103,7 +103,7 @@ class _ReadingGoalScreenState extends State<ReadingGoalScreen> {
                     ),
 
                     if (selectedOption == 'Custom') ...[
-                      20.h.verticalSpace,
+                      20.w.verticalSpace,
                       Form(
                         key: _formKey,
                         child: AppTextField(

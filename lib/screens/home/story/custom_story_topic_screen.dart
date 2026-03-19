@@ -43,7 +43,7 @@ class CustomStoryTopicScreen extends StatelessWidget {
                     fontSize: 32.sp,
                   ),
                 ),
-                10.h.verticalSpace,
+                10.w.verticalSpace,
                 AppText(
                   text: "What are you interested to read or learn about?",
                   style: AppTextStyles.sfProDisplayMedium(
@@ -52,7 +52,7 @@ class CustomStoryTopicScreen extends StatelessWidget {
                   ),
                 ),
 
-                20.h.verticalSpace,
+                20.w.verticalSpace,
                 AppTextField(
                   controller: provider.customTopicCtr,
                   hintText: "I want to learn about...",

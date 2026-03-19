@@ -27,18 +27,18 @@ Widget addReadingBottomSheet({required BuildContext context}) {
             borderRadius: BorderRadius.circular(2),
           ),
         ),
-        27.h.verticalSpace,
+        27.w.verticalSpace,
         AppText(
           text: "Choose Reading Type",
           style: AppTextStyles.sfProDisplayBold(fontSize: 20.sp),
         ),
-        27.h.verticalSpace,
+        27.w.verticalSpace,
         Divider(
           color: AppColors.black.withValues(alpha: 0.1),
           thickness: 1,
           height: 1,
         ),
-        20.h.verticalSpace,
+        20.w.verticalSpace,
 
         //todo Generate Article
         _OptionCard(
@@ -54,7 +54,7 @@ Widget addReadingBottomSheet({required BuildContext context}) {
           },
         ),
 
-        16.h.verticalSpace,
+        16.w.verticalSpace,
 
         //todo Add Book
         _OptionCard(
@@ -68,7 +68,7 @@ Widget addReadingBottomSheet({required BuildContext context}) {
           },
         ),
 
-        16.h.verticalSpace,
+        16.w.verticalSpace,
 
         /// Add eBook
         _OptionCard(
@@ -82,7 +82,7 @@ Widget addReadingBottomSheet({required BuildContext context}) {
           },
         ),
 
-        20.h.verticalSpace,
+        20.w.verticalSpace,
       ],
     ),
   );
@@ -138,7 +138,7 @@ class _OptionCard extends StatelessWidget {
                     text: title,
                     style: AppTextStyles.sfProDisplaySemibold(fontSize: 16.sp),
                   ),
-                  4.h.verticalSpace,
+                  4.w.verticalSpace,
                   AppText(
                     text: subtitle,
                     style: AppTextStyles.sfProDisplayRegular(fontSize: 12.sp),
@@ -196,7 +196,7 @@ class ReadingLevelCard extends StatelessWidget {
                         text: level,
                         style: AppTextStyles.textStyle16Bold,
                       ),
-                      4.h.verticalSpace,
+                      4.w.verticalSpace,
                       AppText(
                         text: description,
                         style: AppTextStyles.sfProDisplayMedium(
@@ -216,7 +216,7 @@ class ReadingLevelCard extends StatelessWidget {
               ],
             ),
 
-            14.h.verticalSpace,
+            14.w.verticalSpace,
 
             /// ─── PROGRESS BAR ───
             ClipRRect(
@@ -229,7 +229,7 @@ class ReadingLevelCard extends StatelessWidget {
               ),
             ),
 
-            8.h.verticalSpace,
+            8.w.verticalSpace,
 
             /// ─── BEGINNER → ADVANCE ───
             Row(

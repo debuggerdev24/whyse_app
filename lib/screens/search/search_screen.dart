@@ -14,8 +14,8 @@ import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/core/routes/app_router.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/screens/dashboard.dart';
-import 'package:redstreakapp/screens/browse/widgets/browse_widgets.dart';
-import 'package:redstreakapp/screens/browse/widgets/search_section_shimmers.dart';
+import 'package:redstreakapp/screens/search/widgets/search_widgets.dart';
+import 'package:redstreakapp/screens/search/widgets/search_section_shimmers.dart';
 import 'package:redstreakapp/services/home/home_api_service.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -333,7 +333,7 @@ class _SearchScreenState extends State<SearchScreen> {
         }
       },
       child: Stack(
-        children: [
+        children:[
           AppLayout(
             body: SafeArea(
               child: RefreshIndicator(
@@ -393,7 +393,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       18.w.verticalSpace,
                       ...List.generate(
                         visibleTopics.length,
-                        (index) {
+                        (index) {                          
                           final topic = visibleTopics[index];
                           final isInMyList = homeProvider
                                   .topicIsInMyListOverride(topic.id) ??

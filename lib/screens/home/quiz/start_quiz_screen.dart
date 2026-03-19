@@ -50,7 +50,7 @@ class StartQuizScreen extends StatelessWidget {
               Spacer(flex: 2),
 
               Image.asset(AppAssets.quiz, height: 92.h, width: 92.w),
-              33.h.verticalSpace,
+              33.w.verticalSpace,
 
               // Title
               AppText(
@@ -61,7 +61,7 @@ class StartQuizScreen extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              9.h.verticalSpace,
+              9.w.verticalSpace,
 
               // Subtitle
               AppText(
@@ -87,7 +87,7 @@ class StartQuizScreen extends StatelessWidget {
                 backgroundColor: AppColors.primaryColor,
                 fixedSize: Size(348.w, 42.h),
               ),
-              40.h.verticalSpace,
+              40.w.verticalSpace,
             ],
           ),
         ),

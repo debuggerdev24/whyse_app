@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/extensions/routes_extensions.dart';
-import 'package:redstreakapp/screens/above_16/create_account_screen.dart';
-import 'package:redstreakapp/screens/above_16/goals_screen.dart';
-import 'package:redstreakapp/screens/above_16/interests_screen.dart';
-import 'package:redstreakapp/screens/above_16/profile_info_screen.dart';
-import 'package:redstreakapp/screens/above_16/reading_goal_screen.dart';
-import 'package:redstreakapp/screens/above_16/subscription_screen.dart';
-import 'package:redstreakapp/screens/above_16/success_screen.dart';
-import 'package:redstreakapp/screens/above_16/topics_screen.dart';
-import 'package:redstreakapp/screens/above_16/what_intrest_screen.dart';
+import 'package:redstreakapp/screens/auth/above_16/create_account_screen.dart';
+import 'package:redstreakapp/screens/auth/above_16/goals_screen.dart';
+import 'package:redstreakapp/screens/auth/above_16/interests_screen.dart';
+import 'package:redstreakapp/screens/auth/above_16/profile_info_screen.dart';
+import 'package:redstreakapp/screens/auth/above_16/reading_goal_screen.dart';
+import 'package:redstreakapp/screens/auth/above_16/subscription_screen.dart';
+import 'package:redstreakapp/screens/auth/above_16/success_screen.dart';
+import 'package:redstreakapp/screens/auth/above_16/topics_screen.dart';
+import 'package:redstreakapp/screens/auth/above_16/what_intrest_screen.dart';
 import 'package:redstreakapp/screens/auth/enter_age_screen.dart';
 import 'package:redstreakapp/screens/auth/forgot_password_screen.dart';
 import 'package:redstreakapp/screens/auth/login_screen.dart';
 import 'package:redstreakapp/screens/auth/reset_password_screen.dart';
 import 'package:redstreakapp/screens/auth/signup_screen.dart';
 import 'package:redstreakapp/screens/auth/verify_mail_screen.dart';
-import 'package:redstreakapp/screens/browse/search_screen.dart';
-import 'package:redstreakapp/screens/home/generate_reading_screen.dart';
+import 'package:redstreakapp/screens/search/search_screen.dart';
 import 'package:redstreakapp/screens/home/story/custom_story_topic_screen.dart';
 import 'package:redstreakapp/screens/home/story/story_reading_screen.dart';
 import 'package:redstreakapp/screens/home/story/story_goals_screen.dart';
@@ -35,8 +34,8 @@ import 'package:redstreakapp/models/home/story_models/story_history_model.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/screens/practice/practice_zone.dart';
 
-import '../../screens/below_16/consent_status_screen.dart';
-import '../../screens/below_16/parent_email_screen.dart';
+import '../../screens/auth/below_16/consent_status_screen.dart';
+import '../../screens/auth/below_16/parent_email_screen.dart';
 import '../../screens/dashboard.dart';
 import '../../screens/home/story/story_interest_screen.dart';
 import '../../screens/home/story/ideas_list_screen.dart';
@@ -227,13 +226,7 @@ class AppRouter {
         return SubScriptionScreen();
       },
     ),
-    GoRoute(
-      path: AppRoutes.bookReadingScreen.path,
-      name: AppRoutes.bookReadingScreen.name,
-      builder: (context, state) {
-        return GenerateReadingScreen();
-      },
-    ),
+   
     GoRoute(
       path: AppRoutes.readingScreen.path,
       name: AppRoutes.readingScreen.name,
@@ -391,9 +384,8 @@ class AppRouter {
     GoRoute(
       path: AppRoutes.storySeriesScreen.path,
       name: AppRoutes.storySeriesScreen.name,
-      onExit: (context, state) async {
-        return StoryReadingScreen.shouldAllowPop(context);
-      },
+      // onExit: (context, state) async {
+      // },
       builder: (context, state) {
         return const StoryReadingScreen();
       },

@@ -47,7 +47,7 @@ class QuizCompletedScreen extends StatelessWidget {
                   Spacer(flex: 2),
                   // Success Image
                   Image.asset(AppAssets.quizcomplete),
-                  19.h.verticalSpace,
+                  19.w.verticalSpace,
                   AppText(
                     text: "Quiz Completed!",
                     style: AppTextStyles.sfProDisplayMedium(
@@ -65,9 +65,9 @@ class QuizCompletedScreen extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  15.h.verticalSpace,
+                  15.w.verticalSpace,
                   SvgIcon(AppAssets.correctoption, size: 24.w),
-                  12.h.verticalSpace,
+                  12.w.verticalSpace,
                   AppText(
                     text: "Quiz Completed!",
                     style: AppTextStyles.sfProDisplaySemibold(
@@ -76,7 +76,7 @@ class QuizCompletedScreen extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  10.h.verticalSpace,
+                  10.w.verticalSpace,
                   AppText(
                     text: "Your Score:",
                     style: AppTextStyles.sfProDisplayBold(
@@ -84,7 +84,7 @@ class QuizCompletedScreen extends StatelessWidget {
                       color: AppColors.black.withValues(alpha: 0.6),
                     ),
                   ),
-                  8.h.verticalSpace,
+                  8.w.verticalSpace,
                   AppText(
                     text: "$score/$total",
                     style: AppTextStyles.sfProDisplayBold(
@@ -92,7 +92,7 @@ class QuizCompletedScreen extends StatelessWidget {
                       color: AppColors.black,
                     ),
                   ),
-                  24.h.verticalSpace,
+                  24.w.verticalSpace,
                   AppText(
                     text: "Reward:",
                     style: AppTextStyles.sfProDisplayBold(
@@ -100,7 +100,7 @@ class QuizCompletedScreen extends StatelessWidget {
                       color: AppColors.black.withValues(alpha: 0.6),
                     ),
                   ),
-                  20.h.verticalSpace,
+                  20.w.verticalSpace,
                   Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 14.w,
@@ -151,7 +151,6 @@ class QuizCompletedScreen extends StatelessWidget {
                           provider.generateSingleStory(
                             storyIdeaId: nextIdeaId,
                             context: context,
-                            onSuccess: () {},
                           );
                           if (!context.mounted) return;
                           context.goNamed(AppRoutes.storySeriesScreen.name);

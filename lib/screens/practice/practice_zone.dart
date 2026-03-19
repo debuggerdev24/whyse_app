@@ -44,21 +44,21 @@ class PracticeZoneSection extends StatelessWidget {
                 ),
               ],
             ),
-            16.h.verticalSpace,
+            16.w.verticalSpace,
             PracticeCard(
               title: "Vocabulary\nQuizzes",
               subtitle: "Solve 10 Quiz Questions",
               icon: AppAssets.vocabulary,
               reward: "3",
             ),
-            16.h.verticalSpace,
+            16.w.verticalSpace,
             PracticeCard(
               title: "Pronunciation\nDrills",
               subtitle: "Solve 2 Drills",
               icon: AppAssets.pronunciation,
               reward: "3",
             ),
-            16.h.verticalSpace,
+            16.w.verticalSpace,
             PracticeCard(
               title: "Comprehension\nChecks",
               subtitle: "Solve 2 Comprehensions",
@@ -161,7 +161,7 @@ class PracticeCard extends StatelessWidget {
                 alignment: Alignment.center,
                 child: SvgIcon(icon, size: 72.w),
               ),
-              22.h.verticalSpace,
+              22.w.verticalSpace,
               Row(
                 children: [
                   SvgIcon(

@@ -177,7 +177,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                       });
                     },
                   ),
-                  18.h.verticalSpace,
+                  18.w.verticalSpace,
                   if (showHomeTopics) ...[
                     Expanded(
                       child: homeProvider.topicsList == null &&

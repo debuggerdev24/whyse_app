@@ -27,14 +27,14 @@ class SuccessScreen extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Image.asset(AppAssets.success, width: 254.w),
-                      30.h.verticalSpace,
+                      30.w.verticalSpace,
 
                       AppText(
                         text: "You’re all set!",
                         style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
                       ),
 
-                      8.h.verticalSpace,
+                      8.w.verticalSpace,
                       AppText(
                         textAlign: TextAlign.center,
                         text:
@@ -98,7 +98,7 @@ class SuccessScreen extends StatelessWidget {
                   // );
                 },
               ),
-              10.h.verticalSpace,
+              10.w.verticalSpace,
             ], 
           ),
         ),

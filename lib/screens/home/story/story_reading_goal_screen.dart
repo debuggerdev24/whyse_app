@@ -77,7 +77,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                         ),
                       ),
 
-                      18.h.verticalSpace,
+                      18.w.verticalSpace,
 
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
@@ -125,7 +125,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                       ),
                       if (provider.selectedReadingDuration.toLowerCase() ==
                           AppEnum.custom.name) ...[
-                        20.h.verticalSpace,
+                        20.w.verticalSpace,
                         AppTextField(
                           hintText: "Enter minutes",
                           controller: provider.customReadingDurationCtr,
@@ -136,7 +136,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                         ),
                       ],
 
-                      25.h.verticalSpace,
+                      25.w.verticalSpace,
                       CustomDropdownField(
                         label: "Text Type",
                         hint: "Select text type",
@@ -145,7 +145,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                           provider.setSelectedTextType = value!;
                         },
                       ),
-                      20.h.verticalSpace,
+                      20.w.verticalSpace,
                       CustomDropdownField(
                         label: "Age Range",
                         hint: "Select age",
@@ -154,7 +154,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                           provider.setSelectedAgeRange = value!;
                         },
                       ),
-                      20.h.verticalSpace,
+                      20.w.verticalSpace,
                       CustomDropdownField(
                         label: "Language of Learning",
                         hint: "Select language",
@@ -164,7 +164,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                           // setState(() => _selectedLanguage = value!);
                         },
                       ),
-                      20.h.verticalSpace,
+                      20.w.verticalSpace,
                       CustomDropdownField(
                         label: "Number of Stories",
                         hint: "Select number of stories",
@@ -177,32 +177,28 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                       AppFilledButton(
                         margin: EdgeInsets.only(top: 20.h),
                         text: "Generate",
+                        
                         backgroundColor: AppColors.primaryColor,
                         onTap: () {
-                          deBouncer.run(() async {
+                          deBouncer.run(() {
+                            if (!provider.validateCreateStoryInput(context)) return;
                             provider.setGenerateStoryIdeasLoading(true);
-                            await provider.createStoryIdeas(
+                            if (context.mounted) {
+                              context.pushNamed(AppRoutes.storySeriesScreen.name);
+                            }
+                            provider.createStoryIdeas(
                               onFailed: (error) {
                                 Logger.error(error);
-                                AppToast.error(context, error);
+                                if (context.mounted) {
+                                  AppToast.error(context, error);
+                                }
                               },
                               context: context,
                               onlyIdeas: true,
+                              forceRegenerate: provider.forceRegenerateTopicId != null,
+                              topicId: provider.forceRegenerateTopicId,
+                              onSuccess: () {},
                             );
-                            context.pushNamed(AppRoutes.storySeriesScreen.name);
-
-                            // if (context.mounted &&
-                            //     provider.storyIdea != null &&
-                            //     provider.storyIdea!.storyIdeas.isNotEmpty) {
-                            //   provider.generateSingleStory(
-                            //     storyIdeaId:
-                            //         provider.storyIdea!.storyIdeas.first.id,
-                            //     context: context,
-                            //     insertAtIndex: 0,
-                            //     onSuccess: () {},
-                            //     showToast: true,
-                            //   );
-                            // }
                           });
                         },
                       ),

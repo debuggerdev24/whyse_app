@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 
 import '../../core/network/end_points.dart';
 import '../../core/network/base_api_service.dart';
@@ -41,8 +42,16 @@ class StoryApiService {
 
   Future<Either<ApiException, Map<String, dynamic>>> createStory({
     required Map<String, dynamic> data,
+    Duration? receiveTimeout,
   }) async {
-    return await BaseApiHelper.instance.post(EndPoints.createStory, data: data);
+    final options = receiveTimeout != null
+        ? Options(receiveTimeout: receiveTimeout)
+        : null;
+    return await BaseApiHelper.instance.post(
+      EndPoints.createStory,
+      data: data,
+      options: options,
+    );
   }
 
   Future<Either<ApiException, Map<String, dynamic>>> createStoryImage({

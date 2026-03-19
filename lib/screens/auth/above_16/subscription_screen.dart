@@ -71,7 +71,7 @@ class _SubScriptionScreenState extends State<SubScriptionScreen> {
                               ],
                             ),
                           ),
-                          31.h.verticalSpace,
+                          31.w.verticalSpace,
                           AppText(
                             text: "Choose your plan",
                             style: AppTextStyles.sfProDisplayBold(
@@ -79,7 +79,7 @@ class _SubScriptionScreenState extends State<SubScriptionScreen> {
                               color: AppColors.white,
                             ),
                           ),
-                          8.h.verticalSpace,
+                          8.w.verticalSpace,
                           Text(
                             "Pick a plan that fits your reading goals and\nstart learning your way.",
                             style: AppTextStyles.sfProDisplayRegular(
@@ -109,7 +109,7 @@ class _SubScriptionScreenState extends State<SubScriptionScreen> {
                           onTap: () => setState(() => selectedPlan = "Free"),
                         ),
             
-                        15.h.verticalSpace,
+                        15.w.verticalSpace,
             
                         /// PREMIUM PLAN
                         PlanCard(
@@ -124,7 +124,7 @@ class _SubScriptionScreenState extends State<SubScriptionScreen> {
                           onTap: () => setState(() => selectedPlan = "Premium"),
                         ),
             
-                        15.h.verticalSpace,
+                        15.w.verticalSpace,
             
                         /// FAMILY PLAN
                         PlanCard(
@@ -139,7 +139,7 @@ class _SubScriptionScreenState extends State<SubScriptionScreen> {
                           onTap: () => setState(() => selectedPlan = "Family"),
                         ),
             
-                        20.h.verticalSpace,
+                        20.w.verticalSpace,
                       ],
                     ),
                   ),
@@ -181,7 +181,7 @@ class _SubScriptionScreenState extends State<SubScriptionScreen> {
                   text: "Subscribe",
                   backgroundColor: AppColors.teal,
                 ),
-                30.h.verticalSpace,
+                30.w.verticalSpace,
               ],
             ),
           

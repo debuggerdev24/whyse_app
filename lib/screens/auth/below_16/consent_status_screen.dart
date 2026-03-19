@@ -35,7 +35,7 @@ class _ConsentStatusScreenState extends State<ConsentStatusScreen> {
                   children: [
                     const Spacer(),
                     SvgIcon(AppAssets.accepted, size: 144.w),
-                    42.h.verticalSpace,
+                    42.w.verticalSpace,
                     AppText(
                       text: "Request sent to parent successfully.",
                       style: AppTextStyles.sfProDisplaySemibold(
@@ -44,7 +44,7 @@ class _ConsentStatusScreenState extends State<ConsentStatusScreen> {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    35.h.verticalSpace,
+                    35.w.verticalSpace,
                     AppText(
                       text: "Consent Status",
                       style: AppTextStyles.sfProDisplaySemibold(
@@ -53,7 +53,7 @@ class _ConsentStatusScreenState extends State<ConsentStatusScreen> {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    3.h.verticalSpace,
+                    3.w.verticalSpace,
 
                     AppText(
                       text: provider.isConsentRequestApproved
@@ -81,7 +81,7 @@ class _ConsentStatusScreenState extends State<ConsentStatusScreen> {
                       backgroundColor: AppColors.primaryColor,
                     ),
 
-                    10.h.verticalSpace,
+                    10.w.verticalSpace,
                   ],
                 ),
               ),

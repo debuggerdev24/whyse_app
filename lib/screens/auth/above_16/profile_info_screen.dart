@@ -15,7 +15,7 @@ import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 
-import '../../providers/on_boarding/on_boarding_provider.dart';
+import '../../../providers/on_boarding/on_boarding_provider.dart';
 
 class ProfileInfoScreen extends StatefulWidget {
   const ProfileInfoScreen({super.key});
@@ -65,7 +65,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                             fontSize: 32.sp,
                           ),
                         ),
-                        8.h.verticalSpace,
+                        8.w.verticalSpace,
                         AppText(
                           text:
                               "Complete your profile to personalize your reading journey.",
@@ -75,7 +75,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                           ),
                         ),
 
-                        20.h.verticalSpace,
+                        20.w.verticalSpace,
 
                         CustomDropDown(
                           hint: "Country",
@@ -86,7 +86,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                           },
                         ),
 
-                        20.h.verticalSpace,
+                        20.w.verticalSpace,
 
                         // Language Dropdown
                         CustomDropDown(

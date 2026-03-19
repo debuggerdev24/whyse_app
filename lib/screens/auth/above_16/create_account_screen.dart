@@ -13,7 +13,7 @@ import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 
-import '../../core/widgets/custom_toast.dart';
+import '../../../core/widgets/custom_toast.dart';
 
 class CreateAccountScreen extends StatefulWidget {
   final String? consentStatus;
@@ -64,7 +64,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         text: "Create Account",
                         style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
                       ),
-                      5.h.verticalSpace,
+                      5.w.verticalSpace,
                       AppText(
                         text: "Enter your details to start learning.",
                         style: AppTextStyles.sfProDisplayMedium(
@@ -73,7 +73,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         ),
                       ),
 
-                      26.h.verticalSpace,
+                      26.w.verticalSpace,
                       //todo
                       Column(
                         spacing: 8.h,
@@ -141,7 +141,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         ],
                       ),
 
-                      22.h.verticalSpace,
+                      22.w.verticalSpace,
                       //todo agree to policy check box
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,

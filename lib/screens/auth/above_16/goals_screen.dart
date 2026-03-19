@@ -80,7 +80,7 @@ class _GoalScreenState extends State<GoalScreen> {
                         text: "What's Your Goal?",
                         style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
                       ),
-                      10.h.verticalSpace,
+                      10.w.verticalSpace,
                       AppText(
                         text:
                             "Choose what motivates you most — we'll help you reach it.",
@@ -90,7 +90,7 @@ class _GoalScreenState extends State<GoalScreen> {
                         ),
                       ),
 
-                      18.h.verticalSpace,
+                      18.w.verticalSpace,
 
                       if (provider.isLoadingGoals)
                         const Expanded(
@@ -106,7 +106,7 @@ class _GoalScreenState extends State<GoalScreen> {
                             itemCount:
                                 goalsList.length + ((isStoryCreation) ? 0 : 1),
                             separatorBuilder: (context, index) =>
-                                8.h.verticalSpace,
+                                8.w.verticalSpace,
                             itemBuilder: (context, index) {
                               // Custom Goal Field at the bottom
                               if (index == goalsList.length) {
@@ -183,7 +183,7 @@ class _GoalScreenState extends State<GoalScreen> {
                                         ),
                                       ),
                                       if (description.isNotEmpty) ...[
-                                        3.h.verticalSpace,
+                                        3.w.verticalSpace,
                                         AppText(
                                           text: description,
                                           style:

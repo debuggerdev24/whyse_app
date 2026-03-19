@@ -12,8 +12,8 @@ import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 
-import '../../core/widgets/app_button.dart';
-import '../../core/widgets/custom_toast.dart';
+import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/custom_toast.dart';
 
 class InterestsScreen extends StatefulWidget {
   const InterestsScreen({super.key});
@@ -119,7 +119,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
                         text: "Pick Your Interests",
                         style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
                       ),
-                      10.h.verticalSpace,
+                      10.w.verticalSpace,
                       AppText(
                         text:
                             "Choose topics you love to personalize your reading journey.",
@@ -129,7 +129,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
                         ),
                       ),
 
-                      20.h.verticalSpace,
+                      20.w.verticalSpace,
 
                       // Loading State
                       if (provider.isLoadingInterests)

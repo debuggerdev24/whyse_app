@@ -186,7 +186,7 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
                         size: 56.sp,
                         color: AppColors.black.withValues(alpha: 0.4),
                       ),
-                      20.h.verticalSpace,
+                      20.w.verticalSpace,
                       AppText(
                         text: isNotGenerated
                             ? "Story not generated yet."
@@ -731,7 +731,7 @@ class _StoryIdeaTile extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    6.h.verticalSpace,
+                    6.w.verticalSpace,
                     AppText(
                       text: DateFormatter.formatDateTimeFrom(idea.createdAt),
                       style: AppTextStyles.sfProDisplayRegular(
@@ -1309,73 +1309,35 @@ class _StoryPage extends StatelessWidget {
                         ),
                       ),
                       12.w.verticalSpace,
-                      Row(
-                        children: [
-                        
-                          if (onPrevPage != null)
-                            Expanded(
-                              child: AppOutlinedButton(
-                                onTap: onPrevPage,
-                                borderColor: AppColors.teal,
-                                textStyle: AppTextStyles.sfProDisplaySemibold(
-                                  fontSize: 14.sp,
-                                  color: AppColors.teal,
+                      AppFilledButton(
+                        text: 'Start Quiz',
+                        backgroundColor: AppColors.teal,
+                        onTap: () async {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            useRootNavigator: true,
+                            builder: (dialogContext) => ZoomIn(
+                              child: AlertDialog(
+                                backgroundColor: AppColors.white,
+                                title: Text(
+                                  "Are you sure you want to start quiz or want to read?",
+                                  style: AppTextStyles.textStyle20Regular,
                                 ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  spacing: 4.w,
-                                  children: [
-                                    Icon(
-                                      Icons.arrow_back_ios,
-                                      size: 16.sp,
-                                      color: AppColors.teal,
-                                    ),
-                                    AppText(
-                                      text: 'Previous',
-                                      style: AppTextStyles.sfProDisplaySemibold(
-                                        fontSize: 14.sp,
-                                        color: AppColors.teal,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(dialogContext).pop(false),
+                                    child: Text("Cancel", style: AppTextStyles.sfProDisplayRegular(fontSize: 17.sp, color: AppColors.black)),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => Navigator.of(dialogContext).pop(true),
+                                    child: Text("Yes", style: AppTextStyles.sfProDisplayRegular(fontSize: 17.sp, color: AppColors.redColor)),
+                                  ),
+                                ],
                               ),
                             ),
-                          if (onPrevPage != null) 12.w.horizontalSpace,
-                          Expanded(
-                            child: AppFilledButton(
-                              text: 'Start Quiz',
-                              backgroundColor: AppColors.teal,
-                              onTap: () async {
-                                final confirm = await showDialog<bool>(
-                                  context: context,
-                                  useRootNavigator: true,
-                                  builder: (dialogContext) => ZoomIn(
-                                    child: AlertDialog(
-                                      backgroundColor: AppColors.white,
-                                      title: Text(
-                                        "Are you sure you want to start quiz or want to read?",
-                                        style: AppTextStyles.textStyle20Regular,
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.of(dialogContext).pop(false),
-                                          child: Text("Cancel", style: AppTextStyles.sfProDisplayRegular(fontSize: 17.sp, color: AppColors.black)),
-                                        ),
-                                        TextButton(
-                                          onPressed: () => Navigator.of(dialogContext).pop(true),
-                                          child: Text("Yes", style: AppTextStyles.sfProDisplayRegular(fontSize: 17.sp, color: AppColors.redColor)),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                                if (confirm == true && context.mounted) onStartQuiz();
-                              },
-                            ),
-                          ),
-                        ],
+                          );
+                          if (confirm == true && context.mounted) onStartQuiz();
+                        },
                       ),
                     ],
                   ),
@@ -1506,7 +1468,7 @@ class _StoryImage extends StatelessWidget {
                 valueColor: AlwaysStoppedAnimation<Color>(AppColors.teal),
               ),
             ),
-            12.h.verticalSpace,
+            12.w.verticalSpace,
             AppText(
               text: percent != null ? '$percent%' : 'Loading...',
               style: AppTextStyles.sfProDisplayMedium(
