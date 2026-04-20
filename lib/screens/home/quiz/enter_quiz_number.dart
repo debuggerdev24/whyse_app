@@ -246,7 +246,7 @@ class _EnterQuizNumbersScreenState extends State<EnterQuizNumbersScreen> {
                       ),
                     ],
                   ),
-                  22.h.verticalSpace,
+                  22.w.verticalSpace,
                   AppFilledButton(
                     text: 'Generate question',
                     onTap: () {
