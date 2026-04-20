@@ -53,6 +53,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
                 });
               },
             ),
+             
             22.verticalSpace,
             _PreferenceToggleItem(
               title: 'Haptic Feedback',
