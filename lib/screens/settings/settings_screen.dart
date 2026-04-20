@@ -56,10 +56,9 @@ class SettingsScreen extends StatelessWidget {
                       onTap: () => context.pushNamed(AppRoutes.preferencesScreen.name),
                     ),
                     25.verticalSpace,
-                    _settingsItem(
-                      title: 'Profile',
-                      onTap: () => context.pushNamed(AppRoutes.editProfileScreen.name),
-                    ),
+                    _settingsItem(title: 'Profile', onTap: () {
+
+                    }),
                     25.verticalSpace,
                     _settingsItem(
                       title: 'Notifications',

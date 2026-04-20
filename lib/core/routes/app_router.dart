@@ -16,6 +16,9 @@ import 'package:redstreakapp/screens/auth/login_screen.dart';
 import 'package:redstreakapp/screens/auth/reset_password_screen.dart';
 import 'package:redstreakapp/screens/auth/signup_screen.dart';
 import 'package:redstreakapp/screens/auth/verify_mail_screen.dart';
+import 'package:redstreakapp/screens/group/add_members.dart';
+import 'package:redstreakapp/screens/group/create_group_screen.dart';
+import 'package:redstreakapp/screens/group/join_group.dart';
 import 'package:redstreakapp/screens/home/story/created_ideas.dart';
 import 'package:redstreakapp/screens/notification/notification_screen.dart';
 import 'package:redstreakapp/screens/profile/profile_screen.dart';
@@ -128,36 +131,6 @@ class AppRouter {
       },
     ),
 
-    //   path: AppRoutes.verifyParentConsentScreen.path,
-    //   name: AppRoutes.verifyParentConsentScreen.name,
-    //   builder: (context, state) {
-    //     final uri = state.uri;
-    //     final token = state.uri.queryParameters["token"];
-    //
-    //     Logger.info("URI -> $uri");
-    //     Logger.info("scheme -> ${uri.scheme}");
-    //     Logger.info("host -> ${uri.host}");
-    //     Logger.info("path -> ${uri.path}");
-    //     if (token != null && token.isNotEmpty) {
-    //       context.read<AuthProvider>().setParentEmailToken = token;
-    //
-    //       //todo Call your API automatically when screen opens
-    //       context.read<AuthProvider>().verifyConsentRequest(
-    //         onSuccess: () {
-    //           context.pushNamed(
-    //             AppRoutes.createAccountScreen.name,
-    //             extra: true,
-    //           );
-    //         },
-    //         onFailed: (e) {
-    //           AppToast.error(context, e.errorMsg);
-    //         },
-    //       );
-    //     }
-    //
-    //     return const ConsentStatusScreen();
-    //   },
-    // ),
     GoRoute(
       path: AppRoutes.loginScreen.path,
       name: AppRoutes.loginScreen.name,
@@ -485,6 +458,27 @@ class AppRouter {
       name: AppRoutes.createdIdeasListScreen.name,
       builder: (context, state) {
         return const CreatedIdeasList();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.createGroupScreen.path,
+      name: AppRoutes.createGroupScreen.name,
+      builder: (context, state) {
+        return const CreateGroupScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.addMembersScreen.path,
+      name: AppRoutes.addMembersScreen.name,
+      builder: (context, state) {
+        return const AddMembersScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.joinGroupScreen.path,
+      name: AppRoutes.joinGroupScreen.name,
+      builder: (context, state) {
+        return const JoinGroupScreen();
       },
     ),
   ];

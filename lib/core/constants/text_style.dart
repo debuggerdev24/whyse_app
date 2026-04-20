@@ -74,7 +74,7 @@ class AppTextStyles {
     );
   }
 
-  static TextStyle sfProTextSemibold({double? fontSize, Color? color}) {
+  static TextStyle semiBold({double? fontSize, Color? color}) {
     return TextStyle(
       fontFamily: 'SFProText',
       fontWeight: FontWeight.w600,

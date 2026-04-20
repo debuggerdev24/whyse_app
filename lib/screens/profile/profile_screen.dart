@@ -42,9 +42,13 @@ class ProfileScreen extends StatelessWidget {
                   children: [
                     _profileDetailsBlock(),
                     _friendsBlock(),
-                    _groupsBlock(),
+                    _groupsBlock(context: context),
                     _overviewBlock(),
                     _interestsBlock(),
+                    _subscriptionBlock(),
+                    _yourBooksBlock(),
+                    _yourEBooksBlock(),
+                    _mySeriesesListBlock(),
                     SizedBox(height: 24.w),
                   ],
                 ),
@@ -237,7 +241,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _groupsBlock() {
+  Widget _groupsBlock({required BuildContext context}) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -278,7 +282,7 @@ class ProfileScreen extends StatelessWidget {
             ),
             16.w.verticalSpace,
             SizedBox(
-              height: 92.h,
+              height: 92.w,
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
@@ -334,7 +338,9 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      context.pushNamed(AppRoutes.createGroupScreen.name);
+                    },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.black,
                       backgroundColor: AppColors.white,
@@ -356,7 +362,9 @@ class ProfileScreen extends StatelessWidget {
                 16.w.horizontalSpace,
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      context.pushNamed(AppRoutes.joinGroupScreen.name);
+                    },
                     style: ElevatedButton.styleFrom(
                       elevation: 0,
                       backgroundColor: AppColors.black,
