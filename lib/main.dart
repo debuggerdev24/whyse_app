@@ -12,18 +12,6 @@ import 'package:redstreakapp/providers/on_boarding/on_boarding_provider.dart';
 import 'package:redstreakapp/whyse_app.dart';
 import 'package:toastification/toastification.dart';
 
-// ─── Client update (whole day) ─────────────────────────────────────────────
-
-
-
-
-
-
-
-
-
-
-// ───────────────────────────────────────────────────────────────────────────
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

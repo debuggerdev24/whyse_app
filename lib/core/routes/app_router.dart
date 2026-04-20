@@ -36,6 +36,8 @@ import 'package:redstreakapp/screens/home/quiz/start_quiz_screen.dart';
 import 'package:redstreakapp/models/home/browse_topic_model.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/screens/practice/practice_zone.dart';
+import 'package:redstreakapp/screens/settings/settings_screen.dart';
+import 'package:redstreakapp/screens/settings/preferences_screen.dart';
 
 import '../../screens/auth/below_16/consent_status_screen.dart';
 import '../../screens/auth/below_16/parent_email_screen.dart';
@@ -414,6 +416,20 @@ class AppRouter {
           progressResponse: progressResponse,
           searchTopic: searchTopic,
         );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.settingsScreen.path,
+      name: AppRoutes.settingsScreen.name,
+      builder: (context, state) {
+        return const SettingsScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.preferencesScreen.path,
+      name: AppRoutes.preferencesScreen.name,
+      builder: (context, state) {
+        return const PreferencesScreen();
       },
     ),
     GoRoute(
