@@ -42,4 +42,9 @@ enum AppRoutes {
   randomStorySeriesScreen, practiceZoneScreen, notificationScreen, createdIdeasListScreen, profileScreen,
   settingsScreen,
   preferencesScreen,
+  settingsNotificationScreen,
+  editProfileScreen,
+  remindersSettingsScreen,
+  friendsNotificationSettingsScreen,
+  groupsNotificationSettingsScreen,
 }
