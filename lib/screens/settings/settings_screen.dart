@@ -60,7 +60,12 @@ class SettingsScreen extends StatelessWidget {
 
                     }),
                     25.verticalSpace,
-                    _settingsItem(title: 'Notifications', onTap: () {}),
+                    _settingsItem(
+                      title: 'Notifications',
+                      onTap: () => context.pushNamed(
+                        AppRoutes.settingsNotificationScreen.name,
+                      ),
+                    ),
                     25.verticalSpace,
                     _settingsItem(title: 'Curriculum', onTap: () {}),
                     25.verticalSpace,

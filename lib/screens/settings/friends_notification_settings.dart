@@ -1,16 +1,18 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/screens/settings/widget/text_with_switch.dart';
 
-class PreferencesScreen extends StatefulWidget {
-  const PreferencesScreen({super.key});
+class FriendsNotificationSettingsScreen extends StatefulWidget {
+  const FriendsNotificationSettingsScreen({super.key});
 
   @override
-  State<PreferencesScreen> createState() => _PreferencesScreenState();
+  State<FriendsNotificationSettingsScreen> createState() =>
+      _FriendsNotificationSettingsScreenState();
 }
 
-class _PreferencesScreenState extends State<PreferencesScreen> {
-  bool _soundEffectsEnabled = true;
-  bool _hapticFeedbackEnabled = false;
+class _FriendsNotificationSettingsScreenState
+    extends State<FriendsNotificationSettingsScreen> {
+  bool _friendActivity = true;
+  bool _friendRequest = false;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +31,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
         ),
         centerTitle: true,
         title: AppText(
-          text: 'Preferences',
+          text: 'Friends',
           style: AppTextStyles.semibold(fontSize: 20),
         ),
         bottom: PreferredSize(
@@ -41,26 +43,26 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
         ),
       ),
       body: Padding(
-        padding: EdgeInsets.fromLTRB(25.r, 20.h, 25.r, 0),
+        padding: EdgeInsets.symmetric(horizontal: 27.r),
         child: Column(
           children: [
+            30.verticalSpace,
             TextWithSwitch(
-              title: 'Sound Effects',
-              value: _soundEffectsEnabled,
+              title: 'Friend Activity',
+              value: _friendActivity,
               onChanged: (value) {
                 setState(() {
-                  _soundEffectsEnabled = value;
+                  _friendActivity = value;
                 });
               },
             ),
-             
             22.verticalSpace,
             TextWithSwitch(
-              title: 'Haptic Feedback',
-              value: _hapticFeedbackEnabled,
+              title: 'Friend Request',
+              value: _friendRequest,
               onChanged: (value) {
                 setState(() {
-                  _hapticFeedbackEnabled = value;
+                  _friendRequest = value;
                 });
               },
             ),

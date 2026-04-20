@@ -1,16 +1,16 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/screens/settings/widget/text_with_switch.dart';
 
-class PreferencesScreen extends StatefulWidget {
-  const PreferencesScreen({super.key});
+class GroupsNotificationSettingsScreen extends StatefulWidget {
+  const GroupsNotificationSettingsScreen({super.key});
 
   @override
-  State<PreferencesScreen> createState() => _PreferencesScreenState();
+  State<GroupsNotificationSettingsScreen> createState() => _GroupState();
 }
 
-class _PreferencesScreenState extends State<PreferencesScreen> {
-  bool _soundEffectsEnabled = true;
-  bool _hapticFeedbackEnabled = false;
+class _GroupState extends State<GroupsNotificationSettingsScreen> {
+  bool _topicShared = true;
+  bool _joiningGroup = false;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
         ),
         centerTitle: true,
         title: AppText(
-          text: 'Preferences',
+          text: 'Groups',
           style: AppTextStyles.semibold(fontSize: 20),
         ),
         bottom: PreferredSize(
@@ -41,26 +41,26 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
         ),
       ),
       body: Padding(
-        padding: EdgeInsets.fromLTRB(25.r, 20.h, 25.r, 0),
+        padding: EdgeInsets.symmetric(horizontal: 27.r),
         child: Column(
           children: [
+            30.verticalSpace,
             TextWithSwitch(
-              title: 'Sound Effects',
-              value: _soundEffectsEnabled,
+              title: 'Topics Shared',
+              value: _topicShared,
               onChanged: (value) {
                 setState(() {
-                  _soundEffectsEnabled = value;
+                  _topicShared = value;
                 });
               },
             ),
-             
             22.verticalSpace,
             TextWithSwitch(
-              title: 'Haptic Feedback',
-              value: _hapticFeedbackEnabled,
+              title: 'Joining Group',
+              value: _joiningGroup,
               onChanged: (value) {
                 setState(() {
-                  _hapticFeedbackEnabled = value;
+                  _joiningGroup = value;
                 });
               },
             ),

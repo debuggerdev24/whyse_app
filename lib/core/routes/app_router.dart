@@ -22,6 +22,7 @@ import 'package:redstreakapp/screens/group/join_group.dart';
 import 'package:redstreakapp/screens/home/story/created_ideas.dart';
 import 'package:redstreakapp/screens/notification/notification_screen.dart';
 import 'package:redstreakapp/screens/profile/profile_screen.dart';
+import 'package:redstreakapp/screens/profile/your_books_screen.dart';
 import 'package:redstreakapp/screens/search/search_screen.dart';
 import 'package:redstreakapp/screens/home/story/custom_story_topic_screen.dart';
 
@@ -39,8 +40,13 @@ import 'package:redstreakapp/screens/home/quiz/start_quiz_screen.dart';
 import 'package:redstreakapp/models/home/browse_topic_model.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/screens/practice/practice_zone.dart';
+import 'package:redstreakapp/screens/settings/friends_notification_settings.dart';
+import 'package:redstreakapp/screens/settings/groups_notification_settings.dart';
+import 'package:redstreakapp/screens/settings/reminders_settings_screen.dart';
 import 'package:redstreakapp/screens/settings/settings_screen.dart';
 import 'package:redstreakapp/screens/settings/preferences_screen.dart';
+import 'package:redstreakapp/screens/settings/settings_notification_screen.dart';
+import 'package:redstreakapp/screens/settings/edit_profile_screen.dart';
 
 import '../../screens/auth/below_16/consent_status_screen.dart';
 import '../../screens/auth/below_16/parent_email_screen.dart';
@@ -403,6 +409,48 @@ class AppRouter {
       name: AppRoutes.preferencesScreen.name,
       builder: (context, state) {
         return const PreferencesScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.settingsNotificationScreen.path,
+      name: AppRoutes.settingsNotificationScreen.name,
+      builder: (context, state) {
+        return const SettingsNotificationScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.editProfileScreen.path,
+      name: AppRoutes.editProfileScreen.name,
+      builder: (context, state) {
+        return const EditProfileScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.remindersSettingsScreen.path,
+      name: AppRoutes.remindersSettingsScreen.name,
+      builder: (context, state) {
+        return const RemindersSettingsScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.friendsNotificationSettingsScreen.path,
+      name: AppRoutes.friendsNotificationSettingsScreen.name,
+      builder: (context, state) {
+        return const FriendsNotificationSettingsScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.groupsNotificationSettingsScreen.path,
+      name: AppRoutes.groupsNotificationSettingsScreen.name,
+      builder: (context, state) {
+        return const GroupsNotificationSettingsScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.yourEBooksScreen.path,
+      name: AppRoutes.yourEBooksScreen.name,
+      builder: (context, state) {
+        return const YourEBooksScreen();
       },
     ),
     GoRoute(
