@@ -37,6 +37,8 @@ class AppTextField extends StatelessWidget {
     this.bottomTextStyle,
     this.readOnly = false,
     this.onSubmit, this.onTapOutside,
+    this.cursorColor,
+    this.minLines,
   });
 
   final String? labelText;
@@ -45,9 +47,7 @@ class AppTextField extends StatelessWidget {
   final String? prefixText;
   final Widget? suffixIcon;
   final String? hintText;
-  final TextStyle? hintStyle;
-  final TextStyle? style;
-  final TextStyle? labelStyle;
+  final TextStyle? hintStyle,style,labelStyle;
   final TextEditingController? controller;
   final FormFieldValidator<String>? validator;
   final Function(String value)? onChanged;
@@ -61,15 +61,15 @@ class AppTextField extends StatelessWidget {
   final OutlineInputBorder? outlineInputBorder;
   final EdgeInsetsGeometry? contentPadding;
   final int? maxLength;
-  final Widget? suffix;
-  final Widget? prefix;
-  final int? maxLines;
+  final Widget? suffix,prefix;
+  final int? maxLines,minLines;
   final bool? enabled;
   final String? bottomText;
   final TextStyle? bottomTextStyle;
   final bool readOnly;
   final ValueChanged<String>? onSubmit;
   final Function()? onTapOutside;
+  final Color? cursorColor;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -77,15 +77,16 @@ class AppTextField extends StatelessWidget {
       children: [
         TextFormField(
           enabled: enabled ?? true,
-          expands: false,
+          // expands: minLines != null ? true : false,
           readOnly: readOnly,
           maxLength: maxLength,
+          minLines: minLines ?? 1,
           validator: validator,
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
           controller: controller,
           obscureText: obSecureText ?? false,
-          cursorColor: AppColors.black,
+          cursorColor: cursorColor ?? AppColors.black,
           showCursor: true,
           style: AppTextStyles.regular(
             color: AppColors.black,

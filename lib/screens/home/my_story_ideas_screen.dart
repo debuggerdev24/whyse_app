@@ -15,8 +15,6 @@ import 'package:redstreakapp/screens/home/widgets/story_ideas_widget.dart';
 class MyStoryIdeasScreen extends StatefulWidget {
   const MyStoryIdeasScreen({super.key});
 
-
-
   @override
   State<MyStoryIdeasScreen> createState() =>
       _MyStoryIdeasScreenState();
