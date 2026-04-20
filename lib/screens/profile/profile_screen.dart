@@ -41,7 +41,7 @@ class ProfileScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _profileDetailsBlock(),
-                    _friendsBlock(),
+                    _friendsBlock(),  
                     _groupsBlock(),
                     _overviewBlock(),
                     _interestsBlock(),
