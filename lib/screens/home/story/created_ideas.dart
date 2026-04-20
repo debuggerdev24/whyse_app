@@ -194,10 +194,7 @@ class CreatedIdeasList extends StatelessWidget {
                                   AppToast.error(context, error);
                                 },
                                 onSuccess: () {
-                                  AppToast.success(
-                                    context,
-                                    "Story created successfully.",
-                                  );
+                                 
                                 },
                                 selectedIdeaIndex: index,
                               );
