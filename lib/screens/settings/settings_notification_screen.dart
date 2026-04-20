@@ -5,62 +5,68 @@ class SettingsNotificationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: Align(
-          alignment: Alignment.centerLeft,
-          child: Padding(
-            padding: const EdgeInsets.only(left: 25),
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => context.pop(),
-              child: SvgIcon(AppAssets.backButton, size: 13.sp),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) context.pop();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 25),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => context.pop(),
+                child: SvgIcon(AppAssets.backButton, size: 13.sp),
+              ),
+            ),
+          ),
+          centerTitle: true,
+          title: AppText(
+            text: 'Notifications',
+            style: AppTextStyles.semibold(fontSize: 20),
+          ),
+          bottom: PreferredSize(
+            preferredSize: Size.fromHeight(1.h),
+            child: Container(
+              color: AppColors.black.withValues(alpha: 0.1),
+              height: 1,
             ),
           ),
         ),
-        centerTitle: true,
-        title: AppText(
-          text: 'Notifications',
-          style: AppTextStyles.semibold(fontSize: 20),
-        ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(1.h),
-          child: Container(
-            color: AppColors.black.withValues(alpha: 0.1),
-            height: 1,
+        body: Padding(
+          padding: EdgeInsets.fromLTRB(25.r, 22.h, 25.r, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _NotificationSettingItem(
+                title: 'Reminders',
+                subtitle: 'Daily Practice Reminders',
+                onTap: () =>
+                    context.pushNamed(AppRoutes.remindersSettingsScreen.name),
+              ),
+              SizedBox(height: 18),
+              _NotificationSettingItem(
+                title: 'Friends',
+                subtitle: 'Updates from your friends',
+                onTap: () => context.pushNamed(
+                  AppRoutes.friendsNotificationSettingsScreen.name,
+                ),
+              ),
+              SizedBox(height: 18),
+              _NotificationSettingItem(
+                title: 'Groups',
+                subtitle: 'Updates from groups',
+                onTap: () => context.pushNamed(
+                  AppRoutes.groupsNotificationSettingsScreen.name,
+                ),
+              ),
+              SizedBox(height: 18),
+              _NotificationSettingItem(title: 'Announcements', onTap: () {}),
+            ],
           ),
-        ),
-      ),
-      body: Padding(
-        padding: EdgeInsets.fromLTRB(25.r, 22.h, 25.r, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _NotificationSettingItem(
-              title: 'Reminders',
-              subtitle: 'Daily Practice Reminders',
-              onTap: () =>
-                  context.pushNamed(AppRoutes.remindersSettingsScreen.name),
-            ),
-            SizedBox(height: 18),
-            _NotificationSettingItem(
-              title: 'Friends',
-              subtitle: 'Updates from your friends',
-              onTap: () => context.pushNamed(
-                AppRoutes.friendsNotificationSettingsScreen.name,
-              ),
-            ),
-            SizedBox(height: 18),
-            _NotificationSettingItem(
-              title: 'Groups',
-              subtitle: 'Updates from groups',
-              onTap: () => context.pushNamed(
-                AppRoutes.groupsNotificationSettingsScreen.name,
-              ),
-            ),
-            SizedBox(height: 18),
-            _NotificationSettingItem(title: 'Announcements', onTap: () {}),
-          ],
         ),
       ),
     );

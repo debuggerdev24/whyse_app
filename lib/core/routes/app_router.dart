@@ -91,6 +91,57 @@ class AppRouter {
                 path: AppRoutes.profileScreen.path,
                 name: AppRoutes.profileScreen.name,
                 builder: (context, state) => ProfileScreen(),
+                routes: [
+                  GoRoute(
+                    path: AppRoutes.settingsScreen.name,
+                    name: AppRoutes.settingsScreen.name,
+                    builder: (context, state) {
+                      return const SettingsScreen();
+                    },
+                  ),
+                  GoRoute(
+                    path: AppRoutes.preferencesScreen.name,
+                    name: AppRoutes.preferencesScreen.name,
+                    builder: (context, state) {
+                      return const PreferencesScreen();
+                    },
+                  ),
+                  GoRoute(
+                    path: AppRoutes.settingsNotificationScreen.name,
+                    name: AppRoutes.settingsNotificationScreen.name,
+                    builder: (context, state) {
+                      return const SettingsNotificationScreen();
+                    },
+                  ),
+                  GoRoute(
+                    path: AppRoutes.editProfileScreen.name,
+                    name: AppRoutes.editProfileScreen.name,
+                    builder: (context, state) {
+                      return const EditProfileScreen();
+                    },
+                  ),
+                  GoRoute(
+                    path: AppRoutes.remindersSettingsScreen.name,
+                    name: AppRoutes.remindersSettingsScreen.name,
+                    builder: (context, state) {
+                      return const RemindersSettingsScreen();
+                    },
+                  ),
+                  GoRoute(
+                    path: AppRoutes.friendsNotificationSettingsScreen.name,
+                    name: AppRoutes.friendsNotificationSettingsScreen.name,
+                    builder: (context, state) {
+                      return const FriendsNotificationSettingsScreen();
+                    },
+                  ),
+                  GoRoute(
+                    path: AppRoutes.groupsNotificationSettingsScreen.name,
+                    name: AppRoutes.groupsNotificationSettingsScreen.name,
+                    builder: (context, state) {
+                      return const GroupsNotificationSettingsScreen();
+                    },
+                  ),
+                ],
               ),
             ],
           ),
@@ -422,55 +473,6 @@ class AppRouter {
           progressResponse: progressResponse,
           searchTopic: searchTopic,
         );
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.settingsScreen.path,
-      name: AppRoutes.settingsScreen.name,
-      builder: (context, state) {
-        return const SettingsScreen();
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.preferencesScreen.path,
-      name: AppRoutes.preferencesScreen.name,
-      builder: (context, state) {
-        return const PreferencesScreen();
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.settingsNotificationScreen.path,
-      name: AppRoutes.settingsNotificationScreen.name,
-      builder: (context, state) {
-        return const SettingsNotificationScreen();
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.editProfileScreen.path,
-      name: AppRoutes.editProfileScreen.name,
-      builder: (context, state) {
-        return const EditProfileScreen();
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.remindersSettingsScreen.path,
-      name: AppRoutes.remindersSettingsScreen.name,
-      builder: (context, state) {
-        return const RemindersSettingsScreen();
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.friendsNotificationSettingsScreen.path,
-      name: AppRoutes.friendsNotificationSettingsScreen.name,
-      builder: (context, state) {
-        return const FriendsNotificationSettingsScreen();
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.groupsNotificationSettingsScreen.path,
-      name: AppRoutes.groupsNotificationSettingsScreen.name,
-      builder: (context, state) {
-        return const GroupsNotificationSettingsScreen();
       },
     ),
     GoRoute(
