@@ -25,6 +25,7 @@ class AppFilledButton extends StatelessWidget {
     this.icon,
     this.isVisible = true,
     this.margin,
+    this.child,
     VoidCallback? onPressed,
   });
 
@@ -39,6 +40,7 @@ class AppFilledButton extends StatelessWidget {
   final bool isVisible;
   final Size? fixedSize;
   final EdgeInsetsGeometry? margin;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {

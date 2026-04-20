@@ -380,10 +380,10 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                           AppButton(
                             text: "Take Quiz",
                             onTap: () {
-                              context.pushNamed(
-                                AppRoutes.enterQuizNumbersScreen.name,
-                                extra: {'storyId': stories.id},
-                              );
+                              // context.pushNamed(
+                              //   AppRoutes.enterQuizNumbersScreen.name,
+                              //   extra: {'storyId': stories.id},
+                              // );
                             },
                             fontSize: 14.sp,
                           )

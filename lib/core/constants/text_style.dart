@@ -31,7 +31,7 @@ class AppTextStyles {
   static TextStyle semibold({double? fontSize, Color? color}) {
     return TextStyle(
       fontFamily: 'SFProDisplay',
-      fontWeight: FontWeight.w600,
+      fontWeight: FontWeight.w700,
       fontSize: fontSize?.sp ?? 16.sp,
       color: color,
     );

@@ -166,7 +166,7 @@ class _AgeEntryScreenState extends State<AgeEntryScreen> {
                           padding: EdgeInsets.symmetric(vertical: 20.h),
 
                           child: AppFilledButton(
-                            backgroundColor: AppColors.primaryColor,
+                            backgroundColor: AppColors.orangeColor,
                             text: "Continue",
                             onTap: () async {
                               if (_dateController.text.trim().isEmpty) {

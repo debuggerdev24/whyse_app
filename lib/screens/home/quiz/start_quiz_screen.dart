@@ -76,7 +76,7 @@ class StartQuizScreen extends StatelessWidget {
                   //   extra: {'quizzes': quizzes, 'storyTitle': storyTitle},
                   // );
                 },
-                backgroundColor: AppColors.primaryColor,
+                backgroundColor: AppColors.orangeColor,
                 fixedSize: Size(348.w, 42.w),
               ),
               40.w.verticalSpace,

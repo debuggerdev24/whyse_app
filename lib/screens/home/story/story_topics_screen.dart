@@ -277,7 +277,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
 
                   AppFilledButton(
                     text: "Next",
-                    backgroundColor: AppColors.primaryColor,
+                    backgroundColor: AppColors.orangeColor,
                     margin: EdgeInsets.only(top: 4.3.w, bottom: 18.w),
                     onTap: () async {
                       if (storyProvider.selectedTopicId.isEmpty) {

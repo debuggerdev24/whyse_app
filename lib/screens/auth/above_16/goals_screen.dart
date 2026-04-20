@@ -203,7 +203,7 @@ class _GoalScreenState extends State<GoalScreen> {
 
                       AppFilledButton(
                         text: "Next",
-                        backgroundColor: AppColors.primaryColor,
+                        backgroundColor: AppColors.orangeColor,
 
                         onTap: () async {
                           final customGoalTitle = provider

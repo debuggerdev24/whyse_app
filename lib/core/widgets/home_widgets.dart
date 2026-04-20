@@ -25,7 +25,7 @@ class HomeHeader extends StatelessWidget {
               SvgIcon(
                 AppAssets.thunder,
                 size: 17.w,
-                color: AppColors.primaryColor,
+                color: AppColors.orangeColor,
               ),
 
               AppText(
@@ -179,7 +179,7 @@ class CalendarStrip extends StatelessWidget {
                 child: Container(
                   height: 4.h,
                   decoration: BoxDecoration(
-                    color: AppColors.primaryColor,
+                    color: AppColors.orangeColor,
                     borderRadius: BorderRadius.circular(2.r),
                   ),
                 ),
@@ -250,7 +250,7 @@ class CalendarStrip extends StatelessWidget {
                       Container(
                         height: 3.w,
                         decoration: BoxDecoration(
-                          color: AppColors.primaryColor,
+                          color: AppColors.orangeColor,
                           borderRadius: BorderRadius.only(
                             bottomRight: Radius.circular(10.r),
                             bottomLeft: Radius.circular(10.r),

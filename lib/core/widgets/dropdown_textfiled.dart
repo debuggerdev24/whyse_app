@@ -124,7 +124,7 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
               width: 8.w,
               height: 8.w,
               decoration: BoxDecoration(
-                color: AppColors.primaryColor,
+                color: AppColors.orangeColor,
                 shape: BoxShape.circle,
               ),
             ),

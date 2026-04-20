@@ -72,9 +72,9 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                             ) {
                               Color color;
                               if (index < quiz.currentQuestionIndex) {
-                                color = AppColors.primaryColor;
+                                color = AppColors.orangeColor;
                               } else if (index == quiz.currentQuestionIndex) {
-                                color = AppColors.primaryColor;
+                                color = AppColors.orangeColor;
                               } else {
                                 color = Colors.grey.withValues(alpha: 0.2);
                               }

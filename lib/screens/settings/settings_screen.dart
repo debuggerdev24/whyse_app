@@ -57,7 +57,7 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     25.verticalSpace,
                     _settingsItem(title: 'Profile', onTap: () {
-
+                      context.pushNamed(AppRoutes.editProfileScreen.name);
                     }),
                     25.verticalSpace,
                     _settingsItem(

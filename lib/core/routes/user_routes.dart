@@ -58,5 +58,9 @@ enum AppRoutes {
   friendsNotificationSettingsScreen,
   groupsNotificationSettingsScreen,
   yourEBooksScreen,
-  preferencesScreen, createGroupScreen, addMembersScreen, joinGroupScreen,
+  createGroupScreen,
+  addMembersScreen,
+  joinGroupScreen,
+  groupListScreen,
+  viewGroupScreen, groupDetailsScreen, streakRankingScreen,
 }

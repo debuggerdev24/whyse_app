@@ -27,7 +27,7 @@ class _WhatInterestScreenState extends State<WhatInterestScreen> {
           children: [
             AppFilledButton(
               text: "Next",
-              backgroundColor: AppColors.primaryColor,
+              backgroundColor: AppColors.orangeColor,
               onTap: () async {
                 context.pushNamed(AppRoutes.readingGoalScreen.name);
               },

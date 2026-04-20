@@ -122,7 +122,7 @@ class _ReadingGoalScreenState extends State<ReadingGoalScreen> {
 
                     AppFilledButton(
                       text: "Next",
-                      backgroundColor: AppColors.primaryColor,
+                      backgroundColor: AppColors.orangeColor,
                       margin: EdgeInsets.only(bottom: 8.h),
                       onTap: () async {
                         int goal = 0;

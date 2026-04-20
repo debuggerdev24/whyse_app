@@ -403,7 +403,7 @@ class _BookItemTile extends StatelessWidget {
                           LinearProgressIndicator(
                             value: data.progress,
                             minHeight: 3.h,
-                            color: AppColors.primaryColor,
+                            color: AppColors.orangeColor,
                             backgroundColor: AppColors.black.withValues(
                               alpha: 0.08,
                             ),
@@ -571,7 +571,7 @@ class _RecipientTile extends StatelessWidget {
                             SvgIcon(
                               AppAssets.thunder,
                               size: 14.sp,
-                              color: AppColors.primaryColor,
+                              color: AppColors.orangeColor,
                             ),
                             5.horizontalSpace,
                             AppText(

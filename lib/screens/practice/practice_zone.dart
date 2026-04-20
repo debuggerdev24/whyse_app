@@ -167,13 +167,13 @@ class PracticeCard extends StatelessWidget {
                   SvgIcon(
                     AppAssets.thunder,
                     size: 16.w,
-                    color: AppColors.primaryColor,
+                    color: AppColors.orangeColor,
                   ),
                   4.w.horizontalSpace,
                   AppText(
                     text: "3",
                     style: AppTextStyles.bold(
-                      color: AppColors.primaryColor,
+                      color: AppColors.orangeColor,
                       fontSize: 16.sp,
                     ),
                   ),

@@ -178,7 +178,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                         margin: EdgeInsets.only(top: 20.h),
                         text: "Generate",
 
-                        backgroundColor: AppColors.primaryColor,
+                        backgroundColor: AppColors.orangeColor,
                         onTap: () {
                           deBouncer.run(() {
                             if (!provider.validateCreateStoryInput(context)) {

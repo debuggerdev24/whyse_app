@@ -47,7 +47,7 @@ class ProfileScreen extends StatelessWidget {
                     _interestsBlock(),
                     _subscriptionBlock(),
                     _yourBooksBlock(),
-                    _yourEBooksBlock(),
+                    _yourEBooksBlock(context),
                     _mySeriesesListBlock(),
                     SizedBox(height: 24.w),
                   ],
@@ -269,7 +269,9 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const Spacer(),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    context.pushNamed(AppRoutes.groupListScreen.name);
+                  },
                   child: AppText(
                     text: 'View all',
                     style: AppTextStyles.semibold(
@@ -420,7 +422,7 @@ class ProfileScreen extends StatelessWidget {
                       leading: SvgIcon(
                         AppAssets.thunder,
                         size: 28.w,
-                        color: AppColors.primaryColor,
+                        color: AppColors.orangeColor,
                       ),
                       value: '263',
                       label: 'Streaks',

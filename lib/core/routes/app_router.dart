@@ -16,9 +16,13 @@ import 'package:redstreakapp/screens/auth/login_screen.dart';
 import 'package:redstreakapp/screens/auth/reset_password_screen.dart';
 import 'package:redstreakapp/screens/auth/signup_screen.dart';
 import 'package:redstreakapp/screens/auth/verify_mail_screen.dart';
-import 'package:redstreakapp/screens/group/add_members.dart';
+import 'package:redstreakapp/screens/group/add_members_screen.dart';
 import 'package:redstreakapp/screens/group/create_group_screen.dart';
-import 'package:redstreakapp/screens/group/join_group.dart';
+import 'package:redstreakapp/screens/group/group_details_screen.dart';
+import 'package:redstreakapp/screens/group/group_list_screen.dart';
+import 'package:redstreakapp/screens/group/join_group_screen.dart';
+import 'package:redstreakapp/screens/group/streak_ranking_screen.dart';
+import 'package:redstreakapp/screens/group/view_group_screen.dart';
 import 'package:redstreakapp/screens/home/story/created_ideas.dart';
 import 'package:redstreakapp/screens/notification/notification_screen.dart';
 import 'package:redstreakapp/screens/profile/profile_screen.dart';
@@ -479,6 +483,34 @@ class AppRouter {
       name: AppRoutes.joinGroupScreen.name,
       builder: (context, state) {
         return const JoinGroupScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.groupListScreen.path,
+      name: AppRoutes.groupListScreen.name,
+      builder: (context, state) {
+        return const GroupListScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.viewGroupScreen.path,
+      name: AppRoutes.viewGroupScreen.name,
+      builder: (context, state) {
+        return const ViewGroupScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.groupDetailsScreen.path,
+      name: AppRoutes.groupDetailsScreen.name,
+      builder: (context, state) {
+        return const GroupDetailsScreen();
+      },  
+    ),
+    GoRoute(
+      path: AppRoutes.streakRankingScreen.path,
+      name: AppRoutes.streakRankingScreen.name,
+      builder: (context, state) {
+        return const StreakRankingScreen();
       },
     ),
   ];

@@ -109,10 +109,10 @@ class QuizCompletedScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(40.r),
                       border: Border.all(
-                        color: AppColors.primaryColor,
+                        color: AppColors.orangeColor,
                         width: 1.2,
                       ),
-                      color: AppColors.primaryColor.withValues(alpha: 0.1),
+                      color: AppColors.orangeColor.withValues(alpha: 0.1),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -120,7 +120,7 @@ class QuizCompletedScreen extends StatelessWidget {
                         SvgIcon(
                           AppAssets.thunder,
                           size: 18.w,
-                          color: AppColors.primaryColor,
+                          color: AppColors.orangeColor,
                         ),
                         8.w.horizontalSpace,
                         AppText(

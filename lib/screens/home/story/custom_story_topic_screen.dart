@@ -63,7 +63,7 @@ class CustomStoryTopicScreen extends StatelessWidget {
                 //todo next button
                 AppFilledButton(
                   text: "Next",
-                  backgroundColor: AppColors.primaryColor,
+                  backgroundColor: AppColors.orangeColor,
                   margin: EdgeInsetsGeometry.only(top: 4.3.h),
                   onTap: () async {
                     if (provider.customTopicCtr.text.isEmpty) {

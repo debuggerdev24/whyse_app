@@ -102,7 +102,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                         AppFilledButton(
                           text: "Next",
                           margin: EdgeInsets.only(bottom: 8),
-                          backgroundColor: AppColors.primaryColor,
+                          backgroundColor: AppColors.orangeColor,
                           onTap: () async {
                             if (onBoardingProvider.selectedCountry == null) {
                               AppToast.error(

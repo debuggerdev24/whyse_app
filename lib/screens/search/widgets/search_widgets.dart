@@ -169,7 +169,7 @@ class FeaturedTopicCard extends StatelessWidget {
                         vertical: 6.h,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primaryColor,
+                        color: AppColors.orangeColor,
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: AppText(
@@ -511,8 +511,8 @@ class TopicArt extends StatelessWidget {
     final palettes = [
       [AppColors.black, AppColors.teal],
       [AppColors.bluecolor, AppColors.teal],
-      [AppColors.primaryColor, AppColors.teal],
-      [AppColors.black, AppColors.primaryColor],
+      [AppColors.orangeColor, AppColors.teal],
+      [AppColors.black, AppColors.orangeColor],
     ];
 
     return palettes[topic.topic.hashCode.abs() % palettes.length];
@@ -814,7 +814,7 @@ class BrowseErrorState extends StatelessWidget {
           Icon(
             Icons.wifi_off_rounded,
             size: 42.sp,
-            color: AppColors.primaryColor,
+            color: AppColors.orangeColor,
           ),
           14.w.verticalSpace,
           AppText(

@@ -199,7 +199,7 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                   AppFilledButton(
                     text: "Next",
                     margin: EdgeInsets.only(bottom: (Platform.isIOS) ? 0.w : 18.w),
-                    backgroundColor: AppColors.primaryColor,
+                    backgroundColor: AppColors.orangeColor,
                     onTap: () async {
                       final goalText = provider.goalTitleController.text.trim();
                       final goalDesText = provider.goalDesController.text

@@ -78,7 +78,7 @@ class _ConsentStatusScreenState extends State<ConsentStatusScreen> {
                         }
                       },
                       text: "Continue",
-                      backgroundColor: AppColors.primaryColor,
+                      backgroundColor: AppColors.orangeColor,
                     ),
 
                     10.w.verticalSpace,

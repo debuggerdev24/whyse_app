@@ -32,6 +32,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: AppColors.backgroundColor,
+        surfaceTintColor: Colors.transparent,
         leading: Align(
           alignment: Alignment.centerLeft,
           child: Padding(
