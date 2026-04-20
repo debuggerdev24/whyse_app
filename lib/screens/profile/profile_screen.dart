@@ -47,7 +47,7 @@ class ProfileScreen extends StatelessWidget {
                     _interestsBlock(),
                     _subscriptionBlock(),
                     _yourBooksBlock(),
-                    _yourEBooksBlock(),
+                    _yourEBooksBlock(context),
                     _mySeriesesListBlock(),
                     SizedBox(height: 24.h),
                   ],
@@ -627,9 +627,28 @@ class ProfileScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AppText(
-              text: 'Your Books',
-              style: AppTextStyles.bold(fontSize: 20, color: AppColors.black),
+            Row(
+              children: [
+                AppText(
+                  text: 'Your Books',
+                  style: AppTextStyles.bold(
+                    fontSize: 20,
+                    color: AppColors.black,
+                  ),
+                ),
+                const Spacer(),
+                // GestureDetector(
+                //   behavior: HitTestBehavior.opaque,
+                //   onTap: () {},
+                //   child: AppText(
+                //     text: 'See all',
+                //     style: AppTextStyles.semibold(
+                //       fontSize: 15,
+                //       color: AppColors.teal,
+                //     ),
+                //   ),
+                // ),
+              ],
             ),
             12.verticalSpace,
             SizedBox(
@@ -671,7 +690,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _yourEBooksBlock() {
+  Widget _yourEBooksBlock(BuildContext context) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -699,7 +718,8 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () =>
+                      context.pushNamed(AppRoutes.yourEBooksScreen.name),
                   child: AppText(
                     text: 'View all',
                     style: AppTextStyles.semibold(

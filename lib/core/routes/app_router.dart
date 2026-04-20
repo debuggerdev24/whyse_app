@@ -19,6 +19,7 @@ import 'package:redstreakapp/screens/auth/verify_mail_screen.dart';
 import 'package:redstreakapp/screens/home/story/created_ideas.dart';
 import 'package:redstreakapp/screens/notification/notification_screen.dart';
 import 'package:redstreakapp/screens/profile/profile_screen.dart';
+import 'package:redstreakapp/screens/profile/your_books_screen.dart';
 import 'package:redstreakapp/screens/search/search_screen.dart';
 import 'package:redstreakapp/screens/home/story/custom_story_topic_screen.dart';
 
@@ -470,6 +471,13 @@ class AppRouter {
       name: AppRoutes.groupsNotificationSettingsScreen.name,
       builder: (context, state) {
         return const GroupsNotificationSettingsScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.yourEBooksScreen.path,
+      name: AppRoutes.yourEBooksScreen.name,
+      builder: (context, state) {
+        return const YourEBooksScreen();
       },
     ),
     GoRoute(
