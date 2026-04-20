@@ -22,16 +22,16 @@ class ProfileHeaderSection extends StatelessWidget {
                   children: [
                     Align(
                       alignment: Alignment.centerLeft,
-                    child: _CircleOutlineIconButton(
-                      onTap: () {
-                        if (context.canPop()) context.pop();
-                      },
-                      child: Icon(
-                        Icons.chevron_left_rounded,
-                        size: 20.sp,
-                        color: AppColors.black,
+                      child: _CircleOutlineIconButton(
+                        onTap: () {
+                          if (context.canPop()) context.pop();
+                        },
+                        child: Icon(
+                          Icons.chevron_left_rounded,
+                          size: 20.sp,
+                          color: AppColors.black,
+                        ),
                       ),
-                    ),
                     ),
                     AppText(
                       text: 'Your Profile',
@@ -45,24 +45,26 @@ class ProfileHeaderSection extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                        _CircleOutlineIconButton(
-                          onTap: () {},
-                          child: Icon(
-                            Icons.notifications_none_rounded,
-                            size: 20.sp,
-                            color: AppColors.black,
+                          _CircleOutlineIconButton(
+                            onTap: () {},
+                            child: Icon(
+                              Icons.notifications_none_rounded,
+                              size: 20.sp,
+                              color: AppColors.black,
+                            ),
                           ),
-                        ),
-                        SizedBox(width: 8.w),
-                        _CircleOutlineIconButton(
-                          onTap: () {},
-                          
-                          child: Icon(
-                            Icons.settings_outlined,
-                            size: 20.sp,
-                            color: AppColors.black,
+                          SizedBox(width: 8.w),
+                          _CircleOutlineIconButton(
+                            onTap: () {
+                              context.pushNamed(AppRoutes.settingsScreen.name);
+                            },
+
+                            child: Icon(
+                              Icons.settings_outlined,
+                              size: 20.sp,
+                              color: AppColors.black,
+                            ),
                           ),
-                        ),
                         ],
                       ),
                     ),
@@ -151,10 +153,7 @@ class ProfileHeaderSection extends StatelessWidget {
 }
 
 class _CircleOutlineIconButton extends StatelessWidget {
-  const _CircleOutlineIconButton({
-    required this.onTap,
-    required this.child,
-  });
+  const _CircleOutlineIconButton({required this.onTap, required this.child});
 
   final VoidCallback onTap;
   final Widget child;
@@ -178,7 +177,6 @@ class _CircleOutlineIconButton extends StatelessWidget {
           ),
           alignment: Alignment.center,
           child: child,
-
         ),
       ),
     );

@@ -1,12 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/auth/session_expiry_notifier.dart';
+import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
-import 'package:redstreakapp/core/routes/app_router.dart';
-import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/services/deep_link/deep_link_handler.dart';
 
 class WhyseApp extends StatefulWidget {
@@ -31,7 +27,9 @@ class _WhyseAppState extends State<WhyseApp> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _deepLinkHandler.init(context: context, authProvider: provider);
     });
-    SessionExpiryNotifier.instance.eventCounter.addListener(_sessionExpiryListener);
+    SessionExpiryNotifier.instance.eventCounter.addListener(
+      _sessionExpiryListener,
+    );
   }
 
   @override
@@ -64,6 +62,22 @@ class _WhyseAppState extends State<WhyseApp> {
       splitScreenMode: true,
       builder: (context, child) {
         return MaterialApp.router(
+          theme: ThemeData(
+            scaffoldBackgroundColor: AppColors.backgroundColor,
+            appBarTheme: AppBarTheme(
+              systemOverlayStyle: SystemUiOverlayStyle(
+                statusBarColor: Colors.transparent,
+                statusBarIconBrightness: Brightness.dark,
+              ),
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              centerTitle: true,
+              titleTextStyle: AppTextStyles.semibold(
+                fontSize: 20,
+                color: AppColors.black,
+              ),
+            ),
+          ),
           debugShowCheckedModeBanner: false,
           routerConfig: AppRouter.goRouter,
         );

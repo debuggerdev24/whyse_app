@@ -40,4 +40,6 @@ enum AppRoutes {
   storyReadingGoalScreen,
   verifyParentConsentScreen, createdStorySummaryScreen, createdStoryReadingScreen, storyIdeasScreen, storyReadingScreen, sharedStoryScreen, searchScreen,
   randomStorySeriesScreen, practiceZoneScreen, notificationScreen, createdIdeasListScreen, profileScreen,
+  settingsScreen,
+  preferencesScreen,
 }

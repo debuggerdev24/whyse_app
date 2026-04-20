@@ -1,5 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/widgets/global_widgets.dart';
+import 'package:redstreakapp/models/home/story_models/story_topics.dart';
 import 'package:redstreakapp/screens/profile/widgets/profile_header_section.dart';
+import 'package:shimmer/shimmer.dart';
 
 const List<({String name, Color bg})> _kProfileFriends = [
   (name: 'emma_rose', bg: Color(0xFF167C80)),
@@ -36,15 +40,74 @@ class ProfileScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    _profileDetailsBlock(),
                     _friendsBlock(),
                     _groupsBlock(),
                     _overviewBlock(),
                     _interestsBlock(),
+                    _subscriptionBlock(),
+                    _yourBooksBlock(),
+                    _yourEBooksBlock(),
+                    _mySeriesesListBlock(),
                     SizedBox(height: 24.h),
                   ],
                 ),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _profileDetailsBlock() {
+    return Container(
+      padding: EdgeInsets.fromLTRB(27.w, 20.h, 27.w, 20.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppText(
+                text: 'Stacey Abrams',
+                style: AppTextStyles.bold(fontSize: 20, color: AppColors.black),
+              ),
+              Row(
+                children: [
+                  AppText(
+                    text: '@StaceyAbs21',
+                    style: AppTextStyles.bold(
+                      fontSize: 14,
+                      color: AppColors.black.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  AppText(
+                    text: ' • Joined 2025',
+                    style: AppTextStyles.semibold(
+                      fontSize: 14,
+                      color: AppColors.black.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppText(
+                text: '15',
+                style: AppTextStyles.bold(fontSize: 20, color: AppColors.black),
+              ),
+              AppText(
+                text: 'Friends',
+                style: AppTextStyles.bold(
+                  fontSize: 14,
+                  color: AppColors.black.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -462,56 +525,528 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
-}
 
-Widget _profileStatCard({
-  required Widget leading,
-  required String value,
-  required String label,
-}) {
-  return Container(
-    decoration: BoxDecoration(
-      color: AppColors.lightwhiteColor,
-      borderRadius: BorderRadius.circular(12.r),
-      border: Border.all(
-        color: AppColors.black.withValues(alpha: 0.08),
-      ),
-    ),
-    child: Padding(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 36.w,
-            child: Center(child: leading),
+  Widget _subscriptionBlock() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        border: Border(
+          top: BorderSide(
+            color: AppColors.black.withValues(alpha: 0.08),
+            width: 1,
           ),
-          10.w.horizontalSpace,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppText(
+              text: 'Subscription',
+              style: AppTextStyles.bold(fontSize: 20, color: AppColors.black),
+            ),
+            11.verticalSpace,
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.lightwhiteColor,
+                borderRadius: BorderRadius.circular(16.r),
+                border: Border.all(
+                  color: AppColors.black.withValues(alpha: 0.08),
+                ),
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 22.h),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(right: 12.w),
+                      child: AppText(
+                        text: 'Free Plan (with ads)',
+                        style: AppTextStyles.bold(
+                          fontSize: 16,
+                          color: AppColors.black,
+                        ),
+                      ),
+                    ),
+                    AppText(
+                      text: '\$0/mo',
+                      style: AppTextStyles.bold(
+                        fontSize: 16,
+                        color: AppColors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            16.verticalSpace,
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  elevation: 0,
+                  backgroundColor: AppColors.black,
+                  foregroundColor: AppColors.white,
+                  padding: EdgeInsets.symmetric(vertical: 14.h),
+                  shape: const StadiumBorder(),
+                ),
+                child: AppText(
+                  text: 'Upgrade',
+                  style: AppTextStyles.semibold(
+                    fontSize: 15,
+                    color: AppColors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _yourBooksBlock() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        border: Border(
+          top: BorderSide(
+            color: AppColors.black.withValues(alpha: 0.08),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppText(
+              text: 'Your Books',
+              style: AppTextStyles.bold(fontSize: 20, color: AppColors.black),
+            ),
+            12.verticalSpace,
+            SizedBox(
+              height: 125,
+              width: double.maxFinite,
+              child: ListView.separated(
+                separatorBuilder: (context, index) => const SizedBox(width: 8),
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: 10,
+                itemBuilder: (context, index) {
+                  return Container(
+                    height: 120,
+                    margin: EdgeInsets.only(bottom: 5, left: 1),
+                    width: 80,
+                    decoration: BoxDecoration(
+                      color: AppColors.lightwhiteColor,
+                      borderRadius: BorderRadius.circular(12.r),
+                      image: DecorationImage(
+                        image: AssetImage(AppAssets.demoBookImage),
+                        fit: BoxFit.cover,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.black.withValues(alpha: 0.15),
+                          spreadRadius: 2,
+                          blurRadius: 2,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _yourEBooksBlock() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        border: Border(
+          top: BorderSide(
+            color: AppColors.black.withValues(alpha: 0.08),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 AppText(
-                  text: value,
+                  text: 'Your eBooks',
                   style: AppTextStyles.bold(
                     fontSize: 20,
                     color: AppColors.black,
                   ),
                 ),
-                4.w.verticalSpace,
-                AppText(
-                  text: label,
-                  style: AppTextStyles.medium(
-                    fontSize: 12,
-                    color: AppColors.black.withValues(alpha: 0.48),
+                GestureDetector(
+                  onTap: () {},
+                  child: AppText(
+                    text: 'View all',
+                    style: AppTextStyles.semibold(
+                      fontSize: 15,
+                      color: AppColors.teal,
+                    ),
                   ),
                 ),
               ],
             ),
+            12.verticalSpace,
+            SizedBox(
+              height: 125,
+              width: double.maxFinite,
+              child: ListView.separated(
+                separatorBuilder: (context, index) => const SizedBox(width: 8),
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: 10,
+                itemBuilder: (context, index) {
+                  return Container(
+                    height: 120,
+                    margin: EdgeInsets.only(bottom: 5, left: 1),
+                    width: 80,
+                    decoration: BoxDecoration(
+                      color: AppColors.lightwhiteColor,
+                      borderRadius: BorderRadius.circular(12.r),
+                      image: DecorationImage(
+                        image: AssetImage(AppAssets.demoBookImage),
+                        fit: BoxFit.cover,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.black.withValues(alpha: 0.15),
+                          spreadRadius: 2,
+                          blurRadius: 2,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _mySeriesesListBlock() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        border: Border(
+          top: BorderSide(
+            color: AppColors.black.withValues(alpha: 0.08),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                AppText(
+                  text: 'My Series List',
+                  style: AppTextStyles.bold(
+                    fontSize: 20,
+                    color: AppColors.black,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {},
+                  child: AppText(
+                    text: 'View all',
+                    style: AppTextStyles.semibold(
+                      fontSize: 15,
+                      color: AppColors.teal,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            12.verticalSpace,
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: List.generate(
+                  5,
+                  (index) => _StoryCard(
+                    story: [
+                      CreatedStoryTopicsModel(
+                        id: '1',
+                        topic: 'Story 1',
+                        learningGoal: 'Learning Goal 1',
+                        type: 'Story',
+                        interests: [],
+                        noOfStories: 3,
+                        noOfStoriesGenerated: 2,
+                        createdBy: '',
+                        isOwnTopic: false,
+                        createdOn: DateTime.now().toIso8601String(),
+                        updatedAt: DateTime.now().toIso8601String(),
+                        thumbnailUrl: AppAssets.demoBookImage,
+                      ),
+                      CreatedStoryTopicsModel(
+                        id: '1',
+                        topic: 'Story 2',
+                        learningGoal: 'Learning Goal 2',
+                        type: 'Story',
+                        interests: [],
+                        noOfStories: 3,
+                        noOfStoriesGenerated: 2,
+                        createdBy: '',
+                        isOwnTopic: false,
+                        createdOn: DateTime.now().toIso8601String(),
+                        updatedAt: DateTime.now().toIso8601String(),
+                        thumbnailUrl: AppAssets.demoBookImage,
+                      ),
+                      CreatedStoryTopicsModel(
+                        id: '1',
+                        topic: 'Story 3',
+                        learningGoal: 'Learning Goal 3',
+                        type: 'Story',
+                        interests: [],
+                        noOfStories: 3,
+                        noOfStoriesGenerated: 2,
+                        createdBy: '',
+                        isOwnTopic: false,
+                        createdOn: DateTime.now().toIso8601String(),
+                        updatedAt: DateTime.now().toIso8601String(),
+                        thumbnailUrl: AppAssets.demoBookImage,
+                      ),
+                      CreatedStoryTopicsModel(
+                        id: '1',
+                        topic: 'Story 4',
+                        learningGoal: 'Learning Goal 4',
+                        type: 'Story',
+                        interests: [],
+                        noOfStories: 3,
+                        noOfStoriesGenerated: 2,
+                        createdBy: '',
+                        isOwnTopic: false,
+                        createdOn: DateTime.now().toIso8601String(),
+                        updatedAt: DateTime.now().toIso8601String(),
+                        thumbnailUrl: AppAssets.demoBookImage,
+                      ),
+                      CreatedStoryTopicsModel(
+                        id: '1',
+                        topic: 'Story 5',
+                        learningGoal: 'Learning Goal 5',
+                        type: 'Story',
+                        interests: [],
+                        noOfStories: 3,
+                        noOfStoriesGenerated: 2,
+                        createdBy: '',
+                        isOwnTopic: false,
+                        createdOn: DateTime.now().toIso8601String(),
+                        updatedAt: DateTime.now().toIso8601String(),
+                        thumbnailUrl: AppAssets.demoBookImage,
+                      ),
+                    ][index],
+                    onTap: () {},
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _profileStatCard({
+    required Widget leading,
+    required String value,
+    required String label,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.lightwhiteColor,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: AppColors.black.withValues(alpha: 0.08)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 36.w,
+              child: Center(child: leading),
+            ),
+            10.w.horizontalSpace,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AppText(
+                    text: value,
+                    style: AppTextStyles.bold(
+                      fontSize: 20,
+                      color: AppColors.black,
+                    ),
+                  ),
+                  4.w.verticalSpace,
+                  AppText(
+                    text: label,
+                    style: AppTextStyles.medium(
+                      fontSize: 12,
+                      color: AppColors.black.withValues(alpha: 0.48),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StoryCard extends StatelessWidget {
+  const _StoryCard({required this.story, this.onTap});
+
+  final CreatedStoryTopicsModel story;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final subtitleColor = AppColors.black.withValues(alpha: 0.45);
+    final readCount = story.noOfStories;
+    final totalCount = story.noOfStoriesGenerated > 0
+        ? story.noOfStoriesGenerated
+        : readCount;
+
+    return Container(
+      width: 210.w,
+      alignment: Alignment.center,
+      margin: EdgeInsets.only(right: 10.w),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+                child: SizedBox(
+                  height: 132.w,
+                  width: double.infinity,
+                  child: story.thumbnailUrl.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: story.thumbnailUrl,
+                          fit: BoxFit.cover,
+                          placeholder: (_, __) => _storyImageShimmer(),
+                          errorWidget: (_, __, ___) =>
+                              const NoImageFound(compact: true, iconOnly: true),
+                        )
+                      : _storyImageShimmer(),
+                ),
+              ),
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Container(
+                  width: 32.h,
+                  height: 32.h,
+                  margin: EdgeInsets.only(top: 10.w, right: 10.w),
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    Icons.bookmark_rounded,
+                    size: 20.sp,
+                    color: AppColors.black,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(14.w, 13.w, 14.w, 2.w),
+            child: AppText(
+              text: story.topic,
+              style: AppTextStyles.bold(fontSize: 16.sp),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 14.w),
+            child: AppText(
+              text: '$readCount out of $totalCount Readings',
+              style: AppTextStyles.medium(
+                fontSize: 12.sp,
+                color: subtitleColor,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          AppButton(
+            margin: EdgeInsets.fromLTRB(14.w, 12.w, 14.w, 16.w),
+            onTap: () {
+              onTap?.call();
+            },
+            text: "Start Reading",
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+Shimmer _storyImageShimmer() {
+  return Shimmer.fromColors(
+    baseColor: AppColors.shimmerBaseColor,
+    highlightColor: AppColors.shimmerHighlightColor,
+    child: Container(
+      width: double.infinity,
+      height: 132.w,
+      color: AppColors.shimmerBaseColor,
     ),
   );
 }

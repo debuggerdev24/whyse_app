@@ -70,6 +70,7 @@ class AppAssets {
   static const ebook = "$_imagePath/e-book.png";
   static const pterodactylus = "$_imagePath/pterodactylus.png";
   static const quiz = "$_imagePath/quiz.png";
+  static const demoBookImage = "$_imagePath/demo_book_img.png";
 }
 
 class SvgIcon extends StatelessWidget {

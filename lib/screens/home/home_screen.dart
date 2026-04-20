@@ -19,11 +19,10 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             const HomeHeader(),
             20.w.verticalSpace,
-            
+
             const CalendarStrip(),
+
             // 24.w.verticalSpace,
-
-
             24.w.verticalSpace,
 
             const HomeStoryTopics(),
