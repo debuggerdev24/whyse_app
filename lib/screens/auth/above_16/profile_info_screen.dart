@@ -61,7 +61,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                         ),
                         AppText(
                           text: "Profile Information",
-                          style: AppTextStyles.sfProDisplayBold(
+                          style: AppTextStyles.bold(
                             fontSize: 32.sp,
                           ),
                         ),
@@ -69,7 +69,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                         AppText(
                           text:
                               "Complete your profile to personalize your reading journey.",
-                          style: AppTextStyles.sfProDisplayMedium(
+                          style: AppTextStyles.medium(
                             fontSize: 16.sp,
                             color: AppColors.black.withValues(alpha: 0.8),
                           ),

@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
+import 'package:redstreakapp/core/widgets/global_widgets.dart';
 import 'package:redstreakapp/models/home/browse_topic_model.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -65,14 +66,14 @@ class _BrowseSearchFieldState extends State<BrowseSearchField> {
       focusNode: _focusNode,
       onChanged: widget.onChanged,
       cursorColor: AppColors.black,
-      style: AppTextStyles.sfProDisplayRegular(
+      style: AppTextStyles.regular(
         color: AppColors.black,
         fontSize: 16.sp,
       ),
       onTapOutside: (_) => FocusScope.of(context).unfocus(),
       decoration: InputDecoration(
         hintText: "Search topics, animals, science, nature...",
-        hintStyle: AppTextStyles.sfProDisplayMedium(
+        hintStyle: AppTextStyles.medium(
           fontSize: 15.sp,
           color: AppColors.black.withValues(alpha: 0.35),
         ),
@@ -173,7 +174,7 @@ class FeaturedTopicCard extends StatelessWidget {
                       ),
                       child: AppText(
                         text: topic.storiesCountLabel,
-                        style: AppTextStyles.sfProDisplaySemibold(
+                        style: AppTextStyles.semibold(
                           fontSize: 12.sp,
                           color: AppColors.white,
                         ),
@@ -202,7 +203,7 @@ class FeaturedTopicCard extends StatelessWidget {
                       text: topic.topic,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.sfProDisplayBold(
+                      style: AppTextStyles.bold(
                         fontSize: 28.sp,
                         height: 1.1,
                         color: AppColors.white,
@@ -213,7 +214,7 @@ class FeaturedTopicCard extends StatelessWidget {
                       text: topic.learningGoal,
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.sfProDisplayMedium(
+                      style: AppTextStyles.medium(
                         fontSize: 14.sp,
                         height: 1.4,
                         color: AppColors.white.withValues(alpha: 0.84),
@@ -306,7 +307,7 @@ class PosterTopicCard extends StatelessWidget {
                     text: topic.topic,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.sfProDisplayBold(
+                    style: AppTextStyles.bold(
                       fontSize: 18.sp,
                       height: 1.15,
                       color: AppColors.white,
@@ -384,7 +385,7 @@ class SearchResultRowCard extends StatelessWidget {
                   text: topic.topic,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.sfProDisplaySemibold(
+                  style: AppTextStyles.semibold(
                     fontSize: 16.sp,
                   ),
                 ),
@@ -458,12 +459,12 @@ class BrowseTopicDetailsSheet extends StatelessWidget {
             18.w.verticalSpace,
             AppText(
               text: topic.topic,
-              style: AppTextStyles.sfProDisplayBold(fontSize: 24.sp),
+              style: AppTextStyles.bold(fontSize: 24.sp),
             ),
             8.w.verticalSpace,
             AppText(
               text: topic.learningGoal,
-              style: AppTextStyles.sfProDisplayMedium(
+              style: AppTextStyles.medium(
                 fontSize: 15.sp,
                 height: 1.5,
                 color: AppColors.black.withValues(alpha: 0.78),
@@ -483,7 +484,7 @@ class BrowseTopicDetailsSheet extends StatelessWidget {
               18.w.verticalSpace,
               AppText(
                 text: "Categories",
-                style: AppTextStyles.sfProDisplaySemibold(fontSize: 16.sp),
+                style: AppTextStyles.semibold(fontSize: 16.sp),
               ),
               10.w.verticalSpace,
               Wrap(
@@ -524,10 +525,8 @@ class TopicArt extends StatelessWidget {
         imageUrl: topic.thumbnailUrl,
         fit: BoxFit.cover,
         placeholder: (context, url) => const ImageShimmer(),
-        errorWidget: (context, url, error) => FallbackTopicArt(
-          topic: topic,
-          colors: _paletteForTopic(),
-        ),
+        errorWidget: (context, url, error) =>
+            const NoImageFound(compact: true),
       );
     }
 
@@ -582,7 +581,7 @@ class TopBadge extends StatelessWidget {
       ),
       child: AppText(
         text: label,
-        style: AppTextStyles.sfProDisplaySemibold(
+        style: AppTextStyles.semibold(
           fontSize: 12.sp,
           color: AppColors.white,
         ),
@@ -662,7 +661,7 @@ class TopicListToggleButton extends StatelessWidget {
                     6.w.horizontalSpace,
                     AppText(
                       text: isInMyList ? "Added" : "Add",
-                      style: AppTextStyles.sfProDisplaySemibold(
+                      style: AppTextStyles.semibold(
                         fontSize: 12.sp,
                         color: foregroundColor,
                       ),
@@ -697,7 +696,7 @@ class GlassChip extends StatelessWidget {
       child: AppText(
         text: '${label.split(' ')[0]} Stories',
 
-        style: AppTextStyles.sfProDisplaySemibold(
+        style: AppTextStyles.semibold(
           fontSize: 12.sp,
           color: textColor,
         ),
@@ -721,7 +720,7 @@ class InterestChip extends StatelessWidget {
       ),
       child: AppText(
         text: label,
-        style: AppTextStyles.sfProDisplaySemibold(
+        style: AppTextStyles.semibold(
           fontSize: 12.sp,
           color: AppColors.teal,
         ),
@@ -745,7 +744,7 @@ class InfoPill extends StatelessWidget {
       ),
       child: AppText(
         text: label,
-        style: AppTextStyles.sfProDisplaySemibold(
+        style: AppTextStyles.semibold(
           fontSize: 13.sp,
           color: AppColors.black.withValues(alpha: 0.75),
         ),
@@ -777,7 +776,7 @@ class BrowseEmptyState extends StatelessWidget {
           14.w.verticalSpace,
           AppText(
             text: "No topics found",
-            style: AppTextStyles.sfProDisplayBold(fontSize: 20.sp),
+            style: AppTextStyles.bold(fontSize: 20.sp),
           ),
           8.w.verticalSpace,
           AppText(
@@ -785,7 +784,7 @@ class BrowseEmptyState extends StatelessWidget {
                 ? "There are no topics to show right now. Pull to refresh and try again."
                 : 'No matches found for "$query". Try a different keyword.',
             textAlign: TextAlign.center,
-            style: AppTextStyles.sfProDisplayMedium(
+            style: AppTextStyles.medium(
               fontSize: 14.sp,
               height: 1.45,
               color: AppColors.black.withValues(alpha: 0.65),
@@ -820,13 +819,13 @@ class BrowseErrorState extends StatelessWidget {
           14.w.verticalSpace,
           AppText(
             text: "Something went wrong",
-            style: AppTextStyles.sfProDisplayBold(fontSize: 20.sp),
+            style: AppTextStyles.bold(fontSize: 20.sp),
           ),
           8.w.verticalSpace,
           AppText(
             text: "Please check your connection and try again.",
             textAlign: TextAlign.center,
-            style: AppTextStyles.sfProDisplayMedium(
+            style: AppTextStyles.medium(
               fontSize: 14.sp,
               height: 1.45,
               color: AppColors.black.withValues(alpha: 0.65),
@@ -843,7 +842,7 @@ class BrowseErrorState extends StatelessWidget {
               ),
               child: AppText(
                 text: "Try Again",
-                style: AppTextStyles.sfProDisplaySemibold(
+                style: AppTextStyles.semibold(
                   fontSize: 14.sp,
                   color: AppColors.white,
                 ),

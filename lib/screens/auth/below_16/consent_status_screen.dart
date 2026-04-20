@@ -38,7 +38,7 @@ class _ConsentStatusScreenState extends State<ConsentStatusScreen> {
                     42.w.verticalSpace,
                     AppText(
                       text: "Request sent to parent successfully.",
-                      style: AppTextStyles.sfProDisplaySemibold(
+                      style: AppTextStyles.semibold(
                         fontSize: 16.sp,
                         color: AppColors.black,
                       ),
@@ -47,7 +47,7 @@ class _ConsentStatusScreenState extends State<ConsentStatusScreen> {
                     35.w.verticalSpace,
                     AppText(
                       text: "Consent Status",
-                      style: AppTextStyles.sfProDisplaySemibold(
+                      style: AppTextStyles.semibold(
                         fontSize: 14.sp,
                         color: AppColors.black.withValues(alpha: 0.6),
                       ),
@@ -59,7 +59,7 @@ class _ConsentStatusScreenState extends State<ConsentStatusScreen> {
                       text: provider.isConsentRequestApproved
                           ? "Accepted"
                           : "Waiting for Approval!",
-                      style: AppTextStyles.sfProDisplayBold(
+                      style: AppTextStyles.bold(
                         fontSize: 16.sp,
                         color: provider.isConsentRequestApproved
                             ? AppColors.greenColor

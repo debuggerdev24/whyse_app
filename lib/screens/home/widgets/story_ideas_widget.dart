@@ -8,6 +8,7 @@ import 'package:redstreakapp/core/utils/date_formatter.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/models/home/story_models/story_summary_model.dart';
 import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
+import 'package:redstreakapp/core/widgets/global_widgets.dart';
 
 class StoryIdeasHeaderCard extends StatelessWidget {
   final StoryIdeaModel summary;
@@ -62,7 +63,7 @@ class StoryIdeasHeaderCard extends StatelessWidget {
                   ),
                   child: AppText(
                     text: "Story Collection",
-                    style: AppTextStyles.sfProDisplaySemibold(
+                    style: AppTextStyles.semibold(
                       fontSize: 12.sp,
                       color: AppColors.white,
                     ),
@@ -73,7 +74,7 @@ class StoryIdeasHeaderCard extends StatelessWidget {
                   text: summary.topicTitle,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.sfProDisplayBold(
+                  style: AppTextStyles.bold(
                     fontSize: 28.sp,
                     height: 1.1,
                     color: AppColors.white,
@@ -85,7 +86,7 @@ class StoryIdeasHeaderCard extends StatelessWidget {
                     text: summary.topicLearningGoal,
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.sfProDisplayMedium(
+                    style: AppTextStyles.medium(
                       fontSize: 14.sp,
                       height: 1.4,
                       color: AppColors.white.withValues(alpha: 0.84),
@@ -177,7 +178,7 @@ class StoryIdeaEpisodeCard extends StatelessWidget {
                 10.w.verticalSpace,
                 AppText(
                   text: "Story ${index.toString().padLeft(2, '0')}",
-                  style: AppTextStyles.sfProDisplaySemibold(
+                  style: AppTextStyles.semibold(
                     fontSize: 12.sp,
                     color: AppColors.teal,
                   ),
@@ -199,7 +200,7 @@ class StoryIdeaEpisodeCard extends StatelessWidget {
                         text: story.storyTitle,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.sfProDisplayBold(
+                        style: AppTextStyles.bold(
                           fontSize: 18.sp,
                           height: 1.2,
                           color: AppColors.black,
@@ -228,7 +229,7 @@ class StoryIdeaEpisodeCard extends StatelessWidget {
                   text: story.description,
                   maxLines: 4,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.sfProDisplayMedium(
+                  style: AppTextStyles.medium(
                     fontSize: 14.sp,
                     height: 1.45,
                     color: AppColors.black.withValues(alpha: 0.68),
@@ -263,7 +264,7 @@ class StoryIdeaEpisodeCard extends StatelessWidget {
                     alignment: Alignment.center,
                     child: AppText(
                       text: "Read Story",
-                      style: AppTextStyles.sfProDisplayBold(
+                      style: AppTextStyles.bold(
                         fontSize: 14.sp,
                         color: AppColors.white,
                       ),
@@ -300,14 +301,14 @@ class StoryIdeasEmptyState extends StatelessWidget {
             14.w.verticalSpace,
             AppText(
               text: "No stories found",
-              style: AppTextStyles.sfProDisplayBold(fontSize: 20.sp),
+              style: AppTextStyles.bold(fontSize: 20.sp),
             ),
             8.w.verticalSpace,
             AppText(
               text:
                   "Story ideas will appear here once this topic has episodes ready to read.",
               textAlign: TextAlign.center,
-              style: AppTextStyles.sfProDisplayMedium(
+              style: AppTextStyles.medium(
                 fontSize: 14.sp,
                 height: 1.45,
                 color: AppColors.black.withValues(alpha: 0.65),
@@ -341,7 +342,7 @@ class _HeaderMetaChip extends StatelessWidget {
           6.w.horizontalSpace,
           AppText(
             text: label,
-            style: AppTextStyles.sfProDisplaySemibold(
+            style: AppTextStyles.semibold(
               fontSize: 12.sp,
               color: AppColors.white,
             ),
@@ -373,7 +374,7 @@ class _EpisodeMetaPill extends StatelessWidget {
           5.w.horizontalSpace,
           AppText(
             text: label,
-            style: AppTextStyles.sfProDisplaySemibold(
+            style: AppTextStyles.semibold(
               fontSize: 12.sp,
               color: AppColors.teal,
             ),
@@ -398,10 +399,11 @@ class _StoryIdeasArtwork extends StatelessWidget {
         imageUrl: resolvedImageUrl,
         fit: BoxFit.cover,
         placeholder: (context, url) => const StoryIdeasImageShimmer(),
-        errorWidget: (context, url, error) => _ArtworkFallback(title: title),
+        errorWidget: (context, url, error) =>
+            NoImageFound(subtitle: title),
       );
     }
-    return _ArtworkFallback(title: title);
+    return NoImageFound(subtitle: title);
   }
 
   String _resolveImageUrl(String url) {
@@ -411,34 +413,5 @@ class _StoryIdeasArtwork extends StatelessWidget {
       return trimmedUrl;
     }
     return DioClient.baseUrl + trimmedUrl;
-  }
-}
-
-class _ArtworkFallback extends StatelessWidget {
-  final String title;
-
-  const _ArtworkFallback({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.bluecolor, AppColors.black, AppColors.teal],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Center(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.w),
-          child: Icon(
-            Icons.movie_creation_outlined,
-            color: AppColors.white.withValues(alpha: 0.88),
-            size: 34.sp,
-          ),
-        ),
-      ),
-    );
   }
 }

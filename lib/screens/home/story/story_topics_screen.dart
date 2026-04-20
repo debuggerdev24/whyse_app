@@ -149,7 +149,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                   ),
                   AppText(
                     text: "Choose Your Favorite Topics",
-                    style: AppTextStyles.sfProDisplayBold(
+                    style: AppTextStyles.bold(
                       height: 1.2,
                       fontSize: 32.sp,
                     ),
@@ -158,7 +158,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                   AppText(
                     text:
                         "Here are some topics we think you'll love based on your interests. You can pick the ones that excite you the most!",
-                    style: AppTextStyles.sfProDisplayMedium(
+                    style: AppTextStyles.medium(
                       fontSize: 16.sp,
                       color: AppColors.black.withValues(alpha: 0.8),
                     ),

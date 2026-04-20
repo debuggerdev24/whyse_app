@@ -30,7 +30,7 @@ Widget addReadingBottomSheet({required BuildContext context}) {
         27.w.verticalSpace,
         AppText(
           text: "Choose Reading Type",
-          style: AppTextStyles.sfProDisplayBold(fontSize: 20.sp),
+          style: AppTextStyles.bold(fontSize: 20.sp),
         ),
         27.w.verticalSpace,
         Divider(
@@ -136,12 +136,12 @@ class _OptionCard extends StatelessWidget {
                 children: [
                   AppText(
                     text: title,
-                    style: AppTextStyles.sfProDisplaySemibold(fontSize: 16.sp),
+                    style: AppTextStyles.semibold(fontSize: 16.sp),
                   ),
                   4.w.verticalSpace,
                   AppText(
                     text: subtitle,
-                    style: AppTextStyles.sfProDisplayRegular(fontSize: 12.sp),
+                    style: AppTextStyles.regular(fontSize: 12.sp),
                   ),
                 ],
               ),
@@ -199,7 +199,7 @@ class ReadingLevelCard extends StatelessWidget {
                       4.w.verticalSpace,
                       AppText(
                         text: description,
-                        style: AppTextStyles.sfProDisplayMedium(
+                        style: AppTextStyles.medium(
                           fontSize: 12.sp,
                           color: AppColors.black.withValues(alpha: 0.4),
                         ),
@@ -237,14 +237,14 @@ class ReadingLevelCard extends StatelessWidget {
               children: [
                 AppText(
                   text: "Beginner",
-                  style: AppTextStyles.sfProDisplaySemibold(
+                  style: AppTextStyles.semibold(
                     fontSize: 12.sp,
                     color: AppColors.teal,
                   ),
                 ),
                 AppText(
                   text: "Advance",
-                  style: AppTextStyles.sfProDisplaySemibold(
+                  style: AppTextStyles.semibold(
                     fontSize: 12.sp,
                     color: AppColors.teal,
                   ),

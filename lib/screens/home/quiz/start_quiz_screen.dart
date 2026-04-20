@@ -1,31 +1,21 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
-import 'package:redstreakapp/core/constants/app_assets.dart';
-import 'package:redstreakapp/core/constants/app_color.dart';
-import 'package:redstreakapp/core/constants/text_style.dart';
-import 'package:redstreakapp/core/helper/log_helper.dart';
-import 'package:redstreakapp/core/widgets/app_button.dart';
-import 'package:redstreakapp/core/widgets/app_layout.dart';
-import 'package:redstreakapp/core/widgets/app_text.dart';
-import 'package:redstreakapp/core/routes/user_routes.dart';
+import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/providers/home/story_provider.dart';
+
 import 'package:redstreakapp/screens/home/quiz/quiz_question_screen.dart';
 
-import '../../../models/home/story_models/story_model.dart';
-
 class StartQuizScreen extends StatelessWidget {
-  final List<StoryQuiz> quizzes;
+  final String storyId;
   final String storyTitle;
 
   const StartQuizScreen({
     super.key,
-    required this.quizzes,
+    required this.storyId,
     required this.storyTitle,
   });
 
   @override
   Widget build(BuildContext context) {
-    Logger.info("From parameter: ${quizzes.length}");
+    Logger.info("Start quiz for storyId: $storyId");
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -52,10 +42,10 @@ class StartQuizScreen extends StatelessWidget {
               Image.asset(AppAssets.quiz, height: 92.h, width: 92.w),
               33.w.verticalSpace,
 
-              // Title
+              //* Title
               AppText(
                 text: "Time for a quick quiz!",
-                style: AppTextStyles.sfProDisplayBold(
+                style: AppTextStyles.bold(
                   fontSize: 32.sp,
                   color: AppColors.black,
                 ),
@@ -63,29 +53,31 @@ class StartQuizScreen extends StatelessWidget {
               ),
               9.w.verticalSpace,
 
-              // Subtitle
+              //* Subtitle
               AppText(
                 text:
-                    "You’ll answer ${quizzes.length} quick questions about the \npassage you just read. Let’s see what you remember!",
-                style: AppTextStyles.sfProDisplayMedium(
+                    "You’ll answer a few quick questions about the \npassage you just read. Let’s see what you remember!",
+                style: AppTextStyles.medium(
                   fontSize: 16.sp,
                   color: AppColors.black.withValues(alpha: 0.6),
                 ).copyWith(height: 1.5),
                 textAlign: TextAlign.center,
               ),
               Spacer(flex: 3),
-
-              //todo Start Quiz Button
+              //* Start Quiz Button
               AppFilledButton(
                 text: "Start Quiz",
                 onTap: () {
-                  context.pushNamed(
-                    AppRoutes.quizQuestionScreen.name,
-                    extra: {'quizzes': quizzes, 'storyTitle': storyTitle},
-                  );
+                  final provider = context.read<StoryProvider>();
+                  provider.getQuiz(storyId: storyId);
+                  // provider.createQuiz(quizzes);
+                  // context.pushNamed(
+                  //   AppRoutes.quizQuestionScreen.name,
+                  //   extra: {'quizzes': quizzes, 'storyTitle': storyTitle},
+                  // );
                 },
                 backgroundColor: AppColors.primaryColor,
-                fixedSize: Size(348.w, 42.h),
+                fixedSize: Size(348.w, 42.w),
               ),
               40.w.verticalSpace,
             ],

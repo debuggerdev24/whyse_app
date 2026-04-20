@@ -52,7 +52,7 @@ class _ParentEmailScreenState extends State<ParentEmailScreen> {
                         120.w.verticalSpace,
                         AppText(
                           text: "Need Parent’s help to Proceed",
-                          style: AppTextStyles.sfProDisplayBold(
+                          style: AppTextStyles.bold(
                             height: 1.2,
                             fontSize: 40.sp,
                             color: AppColors.black,
@@ -61,7 +61,7 @@ class _ParentEmailScreenState extends State<ParentEmailScreen> {
                         13.w.verticalSpace,
                         AppText(
                           text: "Enter your Parent’s email to proceed.",
-                          style: AppTextStyles.sfProDisplayMedium(
+                          style: AppTextStyles.medium(
                             fontSize: 16.sp,
                             color: AppColors.black,
                           ),

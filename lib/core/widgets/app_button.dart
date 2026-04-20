@@ -25,6 +25,7 @@ class AppFilledButton extends StatelessWidget {
     this.icon,
     this.isVisible = true,
     this.margin,
+    VoidCallback? onPressed,
   });
 
   final VoidCallback? onTap;
@@ -70,7 +71,7 @@ class AppFilledButton extends StatelessWidget {
                 textAlign: TextAlign.start,
                 style:
                     textStyle ??
-                    AppTextStyles.sfProDisplaySemibold(
+                    AppTextStyles.semibold(
                       fontSize: 16.5.sp,
                       color: AppColors.white,
                     ),
@@ -127,7 +128,6 @@ class AppOutlinedButton extends StatelessWidget {
         child: OutlinedButton.icon(
           onPressed: onTap,
           style: OutlinedButton.styleFrom(
-            
             padding: padding ?? EdgeInsets.symmetric(vertical: 16.w),
             // fixedSize: fixedSize ?? padding ?? Size(354.w, 50.w),
             foregroundColor: foregroundColor ?? AppColors.black,
@@ -140,7 +140,9 @@ class AppOutlinedButton extends StatelessWidget {
             ),
             splashFactory: NoSplash.splashFactory,
           ),
-          icon: isLoading ?? false ? const SizedBox() : icon ?? const SizedBox(),
+          icon: isLoading ?? false
+              ? const SizedBox()
+              : icon ?? const SizedBox(),
           label: isLoading ?? false
               ? SizedBox(
                   height: 25.h,
@@ -155,7 +157,7 @@ class AppOutlinedButton extends StatelessWidget {
                       text ?? '',
                       style:
                           textStyle ??
-                          AppTextStyles.sfProDisplaySemibold(
+                          AppTextStyles.semibold(
                             fontSize: 16.sp,
                             color: foregroundColor ?? AppColors.black,
                           ),
@@ -233,7 +235,7 @@ class ReadingSkillButton extends StatelessWidget {
               8.w.horizontalSpace,
               AppText(
                 text: title,
-                style: AppTextStyles.sfProDisplayBold(
+                style: AppTextStyles.bold(
                   fontSize: 14.sp,
                   color: isSelected
                       ? Colors.white
@@ -241,6 +243,47 @@ class ReadingSkillButton extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class AppButton extends StatelessWidget {
+  const AppButton({
+    super.key,
+    required this.onTap,
+    required this.text,
+    this.padding,
+    this.fontSize,
+    this.margin,
+
+  });
+  final VoidCallback onTap;
+  final String text;
+  final EdgeInsetsGeometry? padding, margin;
+  final double? fontSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: double.infinity,
+        margin: margin ?? EdgeInsets.zero,
+        padding: padding ?? EdgeInsets.symmetric(vertical: 10.w),
+        decoration: BoxDecoration(
+          color: AppColors.teal,
+          borderRadius: BorderRadius.circular(40.r),
+        ),
+        alignment: Alignment.center,
+        child: AppText(
+          text: text,
+          style: AppTextStyles.bold(
+            fontSize: fontSize ?? 13.sp,
+            color: AppColors.white,
           ),
         ),
       ),

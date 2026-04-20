@@ -36,7 +36,7 @@ class ResetPasswordScreen extends StatelessWidget {
 
                     Text(
                       "Reset Password",
-                      style: AppTextStyles.sfProDisplayBold(
+                      style: AppTextStyles.bold(
                         fontSize: 32.sp,
                         color: AppColors.teal,
                       ),

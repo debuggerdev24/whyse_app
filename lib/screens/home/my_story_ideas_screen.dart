@@ -83,7 +83,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                   child: AppText(
                     text: provider.storyIdeasError ?? "Unable to load stories.",
                     textAlign: TextAlign.center,
-                    style: AppTextStyles.sfProDisplayMedium(
+                    style: AppTextStyles.medium(
                       fontSize: 16.sp,
                       color: AppColors.black.withValues(alpha: 0.7),
                     ),
@@ -118,7 +118,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                             12.w.horizontalSpace,
                             AppText(
                               text: "Stories for ${summary.topicTitle}",
-                              style: AppTextStyles.sfProDisplaySemibold(
+                              style: AppTextStyles.semibold(
                                 fontSize: 18.sp,
                               ),
                             ),
@@ -132,7 +132,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                         padding: EdgeInsets.symmetric(horizontal: 20.w),
                         child: AppText(
                           text: "Stories",
-                          style: AppTextStyles.sfProDisplayBold(
+                          style: AppTextStyles.bold(
                             fontSize: 22.sp,
                           ),
                         ),
@@ -153,7 +153,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                               },
                             );
                           },
-                          onShare: () => shareStoryIdeaLink(
+                          onShare: () => shareSingleStory(
                             storyIdeaId: storyIdea.id,
                             storyTitle: storyIdea.storyTitle,
                           ),

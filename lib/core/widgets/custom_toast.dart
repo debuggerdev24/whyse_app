@@ -68,7 +68,7 @@ class AppToast {
         title: Text(
           message,
           maxLines: 2,
-          style: AppTextStyles.sfProDisplayMedium(
+          style: AppTextStyles.medium(
             fontSize: 16.sp,
             color: AppColors.white,
           ),

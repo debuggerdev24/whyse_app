@@ -22,7 +22,7 @@ String buildTopicShareLink(String topicId) {
 }
 
 // Shares only the story idea link via the platform share sheet (e.g. Messages, Mail).
-Future<void> shareStoryIdeaLink({
+Future<void> shareSingleStory({
   required String storyIdeaId,
   String? storyTitle,
 }) async {

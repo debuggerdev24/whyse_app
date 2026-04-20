@@ -14,8 +14,6 @@ import 'package:redstreakapp/core/routes/user_routes.dart';
 
 import '../../../models/home/story_models/story_model.dart';
 import '../../../providers/home/quiz_provider.dart';
-import '../../../providers/home/story_provider.dart';
-
 class QuizQuestionScreen extends StatefulWidget {
   final List<StoryQuiz>? quizzes;
   final String? storyTitle;
@@ -51,7 +49,7 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   16.w.verticalSpace,
-        
+
                   /// Top Bar
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -80,12 +78,10 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                               } else {
                                 color = Colors.grey.withValues(alpha: 0.2);
                               }
-        
+
                               return Expanded(
                                 child: Container(
-                                  margin: EdgeInsets.symmetric(
-                                    horizontal: 4.w,
-                                  ),
+                                  margin: EdgeInsets.symmetric(horizontal: 4.w),
                                   height: 4.h,
                                   decoration: BoxDecoration(
                                     color: color,
@@ -99,20 +95,20 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                       ),
                     ],
                   ),
-        
+
                   19.w.verticalSpace,
-        
+
                   /// Question
                   AppText(
                     text: currentQuestion['question'],
-                    style: AppTextStyles.sfProDisplayBold(
+                    style: AppTextStyles.bold(
                       fontSize: 32.sp,
                       color: AppColors.black,
                     ).copyWith(height: 1.2),
                   ),
-        
+
                   31.w.verticalSpace,
-        
+
                   /// Options
                   ...List.generate(
                     options.length,
@@ -126,22 +122,22 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                           : null,
                     ),
                   ),
-        
+
                   Spacer(),
-        
+
                   Center(
                     child: AppText(
                       text:
                           "${quiz.currentQuestionIndex + 1} / ${quiz.questions.length}",
-                      style: AppTextStyles.sfProDisplayRegular(
+                      style: AppTextStyles.regular(
                         fontSize: 14.sp,
                         color: Colors.grey,
                       ),
                     ),
                   ),
-        
+
                   16.w.verticalSpace,
-        
+
                   /// Button
                   quiz.isChecked
                       ? AppFilledButton(
@@ -174,7 +170,7 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                               : Colors.grey,
                           fixedSize: Size(348.w, 42.h),
                         ),
-        
+
                   24.w.verticalSpace,
                 ],
               ),
@@ -200,22 +196,22 @@ void showLeaveQuizConfirmation({required BuildContext context}) {
           actions: [
             myActionButtonTheme(
               onPressed: () {
-                context.pop(dialogContext);
-                final prov = context.read<StoryProvider>();
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  prov.clareStoryData();
-                  if (context.mounted) {
-                    context.goNamed(AppRoutes.homeScreen.name);
-                  }
-                });
+                dialogContext.pop();
               },
-              title: "Yes",
+              title: "Cancel",
             ),
             myActionButtonTheme(
               onPressed: () {
-                context.pop();
+                dialogContext.pop();
+                // final prov = context.read<StoryProvider>();
+                // WidgetsBinding.instance.addPostFrameCallback((_) {
+                // prov.clareStoryData();
+                if (context.mounted) {
+                  context.pop();
+                }
+                // });
               },
-              title: "Cancel",
+              title: "Yes",
             ),
           ],
         ),
@@ -232,7 +228,7 @@ Widget myActionButtonTheme({
     onPressed: onPressed,
     child: Text(
       title,
-      style: AppTextStyles.sfProDisplayRegular(
+      style: AppTextStyles.regular(
         color: title == "Yes" ? AppColors.redColor : AppColors.black,
         fontSize: 17.sp,
       ),

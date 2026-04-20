@@ -40,7 +40,7 @@ class PracticeZoneSection extends StatelessWidget {
                 8.w.horizontalSpace,
                 AppText(
                   text: "Practice Zone",
-                  style: AppTextStyles.sfProDisplayBold(fontSize: 20.sp),
+                  style: AppTextStyles.bold(fontSize: 20.sp),
                 ),
               ],
             ),
@@ -113,7 +113,7 @@ class PracticeCard extends StatelessWidget {
               children: [
                 AppText(
                   text: title,
-                  style: AppTextStyles.sfProDisplayBold(fontSize: 20.sp),
+                  style: AppTextStyles.bold(fontSize: 20.sp),
                 ),
                 Divider(
                   color: AppColors.black.withValues(alpha: 0.1),
@@ -172,7 +172,7 @@ class PracticeCard extends StatelessWidget {
                   4.w.horizontalSpace,
                   AppText(
                     text: "3",
-                    style: AppTextStyles.sfProDisplayBold(
+                    style: AppTextStyles.bold(
                       color: AppColors.primaryColor,
                       fontSize: 16.sp,
                     ),

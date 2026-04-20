@@ -16,9 +16,10 @@ import 'package:redstreakapp/models/home/story_models/story_idea_model.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
+import 'package:redstreakapp/core/widgets/global_widgets.dart';
 
-class IdeasListScreen extends StatelessWidget {
-  const IdeasListScreen({super.key});
+class HomeIdeasListScreen extends StatelessWidget {
+  const HomeIdeasListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +58,7 @@ class IdeasListScreen extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context, StoryProvider provider) {
-    final storyIdea = provider.storyIdea;
+    final storyIdea = provider.storyIdeas;
     final ideas = storyIdea?.storyIdeas ?? [];
     final isEmpty = storyIdea == null || ideas.isEmpty;
 
@@ -83,7 +84,7 @@ class IdeasListScreen extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 24.w),
                 child: AppText(
                   text: "Pick a story to read",
-                  style: AppTextStyles.sfProDisplayBold(
+                  style: AppTextStyles.bold(
                     fontSize: 22.sp,
                     color: AppColors.black,
                   ),
@@ -94,7 +95,7 @@ class IdeasListScreen extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 24.w),
                 child: AppText(
                   text: topicTitle,
-                  style: AppTextStyles.sfProDisplayMedium(
+                  style: AppTextStyles.medium(
                     fontSize: 16.sp,
                     color: AppColors.black.withValues(alpha: 0.7),
                   ),
@@ -136,7 +137,7 @@ class IdeasListScreen extends StatelessWidget {
     // provider.beginGenerateSingleStoryLoading();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!context.mounted) return;
-      context.pushNamed(AppRoutes.storySeriesScreen.name);
+      context.pushNamed(AppRoutes.storyReadingScreen.name);
       provider.generateSingleStory(
         storyIdeaId: idea.id,
         context: context,
@@ -159,7 +160,7 @@ class IdeasListScreen extends StatelessWidget {
             ),
             content: Text(
               "You can generate and read the story later.",
-              style: AppTextStyles.sfProDisplayRegular(
+              style: AppTextStyles.regular(
                 fontSize: 14.sp,
                 color: AppColors.black.withValues(alpha: 0.7),
               ),
@@ -172,7 +173,7 @@ class IdeasListScreen extends StatelessWidget {
                 },
                 child: Text(
                   "Quit",
-                  style: AppTextStyles.sfProDisplayRegular(
+                  style: AppTextStyles.regular(
                     color: AppColors.redColor,
                     fontSize: 17.sp,
                   ),
@@ -182,7 +183,7 @@ class IdeasListScreen extends StatelessWidget {
                 onPressed: () => Navigator.of(dialogContext).pop(),
                 child: Text(
                   "Cancel",
-                  style: AppTextStyles.sfProDisplayRegular(
+                  style: AppTextStyles.regular(
                     color: AppColors.black,
                     fontSize: 17.sp,
                   ),
@@ -219,7 +220,7 @@ class _EmptyState extends StatelessWidget {
             AppText(
               text: "No story ideas yet",
               textAlign: TextAlign.center,
-              style: AppTextStyles.sfProDisplayBold(
+              style: AppTextStyles.bold(
                 fontSize: 20.sp,
                 color: AppColors.black,
               ),
@@ -228,7 +229,7 @@ class _EmptyState extends StatelessWidget {
             AppText(
               text: "Go back and generate ideas from your reading goal.",
               textAlign: TextAlign.center,
-              style: AppTextStyles.sfProDisplayRegular(
+              style: AppTextStyles.regular(
                 fontSize: 14.sp,
                 color: AppColors.black.withValues(alpha: 0.6),
               ),
@@ -238,7 +239,7 @@ class _EmptyState extends StatelessWidget {
               onPressed: onBack,
               child: Text(
                 "Go back",
-                style: AppTextStyles.sfProDisplaySemibold(
+                style: AppTextStyles.semibold(
                   color: AppColors.teal,
                   fontSize: 16.sp,
                 ),
@@ -315,13 +316,8 @@ class _IdeaCard extends StatelessWidget {
                             placeholder: (_, __) => Container(
                               color: AppColors.shimmerBaseColor,
                             ),
-                            errorWidget: (_, __, ___) => Container(
-                              color: AppColors.shimmerBaseColor,
-                              child: Icon(
-                                Icons.image_not_supported_outlined,
-                                color: AppColors.black.withValues(alpha: 0.3),
-                              ),
-                            ),
+                            errorWidget: (_, __, ___) =>
+                                const NoImageFound(compact: true),
                           ),
                   ),
                   Positioned.fill(
@@ -352,7 +348,7 @@ class _IdeaCard extends StatelessWidget {
                       ),
                       child: AppText(
                         text: "Story ${displayIndex.toString().padLeft(2, '0')}",
-                        style: AppTextStyles.sfProDisplaySemibold(
+                        style: AppTextStyles.semibold(
                           fontSize: 12.sp,
                           color: AppColors.teal,
                         ),
@@ -371,7 +367,7 @@ class _IdeaCard extends StatelessWidget {
                       text: idea.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.sfProDisplayBold(
+                      style: AppTextStyles.bold(
                         fontSize: 17.sp,
                         color: AppColors.black,
                       ),
@@ -382,7 +378,7 @@ class _IdeaCard extends StatelessWidget {
                         text: idea.description,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.sfProDisplayRegular(
+                        style: AppTextStyles.regular(
                           fontSize: 13.sp,
                           color: AppColors.black.withValues(alpha: 0.65),
                         ),
@@ -390,7 +386,7 @@ class _IdeaCard extends StatelessWidget {
                     8.w.verticalSpace,
                     AppText(
                       text: DateFormatter.formatDateTimeFrom(idea.createdAt),
-                      style: AppTextStyles.sfProDisplayRegular(
+                      style: AppTextStyles.regular(
                         fontSize: 12.sp,
                         color: AppColors.black.withValues(alpha: 0.45),
                       ),
@@ -408,7 +404,7 @@ class _IdeaCard extends StatelessWidget {
                           alignment: Alignment.center,
                           child: AppText(
                             text: "Read Story",
-                            style: AppTextStyles.sfProDisplayBold(
+                            style: AppTextStyles.bold(
                               fontSize: 14.sp,
                               color: AppColors.white,
                             ),

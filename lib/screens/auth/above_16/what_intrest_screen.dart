@@ -60,7 +60,7 @@ class _WhatInterestScreenState extends State<WhatInterestScreen> {
                   ),
                   AppText(
                     text: "what are you interested to read or learn about",
-                    style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
+                    style: AppTextStyles.bold(fontSize: 32.sp),
                   ),
                   10.w.verticalSpace,
 

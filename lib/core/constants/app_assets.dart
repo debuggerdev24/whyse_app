@@ -43,6 +43,8 @@ class AppAssets {
   static const canceloption = "$_iconPath/canceloption.svg";
   static const correctoption = "$_iconPath/correct.svg";
   static const searchIcon = "$_iconPath/searchIcons.svg";
+  static const homeIcon = "$_iconPath/home.svg";
+  static const shareIcon = "$_iconPath/share.svg";
 
   static const font = "$_iconPath/font.svg";
 

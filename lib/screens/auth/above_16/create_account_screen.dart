@@ -62,12 +62,12 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                     children: [
                       AppText(
                         text: "Create Account",
-                        style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
+                        style: AppTextStyles.bold(fontSize: 32.sp),
                       ),
                       5.w.verticalSpace,
                       AppText(
                         text: "Enter your details to start learning.",
-                        style: AppTextStyles.sfProDisplayMedium(
+                        style: AppTextStyles.medium(
                           fontSize: 16.sp,
                           color: AppColors.black.withValues(alpha: 0.8),
                         ),
@@ -180,7 +180,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                   children: [
                                     TextSpan(
                                       text: "I accept WhyseApp’s ",
-                                      style: AppTextStyles.sfProDisplayMedium(
+                                      style: AppTextStyles.medium(
                                         height: 1.25,
                                         fontSize: 14.sp,
                                         color: AppColors.lightblackColor
@@ -189,7 +189,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                     ),
                                     TextSpan(
                                       text: "Terms of Service",
-                                      style: AppTextStyles.sfProDisplayBold(
+                                      style: AppTextStyles.bold(
                                         height: 1.2,
                                         fontSize: 14.sp,
                                         decoration: TextDecoration.underline,
@@ -198,7 +198,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                     ),
                                     TextSpan(
                                       text: " and ",
-                                      style: AppTextStyles.sfProDisplayMedium(
+                                      style: AppTextStyles.medium(
                                         height: 1.2,
                                         fontSize: 14.sp,
                                         color: AppColors.lightblackColor
@@ -207,7 +207,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                     ),
                                     TextSpan(
                                       text: "Privacy Policy",
-                                      style: AppTextStyles.sfProDisplayBold(
+                                      style: AppTextStyles.bold(
                                         fontSize: 14.sp,
                                         height: 1.2,
                                         decoration: TextDecoration.underline,
@@ -216,7 +216,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                     ),
                                     TextSpan(
                                       text: ".",
-                                      style: AppTextStyles.sfProDisplayMedium(
+                                      style: AppTextStyles.medium(
                                         fontSize: 14.sp,
                                         height: 1.2,
                                         color: AppColors.lightblackColor

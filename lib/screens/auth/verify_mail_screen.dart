@@ -29,7 +29,7 @@ class VerifyOtpScreen extends StatelessWidget {
                       26.w.verticalSpace,
                       Text(
                         "Verify OTP",
-                        style: AppTextStyles.sfProDisplayBold(
+                        style: AppTextStyles.bold(
                           fontSize: 32.sp,
                           color: AppColors.teal,
                         ),
@@ -69,7 +69,7 @@ class VerifyOtpScreen extends StatelessWidget {
                       Spacer(),
                       Text(
                         "Didn’t receive OTP?",
-                        style: AppTextStyles.sfProDisplaySemibold(
+                        style: AppTextStyles.semibold(
                           fontSize: 15.sp,
                         ),
                       ),

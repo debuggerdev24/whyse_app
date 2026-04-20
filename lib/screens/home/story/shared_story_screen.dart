@@ -1,31 +1,21 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import 'package:redstreakapp/core/constants/app_color.dart';
-import 'package:redstreakapp/core/constants/text_style.dart';
-import 'package:redstreakapp/core/helper/log_helper.dart';
+
+
 import 'package:redstreakapp/core/network/base_api_service.dart';
-import 'package:redstreakapp/core/utils/date_formatter.dart';
-import 'package:redstreakapp/core/utils/de_bouncing.dart';
-import 'package:redstreakapp/core/widgets/app_button.dart';
-import 'package:redstreakapp/core/widgets/app_layout.dart';
-import 'package:redstreakapp/core/widgets/app_text.dart';
+import 'package:redstreakapp/core/utils/app_imports.dart';
+
 import 'package:redstreakapp/core/utils/share_helper.dart';
-import 'package:redstreakapp/core/widgets/custom_toast.dart';
-import 'package:redstreakapp/screens/dashboard.dart';
-import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
+
 import 'package:redstreakapp/models/home/story_models/story_idea_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_model.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
-import 'package:redstreakapp/core/routes/app_router.dart';
-import 'package:redstreakapp/core/routes/user_routes.dart';
+import 'package:redstreakapp/screens/dashboard.dart';
+import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
+import 'package:redstreakapp/core/widgets/global_widgets.dart';
 
 /// Screen for viewing shared topic (from link). Uses getStoryByIdea (fetch only), no generate-from-idea API.
 class SharedStoryScreen extends StatefulWidget {
@@ -92,7 +82,7 @@ class SharedStoryScreen extends StatefulWidget {
       onPressed: onPressed,
       child: Text(
         title,
-        style: AppTextStyles.sfProDisplayRegular(
+        style: AppTextStyles.regular(
           color: (title == "Yes" || title == "Quit")
               ? AppColors.redColor
               : AppColors.black,
@@ -121,7 +111,7 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
           builder: (context, provider, homeProvider, child) {
             Logger.info("${provider.lessonDuration}");
             if (!context.mounted) return const SizedBox.shrink();
-            final storyIdea = provider.storyIdea;
+            final storyIdea = provider.storyIdeas;
             final isEmpty = storyIdea == null || storyIdea.storyIdeas.isEmpty;
             final ideas = storyIdea?.storyIdeas ?? [];
 
@@ -172,7 +162,9 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
             }
             if (provider.generateStoryError != null && !isEmpty) {
               final currentIndex = provider.currentStoryIndex;
-              final currentIdea = currentIndex < ideas.length ? ideas[currentIndex] : null;
+              final currentIdea = currentIndex < ideas.length
+                  ? ideas[currentIndex]
+                  : null;
               final currentIdeaId = currentIdea?.id;
               final isNotGenerated = currentIdea?.isGenerated == false;
               return Center(
@@ -186,13 +178,13 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
                         size: 56.sp,
                         color: AppColors.black.withValues(alpha: 0.4),
                       ),
-                      20.w.verticalSpace,
+                      20.h.verticalSpace,
                       AppText(
                         text: isNotGenerated
                             ? "Story not generated yet."
                             : "Something went wrong. Please try again.",
                         textAlign: TextAlign.center,
-                        style: AppTextStyles.sfProDisplayMedium(
+                        style: AppTextStyles.medium(
                           fontSize: 16.sp,
                           color: AppColors.black.withValues(alpha: 0.8),
                         ),
@@ -209,7 +201,11 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
                                     storyIdea: currentIdeaId,
                                     fetchOnly: true,
                                     onSuccess: (story) {
-                                      if (context.mounted) provider.addStoryFromHistory(story, currentIndex);
+                                      if (context.mounted)
+                                        provider.addStoryFromHistory(
+                                          story,
+                                          currentIndex,
+                                        );
                                     },
                                     onStoryNotGenerated: () {},
                                   );
@@ -225,7 +221,7 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
                           ),
                           child: Text(
                             "Try again",
-                            style: AppTextStyles.sfProDisplaySemibold(
+                            style: AppTextStyles.semibold(
                               fontSize: 16.sp,
                               color: AppColors.white,
                             ),
@@ -241,7 +237,7 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
               return Center(
                 child: AppText(
                   text: "No story ideas yet",
-                  style: AppTextStyles.sfProDisplayMedium(
+                  style: AppTextStyles.medium(
                     fontSize: 16.sp,
                     color: AppColors.black.withValues(alpha: 0.6),
                   ),
@@ -300,7 +296,7 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
                             children: [
                               AppText(
                                 text: topicTitle,
-                                style: AppTextStyles.sfProDisplayBold(
+                                style: AppTextStyles.bold(
                                   fontSize: 24.sp,
                                   height: 0,
                                   color: AppColors.black,
@@ -312,7 +308,7 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
                                 8.w.verticalSpace,
                                 AppText(
                                   text: storyIdea.topic.learningGoal,
-                                  style: AppTextStyles.sfProDisplayRegular(
+                                  style: AppTextStyles.regular(
                                     fontSize: 14.sp,
                                     color: AppColors.black.withValues(
                                       alpha: 0.7,
@@ -324,7 +320,9 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
                               ],
                               if (storyIdea.topic.interests.isNotEmpty) ...[
                                 12.w.verticalSpace,
-                                _TagsSection(interests: storyIdea.topic.interests),
+                                _TagsSection(
+                                  interests: storyIdea.topic.interests,
+                                ),
                               ],
                               8.w.verticalSpace,
                               if (ideas.length > 1)
@@ -359,7 +357,7 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
                                       child: AppText(
                                         text: "Ideas",
                                         style:
-                                            AppTextStyles.sfProDisplaySemibold(
+                                            AppTextStyles.semibold(
                                               fontSize: 16.sp,
                                               color: AppColors.teal,
                                             ),
@@ -384,31 +382,40 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
                                   idea: ideas[index],
                                   index: index + 1,
                                   onTap: () {
-                                   deBouncer.run(() {
-                                     if (index < provider.stories.length) {
+                                    deBouncer.run(() {
+                                      if (index < provider.stories.length) {
+                                        provider.setCurrentStoryIndex = index;
+                                        return;
+                                      }
+                                      if (!ideas[index].isGenerated) {
+                                        AppToast.info(
+                                          context: context,
+                                          message: "Story not generated yet.",
+                                        );
+                                        return;
+                                      }
                                       provider.setCurrentStoryIndex = index;
-                                      return;
-                                    }
-                                    if (!ideas[index].isGenerated) {
-                                      AppToast.info(
+                                      homeProvider.getStoryByIdea(
                                         context: context,
-                                        message: "Story not generated yet.",
+                                        storyIdea: ideas[index].id,
+                                        fetchOnly: true,
+                                        onSuccess: (story) {
+                                          if (context.mounted)
+                                            provider.addStoryFromHistory(
+                                              story,
+                                              index,
+                                            );
+                                        },
+                                        onStoryNotGenerated: () {
+                                          if (context.mounted)
+                                            AppToast.info(
+                                              context: context,
+                                              message:
+                                                  "Story not available yet.",
+                                            );
+                                        },
                                       );
-                                      return;
-                                    }
-                                    provider.setCurrentStoryIndex = index;
-                                    homeProvider.getStoryByIdea(
-                                      context: context,
-                                      storyIdea: ideas[index].id,
-                                      fetchOnly: true,
-                                      onSuccess: (story) {
-                                        if (context.mounted) provider.addStoryFromHistory(story, index);
-                                      },
-                                      onStoryNotGenerated: () {
-                                        if (context.mounted) AppToast.info(context: context, message: "Story not available yet.");
-                                      },
-                                    );
-                                   });
+                                    });
                                   },
                                   isGenerating:
                                       homeProvider.isGettingStoryLoading &&
@@ -418,7 +425,7 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
                             ),
                           ),
 
-                        24.w.verticalSpace
+                        24.w.verticalSpace,
                       ],
                     ),
                   ),
@@ -430,7 +437,6 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
       ),
     );
   }
-
 
   void showLeaveStoryConfirmation({required BuildContext context}) {
     showDialog(
@@ -516,7 +522,7 @@ class _ReadingTimerText extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppText(
       text: 'Time left: ${_formatDuration(remainingSeconds)}',
-      style: AppTextStyles.sfProDisplaySemibold(
+      style: AppTextStyles.semibold(
         fontSize: 16.sp,
         color: AppColors.teal,
       ),
@@ -559,8 +565,7 @@ class _TagChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.w
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.w),
       decoration: BoxDecoration(
         color: AppColors.teal.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
@@ -572,7 +577,7 @@ class _TagChip extends StatelessWidget {
       alignment: Alignment.center,
       child: AppText(
         text: label,
-        style: AppTextStyles.sfProDisplaySemibold(
+        style: AppTextStyles.semibold(
           fontSize: 13.sp,
           color: AppColors.teal,
         ),
@@ -596,7 +601,7 @@ class _MetaChip extends StatelessWidget {
         6.w.horizontalSpace,
         AppText(
           text: label,
-          style: AppTextStyles.sfProDisplayMedium(
+          style: AppTextStyles.medium(
             fontSize: 13.sp,
             color: AppColors.black.withValues(alpha: 0.6),
           ),
@@ -652,9 +657,12 @@ class _StoryIdeaTile extends StatelessWidget {
                             width: 120.w,
                             height: 80.h,
                             fit: BoxFit.cover,
-                            placeholder: (_, __) => _buildThumbnailPlaceholder(),
-                            errorWidget: (_, __, ___) =>
+                            placeholder: (_, __) =>
                                 _buildThumbnailPlaceholder(),
+                            errorWidget: (_, __, ___) => const NoImageFound(
+                              compact: true,
+                              iconOnly: true,
+                            ),
                           )
                         : _buildThumbnailPlaceholder(),
                   ),
@@ -688,7 +696,7 @@ class _StoryIdeaTile extends StatelessWidget {
                           padding: EdgeInsets.only(top: 1.5),
                           child: AppText(
                             text: "$index. ",
-                            style: AppTextStyles.sfProDisplaySemibold(
+                            style: AppTextStyles.semibold(
                               fontSize: 14.sp,
                               color: AppColors.black.withValues(alpha: 0.5),
                             ),
@@ -700,7 +708,7 @@ class _StoryIdeaTile extends StatelessWidget {
                               Expanded(
                                 child: AppText(
                                   text: idea.title,
-                                  style: AppTextStyles.sfProDisplaySemibold(
+                                  style: AppTextStyles.semibold(
                                     fontSize: 15.sp,
                                     color: AppColors.black,
                                   ),
@@ -713,7 +721,9 @@ class _StoryIdeaTile extends StatelessWidget {
                                 Icon(
                                   Icons.lock_outline_rounded,
                                   size: 18.sp,
-                                  color: AppColors.black.withValues(alpha: 0.45),
+                                  color: AppColors.black.withValues(
+                                    alpha: 0.45,
+                                  ),
                                 ),
                               ],
                             ],
@@ -724,17 +734,17 @@ class _StoryIdeaTile extends StatelessWidget {
                     4.w.verticalSpace,
                     AppText(
                       text: idea.description,
-                      style: AppTextStyles.sfProDisplayRegular(
+                      style: AppTextStyles.regular(
                         fontSize: 13.sp,
                         color: AppColors.black.withValues(alpha: 0.65),
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    6.w.verticalSpace,
+                    6.h.verticalSpace,
                     AppText(
                       text: DateFormatter.formatDateTimeFrom(idea.createdAt),
-                      style: AppTextStyles.sfProDisplayRegular(
+                      style: AppTextStyles.regular(
                         fontSize: 12.sp,
                         color: AppColors.black.withValues(alpha: 0.45),
                       ),
@@ -879,8 +889,8 @@ class _StoryViewerState extends State<_StoryViewer> {
 
   void _openQuiz() {
     context.pushNamed(
-      AppRoutes.startQuizScreen.name,
-      extra: {'quizzes': widget.story.quiz, 'storyTitle': widget.story.title},
+      AppRoutes.enterQuizNumbersScreen.name,
+      extra: {'storyId': widget.story.id},
     );
   }
 
@@ -1061,7 +1071,7 @@ class _StoryPage extends StatelessWidget {
                   Expanded(
                     child: AppText(
                       text: storyTitle,
-                      style: AppTextStyles.sfProDisplayBold(
+                      style: AppTextStyles.bold(
                         fontSize: 22.sp,
                         color: AppColors.black,
                       ),
@@ -1069,9 +1079,7 @@ class _StoryPage extends StatelessWidget {
                   ),
                   12.w.horizontalSpace,
                   GestureDetector(
-                    onTap: () => shareTopicLink(
-                      topicId: topicId,
-                    ),
+                    onTap: () => shareTopicLink(topicId: topicId),
                     behavior: HitTestBehavior.opaque,
                     child: Padding(
                       padding: EdgeInsets.all(4.w),
@@ -1096,7 +1104,7 @@ class _StoryPage extends StatelessWidget {
                   6.w.horizontalSpace,
                   AppText(
                     text: '$totalPages Pages',
-                    style: AppTextStyles.sfProDisplayMedium(
+                    style: AppTextStyles.medium(
                       fontSize: 13.sp,
                       color: AppColors.black.withValues(alpha: 0.6),
                     ),
@@ -1110,7 +1118,7 @@ class _StoryPage extends StatelessWidget {
                   6.w.horizontalSpace,
                   AppText(
                     text: '${lessonDuration > 0 ? lessonDuration : 5} mins',
-                    style: AppTextStyles.sfProDisplayMedium(
+                    style: AppTextStyles.medium(
                       fontSize: 13.sp,
                       color: AppColors.black.withValues(alpha: 0.6),
                     ),
@@ -1119,12 +1127,12 @@ class _StoryPage extends StatelessWidget {
                   if (hasStartedReading)
                     _ReadingTimerText(remainingSeconds: remainingSeconds),
                 ],
-              ),      
+              ),
               10.w.verticalSpace,
               //* Page number
               AppText(
                 text: 'Page ${pageIndex + 1}',
-                style: AppTextStyles.sfProDisplaySemibold(
+                style: AppTextStyles.semibold(
                   fontSize: 14.sp,
                   color: AppColors.teal,
                 ),
@@ -1133,17 +1141,17 @@ class _StoryPage extends StatelessWidget {
               RichText(
                 textAlign: TextAlign.justify,
                 text: TextSpan(
-                  style: AppTextStyles.sfProDisplayRegular(
+                  style: AppTextStyles.regular(
                     fontSize: 16.sp,
                     color: AppColors.black.withValues(alpha: 0.8),
                   ),
                   children: _buildTextSpans(
                     page.text,
-                    AppTextStyles.sfProDisplayRegular(
+                    AppTextStyles.regular(
                       fontSize: 16.sp,
                       color: AppColors.black.withValues(alpha: 0.8),
                     ).copyWith(height: 1.37),
-                    AppTextStyles.sfProDisplayBold(
+                    AppTextStyles.bold(
                       fontSize: 16.sp,
                       color: AppColors.black,
                     ).copyWith(height: 1.37),
@@ -1159,7 +1167,7 @@ class _StoryPage extends StatelessWidget {
                         child: AppOutlinedButton(
                           onTap: onPrevPage,
                           borderColor: AppColors.teal,
-                          textStyle: AppTextStyles.sfProDisplaySemibold(
+                          textStyle: AppTextStyles.semibold(
                             fontSize: 14.sp,
                             color: AppColors.teal,
                           ),
@@ -1175,7 +1183,7 @@ class _StoryPage extends StatelessWidget {
                               ),
                               AppText(
                                 text: 'Previous',
-                                style: AppTextStyles.sfProDisplaySemibold(
+                                style: AppTextStyles.semibold(
                                   fontSize: 14.sp,
                                   color: AppColors.teal,
                                 ),
@@ -1191,7 +1199,7 @@ class _StoryPage extends StatelessWidget {
                         child: AppOutlinedButton(
                           onTap: onNextPage,
                           borderColor: AppColors.teal,
-                          textStyle: AppTextStyles.sfProDisplaySemibold(
+                          textStyle: AppTextStyles.semibold(
                             fontSize: 14.sp,
                             color: AppColors.teal,
                           ),
@@ -1202,7 +1210,7 @@ class _StoryPage extends StatelessWidget {
                             children: [
                               AppText(
                                 text: 'Next',
-                                style: AppTextStyles.sfProDisplaySemibold(
+                                style: AppTextStyles.semibold(
                                   fontSize: 14.sp,
                                   color: AppColors.teal,
                                 ),
@@ -1224,13 +1232,13 @@ class _StoryPage extends StatelessWidget {
                       margin: EdgeInsets.only(top: 10.w),
                       onTap: isTimerRunning ? onStopReading : onResumeReading,
                       borderColor: AppColors.teal,
-                      textStyle: AppTextStyles.sfProDisplaySemibold(
+                      textStyle: AppTextStyles.semibold(
                         fontSize: 14.sp,
                         color: AppColors.teal,
                       ),
                       child: AppText(
                         text: isTimerRunning ? 'Stop' : 'Resume',
-                        style: AppTextStyles.sfProDisplaySemibold(
+                        style: AppTextStyles.semibold(
                           fontSize: 14.sp,
                           color: AppColors.teal,
                         ),
@@ -1258,7 +1266,7 @@ class _StoryPage extends StatelessWidget {
                     children: [
                       AppText(
                         text: 'Finished reading?',
-                        style: AppTextStyles.sfProDisplaySemibold(
+                        style: AppTextStyles.semibold(
                           fontSize: 16.sp,
                           color: AppColors.black,
                         ),
@@ -1266,7 +1274,7 @@ class _StoryPage extends StatelessWidget {
                       8.w.verticalSpace,
                       AppText(
                         text: 'Test your understanding with a short quiz.',
-                        style: AppTextStyles.sfProDisplayRegular(
+                        style: AppTextStyles.regular(
                           fontSize: 14.sp,
                           color: AppColors.black.withValues(alpha: 0.7),
                         ),
@@ -1287,7 +1295,7 @@ class _StoryPage extends StatelessWidget {
                           borderColor: isMarkedAsRead
                               ? AppColors.teal.withValues(alpha: 0.35)
                               : AppColors.teal,
-                          textStyle: AppTextStyles.sfProDisplaySemibold(
+                          textStyle: AppTextStyles.semibold(
                             fontSize: 14.sp,
                             color: isMarkedAsRead
                                 ? AppColors.teal.withValues(alpha: 0.5)
@@ -1299,7 +1307,7 @@ class _StoryPage extends StatelessWidget {
                             text: isMarkedAsRead
                                 ? 'Marked as Read'
                                 : 'Mark as Read',
-                            style: AppTextStyles.sfProDisplaySemibold(
+                            style: AppTextStyles.semibold(
                               fontSize: 14.sp,
                               color: isMarkedAsRead
                                   ? AppColors.teal.withValues(alpha: 0.5)
@@ -1325,12 +1333,26 @@ class _StoryPage extends StatelessWidget {
                                 ),
                                 actions: [
                                   TextButton(
-                                    onPressed: () => Navigator.of(dialogContext).pop(false),
-                                    child: Text("Cancel", style: AppTextStyles.sfProDisplayRegular(fontSize: 17.sp, color: AppColors.black)),
+                                    onPressed: () =>
+                                        Navigator.of(dialogContext).pop(false),
+                                    child: Text(
+                                      "Cancel",
+                                      style: AppTextStyles.regular(
+                                        fontSize: 17.sp,
+                                        color: AppColors.black,
+                                      ),
+                                    ),
                                   ),
                                   TextButton(
-                                    onPressed: () => Navigator.of(dialogContext).pop(true),
-                                    child: Text("Yes", style: AppTextStyles.sfProDisplayRegular(fontSize: 17.sp, color: AppColors.redColor)),
+                                    onPressed: () =>
+                                        Navigator.of(dialogContext).pop(true),
+                                    child: Text(
+                                      "Yes",
+                                      style: AppTextStyles.regular(
+                                        fontSize: 17.sp,
+                                        color: AppColors.redColor,
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -1430,7 +1452,7 @@ class _StoryImage extends StatelessWidget {
                       ),
                       child: AppText(
                         text: pageLabel,
-                        style: AppTextStyles.sfProDisplayMedium(
+                        style: AppTextStyles.medium(
                           fontSize: 12.sp,
                           color: AppColors.black,
                         ),
@@ -1468,10 +1490,10 @@ class _StoryImage extends StatelessWidget {
                 valueColor: AlwaysStoppedAnimation<Color>(AppColors.teal),
               ),
             ),
-            12.w.verticalSpace,
+            12.h.verticalSpace,
             AppText(
               text: percent != null ? '$percent%' : 'Loading...',
-              style: AppTextStyles.sfProDisplayMedium(
+              style: AppTextStyles.medium(
                 fontSize: 14.sp,
                 color: AppColors.black.withValues(alpha: 0.7),
               ),
@@ -1483,14 +1505,10 @@ class _StoryImage extends StatelessWidget {
   }
 
   static Widget _placeholder(double h) {
-    return Container(
+    return SizedBox(
       height: h,
-      color: AppColors.lightwhiteColor,
-      child: Icon(
-        Icons.image_not_supported_outlined,
-        size: 48,
-        color: AppColors.black.withValues(alpha: 0.3),
-      ),
+      width: double.infinity,
+      child: const NoImageFound(compact: true),
     );
   }
 }

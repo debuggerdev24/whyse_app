@@ -61,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       AppText(
                         text: 'Welcome Back!',
-                        style: AppTextStyles.sfProDisplayBold(
+                        style: AppTextStyles.bold(
                           fontSize: 32.sp,
                           color: AppColors.teal,
                         ),
@@ -69,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       15.w.verticalSpace,
                       AppText(
                         text: 'Login',
-                        style: AppTextStyles.sfProDisplaySemibold(
+                        style: AppTextStyles.semibold(
                           fontSize: 16.sp,
                           color: AppColors.black,
                         ),

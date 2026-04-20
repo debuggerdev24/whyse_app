@@ -6,6 +6,7 @@ import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
+import 'package:redstreakapp/core/widgets/global_widgets.dart';
 
 class OnboardingHeader extends StatelessWidget {
   final int currentStep;
@@ -71,7 +72,7 @@ class OnboardingHeader extends StatelessWidget {
                 onTap: onSkip,
                 child: AppText(
                   text: "Skip",
-                  style: AppTextStyles.sfProDisplayMedium(
+                  style: AppTextStyles.medium(
                     fontSize: 16.sp,
                     color: AppColors.primaryColor,
                   ),
@@ -128,7 +129,7 @@ class SelectionOption extends StatelessWidget {
             Expanded(
               child: AppText(
                 text: label,
-                style: AppTextStyles.sfProDisplaySemibold(
+                style: AppTextStyles.semibold(
                   fontSize: 15.sp,
                   color: AppColors.black,
                 ),
@@ -213,7 +214,8 @@ class TopicCard extends StatelessWidget {
                 width: double.infinity,
                 height: double.infinity,
                 placeholder: (_, __) => _buildShimmerPlaceholder(),
-                errorWidget: (_, __, ___) => _buildShimmerPlaceholder(),
+                errorWidget: (_, __, ___) =>
+                    const NoImageFound(compact: true, iconOnly: true),
               )
             else
               Image.asset(
@@ -229,7 +231,7 @@ class TopicCard extends StatelessWidget {
               bottom: 13.h,
               child: AppText(
                 text: label,
-                style: AppTextStyles.sfProDisplayBold(
+                style: AppTextStyles.bold(
                   fontSize: 14.sp,
                   color: Colors.white,
                   letterSpacing: 0.2,

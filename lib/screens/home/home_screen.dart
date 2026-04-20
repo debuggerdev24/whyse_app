@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:redstreakapp/core/widgets/app_layout.dart';
+import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/home_widgets.dart';
 import 'package:redstreakapp/screens/home/widgets/home_topics_section.dart';
 
@@ -23,8 +21,12 @@ class _HomeScreenState extends State<HomeScreen> {
             20.w.verticalSpace,
             
             const CalendarStrip(),
+            // 24.w.verticalSpace,
+
+
             24.w.verticalSpace,
-            const StoryTopicsSection(),
+
+            const HomeStoryTopics(),
             // 24.w.verticalSpace,
             // const PracticeZoneSection(),
             // s

@@ -117,13 +117,13 @@ class _InterestsScreenState extends State<InterestsScreen> {
 
                       AppText(
                         text: "Pick Your Interests",
-                        style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
+                        style: AppTextStyles.bold(fontSize: 32.sp),
                       ),
                       10.w.verticalSpace,
                       AppText(
                         text:
                             "Choose topics you love to personalize your reading journey.",
-                        style: AppTextStyles.sfProDisplayMedium(
+                        style: AppTextStyles.medium(
                           fontSize: 16.sp,
                           color: AppColors.black.withValues(alpha: 0.8),
                         ),

@@ -12,7 +12,7 @@ class StoryHistoryModel implements IReadableStory {
     Metadata metadata;
     DateTime createdAt;
     DateTime updatedAt;
-
+    String thumbnailUrl;
     StoryHistoryModel({
         required this.id,
         required this.title,
@@ -24,6 +24,7 @@ class StoryHistoryModel implements IReadableStory {
         required this.metadata,
         required this.createdAt,
         required this.updatedAt,
+        required this.thumbnailUrl,
     });
 
     /// Satisfies [IReadableStory] — delegates to [metadata.lessonDuration].
@@ -42,6 +43,7 @@ class StoryHistoryModel implements IReadableStory {
         metadata: Metadata.fromJson(json["metadata"]),
         createdAt: DateTime.parse(json["createdAt"]),
         updatedAt: DateTime.parse(json["updatedAt"]),
+        thumbnailUrl: json["thumbnailUrl"] ?? '',
     );
 
 }

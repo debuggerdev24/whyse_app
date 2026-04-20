@@ -126,7 +126,7 @@ class _AgeEntryScreenState extends State<AgeEntryScreen> {
                         children: [
                           AppText(
                             text: 'Let us know your\nage',
-                            style: AppTextStyles.sfProDisplayBold(
+                            style: AppTextStyles.bold(
                               fontSize: 40.sp,
                               height: 1.1,
                             ),

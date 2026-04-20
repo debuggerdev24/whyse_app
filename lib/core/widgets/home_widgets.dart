@@ -1,85 +1,85 @@
-import 'package:animate_do/animate_do.dart';
-
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import 'package:redstreakapp/core/constants/app_assets.dart';
-import 'package:redstreakapp/core/constants/app_color.dart';
-import 'package:redstreakapp/core/constants/text_style.dart';
-import 'package:redstreakapp/core/widgets/app_text.dart';
-import 'package:redstreakapp/core/widgets/custom_toast.dart';
 
+import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
-import 'package:redstreakapp/core/routes/app_router.dart';
-import 'package:redstreakapp/core/routes/user_routes.dart';
-import 'package:redstreakapp/screens/dashboard.dart';
 
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
 
-
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Logo / app icon (Netflix-style left)
-        SvgIcon(
-          AppAssets.note,
-          size: 28.w,
-          color: AppColors.teal,
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.w),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(22.r),
+            border: Border.all(color: AppColors.black.withValues(alpha: 0.12)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 10.w,
+            children: [
+              SvgIcon(
+                AppAssets.thunder,
+                size: 17.w,
+                color: AppColors.primaryColor,
+              ),
+
+              AppText(
+                text: "2",
+                style: AppTextStyles.bold(
+                  fontSize: 20.sp,
+                  color: AppColors.black,
+                ),
+              ),
+            ],
+          ),
         ),
-        // Center title
-        AppText(
-          text: "Story Topics",
-          style: AppTextStyles.sfProDisplayBold(fontSize: 18.sp),
+        Expanded(
+          child: Center(
+            child: AppText(
+              text: "Your Readings",
+              style: AppTextStyles.bold(fontSize: 21.sp),
+            ),
+          ),
         ),
-        // Search + Profile (Netflix-style right)
         Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             GestureDetector(
               onTap: () {
-                tabIndex.value = 1;
-                AppRouter.indexedStackNavigationShell?.goBranch(1);
+                context.pushNamed(AppRoutes.notificationScreen.name);
               },
               child: Padding(
-                padding: EdgeInsets.all(8.w),
-                child: SvgIcon(AppAssets.searchIcon, size: 24.w),
+                padding: EdgeInsets.only(right: 12.w),
+                child: SvgIcon(
+                  AppAssets.notification,
+                  size: 25.w,
+                  color: AppColors.black,
+                ),
               ),
             ),
-            4.w.horizontalSpace,
             GestureDetector(
               onTap: () {
-                showLogOutConfirmationDialog(context: context);
-                // showDialog(
-                //   context: context,
-                //   builder: (context) => AlertDialog(
-                //     title: const Text("Log Out"),
-                //     content: const Text("Are you sure you want to Log Out?"),
-                //     actions: [
-                //       TextButton(
-                //         onPressed: () => Navigator.pop(context),
-                //         child: const Text("Cancel"),
-                //       ),
-                //       TextButton(
-                //         onPressed: () {
-                //           Navigator.pop(context);
-                //           context.read<AuthProvider>().logOutUser(context);
-                //         },
-                //         child: const Text(
-                //           "Log Out",
-                //           style: TextStyle(color: Colors.red),
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // );
+                context.pushNamed(AppRoutes.profileScreen.name);
               },
-              child: CircleAvatar(
-                radius: 18.w,
-                backgroundImage: AssetImage(AppAssets.profile),
+              // onTap: () => showLogOutConfirmationDialog(context: context),
+              child: Container(
+                width: 40.w,
+                height: 40.w,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFFE5D9B8), width: 3.w),
+                ),
+                child: ClipOval(
+                  child: Image.asset(
+                    AppAssets.profile,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
             ),
           ],
@@ -144,7 +144,7 @@ class HomeHeader extends StatelessWidget {
       onPressed: onPressed,
       child: Text(
         title,
-        style: AppTextStyles.sfProDisplayRegular(
+        style: AppTextStyles.regular(
           color: (title == "Yes") ? AppColors.redColor : AppColors.black,
           fontSize: 17.sp,
         ),
@@ -167,7 +167,7 @@ class CalendarStrip extends StatelessWidget {
       children: [
         AppText(
           text: "Weekly goal",
-          style: AppTextStyles.sfProDisplayBold(fontSize: 12.sp),
+          style: AppTextStyles.bold(fontSize: 12.sp),
         ),
         5.w.verticalSpace,
 
@@ -211,7 +211,7 @@ class CalendarStrip extends StatelessWidget {
         6.w.verticalSpace,
         AppText(
           text: "1/3 Exercises",
-          style: AppTextStyles.sfProDisplayBold(
+          style: AppTextStyles.bold(
             fontSize: 12.sp,
             color: AppColors.black.withValues(alpha: 0.4),
           ),
@@ -260,7 +260,7 @@ class CalendarStrip extends StatelessWidget {
                     6.w.verticalSpace,
                     AppText(
                       text: days[index],
-                      style: AppTextStyles.sfProDisplaySemibold(
+                      style: AppTextStyles.semibold(
                         fontSize: 12.sp,
                         color: AppColors.black.withValues(alpha: 0.4),
                       ),
@@ -268,7 +268,7 @@ class CalendarStrip extends StatelessWidget {
                     4.w.verticalSpace,
                     AppText(
                       text: dates[index],
-                      style: AppTextStyles.sfProDisplayBold(
+                      style: AppTextStyles.bold(
                         fontSize: 14.sp,
                         color: AppColors.black,
                       ),
@@ -310,7 +310,7 @@ class BottomStatsCard extends StatelessWidget {
             children: [
               AppText(
                 text: "Oxford Vocabulary",
-                style: AppTextStyles.sfProDisplayBold(
+                style: AppTextStyles.bold(
                   fontSize: 16.sp,
                   color: AppColors.white,
                   letterSpacing: 1,
@@ -332,7 +332,7 @@ class BottomStatsCard extends StatelessWidget {
             children: [
               AppText(
                 text: "3,500/5,000",
-                style: AppTextStyles.sfProDisplayMedium(
+                style: AppTextStyles.medium(
                   fontSize: 12.sp,
                   color: AppColors.white,
                 ),

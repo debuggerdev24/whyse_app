@@ -42,7 +42,7 @@ class CustomBackButton extends StatelessWidget {
             12.w.horizontalSpace,
             AppText(
               text: "Back",
-              style: AppTextStyles.sfProDisplaySemibold(
+              style: AppTextStyles.semibold(
                 color: color,
                 fontSize: 15.sp,
               ),

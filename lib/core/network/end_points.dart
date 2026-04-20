@@ -48,4 +48,6 @@ class EndPoints {
       "/story/ideas/$storyIdea/story";
   static String topicProgress({required String topicId}) => "/story/topics/$topicId/progress";
   static String markAsRead({required String storyIdeaId}) => "/story/ideas/$storyIdeaId/mark-read";
+  static String createQuiz({required String storyId}) => "/story/$storyId/quiz/generate";
+  static String getQuiz({required String storyId}) => "/story/$storyId/quiz";
 }

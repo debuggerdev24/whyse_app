@@ -1,7 +1,7 @@
 
 
 class StoryModel {
-  final String id, title, content;
+  final String id, title, content,thumbnailUrl;
   final List<StoryQuiz> quiz;
   final List<StoryPages> pages;
   final String? readingTopic,
@@ -31,6 +31,7 @@ class StoryModel {
     this.tags,
     this.createdAt,
     this.updatedAt, required this.pages,
+    required this.thumbnailUrl,
   });
 
   factory StoryModel.fromJson(Map<String, dynamic> json) {
@@ -52,7 +53,8 @@ class StoryModel {
       tags: json['tags'] != null ? List<String>.from(json['tags']) : [],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
-      pages: json['pages'] != null ? (json['pages'] as List).map((i) => StoryPages.fromJson(i)).toList() : [],
+      pages: json['pages'] != null ? (json['pages'] as List).map((i) => StoryPages.fromJson(i)).toList() : []
+      ,thumbnailUrl: json["thumbnailUrl"] ?? '',
     );
   }
 }

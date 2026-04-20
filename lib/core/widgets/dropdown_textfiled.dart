@@ -51,14 +51,14 @@ class CustomDropDown extends StatelessWidget {
             dropdownColor: Colors.white,
             elevation: 3,
 
-            style: AppTextStyles.sfProDisplayRegular(
+            style: AppTextStyles.regular(
               fontSize: 16.sp,
               color: AppColors.black,
             ),
 
             hint: AppText(
               text: hint,
-              style: AppTextStyles.sfProDisplaySemibold(
+              style: AppTextStyles.semibold(
                 fontSize: 14.sp,
                 color: AppColors.black.withValues(alpha: 0.3),
               ),
@@ -74,7 +74,7 @@ class CustomDropDown extends StatelessWidget {
                   padding: EdgeInsets.symmetric(vertical: 10.h),
                   child: AppText(
                     text: item,
-                    style: AppTextStyles.sfProDisplayMedium(
+                    style: AppTextStyles.medium(
                       fontSize: 16.sp,
                       color: AppColors.black,
                     ),
@@ -154,7 +154,7 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
               value: selectedValue,
               hint: AppText(
                 text: widget.hint,
-                style: AppTextStyles.sfProDisplayMedium(
+                style: AppTextStyles.medium(
                   fontSize: 14.sp,
                   color: AppColors.black.withValues(alpha: 0.3),
                 ),
@@ -168,7 +168,7 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
                   value: item,
                   child: AppText(
                     text: item,
-                    style: AppTextStyles.sfProDisplayMedium(
+                    style: AppTextStyles.medium(
                       fontSize: 14.sp,
                       color: AppColors.black,
                     ),

@@ -268,14 +268,14 @@ class _SearchScreenState extends State<SearchScreen> {
         backgroundColor: AppColors.backgroundColor,
         title: AppText(
           text: "No readings found",
-          style: AppTextStyles.sfProDisplayBold(fontSize: 18.sp),
+          style: AppTextStyles.bold(fontSize: 18.sp),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
             child: Text(
               "OK",
-              style: AppTextStyles.sfProDisplayRegular(
+              style: AppTextStyles.regular(
                 color: AppColors.black,
                 fontSize: 17.sp,
               ),
@@ -385,7 +385,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         text: _isSearching
                             ? 'Results for "${_searchController.text.trim()}"'
                             : "Recommended for you",
-                        style: AppTextStyles.sfProDisplayBold(
+                        style: AppTextStyles.bold(
                           fontSize: 22.sp,
                           height: 1.2,
                         ),

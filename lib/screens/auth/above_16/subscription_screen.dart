@@ -74,7 +74,7 @@ class _SubScriptionScreenState extends State<SubScriptionScreen> {
                           31.w.verticalSpace,
                           AppText(
                             text: "Choose your plan",
-                            style: AppTextStyles.sfProDisplayBold(
+                            style: AppTextStyles.bold(
                               fontSize: 32.sp,
                               color: AppColors.white,
                             ),
@@ -82,7 +82,7 @@ class _SubScriptionScreenState extends State<SubScriptionScreen> {
                           8.w.verticalSpace,
                           Text(
                             "Pick a plan that fits your reading goals and\nstart learning your way.",
-                            style: AppTextStyles.sfProDisplayRegular(
+                            style: AppTextStyles.regular(
                               fontSize: 16.sp,
                               color: AppColors.white.withValues(alpha: 0.8),
                             ),

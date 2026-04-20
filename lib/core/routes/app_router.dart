@@ -16,11 +16,14 @@ import 'package:redstreakapp/screens/auth/login_screen.dart';
 import 'package:redstreakapp/screens/auth/reset_password_screen.dart';
 import 'package:redstreakapp/screens/auth/signup_screen.dart';
 import 'package:redstreakapp/screens/auth/verify_mail_screen.dart';
+import 'package:redstreakapp/screens/home/story/created_ideas.dart';
+import 'package:redstreakapp/screens/notification/notification_screen.dart';
+import 'package:redstreakapp/screens/profile/profile_screen.dart';
 import 'package:redstreakapp/screens/search/search_screen.dart';
 import 'package:redstreakapp/screens/home/story/custom_story_topic_screen.dart';
-import 'package:redstreakapp/screens/home/story/story_reading_screen.dart';
+
 import 'package:redstreakapp/screens/home/story/story_goals_screen.dart';
-import 'package:redstreakapp/screens/home/story/story_series_screen.dart';
+import 'package:redstreakapp/screens/home/story/created_story.dart';
 import 'package:redstreakapp/screens/home/story/shared_story_screen.dart';
 import 'package:redstreakapp/screens/home/story/random_story_series_screen.dart';
 import 'package:redstreakapp/screens/home/story/story_reading_goal_screen.dart';
@@ -28,9 +31,9 @@ import 'package:redstreakapp/screens/home/story/story_topics_screen.dart';
 import 'package:redstreakapp/screens/home/home_screen.dart';
 import 'package:redstreakapp/screens/home/quiz/quiz_completed_screen.dart';
 import 'package:redstreakapp/screens/home/quiz/quiz_question_screen.dart';
+import 'package:redstreakapp/screens/home/quiz/enter_quiz_number.dart';
 import 'package:redstreakapp/screens/home/quiz/start_quiz_screen.dart';
 import 'package:redstreakapp/models/home/browse_topic_model.dart';
-import 'package:redstreakapp/models/home/story_models/story_history_model.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/screens/practice/practice_zone.dart';
 
@@ -38,7 +41,7 @@ import '../../screens/auth/below_16/consent_status_screen.dart';
 import '../../screens/auth/below_16/parent_email_screen.dart';
 import '../../screens/dashboard.dart';
 import '../../screens/home/story/story_interest_screen.dart';
-import '../../screens/home/story/ideas_list_screen.dart';
+import '../../screens/home/story/home_ideas_list.dart';
 import '../../screens/home/my_story_ideas_screen.dart';
 import '../../screens/splash/splash_screen.dart';
 import '../../models/home/story_models/story_model.dart';
@@ -71,6 +74,16 @@ class AppRouter {
                 name: AppRoutes.homeScreen.name,
                 builder: (context, state) => HomeScreen(),
               ),
+              GoRoute(
+                path: AppRoutes.notificationScreen.path,
+                name: AppRoutes.notificationScreen.name,
+                builder: (context, state) => NotificationScreen(),
+              ),
+              GoRoute(
+                path: AppRoutes.profileScreen.path,
+                name: AppRoutes.profileScreen.name,
+                builder: (context, state) => ProfileScreen(),
+              ),
             ],
           ),
           //* Search tab
@@ -83,6 +96,7 @@ class AppRouter {
               ),
             ],
           ),
+          //* Practice Zone tab
           StatefulShellBranch(
             routes: [
               GoRoute(
@@ -167,7 +181,7 @@ class AppRouter {
       },
     ),
 
-    //todo Below 16 Routes
+    //* Below 16 Routes
     GoRoute(
       path: AppRoutes.parentEmailScreen.path,
       name: AppRoutes.parentEmailScreen.name,
@@ -182,7 +196,7 @@ class AppRouter {
         return ConsentStatusScreen();
       },
     ),
-    //todo Onboarding Routes
+    //* Onboarding Routes
     GoRoute(
       path: AppRoutes.profileInfoScreen.path,
       name: AppRoutes.profileInfoScreen.name,
@@ -211,7 +225,6 @@ class AppRouter {
         return TopicsScreen();
       },
     ),
-
     GoRoute(
       path: AppRoutes.successScreen.path,
       name: AppRoutes.successScreen.name,
@@ -226,37 +239,14 @@ class AppRouter {
         return SubScriptionScreen();
       },
     ),
-   
     GoRoute(
-      path: AppRoutes.readingScreen.path,
-      name: AppRoutes.readingScreen.name,
+      path: AppRoutes.enterQuizNumbersScreen.path,
+      name: AppRoutes.enterQuizNumbersScreen.name,
       builder: (context, state) {
-        final extra = state.extra;
-        if (extra is StoryHistoryModel) {
-          return CreatedStoryReadingScreen(initialStory: extra);
-        }
-        if (extra is Map && extra["storyIdeaId"] != null) {
-          return CreatedStoryReadingScreen(
-            storyIdeaId: extra["storyIdeaId"] as String,
-          );
-        }
-        return const SizedBox.shrink();
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.createdStoryReadingScreen.path,
-      name: AppRoutes.createdStoryReadingScreen.name,
-      builder: (context, state) {
-        final extra = state.extra;
-        if (extra is StoryHistoryModel) {
-          return CreatedStoryReadingScreen(initialStory: extra);
-        }
-        if (extra is Map && extra["storyIdeaId"] != null) {
-          return CreatedStoryReadingScreen(
-            storyIdeaId: extra["storyIdeaId"] as String,
-          );
-        }
-        return const SizedBox.shrink();
+        final extra = state.extra as Map<String, dynamic>? ?? {};
+        return EnterQuizNumbersScreen(
+          storyId: extra["storyId"] as String? ?? '',
+        );
       },
     ),
     GoRoute(
@@ -265,7 +255,7 @@ class AppRouter {
       builder: (context, state) {
         final extra = state.extra as Map<String, dynamic>? ?? {};
         return StartQuizScreen(
-          quizzes: (extra["quizzes"] as List<StoryQuiz>? ?? []),
+          storyId: extra["storyId"] as String? ?? "",
           storyTitle: extra["storyTitle"] as String? ?? "",
         );
       },
@@ -378,16 +368,16 @@ class AppRouter {
       path: AppRoutes.storyIdeasScreen.path,
       name: AppRoutes.storyIdeasScreen.name,
       builder: (context, state) {
-        return const IdeasListScreen();
+        return const HomeIdeasListScreen();
       },
     ),
     GoRoute(
-      path: AppRoutes.storySeriesScreen.path,
-      name: AppRoutes.storySeriesScreen.name,
+      path: AppRoutes.storyReadingScreen.path,
+      name: AppRoutes.storyReadingScreen.name,
       // onExit: (context, state) async {
       // },
       builder: (context, state) {
-        return const StoryReadingScreen();
+        return const CreatedStoryReadingScreen();
       },
     ),
     GoRoute(
@@ -406,8 +396,9 @@ class AppRouter {
       builder: (context, state) {
         final extra = state.extra;
         final isFromSearch = extra is Map && extra["progress"] != null;
-        final progressResponse =
-            isFromSearch ? (extra["progress"] as Map<String, dynamic>) : (extra as Map<String, dynamic>? ?? {});
+        final progressResponse = isFromSearch
+            ? (extra["progress"] as Map<String, dynamic>)
+            : (extra as Map<String, dynamic>? ?? {});
         BrowseTopicModel? searchTopic;
         if (isFromSearch && extra["searchTopic"] != null) {
           try {
@@ -423,6 +414,13 @@ class AppRouter {
           progressResponse: progressResponse,
           searchTopic: searchTopic,
         );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.createdIdeasListScreen.path,
+      name: AppRoutes.createdIdeasListScreen.name,
+      builder: (context, state) {
+        return const CreatedIdeasList();
       },
     ),
   ];

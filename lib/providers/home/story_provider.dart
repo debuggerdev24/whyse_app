@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart';
 import 'package:flutter/widgets.dart';
-import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
+import 'package:redstreakapp/models/home/story_models/quiz_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_idea_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_summary_model.dart'
     hide StoryIdea;
@@ -17,8 +17,6 @@ import '../../models/home/interest_model.dart';
 import '../../models/home/story_models/story_history_model.dart';
 import '../../models/home/story_models/story_model.dart';
 import '../../models/home/topic_model.dart';
-import '../../core/routes/app_router.dart';
-import '../../core/routes/user_routes.dart';
 import '../../services/home/home_api_service.dart';
 import '../../services/home/story_api_service.dart';
 
@@ -54,7 +52,10 @@ class StoryProvider extends ChangeNotifier {
   Map<String, dynamic> dataToSendCreateStory = {};
   final allowedDurations = {5, 10, 15, 20, 25, 30, 35, 40, 45};
   List<StoryModel> _stories = [];
-  StoryIdeasModel? storyIdea;
+  StoryModel? _story;
+  StoryIdeasModel? storyIdeas;
+  QuizModel? quiz;
+  bool isCreateQuizLoading = false;
 
   /// Set when entering story from search; used to show add/remove from my list toggle.
   BrowseTopicModel? _topicFromSearch;
@@ -89,6 +90,7 @@ class StoryProvider extends ChangeNotifier {
   }
 
   List<StoryModel> get stories => _stories;
+  StoryModel? get story => _story;
   final List<String> readingDurations = [
     '5 mins',
     '10 mins',
@@ -135,10 +137,9 @@ class StoryProvider extends ChangeNotifier {
   //* interest field
   List<InterestModel> interestsList = [];
   final List<String> customInterestsList = [];
-  final Set<String> selectedInterestIds = {};
-  final Set<String> selectedCustomInterests = {};
+  final Set<String> selectedInterestIds = {}, selectedCustomInterests = {};
 
-  //todo goal fields
+  //* goal fields
   List<GoalModel> goalsList = [];
   final Set<String> selectedGoalIds = {};
   bool isCustomGoalSelected = false;
@@ -418,11 +419,11 @@ class StoryProvider extends ChangeNotifier {
     try {
       Either<ApiException, Map<String, dynamic>> createResponse =
           await doRequest().timeout(
-        _generateStoryTimeout,
-        onTimeout: () => throw TimeoutException(
-          "Story generation took longer than 1 minute",
-        ),
-      );
+            _generateStoryTimeout,
+            onTimeout: () => throw TimeoutException(
+              "Story generation took longer than 1 minute",
+            ),
+          );
 
       final isTimeout = createResponse.fold(
         (l) => isTimeoutError(l.errorMsg),
@@ -436,14 +437,10 @@ class StoryProvider extends ChangeNotifier {
         );
         try {
           createResponse = await StoryApiService.instance
-              .createStory(
-                data: payload,
-                receiveTimeout: receiveTimeout,
-              )
+              .createStory(data: payload, receiveTimeout: receiveTimeout)
               .timeout(
                 _generateStoryTimeout,
-                onTimeout: () =>
-                    throw TimeoutException("Retry also timed out"),
+                onTimeout: () => throw TimeoutException("Retry also timed out"),
               );
         } on TimeoutException {
           generateStoryError =
@@ -473,8 +470,7 @@ class StoryProvider extends ChangeNotifier {
             .createStory(data: payload, receiveTimeout: receiveTimeout)
             .timeout(
               _generateStoryTimeout,
-              onTimeout: () =>
-                  throw TimeoutException("Retry also timed out"),
+              onTimeout: () => throw TimeoutException("Retry also timed out"),
             );
         applyResult(retryResponse);
       } on TimeoutException {
@@ -512,6 +508,7 @@ class StoryProvider extends ChangeNotifier {
     content: '',
     quiz: [],
     pages: [],
+    thumbnailUrl: '',
     lessonDuration: 0,
   );
 
@@ -657,7 +654,7 @@ class StoryProvider extends ChangeNotifier {
           ),
         )
         .toList();
-    storyIdea = StoryIdeasModel(
+    this.storyIdeas = StoryIdeasModel(
       promptType: "topic",
       grade: null,
       mustIncludeWords: null,
@@ -689,6 +686,7 @@ class StoryProvider extends ChangeNotifier {
       tags: h.metadata.tags,
       createdAt: h.createdAt.toIso8601String(),
       updatedAt: h.updatedAt.toIso8601String(),
+      thumbnailUrl: h.thumbnailUrl,
     );
     _addStoryAtIndex(m, index);
     _currentStoryIndex = index;
@@ -718,7 +716,7 @@ class StoryProvider extends ChangeNotifier {
           ),
         )
         .toList();
-    storyIdea = StoryIdeasModel(
+    this.storyIdeas = StoryIdeasModel(
       promptType: "progress",
       grade: null,
       mustIncludeWords: null,
@@ -733,8 +731,8 @@ class StoryProvider extends ChangeNotifier {
 
   /// Index of a reading item by storyIdeaId in current storyIdea.
   int indexOfReadingByStoryIdeaId(String storyIdeaId) {
-    if (storyIdea == null) return -1;
-    final idx = storyIdea!.storyIdeas.indexWhere((s) => s.id == storyIdeaId);
+    if (storyIdeas == null) return -1;
+    final idx = storyIdeas!.storyIdeas.indexWhere((s) => s.id == storyIdeaId);
     return idx;
   }
 
@@ -750,7 +748,6 @@ class StoryProvider extends ChangeNotifier {
     required BuildContext context,
     bool forceRegenerate = false,
     String? topicId,
-    bool onlyIdeas = false,
     VoidCallback? onSuccess,
   }) async {
     if (!forceRegenerate && !_validateCreateStoryInput(context)) return;
@@ -758,7 +755,7 @@ class StoryProvider extends ChangeNotifier {
     _currentStoryIndex = 0;
     _currentStoryPageIndex = 0;
     stories.clear();
-    storyIdea = null;
+    storyIdeas = null;
     notifyListeners();
 
     dataToSendCreateStory = {
@@ -786,160 +783,152 @@ class StoryProvider extends ChangeNotifier {
       }
       clearForceRegenerateTopicId();
     }
+    try {
+      final response = await StoryApiService.instance
+          .createStoryIdeas(data: dataToSendCreateStory)
+          .timeout(
+            const Duration(minutes: 2),
+            onTimeout: () => Left(
+              ApiException(
+                errorMsg: "Story ideas are taking too long. Please try again.",
+                code: '',
+              ),
+            ),
+          );
 
-    final response = await StoryApiService.instance.createStoryIdeas(
-      data: dataToSendCreateStory,
-    );
+      response.fold(
+        (l) {
+          Logger.error(l.errorMsg);
+          onFailed.call(l.errorMsg);
+        },
+        (r) {
+          Logger.info("createStoryIdeas response: ${r["data"].toString()}");
+          storyIdeas = StoryIdeasModel.fromJson(r["data"]);
 
+          if (_noOfStories > 0 &&
+              storyIdeas!.storyIdeas.length > _noOfStories) {
+            storyIdeas!.storyIdeas = storyIdeas!.storyIdeas
+                .take(_noOfStories)
+                .toList();
+          }
+          onSuccess?.call();
+          notifyListeners();
+        },
+      );
+    } catch (e, st) {
+      Logger.error("createStoryIdeas error: $e\n$st");
+      onFailed.call("Something went wrong. Please try again.");
+    } finally {
+      isGenerateStoryIdeasLoading = false;
+      notifyListeners();
+    }
+  }
+
+  //* create story
+  Future<void> createStory({
+    required VoidCallback onSuccess,
+    required Function(String error) onFailed,
+    required int selectedIdeaIndex,
+  }) async {
+    stories.clear();
+    if (storyIdeas == null ||
+        selectedIdeaIndex < 0 ||
+        selectedIdeaIndex >= storyIdeas!.storyIdeas.length) {
+      onFailed.call("Please select a valid story idea.");
+      return;
+    }
+    isCreateStoryLoading = true;
+    notifyListeners();
+    try {
+      final response = await StoryApiService.instance
+          .createStory(
+            data: {"storyIdeaId": storyIdeas!.storyIdeas[selectedIdeaIndex].id},
+          )
+          .timeout(
+            const Duration(minutes: 2),
+            onTimeout: () => Left(
+              ApiException(
+                errorMsg: "Story generation timed out. Please try again.",
+                code: '',
+              ),
+            ),
+          );
+      response.fold(
+        (l) {
+          onFailed.call(l.errorMsg);
+        },
+        (r) {
+          final story = StoryModel.fromJson(r["data"]);
+          _stories.add(story);
+          onSuccess.call();
+          notifyListeners();
+        },
+      );
+    } catch (e, st) {
+      Logger.error("createStory error: $e\n$st");
+      onFailed.call("Something went wrong. Please try again.");
+    } finally {
+      isCreateStoryLoading = false;
+      notifyListeners();
+    }
+  }
+
+  //* create and quiz
+  Future<bool> createQuiz({
+    required String storyId,
+    required int noOfMcq,
+    required int noOfOpenQuestions,
+    required int noOfTrueFalse,
+    bool replaceExisting = false,
+  }) async {
+    isCreateQuizLoading = true;
+    notifyListeners();
+    var ok = false;
+    try {
+      final data  = {
+        "quizMcqCount": noOfMcq,
+        "quizOpenCount": noOfOpenQuestions,
+        "quizTrueFalseCount": noOfTrueFalse,
+        "replaceExisting": replaceExisting,
+      };
+      final response = await StoryApiService.instance.createQuiz(storyId: storyId, data: data);
+      response.fold(
+        (l) {
+          Logger.error(l.errorMsg);
+          ok = false;
+        },
+        (r) {
+          quiz = QuizModel.fromJson(r["data"]);
+          ok = true;
+        },
+      );
+    } finally {
+      isCreateQuizLoading = false;
+      notifyListeners();
+    }
+    return ok;
+  }
+
+  Future<void> getQuiz({required String storyId}) async {
+    quiz = null;
+    notifyListeners();
+    final response = await StoryApiService.instance.getQuiz(storyId: storyId);
     response.fold(
       (l) {
         Logger.error(l.errorMsg);
-        isGenerateStoryIdeasLoading = false;
-        notifyListeners();
-        onFailed.call(l.errorMsg);
       },
-      (r) async {
-        storyIdea = StoryIdeasModel.fromJson(r["data"]);
-        if (storyIdea!.storyIdeas.isEmpty) {
-          isGenerateStoryIdeasLoading = false;
-          notifyListeners();
-          onFailed.call("No story ideas returned");
+      (r) {
+        if (r["data"]["questions"].isEmpty) {
+          // createQuiz(
+          //   storyId: storyId,
+          //   noOfMcq: 1,
+          //   noOfOpenQuestions: 1,
+          //   noOfTrueFalse: 1,
+          // );
           return;
         }
-
-        if (storyIdea!.storyIdeas.length > _noOfStories) {
-          storyIdea!.storyIdeas = storyIdea!.storyIdeas
-              .take(_noOfStories)
-              .toList();
-        }
-
-        // if (onlyIdeas) {
-        //   isGenerateStoryIdeasLoading = false;
-        //   notifyListeners();
-        //   return;
-        // }
-
-        //* The main story creation function
-        final createResponse = await StoryApiService.instance.createStory(
-          data: {"storyIdeaId": storyIdea!.storyIdeas.first.id},
-        );
-
-        createResponse.fold(
-          (l) {
-            isGenerateStoryIdeasLoading = false;
-            notifyListeners();
-            onFailed.call(l.errorMsg);
-          },
-          (r) async {
-            final story = StoryModel.fromJson(r["data"]);
-            stories.add(story);
-            _currentStoryIndex = 0;
-            _currentStoryPageIndex = 0;
-            isGenerateStoryIdeasLoading = false;
-            notifyListeners();
-            onSuccess?.call();
-          },
-        );
-      },
-    );
-  }
-
-  //todo create story
-  Future<void> createStory({
-    required VoidCallback onStarted,
-    required BuildContext context,
-  }) async {
-    isCreateStoryLoading = true;
-    notifyListeners();
-    // onStarted.call();
-
-    final response = await StoryApiService.instance.createStoryIdeas(
-      data: dataToSendCreateStory,
-    );
-
-    response.fold(
-      (l) {
-        if (context.mounted) {
-          AppToast.error(context, l.errorMsg);
-        }
-      },
-      (r) async {
-        storyIdea = StoryIdeasModel.fromJson(r["data"]);
-        if (storyIdea!.storyIdeas.isEmpty) {
-          if (context.mounted)
-            AppToast.error(context, "No story ideas returned");
-          return;
-        }
-
-        if (storyIdea!.storyIdeas.length > _noOfStories) {
-          storyIdea!.storyIdeas = storyIdea!.storyIdeas
-              .take(_noOfStories)
-              .toList();
-        }
-
-        Logger.info(
-          "Story Ideas length: ${storyIdea!.storyIdeas.length.toString()}",
-        );
-
-        final response = await StoryApiService.instance.createStory(
-          data: {"storyIdeaId": storyIdea!.storyIdeas.first.id},
-        );
-        response.fold(
-          (l) {
-            if (context.mounted) {
-              AppToast.error(context, l.errorMsg);
-            }
-          },
-          (r) {
-            final story = StoryModel.fromJson(r["data"]);
-            stories.add(story);
-
-            if (context.mounted) {
-              context.pushNamed(AppRoutes.storyIdeasScreen.name);
-            } else {
-              AppRouter.goRouter.pushNamed(AppRoutes.storyIdeasScreen.name);
-            }
-          },
-        );
-      },
-    );
-    isGenerateStoryIdeasLoading = false;
-    notifyListeners();
-  }
-
-  //todo create story image
-  bool isCreateStoryImageLoading = false;
-  Future<void> createStoryImage({
-    required Function(String error) onFailed,
-    required String storyid,
-    required int pageCount,
-  }) async {
-    isCreateStoryImageLoading = true;
-    notifyListeners();
-    createdStoryImages.clear();
-    final response = await StoryApiService.instance.createStoryImage(
-      data: {"storyId": storyid, "imageCount": pageCount},
-    );
-
-    response.fold(
-      (l) {
-        onFailed.call(l.errorMsg);
-      },
-      (r) async {
-        Logger.info(
-          "createdStoryImagePath : ${r["data"]["imagePaths"].toString()}",
-        );
-        final images = List<String>.from(r["data"]["imagePaths"]);
-        createdStoryImages.add({"images": images});
-        Logger.info(
-          "createdStoryImagePaths length: ${createdStoryImages.length}",
-        );
-        Logger.info("storyPage length: ${pageCount}}");
-        // linkImageToStory(image: createdStoryImages.first["images"]!.first);
-
-        isCreateStoryImageLoading = false;
+        quiz = QuizModel.fromJson(r["data"]);
         notifyListeners();
-        // clearStoryFields();
       },
     );
   }
@@ -961,7 +950,7 @@ class StoryProvider extends ChangeNotifier {
   void clareStoryData() {
     createdStoryImages.clear();
     stories.clear();
-    storyIdea = null;
+    storyIdeas = null;
     dataToSendCreateStory = {};
     _markingReadStoryIdeaIds.clear();
     _markedReadStoryIdeaIds.clear();
@@ -971,7 +960,7 @@ class StoryProvider extends ChangeNotifier {
     isCreateStoryLoading = false;
     isGenerateSingleStoryLoading = false;
     isGenerateStoryIdeasLoading = false;
-    isCreateStoryImageLoading = false;
+    isCreateQuizLoading = false;
     _currentStoryIndex = 0;
     _currentStoryPageIndex = 0;
     clareStoryData();

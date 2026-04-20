@@ -20,14 +20,6 @@ class StoryIdeasModel {
         topic: Topic.fromJson(json["topic"]),
         storyIdeas: List<StoryIdea>.from(json["storyIdeas"].map((x) => StoryIdea.fromJson(x))),
     );
-
-    Map<String, dynamic> toJson() => {
-        "promptType": promptType,
-        "grade": grade,
-        "mustIncludeWords": mustIncludeWords,
-        "topic": topic.toJson(),
-        "storyIdeas": List<dynamic>.from(storyIdeas.map((x) => x.toJson())),
-    };
 }
 
 class StoryIdea {
@@ -59,16 +51,6 @@ class StoryIdea {
         sequenceIndex: json["sequenceIndex"],
         isGenerated: json["isGenerated"] != false,
     );
-
-    Map<String, dynamic> toJson() => {
-        "id": id,
-        "title": title,
-        "description": description,
-        "thumbnailUrl": thumbnailUrl,
-        "createdAt": createdAt.toIso8601String(),
-        "sequenceIndex": sequenceIndex,
-        "isGenerated": isGenerated,
-    };
 }
 
 class Topic {

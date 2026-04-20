@@ -50,7 +50,7 @@ class QuizCompletedScreen extends StatelessWidget {
                   19.w.verticalSpace,
                   AppText(
                     text: "Quiz Completed!",
-                    style: AppTextStyles.sfProDisplayMedium(
+                    style: AppTextStyles.medium(
                       fontSize: 12.sp,
                       color: AppColors.black.withValues(alpha: 0.8),
                     ),
@@ -59,7 +59,7 @@ class QuizCompletedScreen extends StatelessWidget {
                   // Title
                   AppText(
                     text: storyTitle,
-                    style: AppTextStyles.sfProDisplaySemibold(
+                    style: AppTextStyles.semibold(
                       fontSize: 20.sp,
                       color: AppColors.black,
                     ),
@@ -70,7 +70,7 @@ class QuizCompletedScreen extends StatelessWidget {
                   12.w.verticalSpace,
                   AppText(
                     text: "Quiz Completed!",
-                    style: AppTextStyles.sfProDisplaySemibold(
+                    style: AppTextStyles.semibold(
                       fontSize: 32.sp,
                       color: AppColors.black,
                     ),
@@ -79,7 +79,7 @@ class QuizCompletedScreen extends StatelessWidget {
                   10.w.verticalSpace,
                   AppText(
                     text: "Your Score:",
-                    style: AppTextStyles.sfProDisplayBold(
+                    style: AppTextStyles.bold(
                       fontSize: 14.sp,
                       color: AppColors.black.withValues(alpha: 0.6),
                     ),
@@ -87,7 +87,7 @@ class QuizCompletedScreen extends StatelessWidget {
                   8.w.verticalSpace,
                   AppText(
                     text: "$score/$total",
-                    style: AppTextStyles.sfProDisplayBold(
+                    style: AppTextStyles.bold(
                       fontSize: 20.sp,
                       color: AppColors.black,
                     ),
@@ -95,7 +95,7 @@ class QuizCompletedScreen extends StatelessWidget {
                   24.w.verticalSpace,
                   AppText(
                     text: "Reward:",
-                    style: AppTextStyles.sfProDisplayBold(
+                    style: AppTextStyles.bold(
                       fontSize: 14.sp,
                       color: AppColors.black.withValues(alpha: 0.6),
                     ),
@@ -125,7 +125,7 @@ class QuizCompletedScreen extends StatelessWidget {
                         8.w.horizontalSpace,
                         AppText(
                           text: score.toString(),
-                          style: AppTextStyles.sfProDisplaySemibold(
+                          style: AppTextStyles.semibold(
                             fontSize: 16.sp,
                             color: AppColors.black,
                           ),
@@ -135,7 +135,7 @@ class QuizCompletedScreen extends StatelessWidget {
                   ),
                   Spacer(flex: 2),
     
-                  if ((provider.storyIdea?.storyIdeas.length ?? provider.stories.length) - 1 > provider.currentStoryIndex)
+                  if ((provider.storyIdeas?.storyIdeas.length ?? provider.stories.length) - 1 > provider.currentStoryIndex)
                     AppFilledButton(
                       text: "See Next Story",
                       onTap: () {
@@ -144,16 +144,16 @@ class QuizCompletedScreen extends StatelessWidget {
                         if (nextIndex < provider.stories.length) {
                           provider.setCurrentStoryIndex = nextIndex;
                           if (!context.mounted) return;
-                          context.goNamed(AppRoutes.storySeriesScreen.name);
-                        } else if (provider.storyIdea != null && nextIndex < provider.storyIdea!.storyIdeas.length) {
-                          final nextIdeaId = provider.storyIdea!.storyIdeas[nextIndex].id;
+                          context.goNamed(AppRoutes.storyReadingScreen.name);
+                        } else if (provider.storyIdeas != null && nextIndex < provider.storyIdeas!.storyIdeas.length) {
+                          final nextIdeaId = provider.storyIdeas!.storyIdeas[nextIndex].id;
                           provider.setCurrentStoryIndex = nextIndex;
                           provider.generateSingleStory(
                             storyIdeaId: nextIdeaId,
                             context: context,
                           );
                           if (!context.mounted) return;
-                          context.goNamed(AppRoutes.storySeriesScreen.name);
+                          context.goNamed(AppRoutes.storyReadingScreen.name);
                         }
                       },
                       backgroundColor: AppColors.teal,

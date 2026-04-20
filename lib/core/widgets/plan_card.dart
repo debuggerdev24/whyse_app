@@ -74,7 +74,7 @@ class PlanCard extends StatelessWidget {
                           padding: EdgeInsets.only(bottom: 13.h, right: 15.w),
                           child: AppText(
                             text: price,
-                            style: AppTextStyles.sfProDisplayBold(
+                            style: AppTextStyles.bold(
                               fontSize: 16.sp,
                             ),
                           ),
@@ -108,7 +108,7 @@ class PlanCard extends StatelessWidget {
           6.w.horizontalSpace,
           AppText(
             text: text,
-            style: AppTextStyles.sfProDisplayMedium(fontSize: 14.sp),
+            style: AppTextStyles.medium(fontSize: 14.sp),
           ),
         ],
       ),

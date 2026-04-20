@@ -80,6 +80,24 @@ class StoryApiService {
   Future<Either<ApiException, Map<String, dynamic>>> markAsRead({
     required String storyIdeaId,
   }) async {
-    return BaseApiHelper.instance.post(EndPoints.markAsRead(storyIdeaId: storyIdeaId));
+    return BaseApiHelper.instance.post(
+      EndPoints.markAsRead(storyIdeaId: storyIdeaId),
+    );
+  }
+
+  Future<Either<ApiException, Map<String, dynamic>>> createQuiz({
+    required String storyId,
+    Map<String, dynamic>? data,
+  }) async {
+    return BaseApiHelper.instance.post(
+      EndPoints.createQuiz(storyId: storyId),
+      data: data,
+    );
+  }
+
+  Future<Either<ApiException, Map<String, dynamic>>> getQuiz({
+    required String storyId,
+  }) async {
+    return BaseApiHelper.instance.get(EndPoints.getQuiz(storyId: storyId));
   }
 }

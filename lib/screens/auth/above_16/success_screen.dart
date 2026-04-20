@@ -31,7 +31,7 @@ class SuccessScreen extends StatelessWidget {
 
                       AppText(
                         text: "You’re all set!",
-                        style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
+                        style: AppTextStyles.bold(fontSize: 32.sp),
                       ),
 
                       8.w.verticalSpace,
@@ -39,7 +39,7 @@ class SuccessScreen extends StatelessWidget {
                         textAlign: TextAlign.center,
                         text:
                             "Your reading journey starts today — let’s build your first streak!",
-                        style: AppTextStyles.sfProDisplayMedium(
+                        style: AppTextStyles.medium(
                           fontSize: 16.sp,
                           color: AppColors.black.withValues(alpha: 0.8),
                         ),

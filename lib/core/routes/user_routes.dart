@@ -24,6 +24,7 @@ enum AppRoutes {
   dashBoardScreen,
   bookReadingScreen,
   readingScreen,
+  enterQuizNumbersScreen,
   startQuizScreen,
   quizQuestionScreen,
   quizCompletedScreen,
@@ -37,6 +38,6 @@ enum AppRoutes {
   homeScreen,
   customTopicScreen,
   storyReadingGoalScreen,
-  verifyParentConsentScreen, createdStorySummaryScreen, createdStoryReadingScreen, storyIdeasScreen, storySeriesScreen, sharedStoryScreen, searchScreen,
-  randomStorySeriesScreen, practiceZoneScreen,
+  verifyParentConsentScreen, createdStorySummaryScreen, createdStoryReadingScreen, storyIdeasScreen, storyReadingScreen, sharedStoryScreen, searchScreen,
+  randomStorySeriesScreen, practiceZoneScreen, notificationScreen, createdIdeasListScreen, profileScreen,
 }

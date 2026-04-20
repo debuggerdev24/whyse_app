@@ -32,7 +32,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                       26.w.verticalSpace,
                       Text(
                         "Forgot Password",
-                        style: AppTextStyles.sfProDisplayBold(
+                        style: AppTextStyles.bold(
                           fontSize: 32.sp,
                           color: AppColors.teal,
                         ),

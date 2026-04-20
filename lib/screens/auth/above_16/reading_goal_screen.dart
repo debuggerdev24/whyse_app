@@ -58,7 +58,7 @@ class _ReadingGoalScreenState extends State<ReadingGoalScreen> {
                     /// TITLE
                     AppText(
                       text: "Set Your Daily Reading Goal",
-                      style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
+                      style: AppTextStyles.bold(fontSize: 32.sp),
                     ),
 
                     8.w.verticalSpace,
@@ -66,7 +66,7 @@ class _ReadingGoalScreenState extends State<ReadingGoalScreen> {
                     AppText(
                       text:
                           "Choose how much time you want to read \neach day to keep your streak alive and earn rewards.",
-                      style: AppTextStyles.sfProDisplayMedium(
+                      style: AppTextStyles.medium(
                         fontSize: 16.sp,
                         color: AppColors.black.withValues(alpha: 0.8),
                       ),
@@ -181,7 +181,7 @@ class _ReadingGoalScreenState extends State<ReadingGoalScreen> {
         ),
         child: AppText(
           text: text,
-          style: AppTextStyles.sfProDisplaySemibold(
+          style: AppTextStyles.semibold(
             fontSize: isSelected ? 15.sp : 13.sp,
             color: isSelected
                 ? Colors.white

@@ -13,7 +13,6 @@ import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/core/routes/app_router.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/screens/home/story/shared_story_screen.dart';
-import 'package:redstreakapp/screens/home/story/story_series_screen.dart';
 
 class DeepLinkHandler {
   final AppLinks _appLinks = AppLinks();
@@ -198,7 +197,6 @@ class DeepLinkHandler {
         // Fallback: legacy link with story idea id only -> open single story reading screen.
         if (storyIdeaId != null && storyIdeaId.trim().isNotEmpty) {
           Logger.info("Story deep link (legacy) -> storyIdeaId: $storyIdeaId");
-          StoryReadingScreen.skipLeaveDialogForDeepLink = true;
           AppRouter.goRouter.goNamed(
             AppRoutes.createdStoryReadingScreen.name,
             extra: <String, dynamic>{"storyIdeaId": storyIdeaId.trim()},

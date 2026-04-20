@@ -91,14 +91,14 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                     // },
                     child: AppText(
                       text: "What's Your Goal?",
-                      style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
+                      style: AppTextStyles.bold(fontSize: 32.sp),
                     ),
                   ),
                   10.w.verticalSpace,
                   AppText(
                     text:
                         "Choose what motivates you most — we'll help you reach it.",
-                    style: AppTextStyles.sfProDisplayMedium(
+                    style: AppTextStyles.medium(
                       fontSize: 16.sp,
                       color: AppColors.black.withValues(alpha: 0.8),
                     ),
@@ -173,7 +173,7 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                                 children: [
                                   AppText(
                                     text: goal.title,
-                                    style: AppTextStyles.sfProDisplayBold(
+                                    style: AppTextStyles.bold(
                                       fontSize: 14.sp,
                                       color: AppColors.black,
                                     ),
@@ -182,7 +182,7 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                                     3.w.verticalSpace,
                                     AppText(
                                       text: goal.description,
-                                      style: AppTextStyles.sfProDisplayRegular(
+                                      style: AppTextStyles.regular(
                                         fontSize: 14.sp,
                                         color: AppColors.black,
                                       ),

@@ -132,7 +132,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
                       ),
                       AppText(
                         text: "Choose Your Favorite Topics",
-                        style: AppTextStyles.sfProDisplayBold(fontSize: 32.sp),
+                        style: AppTextStyles.bold(fontSize: 32.sp),
                       ),
 
                       10.w.verticalSpace,
@@ -140,7 +140,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
                       AppText(
                         text:
                             "Here are some topics we think you'll love based on your interests. You can pick the ones that excite you the most!",
-                        style: AppTextStyles.sfProDisplayMedium(
+                        style: AppTextStyles.medium(
                           fontSize: 16.sp,
                           color: AppColors.black.withValues(alpha: 0.8),
                         ),
@@ -310,7 +310,7 @@ class _CustomTopicChip extends StatelessWidget {
             children: [
               AppText(
                 text: label,
-                style: AppTextStyles.sfProDisplaySemibold(
+                style: AppTextStyles.semibold(
                   fontSize: 14.sp,
                   color: isSelected
                       ? AppColors.teal

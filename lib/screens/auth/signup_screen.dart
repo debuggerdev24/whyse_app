@@ -63,14 +63,14 @@ class _SignupScreenState extends State<SignupScreen> {
 
                             AppText(
                               text: 'Welcome to',
-                              style: AppTextStyles.sfProDisplayBold(
+                              style: AppTextStyles.bold(
                                 fontSize: 32.sp,
                                 color: AppColors.teal,
                               ),
                             ),
                             AppText(
                               text: 'ReadStreakApp',
-                              style: AppTextStyles.sfProDisplayBold(
+                              style: AppTextStyles.bold(
                                 fontSize: 32.sp,
                                 color: AppColors.teal,
                               ),

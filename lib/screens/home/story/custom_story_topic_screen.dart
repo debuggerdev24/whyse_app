@@ -38,7 +38,7 @@ class CustomStoryTopicScreen extends StatelessWidget {
                 ),
                 AppText(
                   text: "Add Your Favorite Topic",
-                  style: AppTextStyles.sfProDisplayBold(
+                  style: AppTextStyles.bold(
                     height: 1.2,
                     fontSize: 32.sp,
                   ),
@@ -46,7 +46,7 @@ class CustomStoryTopicScreen extends StatelessWidget {
                 10.w.verticalSpace,
                 AppText(
                   text: "What are you interested to read or learn about?",
-                  style: AppTextStyles.sfProDisplayMedium(
+                  style: AppTextStyles.medium(
                     fontSize: 16.sp,
                     color: AppColors.black.withValues(alpha: 0.8),
                   ),

@@ -33,7 +33,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
     final pr = context.read<StoryProvider>();
 
     return PopScope(
-      canPop: pr.isCreateStoryImageLoading || pr.isCreateStoryLoading
+      canPop:  pr.isCreateStoryLoading
           ? false
           : true,
       child: AppLayout(
@@ -60,7 +60,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                       /// TITLE
                       AppText(
                         text: "Set Your Daily Reading Goal",
-                        style: AppTextStyles.sfProDisplayBold(
+                        style: AppTextStyles.bold(
                           height: 1.2,
                           fontSize: 32.sp,
                         ),
@@ -71,7 +71,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                       AppText(
                         text:
                             "Choose how much time you want to read \neach day to keep your streak alive and earn rewards.",
-                        style: AppTextStyles.sfProDisplayMedium(
+                        style: AppTextStyles.medium(
                           fontSize: 16.sp,
                           color: AppColors.black.withValues(alpha: 0.8),
                         ),
@@ -177,15 +177,18 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                       AppFilledButton(
                         margin: EdgeInsets.only(top: 20.h),
                         text: "Generate",
-                        
+
                         backgroundColor: AppColors.primaryColor,
                         onTap: () {
                           deBouncer.run(() {
-                            if (!provider.validateCreateStoryInput(context)) return;
-                            provider.setGenerateStoryIdeasLoading(true);
-                            if (context.mounted) {
-                              context.pushNamed(AppRoutes.storySeriesScreen.name);
+                            if (!provider.validateCreateStoryInput(context)) {
+                              return;
                             }
+                            provider.setGenerateStoryIdeasLoading(true);
+
+                            context.pushNamed(
+                              AppRoutes.createdIdeasListScreen.name,
+                            );
                             provider.createStoryIdeas(
                               onFailed: (error) {
                                 Logger.error(error);
@@ -194,10 +197,11 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                                 }
                               },
                               context: context,
-                              onlyIdeas: true,
                               forceRegenerate: provider.forceRegenerateTopicId != null,
                               topicId: provider.forceRegenerateTopicId,
-                              onSuccess: () {},
+                              onSuccess: () {
+                                AppToast.success(context, "Story Ideas created successfully.");
+                              },
                             );
                           });
                         },
@@ -230,7 +234,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
         ),
         child: AppText(
           text: text,
-          style: AppTextStyles.sfProDisplaySemibold(
+          style: AppTextStyles.semibold(
             fontSize: isSelected ? 15.sp : 13.sp,
             color: isSelected
                 ? Colors.white

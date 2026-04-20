@@ -87,7 +87,7 @@ class AppTextField extends StatelessWidget {
           obscureText: obSecureText ?? false,
           cursorColor: AppColors.black,
           showCursor: true,
-          style: AppTextStyles.sfProDisplayRegular(
+          style: AppTextStyles.regular(
             color: AppColors.black,
             fontSize: 16.sp,
           ),
@@ -99,7 +99,7 @@ class AppTextField extends StatelessWidget {
           },
 
           decoration: InputDecoration(
-            errorStyle: AppTextStyles.sfProDisplayRegular(
+            errorStyle: AppTextStyles.regular(
               color: AppColors.redColor,
               fontSize: 14.sp,
             ),
@@ -113,7 +113,7 @@ class AppTextField extends StatelessWidget {
             hintText: hintText,
             hintStyle:
                 hintStyle ??
-                AppTextStyles.sfProDisplaySemibold(
+                AppTextStyles.semibold(
                   color: AppColors.black.withValues(alpha: 0.3),
                   fontSize: 15.sp,
                 ),
