@@ -94,11 +94,6 @@ class AppRouter {
                 name: AppRoutes.notificationScreen.name,
                 builder: (context, state) => NotificationScreen(),
               ),
-              GoRoute(
-                path: AppRoutes.profileScreen.path,
-                name: AppRoutes.profileScreen.name,
-                builder: (context, state) => ProfileScreen(),
-              ),
             ],
           ),
           //* Search tab
@@ -402,55 +397,6 @@ class AppRouter {
       },
     ),
     GoRoute(
-      path: AppRoutes.settingsScreen.path,
-      name: AppRoutes.settingsScreen.name,
-      builder: (context, state) {
-        return const SettingsScreen();
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.preferencesScreen.path,
-      name: AppRoutes.preferencesScreen.name,
-      builder: (context, state) {
-        return const PreferencesScreen();
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.settingsNotificationScreen.path,
-      name: AppRoutes.settingsNotificationScreen.name,
-      builder: (context, state) {
-        return const SettingsNotificationScreen();
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.editProfileScreen.path,
-      name: AppRoutes.editProfileScreen.name,
-      builder: (context, state) {
-        return const EditProfileScreen();
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.remindersSettingsScreen.path,
-      name: AppRoutes.remindersSettingsScreen.name,
-      builder: (context, state) {
-        return const RemindersSettingsScreen();
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.friendsNotificationSettingsScreen.path,
-      name: AppRoutes.friendsNotificationSettingsScreen.name,
-      builder: (context, state) {
-        return const FriendsNotificationSettingsScreen();
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.groupsNotificationSettingsScreen.path,
-      name: AppRoutes.groupsNotificationSettingsScreen.name,
-      builder: (context, state) {
-        return const GroupsNotificationSettingsScreen();
-      },
-    ),
-    GoRoute(
       path: AppRoutes.yourEBooksScreen.path,
       name: AppRoutes.yourEBooksScreen.name,
       builder: (context, state) {
@@ -465,53 +411,60 @@ class AppRouter {
       },
     ),
     GoRoute(
-      path: AppRoutes.createGroupScreen.path,
-      name: AppRoutes.createGroupScreen.name,
-      builder: (context, state) {
-        return const CreateGroupScreen();
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.addMembersScreen.path,
-      name: AppRoutes.addMembersScreen.name,
-      builder: (context, state) {
-        return const AddMembersScreen();
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.joinGroupScreen.path,
-      name: AppRoutes.joinGroupScreen.name,
-      builder: (context, state) {
-        return const JoinGroupScreen();
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.groupListScreen.path,
-      name: AppRoutes.groupListScreen.name,
-      builder: (context, state) {
-        return const GroupListScreen();
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.viewGroupScreen.path,
-      name: AppRoutes.viewGroupScreen.name,
-      builder: (context, state) {
-        return const ViewGroupScreen();
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.groupDetailsScreen.path,
-      name: AppRoutes.groupDetailsScreen.name,
-      builder: (context, state) {
-        return const GroupDetailsScreen();
-      },  
-    ),
-    GoRoute(
-      path: AppRoutes.streakRankingScreen.path,
-      name: AppRoutes.streakRankingScreen.name,
-      builder: (context, state) {
-        return const StreakRankingScreen();
-      },
+      path: AppRoutes.profileScreen.path,
+      name: AppRoutes.profileScreen.name,
+      builder: (context, state) => ProfileScreen(),
+      routes: [
+        GoRoute(
+          path: AppRoutes.settingsScreen.name,
+          name: AppRoutes.settingsScreen.name,
+          builder: (context, state) {
+            return const SettingsScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.preferencesScreen.name,
+          name: AppRoutes.preferencesScreen.name,
+          builder: (context, state) {
+            return const PreferencesScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.settingsNotificationScreen.name,
+          name: AppRoutes.settingsNotificationScreen.name,
+          builder: (context, state) {
+            return const SettingsNotificationScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.editProfileScreen.name,
+          name: AppRoutes.editProfileScreen.name,
+          builder: (context, state) {
+            return const EditProfileScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.remindersSettingsScreen.name,
+          name: AppRoutes.remindersSettingsScreen.name,
+          builder: (context, state) {
+            return const RemindersSettingsScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.friendsNotificationSettingsScreen.name,
+          name: AppRoutes.friendsNotificationSettingsScreen.name,
+          builder: (context, state) {
+            return const FriendsNotificationSettingsScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.groupsNotificationSettingsScreen.name,
+          name: AppRoutes.groupsNotificationSettingsScreen.name,
+          builder: (context, state) {
+            return const GroupsNotificationSettingsScreen();
+          },
+        ),
+      ],
     ),
   ];
 }
