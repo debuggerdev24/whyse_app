@@ -9,7 +9,8 @@ class LocalStorageService {
       _consentReqStatusKey = "consent_request_status",
       _createAccMailKey = "create_acc_mail",
       _createAccPassKey = "create_acc_pass",
-      _googleIdTokenKey = "google_id_token";
+      _googleIdTokenKey = "google_id_token",
+      _loggedInUsersId = "logged_in_user_is";
 
   late SharedPreferences prefs;
 
@@ -27,6 +28,7 @@ class LocalStorageService {
   String get getRegisteredUserMail => prefs.getString(_createAccMailKey) ?? "";
   String get getRegisteredUserPassword =>
       prefs.getString(_createAccPassKey) ?? "";
+  String get getLoggedInUserId => prefs.getString(_loggedInUsersId) ?? "";
 
   //todo remove auth data functions
   Future<void> removeAuthToken() async {
@@ -72,6 +74,10 @@ class LocalStorageService {
 
   Future<void> saveUserPass({required String password}) async {
     await prefs.setString(_createAccPassKey, password);
+  }
+
+  Future<void> saveUserId({required String id}) async {
+    await prefs.setString(_loggedInUsersId, id);
   }
 
   /// ---------------- Onboarding ----------------

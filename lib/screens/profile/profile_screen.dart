@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/global_widgets.dart';
 import 'package:redstreakapp/models/home/story_models/story_topics.dart';
+import 'package:redstreakapp/screens/profile/widgets/group_block.dart';
 import 'package:redstreakapp/screens/profile/widgets/profile_header_section.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -41,14 +42,14 @@ class ProfileScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _profileDetailsBlock(),
-                    _friendsBlock(),  
-                    _groupsBlock(context: context),
+                    _friendsBlock(),
+                    GroupBlock(),
                     _overviewBlock(),
                     _interestsBlock(),
                     _subscriptionBlock(),
                     _yourBooksBlock(),
                     _yourEBooksBlock(context),
-                    _mySeriesesListBlock(),
+                    _mySeriesListBlock(),
                     SizedBox(height: 24.w),
                   ],
                 ),
@@ -234,156 +235,6 @@ class ProfileScreen extends StatelessWidget {
                   ],
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _groupsBlock({required BuildContext context}) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border(
-          top: BorderSide(
-            color: AppColors.black.withValues(alpha: 0.08),
-            width: 1,
-          ),
-        ),
-      ),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                AppText(
-                  text: 'Groups',
-                  style: AppTextStyles.bold(
-                    fontSize: 20,
-                    color: AppColors.black,
-                  ),
-                ),
-                const Spacer(),
-                GestureDetector(
-                  onTap: () {
-                    context.pushNamed(AppRoutes.groupListScreen.name);
-                  },
-                  child: AppText(
-                    text: 'View all',
-                    style: AppTextStyles.semibold(
-                      fontSize: 15,
-                      color: AppColors.teal,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            16.w.verticalSpace,
-            SizedBox(
-              height: 92.w,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                child: Row(
-                  children: [
-                    for (var i = 0; i < _kProfileGroups.length; i++) ...[
-                      if (i > 0) 16.w.horizontalSpace,
-                      SizedBox(
-                        width: 72.w,
-                        child: Column(
-                          children: [
-                            Container(
-                              width: 64.w,
-                              height: 64.w,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: _kProfileGroups[i].bg,
-                                border: i == 0
-                                    ? Border.all(
-                                        color: const Color(0xFF4A8FD4),
-                                        width: 2,
-                                      )
-                                    : null,
-                              ),
-                              alignment: Alignment.center,
-                              child: Icon(
-                                Icons.groups_2_rounded,
-                                size: 30.sp,
-                                color: AppColors.black.withValues(alpha: 0.45),
-                              ),
-                            ),
-                            8.w.verticalSpace,
-                            AppText(
-                              text: _kProfileGroups[i].name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                              style: AppTextStyles.medium(
-                                fontSize: 12,
-                                color: AppColors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-            20.w.verticalSpace,
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {
-                      context.pushNamed(AppRoutes.createGroupScreen.name);
-                    },
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.black,
-                      backgroundColor: AppColors.white,
-                      side: BorderSide(
-                        color: AppColors.black.withValues(alpha: 0.15),
-                      ),
-                      padding: EdgeInsets.symmetric(vertical: 14.h),
-                      shape: const StadiumBorder(),
-                    ),
-                    child: AppText(
-                      text: 'Create Group',
-                      style: AppTextStyles.semibold(
-                        fontSize: 15,
-                        color: AppColors.black,
-                      ),
-                    ),
-                  ),
-                ),
-                16.w.horizontalSpace,
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      context.pushNamed(AppRoutes.joinGroupScreen.name);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: AppColors.black,
-                      foregroundColor: AppColors.white,
-                      padding: EdgeInsets.symmetric(vertical: 14.h),
-                      shape: const StadiumBorder(),
-                    ),
-                    child: AppText(
-                      text: 'Join Group',
-                      style: AppTextStyles.semibold(
-                        fontSize: 15,
-                        color: AppColors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
             ),
           ],
         ),
@@ -776,7 +627,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _mySeriesesListBlock() {
+  Widget _mySeriesListBlock() {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(

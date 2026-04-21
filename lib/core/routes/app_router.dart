@@ -464,6 +464,59 @@ class AppRouter {
             return const GroupsNotificationSettingsScreen();
           },
         ),
+        GoRoute(
+          path: AppRoutes.createGroupScreen.name,
+          name: AppRoutes.createGroupScreen.name,
+          builder: (context, state) {
+            return const CreateGroupScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.addMembersScreen.name,
+          name: AppRoutes.addMembersScreen.name,
+          builder: (context, state) {
+            return const AddMembersScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.groupListScreen.name,
+          name: AppRoutes.groupListScreen.name,
+          builder: (context, state) {
+            return const GroupListScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.viewGroupScreen.name,
+          name: AppRoutes.viewGroupScreen.name,
+          builder: (context, state) {
+            return ViewGroupScreen(
+               params: state.extra as GroupDetailsScreenParams,
+            );
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.groupDetailsScreen.name,
+          name: AppRoutes.groupDetailsScreen.name,
+          builder: (context, state) {
+            return GroupDetailsScreen(
+              params: state.extra as GroupDetailsScreenParams,
+            );
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.streakRankingScreen.name,
+          name: AppRoutes.streakRankingScreen.name,
+          builder: (context, state) {
+            return const StreakRankingScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.joinGroupScreen.name,
+          name: AppRoutes.joinGroupScreen.name,
+          builder: (context, state) {
+            return const JoinGroupScreen();
+          },
+        ),
       ],
     ),
   ];

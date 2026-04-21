@@ -738,7 +738,10 @@ class AuthProvider with ChangeNotifier {
   bool isLoadingTopics = false;
   List<dynamic> topicsList = [];
 
-  Future<void> fetchDefaultTopics(BuildContext context, {String? search}) async {
+  Future<void> fetchDefaultTopics(
+    BuildContext context, {
+    String? search,
+  }) async {
     try {
       isLoadingTopics = true;
       notifyListeners();
@@ -931,6 +934,8 @@ class AuthProvider with ChangeNotifier {
               );
             }
           }
+
+          await LocalStorageService.instance.saveUserId(id: data['user']['id']);
           // Fallback to flat structure
           // else if (data['accessToken'] != null) {
           //   token = data['accessToken'];
@@ -1698,7 +1703,9 @@ class AuthProvider with ChangeNotifier {
     response.fold(
       (l) {
         if (l.code == "400") {
-          onFailed.call("New password should be different from the old password");
+          onFailed.call(
+            "New password should be different from the old password",
+          );
         } else {
           onFailed.call(l.errorMsg);
         }

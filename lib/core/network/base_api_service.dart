@@ -30,9 +30,7 @@ class DioClient {
         connectTimeout: const Duration(seconds: 60),
         receiveTimeout: const Duration(seconds: 180),
         sendTimeout: const Duration(seconds: 120),
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: {"Content-Type": "application/json"},
       ),
     );
 
@@ -452,7 +450,7 @@ class BaseApiHelper {
     }
     if (e.response != null) {
       final data = e.response?.data;
-      if (e.response?.statusCode == 400) {
+      if (e.response!.statusCode! >= 400 || e.response!.statusCode! < 500) {
         if (data is Map) {
           final errorContent = data['error'] ?? data['errors'];
           // If we found 'error' or 'errors' and it's a map
@@ -474,14 +472,14 @@ class BaseApiHelper {
           final firstKey = data.keys.firstOrNull;
           final errorList = data[firstKey];
           if (errorList is List && errorList.isNotEmpty) {
-            return errorList.first.toString();
+            return errorList.first['msg'];
           }
         } else if (data is String) {
           return data;
         }
         return 'Invalid request (400)';
       } else if (e.response?.statusCode == 401) {
-        return "Something went wrong. Please restart again.";//'Unauthorized. Please log in again.';
+        return "Something went wrong. Please restart again."; //'Unauthorized. Please log in again.';
       }
       return data[1] ?? 'Unexpected server response';
     }

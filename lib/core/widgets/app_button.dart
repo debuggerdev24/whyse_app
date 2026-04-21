@@ -26,13 +26,14 @@ class AppFilledButton extends StatelessWidget {
     this.isVisible = true,
     this.margin,
     this.child,
+    this.loadingColor,
     VoidCallback? onPressed,
   });
 
   final VoidCallback? onTap;
   final String text;
   final Widget? icon;
-  final Color? backgroundColor, foregroundColor;
+  final Color? backgroundColor, foregroundColor, loadingColor;
   final AppButtonWidthType? type, colorType;
   final bool? isLoading;
   final double? radius, elevation;
@@ -64,9 +65,12 @@ class AppFilledButton extends StatelessWidget {
         icon: isLoading ?? false ? Container() : icon ?? Container(),
         label: isLoading ?? false
             ? SizedBox(
-                height: 25.h,
+                height: 20.h,
                 width: 20.w,
-                child: CircularProgressIndicator(strokeWidth: 4.r),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.r,
+                  color: loadingColor,
+                ),
               )
             : Text(
                 text,
@@ -260,7 +264,6 @@ class AppButton extends StatelessWidget {
     this.padding,
     this.fontSize,
     this.margin,
-
   });
   final VoidCallback onTap;
   final String text;

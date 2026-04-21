@@ -1,7 +1,10 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/screens/group/group_details_screen.dart';
+import 'package:redstreakapp/screens/group/widget/group_image_widget.dart';
 
 class ViewGroupScreen extends StatelessWidget {
-  const ViewGroupScreen({super.key});
+  final GroupDetailsScreenParams params;
+  const ViewGroupScreen({super.key, required this.params});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +34,6 @@ class ViewGroupScreen extends StatelessWidget {
             ),
             margin: EdgeInsets.only(bottom: 15.w),
             onTap: () {},
-
           ),
         ],
       ),
@@ -48,26 +50,14 @@ class ViewGroupScreen extends StatelessWidget {
       titleSpacing: 0,
       title: Row(
         children: [
-          Container(
-            width: 40.w,
-            height: 40.w,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.lighttealcolor,
-            ),
-            child: Icon(
-              Icons.people_alt_rounded,
-              size: 20.sp,
-              color: AppColors.teal,
-            ),
-          ),
+          GroupImageWidget(imageUrl: params.thumbnail, size: 40.w),
           15.w.horizontalSpace,
           Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AppText(
-                text: "Grp1e",
+                text: params.groupName,
                 style: AppTextStyles.semibold(
                   fontSize: 16.sp,
                   color: AppColors.black,
@@ -75,7 +65,10 @@ class ViewGroupScreen extends StatelessWidget {
               ),
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: () => context.pushNamed(AppRoutes.groupDetailsScreen.name),
+                onTap: () => context.pushNamed(
+                  AppRoutes.groupDetailsScreen.name,  
+                  extra: params,
+                ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [

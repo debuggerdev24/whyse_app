@@ -35,6 +35,13 @@ class EndPoints {
   static const verifyForgotPassMail = "/mobile/auth/verify-recovery";
   static const verifyParentConsent = "/mobile/auth/parent-consent";
   static const refreshToken = "/mobile/auth/refresh-token";
+  static const getMyGroups = "/mobile/groups";
+  static const joinGroupByCode = "/mobile/groups/join-by-code";
+  static String createGroup = '/mobile/groups';
+  static String getGroupMembers({required String groupId}) =>
+      "/groups/$groupId/members";
+  static String leaveGroup({required String groupId}) =>
+      "/mobile/groups/$groupId/leave";
   static String getMyTopics({int page = 1}) =>
       "/story/topics?page=$page&limit=20&createdBy=self";
   static const browseAllTopics = "/story/topics";
@@ -46,8 +53,11 @@ class EndPoints {
       "/story/topics/$topicId/story-ideas";
   static String getStoryByStoryIdea({required String storyIdea}) =>
       "/story/ideas/$storyIdea/story";
-  static String topicProgress({required String topicId}) => "/story/topics/$topicId/progress";
-  static String markAsRead({required String storyIdeaId}) => "/story/ideas/$storyIdeaId/mark-read";
-  static String createQuiz({required String storyId}) => "/story/$storyId/quiz/generate";
+  static String topicProgress({required String topicId}) =>
+      "/story/topics/$topicId/progress";
+  static String markAsRead({required String storyIdeaId}) =>
+      "/story/ideas/$storyIdeaId/mark-read";
+  static String createQuiz({required String storyId}) =>
+      "/story/$storyId/quiz/generate";
   static String getQuiz({required String storyId}) => "/story/$storyId/quiz";
 }

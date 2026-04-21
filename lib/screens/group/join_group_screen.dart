@@ -1,5 +1,6 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:pinput/pinput.dart';
+import 'package:redstreakapp/providers/group_provider.dart';
 
 class JoinGroupScreen extends StatefulWidget {
   const JoinGroupScreen({super.key});
@@ -102,17 +103,40 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
                           ),
                         ),
                         separatorBuilder: (_) => SizedBox(width: gap),
-                        keyboardType: TextInputType.number,
+                        keyboardType: TextInputType.text,
+                        validator: (value) {
+                          if (value?.length != pinLength) {
+                            return 'Please enter valid code';
+                          }
+                          return null;
+                        },
                         onCompleted: (_) => FocusScope.of(context).unfocus(),
                       );
                     },
                   ),
                   Spacer(),
-                  AppFilledButton(
-                    text: 'Join',
-                    onTap: () {},
-                    margin: EdgeInsets.only(top: 24.w),
-                    backgroundColor: AppColors.teal,
+                  Selector<GroupProvider, bool>(
+                    selector: (p0, p1) => p1.joinGroupLoading,
+                    builder: (context, value, child) => AppFilledButton(
+                      text: 'Join',
+                      loadingColor: AppColors.white,
+                      isLoading: value,
+                      onTap: () {
+                        context.read<GroupProvider>().joinGroupByCode(
+                          code: _pinController.text.trim(),
+                          onSuccess: () {
+                            _pinController.clear();
+                            AppToast.success(context, 'Joined Successfully');
+                            context.pop();
+                          },
+                          onError: (error) {
+                            AppToast.error(context, error);
+                          },
+                        );
+                      },
+                      margin: EdgeInsets.only(top: 24.w),
+                      backgroundColor: AppColors.teal,
+                    ),
                   ),
                 ],
               ),
