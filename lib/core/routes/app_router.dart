@@ -32,6 +32,7 @@ import 'package:redstreakapp/screens/home/story/custom_story_topic_screen.dart';
 
 import 'package:redstreakapp/screens/home/story/story_goals_screen.dart';
 import 'package:redstreakapp/screens/home/story/created_story.dart';
+import 'package:redstreakapp/screens/home/story/my_story_reading_screen.dart';
 import 'package:redstreakapp/screens/home/story/shared_story_screen.dart';
 import 'package:redstreakapp/screens/home/story/random_story_series_screen.dart';
 import 'package:redstreakapp/screens/home/story/story_reading_goal_screen.dart';
@@ -299,7 +300,12 @@ class AppRouter {
       path: AppRoutes.storyGoalsScreen.path,
       name: AppRoutes.storyGoalsScreen.name,
       builder: (context, state) {
-        return StoryGoalsScreen();
+        final extra = state.extra;
+        final openedFromCreatedIdeas =
+            extra is Map && extra['openedFromCreatedIdeas'] == true;
+        return StoryGoalsScreen(
+          openedFromCreatedIdeas: openedFromCreatedIdeas,
+        );
       },
     ),
     GoRoute(
@@ -358,6 +364,13 @@ class AppRouter {
       // },
       builder: (context, state) {
         return const CreatedStoryReadingScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.createdStoryReadingScreen.path,
+      name: AppRoutes.createdStoryReadingScreen.name,
+      builder: (context, state) {
+        return const MyStoryReadingScreen();
       },
     ),
     GoRoute(

@@ -17,7 +17,12 @@ import '../../../providers/home/story_provider.dart';
 import '../../../core/routes/user_routes.dart';
 
 class StoryGoalsScreen extends StatefulWidget {
-  const StoryGoalsScreen({super.key});
+  const StoryGoalsScreen({
+    super.key,
+    this.openedFromCreatedIdeas = false,
+  });
+
+  final bool openedFromCreatedIdeas;
 
   @override
   State<StoryGoalsScreen> createState() => _StoryGoalsScreenState();
@@ -53,7 +58,11 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                             if (context.canPop()) {
                               context.pop();
                             } else {
-                              context.goNamed(AppRoutes.topicsScreen.name);
+                              context.goNamed(
+                                widget.openedFromCreatedIdeas
+                                    ? AppRoutes.createdIdeasListScreen.name
+                                    : AppRoutes.homeScreen.name,
+                              );
                             }
                           },
                           onSkip: () {

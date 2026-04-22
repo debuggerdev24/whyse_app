@@ -183,7 +183,6 @@ class StoryProvider extends ChangeNotifier {
   }
 
   bool isGetGoalsLoading = false;
-
   Future<void> getStoryGoals({required Function(String error) onFailed}) async {
     isGetGoalsLoading = true;
     notifyListeners();
@@ -206,7 +205,6 @@ class StoryProvider extends ChangeNotifier {
   }
 
   bool isGetInterestLoading = false;
-
   Future<void> getStoryInterest({
     required Function(String error) onFailed,
   }) async {
@@ -259,7 +257,6 @@ class StoryProvider extends ChangeNotifier {
   }
 
   bool isGetTopicsLoading = false;
-
   Future<void> getStoryTopics({
     required Function(String error) onFailed,
   }) async {
@@ -283,7 +280,6 @@ class StoryProvider extends ChangeNotifier {
   }
 
   bool isGetSearchedTopicsLoading = false;
-
   Future<void> getSearchedStoryTopics({
     required Function(String error) onFailed,
   }) async {

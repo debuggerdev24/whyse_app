@@ -163,25 +163,27 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
     );
   }
 
-  Column buildEmptyState(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        AppText(
-          text: "Your Story Topics",
-          style: AppTextStyles.semibold(fontSize: 20.sp),
-        ),
-        16.w.verticalSpace,
-        Center(
-          child: AppText(
-            text: "No stories available",
-            style: AppTextStyles.textStyle14Regular,
+  buildEmptyState(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          AppText(
+            text: "Your Story Topics",
+            style: AppTextStyles.semibold(fontSize: 20.sp),
           ),
-        ),
-        24.w.verticalSpace,
-        _addNewReadingButton(context),
-      ],
+          16.w.verticalSpace,
+          Center(
+            child: AppText(
+              text: "No stories available",
+              style: AppTextStyles.textStyle14Regular,
+            ),
+          ),
+          24.w.verticalSpace,
+          _addNewReadingButton(context),
+        ],
+      ),
     );
   }
 
@@ -228,9 +230,7 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
                         padding: EdgeInsets.only(right: 10.w),
                         child: AppText(
                           text: recentStory.topic,
-                          style: AppTextStyles.bold(
-                            fontSize: 20.sp,
-                          ),
+                          style: AppTextStyles.bold(fontSize: 20.sp),
                         ),
                       ),
                       22.w.verticalSpace,
@@ -364,10 +364,7 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
         alignment: Alignment.center,
         child: AppText(
           text: "Add New Reading",
-          style: AppTextStyles.bold(
-            fontSize: 15.sp,
-            color: AppColors.teal,
-          ),
+          style: AppTextStyles.bold(fontSize: 15.sp, color: AppColors.teal),
         ),
       ),
     );
@@ -711,10 +708,8 @@ class NetflixStyleTopicCard extends StatelessWidget {
                       height: 160.w,
                       fit: BoxFit.cover,
                       placeholder: (_, __) => _netflixCardShimmer(w),
-                      errorWidget: (_, __, ___) => const NoImageFound(
-                        compact: true,
-                        iconOnly: true,
-                      ),
+                      errorWidget: (_, __, ___) =>
+                          const NoImageFound(compact: true, iconOnly: true),
                     )
                   : SizedBox(
                       width: w,
@@ -795,10 +790,8 @@ class StoryCard extends StatelessWidget {
                       imageUrl: story.thumbnailUrl,
                       fit: BoxFit.cover,
                       placeholder: (_, __) => _storyImageShimmer(),
-                      errorWidget: (_, __, ___) => const NoImageFound(
-                        compact: true,
-                        iconOnly: true,
-                      ),
+                      errorWidget: (_, __, ___) =>
+                          const NoImageFound(compact: true, iconOnly: true),
                     )
                   : _storyImageShimmer(),
             ),

@@ -58,7 +58,9 @@ class CreatedIdeasList extends StatelessWidget {
                                 children: [
                                   _circleButton(
                                     onTap: () {
-                                      context.goNamed(AppRoutes.homeScreen.name);
+                                      context.goNamed(
+                                        AppRoutes.homeScreen.name,
+                                      );
                                     },
                                     child: SvgIcon(
                                       AppAssets.homeIcon,
@@ -91,6 +93,28 @@ class CreatedIdeasList extends StatelessWidget {
                                     ),
                                   ),
                                   _circleButton(
+                                    onTap: () {
+                                      showMoreOptionsBottomSheet(
+                                        context,
+                                        onRegenerateTopic: () {
+                                          provider.clearStoryFields();
+                                          context.pushNamed(
+                                            AppRoutes.storyGoalsScreen.name,
+                                            extra: const {
+                                              'openedFromCreatedIdeas': true,
+                                            },
+                                          );
+                                          // provider.regenerateTopic(
+                                          //   onFailed: (error) {
+                                          //     AppToast.error(context, error);
+                                          //   },
+                                          //   onSuccess: () {
+                                          //     context.pop();
+                                          //   },
+                                          // );
+                                        },
+                                      );
+                                    },
                                     child: Icon(
                                       Icons.more_vert,
                                       size: 17.w,
@@ -172,7 +196,7 @@ class CreatedIdeasList extends StatelessWidget {
                       18.w.verticalSpace,
                       AppText(
                         text:
-                            "${storyIdeas!.storyIdeas.length} Readings - 10 mins",
+                            "${storyIdeas.storyIdeas.length} Readings - 10 mins",
                         style: AppTextStyles.bold(
                           fontSize: 16.sp,
                           color: AppColors.black,
@@ -193,9 +217,7 @@ class CreatedIdeasList extends StatelessWidget {
                                 onFailed: (error) {
                                   AppToast.error(context, error);
                                 },
-                                onSuccess: () {
-                                 
-                                },
+                                onSuccess: () {},
                                 selectedIdeaIndex: index,
                               );
                             },
@@ -219,6 +241,78 @@ class CreatedIdeasList extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+
+  showMoreOptionsBottomSheet(
+    BuildContext context, {
+    required VoidCallback onRegenerateTopic,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: .fromLTRB(
+                20,
+                25,
+                20,
+                MediaQuery.paddingOf(context).bottom + 15,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      AppText(
+                        text: "More Options",
+                        style: AppTextStyles.bold(fontSize: 18.sp),
+                      ),
+                      _circleButton(
+                        onTap: () => context.pop(),
+                        child: Icon(
+                          Icons.close,
+                          size: 15.w,
+                          color: AppColors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                  20.w.verticalSpace,
+                  FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.extealighttealcolor,
+                      foregroundColor: AppColors.teal,
+                      minimumSize: Size(double.infinity, 48.w),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                    onPressed: () {
+                      context.pop();
+                      onRegenerateTopic.call();
+                    },
+                    child: AppText(
+                      text: "Regenerate Topic",
+                      style: AppTextStyles.semiBold(fontSize: 16.sp),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -247,10 +341,7 @@ class CreatedIdeasList extends StatelessWidget {
       ),
       child: AppText(
         text: label,
-        style: AppTextStyles.medium(
-          fontSize: 12.sp,
-          color: AppColors.teal,
-        ),
+        style: AppTextStyles.medium(fontSize: 12.sp, color: AppColors.teal),
       ),
     );
   }
@@ -343,11 +434,8 @@ class _ReadingDescriptionState extends State<_ReadingDescription> {
   bool isExpanded = false;
 
   void _toggleExpanded() {
-    // Avoid mutating widget tree during pointer/mouse tracker update cycle.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      setState(() => isExpanded = !isExpanded);
-    });
+    if (!mounted) return;
+    setState(() => isExpanded = !isExpanded);
   }
 
   @override
@@ -359,7 +447,7 @@ class _ReadingDescriptionState extends State<_ReadingDescription> {
       color: AppColors.black.withValues(alpha: 0.55),
     );
     final linkStyle =
-        AppTextStyles.semibold(fontSize: 14.sp  , color: AppColors.teal).copyWith(
+        AppTextStyles.semibold(fontSize: 14.sp, color: AppColors.teal).copyWith(
           decoration: TextDecoration.underline,
           decorationColor: AppColors.teal,
         );
@@ -373,18 +461,40 @@ class _ReadingDescriptionState extends State<_ReadingDescription> {
       children: [
         GestureDetector(
           onTap: widget.onOpenStory,
-          child: AppText(
-            text: display,
-            style: bodyStyle,
-            maxLines: isExpanded ? null : 2,
-            overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 260),
+            curve: Curves.easeInOutCubic,
+            child: AppText(
+              text: display,
+              style: bodyStyle,
+              maxLines: isExpanded ? null : 2,
+              overflow: isExpanded
+                  ? TextOverflow.visible
+                  : TextOverflow.ellipsis,
+            ),
           ),
         ),
         GestureDetector(
           onTap: _toggleExpanded,
-          child: AppText(
-            text: isExpanded ? 'Read less' : 'Read more',
-            style: linkStyle,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 220),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: SizeTransition(
+                  sizeFactor: animation,
+                  axis: Axis.horizontal,
+                  child: child,
+                ),
+              );
+            },
+            child: AppText(
+              key: ValueKey(isExpanded),
+              text: isExpanded ? 'Read less' : 'Read more',
+              style: linkStyle,
+            ),
           ),
         ),
       ],
@@ -407,11 +517,7 @@ class _ExpandableDescriptionState extends State<_ExpandableDescription> {
   bool isExpanded = false;
 
   void _toggleExpanded() {
-    // Avoid mutating widget tree during pointer/mouse tracker update cycle.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      setState(() => isExpanded = !isExpanded);
-    });
+    setState(() => isExpanded = !isExpanded);
   }
 
   @override
@@ -433,26 +539,47 @@ class _ExpandableDescriptionState extends State<_ExpandableDescription> {
       return AppText(text: display, style: bodyStyle);
     }
 
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onTap: _toggleExpanded,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppText(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AnimatedSize(
+          duration: const Duration(milliseconds: 260),
+          curve: Curves.easeInOutCubic,
+          child: AppText(
             text: display,
             style: bodyStyle,
             maxLines: isExpanded ? null : 2,
-            overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+            overflow: isExpanded
+                ? TextOverflow.visible
+                : TextOverflow.ellipsis,
           ),
+        ),
 
-          6.w.verticalSpace,
-          AppText(
-            text: isExpanded ? 'Read less' : 'Read more',
-            style: linkStyle,
+        6.w.verticalSpace,
+        GestureDetector(
+          onTap: _toggleExpanded,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 220),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: SizeTransition(
+                  sizeFactor: animation,
+                  axis: Axis.horizontal,
+                  child: child,
+                ),
+              );
+            },
+            child: AppText(
+              key: ValueKey(isExpanded),
+              text: isExpanded ? 'Read less' : 'Read more',
+              style: linkStyle,
+            ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
