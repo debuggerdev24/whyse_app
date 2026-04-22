@@ -1,5 +1,6 @@
 import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/widgets/loading_dialog.dart';
 import 'package:redstreakapp/models/group/group_members_model.dart';
 import 'package:redstreakapp/providers/group_provider.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
@@ -118,42 +119,44 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             Divider(height: 1, color: AppColors.black.withValues(alpha: 0.1)),
             20.w.verticalSpace,
             //* Description
-            Container(
-              width: double.maxFinite,
-              margin: EdgeInsets.symmetric(horizontal: 24.w),
-              padding: EdgeInsets.fromLTRB(24.w, 20.w, 24.w, 16.h),
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(16.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.black.withValues(alpha: 0.06),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AppText(
-                    text: 'Description',
-                    style: AppTextStyles.semibold(
-                      fontSize: 16.sp,
-                      color: AppColors.black,
+            if (widget.params.description != null &&
+                widget.params.description!.isNotEmpty)
+              Container(
+                width: double.maxFinite,
+                margin: EdgeInsets.symmetric(horizontal: 24.w),
+                padding: EdgeInsets.fromLTRB(24.w, 20.w, 24.w, 16.h),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(16.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.black.withValues(alpha: 0.06),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
                     ),
-                  ),
-                  8.w.verticalSpace,
-                  AppText(
-                    text: widget.params.description ?? "-",
-                    style: AppTextStyles.medium(
-                      fontSize: 14.sp,
-                      color: AppColors.black.withValues(alpha: 0.68),
-                    ).copyWith(height: 1.35),
-                  ),
-                ],
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AppText(
+                      text: 'Description',
+                      style: AppTextStyles.semibold(
+                        fontSize: 16.sp,
+                        color: AppColors.black,
+                      ),
+                    ),
+                    8.w.verticalSpace,
+                    AppText(
+                      text: widget.params.description ?? "-",
+                      style: AppTextStyles.medium(
+                        fontSize: 14.sp,
+                        color: AppColors.black.withValues(alpha: 0.68),
+                      ).copyWith(height: 1.35),
+                    ),
+                  ],
+                ),
               ),
-            ),
 
             //* Updates
             Container(
@@ -345,11 +348,15 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                                   item: member,
                                   onTap: (isLeave, groupId) {
                                     if (isLeave) {
+                                      showLoadingDialog(context);
                                       context.read<GroupProvider>().leaveGroup(
                                         groupId: groupId,
-                                        onError: (error) =>
-                                            AppToast.error(context, error),
+                                        onError: (error) {
+                                          context.pop();
+                                          AppToast.error(context, error);
+                                        },
                                         onSuccess: () {
+                                          context.pop();
                                           AppToast.success(
                                             context,
                                             'Left Group',

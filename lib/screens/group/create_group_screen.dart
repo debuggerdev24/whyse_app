@@ -66,6 +66,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                             return null;
                           },
                         ),
+                        
                         20.w.verticalSpace,
                         //* Group Description
                         AppText(

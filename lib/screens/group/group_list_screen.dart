@@ -65,6 +65,17 @@ class _GroupListScreenState extends State<GroupListScreen> {
                       final group = vm.groups[index].group;
                       return _GroupTile(
                         group: group,
+                        onGroupTap: () {
+                          context.pushNamed(
+                            AppRoutes.groupDetailsScreen.name,
+                            extra: GroupDetailsScreenParams(
+                              id: group.id,
+                              groupName: group.title,
+                              thumbnail: group.thumbnailUrl,
+                              description: group.description,
+                            ),
+                          );
+                        },
                         onTap: () {
                           context.pushNamed(
                             AppRoutes.viewGroupScreen.name,
@@ -209,19 +220,21 @@ class _EmptyState extends StatelessWidget {
 }
 
 class _GroupTile extends StatelessWidget {
-  const _GroupTile({required this.group, required this.onTap});
+  const _GroupTile({required this.group, required this.onTap, required this.onGroupTap});
 
   final Group group;
-  final VoidCallback onTap;
+  final VoidCallback onTap, onGroupTap;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
+      onDoubleTap: onGroupTap,
+
       behavior: HitTestBehavior.opaque,
       child: Row(
         children: [
-          GroupImageWidget(size: 48.w, imageUrl: group.thumbnailUrl),
+          GestureDetector(onTap: onGroupTap ,child: GroupImageWidget(size: 48.w, imageUrl: group.thumbnailUrl)),
           16.w.horizontalSpace,
           Expanded(
             child: Column(

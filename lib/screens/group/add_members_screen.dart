@@ -28,7 +28,7 @@ class AddMembersScreen extends StatelessWidget {
                   ),
                   8.w.verticalSpace,
                   AppTextField(
-                    hintText: "Enter email/username/phone no",
+                    hintText: "Enter email or phone number",
                     hintStyle: AppTextStyles.medium(
                       fontSize: 14.sp,
                       color: AppColors.black.withValues(alpha: 0.25),
@@ -104,10 +104,7 @@ class _MemberTile extends StatelessWidget {
           backgroundColor: member.avatarColor,
           child: AppText(
             text: member.initials,
-            style: AppTextStyles.bold(
-              fontSize: 13.sp,
-              color: AppColors.white,
-            ),
+            style: AppTextStyles.bold(fontSize: 13.sp, color: AppColors.white),
           ),
         ),
         16.w.horizontalSpace,
