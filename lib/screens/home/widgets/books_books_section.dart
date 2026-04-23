@@ -4,8 +4,8 @@ import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:shimmer/shimmer.dart';
 
 /// Horizontal "Ebooks" and "Books" shelves matching the home design reference.
-class EbooksBooksHomeSections extends StatelessWidget {
-  const EbooksBooksHomeSections({super.key});
+class BooksBooksHomeSections extends StatelessWidget {
+  const BooksBooksHomeSections({super.key});
 
   @override
   Widget build(BuildContext context) {

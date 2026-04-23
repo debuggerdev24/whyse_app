@@ -11,6 +11,7 @@ class AppColors {
 
   static const Color white = Color(0xFFFFFFFF);
   static const Color backgroundColor = Color(0xFFFAFAFA);
+  static const Color searchBackgroundColor = Color(0xFFF1F1F1);
 
   static const Color orangeColor = Color(0xFFF28518);
   static const Color lightyellowcolor = Color(0xFFF2ECE6);

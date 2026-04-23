@@ -2,7 +2,7 @@ import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/home_widgets.dart';
 import 'package:redstreakapp/screens/home/widgets/continue_reading_section.dart';
 import 'package:redstreakapp/screens/home/widgets/curiosity_reading_section.dart';
-import 'package:redstreakapp/screens/home/widgets/ebooks_books_section.dart';
+import 'package:redstreakapp/screens/home/widgets/books_books_section.dart';
 import 'package:redstreakapp/screens/home/widgets/home_topics_section.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -40,7 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: const HomeStoryTopics(),
             ),
-            const EbooksBooksHomeSections(),
+            const BooksBooksHomeSections(),
             24.w.verticalSpace,
           ],
         ),

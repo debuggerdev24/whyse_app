@@ -131,6 +131,7 @@ class GroupItem extends StatelessWidget {
             groupName: group.title,
             thumbnail: group.thumbnailUrl,
             description: group.description,
+            inviteCode: group.joinCode,
           ),
         );
       },

@@ -114,12 +114,6 @@ class _CustomSwitchState extends State<AppSwitchButton>
         widget.trackWidth +
         widget.thumbDiameter; // track + one thumb radius on each side
 
-    // How far the thumb centre can travel (from left edge to right edge).
-    // At OFF: thumb centre is at thumbDiameter/2
-    // At ON:  thumb centre is at totalWidth - thumbDiameter/2
-    final double thumbTravelDistance =
-        widget.trackWidth - widget.thumbDiameter * 0; // simplified below
-
     // We'll position with AnimatedBuilder + custom painting for pixel-perfect control.
     return GestureDetector(
       onTap: _handleTap,

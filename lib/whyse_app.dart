@@ -69,6 +69,7 @@ class _WhyseAppState extends State<WhyseApp> {
                 statusBarColor: Colors.transparent,
                 statusBarIconBrightness: Brightness.dark,
               ),
+                scrolledUnderElevation: 0,
               backgroundColor: Colors.transparent,
               elevation: 0,
               centerTitle: true,

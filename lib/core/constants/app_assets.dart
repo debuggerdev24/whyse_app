@@ -17,14 +17,18 @@ class AppAssets {
 
   static const rightArrow = "$_iconPath/right_arrow.svg";
   static const brain = "$_iconPath/brain.svg";
+  static const add = "$_iconPath/add.svg";
   static const adventure = "$_iconPath/adventure.svg";
   static const check = "$_iconPath/check.svg";
   static const comics = "$_iconPath/comics.svg";
   static const fantancy = "$_iconPath/fantancy.svg";
+  static const copy = "$_iconPath/copy.svg";
   static const histoy = "$_iconPath/histoy.svg";
+  static const like = "$_iconPath/like.svg";
   static const mystery = "$_iconPath/mystery.svg";
   static const nature = "$_iconPath/nature.svg";
   static const done = "$_iconPath/done.svg";
+  static const closeFilled = "$_iconPath/close_filled.svg";
   static const science = "$_iconPath/science.svg";
   static const accepted = "$_iconPath/accepted.svg";
   static const dumble = "$_iconPath/dumble.svg";

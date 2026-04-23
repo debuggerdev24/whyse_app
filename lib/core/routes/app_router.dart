@@ -53,6 +53,8 @@ import 'package:redstreakapp/screens/settings/settings_screen.dart';
 import 'package:redstreakapp/screens/settings/preferences_screen.dart';
 import 'package:redstreakapp/screens/settings/settings_notification_screen.dart';
 import 'package:redstreakapp/screens/settings/edit_profile_screen.dart';
+import 'package:redstreakapp/screens/your_book/find_your_books_screen.dart';
+import 'package:redstreakapp/screens/your_book/book_details_screen.dart';
 
 import '../../screens/auth/below_16/consent_status_screen.dart';
 import '../../screens/auth/below_16/parent_email_screen.dart';
@@ -102,9 +104,9 @@ class AppRouter {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppRoutes.searchScreen.path,
-                name: AppRoutes.searchScreen.name,
-                builder: (context, state) => SearchScreen(),
+                path: AppRoutes.findYourBooksScreen.path,
+                name: AppRoutes.findYourBooksScreen.name,
+                builder: (context, state) => FindYourBooksScreen(),
               ),
             ],
           ),
@@ -115,6 +117,15 @@ class AppRouter {
                 path: AppRoutes.practiceZoneScreen.path,
                 name: AppRoutes.practiceZoneScreen.name,
                 builder: (context, state) => PracticeZoneSection(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.searchScreen.path,
+                name: AppRoutes.searchScreen.name,
+                builder: (context, state) => SearchScreen(),
               ),
             ],
           ),
@@ -420,6 +431,13 @@ class AppRouter {
       name: AppRoutes.createdIdeasListScreen.name,
       builder: (context, state) {
         return const CreatedIdeasList();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.bookDetailsScreen.path,
+      name: AppRoutes.bookDetailsScreen.name,
+      builder: (context, state) {
+        return const BookDetailsScreen();
       },
     ),
     GoRoute(

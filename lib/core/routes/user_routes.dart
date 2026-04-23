@@ -66,4 +66,6 @@ enum AppRoutes {
   groupDetailsScreen,
   streakRankingScreen,
   curiosityReadingScreen,
+  findYourBooksScreen,
+  bookDetailsScreen
 }

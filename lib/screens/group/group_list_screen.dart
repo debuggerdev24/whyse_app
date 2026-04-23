@@ -73,6 +73,7 @@ class _GroupListScreenState extends State<GroupListScreen> {
                               groupName: group.title,
                               thumbnail: group.thumbnailUrl,
                               description: group.description,
+                              inviteCode: group.joinCode
                             ),
                           );
                         },
@@ -84,6 +85,7 @@ class _GroupListScreenState extends State<GroupListScreen> {
                               groupName: group.title,
                               thumbnail: group.thumbnailUrl,
                               description: group.description,
+                              inviteCode: group.joinCode
                             ),
                           );
                         },

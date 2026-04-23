@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/providers/home/curiosity_reading_provider.dart';
-import 'package:redstreakapp/screens/home/curiosity_reading/curiosity_reading_screen.dart';
 import 'package:shimmer/shimmer.dart';
 
 class CuriosityReadingSection extends StatelessWidget {
@@ -89,7 +89,7 @@ class ArticleCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.18),
+              color: Colors.black.setOpacity(0.18),
               blurRadius: 6,
               offset: const Offset(0, 6),
             ),
@@ -242,71 +242,3 @@ class _ImageErrorPlaceholder extends StatelessWidget {
     );
   }
 }
-
-/// Teal "Read" button
-class _ReadButton extends StatelessWidget {
-  final VoidCallback? onTap;
-
-  const _ReadButton({this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.w),
-        decoration: BoxDecoration(
-          color: AppColors.teal, // teal color from design
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: AppText(
-          text: "Read",
-          style: AppTextStyles.semiBold(
-            fontSize: 12.sp,
-            color: AppColors.white,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// class _ArticleCardListView extends StatelessWidget {
-//   final String? sectionTitle;
-//   final double cardWidth;
-//   final double cardHeight;
-//   final EdgeInsetsGeometry padding;
-
-//   const _ArticleCardListView({
-//     this.sectionTitle,
-//     this.cardWidth = 260,
-//     this.cardHeight = 180,
-//     this.padding = const EdgeInsets.symmetric(horizontal: 16),
-//   });
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Column(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       mainAxisSize: MainAxisSize.min,
-//       children: [
-//         if (sectionTitle != null) ...[
-//           Padding(
-//             padding: padding,
-//             child: Text(
-//               sectionTitle!,
-//               style: TextStyle(
-//                 color: Colors.teal.shade600,
-//                 fontSize: 18,
-//                 fontWeight: FontWeight.w700,
-//                 letterSpacing: 0.2,
-//               ),
-//             ),
-//           ),
-//           const SizedBox(height: 12),
-//         ],
-
-//       ],
-//     );
-//   }
-// }
