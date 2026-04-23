@@ -28,7 +28,6 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.backgroundColor,
         surfaceTintColor: Colors.transparent,
-
         title: AppText(text: 'Create Group'),
         leading: IconButton(
           onPressed: () => context.pop(),
@@ -66,7 +65,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                             return null;
                           },
                         ),
-                        
+
                         20.w.verticalSpace,
                         //* Group Description
                         AppText(

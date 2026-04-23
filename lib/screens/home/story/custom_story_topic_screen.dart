@@ -7,7 +7,6 @@ import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
-
 import '../../../core/constants/app_color.dart';
 import '../../../core/constants/text_style.dart';
 import '../../../core/widgets/app_button.dart';

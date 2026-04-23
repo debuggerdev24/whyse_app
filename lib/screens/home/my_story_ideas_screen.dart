@@ -291,21 +291,19 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                               onOpenStory: () {
                                 final storyProvider = context
                                     .read<StoryProvider>();
+                                storyProvider.setFromStorySummary(summary);
                                 context.pushNamed(
                                   AppRoutes.createdStoryReadingScreen.name,
                                   extra: <String, dynamic>{
                                     "storyIdeaId": summary.storyIdeas[index].id,
                                   },
                                 );
-                                storyProvider.fetchSingleStoryByIdea(
-                                  storyIdeaId: summary.storyIdeas[index].id,
-                                  context: context,
-                                  insertAtIndex: 0,
-                                  onStoryNotGenerated: (ctx) {
-                                    AppToast.error(
-                                      ctx,
-                                      "Story not found. Please try again.",
-                                    );
+                                storyProvider.createStory(
+                                  selectedIdeaIndex: index,
+                                  onSuccess: () {},
+                                  onFailed: (error) {
+                                    if (!context.mounted) return;
+                                    AppToast.error(context, error);
                                   },
                                 );
                               },

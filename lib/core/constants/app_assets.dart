@@ -15,6 +15,8 @@ class AppAssets {
   static const backButton = "$_iconPath/backbutton.svg";
   static const datepicker = "$_iconPath/datepicker.svg";
 
+  static const rightArrow = "$_iconPath/right_arrow.svg";
+  static const brain = "$_iconPath/brain.svg";
   static const adventure = "$_iconPath/adventure.svg";
   static const check = "$_iconPath/check.svg";
   static const comics = "$_iconPath/comics.svg";

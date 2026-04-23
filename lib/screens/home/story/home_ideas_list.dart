@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +28,8 @@ class HomeIdeasListScreen extends StatelessWidget {
           builder: (context, provider, child) {
             final isShimmerRunning = provider.isGenerateStoryIdeasLoading ||
                 provider.isGenerateSingleStoryLoading;
-            return Stack(
+            return 
+            Stack(
               children: [
                 if (isShimmerRunning)
                   HomeSectionShimmer.ideasListScreenShimmer()
@@ -93,7 +93,8 @@ class HomeIdeasListScreen extends StatelessWidget {
               
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: AppText(
+                child: 
+                AppText(
                   text: topicTitle,
                   style: AppTextStyles.medium(
                     fontSize: 16.sp,

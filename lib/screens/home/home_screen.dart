@@ -1,5 +1,8 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/home_widgets.dart';
+import 'package:redstreakapp/screens/home/widgets/continue_reading_section.dart';
+import 'package:redstreakapp/screens/home/widgets/curiosity_reading_section.dart';
+import 'package:redstreakapp/screens/home/widgets/ebooks_books_section.dart';
 import 'package:redstreakapp/screens/home/widgets/home_topics_section.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,21 +18,30 @@ class _HomeScreenState extends State<HomeScreen> {
     return AppLayout(
       body: SafeArea(
         child: ListView(
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.w),
+          padding: EdgeInsets.symmetric(vertical: 15.w),
           children: [
-            const HomeHeader(),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              child: const HomeHeader(),
+            ),
             20.w.verticalSpace,
 
             const CalendarStrip(),
-
-            // 24.w.verticalSpace,
             24.w.verticalSpace,
 
-            const HomeStoryTopics(),
-            // 24.w.verticalSpace,
-            // const PracticeZoneSection(),
-            // s
-            // 10.w.verticalSpace,
+            CuriosityReadingSection(),
+
+            24.w.verticalSpace,
+
+            ContinueReadingSection(),
+            24.w.verticalSpace,
+
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              child: const HomeStoryTopics(),
+            ),
+            const EbooksBooksHomeSections(),
+            24.w.verticalSpace,
           ],
         ),
       ),

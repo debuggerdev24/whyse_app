@@ -62,5 +62,8 @@ enum AppRoutes {
   addMembersScreen,
   joinGroupScreen,
   groupListScreen,
-  viewGroupScreen, groupDetailsScreen, streakRankingScreen,
+  viewGroupScreen,
+  groupDetailsScreen,
+  streakRankingScreen,
+  curiosityReadingScreen,
 }

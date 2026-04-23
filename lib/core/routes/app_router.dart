@@ -23,6 +23,7 @@ import 'package:redstreakapp/screens/group/group_list_screen.dart';
 import 'package:redstreakapp/screens/group/join_group_screen.dart';
 import 'package:redstreakapp/screens/group/streak_ranking_screen.dart';
 import 'package:redstreakapp/screens/group/view_group_screen.dart';
+import 'package:redstreakapp/screens/home/curiosity_reading/curiosity_reading_screen.dart';
 import 'package:redstreakapp/screens/home/story/created_ideas.dart';
 import 'package:redstreakapp/screens/notification/notification_screen.dart';
 import 'package:redstreakapp/screens/profile/profile_screen.dart';
@@ -303,9 +304,7 @@ class AppRouter {
         final extra = state.extra;
         final openedFromCreatedIdeas =
             extra is Map && extra['openedFromCreatedIdeas'] == true;
-        return StoryGoalsScreen(
-          openedFromCreatedIdeas: openedFromCreatedIdeas,
-        );
+        return StoryGoalsScreen(openedFromCreatedIdeas: openedFromCreatedIdeas);
       },
     ),
     GoRoute(
@@ -503,7 +502,7 @@ class AppRouter {
           name: AppRoutes.viewGroupScreen.name,
           builder: (context, state) {
             return ViewGroupScreen(
-               params: state.extra as GroupDetailsScreenParams,
+              params: state.extra as GroupDetailsScreenParams,
             );
           },
         ),
@@ -528,6 +527,13 @@ class AppRouter {
           name: AppRoutes.joinGroupScreen.name,
           builder: (context, state) {
             return const JoinGroupScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.curiosityReadingScreen.name,
+          name: AppRoutes.curiosityReadingScreen.name,
+          builder: (context, state) {
+            return const CuriosityReadingScreen();
           },
         ),
       ],

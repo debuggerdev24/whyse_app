@@ -6,6 +6,7 @@ import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/core/utils/shared_pref.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/providers/group_provider.dart';
+import 'package:redstreakapp/providers/home/curiosity_reading_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/quiz_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
@@ -35,6 +36,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => HomeProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProvider(create: (_) => GroupProvider()),
+        ChangeNotifierProvider(create: (_) => CuriosityReadingProvider()),
       ],
       child: ToastificationWrapper(child: const WhyseApp()),
     ),

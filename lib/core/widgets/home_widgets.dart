@@ -1,5 +1,3 @@
-import 'package:flutter_svg/svg.dart';
-
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 
@@ -72,13 +70,13 @@ class HomeHeader extends StatelessWidget {
                 height: 40.w,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFFE5D9B8), width: 3.w),
+                  border: Border.all(
+                    color: const Color(0xFFE5D9B8),
+                    width: 3.w,
+                  ),
                 ),
                 child: ClipOval(
-                  child: Image.asset(
-                    AppAssets.profile,
-                    fit: BoxFit.cover,
-                  ),
+                  child: Image.asset(AppAssets.profile, fit: BoxFit.cover),
                 ),
               ),
             ),
@@ -156,127 +154,167 @@ class HomeHeader extends StatelessWidget {
 class CalendarStrip extends StatelessWidget {
   const CalendarStrip({super.key});
 
+  List<DateTime> _getCurrentMonthDates() {
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, 1);
+    final end = DateTime(now.year, now.month + 1, 0);
+    return List<DateTime>.generate(
+      end.day,
+      (index) => start.add(Duration(days: index)),
+    );
+  }
+
+  String _weekdayShort(DateTime date) {
+    const labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    return labels[date.weekday - 1];
+  }
+
+  String _monthName(int month) {
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    return months[month - 1];
+  }
+
   @override
   Widget build(BuildContext context) {
-    final days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-    final dates = ['18', '19', '20', '21', '22', '23', '24'];
-    final status = ["check", null, 'check', 'check', 'today', null, null];
+    final now = DateTime.now();
+    final monthDates = _getCurrentMonthDates();
+    // final monthTitle = "${_monthName(now.month)} ${now.year}";
+    final todayIndex = monthDates.indexWhere(
+      (date) =>
+          date.year == now.year &&
+          date.month == now.month &&
+          date.day == now.day,
+    );
+    final scrollController = ScrollController(
+      initialScrollOffset: todayIndex > 0 ? (todayIndex - 1) * 57.w : 0,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppText(
-          text: "Weekly goal",
-          style: AppTextStyles.bold(fontSize: 12.sp),
-        ),
-        5.w.verticalSpace,
+        // AppText(
+        //   text: monthTitle,
+        //   style: AppTextStyles.bold(
+        //     fontSize: 12.sp,
+        //     color: AppColors.black.withValues(alpha: 0.6),
+        //   ),
+        // ),
+        // AppText(
+        //   text: "Weekly goal",
+        //   style: AppTextStyles.bold(fontSize: 12.sp),
+        // ),
+        // 5.w.verticalSpace,
 
-        SizedBox(
-          width: double.infinity,
-          child: Row(
-            children: [
-              Expanded(
-                child: Container(
-                  height: 4.h,
-                  decoration: BoxDecoration(
-                    color: AppColors.orangeColor,
-                    borderRadius: BorderRadius.circular(2.r),
-                  ),
-                ),
-              ),
-              4.w.horizontalSpace,
-              Expanded(
-                child: Container(
-                  height: 4.h,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(2.r),
-                  ),
-                ),
-              ),
-              4.w.horizontalSpace,
-              Expanded(
-                child: Container(
-                  height: 4.h,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(2.r),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        6.w.verticalSpace,
-        AppText(
-          text: "1/3 Exercises",
-          style: AppTextStyles.bold(
-            fontSize: 12.sp,
-            color: AppColors.black.withValues(alpha: 0.4),
-          ),
-        ),
+        // SizedBox(
+        //   width: double.infinity,
+        //   child: Row(
+        //     children: [
+        //       Expanded(
+        //         child: Container(
+        //           height: 4.h,
+        //           decoration: BoxDecoration(
+        //             color: AppColors.orangeColor,
+        //             borderRadius: BorderRadius.circular(2.r),
+        //           ),
+        //         ),
+        //       ),
+        //       4.w.horizontalSpace,
+        //       Expanded(
+        //         child: Container(
+        //           height: 4.h,
+        //           decoration: BoxDecoration(
+        //             color: Colors.grey.shade200,
+        //             borderRadius: BorderRadius.circular(2.r),
+        //           ),
+        //         ),
+        //       ),
+        //       4.w.horizontalSpace,
+        //       Expanded(
+        //         child: Container(
+        //           height: 4.h,
+        //           decoration: BoxDecoration(
+        //             color: Colors.grey.shade200,
+        //             borderRadius: BorderRadius.circular(2.r),
+        //           ),
+        //         ),
+        //       ),
+        //     ],
+        //   ),
+        // ),
+        // 6.w.verticalSpace,
+        // AppText(
+        //   text: "1/3 Exercises",
+        //   style: AppTextStyles.bold(
+        //     fontSize: 12.sp,
+        //     color: AppColors.black.withValues(alpha: 0.4),
+        //   ),
+        // ),
         13.w.verticalSpace,
-        SizedBox(
-          height: 76.h,
+        Container(
+          height: 90.h,
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.black.withValues(alpha: 0.12)),
+          ),
+          padding: EdgeInsets.only(top: 10.w, bottom: 10.w),
           child: ListView.separated(
-            padding: EdgeInsets.zero,
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            controller: scrollController,
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
-            itemCount: days.length,
-            separatorBuilder: (_, __) => 9.w.horizontalSpace,
+            itemCount: monthDates.length,
+            separatorBuilder: (_, __) => 5.w.horizontalSpace,
             itemBuilder: (context, index) {
-              final isChecked = status[index] == 'check';
-              final isToday = status[index] == 'today';
-
-              return Container(
-                width: 50.w,
-                height: 68.h,
-                decoration: BoxDecoration(
-                  color: isToday
-                      ? AppColors.lighttealcolor
-                      : isChecked
-                      ? AppColors.lightyellowcolor
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.only(
-                    bottomRight: Radius.circular(10.r),
-                    bottomLeft: Radius.circular(10.r),
-                  ),
-                ),
-
+              final date = monthDates[index];
+              final isToday =
+                  date.year == now.year &&
+                  date.month == now.month &&
+                  date.day == now.day;
+              return SizedBox(
+                width: 52.w,
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    if (isChecked)
-                      Container(
-                        height: 3.w,
-                        decoration: BoxDecoration(
-                          color: AppColors.orangeColor,
-                          borderRadius: BorderRadius.only(
-                            bottomRight: Radius.circular(10.r),
-                            bottomLeft: Radius.circular(10.r),
-                          ),
-                        ),
-                      ),
-                    6.w.verticalSpace,
                     AppText(
-                      text: days[index],
-                      style: AppTextStyles.semibold(
-                        fontSize: 12.sp,
-                        color: AppColors.black.withValues(alpha: 0.4),
-                      ),
-                    ),
-                    4.w.verticalSpace,
-                    AppText(
-                      text: dates[index],
+                      text: _weekdayShort(date),
                       style: AppTextStyles.bold(
                         fontSize: 14.sp,
-                        color: AppColors.black,
+                        color: AppColors.black.withValues(alpha: 0.35),
                       ),
                     ),
-                    if (isChecked) ...[
-                      4.w.verticalSpace,
-                      SvgPicture.asset(AppAssets.check1),
-                    ],
+                    5.h.verticalSpace,
+                    Container(
+                      width: 45.w,
+                      height: 45.w,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isToday
+                            ? AppColors.orangeColor
+                            : Colors.transparent,
+                      ),
+                      child: AppText(
+                        text: date.day.toString(),
+                        style: AppTextStyles.bold(
+                          fontSize: 18.sp,
+                          color: isToday
+                              ? AppColors.black
+                              : AppColors.black.withValues(alpha: 0.55),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               );
@@ -287,9 +325,6 @@ class CalendarStrip extends StatelessWidget {
     );
   }
 }
-
-
-
 
 class BottomStatsCard extends StatelessWidget {
   const BottomStatsCard({super.key});
@@ -361,5 +396,3 @@ class BottomStatsCard extends StatelessWidget {
     );
   }
 }
-
-
