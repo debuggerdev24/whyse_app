@@ -6,19 +6,26 @@ import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
+import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/core/utils/share_helper.dart';
-import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/core/widgets/global_widgets.dart';
+import 'package:redstreakapp/models/home/story_models/story_idea_model.dart'
+    as generated_models;
+import 'package:redstreakapp/models/home/story_models/story_summary_model.dart'
+    as summary_models;
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
+import 'package:redstreakapp/screens/home/widgets/story_ui_components.dart';
 import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
 import 'package:shimmer/shimmer.dart';
 
 class MyStoryIdeasScreen extends StatefulWidget {
-  const MyStoryIdeasScreen({super.key});
+  const MyStoryIdeasScreen({super.key, this.preferGeneratedData = false});
+
+  final bool preferGeneratedData;
 
   @override
   State<MyStoryIdeasScreen> createState() => _MyStoryIdeasScreenState();
@@ -26,10 +33,49 @@ class MyStoryIdeasScreen extends StatefulWidget {
 
 class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
   final ScrollController _scrollController = ScrollController();
+  bool _waitingForGeneratedFirstResponse = true;
+
+  summary_models.StoryIdeaModel? _mapGeneratedIdeasToSummary(
+    generated_models.StoryIdeasModel? storyIdeas,
+  ) {
+    if (storyIdeas == null) return null;
+
+    return summary_models.StoryIdeaModel(
+      topicId: storyIdeas.topic.id,
+      topicTitle: storyIdeas.topic.title,
+      topicType: storyIdeas.promptType,
+      isOwnTopic: true,
+      topicLearningGoal: storyIdeas.topic.learningGoal,
+      topicThumbnailUrl: storyIdeas.topic.thumbnailUrl,
+      storyIdeas: storyIdeas.storyIdeas
+          .map(
+            (idea) => summary_models.StoryIdea(
+              id: idea.id,
+              storyTitle: idea.title,
+              description: idea.description,
+              thumbnailUrl: (idea.thumbnailUrl ?? '').toString(),
+              sequenceIndex: idea.sequenceIndex,
+              grade: '',
+              tags: const [],
+              age: '',
+              language: '',
+              topic: storyIdeas.topic.title,
+              topicType: storyIdeas.promptType,
+              source: '',
+              isGenerated: idea.isGenerated,
+              hasStory: idea.isGenerated,
+              createdOn: idea.createdAt.toIso8601String(),
+              updatedAt: idea.createdAt.toIso8601String(),
+            ),
+          )
+          .toList(),
+    );
+  }
 
   @override
   void initState() {
     super.initState();
+    _waitingForGeneratedFirstResponse = widget.preferGeneratedData;
     _scrollController.addListener(_onScroll);
   }
 
@@ -60,284 +106,292 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AppLayout(
-      body: SafeArea(
-        child: Consumer<HomeProvider>(
-          builder: (context, homeProvider, child) {
-            final summary = homeProvider.storySummary;
+    return Scaffold(
+      body: Consumer2<HomeProvider, StoryProvider>(
+        builder: (context, homeProvider, storyProvider, child) {
+          final generatedSummary = _mapGeneratedIdeasToSummary(
+            storyProvider.storyIdeas,
+          );
 
-            if (homeProvider.isStoryIdeasLoading) {
-              return HomeSectionShimmer.createdStoryIdeasLoadingShimmer();
+          if (widget.preferGeneratedData && _waitingForGeneratedFirstResponse) {
+            if (generatedSummary != null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!mounted) return;
+                setState(() => _waitingForGeneratedFirstResponse = false);
+              });
+            } else if (!storyProvider.isGenerateStoryIdeasLoading) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!mounted) return;
+                setState(() => _waitingForGeneratedFirstResponse = false);
+              });
             }
+            return HomeSectionShimmer.createdStoryIdeasLoadingShimmer();
+          }
 
-            if (summary == null) {
-              return Center(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 28.w),
-                  child: AppText(
-                    text:
-                        homeProvider.storyIdeasError ??
-                        "Unable to load stories.",
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.medium(
-                      fontSize: 16.sp,
-                      color: AppColors.black.withValues(alpha: 0.7),
-                    ),
+          final summary = widget.preferGeneratedData
+              ? (generatedSummary ?? homeProvider.storySummary)
+              : (homeProvider.storySummary ?? generatedSummary);
+
+          if (homeProvider.isStoryIdeasLoading ||
+              (summary == null && storyProvider.isGenerateStoryIdeasLoading)) {
+            return HomeSectionShimmer.createdStoryIdeasLoadingShimmer();
+          }
+
+          if (summary == null) {
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 28.w),
+                child: AppText(
+                  text:
+                      homeProvider.storyIdeasError ??
+                      "Unable to load stories.",
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.medium(
+                    fontSize: 16.sp,
+                    color: AppColors.black.withValues(alpha: 0.7),
                   ),
                 ),
-              );
-            }
+              ),
+            );
+          }
 
-            if (summary.storyIdeas.isEmpty) {
-              return Center(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 28.w),
-                  child: AppText(
-                    text: "No stories available.",
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.medium(
-                      fontSize: 16.sp,
-                      color: AppColors.black.withValues(alpha: 0.7),
-                    ),
+          if (summary.storyIdeas.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 28.w),
+                child: AppText(
+                  text: "No stories available.",
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.medium(
+                    fontSize: 16.sp,
+                    color: AppColors.black.withValues(alpha: 0.7),
                   ),
                 ),
-              );
-            }
+              ),
+            );
+          }
 
-            final topicTitle = summary.topicTitle.isNotEmpty
-                ? summary.topicTitle
-                : 'Nature';
-            final topicDescription = summary.topicLearningGoal;
-            final topicThumb = summary.topicThumbnailUrl;
+          final topicTitle = summary.topicTitle.isNotEmpty
+              ? summary.topicTitle
+              : 'Nature';
+          final topicDescription = summary.topicLearningGoal;
+          final topicThumb = summary.topicThumbnailUrl;
 
-            return SingleChildScrollView(
-              controller: _scrollController,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    height: 310.w,
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        if (topicThumb.isNotEmpty)
-                          CachedNetworkImage(
-                            imageUrl: topicThumb,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Shimmer.fromColors(
-                              baseColor: AppColors.shimmerBaseColor,
-                              highlightColor: AppColors.shimmerHighlightColor,
-                              child: Container(
-                                color: AppColors.shimmerBaseColor,
-                              ),
-                            ),
-                            errorWidget: (context, url, error) =>
-                                const NoImageFound(),
-                          )
-                        else
-                          const NoImageFound(),
-                        SafeArea(
-                          child: Padding(
-                            padding: EdgeInsets.fromLTRB(
-                              14.w,
-                              18.w,
-                              14.w,
-                              14.w,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    _circleButton(
-                                      onTap: () {
-                                        if (context.canPop()) {
-                                          context.pop();
-                                        } else {
-                                          context.goNamed(
-                                            AppRoutes.homeScreen.name,
-                                          );
-                                        }
-                                      },
-                                      child: SvgIcon(
-                                        AppAssets.backButton,
-                                        size: 12.w,
-                                        color: AppColors.black,
-                                      ),
-                                    ),
-                                    const Spacer(),
-                                    // _circleButton(
-                                    //   onTap: () {
-                                    //     context.goNamed(AppRoutes.homeScreen.name);
-                                    //   },
-                                    //   child: SvgIcon(
-                                    //     AppAssets.homeIcon,
-                                    //     size: 15.w,
-                                    //     color: AppColors.black,
-                                    //   ),
-                                    // ),
-                                  ],
-                                ),
-                                const Spacer(),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Expanded(
-                                      child: AppText(
-                                        text: topicTitle,
-                                        style: AppTextStyles.bold(
-                                          fontSize: 24.sp,
-                                          color: AppColors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                child: StoryHeroHeader(
+                  imageUrl: topicThumb,
+                  title: topicTitle,
+                  topLeft: StoryCircleButton(
+                    onTap: () {
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        context.goNamed(AppRoutes.homeScreen.name);
+                      }
+                    },
+                    child: Icon(
+                      Icons.chevron_left_rounded,
+                      size: 19.w,
+                      color: AppColors.black,
+                    ),
+                  ),
+                  bottomRight: StoryCircleButton(
+                    onTap: () {},
+                    child: Icon(
+                      Icons.more_vert,
+                      size: 18.w,
+                      color: AppColors.black,
+                    ),
+                  ),
+                  titleStyle: AppTextStyles.bold(
+                    fontSize: 24.sp,
+                    color: AppColors.white,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      18.w.verticalSpace,
+                      _MyExpandableDescription(
+                        text: topicDescription,
+                        title: topicTitle,
+                        description: topicDescription,
+                        tags: [
+                          '12-15 years',
+                          'CEFR A2',
+                          'Reading',
+                          'Writing',
+                          'Speaking',
+                          'Listening',
+                        ],
+                      ),
+                      10.w.verticalSpace,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          _infoChip('12-15 years'),
+                          8.w.horizontalSpace,
+                          _infoChip('CEFR A2'),
+                        ],
+                      ),
+                      20.w.verticalSpace,
+                      GestureDetector(
+                        onTap: () {
+                          if (summary.storyIdeas.isEmpty) return;
+                          final storyProvider = context.read<StoryProvider>();
+                          storyProvider.setFromStorySummary(summary);
+                          context.pushNamed(
+                            AppRoutes.createdStoryReadingScreen.name,
+                            extra: <String, dynamic>{
+                              "storyIdeaId": summary.storyIdeas.first.id,
+                            },
+                          );
+                          storyProvider.createStory(
+                            selectedIdeaIndex: 0,
+                            onSuccess: () {},
+                            onFailed: (error) {
+                              if (!context.mounted) return;
+                              AppToast.error(context, error);
+                            },
+                          );
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          height: 48.w,
+                          decoration: BoxDecoration(
+                            color: AppColors.black,
+                            borderRadius: BorderRadius.circular(30.r),
+                          ),
+                          alignment: Alignment.center,
+                          child: AppText(
+                            text: 'Continue Reading',
+                            style: AppTextStyles.bold(
+                              fontSize: 18.sp,
+                              color: AppColors.white,
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        18.w.verticalSpace,
-                        _MyExpandableDescription(text: topicDescription),
-                        10.w.verticalSpace,
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
+                      ),
+                      18.w.verticalSpace,
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10.w),
+                        child: Row(
                           children: [
-                            _infoChip('12-15 years'),
-                            8.w.horizontalSpace,
-                            _infoChip('CEFR A2'),
-                            const Spacer(),
                             GestureDetector(
-                              onTap: () {
-                                shareTopicLink(topicId: summary.topicId);
-                              },
-                              child: Container(
-                                padding: EdgeInsets.all(8.w),
-                                decoration: BoxDecoration(
-                                  color: AppColors.white,
-                                  border: Border.all(
-                                    color: AppColors.black.withValues(
-                                      alpha: 0.1,
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () {},
+                              child: Column(
+                                children: [
+                                  SvgIcon(
+                                    AppAssets.add,
+                                    size: 24.w,
+                                    color: AppColors.black,
+                                  ),
+                                  2.w.verticalSpace,
+                                  AppText(
+                                    text: 'Add to List',
+                                    style: AppTextStyles.semibold(
+                                      fontSize: 16.sp,
+                                      color: AppColors.black,
                                     ),
                                   ),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: SvgIcon(
-                                  AppAssets.shareIcon,
-                                  size: 20.w,
-                                  color: AppColors.black,
-                                ),
+                                ],
                               ),
                             ),
+                            25.w.horizontalSpace,
                             GestureDetector(
-                              onTap: () {},
-                              child: Container(
-                                margin: EdgeInsets.only(left: 8.w),
-                                padding: EdgeInsets.all(5.w),
-                                decoration: BoxDecoration(
-                                  color: AppColors.white,
-                                  border: Border.all(
-                                    color: AppColors.black.withValues(
-                                      alpha: 0.1,
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () =>
+                                  shareTopicLink(topicId: summary.topicId),
+                              child: Column(
+                                children: [
+                                  SvgIcon(
+                                    AppAssets.shareIcon,
+                                    size: 22.w,
+                                    color: AppColors.black,
+                                  ),
+                                  4.w.verticalSpace,
+                                  AppText(
+                                    text: 'Share',
+                                    style: AppTextStyles.semibold(
+                                      fontSize: 16.sp,
+                                      color: AppColors.black,
                                     ),
                                   ),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.bookmark_border,
-                                  size: 23.5.w,
-                                  color: AppColors.black,
-                                ),
+                                ],
                               ),
                             ),
                           ],
                         ),
-                        16.w.verticalSpace,
-                        Divider(
-                          height: 1.w,
-                          thickness: 1.w,
-                          color: AppColors.black.withValues(alpha: 0.1),
+                      ),
+                      16.w.verticalSpace,
+                      Divider(
+                        height: 1.w,
+                        thickness: 1.w,
+                        color: AppColors.black.withValues(alpha: 0.1),
+                      ),
+                      18.w.verticalSpace,
+                      AppText(
+                        text:
+                            "${summary.storyIdeas.length} Readings \u2022 10 mins",
+                        style: AppTextStyles.bold(
+                          fontSize: 16.sp,
+                          color: AppColors.black,
                         ),
-                        18.w.verticalSpace,
-                        AppText(
-                          text:
-                              "${summary.storyIdeas.length} Readings - 10 mins",
-                          style: AppTextStyles.bold(
-                            fontSize: 16.sp,
-                            color: AppColors.black,
+                      ),
+                      18.w.verticalSpace,
+                      ...List.generate(
+                        summary.storyIdeas.length,
+                        (index) => Padding(
+                          padding: EdgeInsets.only(bottom: 18.w),
+                          child: _MyReadingItemTile(
+                            index: index + 1,
+                            isSelected: index == 0,
+                            title: summary.storyIdeas[index].storyTitle,
+                            description: summary.storyIdeas[index].description,
+                            thumbnailUrl:
+                                summary.storyIdeas[index].thumbnailUrl,
+                            topicThumbnailUrl: summary.topicThumbnailUrl,
+                            onOpenStory: () {
+                              final storyProvider = context
+                                  .read<StoryProvider>();
+                              storyProvider.setFromStorySummary(summary);
+                              context.pushNamed(
+                                AppRoutes.createdStoryReadingScreen.name,
+                                extra: <String, dynamic>{
+                                  "storyIdeaId": summary.storyIdeas[index].id,
+                                },
+                              );
+                              storyProvider.createStory(
+                                selectedIdeaIndex: index,
+                                onSuccess: () {},
+                                onFailed: (error) {
+                                  if (!context.mounted) return;
+                                  AppToast.error(context, error);
+                                },
+                              );
+                            },
                           ),
                         ),
-                        18.w.verticalSpace,
-                        ...List.generate(
-                          summary.storyIdeas.length,
-                          (index) => Padding(
-                            padding: EdgeInsets.only(bottom: 18.w),
-                            child: _MyReadingItemTile(
-                              index: index + 1,
-                              title: summary.storyIdeas[index].storyTitle,
-                              description:
-                                  summary.storyIdeas[index].description,
-                              thumbnailUrl:
-                                  summary.storyIdeas[index].thumbnailUrl,
-                              topicThumbnailUrl: summary.topicThumbnailUrl,
-                              onOpenStory: () {
-                                final storyProvider = context
-                                    .read<StoryProvider>();
-                                storyProvider.setFromStorySummary(summary);
-                                context.pushNamed(
-                                  AppRoutes.createdStoryReadingScreen.name,
-                                  extra: <String, dynamic>{
-                                    "storyIdeaId": summary.storyIdeas[index].id,
-                                  },
-                                );
-                                storyProvider.createStory(
-                                  selectedIdeaIndex: index,
-                                  onSuccess: () {},
-                                  onFailed: (error) {
-                                    if (!context.mounted) return;
-                                    AppToast.error(context, error);
-                                  },
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                        if (homeProvider.isStoryIdeasLoadingMore) ...[
-                          4.w.verticalSpace,
-                          HomeSectionShimmer.createdStoryIdeasLoadMoreShimmer(),
-                        ],
+                      ),
+                      if (homeProvider.isStoryIdeasLoadingMore) ...[
+                        4.w.verticalSpace,
+                        HomeSectionShimmer.createdStoryIdeasLoadMoreShimmer(),
                       ],
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _circleButton({required Widget child, VoidCallback? onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 32.w,
-        height: 32.w,
-        decoration: const BoxDecoration(
-          color: AppColors.white,
-          shape: BoxShape.circle,
-        ),
-        alignment: Alignment.center,
-        child: child,
+            ],
+          );
+        },
       ),
     );
   }
@@ -361,6 +415,7 @@ class _MyReadingItemTile extends StatelessWidget {
   const _MyReadingItemTile({
     required this.onOpenStory,
     required this.index,
+    required this.isSelected,
     required this.title,
     required this.description,
     required this.thumbnailUrl,
@@ -369,6 +424,7 @@ class _MyReadingItemTile extends StatelessWidget {
 
   final VoidCallback onOpenStory;
   final int index;
+  final bool isSelected;
   final String title, description, thumbnailUrl, topicThumbnailUrl;
 
   @override
@@ -379,32 +435,56 @@ class _MyReadingItemTile extends StatelessWidget {
         GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: onOpenStory,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16.r),
-            child: SizedBox(
-              width: 122.w,
-              height: 84.w,
-              child: CachedNetworkImage(
-                imageUrl: thumbnailUrl,
-                fit: BoxFit.cover,
-                placeholder: (_, __) => Shimmer.fromColors(
-                  baseColor: AppColors.shimmerBaseColor,
-                  highlightColor: AppColors.shimmerHighlightColor,
-                  child: Container(color: AppColors.shimmerBaseColor),
-                ),
-                errorWidget: (_, __, ___) => CachedNetworkImage(
-                  imageUrl: topicThumbnailUrl,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Shimmer.fromColors(
-                    baseColor: AppColors.shimmerBaseColor,
-                    highlightColor: AppColors.shimmerHighlightColor,
-                    child: Container(color: AppColors.shimmerBaseColor),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16.r),
+                child: SizedBox(
+                  width: 122.w,
+                  height: 84.w,
+                  child: CachedNetworkImage(
+                    imageUrl: thumbnailUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) => Shimmer.fromColors(
+                      baseColor: AppColors.shimmerBaseColor,
+                      highlightColor: AppColors.shimmerHighlightColor,
+                      child: Container(color: AppColors.shimmerBaseColor),
+                    ),
+                    errorWidget: (_, __, ___) => CachedNetworkImage(
+                      imageUrl: topicThumbnailUrl,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Shimmer.fromColors(
+                        baseColor: AppColors.shimmerBaseColor,
+                        highlightColor: AppColors.shimmerHighlightColor,
+                        child: Container(color: AppColors.shimmerBaseColor),
+                      ),
+                      errorWidget: (_, __, ___) =>
+                          const NoImageFound(compact: true),
+                    ),
                   ),
-                  errorWidget: (_, __, ___) =>
-                      const NoImageFound(compact: true),
                 ),
               ),
-            ),
+              if (isSelected)
+                Positioned(
+                  top: -8.w,
+                  right: -8.w,
+                  child: Container(
+                    width: 24.w,
+                    height: 24.w,
+                    decoration: BoxDecoration(
+                      color: AppColors.teal,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.white, width: 2.w),
+                    ),
+                    child: Icon(
+                      Icons.check,
+                      size: 14.w,
+                      color: AppColors.white,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
         12.w.horizontalSpace,
@@ -445,7 +525,6 @@ class _MyReadingDescription extends StatefulWidget {
 }
 
 class _MyReadingDescriptionState extends State<_MyReadingDescription> {
-  static const int _minCharsForToggle = 55;
   bool isExpanded = false;
 
   void _toggleExpanded() {
@@ -467,59 +546,74 @@ class _MyReadingDescriptionState extends State<_MyReadingDescription> {
           decorationColor: AppColors.teal,
         );
 
-    if (display.length <= _minCharsForToggle) {
-      return AppText(text: display, style: bodyStyle);
-    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final textPainter = TextPainter(
+          text: TextSpan(text: display, style: bodyStyle),
+          maxLines: 2,
+          textDirection: Directionality.of(context),
+        )..layout(maxWidth: constraints.maxWidth);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        GestureDetector(
-          onTap: widget.onOpenStory,
-          child: AnimatedSize(
-            duration: const Duration(milliseconds: 260),
-            curve: Curves.easeInOutCubic,
-            child: AppText(
-              text: display,
-              style: bodyStyle,
-              maxLines: isExpanded ? null : 2,
-              overflow: isExpanded
-                  ? TextOverflow.visible
-                  : TextOverflow.ellipsis,
-            ),
-          ),
-        ),
-        GestureDetector(
-          onTap: _toggleExpanded,
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 220),
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
-            transitionBuilder: (child, animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: SizeTransition(
-                  sizeFactor: animation,
-                  axis: Axis.horizontal,
-                  child: child,
+        final hasOverflow = textPainter.didExceedMaxLines;
+        if (!hasOverflow) return AppText(text: display, style: bodyStyle);
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            GestureDetector(
+              onTap: widget.onOpenStory,
+              child: AnimatedSize(
+                duration: const Duration(milliseconds: 260),
+                curve: Curves.easeInOutCubic,
+                child: AppText(
+                  text: display,
+                  style: bodyStyle,
+                  maxLines: isExpanded ? null : 2,
+                  overflow: isExpanded
+                      ? TextOverflow.visible
+                      : TextOverflow.ellipsis,
                 ),
-              );
-            },
-            child: AppText(
-              key: ValueKey(isExpanded),
-              text: isExpanded ? 'Read less' : 'Read more',
-              style: linkStyle,
+              ),
             ),
-          ),
-        ),
-      ],
+            GestureDetector(
+              onTap: _toggleExpanded,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 220),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (child, animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SizeTransition(
+                      sizeFactor: animation,
+                      axis: Axis.horizontal,
+                      child: child,
+                    ),
+                  );
+                },
+                child: AppText(
+                  key: ValueKey(isExpanded),
+                  text: isExpanded ? 'Read less' : 'more',
+                  style: linkStyle,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
 
 class _MyExpandableDescription extends StatefulWidget {
-  const _MyExpandableDescription({required this.text});
-  final String text;
+  const _MyExpandableDescription({
+    required this.text,
+    required this.title,
+    required this.description,
+    required this.tags,
+  });
+  final String text, title, description;
+  final List<String> tags;
 
   @override
   State<_MyExpandableDescription> createState() =>
@@ -528,11 +622,6 @@ class _MyExpandableDescription extends StatefulWidget {
 
 class _MyExpandableDescriptionState extends State<_MyExpandableDescription> {
   static const int _minCharsForToggle = 100;
-  bool isExpanded = false;
-
-  void _toggleExpanded() {
-    setState(() => isExpanded = !isExpanded);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -540,54 +629,166 @@ class _MyExpandableDescriptionState extends State<_MyExpandableDescription> {
     final display = full.isEmpty ? 'No description available.' : full;
 
     final bodyStyle = AppTextStyles.medium(
-      color: AppColors.black.withValues(alpha: 0.55),
+      color: AppColors.black.withValues(alpha: 0.65),
       fontSize: 14.sp,
     );
-    final linkStyle =
-        AppTextStyles.semibold(fontSize: 14.sp, color: AppColors.teal).copyWith(
-          decoration: TextDecoration.underline,
-          decorationColor: AppColors.teal,
-        );
+    final linkStyle = AppTextStyles.bold(
+      fontSize: 14.sp,
+      color: AppColors.black,
+    );
 
     if (display.length <= _minCharsForToggle) {
       return AppText(text: display, style: bodyStyle);
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        AnimatedSize(
-          duration: const Duration(milliseconds: 260),
-          curve: Curves.easeInOutCubic,
-          child: AppText(
-            text: display,
-            style: bodyStyle,
-            maxLines: isExpanded ? null : 2,
-            overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
-          ),
-        ),
-        6.w.verticalSpace,
-        GestureDetector(
-          onTap: _toggleExpanded,
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 220),
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
-            transitionBuilder: (child, animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: SizeTransition(
-                  sizeFactor: animation,
-                  axis: Axis.horizontal,
-                  child: child,
+    return RichText(
+      text: TextSpan(
+        style: bodyStyle,
+        children: [
+          TextSpan(text: '${display.substring(0, _minCharsForToggle)}... '),
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: GestureDetector(
+              onTap: () => showModalBottomSheet(
+                context: context,
+                backgroundColor: Colors.transparent,
+                isScrollControlled: true,
+                builder: (context) => _StoryIdeaDetailsBottomSheet(
+                  title: widget.title,
+                  description: widget.description,
+                  tags: widget.tags,
                 ),
-              );
-            },
-            child: AppText(
-              key: ValueKey(isExpanded),
-              text: isExpanded ? 'Read less' : 'Read more',
-              style: linkStyle,
+              ),
+              child: AppText(text: 'more', style: linkStyle),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StoryIdeaDetailsBottomSheet extends StatelessWidget {
+  const _StoryIdeaDetailsBottomSheet({
+    required this.title,
+    required this.description,
+    required this.tags,
+  });
+
+  final String title;
+  final String description;
+  final List<String> tags;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.all(16.0.r),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Align(
+                      alignment: Alignment.topCenter,
+                      child: Container(
+                        height: 4.w,
+                        width: 40.w,
+                        decoration: BoxDecoration(
+                          color: AppColors.black.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => context.pop(),
+                        child: Container(
+                          height: 32.h,
+                          width: 32.h,
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.black.withValues(alpha: 0.1),
+                              width: 1.w,
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          padding: EdgeInsets.all(4.r),
+                          child: Icon(
+                            Icons.close,
+                            size: 15.w,
+                            color: AppColors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              5.h.verticalSpace,
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32.w),
+                child: AppText(
+                  text: title,
+                  style: AppTextStyles.bold(fontSize: 24),
+                ),
+              ),
+              10.h.verticalSpace,
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32.w),
+                child: AppText(
+                  text: description,
+                  style: AppTextStyles.regular(
+                    fontSize: 14,
+                    color: AppColors.black.setOpacity(0.4),
+                  ),
+                ),
+              ),
+              15.h.verticalSpace,
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32.w),
+                child: Wrap(
+                  spacing: 8.w,
+                  runSpacing: 8.w,
+                  alignment: WrapAlignment.start,
+                  runAlignment: WrapAlignment.start,
+                  children: List.generate(
+                    tags.length,
+                    (index) => Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12.w,
+                        vertical: 6.w,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.extealighttealcolor,
+                        borderRadius: BorderRadius.circular(20.r),
+                      ),
+                      child: AppText(
+                        text: tags[index],
+                        style: AppTextStyles.bold(
+                          fontSize: 12.sp,
+                          color: AppColors.teal,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: MediaQuery.of(context).padding.bottom + 20.h),
+            ],
           ),
         ),
       ],

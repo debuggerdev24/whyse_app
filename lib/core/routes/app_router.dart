@@ -21,10 +21,10 @@ import 'package:redstreakapp/screens/group/create_group_screen.dart';
 import 'package:redstreakapp/screens/group/group_details_screen.dart';
 import 'package:redstreakapp/screens/group/group_list_screen.dart';
 import 'package:redstreakapp/screens/group/join_group_screen.dart';
+import 'package:redstreakapp/screens/group/share_stories_in_group_screen.dart';
 import 'package:redstreakapp/screens/group/streak_ranking_screen.dart';
 import 'package:redstreakapp/screens/group/view_group_screen.dart';
 import 'package:redstreakapp/screens/home/curiosity_reading/curiosity_reading_screen.dart';
-import 'package:redstreakapp/screens/home/story/created_ideas.dart';
 import 'package:redstreakapp/screens/notification/notification_screen.dart';
 import 'package:redstreakapp/screens/profile/profile_screen.dart';
 import 'package:redstreakapp/screens/profile/your_books_screen.dart';
@@ -32,8 +32,7 @@ import 'package:redstreakapp/screens/search/search_screen.dart';
 import 'package:redstreakapp/screens/home/story/custom_story_topic_screen.dart';
 
 import 'package:redstreakapp/screens/home/story/story_goals_screen.dart';
-import 'package:redstreakapp/screens/home/story/created_story.dart';
-import 'package:redstreakapp/screens/home/story/my_story_reading_screen.dart';
+import 'package:redstreakapp/screens/home/story/created_story_reading_screen.dart';
 import 'package:redstreakapp/screens/home/story/shared_story_screen.dart';
 import 'package:redstreakapp/screens/home/story/random_story_series_screen.dart';
 import 'package:redstreakapp/screens/home/story/story_reading_goal_screen.dart';
@@ -380,7 +379,7 @@ class AppRouter {
       path: AppRoutes.createdStoryReadingScreen.path,
       name: AppRoutes.createdStoryReadingScreen.name,
       builder: (context, state) {
-        return const MyStoryReadingScreen();
+        return const CreatedStoryReadingScreen();
       },
     ),
     GoRoute(
@@ -420,8 +419,8 @@ class AppRouter {
       },
     ),
     GoRoute(
-      path: AppRoutes.yourEBooksScreen.path,
-      name: AppRoutes.yourEBooksScreen.name,
+      path: AppRoutes.yourBooksScreen.path,
+      name: AppRoutes.yourBooksScreen.name,
       builder: (context, state) {
         return const YourEBooksScreen();
       },
@@ -430,7 +429,10 @@ class AppRouter {
       path: AppRoutes.createdIdeasListScreen.path,
       name: AppRoutes.createdIdeasListScreen.name,
       builder: (context, state) {
-        return const CreatedIdeasList();
+        final extra = state.extra;
+        final preferGeneratedData =
+            extra is Map && extra['preferGeneratedData'] == true;
+        return MyStoryIdeasScreen(preferGeneratedData: preferGeneratedData);
       },
     ),
     GoRoute(
@@ -552,6 +554,13 @@ class AppRouter {
           name: AppRoutes.curiosityReadingScreen.name,
           builder: (context, state) {
             return const CuriosityReadingScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.shareStoriesInGroupScreen.name,
+          name: AppRoutes.shareStoriesInGroupScreen.name,
+          builder: (context, state) {
+            return const ShareStoriesInGroupScreen();
           },
         ),
       ],

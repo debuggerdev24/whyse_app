@@ -12,7 +12,7 @@ import 'package:redstreakapp/screens/dashboard.dart';
   import 'package:redstreakapp/models/home/browse_topic_model.dart';
 import 'package:redstreakapp/models/home/topic_progress_model.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
-import 'package:redstreakapp/screens/home/story/created_story.dart';
+import 'package:redstreakapp/screens/home/story/created_story_reading_screen.dart';
 import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
 
 class RandomTopicReadingScreen extends StatefulWidget {

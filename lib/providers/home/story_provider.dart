@@ -269,7 +269,7 @@ class StoryProvider extends ChangeNotifier {
         onFailed.call(l.errorMsg);
       },
       (r) {
-        final data = r["data"];
+        final data = r["data"]['topics'];
         topicsList = (data as List).map((e) => TopicModel.fromJson(e)).toList();
         notifyListeners();
       },

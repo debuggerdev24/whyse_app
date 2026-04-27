@@ -62,6 +62,9 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                                 widget.openedFromCreatedIdeas
                                     ? AppRoutes.createdIdeasListScreen.name
                                     : AppRoutes.homeScreen.name,
+                                extra: widget.openedFromCreatedIdeas
+                                    ? const {'preferGeneratedData': true}
+                                    : null,
                               );
                             }
                           },

@@ -1,4 +1,5 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/providers/profile/your_books_provider.dart';
 
 class YourEBooksScreen extends StatelessWidget {
   const YourEBooksScreen({super.key});
@@ -44,55 +45,137 @@ class YourEBooksScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: Align(
-          alignment: Alignment.centerLeft,
-          child: Padding(
-            padding: EdgeInsets.only(left: 25.r),
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => context.pop(),
-              child: SvgIcon(AppAssets.backButton, size: 13.sp),
+    return Consumer<YourBooksProvider>(
+      builder: (context, provider, child) {
+        return Scaffold(
+          appBar: AppBar(
+            leading: provider.optionMode.isNone
+                ? Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 25.r),
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => context.pop(),
+                        child: SvgIcon(AppAssets.backButton, size: 13.sp),
+                      ),
+                    ),
+                  )
+                : Padding(
+                    padding: EdgeInsets.only(left: 18.r),
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => provider.setOptionMode(OptionMode.none),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: AppText(
+                          text: 'Cancel',
+                          style: AppTextStyles.bold(
+                            fontSize: 14,
+                            color: AppColors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+            centerTitle: true,
+            title: provider.optionMode.isNone
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SvgIcon(
+                        AppAssets.bookOpen,
+                        size: 24.sp,
+                        color: AppColors.black,
+                      ),
+                      5.horizontalSpace,
+                      AppText(
+                        text: 'Your Books',
+                        style: AppTextStyles.bold(fontSize: 20),
+                      ),
+                    ],
+                  )
+                : AppText(
+                    text: 'Select books',
+                    style: AppTextStyles.bold(fontSize: 20),
+                  ),
+            actions: [
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  if (provider.optionMode.isNone) {
+                    _showOptionsBottomSheet(context);
+                    return;
+                  }
+                  if (!provider.hasSelection) return;
+                  if (provider.optionMode.isShare) {
+                    _showShareWithBottomSheet(context);
+                    return;
+                  }
+                  if (provider.optionMode.isRemove) {
+                    provider.clearBookSelection();
+                    provider.setOptionMode(OptionMode.none);
+                    AppToast.success(context, 'Selected books removed');
+                  }
+                },
+                child: !provider.optionMode.isNone
+                    ? Padding(
+                        padding: EdgeInsets.only(right: 25.r),
+                        child: AppText(
+                          text: provider.optionMode.isShare
+                              ? 'Share with'
+                              : 'Remove',
+                          style: AppTextStyles.bold(
+                            fontSize: 14,
+                            color: provider.hasSelection
+                                ? AppColors.teal
+                                : AppColors.teal.withValues(alpha: 0.5),
+                          ),
+                        ),
+                      )
+                    : Container(
+                        width: 28.w,
+                        height: 28.w,
+                        margin: EdgeInsets.only(right: 25.r),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.white,
+                          border: Border.all(
+                            color: AppColors.black.withValues(alpha: 0.14),
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.more_vert_rounded,
+                          size: 17.sp,
+                          color: AppColors.black,
+                        ),
+                      ),
+              ),
+            ],
+            bottom: PreferredSize(
+              preferredSize: Size.fromHeight(1.h),
+              child: Container(
+                color: AppColors.black.withValues(alpha: 0.1),
+                height: 1,
+              ),
             ),
           ),
-        ),
-        centerTitle: true,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SvgIcon(AppAssets.bookOpen, size: 24.sp, color: AppColors.black),
-            5.horizontalSpace,
-            AppText(
-              text: 'Your Books',
-              style: AppTextStyles.bold(fontSize: 20),
+          body: ListView.separated(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 20.h),
+            itemBuilder: (context, index) =>
+                _BookItemTile(data: _books[index], index: index),
+            separatorBuilder: (context, index) => Padding(
+              padding: EdgeInsets.symmetric(vertical: 14.h),
+              child: Divider(
+                color: AppColors.black.withValues(alpha: 0.08),
+                height: 1,
+              ),
             ),
-          ],
-        ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(1.h),
-          child: Container(
-            color: AppColors.black.withValues(alpha: 0.1),
-            height: 1,
+            itemCount: _books.length,
           ),
-        ),
-      ),
-      body: ListView.separated(
-        physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 20.h),
-        itemBuilder: (context, index) => _BookItemTile(
-          data: _books[index],
-          onMoreTap: () => _showOptionsBottomSheet(context),
-        ),
-        separatorBuilder: (context, index) => Padding(
-          padding: EdgeInsets.symmetric(vertical: 14.h),
-          child: Divider(
-            color: AppColors.black.withValues(alpha: 0.08),
-            height: 1,
-          ),
-        ),
-        itemCount: _books.length,
-      ),
+        );
+      },
     );
   }
 
@@ -112,17 +195,22 @@ class YourEBooksScreen extends StatelessWidget {
                 label: 'Share',
                 icon: Icons.ios_share_rounded,
                 onTap: () {
-                  final rootContext =
-                      AppRouter.rootNavigatorKey.currentContext ?? context;
                   Navigator.of(context).pop();
-                  _showShareWithBottomSheet(rootContext);
+                  context.read<YourBooksProvider>().setOptionMode(
+                    OptionMode.share,
+                  );
                 },
               ),
               16.horizontalSpace,
               _SheetActionButton(
                 label: 'Remove',
                 icon: Icons.close_rounded,
-                onTap: () => Navigator.of(context).pop(),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  context.read<YourBooksProvider>().setOptionMode(
+                    OptionMode.remove,
+                  );
+                },
               ),
             ],
           ),
@@ -320,126 +408,147 @@ class YourEBooksScreen extends StatelessWidget {
 }
 
 class _BookItemTile extends StatelessWidget {
-  const _BookItemTile({required this.data, required this.onMoreTap});
+  const _BookItemTile({required this.data, required this.index});
 
   final _BookItemData data;
-  final VoidCallback onMoreTap;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
     final progressPercent = '${(data.progress * 100).round()}%';
+    return Consumer<YourBooksProvider>(
+      builder: (context, provider, child) {
+        final isSelectMode =
+            provider.optionMode.isShare || provider.optionMode.isRemove;
+        final isSelected = provider.isBookSelected(index);
 
-    return SizedBox(
-      height: 135.h,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 95.h,
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: isSelectMode
+              ? () => provider.toggleBookSelection(index)
+              : null,
+          child: SizedBox(
             height: 135.h,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.r),
-              image: DecorationImage(
-                image: AssetImage(data.imagePath),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          12.horizontalSpace,
-          Expanded(
-            child: Column(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AppText(
-                  text: data.author,
-                  style: AppTextStyles.semibold(
-                    fontSize: 13,
-                    color: AppColors.black.withValues(alpha: 0.8),
+                Container(
+                  width: 95.h,
+                  height: 135.h,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8.r),
+                    image: DecorationImage(
+                      image: AssetImage(data.imagePath),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
-                2.verticalSpace,
-                AppText(
-                  text: data.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.bold(fontSize: 16),
-                ),
-                4.verticalSpace,
-                AppText(
-                  text: data.description,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.medium(
-                    fontSize: 12,
-                    color: AppColors.black.withValues(alpha: 0.80),
-                    height: 1.2,
-                  ),
-                ),
-                const Spacer(),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
+                12.horizontalSpace,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AppText(
+                        text: data.author,
+                        style: AppTextStyles.semibold(
+                          fontSize: 13,
+                          color: AppColors.black.withValues(alpha: 0.8),
+                        ),
+                      ),
+                      2.verticalSpace,
+                      AppText(
+                        text: data.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.bold(fontSize: 16),
+                      ),
+                      4.verticalSpace,
+                      AppText(
+                        text: data.description,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.medium(
+                          fontSize: 12,
+                          color: AppColors.black.withValues(alpha: 0.80),
+                          height: 1.2,
+                        ),
+                      ),
+                      const Spacer(),
+                      Row(
                         children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: AppText(
-                                  text: '${data.pagesLeft} Pages left',
-                                  style: AppTextStyles.semibold(fontSize: 12),
+                          Expanded(
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: AppText(
+                                        text: '${data.pagesLeft} Pages left',
+                                        style: AppTextStyles.semibold(
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                    AppText(
+                                      text: progressPercent,
+                                      style: AppTextStyles.bold(
+                                        fontSize: 10,
+                                        color: AppColors.black.withValues(
+                                          alpha: 0.7,
+                                        ),
+                                      ),
+                                    ),
+                                    10.horizontalSpace,
+                                  ],
                                 ),
-                              ),
-                              AppText(
-                                text: progressPercent,
-                                style: AppTextStyles.bold(
-                                  fontSize: 10,
-                                  color: AppColors.black.withValues(alpha: 0.7),
+                                6.verticalSpace,
+                                LinearProgressIndicator(
+                                  value: data.progress,
+                                  minHeight: 3.h,
+                                  color: AppColors.orangeColor,
+                                  backgroundColor: AppColors.black.withValues(
+                                    alpha: 0.08,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10.r),
                                 ),
-                              ),
-                              10.horizontalSpace,
-                            ],
-                          ),
-                          6.verticalSpace,
-                          LinearProgressIndicator(
-                            value: data.progress,
-                            minHeight: 3.h,
-                            color: AppColors.orangeColor,
-                            backgroundColor: AppColors.black.withValues(
-                              alpha: 0.08,
+                              ],
                             ),
-                            borderRadius: BorderRadius.circular(10.r),
                           ),
                         ],
                       ),
-                    ),
-                    GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: onMoreTap,
-                      child: Container(
-                        width: 28.w,
-                        height: 28.w,
-                        margin: EdgeInsets.only(left: 15.r),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.white,
-                          border: Border.all(
-                            color: AppColors.black.withValues(alpha: 0.14),
-                          ),
-                        ),
-                        child: Icon(
-                          Icons.more_vert_rounded,
-                          size: 17.sp,
-                          color: AppColors.black,
+                    ],
+                  ),
+                ),
+                if (isSelectMode)
+                  Padding(
+                    padding: EdgeInsets.only(left: 10.w, top: 50.h),
+                    child: Container(
+                      height: 30.h,
+                      width: 30.h,
+                      decoration: BoxDecoration(
+                        color: isSelected ? AppColors.teal : AppColors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isSelected
+                              ? AppColors.teal
+                              : AppColors.black.withValues(alpha: 0.1),
+                          width: 1,
                         ),
                       ),
+                      child: isSelected
+                          ? Icon(
+                              Icons.check,
+                              color: AppColors.white,
+                              size: 18.sp,
+                            )
+                          : null,
                     ),
-                  ],
-                ),
+                  ),
               ],
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

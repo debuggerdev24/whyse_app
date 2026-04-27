@@ -14,14 +14,6 @@ const List<({String name, Color bg})> _kProfileFriends = [
   (name: 'ava_the_reader', bg: Color(0xFF167C80)),
 ];
 
-const List<({String name, Color bg})> _kProfileGroups = [
-  (name: 'Grp1e', bg: Color(0xFFC5D4F0)),
-  (name: 'Grp354', bg: Color(0xFFE5D4C5)),
-  (name: 'Grp356', bg: Color(0xFFD4E5C8)),
-  (name: 'Gp879', bg: Color(0xFFE8D0E8)),
-  (name: 'Gp152', bg: Color(0xFFD0E8E8)),
-];
-
 const List<String> _kProfileInterests = ['Nature', 'Mystery', 'Adventure'];
 
 class ProfileScreen extends StatelessWidget {
@@ -47,7 +39,7 @@ class ProfileScreen extends StatelessWidget {
                     _overviewBlock(),
                     _interestsBlock(),
                     _subscriptionBlock(),
-                    _yourBooksBlock(),
+                    _yourBooksBlock(context),
                     _yourEBooksBlock(context),
                     _mySeriesListBlock(),
                     SizedBox(height: 24.w),
@@ -467,7 +459,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _yourBooksBlock() {
+  Widget _yourBooksBlock(BuildContext context) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -494,17 +486,18 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                // GestureDetector(
-                //   behavior: HitTestBehavior.opaque,
-                //   onTap: () {},
-                //   child: AppText(
-                //     text: 'See all',
-                //     style: AppTextStyles.semibold(
-                //       fontSize: 15,
-                //       color: AppColors.teal,
-                //     ),
-                //   ),
-                // ),
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () =>
+                      context.pushNamed(AppRoutes.yourBooksScreen.name),
+                  child: AppText(
+                    text: 'See all',
+                    style: AppTextStyles.semibold(
+                      fontSize: 15,
+                      color: AppColors.teal,
+                    ),
+                  ),
+                ),
               ],
             ),
             12.verticalSpace,
@@ -576,7 +569,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 GestureDetector(
                   onTap: () =>
-                      context.pushNamed(AppRoutes.yourEBooksScreen.name),
+                      context.pushNamed(AppRoutes.yourBooksScreen.name),
                   child: AppText(
                     text: 'View all',
                     style: AppTextStyles.semibold(

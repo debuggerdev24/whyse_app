@@ -171,7 +171,9 @@ class _UnifiedGroupScreenState extends State<UnifiedGroupScreen>
                   size: 20.sp,
                   color: AppColors.white,
                 ),
-                onTap: () {},
+                onTap: () {
+                  context.pushNamed(AppRoutes.shareStoriesInGroupScreen.name);
+                },
               ),
             ),
         ],

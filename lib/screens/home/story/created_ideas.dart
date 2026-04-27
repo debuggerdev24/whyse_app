@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
-import 'package:redstreakapp/core/widgets/global_widgets.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
+import 'package:redstreakapp/screens/home/widgets/story_ui_components.dart';
 import 'package:shimmer/shimmer.dart';
 
 class CreatedIdeasList extends StatelessWidget {
@@ -28,106 +28,45 @@ class CreatedIdeasList extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 //*Top Image
-                SizedBox(
-                  height: 310.w,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      if (thumb.isNotEmpty)
-                        CachedNetworkImage(
-                          imageUrl: thumb,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Shimmer.fromColors(
-                            baseColor: AppColors.shimmerBaseColor,
-                            highlightColor: AppColors.shimmerHighlightColor,
-                            child: Container(color: AppColors.shimmerBaseColor),
-                          ),
-                          errorWidget: (context, url, error) =>
-                              const NoImageFound(),
-                        )
-                      else
-                        const NoImageFound(),
-                      SafeArea(
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(14.w, 18.w, 14.w, 14.w),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              //* Home and close button
-                              Row(
-                                children: [
-                                  _circleButton(
-                                    onTap: () {
-                                      context.goNamed(
-                                        AppRoutes.homeScreen.name,
-                                      );
-                                    },
-                                    child: SvgIcon(
-                                      AppAssets.homeIcon,
-                                      size: 15.w,
-                                      color: AppColors.black,
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  _circleButton(
-                                    child: Icon(
-                                      Icons.close,
-                                      size: 15.w,
-                                      color: AppColors.black,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const Spacer(),
-                              //* title and more button
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Expanded(
-                                    child: AppText(
-                                      text: title,
-                                      style: AppTextStyles.bold(
-                                        fontSize: 24.sp,
-                                        color: AppColors.white,
-                                      ),
-                                    ),
-                                  ),
-                                  _circleButton(
-                                    onTap: () {
-                                      showMoreOptionsBottomSheet(
-                                        context,
-                                        onRegenerateTopic: () {
-                                          provider.clearStoryFields();
-                                          context.pushNamed(
-                                            AppRoutes.storyGoalsScreen.name,
-                                            extra: const {
-                                              'openedFromCreatedIdeas': true,
-                                            },
-                                          );
-                                          // provider.regenerateTopic(
-                                          //   onFailed: (error) {
-                                          //     AppToast.error(context, error);
-                                          //   },
-                                          //   onSuccess: () {
-                                          //     context.pop();
-                                          //   },
-                                          // );
-                                        },
-                                      );
-                                    },
-                                    child: Icon(
-                                      Icons.more_vert,
-                                      size: 17.w,
-                                      color: AppColors.black,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+                StoryHeroHeader(
+                  imageUrl: thumb,
+                  title: title,
+                  topLeft: StoryCircleButton(
+                    onTap: () {
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        context.goNamed(AppRoutes.homeScreen.name);
+                      }
+                    },
+                    child: Icon(
+                      Icons.chevron_left_rounded,
+                      size: 19.w,
+                      color: AppColors.black,
+                    ),
+                  ),
+                  bottomRight: StoryCircleButton(
+                    onTap: () {
+                      showMoreOptionsBottomSheet(
+                        context,
+                        onRegenerateTopic: () {
+                          provider.clearStoryFields();
+                          context.pushNamed(
+                            AppRoutes.storyGoalsScreen.name,
+                            extra: const {'openedFromCreatedIdeas': true},
+                          );
+                        },
+                      );
+                    },
+                    child: Icon(
+                      Icons.more_vert,
+                      size: 17.w,
+                      color: AppColors.black,
+                    ),
+                  ),
+                  titleStyle: AppTextStyles.bold(
+                    fontSize: 24.sp,
+                    color: AppColors.white,
                   ),
                 ),
                 Padding(
@@ -139,53 +78,95 @@ class CreatedIdeasList extends StatelessWidget {
                       //* Topic Description
                       _ExpandableDescription(text: description),
                       10.w.verticalSpace,
-                      //* share and bookmark button
+                      //* meta chips
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           _infoChip('12-15 years'),
                           8.w.horizontalSpace,
                           _infoChip('CEFR A2'),
-                          const Spacer(),
-                          GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              padding: EdgeInsets.all(8.w),
-                              decoration: BoxDecoration(
-                                color: AppColors.white,
-                                border: Border.all(
-                                  color: AppColors.black.withValues(alpha: 0.1),
-                                ),
-                                shape: BoxShape.circle,
-                              ),
-                              child: SvgIcon(
-                                AppAssets.shareIcon,
-                                size: 20.w,
-                                color: AppColors.black,
-                              ),
-                            ),
-                          ),
-
-                          GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              margin: EdgeInsets.only(left: 8.w),
-                              padding: EdgeInsets.all(5.w),
-                              decoration: BoxDecoration(
-                                color: AppColors.white,
-                                border: Border.all(
-                                  color: AppColors.black.withValues(alpha: 0.1),
-                                ),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.bookmark_border,
-                                size: 23.5.w,
-                                color: AppColors.black,
-                              ),
-                            ),
-                          ),
                         ],
+                      ),
+                      20.w.verticalSpace,
+                      GestureDetector(
+                        onTap: () {
+                          if (storyIdeas.storyIdeas.isEmpty) return;
+                          context.pushNamed(AppRoutes.storyReadingScreen.name);
+                          provider.createStory(
+                            onFailed: (error) {
+                              AppToast.error(context, error);
+                            },
+                            onSuccess: () {},
+                            selectedIdeaIndex: 0,
+                          );
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          height: 48.w,
+                          decoration: BoxDecoration(
+                            color: AppColors.black,
+                            borderRadius: BorderRadius.circular(30.r),
+                          ),
+                          alignment: Alignment.center,
+                          child: AppText(
+                            text: 'Continue Reading',
+                            style: AppTextStyles.bold(
+                              fontSize: 18.sp,
+                              color: AppColors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      18.w.verticalSpace,
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10.w),
+                        child: Row(
+                          children: [
+                            GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () {},
+                              child: Column(
+                                children: [
+                                  SvgIcon(
+                                    AppAssets.add,
+                                    size: 24.w,
+                                    color: AppColors.black,
+                                  ),
+                                  2.w.verticalSpace,
+                                  AppText(
+                                    text: 'Add to List',
+                                    style: AppTextStyles.semibold(
+                                      fontSize: 16.sp,
+                                      color: AppColors.black,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            25.w.horizontalSpace,
+                            GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () {},
+                              child: Column(
+                                children: [
+                                  SvgIcon(
+                                    AppAssets.shareIcon,
+                                    size: 22.w,
+                                    color: AppColors.black,
+                                  ),
+                                  4.w.verticalSpace,
+                                  AppText(
+                                    text: 'Share',
+                                    style: AppTextStyles.semibold(
+                                      fontSize: 16.sp,
+                                      color: AppColors.black,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       16.w.verticalSpace,
                       Divider(
@@ -196,7 +177,7 @@ class CreatedIdeasList extends StatelessWidget {
                       18.w.verticalSpace,
                       AppText(
                         text:
-                            "${storyIdeas.storyIdeas.length} Readings - 10 mins",
+                            "${storyIdeas.storyIdeas.length} Readings • 10 mins",
                         style: AppTextStyles.bold(
                           fontSize: 16.sp,
                           color: AppColors.black,
@@ -223,6 +204,7 @@ class CreatedIdeasList extends StatelessWidget {
                             },
                             topicThumbnailUrl: topic?.thumbnailUrl ?? '',
                             index: index + 1,
+                            isSelected: index == 0,
                             title: storyIdeas.storyIdeas[index].title,
                             description:
                                 storyIdeas.storyIdeas[index].description,
@@ -278,7 +260,7 @@ class CreatedIdeasList extends StatelessWidget {
                         text: "More Options",
                         style: AppTextStyles.bold(fontSize: 18.sp),
                       ),
-                      _circleButton(
+                      StoryCircleButton(
                         onTap: () => context.pop(),
                         child: Icon(
                           Icons.close,
@@ -316,22 +298,6 @@ class CreatedIdeasList extends StatelessWidget {
     );
   }
 
-  Widget _circleButton({required Widget child, VoidCallback? onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 32.w,
-        height: 32.w,
-        decoration: const BoxDecoration(
-          color: AppColors.white,
-          shape: BoxShape.circle,
-        ),
-        alignment: Alignment.center,
-        child: child,
-      ),
-    );
-  }
-
   Widget _infoChip(String label) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.w),
@@ -351,6 +317,7 @@ class _ReadingItemTile extends StatelessWidget {
   const _ReadingItemTile({
     required this.onOpenStory,
     required this.index,
+    required this.isSelected,
     required this.title,
     required this.description,
     required this.thumbnailUrl,
@@ -359,6 +326,7 @@ class _ReadingItemTile extends StatelessWidget {
 
   final VoidCallback onOpenStory;
   final int index;
+  final bool isSelected;
   final String title, description, thumbnailUrl, topicThumbnailUrl;
 
   @override
@@ -369,30 +337,54 @@ class _ReadingItemTile extends StatelessWidget {
         GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: onOpenStory,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16.r),
-            child: SizedBox(
-              width: 122.w,
-              height: 84.w,
-              child: CachedNetworkImage(
-                imageUrl: thumbnailUrl,
-                fit: BoxFit.cover,
-                placeholder: (_, __) => Shimmer.fromColors(
-                  baseColor: AppColors.shimmerBaseColor,
-                  highlightColor: AppColors.shimmerHighlightColor,
-                  child: Container(color: AppColors.shimmerBaseColor),
-                ),
-                errorWidget: (_, __, ___) => CachedNetworkImage(
-                  imageUrl: topicThumbnailUrl,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Shimmer.fromColors(
-                    baseColor: AppColors.shimmerBaseColor,
-                    highlightColor: AppColors.shimmerHighlightColor,
-                    child: Container(color: AppColors.shimmerBaseColor),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16.r),
+                child: SizedBox(
+                  width: 122.w,
+                  height: 84.w,
+                  child: CachedNetworkImage(
+                    imageUrl: thumbnailUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) => Shimmer.fromColors(
+                      baseColor: AppColors.shimmerBaseColor,
+                      highlightColor: AppColors.shimmerHighlightColor,
+                      child: Container(color: AppColors.shimmerBaseColor),
+                    ),
+                    errorWidget: (_, __, ___) => CachedNetworkImage(
+                      imageUrl: topicThumbnailUrl,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Shimmer.fromColors(
+                        baseColor: AppColors.shimmerBaseColor,
+                        highlightColor: AppColors.shimmerHighlightColor,
+                        child: Container(color: AppColors.shimmerBaseColor),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+              if (isSelected)
+                Positioned(
+                  top: -8.w,
+                  right: -8.w,
+                  child: Container(
+                    width: 24.w,
+                    height: 24.w,
+                    decoration: BoxDecoration(
+                      color: AppColors.teal,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.white, width: 2.w),
+                    ),
+                    child: Icon(
+                      Icons.check,
+                      size: 14.w,
+                      color: AppColors.white,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
         12.w.horizontalSpace,
@@ -429,8 +421,6 @@ class _ReadingDescription extends StatefulWidget {
 }
 
 class _ReadingDescriptionState extends State<_ReadingDescription> {
-  static const int _minCharsForToggle = 55;
-
   bool isExpanded = false;
 
   void _toggleExpanded() {
@@ -452,52 +442,61 @@ class _ReadingDescriptionState extends State<_ReadingDescription> {
           decorationColor: AppColors.teal,
         );
 
-    if (display.length <= _minCharsForToggle) {
-      return AppText(text: display, style: bodyStyle);
-    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final textPainter = TextPainter(
+          text: TextSpan(text: display, style: bodyStyle),
+          maxLines: 2,
+          textDirection: Directionality.of(context),
+        )..layout(maxWidth: constraints.maxWidth);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        GestureDetector(
-          onTap: widget.onOpenStory,
-          child: AnimatedSize(
-            duration: const Duration(milliseconds: 260),
-            curve: Curves.easeInOutCubic,
-            child: AppText(
-              text: display,
-              style: bodyStyle,
-              maxLines: isExpanded ? null : 2,
-              overflow: isExpanded
-                  ? TextOverflow.visible
-                  : TextOverflow.ellipsis,
-            ),
-          ),
-        ),
-        GestureDetector(
-          onTap: _toggleExpanded,
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 220),
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
-            transitionBuilder: (child, animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: SizeTransition(
-                  sizeFactor: animation,
-                  axis: Axis.horizontal,
-                  child: child,
+        final hasOverflow = textPainter.didExceedMaxLines;
+        if (!hasOverflow) return AppText(text: display, style: bodyStyle);
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            GestureDetector(
+              onTap: widget.onOpenStory,
+              child: AnimatedSize(
+                duration: const Duration(milliseconds: 260),
+                curve: Curves.easeInOutCubic,
+                child: AppText(
+                  text: display,
+                  style: bodyStyle,
+                  maxLines: isExpanded ? null : 2,
+                  overflow: isExpanded
+                      ? TextOverflow.visible
+                      : TextOverflow.ellipsis,
                 ),
-              );
-            },
-            child: AppText(
-              key: ValueKey(isExpanded),
-              text: isExpanded ? 'Read less' : 'Read more',
-              style: linkStyle,
+              ),
             ),
-          ),
-        ),
-      ],
+            GestureDetector(
+              onTap: _toggleExpanded,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 220),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (child, animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SizeTransition(
+                      sizeFactor: animation,
+                      axis: Axis.horizontal,
+                      child: child,
+                    ),
+                  );
+                },
+                child: AppText(
+                  key: ValueKey(isExpanded),
+                  text: isExpanded ? 'Read less' : 'more',
+                  style: linkStyle,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

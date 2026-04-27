@@ -32,6 +32,8 @@ class AppAssets {
   static const science = "$_iconPath/science.svg";
   static const accepted = "$_iconPath/accepted.svg";
   static const dumble = "$_iconPath/dumble.svg";
+  static const clock = "$_iconPath/clock.svg";
+  static const page = "$_iconPath/page.svg";
   static const note = "$_iconPath/note.svg";
   static const star = "$_iconPath/star.svg";
   static const book = "$_iconPath/book.svg";

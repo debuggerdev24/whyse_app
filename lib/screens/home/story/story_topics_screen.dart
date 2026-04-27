@@ -55,13 +55,15 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
     if (home.isTopicsLoadingMore ||
         !home.hasMoreTopics ||
         home.topicsList == null ||
-        home.topicsList!.isEmpty) return;
+        home.topicsList!.isEmpty)
+      return;
     if (!_scrollController.hasClients) return;
     final pos = _scrollController.position;
     if (pos.pixels >= pos.maxScrollExtent - 200) {
       home.getMyTopicsLoadMore();
     }
   }
+
   String _getIconForTopic(String title) {
     String lower = title.toLowerCase();
 
@@ -124,8 +126,11 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
         bottom: (Platform.isIOS) ? false : true,
         child: Consumer2<StoryProvider, HomeProvider>(
           builder: (context, storyProvider, homeProvider, child) {
-            final searchEmpty = storyProvider.searchTopicCtr.text.trim().isEmpty;
-            final showHomeTopics = searchEmpty && !storyProvider.isGetSearchedTopicsLoading;
+            final searchEmpty = storyProvider.searchTopicCtr.text
+                .trim()
+                .isEmpty;
+            final showHomeTopics =
+                searchEmpty && !storyProvider.isGetSearchedTopicsLoading;
 
             return Padding(
               padding: EdgeInsets.fromLTRB(24.w, 10.w, 24.w, 0),
@@ -149,10 +154,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                   ),
                   AppText(
                     text: "Choose Your Favorite Topics",
-                    style: AppTextStyles.bold(
-                      height: 1.2,
-                      fontSize: 32.sp,
-                    ),
+                    style: AppTextStyles.bold(height: 1.2, fontSize: 32.sp),
                   ),
                   10.w.verticalSpace,
                   AppText(
@@ -180,60 +182,61 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                   18.w.verticalSpace,
                   if (showHomeTopics) ...[
                     Expanded(
-                      child: homeProvider.topicsList == null &&
+                      child:
+                          homeProvider.topicsList == null &&
                               homeProvider.isTopicsLoading
                           ? Center(child: ApiLoadingIndicator())
                           : (homeProvider.topicsList == null ||
-                                  homeProvider.topicsList!.isEmpty)
-                              ? Padding(
-                                  padding: EdgeInsets.only(top: 50.h),
-                                  child: Align(
-                                    alignment: Alignment.topCenter,
-                                    child: Text("No topics available"),
-                                  ),
-                                )
-                              : GridView.builder(
-                                  controller: _scrollController,
-                                  padding: EdgeInsets.zero,
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                homeProvider.topicsList!.isEmpty)
+                          ? Padding(
+                              padding: EdgeInsets.only(top: 50.h),
+                              child: Align(
+                                alignment: Alignment.topCenter,
+                                child: Text("No topics available"),
+                              ),
+                            )
+                          : GridView.builder(
+                              controller: _scrollController,
+                              padding: EdgeInsets.zero,
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 2,
                                     crossAxisSpacing: 20.w,
                                     mainAxisSpacing: 25.h,
                                     childAspectRatio: 1.4,
                                   ),
-                                  itemCount: (homeProvider.topicsList!.length) +
-                                      (homeProvider.hasMoreTopics ? 1 : 0),
-                                  itemBuilder: (context, index) {
-                                    final list = homeProvider.topicsList!;
-                                    if (index >= list.length) {
-                                      return Center(
-                                        child: Padding(
-                                          padding: EdgeInsets.all(16.w),
-                                          child: homeProvider.isTopicsLoadingMore
-                                              ? ApiLoadingIndicator()
-                                              : const SizedBox.shrink(),
-                                        ),
-                                      );
-                                    }
-                                    final topic = list[index];
-                                    final title = topic.topic;
-                                    final id = topic.id;
-                                    final thumb = topic.thumbnailUrl
-                                        .trim()
-                                        .isNotEmpty
-                                        ? topic.thumbnailUrl
-                                        : null;
-                                    return TopicCard(
-                                      label: title,
-                                      imagePath: thumb ?? _getIconForTopic(title),
-                                      isSelected:
-                                          storyProvider.selectedTopicId == id,
-                                      onTap: () =>
-                                          storyProvider.toggleApiTopic(id, title),
-                                    );
-                                  },
-                                ),
+                              itemCount:
+                                  (homeProvider.topicsList!.length) +
+                                  (homeProvider.hasMoreTopics ? 1 : 0),
+                              itemBuilder: (context, index) {
+                                final list = homeProvider.topicsList!;
+                                if (index >= list.length) {
+                                  return Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(16.w),
+                                      child: homeProvider.isTopicsLoadingMore
+                                          ? ApiLoadingIndicator()
+                                          : const SizedBox.shrink(),
+                                    ),
+                                  );
+                                }
+                                final topic = list[index];
+                                final title = topic.topic;
+                                final id = topic.id;
+                                final thumb =
+                                    topic.thumbnailUrl.trim().isNotEmpty
+                                    ? topic.thumbnailUrl
+                                    : null;
+                                return TopicCard(
+                                  label: title,
+                                  imagePath: thumb ?? _getIconForTopic(title),
+                                  isSelected:
+                                      storyProvider.selectedTopicId == id,
+                                  onTap: () =>
+                                      storyProvider.toggleApiTopic(id, title),
+                                );
+                              },
+                            ),
                     ),
                   ] else if (storyProvider.isGetSearchedTopicsLoading)
                     Expanded(child: _shimmer())
@@ -241,8 +244,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                     Expanded(
                       child: GridView(
                         padding: EdgeInsets.zero,
-                        gridDelegate:
-                            SliverGridDelegateWithFixedCrossAxisCount(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           crossAxisSpacing: 20.w,
                           mainAxisSpacing: 25.h,

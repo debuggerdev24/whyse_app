@@ -1,4 +1,5 @@
 import 'package:redstreakapp/core/enums/data_status.dart';
+import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/models/group/group_response_model.dart';
 import 'package:redstreakapp/providers/group_provider.dart';
@@ -36,7 +37,7 @@ class _GroupListScreenState extends State<GroupListScreen> {
       ),
       body: Column(
         children: [
-          Divider(color: AppColors.black.withOpacity(0.1), height: 1),
+          Divider(color: AppColors.black.setOpacity(0.1), height: 1),
           Expanded(
             child: Padding(
               padding: EdgeInsets.fromLTRB(24.w, 14.w, 24.w, 0),
@@ -59,7 +60,7 @@ class _GroupListScreenState extends State<GroupListScreen> {
                     separatorBuilder: (_, __) => Divider(
                       height: 24.w,
                       thickness: 1,
-                      color: AppColors.black.withOpacity(0.08),
+                      color: AppColors.black.setOpacity(0.08),
                     ),
                     itemBuilder: (context, index) {
                       final group = vm.groups[index].group;

@@ -188,6 +188,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
 
                             context.pushNamed(
                               AppRoutes.createdIdeasListScreen.name,
+                              extra: const {'preferGeneratedData': true},
                             );
                             provider.createStoryIdeas(
                               onFailed: (error) {

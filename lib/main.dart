@@ -9,9 +9,11 @@ import 'package:redstreakapp/providers/group_provider.dart';
 import 'package:redstreakapp/providers/home/curiosity_reading_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/quiz_provider.dart';
+import 'package:redstreakapp/providers/home/reading_appearance_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/providers/on_boarding/on_boarding_provider.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
+import 'package:redstreakapp/providers/profile/your_books_provider.dart';
 import 'package:redstreakapp/whyse_app.dart';
 import 'package:toastification/toastification.dart';
 
@@ -31,12 +33,14 @@ void main() async {
       providers:[
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => StoryProvider()),
+        ChangeNotifierProvider(create: (_) => ReadingAppearanceProvider()),
         ChangeNotifierProvider(create: (_) => QuizProvider()),
         ChangeNotifierProvider(create: (_) => OnBoardingProvider()),
         ChangeNotifierProvider(create: (_) => HomeProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProvider(create: (_) => GroupProvider()),
         ChangeNotifierProvider(create: (_) => CuriosityReadingProvider()),
+        ChangeNotifierProvider(create: (_) => YourBooksProvider()),
       ],
       child: ToastificationWrapper(child: const WhyseApp()),
     ),

@@ -116,168 +116,131 @@ class _CreatedStoryReadingScreenShimmer extends StatelessWidget {
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
-    return ColoredBox(
-      color: AppColors.backgroundColor,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(
-            height: 310.w,
-            child: Stack(
-              fit: StackFit.expand,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(
+          height: 310.w,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Shimmer.fromColors(
+                baseColor: AppColors.shimmerBaseColor,
+                highlightColor: AppColors.shimmerHighlightColor,
+                child: SizedBox.expand(
+                  child: ColoredBox(color: AppColors.shimmerBaseColor),
+                ),
+              ),
+              SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(14.w, 18.w, 14.w, 14.w),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _block(
+                        width: 36.w,
+                        height: 36.w,
+                        radius: 999,
+                        fill: AppColors.white,
+                      ),
+                      const Spacer(),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                _block(
+                                  width: 250.w,
+                                  height: 22.w,
+                                  radius: 6,
+                                  fill: AppColors.white,
+                                ),
+                                8.w.verticalSpace,
+                                _block(
+                                  width: 180.w,
+                                  height: 22.w,
+                                  radius: 6,
+                                  fill: AppColors.white,
+                                ),
+                                10.w.verticalSpace,
+                                Row(
+                                  children: [
+                                    _block(
+                                      width: 78.w,
+                                      height: 13.w,
+                                      radius: 4,
+                                      fill: AppColors.white,
+                                    ),
+                                    12.w.horizontalSpace,
+                                    _block(
+                                      width: 70.w,
+                                      height: 13.w,
+                                      radius: 4,
+                                      fill: AppColors.white,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          10.w.horizontalSpace,
+                          _block(
+                            width: 32.w,
+                            height: 32.w,
+                            radius: 999,
+                            fill: AppColors.white,
+                          ),
+                          8.w.horizontalSpace,
+                          _block(
+                            width: 32.w,
+                            height: 32.w,
+                            radius: 999,
+                            fill: AppColors.white,
+                          ),
+                          8.w.horizontalSpace,
+                          _block(
+                            width: 32.w,
+                            height: 32.w,
+                            radius: 999,
+                            fill: AppColors.white,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(16.w, 16.w, 16.w, 14.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Shimmer.fromColors(
-                  baseColor: AppColors.shimmerBaseColor,
-                  highlightColor: AppColors.shimmerHighlightColor,
-                  child: SizedBox.expand(
-                    child: ColoredBox(color: AppColors.shimmerBaseColor),
-                  ),
-                ),
-                SafeArea(
-                  bottom: false,
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(14.w, 18.w, 14.w, 14.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            _block(
-                              width: 32.w,
-                              height: 32.w,
-                              radius: 999,
-                              fill: AppColors.white,
-                            ),
-                            const Spacer(),
-                            _block(
-                              width: 108.w,
-                              height: 26.w,
-                              radius: 999,
-                              fill: AppColors.white,
-                            ),
-                          ],
-                        ),
-                        const Spacer(),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _block(
-                                    width: double.infinity,
-                                    height: 24.w,
-                                    radius: 6,
-                                    fill: AppColors.white,
-                                  ),
-                                  8.w.verticalSpace,
-                                  _block(
-                                    width: 260.w,
-                                    height: 22.w,
-                                    radius: 6,
-                                    fill: AppColors.white,
-                                  ),
-                                  10.w.verticalSpace,
-                                  Row(
-                                    children: [
-                                      _block(
-                                        width: 76.w,
-                                        height: 13.w,
-                                        radius: 4,
-                                        fill: AppColors.white,
-                                      ),
-                                      12.w.horizontalSpace,
-                                      _block(
-                                        width: 68.w,
-                                        height: 13.w,
-                                        radius: 4,
-                                        fill: AppColors.white,
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            10.w.horizontalSpace,
-                            _block(
-                              width: 32.w,
-                              height: 32.w,
-                              radius: 999,
-                              fill: AppColors.white,
-                            ),
-                            8.w.horizontalSpace,
-                            _block(
-                              width: 32.w,
-                              height: 32.w,
-                              radius: 999,
-                              fill: AppColors.white,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                _block(width: double.infinity, height: 14.w, radius: 4),
+                8.w.verticalSpace,
+                _block(width: double.infinity, height: 14.w, radius: 4),
+                8.w.verticalSpace,
+                _block(width: 280.w, height: 14.w, radius: 4),
+                8.w.verticalSpace,
+                _block(width: 240.w, height: 14.w, radius: 4),
+                20.w.verticalSpace,
+                _block(width: double.infinity, height: 210.w, radius: 8),
               ],
             ),
           ),
-          Expanded(
-            child: ColoredBox(
-              color: AppColors.white,
-              child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(16.w, 12.w, 16.w, 10.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _block(
-                      width: double.infinity,
-                      height: 14.w,
-                      radius: 4,
-                    ),
-                    8.w.verticalSpace,
-                    _block(
-                      width: double.infinity,
-                      height: 14.w,
-                      radius: 4,
-                    ),
-                    8.w.verticalSpace,
-                    _block(width: 280.w, height: 14.w, radius: 4),
-                    8.w.verticalSpace,
-                    _block(
-                      width: double.infinity,
-                      height: 14.w,
-                      radius: 4,
-                    ),
-                    8.w.verticalSpace,
-                    _block(width: 200.w, height: 14.w, radius: 4),
-                    16.w.verticalSpace,
-                    _block(
-                      width: double.infinity,
-                      height: 210.w,
-                      radius: 8,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-              16.w,
-              0,
-              16.w,
-              8.w + bottomInset,
-            ),
-            child: _block(
-              width: double.infinity,
-              height: 48.w,
-              radius: 999,
-            ),
-          ),
-        ],
-      ),
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, bottomInset + 15.w),
+          child: _block(width: double.infinity, height: 48.w, radius: 999),
+        ),
+      ],
     );
   }
 }
@@ -564,20 +527,84 @@ class StoryIdeasLoadingShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    return SingleChildScrollView(
       physics: const NeverScrollableScrollPhysics(),
-      children: [
-        Container(
-          margin: EdgeInsets.only(left: 20.w, right: 20.w, top: 16.w),
-          child: _StoryIdeasShimmerBox(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _StoryIdeasShimmerBox(
             width: double.infinity,
-            height: 260.h,
-            borderRadius: 28,
+            height: 310.w,
+            borderRadius: 0,
           ),
-        ),
-        20.w.verticalSpace,
-        ...List.generate(3, (_) => const StoryIdeaEpisodeShimmer()),
-      ],
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                18.w.verticalSpace,
+                const _StoryIdeasShimmerBox(
+                  width: double.infinity,
+                  height: 38,
+                  borderRadius: 8,
+                ),
+                10.w.verticalSpace,
+                Row(
+                  children: const [
+                    _StoryIdeasShimmerBox(
+                      width: 84,
+                      height: 28,
+                      borderRadius: 999,
+                    ),
+                    SizedBox(width: 8),
+                    _StoryIdeasShimmerBox(
+                      width: 78,
+                      height: 28,
+                      borderRadius: 999,
+                    ),
+                  ],
+                ),
+                20.w.verticalSpace,
+                const _StoryIdeasShimmerBox(
+                  width: double.infinity,
+                  height: 48,
+                  borderRadius: 999,
+                ),
+                18.w.verticalSpace,
+                Row(
+                  children: const [
+                    _StoryIdeasShimmerBox(
+                      width: 80,
+                      height: 44,
+                      borderRadius: 8,
+                    ),
+                    SizedBox(width: 25),
+                    _StoryIdeasShimmerBox(
+                      width: 72,
+                      height: 44,
+                      borderRadius: 8,
+                    ),
+                  ],
+                ),
+                16.w.verticalSpace,
+                const _StoryIdeasShimmerBox(
+                  width: double.infinity,
+                  height: 1,
+                  borderRadius: 1,
+                ),
+                18.w.verticalSpace,
+                const _StoryIdeasShimmerBox(
+                  width: 180,
+                  height: 18,
+                  borderRadius: 6,
+                ),
+                18.w.verticalSpace,
+                ...List.generate(4, (_) => const StoryIdeaEpisodeShimmer()),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -598,68 +625,30 @@ class StoryIdeaEpisodeShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.fromLTRB(20.w, 0, 20.w, 16.h),
-      padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(24.r),
-      ),
+    return Padding(
+      padding: EdgeInsets.only(bottom: 18.w),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              _StoryIdeasShimmerBox(width: 118, height: 78, borderRadius: 18),
-            ],
-          ),
-          14.w.horizontalSpace,
+          const _StoryIdeasShimmerBox(width: 122, height: 84, borderRadius: 16),
+          12.w.horizontalSpace,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const _StoryIdeasShimmerBox(
-                  width: 64,
-                  height: 12,
-                  borderRadius: 999,
-                ),
-                10.w.verticalSpace,
-                const _StoryIdeasShimmerBox(
+              children: const [
+                _StoryIdeasShimmerBox(
                   width: double.infinity,
-                  height: 16,
+                  height: 18,
                   borderRadius: 6,
                 ),
-                6.w.verticalSpace,
-                const _StoryIdeasShimmerBox(
+                SizedBox(height: 8),
+                _StoryIdeasShimmerBox(
                   width: double.infinity,
                   height: 14,
                   borderRadius: 6,
                 ),
-                6.w.verticalSpace,
-                const _StoryIdeasShimmerBox(
-                  width: 170,
-                  height: 14,
-                  borderRadius: 6,
-                ),
-                10.w.verticalSpace,
-                Row(
-                  children: const [
-                    Expanded(
-                      child: _StoryIdeasShimmerBox(
-                        width: double.infinity,
-                        height: 28,
-                        borderRadius: 999,
-                      ),
-                    ),
-                  ],
-                ),
-                12.w.verticalSpace,
-                const _StoryIdeasShimmerBox(
-                  width: double.infinity,
-                  height: 42,
-                  borderRadius: 999,
-                ),
+                SizedBox(height: 6),
+                _StoryIdeasShimmerBox(width: 150, height: 14, borderRadius: 6),
               ],
             ),
           ),
