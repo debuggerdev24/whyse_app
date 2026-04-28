@@ -98,11 +98,12 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                             context.read<GroupProvider>().createGroup(
                               code: _titleController.text,
                               description: _descriptionController.text,
-                              onSuccess: () {
+                              onSuccess: (groupId) {
                                 AppToast.success(context, 'Group Created');
                                 context.read<ProfileProvider>().getGroupsList();
                                 context.pushReplacementNamed(
                                   AppRoutes.addMembersScreen.name,
+                                  extra: groupId,
                                 );
                               },
                               onError: (error) {

@@ -1,5 +1,6 @@
 import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/utils/shared_pref.dart';
 import 'package:redstreakapp/core/widgets/loading_dialog.dart';
 import 'package:redstreakapp/models/group/group_members_model.dart';
 import 'package:redstreakapp/providers/group_provider.dart';
@@ -126,7 +127,10 @@ class _MembersCard extends StatelessWidget {
         children: [
           AppOutlinedButton(
             onTap: () {
-              context.pushNamed(AppRoutes.addMembersScreen.name);
+              context.pushNamed(
+                AppRoutes.addMembersScreen.name,
+                extra: params.id,
+              );
             },
             margin: EdgeInsets.only(bottom: 14.h),
             borderColor: AppColors.black.withValues(alpha: 0.14),
@@ -190,6 +194,12 @@ class _MembersCard extends StatelessWidget {
               if (value.members.isEmpty) {
                 return const SizedBox.shrink();
               }
+
+              final myUserId = LocalStorageService.instance.getLoggedInUserId;
+              final amIOwner = value.members.any(
+                (m) => m.userId == myUserId && m.isOwner,
+              );
+
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -203,29 +213,48 @@ class _MembersCard extends StatelessWidget {
                   12.h.verticalSpace,
                   ...List.generate(value.members.length, (index) {
                     final member = value.members[index];
+                    final isMe = member.userId == myUserId;
+
                     return Column(
                       children: [
                         GroupMemberRow(
                           item: member,
-                          onTap: (isLeave, groupId) {
-                            if (isLeave) {
-                              showLoadingDialog(context);
-                              context.read<GroupProvider>().leaveGroup(
-                                groupId: groupId,
-                                onError: (error) {
-                                  context.pop();
-                                  AppToast.error(context, error);
-                                },
-                                onSuccess: () {
-                                  context.pop();
-                                  AppToast.success(context, 'Left Group');
-                                  context
-                                      .read<ProfileProvider>()
-                                      .getGroupsList();
-                                  context.pop();
-                                },
-                              );
-                            }
+                          isMe: isMe,
+                          amIOwner: amIOwner,
+                          onLeave: () {
+                            showLoadingDialog(context);
+                            context.read<GroupProvider>().leaveGroup(
+                              groupId: member.groupId,
+                              onError: (error) {
+                                context.pop();
+                                AppToast.error(context, error);
+                              },
+                              onSuccess: () {
+                                context.pop();
+                                AppToast.success(context, 'Left Group');
+                                context.read<ProfileProvider>().getGroupsList();
+                                context.read<GroupProvider>().getGroupsList();
+                                context.pop();
+                              },
+                            );
+                          },
+                          onRemove: () {
+                            showLoadingDialog(context);
+                            context.read<GroupProvider>().removeMemberFromGroup(
+                              groupId: member.groupId,
+                              userId: member.userId,
+                              onError: (error) {
+                                context.pop();
+                                AppToast.error(context, error);
+                              },
+                              onSuccess: () {
+                                context.pop();
+                                AppToast.success(
+                                  context,
+                                  'Member removed successfully',
+                                );
+                              },
+                            );
                           },
                         ),
                         if (index != value.members.length - 1)
@@ -246,15 +275,35 @@ class _MembersCard extends StatelessWidget {
   }
 }
 
+enum _MemberTagType { leave, remove, owner, member }
+
 class GroupMemberRow extends StatelessWidget {
-  const GroupMemberRow({super.key, required this.item, required this.onTap});
+  const GroupMemberRow({
+    super.key,
+    required this.item,
+    required this.isMe,
+    required this.amIOwner,
+    required this.onLeave,
+    required this.onRemove,
+  });
 
   final GroupMember item;
-  final void Function(bool isLeave, String groupId) onTap;
+  final bool isMe;
+  final bool amIOwner;
+  final VoidCallback onLeave;
+  final VoidCallback onRemove;
+
+  _MemberTagType get _tagType {
+    if (isMe && amIOwner) return _MemberTagType.owner;
+    if (isMe) return _MemberTagType.leave;
+    if (item.isOwner) return _MemberTagType.owner;
+    if (amIOwner) return _MemberTagType.remove;
+    return _MemberTagType.member;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isLeave = item.isOwner;
+    final tag = _tagType;
     return Row(
       children: [
         Container(
@@ -268,41 +317,91 @@ class GroupMemberRow extends StatelessWidget {
         ),
         12.w.horizontalSpace,
         Expanded(
-          child: AppText(
-            text: item.displayName,
-            style: AppTextStyles.semibold(
-              fontSize: 16.sp,
-              color: AppColors.black,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppText(
+                text: item.displayName,
+                style: AppTextStyles.semibold(
+                  fontSize: 16.sp,
+                  color: AppColors.black,
+                ),
+              ),
+              if (isMe)
+                AppText(
+                  text: 'You',
+                  style: AppTextStyles.medium(
+                    fontSize: 12.sp,
+                    color: AppColors.black.withValues(alpha: 0.45),
+                  ),
+                ),
+            ],
           ),
         ),
-        GestureDetector(
-          onTap: () => onTap.call(isLeave, item.groupId),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.h),
-            decoration: BoxDecoration(
-              color: isLeave
-                  ? const Color(0xFFFFF5F5)
-                  : const Color(0xFFF3F3F3),
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(
-                color: isLeave
-                    ? AppColors.redColor.withValues(alpha: 0.6)
-                    : Colors.transparent,
-              ),
-            ),
-            child: AppText(
-              text: isLeave ? 'Leave' : 'Remove',
-              style: AppTextStyles.semibold(
-                fontSize: 12.sp,
-                color: isLeave
-                    ? AppColors.redColor
-                    : AppColors.black.withValues(alpha: 0.82),
-              ),
-            ),
-          ),
+        _MemberTag(
+          type: tag,
+          onTap: switch (tag) {
+            _MemberTagType.leave => onLeave,
+            _MemberTagType.remove => onRemove,
+            _MemberTagType.owner => null,
+            _MemberTagType.member => null,
+          },
         ),
       ],
     );
+  }
+}
+
+class _MemberTag extends StatelessWidget {
+  const _MemberTag({required this.type, this.onTap});
+
+  final _MemberTagType type;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final (label, bgColor, textColor, borderColor) = switch (type) {
+      _MemberTagType.leave => (
+        'Leave',
+        const Color(0xFFFFF5F5),
+        AppColors.redColor,
+        AppColors.redColor.withValues(alpha: 0.6),
+      ),
+      _MemberTagType.remove => (
+        'Remove',
+        const Color(0xFFFFF5F5),
+        AppColors.redColor,
+        AppColors.redColor.withValues(alpha: 0.4),
+      ),
+      _MemberTagType.owner => (
+        'Owner',
+        AppColors.extealighttealcolor,
+        AppColors.teal,
+        AppColors.teal.withValues(alpha: 0.4),
+      ),
+      _MemberTagType.member => (
+        'Member',
+        const Color(0xFFF3F3F3),
+        AppColors.black.withValues(alpha: 0.6),
+        Colors.transparent,
+      ),
+    };
+
+    final child = Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: borderColor),
+      ),
+      child: AppText(
+        text: label,
+        style: AppTextStyles.semibold(fontSize: 12.sp, color: textColor),
+      ),
+    );
+
+    if (onTap == null) return child;
+
+    return GestureDetector(onTap: onTap, child: child);
   }
 }

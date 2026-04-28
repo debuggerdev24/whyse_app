@@ -50,8 +50,8 @@ class HomeProvider extends ChangeNotifier {
   /// Use when displaying topic in list; falls back to topic.isInMyList if not overridden.
   bool? topicIsInMyListOverride(String topicId) =>
       _topicIsInMyListOverrides.containsKey(topicId)
-          ? _topicIsInMyListOverrides[topicId]
-          : null;
+      ? _topicIsInMyListOverrides[topicId]
+      : null;
 
   Future<void> getMyTopics() async {
     if (isTopicsLoading) return;
@@ -316,7 +316,7 @@ class HomeProvider extends ChangeNotifier {
     required BrowseTopicModel topic,
     required Function(String error) onFailed,
   }) async {
-    if ( _togglingTopicIds.contains(topic.id)) {
+    if (_togglingTopicIds.contains(topic.id)) {
       return null;
     }
 

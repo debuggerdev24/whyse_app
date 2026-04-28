@@ -269,8 +269,16 @@ class StoryProvider extends ChangeNotifier {
         onFailed.call(l.errorMsg);
       },
       (r) {
-        final data = r["data"]['topics'];
-        topicsList = (data as List).map((e) => TopicModel.fromJson(e)).toList();
+        try {
+          final dataMap = r["data"];
+          final data = dataMap['userTopics'] ?? dataMap['topics'];
+          if (data is List) {
+            topicsList =
+                data.map((e) => TopicModel.fromJson(e)).toList();
+          }
+        } catch (_) {
+          topicsList = [];
+        }
         notifyListeners();
       },
     );
@@ -733,6 +741,7 @@ class StoryProvider extends ChangeNotifier {
   }
 
   bool isGenerateStoryIdeasLoading = false;
+  String? generateStoryIdeasError;
 
   void setGenerateStoryIdeasLoading(bool value) {
     isGenerateStoryIdeasLoading = value;
@@ -748,6 +757,7 @@ class StoryProvider extends ChangeNotifier {
   }) async {
     if (!forceRegenerate && !_validateCreateStoryInput(context)) return;
     isGenerateStoryIdeasLoading = true;
+    generateStoryIdeasError = null;
     _currentStoryIndex = 0;
     _currentStoryPageIndex = 0;
     stories.clear();
@@ -795,6 +805,7 @@ class StoryProvider extends ChangeNotifier {
       response.fold(
         (l) {
           Logger.error(l.errorMsg);
+          generateStoryIdeasError = l.errorMsg;
           onFailed.call(l.errorMsg);
         },
         (r) {
@@ -813,6 +824,7 @@ class StoryProvider extends ChangeNotifier {
       );
     } catch (e, st) {
       Logger.error("createStoryIdeas error: $e\n$st");
+      generateStoryIdeasError = "Something went wrong. Please try again.";
       onFailed.call("Something went wrong. Please try again.");
     } finally {
       isGenerateStoryIdeasLoading = false;
@@ -956,6 +968,7 @@ class StoryProvider extends ChangeNotifier {
     isCreateStoryLoading = false;
     isGenerateSingleStoryLoading = false;
     isGenerateStoryIdeasLoading = false;
+    generateStoryIdeasError = null;
     isCreateQuizLoading = false;
     _currentStoryIndex = 0;
     _currentStoryPageIndex = 0;

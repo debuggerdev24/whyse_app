@@ -1,4 +1,5 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/providers/auth/auth_provider.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -103,15 +104,35 @@ class SettingsScreen extends StatelessWidget {
                   padding: EdgeInsets.only(bottom: 12, left: 25.r, right: 25.r),
                   child: SizedBox(
                     width: double.infinity,
-                    child: OutlinedButton(
-                      onPressed: () {},
-                      child: AppText(
-                        text: 'Sign out',
-                        style: AppTextStyles.bold(
-                          fontSize: 16,
-                          color: AppColors.black,
-                        ),
-                      ),
+                    child: Consumer<AuthProvider>(
+                      builder: (context, provider, _) {
+                        return OutlinedButton(
+                          onPressed: () {
+                            provider.logOutUser(
+                              onSuccess: () {
+                                context.goNamed(AppRoutes.loginScreen.name);
+                              },
+                            );
+                          },
+                          child: provider.isLogOutLoading
+                              ? Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(3),
+                                    child: CircularProgressIndicator(
+                                      color: AppColors.black,
+                                      strokeWidth: 1,
+                                    ),
+                                  ),
+                                )
+                              : AppText(
+                                  text: 'Sign out',
+                                  style: AppTextStyles.bold(
+                                    fontSize: 16,
+                                    color: AppColors.black,
+                                  ),
+                                ),
+                        );
+                      },
                     ),
                   ),
                 ),

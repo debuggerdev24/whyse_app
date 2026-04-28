@@ -15,7 +15,6 @@ import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
-import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:shimmer/shimmer.dart';
@@ -28,40 +27,20 @@ class StoryTopicsScreen extends StatefulWidget {
 }
 
 class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
-  final ScrollController _scrollController = ScrollController();
-
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final home = context.read<HomeProvider>();
-      if (home.topicsList == null && !home.isTopicsLoading) {
-        home.getMyTopics();
+      final story = context.read<StoryProvider>();
+      if (story.topicsList.isEmpty && !story.isGetTopicsLoading) {
+        story.getStoryTopics(onFailed: (_) {});
       }
     });
   }
 
   @override
   void dispose() {
-    _scrollController
-      ..removeListener(_onScroll)
-      ..dispose();
     super.dispose();
-  }
-
-  void _onScroll() {
-    final home = context.read<HomeProvider>();
-    if (home.isTopicsLoadingMore ||
-        !home.hasMoreTopics ||
-        home.topicsList == null ||
-        home.topicsList!.isEmpty)
-      return;
-    if (!_scrollController.hasClients) return;
-    final pos = _scrollController.position;
-    if (pos.pixels >= pos.maxScrollExtent - 200) {
-      home.getMyTopicsLoadMore();
-    }
   }
 
   String _getIconForTopic(String title) {
@@ -124,12 +103,12 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
       resizeToAvoidBottomInset: false,
       body: SafeArea(
         bottom: (Platform.isIOS) ? false : true,
-        child: Consumer2<StoryProvider, HomeProvider>(
-          builder: (context, storyProvider, homeProvider, child) {
+        child: Consumer<StoryProvider>(
+          builder: (context, storyProvider, child) {
             final searchEmpty = storyProvider.searchTopicCtr.text
                 .trim()
                 .isEmpty;
-            final showHomeTopics =
+            final showDefaultTopics =
                 searchEmpty && !storyProvider.isGetSearchedTopicsLoading;
 
             return Padding(
@@ -180,14 +159,11 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                     },
                   ),
                   18.w.verticalSpace,
-                  if (showHomeTopics) ...[
+                  if (showDefaultTopics) ...[
                     Expanded(
-                      child:
-                          homeProvider.topicsList == null &&
-                              homeProvider.isTopicsLoading
+                      child: storyProvider.isGetTopicsLoading
                           ? Center(child: ApiLoadingIndicator())
-                          : (homeProvider.topicsList == null ||
-                                homeProvider.topicsList!.isEmpty)
+                          : storyProvider.topicsList.isEmpty
                           ? Padding(
                               padding: EdgeInsets.only(top: 50.h),
                               child: Align(
@@ -196,8 +172,11 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                               ),
                             )
                           : GridView.builder(
-                              controller: _scrollController,
-                              padding: EdgeInsets.zero,
+                              padding: EdgeInsets.only(
+                                left: 10.w,
+                                right: 10.w,
+                                bottom: 20.w,
+                              ),
                               gridDelegate:
                                   SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 2,
@@ -205,23 +184,10 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                                     mainAxisSpacing: 25.h,
                                     childAspectRatio: 1.4,
                                   ),
-                              itemCount:
-                                  (homeProvider.topicsList!.length) +
-                                  (homeProvider.hasMoreTopics ? 1 : 0),
+                              itemCount: storyProvider.topicsList.length,
                               itemBuilder: (context, index) {
-                                final list = homeProvider.topicsList!;
-                                if (index >= list.length) {
-                                  return Center(
-                                    child: Padding(
-                                      padding: EdgeInsets.all(16.w),
-                                      child: homeProvider.isTopicsLoadingMore
-                                          ? ApiLoadingIndicator()
-                                          : const SizedBox.shrink(),
-                                    ),
-                                  );
-                                }
-                                final topic = list[index];
-                                final title = topic.topic;
+                                final topic = storyProvider.topicsList[index];
+                                final title = topic.title;
                                 final id = topic.id;
                                 final thumb =
                                     topic.thumbnailUrl.trim().isNotEmpty
@@ -243,7 +209,11 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                   else if (storyProvider.searchedTopicsList.isNotEmpty)
                     Expanded(
                       child: GridView(
-                        padding: EdgeInsets.zero,
+                        padding: EdgeInsets.only(
+                          left: 10.w,
+                          right: 10.w,
+                          bottom: 20.w,
+                        ),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           crossAxisSpacing: 20.w,

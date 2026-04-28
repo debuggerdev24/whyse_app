@@ -66,6 +66,7 @@ class _GroupListScreenState extends State<GroupListScreen> {
                       final group = vm.groups[index].group;
                       return _GroupTile(
                         group: group,
+                        memberCount: vm.groups[index].memberCount,
                         onGroupTap: () {
                           context.pushNamed(
                             AppRoutes.groupDetailsScreen.name,
@@ -74,7 +75,7 @@ class _GroupListScreenState extends State<GroupListScreen> {
                               groupName: group.title,
                               thumbnail: group.thumbnailUrl,
                               description: group.description,
-                              inviteCode: group.joinCode
+                              inviteCode: group.joinCode,
                             ),
                           );
                         },
@@ -86,7 +87,7 @@ class _GroupListScreenState extends State<GroupListScreen> {
                               groupName: group.title,
                               thumbnail: group.thumbnailUrl,
                               description: group.description,
-                              inviteCode: group.joinCode
+                              inviteCode: group.joinCode,
                             ),
                           );
                         },
@@ -223,9 +224,15 @@ class _EmptyState extends StatelessWidget {
 }
 
 class _GroupTile extends StatelessWidget {
-  const _GroupTile({required this.group, required this.onTap, required this.onGroupTap});
+  const _GroupTile({
+    required this.group,
+    required this.onTap,
+    required this.onGroupTap,
+    required this.memberCount,
+  });
 
   final Group group;
+  final int memberCount;
   final VoidCallback onTap, onGroupTap;
 
   @override
@@ -237,7 +244,10 @@ class _GroupTile extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: Row(
         children: [
-          GestureDetector(onTap: onGroupTap ,child: GroupImageWidget(size: 48.w, imageUrl: group.thumbnailUrl)),
+          GestureDetector(
+            onTap: onGroupTap,
+            child: GroupImageWidget(size: 48.w, imageUrl: group.thumbnailUrl),
+          ),
           16.w.horizontalSpace,
           Expanded(
             child: Column(
@@ -251,7 +261,7 @@ class _GroupTile extends StatelessWidget {
                   ),
                 ),
                 AppText(
-                  text: '0 Members',
+                  text: '$memberCount Members',
                   style: AppTextStyles.semibold(
                     fontSize: 14.sp,
                     color: AppColors.orangeColor,

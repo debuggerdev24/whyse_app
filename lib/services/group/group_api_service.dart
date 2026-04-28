@@ -48,4 +48,37 @@ class GroupApiService {
           : {"title": title, "description": description},
     );
   }
+
+  Future<Either<ApiException, Map<String, dynamic>>> addGroupMembers({
+    required String groupId,
+    required List<String> userIds,
+    String role = 'MEMBER',
+  }) async {
+    return await BaseApiHelper.instance.post(
+      EndPoints.addGroupMembers(groupId: groupId),
+      data: {
+        "userIds": userIds,
+        "role": role,
+      },
+    );
+  }
+
+  Future<Either<ApiException, Map<String, dynamic>>> removeGroupMember({
+    required String groupId,
+    required String userId,
+  }) async {
+    return await BaseApiHelper.instance.delete(
+      EndPoints.removeGroupMember(groupId: groupId, userId: userId),
+    );
+  }
+
+  Future<Either<ApiException, Map<String, dynamic>>> searchUsers({
+    int page = 1,
+    int limit = 20,
+    String? q,
+  }) async {
+    return await BaseApiHelper.instance.get(
+      EndPoints.searchUsers(page: page, limit: limit, q: q),
+    );
+  }
 }

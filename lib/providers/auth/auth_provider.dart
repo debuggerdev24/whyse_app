@@ -1215,7 +1215,7 @@ class AuthProvider with ChangeNotifier {
       try {
         account = await googleSignIn.signIn();
       } on PlatformException catch (e) {
-        Logger.error("Google Sign-In Platform Exception: ${e.message}");
+        Logger.error("Google Sign-In Platform Exception: ${e.toString()}");
         isSocialLoginLoading = false;
         notifyListeners();
         return null;

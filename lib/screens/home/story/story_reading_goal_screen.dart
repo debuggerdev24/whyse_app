@@ -14,6 +14,7 @@ import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
+import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 
@@ -202,6 +203,9 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                               topicId: provider.forceRegenerateTopicId,
                               onSuccess: () {
                                 AppToast.success(context, "Story Ideas created successfully.");
+                                if (context.mounted) {
+                                  context.read<HomeProvider>().getMyTopics();
+                                }
                               },
                             );
                           });

@@ -38,8 +38,22 @@ class EndPoints {
   static const getMyGroups = "/mobile/groups";
   static const joinGroupByCode = "/mobile/groups/join-by-code";
   static String createGroup = '/mobile/groups';
+  static String searchUsers({int page = 1, int limit = 20, String? q}) {
+    final buffer = StringBuffer('/users/search?page=$page&limit=$limit');
+    if (q != null && q.trim().isNotEmpty) {
+      buffer.write('&q=${Uri.encodeComponent(q.trim())}');
+    }
+    return buffer.toString();
+  }
   static String getGroupMembers({required String groupId}) =>
       "/groups/$groupId/members";
+  static String addGroupMembers({required String groupId}) =>
+      "/groups/$groupId/members";
+  static String removeGroupMember({
+    required String groupId,
+    required String userId,
+  }) =>
+      "/groups/$groupId/members/$userId";
   static String leaveGroup({required String groupId}) =>
       "/mobile/groups/$groupId/leave";
   static String getMyTopics({int page = 1}) =>

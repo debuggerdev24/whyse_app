@@ -176,6 +176,7 @@ class TopicCard extends StatelessWidget {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -186,7 +187,7 @@ class TopicCard extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.5),
-              blurRadius: 18,
+              blurRadius: 5,
               spreadRadius: -1,
               offset: const Offset(0, 8),
             ),
@@ -207,7 +208,7 @@ class TopicCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20.r),
               ),
             ),
-            if(_isNetworkUrl(imagePath))
+            if (_isNetworkUrl(imagePath))
               CachedNetworkImage(
                 imageUrl: imagePath,
                 fit: BoxFit.cover,

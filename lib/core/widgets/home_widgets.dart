@@ -19,7 +19,7 @@ class HomeHeader extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             spacing: 10.w,
-            children: [
+            children: [ 
               SvgIcon(
                 AppAssets.thunder,
                 size: 17.w,
@@ -106,18 +106,6 @@ class HomeHeader extends StatelessWidget {
                       context.goNamed(AppRoutes.loginScreen.name);
                     },
                   );
-
-                  //    onSuccess: () {
-                  //                       AppToast.showSuccess(
-                  //
-                  //                          context,
-                  //                         "Log Out Successfully",
-                  //                       );
-                  //                       context.goNamed(UserAppRoutes.loginScreen.name);
-                  //                     },
-                  //                     onFailed: (error) {
-                  //                       AppToast.showError( context,"Log out failed");
-                  //                     },
                 },
                 title: "Yes",
               ),
@@ -264,7 +252,7 @@ class CalendarStrip extends StatelessWidget {
         // ),
         13.w.verticalSpace,
         Container(
-          height: 90.h,
+          height: 85.h,
           decoration: BoxDecoration(
             border: Border.all(color: AppColors.black.withValues(alpha: 0.12)),
           ),
@@ -296,8 +284,8 @@ class CalendarStrip extends StatelessWidget {
                     ),
                     5.h.verticalSpace,
                     Container(
-                      width: 45.w,
-                      height: 45.w,
+                      width: 35.h,
+                      height: 35.h,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
@@ -308,7 +296,7 @@ class CalendarStrip extends StatelessWidget {
                       child: AppText(
                         text: date.day.toString(),
                         style: AppTextStyles.bold(
-                          fontSize: 18.sp,
+                          fontSize: 14,
                           color: isToday
                               ? AppColors.black
                               : AppColors.black.withValues(alpha: 0.55),

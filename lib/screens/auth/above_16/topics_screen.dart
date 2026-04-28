@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -32,14 +31,12 @@ class _TopicsScreenState extends State<TopicsScreen> {
   final Set<String> selectedTopicIds = {};
   final Set<String> selectedCustomTopics = {};
 
-
   void _removeCustomTopic(String title) {
     setState(() {
       customTopics.remove(title);
       selectedCustomTopics.remove(title);
     });
   }
-
 
   @override
   void initState() {
@@ -51,19 +48,18 @@ class _TopicsScreenState extends State<TopicsScreen> {
 
   @override
   void dispose() {
-
     searchController.dispose();
     customTopicController.dispose();
     super.dispose();
   }
 
   void _onSearchChanged(String value) {
-      if (!mounted) return;
-      final query = value.trim();
-      context.read<AuthProvider>().fetchDefaultTopics(
-            context,
-            search: query.isEmpty ? null : query,
-          );
+    if (!mounted) return;
+    final query = value.trim();
+    context.read<AuthProvider>().fetchDefaultTopics(
+      context,
+      search: query.isEmpty ? null : query,
+    );
   }
 
   void _toggleApiTopic(String id) {
@@ -78,7 +74,6 @@ class _TopicsScreenState extends State<TopicsScreen> {
 
   void _toggleCustomTopic(String title) {
     setState(() {
-
       if (selectedCustomTopics.contains(title)) {
         selectedCustomTopics.remove(title);
       } else {
@@ -114,7 +109,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: 24.w,
-                    vertical: 20.w
+                    vertical: 20.w,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,7 +140,6 @@ class _TopicsScreenState extends State<TopicsScreen> {
                           color: AppColors.black.withValues(alpha: 0.8),
                         ),
                       ),
-
                       16.w.verticalSpace,
                       // Search topics (filters API list)
                       AppTextField(
@@ -161,9 +155,9 @@ class _TopicsScreenState extends State<TopicsScreen> {
                         ),
                         onChanged: (value) => deBouncer.run(() {
                           _onSearchChanged(value);
-                        },),
+                        }),
                       ),
-                      
+
                       14.w.verticalSpace,
                       // Custom Topic Input
                       AppTextField(
@@ -171,7 +165,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
                         hintText: "Add Topic...",
                         onSubmit: (val) => _addCustomTopic(val),
                         onTapOutside: () {
-                        _addCustomTopic(customTopicController.text);
+                          _addCustomTopic(customTopicController.text);
                         },
                       ),
                       20.w.verticalSpace,
@@ -187,7 +181,11 @@ class _TopicsScreenState extends State<TopicsScreen> {
                       else
                         Expanded(
                           child: GridView(
-                            padding: EdgeInsets.zero,
+                            padding: .only(
+                              left: 10.w,
+                              right: 10.w,
+                              bottom: 20.w,
+                            ),
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 2,
@@ -223,7 +221,9 @@ class _TopicsScreenState extends State<TopicsScreen> {
                               final title = customTopics[index];
                               return _CustomTopicChip(
                                 label: title,
-                                isSelected: selectedCustomTopics.contains(title),
+                                isSelected: selectedCustomTopics.contains(
+                                  title,
+                                ),
                                 onTap: () => _toggleCustomTopic(title),
                                 onRemove: () => _removeCustomTopic(title),
                               );

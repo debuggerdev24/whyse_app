@@ -1,6 +1,7 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:pinput/pinput.dart';
 import 'package:redstreakapp/providers/group_provider.dart';
+import 'package:redstreakapp/providers/profile/profile_provider.dart';
 
 class JoinGroupScreen extends StatefulWidget {
   const JoinGroupScreen({super.key});
@@ -127,6 +128,8 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
                           onSuccess: () {
                             _pinController.clear();
                             AppToast.success(context, 'Joined Successfully');
+                            context.read<ProfileProvider>().getGroupsList();
+                            context.read<GroupProvider>().getGroupsList();
                             context.pop();
                           },
                           onError: (error) {

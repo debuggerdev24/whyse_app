@@ -20,15 +20,17 @@ class TopicModel {
 
   factory TopicModel.fromJson(Map<String, dynamic> json) => TopicModel(
     id: json["id"],
-    title: json["title"],
-    learningGoal: json["learningGoal"],
+    title: json["title"] ?? json["topic"] ?? "",
+    learningGoal: json["learningGoal"] ?? "",
     adminPromptId: json["adminPromptId"],
-    userId: json["userId"],
-    type: json["type"],
-    interestIds: List<dynamic>.from(json["interestIds"].map((x) => x)),
+    userId: json["userId"] ?? "",
+    type: json["type"] ?? "",
+    interestIds: json["interestIds"] != null
+        ? List<dynamic>.from(json["interestIds"].map((x) => x))
+        : [],
     createdAt: DateTime.parse(json["createdAt"]),
     updatedAt: DateTime.parse(json["updatedAt"]),
-    thumbnailUrl: json["thumbnailUrl"],
+    thumbnailUrl: json["thumbnailUrl"] ?? "",
   );
 }
 

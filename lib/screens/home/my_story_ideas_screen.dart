@@ -107,6 +107,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.white,
       body: Consumer2<HomeProvider, StoryProvider>(
         builder: (context, homeProvider, storyProvider, child) {
           final generatedSummary = _mapGeneratedIdeasToSummary(
@@ -138,18 +139,94 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
           }
 
           if (summary == null) {
+            final errorMsg = storyProvider.generateStoryIdeasError ??
+                homeProvider.storyIdeasError ??
+                "Unable to load stories.";
             return Center(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 28.w),
-                child: AppText(
-                  text:
-                      homeProvider.storyIdeasError ??
-                      "Unable to load stories.",
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.medium(
-                    fontSize: 16.sp,
-                    color: AppColors.black.withValues(alpha: 0.7),
-                  ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.error_outline_rounded,
+                      size: 48.w,
+                      color: AppColors.black.withValues(alpha: 0.3),
+                    ),
+                    16.w.verticalSpace,
+                    AppText(
+                      text: errorMsg,
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.medium(
+                        fontSize: 16.sp,
+                        color: AppColors.black.withValues(alpha: 0.7),
+                      ),
+                    ),
+                    24.w.verticalSpace,
+                    GestureDetector(
+                      onTap: () {
+                        storyProvider.createStoryIdeas(
+                          context: context,
+                          forceRegenerate:
+                              storyProvider.forceRegenerateTopicId != null,
+                          topicId: storyProvider.forceRegenerateTopicId,
+                          onFailed: (error) {
+                            if (!context.mounted) return;
+                            AppToast.error(context, error);
+                          },
+                          onSuccess: () {
+                            if (!context.mounted) return;
+                            AppToast.success(
+                                context, "Story Ideas created successfully.");
+                            context.read<HomeProvider>().getMyTopics();
+                          },
+                        );
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 24.w, vertical: 12.w),
+                        decoration: BoxDecoration(
+                          color: AppColors.teal,
+                          borderRadius: BorderRadius.circular(30.r),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.refresh_rounded,
+                              size: 20.w,
+                              color: AppColors.white,
+                            ),
+                            8.w.horizontalSpace,
+                            AppText(
+                              text: "Retry",
+                              style: AppTextStyles.semibold(
+                                fontSize: 16.sp,
+                                color: AppColors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    16.w.verticalSpace,
+                    GestureDetector(
+                      onTap: () {
+                        if (context.canPop()) {
+                          context.pop();
+                        } else {
+                          context.goNamed(AppRoutes.homeScreen.name);
+                        }
+                      },
+                      child: AppText(
+                        text: "Go Back",
+                        style: AppTextStyles.semibold(
+                          fontSize: 14.sp,
+                          color: AppColors.black.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );

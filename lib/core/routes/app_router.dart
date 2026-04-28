@@ -507,7 +507,9 @@ class AppRouter {
           path: AppRoutes.addMembersScreen.name,
           name: AppRoutes.addMembersScreen.name,
           builder: (context, state) {
-            return const AddMembersScreen();
+            return AddMembersScreen(
+              groupId: state.extra as String,
+            );
           },
         ),
         GoRoute(

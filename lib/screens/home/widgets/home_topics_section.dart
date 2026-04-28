@@ -46,7 +46,7 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
                 children: [
                   AppText(
                     text: "Series",
-                    style: AppTextStyles.bold(fontSize: 20.sp),
+                    style: AppTextStyles.bold(fontSize: 20),
                   ),
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
@@ -163,27 +163,24 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
     );
   }
 
-  buildEmptyState(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          AppText(
-            text: "Your Story Topics",
-            style: AppTextStyles.semibold(fontSize: 20.sp),
+  Widget buildEmptyState(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AppText(
+          text: "Your Story Topics",
+          style: AppTextStyles.semibold(fontSize: 20.sp),
+        ),
+        16.w.verticalSpace,
+        Center(
+          child: AppText(
+            text: "No stories available",
+            style: AppTextStyles.textStyle14Regular,
           ),
-          16.w.verticalSpace,
-          Center(
-            child: AppText(
-              text: "No stories available",
-              style: AppTextStyles.textStyle14Regular,
-            ),
-          ),
-          24.w.verticalSpace,
-          _addNewReadingButton(context),
-        ],
-      ),
+        ),
+        24.w.verticalSpace,
+        _addNewReadingButton(context),
+      ],
     );
   }
 
@@ -344,14 +341,16 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
   Widget _addNewReadingButton(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        showModalBottomSheet(
-          context: context,
-          useRootNavigator: true,
-          backgroundColor: Colors.transparent,
-          isScrollControlled: true,
-          builder: (sheetContext) =>
-              addReadingBottomSheet(context: sheetContext),
-        );
+        // showModalBottomSheet(
+        //   context: context,
+        //   useRootNavigator: true,
+        //   backgroundColor: Colors.transparent,
+        //   isScrollControlled: true,
+        //   builder: (sheetContext) =>
+        //       addReadingBottomSheet(context: sheetContext),
+        // );
+        context.read<StoryProvider>().clearStoryFields();
+        context.pushNamed(AppRoutes.storyGoalsScreen.name);
       },
       child: Container(
         width: double.infinity,

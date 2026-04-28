@@ -51,11 +51,13 @@ class GroupResponse {
   final Group group;
   final UserRole myRole;
   final DateTime joinedAt;
+  final int memberCount;
 
   const GroupResponse({
     required this.group,
     required this.myRole,
     required this.joinedAt,
+    required this.memberCount,
   });
 
   factory GroupResponse.fromJson(Map<String, dynamic> json) {
@@ -63,6 +65,7 @@ class GroupResponse {
       group: Group.fromJson(json['group']),
       myRole: UserRoleX.fromString(json['myRole']),
       joinedAt: DateTime.parse(json['joinedAt']),
+      memberCount: json['memberCount'],
     );
   }
 
@@ -71,6 +74,7 @@ class GroupResponse {
       'group': group.toJson(),
       'myRole': myRole.toJson(),
       'joinedAt': joinedAt.toIso8601String(),
+      'memberCount' : memberCount,
     };
   }
 }
