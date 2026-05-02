@@ -1,6 +1,9 @@
+import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/widgets/user_avatar_image.dart';
+import 'package:redstreakapp/providers/profile/profile_provider.dart';
 
-/// Tan header for profile (static placeholders until API).
+/// Tan header for profile.
 const Color _profileHeaderBg = Color(0xFFE8D9C4);
 
 class ProfileHeaderSection extends StatelessWidget {
@@ -46,7 +49,11 @@ class ProfileHeaderSection extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           _CircleOutlineIconButton(
-                            onTap: () {},
+                            onTap: () {
+                             context.pushNamed(
+                                AppRoutes.notificationScreen.name,
+                              );
+                            },
                             child: Icon(
                               Icons.notifications_none_rounded,
                               size: 20.sp,
@@ -117,10 +124,18 @@ class ProfileHeaderSection extends StatelessWidget {
                           ),
                         ),
                         alignment: Alignment.center,
-                        child: Icon(
-                          Icons.person_rounded,
-                          size: 64.sp,
-                          color: AppColors.black.withValues(alpha: 0.45),
+                        child: ClipOval(
+                          child: Consumer<ProfileProvider>(
+                            builder: (context, profile, _) {
+                              return UserAvatarImage(
+                                avatarUrl: profile.profileData?.avatarUrl,
+                                size: 120.w,
+                                showPlaceholderShimmerWhenEmpty:
+                                    profile.getProfileState ==
+                                    DataState.loading,
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),

@@ -3,7 +3,6 @@ import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 
-
 import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 
@@ -201,11 +200,12 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
                                     storyIdea: currentIdeaId,
                                     fetchOnly: true,
                                     onSuccess: (story) {
-                                      if (context.mounted)
+                                      if (context.mounted) {
                                         provider.addStoryFromHistory(
                                           story,
                                           currentIndex,
                                         );
+                                      }
                                     },
                                     onStoryNotGenerated: () {},
                                   );
@@ -356,11 +356,10 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
                                       ),
                                       child: AppText(
                                         text: "Ideas",
-                                        style:
-                                            AppTextStyles.semibold(
-                                              fontSize: 16.sp,
-                                              color: AppColors.teal,
-                                            ),
+                                        style: AppTextStyles.semibold(
+                                          fontSize: 16.sp,
+                                          color: AppColors.teal,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -400,19 +399,21 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
                                         storyIdea: ideas[index].id,
                                         fetchOnly: true,
                                         onSuccess: (story) {
-                                          if (context.mounted)
+                                          if (context.mounted) {
                                             provider.addStoryFromHistory(
                                               story,
                                               index,
                                             );
+                                          }
                                         },
                                         onStoryNotGenerated: () {
-                                          if (context.mounted)
+                                          if (context.mounted) {
                                             AppToast.info(
                                               context: context,
                                               message:
                                                   "Story not available yet.",
                                             );
+                                          }
                                         },
                                       );
                                     });
@@ -522,10 +523,7 @@ class _ReadingTimerText extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppText(
       text: 'Time left: ${_formatDuration(remainingSeconds)}',
-      style: AppTextStyles.semibold(
-        fontSize: 16.sp,
-        color: AppColors.teal,
-      ),
+      style: AppTextStyles.semibold(fontSize: 16.sp, color: AppColors.teal),
     );
   }
 }
@@ -577,10 +575,7 @@ class _TagChip extends StatelessWidget {
       alignment: Alignment.center,
       child: AppText(
         text: label,
-        style: AppTextStyles.semibold(
-          fontSize: 13.sp,
-          color: AppColors.teal,
-        ),
+        style: AppTextStyles.semibold(fontSize: 13.sp, color: AppColors.teal),
       ),
     );
   }

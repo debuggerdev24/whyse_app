@@ -8,9 +8,10 @@ class HomeApiService {
   static HomeApiService get instance => _instance;
   Future<Either<ApiException, Map<String, dynamic>>> getMyTopics({
     int page = 1,
+    int limit = 20,
   }) async {
     return await BaseApiHelper.instance.get(
-      EndPoints.getMyTopics(page: page),
+      EndPoints.getMyTopics(page: page, limit: limit),
     );
   }
 

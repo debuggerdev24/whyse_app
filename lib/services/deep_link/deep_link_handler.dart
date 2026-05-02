@@ -75,7 +75,6 @@ class DeepLinkHandler {
           uri.host == AppConstants.domain) {
         Logger.info("Navigation triggered from verify-reset-password link");
 
-        
         final fragment = uri.fragment;
         Logger.info("Fragment: $fragment");
 
@@ -212,7 +211,7 @@ class DeepLinkHandler {
     } catch (e, st) {
       Logger.error("Deep link error -> $e\nStackTrace -> $st");
     } finally {
-      _isProcessingLink = false; // ✅ SINGLE PLACE
+      _isProcessingLink = false;
     }
   }
 
@@ -235,18 +234,15 @@ class DeepLinkHandler {
         "Deep link: no story ideas for topicId $topicId or topic mismatch",
       );
       if (context.mounted) {
-        AppToast.error(
-          context,
-          "Could not load stories for this topic.",
-        );
+        AppToast.error(context, "Could not load stories for this topic.");
       }
       return;
     }
 
     storyProvider.setFromStorySummary(summary);
-    SharedStoryScreen.prepareForDeepLink();
+    SharedStoryScreen.prepareForDeepLink();   
 
     if (!context.mounted) return;
     AppRouter.goRouter.goNamed(AppRoutes.sharedStoryScreen.name);
   }
-}
+} 

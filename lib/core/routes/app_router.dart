@@ -22,6 +22,8 @@ import 'package:redstreakapp/screens/group/group_details_screen.dart';
 import 'package:redstreakapp/screens/group/group_list_screen.dart';
 import 'package:redstreakapp/screens/group/join_group_screen.dart';
 import 'package:redstreakapp/screens/group/share_stories_in_group_screen.dart';
+import 'package:redstreakapp/screens/profile/friends_list_screen.dart';
+import 'package:redstreakapp/screens/profile/add_friends_screen.dart';
 import 'package:redstreakapp/screens/group/streak_ranking_screen.dart';
 import 'package:redstreakapp/screens/group/view_group_screen.dart';
 import 'package:redstreakapp/screens/home/curiosity_reading/curiosity_reading_screen.dart';
@@ -91,11 +93,6 @@ class AppRouter {
                 path: AppRoutes.homeScreen.path,
                 name: AppRoutes.homeScreen.name,
                 builder: (context, state) => HomeScreen(),
-              ),
-              GoRoute(
-                path: AppRoutes.notificationScreen.path,
-                name: AppRoutes.notificationScreen.name,
-                builder: (context, state) => NotificationScreen(),
               ),
             ],
           ),
@@ -443,6 +440,11 @@ class AppRouter {
       },
     ),
     GoRoute(
+      path: AppRoutes.notificationScreen.path,
+      name: AppRoutes.notificationScreen.name,
+      builder: (context, state) => const NotificationScreen(),
+    ),
+    GoRoute(
       path: AppRoutes.profileScreen.path,
       name: AppRoutes.profileScreen.name,
       builder: (context, state) => ProfileScreen(),
@@ -563,6 +565,20 @@ class AppRouter {
           name: AppRoutes.shareStoriesInGroupScreen.name,
           builder: (context, state) {
             return const ShareStoriesInGroupScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.friendsListScreen.name,
+          name: AppRoutes.friendsListScreen.name,
+          builder: (context, state) {
+            return const FriendsListScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.addFriendsScreen.name,
+          name: AppRoutes.addFriendsScreen.name,
+          builder: (context, state) {
+            return const AddFriendsScreen();
           },
         ),
       ],

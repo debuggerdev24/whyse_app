@@ -1,23 +1,33 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:redstreakapp/core/enums/data_status.dart';
+import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/global_widgets.dart';
+import 'package:redstreakapp/models/friend/friend_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_topics.dart';
+import 'package:redstreakapp/providers/friend/friend_provider.dart';
+import 'package:redstreakapp/providers/profile/profile_provider.dart';
 import 'package:redstreakapp/screens/profile/widgets/group_block.dart';
 import 'package:redstreakapp/screens/profile/widgets/profile_header_section.dart';
 import 'package:shimmer/shimmer.dart';
 
-const List<({String name, Color bg})> _kProfileFriends = [
-  (name: 'emma_rose', bg: Color(0xFF167C80)),
-  (name: 'liam_12_official', bg: Color(0xFFE8D9C4)),
-  (name: 'sofia_reads', bg: Color(0xFFFFB37A)),
-  (name: 'noah_story', bg: Color(0xFFFFA8C5)),
-  (name: 'ava_the_reader', bg: Color(0xFF167C80)),
-];
-
 const List<String> _kProfileInterests = ['Nature', 'Mystery', 'Adventure'];
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      context.read<FriendProvider>().getFriends();  
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +43,8 @@ class ProfileScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _profileDetailsBlock(),
-                    _friendsBlock(),
+                    _profileDetailsBlock(context),
+                    _friendsBlock(context),
                     GroupBlock(),
                     _overviewBlock(),
                     _interestsBlock(),
@@ -53,70 +63,93 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _profileDetailsBlock() {
-    return Container(
-      padding: EdgeInsets.fromLTRB(27.w, 20.h, 27.w, 20.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _profileDetailsBlock(BuildContext context) {
+    return Consumer<ProfileProvider>(
+      builder: (context, provider, _) {
+        if (provider.getProfileState == DataState.loading) {
+          return const _ProfileDetailsBlockShimmer();
+        }
+
+        if (provider.profileData == null ||
+            provider.getProfileState == DataState.failed) {
+          return Center(child: Text('Failed to load profile data'));
+        }
+
+        return Container(
+          padding: EdgeInsets.fromLTRB(27.w, 20.h, 27.w, 20.h),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              AppText(
-                text: 'Stacey Abrams',
-                style: AppTextStyles.bold(fontSize: 20, color: AppColors.black),
-              ),
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   AppText(
-                    text: '@StaceyAbs21',
+                    text: provider.profileData!.displayName,
                     style: AppTextStyles.bold(
-                      fontSize: 14,
-                      color: AppColors.black.withValues(alpha: 0.6),
+                      fontSize: 20,
+                      color: AppColors.black,
                     ),
                   ),
-                  AppText(
-                    text: ' • Joined 2025',
-                    style: AppTextStyles.semibold(
-                      fontSize: 14,
-                      color: AppColors.black.withValues(alpha: 0.6),
-                    ),
+                  Row(
+                    children: [
+                      AppText(
+                        text: '@${provider.profileData!.username}',
+                        style: AppTextStyles.bold(
+                          fontSize: 14,
+                          color: AppColors.black.withValues(alpha: 0.6),
+                        ),
+                      ),
+                      AppText(
+                        text: ' • Joined -',
+                        style: AppTextStyles.semibold(
+                          fontSize: 14,
+                          color: AppColors.black.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
+              Consumer<FriendProvider>(
+                builder: (context, provider, _) {
+                  final count = provider.getFriendsState == DataState.success
+                      ? provider.friendsList.length
+                      : 0;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AppText(
+                        text: '$count',
+                        style: AppTextStyles.bold(
+                          fontSize: 20,
+                          color: AppColors.black,
+                        ),
+                      ),
+                      AppText(
+                        text: 'Friends',
+                        style: AppTextStyles.bold(
+                          fontSize: 14,
+                          color: AppColors.black.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ],
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AppText(
-                text: '15',
-                style: AppTextStyles.bold(fontSize: 20, color: AppColors.black),
-              ),
-              AppText(
-                text: 'Friends',
-                style: AppTextStyles.bold(
-                  fontSize: 14,
-                  color: AppColors.black.withValues(alpha: 0.6),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _friendsBlock() {
+  Widget _friendsBlock(BuildContext context) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         color: AppColors.white,
         border: Border(
-          top: BorderSide(
-            color: AppColors.black.withValues(alpha: 0.08),
-            width: 1,
-          ),
+          top: BorderSide(color: AppColors.black.setOpacity(0.08), width: 1),
         ),
       ),
       child: Padding(
@@ -134,98 +167,218 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                GestureDetector(
-                  onTap: () {},
-                  child: AppText(
-                    text: 'View all',
-                    style: AppTextStyles.semibold(
-                      fontSize: 15,
-                      color: AppColors.teal,
-                    ),
-                  ),
+                Consumer<FriendProvider>(
+                  builder: (context, provider, _) {
+                    if (provider.getFriendsState == DataState.success &&
+                        provider.friendsList.isNotEmpty) {
+                      return GestureDetector(
+                        onTap: () =>
+                            context.pushNamed(AppRoutes.friendsListScreen.name),
+                        child: AppText(
+                          text: 'View all',
+                          style: AppTextStyles.semibold(
+                            fontSize: 15,
+                            color: AppColors.teal,
+                          ),
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
                 ),
               ],
             ),
             16.w.verticalSpace,
-            SizedBox(
-              height: 92.h,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                child: Row(
-                  children: [
-                    for (var i = 0; i < _kProfileFriends.length; i++) ...[
-                      if (i > 0) 16.w.horizontalSpace,
-                      SizedBox(
-                        width: 72.w,
-                        child: Column(
-                          children: [
-                            Container(
-                              width: 64.w,
-                              height: 64.w,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: _kProfileFriends[i].bg,
-                              ),
-                              alignment: Alignment.center,
-                              child: Icon(
-                                Icons.person_rounded,
-                                size: 34.sp,
-                                color: AppColors.white.withValues(alpha: 0.92),
-                              ),
-                            ),
-                            8.w.verticalSpace,
-                            AppText(
-                              text: _kProfileFriends[i].name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                              style: AppTextStyles.medium(
-                                fontSize: 12,
-                                color: AppColors.black,
-                              ),
-                            ),
-                          ],
+            Consumer<FriendProvider>(
+              builder: (context, provider, _) {
+                return _buildFriendsContent(context, provider);
+              },
+            ),
+            16.w.verticalSpace,
+            _addFriendsButton(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFriendsContent(BuildContext context, FriendProvider provider) {
+    switch (provider.getFriendsState) {
+      case DataState.loading:
+        return _buildFriendsShimmer();
+      case DataState.failed:
+        return _buildFriendsError(context, provider);
+      case DataState.success:
+        if (provider.friendsList.isEmpty) {
+          return _buildFriendsEmpty();
+        }
+        return _buildFriendsList(provider.friendsList);
+    }
+  }
+
+  Widget _buildFriendsList(List<FriendResponse> friends) {
+    return SizedBox(
+      height: 92.h,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        child: Row(
+          children: [
+            for (var i = 0; i < friends.length; i++) ...[
+              if (i > 0) 16.w.horizontalSpace,
+              _ProfileFriendAvatar(friend: friends[i].friend),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFriendsShimmer() {
+    return SizedBox(
+      height: 92.h,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const NeverScrollableScrollPhysics(),
+        child: Row(
+          children: [
+            for (var i = 0; i < 5; i++) ...[
+              if (i > 0) 16.w.horizontalSpace,
+              Shimmer.fromColors(
+                baseColor: AppColors.shimmerBaseColor,
+                highlightColor: AppColors.shimmerHighlightColor,
+                child: SizedBox(
+                  width: 72.w,
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 64.w,
+                        height: 64.w,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                        ),
+                      ),
+                      8.w.verticalSpace,
+                      Container(
+                        width: 52.w,
+                        height: 12.h,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(4.r),
                         ),
                       ),
                     ],
-                  ],
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFriendsError(BuildContext context, FriendProvider provider) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 20.h),
+      child: Column(
+        children: [
+          Icon(
+            Icons.wifi_off_rounded,
+            size: 32.w,
+            color: AppColors.black.setOpacity(0.25),
+          ),
+          8.h.verticalSpace,
+          AppText(
+            text: provider.getFriendsError ?? 'Failed to load friends',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.medium(
+              fontSize: 13,
+              color: AppColors.black.setOpacity(0.5),
+            ),
+          ),
+          12.h.verticalSpace,
+          GestureDetector(
+            onTap: () => context.read<FriendProvider>().getFriends(),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20.r),
+                border: Border.all(color: AppColors.teal.setOpacity(0.4)),
+              ),
+              child: AppText(
+                text: 'Retry',
+                style: AppTextStyles.semibold(
+                  fontSize: 13,
+                  color: AppColors.teal,
                 ),
               ),
             ),
-            20.w.verticalSpace,
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () {},
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.black,
-                  backgroundColor: AppColors.white,
-                  side: BorderSide(
-                    color: AppColors.black.withValues(alpha: 0.15),
-                  ),
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
-                  shape: const StadiumBorder(),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.person_add_alt_1_rounded,
-                      size: 22.sp,
-                      color: AppColors.black,
-                    ),
-                    16.w.horizontalSpace,
-                    AppText(
-                      text: 'Add Friends',
-                      style: AppTextStyles.semibold(
-                        fontSize: 16,
-                        color: AppColors.black,
-                      ),
-                    ),
-                  ],
-                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFriendsEmpty() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 16.h),
+      child: Column(
+        children: [
+          Icon(
+            Icons.people_outline_rounded,
+            size: 36.w,
+            color: AppColors.black.setOpacity(0.2),
+          ),
+          8.h.verticalSpace,
+          AppText(
+            text: 'No friends yet',
+            style: AppTextStyles.semibold(
+              fontSize: 14,
+              color: AppColors.black.setOpacity(0.45),
+            ),
+          ),
+          4.h.verticalSpace,
+          AppText(
+            text: 'Add friends to start reading together',
+            style: AppTextStyles.medium(
+              fontSize: 12,
+              color: AppColors.black.setOpacity(0.35),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _addFriendsButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton(
+        onPressed: () => context.pushNamed(AppRoutes.addFriendsScreen.name),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.black,
+          backgroundColor: AppColors.white,
+          side: BorderSide(color: AppColors.black.setOpacity(0.15)),
+          padding: EdgeInsets.symmetric(vertical: 14.h),
+          shape: const StadiumBorder(),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.person_add_alt_1_rounded,
+              size: 22.sp,
+              color: AppColors.black,
+            ),
+            16.w.horizontalSpace,
+            AppText(
+              text: 'Add Friends',
+              style: AppTextStyles.semibold(
+                fontSize: 16,
+                color: AppColors.black,
               ),
             ),
           ],
@@ -240,10 +393,7 @@ class ProfileScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         border: Border(
-          top: BorderSide(
-            color: AppColors.black.withValues(alpha: 0.08),
-            width: 1,
-          ),
+          top: BorderSide(color: AppColors.black.setOpacity(0.08), width: 1),
         ),
       ),
       child: Padding(
@@ -277,7 +427,7 @@ class ProfileScreen extends StatelessWidget {
                       leading: Icon(
                         Icons.description_outlined,
                         size: 28.sp,
-                        color: AppColors.black.withValues(alpha: 0.55),
+                        color: AppColors.black.setOpacity(0.55),
                       ),
                       value: '450',
                       label: 'Pages Read',
@@ -296,7 +446,7 @@ class ProfileScreen extends StatelessWidget {
                       leading: Icon(
                         Icons.schedule_outlined,
                         size: 28.sp,
-                        color: AppColors.black.withValues(alpha: 0.55),
+                        color: AppColors.black.setOpacity(0.55),
                       ),
                       value: '60',
                       label: 'Hours',
@@ -325,10 +475,7 @@ class ProfileScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         border: Border(
-          top: BorderSide(
-            color: AppColors.black.withValues(alpha: 0.08),
-            width: 1,
-          ),
+          top: BorderSide(color: AppColors.black.setOpacity(0.08), width: 1),
         ),
       ),
       child: Padding(
@@ -760,7 +907,7 @@ class ProfileScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.lightwhiteColor,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.black.withValues(alpha: 0.08)),
+        border: Border.all(color: AppColors.black.setOpacity(0.08)),
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
@@ -789,7 +936,7 @@ class ProfileScreen extends StatelessWidget {
                     text: label,
                     style: AppTextStyles.medium(
                       fontSize: 12,
-                      color: AppColors.black.withValues(alpha: 0.48),
+                      color: AppColors.black.setOpacity(0.48),
                     ),
                   ),
                 ],
@@ -797,6 +944,61 @@ class ProfileScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ProfileFriendAvatar extends StatelessWidget {
+  const _ProfileFriendAvatar({required this.friend});
+
+  final FriendUser friend;
+
+  static const List<Color> _avatarColors = [
+    Color(0xFF167C80),
+    Color(0xFFE8D9C4),
+    Color(0xFFFFB37A),
+    Color(0xFFFFA8C5),
+    Color(0xFF6B8E9B),
+    Color(0xFF53C3BF),
+    Color(0xFFD7B086),
+    Color(0xFF66C99D),
+  ];
+
+  Color get _color {
+    final hash = friend.id.codeUnits.fold<int>(0, (prev, c) => prev + c);
+    return _avatarColors[hash % _avatarColors.length];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final name = friend.displayName ?? friend.username ?? '';
+    return SizedBox(
+      width: 72.w,
+      child: Column(
+        children: [
+          Container(
+            width: 64.w,
+            height: 64.w,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: _color),
+            alignment: Alignment.center,
+            child: AppText(
+              text: friend.initials,
+              style: AppTextStyles.bold(
+                fontSize: 22.sp,
+                color: AppColors.white.setOpacity(0.92),
+              ),
+            ),
+          ),
+          8.w.verticalSpace,
+          AppText(
+            text: name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.medium(fontSize: 12, color: AppColors.black),
+          ),
+        ],
       ),
     );
   }
@@ -810,7 +1012,7 @@ class _StoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subtitleColor = AppColors.black.withValues(alpha: 0.45);
+    final subtitleColor = AppColors.black.setOpacity(0.45);
     final readCount = story.noOfStories;
     final totalCount = story.noOfStoriesGenerated > 0
         ? story.noOfStoriesGenerated
@@ -825,7 +1027,7 @@ class _StoryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: AppColors.black.setOpacity(0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -919,4 +1121,60 @@ Shimmer _storyImageShimmer() {
       color: AppColors.shimmerBaseColor,
     ),
   );
+}
+
+class _ProfileDetailsBlockShimmer extends StatelessWidget {
+  const _ProfileDetailsBlockShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(27, 20, 27, 20),
+      child: Shimmer.fromColors(
+        baseColor: Colors.grey.shade300,
+        highlightColor: Colors.grey.shade100,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            /// LEFT SIDE (Name + Username)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _box(width: 140, height: 20),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    _box(width: 100, height: 14),
+                    const SizedBox(width: 6),
+                    _box(width: 90, height: 14),
+                  ],
+                ),
+              ],
+            ),
+
+            /// RIGHT SIDE (Friends count)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _box(width: 40, height: 20),
+                const SizedBox(height: 6),
+                _box(width: 60, height: 14),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _box({required double width, required double height}) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(6),
+      ),
+    );
+  }
 }

@@ -22,7 +22,7 @@ class ToggleTopicListResult {
 
 class HomeProvider extends ChangeNotifier {
   static const int storyIdeasPageLimit = 20;
-  static const int topicsPageLimit = 20;
+  static const int topicsPageLimit = 8;
 
   List<CreatedStoryTopicsModel>? topicsList;
   bool isTopicsLoading = false;
@@ -61,7 +61,10 @@ class HomeProvider extends ChangeNotifier {
     _topicsCurrentPage = 1;
     notifyListeners();
 
-    final response = await HomeApiService.instance.getMyTopics(page: 1);
+    final response = await HomeApiService.instance.getMyTopics(
+      page: 1,
+      limit: topicsPageLimit,
+    );
 
     isTopicsLoading = false;
     response.fold(
@@ -98,8 +101,9 @@ class HomeProvider extends ChangeNotifier {
         isTopicsLoadingMore ||
         !hasMoreTopics ||
         topicsList == null ||
-        topicsList!.isEmpty)
+        topicsList!.isEmpty) {
       return;
+    }
 
     isTopicsLoadingMore = true;
     notifyListeners();

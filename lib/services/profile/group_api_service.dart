@@ -3,19 +3,19 @@ import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/core/network/end_points.dart';
 
 class GroupApiService {
-  GroupApiService._();
-
-  static final GroupApiService _instance = GroupApiService._();
-  static GroupApiService instance = _instance;
+  final BaseApiHelper _apiHelper;
+  GroupApiService(
+    this._apiHelper,
+  );
 
   Future<Either<ApiException, Map<String, dynamic>>> getMyGroups() async {
-    return await BaseApiHelper.instance.get(EndPoints.getMyGroups);
+    return await _apiHelper.get(EndPoints.getMyGroups);
   }
 
   Future<Either<ApiException, Map<String, dynamic>>> getGroupMembers(
     String groupId,
   ) async {
-    return await BaseApiHelper.instance.get(
+    return await _apiHelper.get(
       EndPoints.getGroupMembers(groupId: groupId),
     );
   }
@@ -23,7 +23,7 @@ class GroupApiService {
   Future<Either<ApiException, Map<String, dynamic>>> leaveGroup(
     String groupId,
   ) async {
-    return await BaseApiHelper.instance.post(
+    return await _apiHelper.post(
       EndPoints.leaveGroup(groupId: groupId),
     );
   }
@@ -31,7 +31,7 @@ class GroupApiService {
   Future<Either<ApiException, Map<String, dynamic>>> joinGroupByCode(
     String code,
   ) async {
-    return await BaseApiHelper.instance.post(
+    return await _apiHelper.post(
       EndPoints.joinGroupByCode,
       data: {"code": code.trim()},
     );
@@ -41,7 +41,7 @@ class GroupApiService {
     required String title,
     String? description,
   }) async {
-    return await BaseApiHelper.instance.post(
+    return await _apiHelper.post(
       EndPoints.createGroup,
       data: description == null
           ? {"title": title}
@@ -54,7 +54,7 @@ class GroupApiService {
     required List<String> userIds,
     String role = 'MEMBER',
   }) async {
-    return await BaseApiHelper.instance.post(
+    return await _apiHelper.post(
       EndPoints.addGroupMembers(groupId: groupId),
       data: {
         "userIds": userIds,
@@ -67,7 +67,7 @@ class GroupApiService {
     required String groupId,
     required String userId,
   }) async {
-    return await BaseApiHelper.instance.delete(
+    return await _apiHelper.delete(
       EndPoints.removeGroupMember(groupId: groupId, userId: userId),
     );
   }
@@ -77,7 +77,7 @@ class GroupApiService {
     int limit = 20,
     String? q,
   }) async {
-    return await BaseApiHelper.instance.get(
+    return await _apiHelper.get(
       EndPoints.searchUsers(page: page, limit: limit, q: q),
     );
   }

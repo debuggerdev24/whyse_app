@@ -2,7 +2,7 @@ import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/models/group/group_response_model.dart';
-import 'package:redstreakapp/providers/group_provider.dart';
+import 'package:redstreakapp/providers/profile/group_provider.dart';
 import 'package:redstreakapp/screens/group/group_details_screen.dart';
 import 'package:redstreakapp/screens/group/widget/group_image_widget.dart';
 import 'package:shimmer/shimmer.dart';

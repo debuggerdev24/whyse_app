@@ -69,4 +69,6 @@ enum AppRoutes {
   findYourBooksScreen,
   bookDetailsScreen,
   shareStoriesInGroupScreen,
+  friendsListScreen,
+  addFriendsScreen,
 }

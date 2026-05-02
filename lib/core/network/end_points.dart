@@ -2,6 +2,8 @@ import 'dart:core';
 
 class EndPoints {
   EndPoints._();
+  static const profile = "/mobile/profile/me";
+  static const profileAvatar = "/mobile/profile/me/avatar";
   static const startOnBoarding = "/mobile/auth/start-onboarding";
   static const onBoardingProgress = "/mobile/auth/onboarding-progress";
   static const getDefaultInterest = "/mobile/auth/default-interests";
@@ -40,9 +42,8 @@ class EndPoints {
   static String createGroup = '/mobile/groups';
   static String searchUsers({int page = 1, int limit = 20, String? q}) {
     final buffer = StringBuffer('/users/search?page=$page&limit=$limit');
-    if (q != null && q.trim().isNotEmpty) {
-      buffer.write('&q=${Uri.encodeComponent(q.trim())}');
-    }
+    final searchValue = (q ?? '').trim();
+    buffer.write('&q=${Uri.encodeComponent(searchValue)}');
     return buffer.toString();
   }
   static String getGroupMembers({required String groupId}) =>
@@ -56,8 +57,11 @@ class EndPoints {
       "/groups/$groupId/members/$userId";
   static String leaveGroup({required String groupId}) =>
       "/mobile/groups/$groupId/leave";
-  static String getMyTopics({int page = 1}) =>
-      "/story/topics?page=$page&limit=20&createdBy=self";
+  
+  // get home screen topics list, (user generated)s
+  static String getMyTopics({int page = 1, int limit = 20}) =>
+      "/story/topics?page=$page&limit=$limit&createdBy=self";
+  
   static const browseAllTopics = "/story/topics";
   static String storeImage({required String storyId}) =>
       "/story/mobile-story/$storyId/store-images";
@@ -74,4 +78,26 @@ class EndPoints {
   static String createQuiz({required String storyId}) =>
       "/story/$storyId/quiz/generate";
   static String getQuiz({required String storyId}) => "/story/$storyId/quiz";
+
+  static String getFriends({int page = 1, int limit = 20}) =>
+      "/mobile/friends?page=$page&limit=$limit";
+
+  static String searchFriends({int page = 1, int limit = 20, String? q}) {
+    final buffer = StringBuffer('/mobile/friends/search?page=$page&limit=$limit');
+    if (q != null && q.trim().isNotEmpty) {
+      buffer.write('&q=${Uri.encodeComponent(q.trim())}');
+    }
+    return buffer.toString();
+  }
+
+  static const sendFriendRequest = "/mobile/friends/request";
+
+  static String getFriendRequests({int page = 1, int limit = 50}) =>
+      "/mobile/friends/requests?page=$page&limit=$limit";
+
+  static String updateFriendRequest({required String friendshipId}) =>
+      "/mobile/friends/$friendshipId";
+
+  static String removeFriend({required String friendshipId}) =>
+      "/mobile/friends/$friendshipId";
 }

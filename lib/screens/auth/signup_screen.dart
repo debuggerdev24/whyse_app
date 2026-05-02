@@ -373,38 +373,38 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  /// ---------------- SOCIAL BUTTON ----------------
-  Widget _socialButton({
-    required String label,
-    required String icon,
-    required VoidCallback onTap,
-  }) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.lightwhiteColor,
-        borderRadius: BorderRadius.circular(40.r),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(40.r),
-        onTap: onTap,
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 24.w),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              /// Left icon
-              Align(
-                alignment: Alignment.centerLeft,
-                child: SvgIcon(icon, size: 22.sp),
-              ),
+  // /// ---------------- SOCIAL BUTTON ----------------
+  // Widget _socialButton({
+  //   required String label,
+  //   required String icon,
+  //   required VoidCallback onTap,
+  // }) {
+  //   return Container(
+  //     width: double.infinity,
+  //     decoration: BoxDecoration(
+  //       color: AppColors.lightwhiteColor,
+  //       borderRadius: BorderRadius.circular(40.r),
+  //     ),
+  //     child: InkWell(
+  //       borderRadius: BorderRadius.circular(40.r),
+  //       onTap: onTap,
+  //       child: Padding(
+  //         padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 24.w),
+  //         child: Stack(
+  //           alignment: Alignment.center,
+  //           children: [
+  //             /// Left icon
+  //             Align(
+  //               alignment: Alignment.centerLeft,
+  //               child: SvgIcon(icon, size: 22.sp),
+  //             ),
 
-              /// Center text
-              AppText(text: label, style: AppTextStyles.textStyle14Bold),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  //             /// Center text
+  //             AppText(text: label, style: AppTextStyles.textStyle14Bold),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 }

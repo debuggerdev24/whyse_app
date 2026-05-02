@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:redstreakapp/core/utils/app_imports.dart';
 
 class AppAssets {
   AppAssets._();
@@ -12,6 +12,9 @@ class AppAssets {
   static const apple = "$_iconPath/apple.svg";
 
   static const google = "$_iconPath/google.svg";
+  static const instagramLogo = "$_iconPath/instagram_logo.svg";
+  /// Asset filename is `x_logo.svg.svg` in the repo.
+  static const xLogo = "$_iconPath/x_logo.svg.svg";
   static const backButton = "$_iconPath/backbutton.svg";
   static const datepicker = "$_iconPath/datepicker.svg";
 
@@ -98,7 +101,7 @@ class SvgIcon extends StatelessWidget {
       iconPath,
       width: width,
       height: height,
-      color: color,
+      colorFilter: color == null ? null : ColorFilter.mode(color!, BlendMode.srcIn),
     );
   }
 }

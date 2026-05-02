@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -14,7 +15,7 @@ class GroupImageWidget extends StatelessWidget {
       height: size ?? 64.w,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: imageUrl == null ? AppColors.black.withOpacity(0.1) : null,
+        color: imageUrl == null ? AppColors.black.setOpacity(0.1) : null,
       ),
       alignment: Alignment.center,
       child: imageUrl == null
@@ -31,7 +32,7 @@ class GroupImageWidget extends StatelessWidget {
                   height: size ?? 64.w,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: AppColors.black.withOpacity(0.1),
+                    color: AppColors.black.setOpacity(0.1),
                   ),
                   alignment: Alignment.center,
                   child: const Icon(Icons.group),

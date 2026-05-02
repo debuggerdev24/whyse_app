@@ -15,6 +15,7 @@ import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 
+import '../../../core/helper/log_helper.dart';
 import '../../../providers/on_boarding/on_boarding_provider.dart';
 
 class ProfileInfoScreen extends StatefulWidget {
@@ -61,9 +62,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                         ),
                         AppText(
                           text: "Profile Information",
-                          style: AppTextStyles.bold(
-                            fontSize: 32.sp,
-                          ),
+                          style: AppTextStyles.bold(fontSize: 32.sp),
                         ),
                         8.w.verticalSpace,
                         AppText(
@@ -82,6 +81,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                           value: onBoardingProvider.selectedCountry,
                           items: AppConstants.countries,
                           onChanged: (value) {
+                            Logger.info("Selected country: $value");
                             onBoardingProvider.setCountry(value);
                           },
                         ),
@@ -92,7 +92,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                         CustomDropDown(
                           hint: "Preferred Reading Language",
                           value: onBoardingProvider.selectedLanguage,
-                          items: ["English", "Hindi", "Arabic", "French"],
+                          items: AppConstants.preferredLanguages,
                           onChanged: (value) {
                             onBoardingProvider.setLanguage(value);
                           },

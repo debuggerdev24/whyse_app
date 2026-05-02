@@ -1,6 +1,6 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
-import 'package:redstreakapp/providers/group_provider.dart';
+import 'package:redstreakapp/providers/profile/group_provider.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
 
 class CreateGroupScreen extends StatefulWidget {

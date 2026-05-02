@@ -34,9 +34,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
     final pr = context.read<StoryProvider>();
 
     return PopScope(
-      canPop:  pr.isCreateStoryLoading
-          ? false
-          : true,
+      canPop: pr.isCreateStoryLoading ? false : true,
       child: AppLayout(
         resizeToAvoidBottomInset: false,
         body: SafeArea(
@@ -61,10 +59,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                       /// TITLE
                       AppText(
                         text: "Set Your Daily Reading Goal",
-                        style: AppTextStyles.bold(
-                          height: 1.2,
-                          fontSize: 32.sp,
-                        ),
+                        style: AppTextStyles.bold(height: 1.2, fontSize: 32.sp),
                       ),
 
                       6.w.verticalSpace,
@@ -182,9 +177,9 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                         backgroundColor: AppColors.orangeColor,
                         onTap: () {
                           deBouncer.run(() {
-                            if (!provider.validateCreateStoryInput(context)) {
-                              return;
-                            }
+                            // if (!provider.validateCreateStoryInput(context)) {
+                            //   return;
+                            // }
                             provider.setGenerateStoryIdeasLoading(true);
 
                             context.pushNamed(
@@ -199,10 +194,14 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                                 }
                               },
                               context: context,
-                              forceRegenerate: provider.forceRegenerateTopicId != null,
+                              forceRegenerate:
+                                  provider.forceRegenerateTopicId != null,
                               topicId: provider.forceRegenerateTopicId,
                               onSuccess: () {
-                                AppToast.success(context, "Story Ideas created successfully.");
+                                AppToast.success(
+                                  context,
+                                  "Story Ideas created successfully.",
+                                );
                                 if (context.mounted) {
                                   context.read<HomeProvider>().getMyTopics();
                                 }

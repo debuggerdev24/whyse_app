@@ -3,7 +3,7 @@ import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/utils/shared_pref.dart';
 import 'package:redstreakapp/core/widgets/loading_dialog.dart';
 import 'package:redstreakapp/models/group/group_members_model.dart';
-import 'package:redstreakapp/providers/group_provider.dart';
+import 'package:redstreakapp/providers/profile/group_provider.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
 import 'package:redstreakapp/screens/group/group_screen_params.dart';
 import 'package:shimmer/shimmer.dart';

@@ -41,6 +41,9 @@ class AppConstants {
       recovery = "recovery",
       falseSt = "false";
 
+
+      static const List<String> preferredLanguages = ["English", "Hindi", "Arabic", "French"];
+
   static const List<String> countries = [
     "Afghanistan",
     "Albania",

@@ -142,11 +142,11 @@ class _TopicsScreenState extends State<TopicsScreen> {
                       ),
                       16.w.verticalSpace,
                       // Search topics (filters API list)
-                      AppTextField(
+                      AppTextField( 
                         controller: searchController,
                         hintText: "Search topics...",
                         prefixIcon: Padding(
-                          padding: EdgeInsets.only(left: 14.w, right: 10.w),
+                          padding: EdgeInsets.only(left: 14.w, right: 10.w),  
                           child: SvgIcon(
                             AppAssets.searchIcon,
                             size: 20.w,
@@ -199,7 +199,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
                                 final id = topic['id'];
                                 return TopicCard(
                                   label: topic['title'],
-                                  imagePath: topic["thumbnailUrl"],
+                                  imagePath: topic["thumbnailUrl"] ?? "",
                                   isSelected: selectedTopicIds.contains(id),
                                   onTap: () => _toggleApiTopic(id),
                                 );

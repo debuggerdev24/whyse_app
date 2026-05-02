@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -7,7 +6,6 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:redstreakapp/core/auth/session_expiry_notifier.dart';
 import 'package:redstreakapp/core/network/end_points.dart';
 import 'package:redstreakapp/core/utils/shared_pref.dart';
-
 import '../helper/log_helper.dart';
 
 class DioClient {
@@ -47,7 +45,11 @@ class DioClient {
       InterceptorsWrapper(
         onRequest: (options, handler) {
           final token = LocalStorageService.instance.getAuthToken;
-          options.headers["Content-Type"] = "application/json";
+          if (options.data is! FormData) {
+            options.headers["Content-Type"] = "application/json";
+          } else {
+            options.headers.remove("Content-Type");
+          }
           if (token != null && token.isNotEmpty) {
             options.headers["Authorization"] = "Bearer $token";
           } else {

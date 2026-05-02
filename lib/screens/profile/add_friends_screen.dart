@@ -3,41 +3,41 @@ import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/models/friend/friend_model.dart';
 import 'package:redstreakapp/providers/friend/friend_provider.dart';
-import 'package:redstreakapp/providers/profile/group_provider.dart';
 
-class AddMembersScreen extends StatefulWidget {
-  final String groupId;
-  const AddMembersScreen({super.key, required this.groupId});
+class AddFriendsScreen extends StatefulWidget {
+  const AddFriendsScreen({super.key});
 
   @override
-  State<AddMembersScreen> createState() => _AddMembersScreenState();
+  State<AddFriendsScreen> createState() => _AddFriendsScreenState();
 }
 
-class _AddMembersScreenState extends State<AddMembersScreen> {
+class _AddFriendsScreenState extends State<AddFriendsScreen> {
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
+  final DeBouncer _searchDebouncer = DeBouncer(milliSecond: 400);
+
+  final Set<String> _sentRequests = {};
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<GroupProvider>().clearUserSelection();
-      context.read<FriendProvider>().getFriends();
+      context.read<FriendProvider>().searchUsers();
     });
   }
 
   void _onScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
-      context.read<FriendProvider>().loadMoreFriends();
+      context.read<FriendProvider>().loadMoreSearchUsers();
     }
   }
 
   void _onSearchChanged(String value) {
-    if (!mounted) return;
-    setState(() => _searchQuery = value.trim().toLowerCase());
+    _searchDebouncer.run(() {
+      context.read<FriendProvider>().searchUsers(query: value);
+    });
   }
 
   @override
@@ -54,23 +54,20 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.backgroundColor,
         surfaceTintColor: Colors.transparent,
-        title: AppText(text: 'Add Members'),
+        title: const AppText(text: 'Add Friends'),
+        leading: IconButton(
+          onPressed: () => context.pop(),
+          icon: const Icon(Icons.chevron_left_rounded),
+        ),
       ),
-      body: Consumer2<GroupProvider, FriendProvider>(
-        builder: (context, groupProvider, friendProvider, _) {
-          final filteredFriends = friendProvider.friendsList.where((friend) {
-            if (_searchQuery.isEmpty) return true;
-            final name = (friend.friend.displayName ?? '').toLowerCase();
-            final email = (friend.friend.email ?? '').toLowerCase();
-            final username = (friend.friend.username ?? '').toLowerCase();
-            return name.contains(_searchQuery) ||
-                email.contains(_searchQuery) ||
-                username.contains(_searchQuery);
-          }).toList();
-
+      body: Consumer<FriendProvider>(
+        builder: (context, provider, _) {
           return Column(
             children: [
-              Divider(color: AppColors.black.withValues(alpha: 0.1), height: 1),
+              Divider(
+                color: AppColors.black.withValues(alpha: 0.1),
+                height: 1,
+              ),
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.symmetric(
@@ -81,7 +78,7 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       AppText(
-                        text: "Add Members",
+                        text: "Find Friends",
                         style: AppTextStyles.semiBold(fontSize: 14.sp),
                       ),
                       8.w.verticalSpace,
@@ -115,45 +112,11 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
                       ),
                       18.w.verticalSpace,
                       AppText(
-                        text: "Members",
+                        text: "People",
                         style: AppTextStyles.semiBold(fontSize: 14.sp),
                       ),
                       8.w.verticalSpace,
-                      Expanded(
-                        child: _buildUsersList(
-                          friendProvider: friendProvider,
-                          groupProvider: groupProvider,
-                          filteredFriends: filteredFriends,
-                        ),
-                      ),
-                      12.w.verticalSpace,
-                      AppFilledButton(
-                        text: groupProvider.selectedUsersCount > 0
-                            ? "Add Members (${groupProvider.selectedUsersCount})"
-                            : "Add Members",
-                        isLoading: groupProvider.addMembersLoading,
-                        onTap: groupProvider.selectedUsersCount > 0
-                            ? () {
-                                groupProvider.addMembersToGroup(
-                                  groupId: widget.groupId,
-                                  onSuccess: () {
-                                    AppToast.success(
-                                      context,
-                                      'Members added successfully',
-                                    );
-                                    groupProvider.clearUserSelection();
-                                    groupProvider.getGroupMembers(
-                                      groupId: widget.groupId,
-                                    );
-                                    context.pop();
-                                  },
-                                  onError: (error) {
-                                    AppToast.error(context, error);
-                                  },
-                                );
-                              }
-                            : null,
-                      ),
+                      Expanded(child: _buildUsersList(provider)),
                     ],
                   ),
                 ),
@@ -165,25 +128,17 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
     );
   }
 
-  Widget _buildUsersList({
-    required FriendProvider friendProvider,
-    required GroupProvider groupProvider,
-    required List<FriendResponse> filteredFriends,
-  }) {
-    switch (friendProvider.getFriendsState) {
+  Widget _buildUsersList(FriendProvider provider) {
+    switch (provider.searchUsersState) {
       case DataState.loading:
         return _buildLoadingState();
       case DataState.failed:
-        return _buildErrorState(friendProvider);
+        return _buildErrorState(provider);
       case DataState.success:
-        if (filteredFriends.isEmpty) {
+        if (provider.searchUsersList.isEmpty) {
           return _buildEmptyState();
         }
-        return _buildSuccessList(
-          friendProvider: friendProvider,
-          groupProvider: groupProvider,
-          filteredFriends: filteredFriends,
-        );
+        return _buildSuccessList(provider);
     }
   }
 
@@ -197,7 +152,7 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
         color: AppColors.black.withValues(alpha: 0.08),
       ),
       itemBuilder: (context, index) {
-        return const _ShimmerMemberTile();
+        return const _ShimmerUserTile();
       },
     );
   }
@@ -216,7 +171,7 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
             ),
             12.h.verticalSpace,
             AppText(
-              text: provider.getFriendsError ?? 'Something went wrong',
+              text: provider.searchUsersError ?? 'Something went wrong',
               textAlign: TextAlign.center,
               style: AppTextStyles.medium(
                 fontSize: 14.sp,
@@ -226,10 +181,15 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
             16.h.verticalSpace,
             GestureDetector(
               onTap: () {
-                context.read<FriendProvider>().getFriends();
+                context.read<FriendProvider>().searchUsers(
+                  query: _searchController.text,
+                );
               },
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.h),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 24.w,
+                  vertical: 10.h,
+                ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20.r),
                   border: Border.all(
@@ -263,7 +223,7 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
           ),
           12.h.verticalSpace,
           AppText(
-            text: "No friends found",
+            text: "No users found",
             style: AppTextStyles.semiBold(
               fontSize: 16.sp,
               color: AppColors.black.withValues(alpha: 0.45),
@@ -271,9 +231,7 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
           ),
           4.h.verticalSpace,
           AppText(
-            text: _searchQuery.isEmpty
-                ? "Add friends first, then add them to groups"
-                : "Try searching with a different keyword",
+            text: "Try searching with a different keyword",
             style: AppTextStyles.medium(
               fontSize: 13.sp,
               color: AppColors.black.withValues(alpha: 0.35),
@@ -284,12 +242,9 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
     );
   }
 
-  Widget _buildSuccessList({
-    required FriendProvider friendProvider,
-    required GroupProvider groupProvider,
-    required List<FriendResponse> filteredFriends,
-  }) {
-    final itemCount = filteredFriends.length + (friendProvider.isLoadingMore ? 1 : 0);
+  Widget _buildSuccessList(FriendProvider provider) {
+    final users = provider.searchUsersList;
+    final itemCount = users.length + (provider.searchHasNextPage ? 1 : 0);
 
     return ListView.separated(
       controller: _scrollController,
@@ -300,15 +255,78 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
         color: AppColors.black.withValues(alpha: 0.08),
       ),
       itemBuilder: (context, index) {
-        if (index == filteredFriends.length) {
+        if (index == users.length) {
           return _buildPaginationLoader();
         }
-        final user = filteredFriends[index].friend;
-        return _MemberTile(
+        final user = users[index];
+        final isSent = _sentRequests.contains(user.id);
+        return _UserTile(
           user: user,
-          isSelected: groupProvider.isUserSelected(user.id),
-          onToggle: () => groupProvider.toggleUserSelection(user.id),
+          isSent: isSent,
+          onAdd: () => _sendFriendRequest(user),
         );
+      },
+    );
+  }
+
+  void _sendFriendRequest(FriendUser user) {
+    if (user.email == null || user.email!.isEmpty) {
+      AppToast.error(context, 'User does not have an email address');
+      return;
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => Center(
+        child: Container(
+          padding: EdgeInsets.all(24.w),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 36.sp,
+                height: 36.sp,
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  color: AppColors.teal,
+                ),
+              ),
+              16.h.verticalSpace,
+              AppText(
+                text: 'Sending request...',
+                style: AppTextStyles.medium(
+                  fontSize: 14.sp,
+                  color: AppColors.black,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    context.read<FriendProvider>().sendFriendRequest(
+      email: user.email!,
+      onSuccess: () {
+        if (!mounted) return;
+        Navigator.of(context).pop();
+        setState(() => _sentRequests.add(user.id));
+        AppToast.success(
+          context,
+          'Friend request sent to ${user.displayName ?? "user"}',
+        );
+        context.read<FriendProvider>().getFriends();
+        context.pop();
+      },
+      onError: (error) {
+        if (!mounted) return;
+        Navigator.of(context).pop();
+        AppToast.error(context, error);
       },
     );
   }
@@ -330,18 +348,16 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
   }
 }
 
-// ================= MEMBER TILE =================
-
-class _MemberTile extends StatelessWidget {
-  const _MemberTile({
+class _UserTile extends StatelessWidget {
+  const _UserTile({
     required this.user,
-    required this.isSelected,
-    required this.onToggle,
+    required this.isSent,
+    required this.onAdd,
   });
 
   final FriendUser user;
-  final bool isSelected;
-  final VoidCallback onToggle;
+  final bool isSent;
+  final VoidCallback onAdd;
 
   static const List<Color> _avatarColors = [
     Color(0xFF53C3BF),
@@ -359,92 +375,83 @@ class _MemberTile extends StatelessWidget {
     return _avatarColors[hash % _avatarColors.length];
   }
 
-  String get _fullName {
-    final display = user.displayName?.trim() ?? '';
-    if (display.isNotEmpty) return display;
-    final username = user.username?.trim() ?? '';
-    if (username.isNotEmpty) return username;
-    return 'Unknown user';
-  }
-
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onToggle,
-      behavior: HitTestBehavior.opaque,
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 20.r,
-            backgroundColor: _avatarColor,
-            child: AppText(
-              text: user.initials,
-              style: AppTextStyles.bold(
-                fontSize: 13.sp,
-                color: AppColors.white,
-              ),
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 22.r,
+          backgroundColor: _avatarColor,
+          child: AppText(
+            text: user.initials,
+            style: AppTextStyles.bold(
+              fontSize: 14.sp,
+              color: AppColors.white,
             ),
           ),
-          16.w.horizontalSpace,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText(
-                  text: _fullName,
-                  style: AppTextStyles.bold(
-                    fontSize: 18.sp,
-                    color: AppColors.black,
-                  ),
+        ),
+        16.w.horizontalSpace,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppText(
+                text: user.displayName ?? user.username ?? '',
+                style: AppTextStyles.semibold(
+                  fontSize: 16.sp,
+                  color: AppColors.black,
                 ),
+              ),
+              if (user.email != null && user.email!.isNotEmpty) ...[
                 2.h.verticalSpace,
                 AppText(
-                  text: user.email ?? '',
+                  text: user.email!,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.medium(
                     fontSize: 13.sp,
-                    color: AppColors.black.withValues(alpha: 0.55),
+                    color: AppColors.black.withValues(alpha: 0.5),
                   ),
                 ),
               ],
-            ),
+            ],
           ),
-          10.w.horizontalSpace,
-          AnimatedContainer(
+        ),
+        10.w.horizontalSpace,
+        GestureDetector(
+          onTap: isSent ? null : onAdd,
+          child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            width: 24.sp,
-            height: 24.sp,
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.w),
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isSelected ? AppColors.teal : Colors.transparent,
-              border: Border.all(
-                color: isSelected
-                    ? AppColors.teal
-                    : AppColors.black.withValues(alpha: 0.25),
-                width: 2,
+              color: isSent ? AppColors.extealighttealcolor : AppColors.teal,
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            child: AppText(
+              text: isSent ? 'Sent' : 'Add',
+              style: AppTextStyles.semibold(
+                fontSize: 13.sp,
+                color: isSent ? AppColors.teal : AppColors.white,
               ),
             ),
-            child: isSelected
-                ? Icon(Icons.check, size: 14.sp, color: AppColors.white)
-                : null,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
-// ================= SHIMMER LOADING TILE =================
-
-class _ShimmerMemberTile extends StatelessWidget {
-  const _ShimmerMemberTile();
+class _ShimmerUserTile extends StatelessWidget {
+  const _ShimmerUserTile();
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        CircleAvatar(radius: 20.r, backgroundColor: AppColors.shimmerBaseColor),
+        CircleAvatar(
+          radius: 22.r,
+          backgroundColor: AppColors.shimmerBaseColor,
+        ),
         16.w.horizontalSpace,
         Expanded(
           child: Column(
@@ -473,10 +480,10 @@ class _ShimmerMemberTile extends StatelessWidget {
         10.w.horizontalSpace,
         Container(
           height: 34.h,
-          width: 90.w,
+          width: 70.w,
           decoration: BoxDecoration(
             color: AppColors.shimmerBaseColor.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: BorderRadius.circular(20.r),
           ),
         ),
       ],

@@ -252,13 +252,13 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                     backgroundColor: AppColors.orangeColor,
                     margin: EdgeInsets.only(top: 4.3.w, bottom: 18.w),
                     onTap: () async {
-                      if (storyProvider.selectedTopicId.isEmpty) {
-                        AppToast.error(
-                          context,
-                          "Please select at least one topic",
-                        );
-                        return;
-                      }
+                      // if (storyProvider.selectedTopicId.isEmpty) {
+                      //   AppToast.error(
+                      //     context,
+                      //     "Please select at least one topic",
+                      //   );
+                      //   return;
+                      // }
                       storyProvider.setSelectedReadingDuration = "5 mins";
                       context.pushNamed(AppRoutes.storyReadingGoalScreen.name);
                     },

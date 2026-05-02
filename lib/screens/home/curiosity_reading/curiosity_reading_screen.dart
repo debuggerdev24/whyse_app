@@ -113,8 +113,8 @@ class CuriosityReadingScreen extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.1),
-                    Colors.black.withOpacity(0.6),
+                    Colors.black.setOpacity(0.1),
+                    Colors.black.setOpacity(0.6),
                   ],
                 ),
               ),

@@ -4,9 +4,12 @@ import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/models/group/group_members_model.dart';
 import 'package:redstreakapp/models/group/group_response_model.dart';
 import 'package:redstreakapp/models/group/search_user_model.dart';
-import 'package:redstreakapp/services/group/group_api_service.dart';
+import 'package:redstreakapp/services/profile/group_api_service.dart';
 
 class GroupProvider extends ChangeNotifier {
+  final GroupApiService _groupApiService;
+  GroupProvider(this._groupApiService);
+
   DataState getGroupListState = DataState.loading;
   String? getGroupsListError;
 
@@ -64,7 +67,7 @@ class GroupProvider extends ChangeNotifier {
     try {
       _addMembersLoading = true;
       notifyListeners();
-      final result = await GroupApiService.instance.addGroupMembers(
+      final result = await _groupApiService.addGroupMembers(
         groupId: groupId,
         userIds: _selectedUserIds.toList(),
       );
@@ -101,7 +104,7 @@ class GroupProvider extends ChangeNotifier {
     required Function(String error) onError,
   }) async {
     try {
-      final result = await GroupApiService.instance.removeGroupMember(
+      final result = await _groupApiService.removeGroupMember(
         groupId: groupId,
         userId: userId,
       );
@@ -148,7 +151,7 @@ class GroupProvider extends ChangeNotifier {
       getGroupsListError = null;
       _myGroupsList = [];
       notifyListeners();
-      final result = await GroupApiService.instance.getMyGroups();
+      final result = await _groupApiService.getMyGroups();
       result.fold(
         (l) {
           getGroupListState = DataState.failed;
@@ -185,7 +188,7 @@ class GroupProvider extends ChangeNotifier {
       getGroupMembersError = null;
       _groupMembersList = [];
       notifyListeners();
-      final result = await GroupApiService.instance.getGroupMembers(groupId);
+      final result = await _groupApiService.getGroupMembers(groupId);
       result.fold(
         (l) {
           getGroupMembersState = DataState.failed;
@@ -222,7 +225,7 @@ class GroupProvider extends ChangeNotifier {
     try {
       _createGroupLoading = true;
       notifyListeners();
-      final result = await GroupApiService.instance.createGroup(
+      final result = await _groupApiService.createGroup(
         title: code,
         description: description,
       );
@@ -258,7 +261,7 @@ class GroupProvider extends ChangeNotifier {
     try {
       _joinGroupLoading = true;
       notifyListeners();
-      final result = await GroupApiService.instance.joinGroupByCode(code);
+      final result = await _groupApiService.joinGroupByCode(code);
       result.fold(
         (l) {
           _joinGroupLoading = false;
@@ -292,7 +295,7 @@ class GroupProvider extends ChangeNotifier {
     try {
       _leaveGroupLoading = true;
       notifyListeners();
-      final result = await GroupApiService.instance.leaveGroup(groupId);
+      final result = await _groupApiService.leaveGroup(groupId);
       result.fold(
         (l) {
           _leaveGroupLoading = false;
@@ -332,7 +335,7 @@ class GroupProvider extends ChangeNotifier {
       _usersHasNextPage = true;
       notifyListeners();
 
-      final result = await GroupApiService.instance.searchUsers(
+      final result = await _groupApiService.searchUsers(
         page: 1,
         q: _usersSearchQuery.isEmpty ? null : _usersSearchQuery,
       );
@@ -377,7 +380,7 @@ class GroupProvider extends ChangeNotifier {
       notifyListeners();
 
       final nextPage = _usersCurrentPage + 1;
-      final result = await GroupApiService.instance.searchUsers(
+      final result = await _groupApiService.searchUsers(
         page: nextPage,
         q: _usersSearchQuery.isEmpty ? null : _usersSearchQuery,
       );

@@ -13,9 +13,7 @@ import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
-
 import '../../../core/widgets/app_button.dart';
-import '../../../core/widgets/custom_toast.dart';
 
 class StoryInterestsScreen extends StatefulWidget {
   const StoryInterestsScreen({super.key});
@@ -83,7 +81,6 @@ class _StoryInterestsScreenState extends State<StoryInterestsScreen> {
                   else
                     Expanded(
                       child: ListView(
-
                         children: [
                           // API Interests
                           ...provider.interestsList.map((interest) {
@@ -127,18 +124,18 @@ class _StoryInterestsScreenState extends State<StoryInterestsScreen> {
 
                   AppFilledButton(
                     text: "Next",
-                    margin: EdgeInsets.only(bottom: 18.w,top: 4.3.w),
+                    margin: EdgeInsets.only(bottom: 18.w, top: 4.3.w),
                     backgroundColor: AppColors.orangeColor,
-                    
+
                     onTap: () {
-                      if (provider.selectedInterestIds.isEmpty &&
-                          provider.selectedCustomInterests.isEmpty) {
-                        AppToast.error(
-                          context,
-                          "Please select at least one interest",
-                        );
-                        return;
-                      }
+                      // if (provider.selectedInterestIds.isEmpty &&
+                      //     provider.selectedCustomInterests.isEmpty) {
+                      //   AppToast.error(
+                      //     context,
+                      //     "Please select at least one interest",
+                      //   );
+                      //   return;
+                      // }
 
                       context.pushNamed(AppRoutes.storyTopicsScreen.name);
                     },

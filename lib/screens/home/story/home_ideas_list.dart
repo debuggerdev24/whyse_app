@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -148,54 +147,54 @@ class HomeIdeasListScreen extends StatelessWidget {
     });
   }
 
-  void _showLeaveConfirmation({required BuildContext context}) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return ZoomIn(
-          child: AlertDialog(
-            backgroundColor: AppColors.white,
-            title: Text(
-              "Are you sure you want to quit?",
-              style: AppTextStyles.textStyle20Regular,
-            ),
-            content: Text(
-              "You can generate and read the story later.",
-              style: AppTextStyles.regular(
-                fontSize: 14.sp,
-                color: AppColors.black.withValues(alpha: 0.7),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(dialogContext).pop();
-                  context.pop();
-                },
-                child: Text(
-                  "Quit",
-                  style: AppTextStyles.regular(
-                    color: AppColors.redColor,
-                    fontSize: 17.sp,
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(),
-                child: Text(
-                  "Cancel",
-                  style: AppTextStyles.regular(
-                    color: AppColors.black,
-                    fontSize: 17.sp,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+  // void _showLeaveConfirmation({required BuildContext context}) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (dialogContext) {
+  //       return ZoomIn(
+  //         child: AlertDialog(
+  //           backgroundColor: AppColors.white,
+  //           title: Text(
+  //             "Are you sure you want to quit?",
+  //             style: AppTextStyles.textStyle20Regular,
+  //           ),
+  //           content: Text(
+  //             "You can generate and read the story later.",
+  //             style: AppTextStyles.regular(
+  //               fontSize: 14.sp,
+  //               color: AppColors.black.withValues(alpha: 0.7),
+  //             ),
+  //           ),
+  //           actions: [
+  //             TextButton(
+  //               onPressed: () {
+  //                 Navigator.of(dialogContext).pop();
+  //                 context.pop();
+  //               },
+  //               child: Text(
+  //                 "Quit",
+  //                 style: AppTextStyles.regular(
+  //                   color: AppColors.redColor,
+  //                   fontSize: 17.sp,
+  //                 ),
+  //               ),
+  //             ),
+  //             TextButton(
+  //               onPressed: () => Navigator.of(dialogContext).pop(),
+  //               child: Text(
+  //                 "Cancel",
+  //                 style: AppTextStyles.regular(
+  //                   color: AppColors.black,
+  //                   fontSize: 17.sp,
+  //                 ),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 }
 
 class _EmptyState extends StatelessWidget {

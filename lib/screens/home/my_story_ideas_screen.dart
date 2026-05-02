@@ -71,7 +71,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
           .toList(),
     );
   }
-
+  
   @override
   void initState() {
     super.initState();
@@ -139,7 +139,8 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
           }
 
           if (summary == null) {
-            final errorMsg = storyProvider.generateStoryIdeasError ??
+            final errorMsg =
+                storyProvider.generateStoryIdeasError ??
                 homeProvider.storyIdeasError ??
                 "Unable to load stories.";
             return Center(
@@ -177,14 +178,18 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                           onSuccess: () {
                             if (!context.mounted) return;
                             AppToast.success(
-                                context, "Story Ideas created successfully.");
+                              context,
+                              "Story Ideas created successfully.",
+                            );
                             context.read<HomeProvider>().getMyTopics();
                           },
                         );
                       },
                       child: Container(
                         padding: EdgeInsets.symmetric(
-                            horizontal: 24.w, vertical: 12.w),
+                          horizontal: 24.w,
+                          vertical: 12.w,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.teal,
                           borderRadius: BorderRadius.circular(30.r),
@@ -368,14 +373,14 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                                 children: [
                                   SvgIcon(
                                     AppAssets.add,
-                                    size: 24.w,
+                                    size: 20.w,
                                     color: AppColors.black,
                                   ),
                                   2.w.verticalSpace,
                                   AppText(
                                     text: 'Add to List',
                                     style: AppTextStyles.semibold(
-                                      fontSize: 16.sp,
+                                      fontSize: 14,
                                       color: AppColors.black,
                                     ),
                                   ),
@@ -391,14 +396,14 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                                 children: [
                                   SvgIcon(
                                     AppAssets.shareIcon,
-                                    size: 22.w,
+                                    size: 18.w,
                                     color: AppColors.black,
                                   ),
                                   4.w.verticalSpace,
                                   AppText(
                                     text: 'Share',
                                     style: AppTextStyles.semibold(
-                                      fontSize: 16.sp,
+                                      fontSize: 14,
                                       color: AppColors.black,
                                     ),
                                   ),
@@ -771,43 +776,42 @@ class _StoryIdeaDetailsBottomSheet extends StatelessWidget {
             children: [
               Padding(
                 padding: EdgeInsets.all(16.0.r),
-                child: Stack(
-                  clipBehavior: Clip.none,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Align(
-                      alignment: Alignment.topCenter,
-                      child: Container(
-                        height: 4.w,
-                        width: 40.w,
-                        decoration: BoxDecoration(
-                          color: AppColors.black.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
+                    const Spacer(),
+                    Container(
+                      height: 4.w,
+                      width: 40.w,
+                      decoration: BoxDecoration(
+                        color: AppColors.black.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(999),
                       ),
                     ),
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () => context.pop(),
-                        child: Container(
-                          height: 32.h,
-                          width: 32.h,
-                          decoration: BoxDecoration(
-                            color: AppColors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: AppColors.black.withValues(alpha: 0.1),
-                              width: 1.w,
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Container(
+                            height: 32.h,
+                            width: 32.h,
+                            decoration: BoxDecoration(
+                              color: AppColors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: AppColors.black.withValues(alpha: 0.1),
+                                width: 1.w,
+                              ),
                             ),
-                          ),
-                          alignment: Alignment.center,
-                          padding: EdgeInsets.all(4.r),
-                          child: Icon(
-                            Icons.close,
-                            size: 15.w,
-                            color: AppColors.black,
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.all(4.r),
+                            child: Icon(
+                              Icons.close,
+                              size: 15.w,
+                              color: AppColors.black,
+                            ),
                           ),
                         ),
                       ),

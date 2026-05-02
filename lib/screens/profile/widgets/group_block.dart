@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:redstreakapp/core/enums/data_status.dart';
+import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/models/group/group_response_model.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
@@ -32,7 +33,7 @@ class _GroupBlockState extends State<GroupBlock> {
           decoration: BoxDecoration(
             color: AppColors.white,
             border: Border(
-              top: BorderSide(color: AppColors.black.withOpacity(0.08)),
+              top: BorderSide(color: AppColors.black.setOpacity(0.08)),
             ),
           ),
           child: Padding(
@@ -40,7 +41,7 @@ class _GroupBlockState extends State<GroupBlock> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _Header(showViewAll: vm.isSuccess),
+                _Header(showViewAll: vm.isSuccess && vm.groups.isNotEmpty),
                 16.w.verticalSpace,
                 _GroupList(vm: vm),
                 20.w.verticalSpace,
@@ -85,30 +86,41 @@ class _GroupList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (vm.isLoading) {
+      return SizedBox(
+        height: 92.w,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          child: const _ShimmerList(),
+        ),
+      );
+    }
+    if (vm.isError) {
+      return SizedBox(
+        height: 92.w,
+        child: Center(child: _ErrorWidget(message: vm.error)),
+      );
+    }
+    if (vm.groups.isEmpty) {
+      return const _EmptyState();
+    }
     return SizedBox(
       height: 92.w,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
-        child: _buildContent(),
+        child: Row(
+          children: vm.groups
+              .map(
+                (g) => Padding(
+                  padding: EdgeInsets.only(right: 16.w),
+                  child: GroupItem(group: g.group),
+                ),
+              )
+              .toList(),
+        ),
       ),
-    );
-  }
-
-  Widget _buildContent() {
-    if (vm.isLoading) return const _ShimmerList();
-    if (vm.isError) return _ErrorWidget(message: vm.error);
-    if (vm.groups.isEmpty) return _EmptyState();
-
-    return Row(
-      children: vm.groups
-          .map(
-            (g) => Padding(
-              padding: EdgeInsets.only(right: 16.w),
-              child: GroupItem(group: g.group),
-            ),
-          )
-          .toList(),
     );
   }
 }
@@ -145,7 +157,7 @@ class GroupItem extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: imageUrl == null
-                    ? AppColors.black.withOpacity(0.1)
+                    ? AppColors.black.setOpacity(0.1)
                     : null,
               ),
               alignment: Alignment.center,
@@ -163,7 +175,7 @@ class GroupItem extends StatelessWidget {
                           height: 64.w,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: AppColors.black.withOpacity(0.1),
+                            color: AppColors.black.setOpacity(0.1),
                           ),
                           alignment: Alignment.center,
                           child: const Icon(Icons.group),
@@ -349,10 +361,35 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: AppText(
-        text: 'No groups found',
-        style: AppTextStyles.medium(fontSize: 14),
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 16.h),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.groups_outlined,
+            size: 36.w,
+            color: AppColors.black.setOpacity(0.2),
+          ),
+          8.h.verticalSpace,
+          AppText(
+            text: 'No groups yet',
+            style: AppTextStyles.semibold(
+              fontSize: 14,
+              color: AppColors.black.setOpacity(0.45),
+            ),
+          ),
+          4.h.verticalSpace,
+          AppText(
+            text: 'Create or join a group to start reading together',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.medium(
+              fontSize: 12,
+              color: AppColors.black.setOpacity(0.35),
+            ),
+          ),
+        ],
       ),
     );
   }

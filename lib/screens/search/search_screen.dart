@@ -42,17 +42,17 @@ class _SearchScreenState extends State<SearchScreen> {
   int _requestId = 0;
   bool _isLoadingProgress = false;
 
-  List<String> get _interestFilters {
-    final interests =
-        _topics
-            .expand((topic) => topic.interests)
-            .where((interest) => interest.trim().isNotEmpty)
-            .toSet()
-            .toList()
-          ..sort();
+  // List<String> get _interestFilters {
+  //   final interests =
+  //       _topics
+  //           .expand((topic) => topic.interests)
+  //           .where((interest) => interest.trim().isNotEmpty)
+  //           .toSet()
+  //           .toList()
+  //         ..sort();
 
-     return [_allFilter, ...interests];
-  }
+  //    return [_allFilter, ...interests];
+  // }
 
   List<BrowseTopicModel> get _visibleTopics {
     if (_selectedInterest == _allFilter) {
@@ -223,15 +223,15 @@ class _SearchScreenState extends State<SearchScreen> {
     });
   }
 
-  void _showTopicDetails(BrowseTopicModel topic) {
-    showModalBottomSheet<void>(
-      context: context,
-      useRootNavigator: true,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => BrowseTopicDetailsSheet(topic: topic),
-    );
-  }
+  // void _showTopicDetails(BrowseTopicModel topic) {
+  //   showModalBottomSheet<void>(
+  //     context: context,
+  //     useRootNavigator: true,
+  //     isScrollControlled: true,
+  //     backgroundColor: Colors.transparent,
+  //     builder: (context) => BrowseTopicDetailsSheet(topic: topic),
+  //   );
+  // }
 
   Future<void> _openTopicProgress(BrowseTopicModel topic) async {
     if (_isLoadingProgress) return;
@@ -261,30 +261,30 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  void _showNoReadingsPopup() {
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.backgroundColor,
-        title: AppText(
-          text: "No readings found",
-          style: AppTextStyles.bold(fontSize: 18.sp),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(
-              "OK",
-              style: AppTextStyles.regular(
-                color: AppColors.black,
-                fontSize: 17.sp,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // void _showNoReadingsPopup() {
+  //   showDialog<void>(
+  //     context: context,
+  //     builder: (ctx) => AlertDialog(
+  //       backgroundColor: AppColors.backgroundColor,
+  //       title: AppText(
+  //         text: "No readings found",
+  //         style: AppTextStyles.bold(fontSize: 18.sp),
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.of(ctx).pop(),
+  //           child: Text(
+  //             "OK",
+  //             style: AppTextStyles.regular(
+  //               color: AppColors.black,
+  //               fontSize: 17.sp,
+  //             ),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Future<void> _handleTopicListToggle(BrowseTopicModel topic) async {
     final result = await context.read<HomeProvider>().toggleTopicList(

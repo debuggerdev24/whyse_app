@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
-import 'package:redstreakapp/providers/group_provider.dart';
+import 'package:redstreakapp/providers/profile/group_provider.dart';
 import 'package:redstreakapp/screens/group/group_details_tab.dart';
 import 'package:redstreakapp/screens/group/group_screen_params.dart';
 import 'package:redstreakapp/screens/group/widget/group_image_widget.dart';

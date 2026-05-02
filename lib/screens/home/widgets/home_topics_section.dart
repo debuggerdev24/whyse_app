@@ -5,13 +5,12 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
+import 'package:redstreakapp/core/utils/network_image_url.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/models/home/story_models/story_topics.dart';
-
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
-import 'package:redstreakapp/screens/home/widgets/add_reading_bottom_sheet.dart';
 import 'package:redstreakapp/core/widgets/global_widgets.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:shimmer/shimmer.dart';
@@ -127,41 +126,41 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
             //       );
             //     },
             //   ),
-            if (list.length > 1) 16.w.verticalSpace,
-            if (provider.hasMoreTopics)
-              Padding(
-                padding: EdgeInsets.only(bottom: 12.w),
-                child: _buildLoadMoreTile(provider),
-              ),
+            // if (list.length > 1) 16.w.verticalSpace,
+            // if (provider.hasMoreTopics)
+            //   Padding(
+            //     padding: EdgeInsets.only(bottom: 12.w),
+            //     child: _buildLoadMoreTile(provider),
+            //   ),
           ],
         );
       },
     );
   }
 
-  Widget _buildLoadMoreTile(HomeProvider provider) {
-    return GestureDetector(
-      onTap: provider.hasMoreTopics && !provider.isTopicsLoadingMore
-          ? () => provider.getMyTopicsLoadMore()
-          : null,
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.symmetric(vertical: 14.w),
-        decoration: BoxDecoration(
-          color: AppColors.black.withValues(alpha: 0.06),
-          borderRadius: BorderRadius.circular(12.r),
-        ),
-        alignment: Alignment.center,
-        child: AppText(
-          text: provider.isTopicsLoadingMore ? "Loading..." : "Load more",
-          style: AppTextStyles.medium(
-            fontSize: 14.sp,
-            color: AppColors.black.withValues(alpha: 0.6),
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildLoadMoreTile(HomeProvider provider) {
+  //   return GestureDetector(
+  //     onTap: provider.hasMoreTopics && !provider.isTopicsLoadingMore
+  //         ? () => provider.getMyTopicsLoadMore()
+  //         : null,
+  //     child: Container(
+  //       width: double.infinity,
+  //       padding: EdgeInsets.symmetric(vertical: 14.w),
+  //       decoration: BoxDecoration(
+  //         color: AppColors.black.withValues(alpha: 0.06),
+  //         borderRadius: BorderRadius.circular(12.r),
+  //       ),
+  //       alignment: Alignment.center,
+  //       child: AppText(
+  //         text: provider.isTopicsLoadingMore ? "Loading..." : "Load more",
+  //         style: AppTextStyles.medium(
+  //           fontSize: 14.sp,
+  //           color: AppColors.black.withValues(alpha: 0.6),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget buildEmptyState(BuildContext context) {
     return Column(
@@ -504,6 +503,25 @@ class _StoryCardShimmer extends StatelessWidget {
   }
 }
 
+Widget _buildTopicCover(
+  String rawThumbnailUrl, {
+  required Widget shimmer,
+  bool compact = false,
+  bool iconOnly = false,
+}) {
+  final resolved = resolveNetworkImageUrl(rawThumbnailUrl);
+  if (resolved.isEmpty) {
+    return NoImageFound(compact: compact, iconOnly: iconOnly);
+  }
+  return CachedNetworkImage(
+    imageUrl: resolved,
+    fit: BoxFit.cover,
+    placeholder: (_, __) => shimmer,
+    errorWidget: (_, __, ___) =>
+        NoImageFound(compact: compact, iconOnly: iconOnly),
+  );
+}
+
 /// Featured main topic card (Netflix-style hero: large poster + title + tags + actions).
 class FeaturedTopicCard extends StatelessWidget {
   const FeaturedTopicCard({
@@ -529,15 +547,11 @@ class FeaturedTopicCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(8.r),
             child: AspectRatio(
               aspectRatio: 16 / 11,
-              child: story.thumbnailUrl.isNotEmpty
-                  ? CachedNetworkImage(
-                      imageUrl: story.thumbnailUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (_, __) => _featuredShimmer(),
-                      errorWidget: (_, __, ___) =>
-                          const NoImageFound(compact: true),
-                    )
-                  : _featuredShimmer(),
+              child: _buildTopicCover(
+                story.thumbnailUrl,
+                shimmer: _featuredShimmer(),
+                compact: true,
+              ),
             ),
           ),
         ),
@@ -700,21 +714,16 @@ class NetflixStyleTopicCard extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(12.r),
-              child: story.thumbnailUrl.isNotEmpty
-                  ? CachedNetworkImage(
-                      imageUrl: story.thumbnailUrl,
-                      width: w,
-                      height: 160.w,
-                      fit: BoxFit.cover,
-                      placeholder: (_, __) => _netflixCardShimmer(w),
-                      errorWidget: (_, __, ___) =>
-                          const NoImageFound(compact: true, iconOnly: true),
-                    )
-                  : SizedBox(
-                      width: w,
-                      height: 160.w,
-                      child: _netflixCardShimmer(w),
-                    ),
+              child: SizedBox(
+                width: w,
+                height: 160.w,
+                child: _buildTopicCover(
+                  story.thumbnailUrl,
+                  shimmer: _netflixCardShimmer(w),
+                  compact: true,
+                  iconOnly: true,
+                ),
+              ),
             ),
             8.w.verticalSpace,
             Expanded(
@@ -784,15 +793,12 @@ class StoryCard extends StatelessWidget {
             child: SizedBox(
               height: 132.w,
               width: double.infinity,
-              child: story.thumbnailUrl.isNotEmpty
-                  ? CachedNetworkImage(
-                      imageUrl: story.thumbnailUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (_, __) => _storyImageShimmer(),
-                      errorWidget: (_, __, ___) =>
-                          const NoImageFound(compact: true, iconOnly: true),
-                    )
-                  : _storyImageShimmer(),
+              child: _buildTopicCover(
+                story.thumbnailUrl,
+                shimmer: _storyImageShimmer(),
+                compact: true,
+                iconOnly: true,
+              ),
             ),
           ),
           Padding(

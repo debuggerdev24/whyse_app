@@ -120,7 +120,7 @@ class ArticleCard extends StatelessWidget {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withOpacity(0.65),
+                      Colors.black.setOpacity(0.65),
                     ],
                     stops: const [0.35, 1.0],
                   ),
@@ -135,7 +135,7 @@ class ArticleCard extends StatelessWidget {
                   width: 32.w,
                   height: 32.w,
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.18),
+                    color: Colors.black.setOpacity(0.18),
                     shape: BoxShape.circle,
                   ),
                   padding: EdgeInsets.all(4),
@@ -226,7 +226,7 @@ class _ImageErrorPlaceholder extends StatelessWidget {
         children: [
           Icon(
             Icons.broken_image_outlined,
-            color: Colors.white.withValues(alpha: 0.7),
+            color: Colors.white.setOpacity(0.7),
             size: 34.w,
           ),
           6.h.verticalSpace,
@@ -234,7 +234,7 @@ class _ImageErrorPlaceholder extends StatelessWidget {
             text: 'Image unavailable',
             style: AppTextStyles.semiBold(
               fontSize: 11.sp,
-              color: Colors.white.withValues(alpha: 0.75),
+              color: Colors.white.setOpacity(0.75),
             ),
           ),
         ],

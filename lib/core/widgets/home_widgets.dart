@@ -1,5 +1,8 @@
+import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/widgets/user_avatar_image.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
+import 'package:redstreakapp/providers/profile/profile_provider.dart';
 
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
@@ -76,7 +79,16 @@ class HomeHeader extends StatelessWidget {
                   ),
                 ),
                 child: ClipOval(
-                  child: Image.asset(AppAssets.profile, fit: BoxFit.cover),
+                  child: Consumer<ProfileProvider>(
+                    builder: (context, profile, _) {
+                      return UserAvatarImage(
+                        avatarUrl: profile.profileData?.avatarUrl,
+                        size: 40.w,
+                        showPlaceholderShimmerWhenEmpty:
+                            profile.getProfileState == DataState.loading,
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
@@ -157,23 +169,23 @@ class CalendarStrip extends StatelessWidget {
     return labels[date.weekday - 1];
   }
 
-  String _monthName(int month) {
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return months[month - 1];
-  }
+  // String _monthName(int month) {
+  //   const months = [
+  //     'January',
+  //     'February',
+  //     'March',
+  //     'April',
+  //     'May',
+  //     'June',
+  //     'July',
+  //     'August',
+  //     'September',
+  //     'October',
+  //     'November',
+  //     'December',
+  //   ];
+  //   return months[month - 1];
+  // }
 
   @override
   Widget build(BuildContext context) {

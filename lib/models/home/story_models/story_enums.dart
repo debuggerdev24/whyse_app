@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 enum ReadingLevel {
   CEFR_A1("CEFR A1"),
   CEFR_A2("CEFR A2"),

@@ -273,8 +273,7 @@ class StoryProvider extends ChangeNotifier {
           final dataMap = r["data"];
           final data = dataMap['userTopics'] ?? dataMap['topics'];
           if (data is List) {
-            topicsList =
-                data.map((e) => TopicModel.fromJson(e)).toList();
+            topicsList = data.map((e) => TopicModel.fromJson(e)).toList();
           }
         } catch (_) {
           topicsList = [];
@@ -493,16 +492,18 @@ class StoryProvider extends ChangeNotifier {
         generateStoryError = e.toString();
         isGenerateSingleStoryLoading = false;
         notifyListeners();
-        if (context.mounted)
+        if (context.mounted) {
           AppToast.error(context, "Something went wrong. Please try again.");
+        }
       }
     } catch (e, st) {
       Logger.error("Generate story error: $e\n$st");
       generateStoryError = e.toString();
       isGenerateSingleStoryLoading = false;
       notifyListeners();
-      if (context.mounted)
+      if (context.mounted) {
         AppToast.error(context, "Something went wrong. Please try again.");
+      }
     }
   }
 
@@ -586,7 +587,7 @@ class StoryProvider extends ChangeNotifier {
           isGenerateSingleStoryLoading = false;
           notifyListeners();
           if (context.mounted)
-            AppToast.error(context, "Something went wrong. Please try again.");
+            {AppToast.error(context, "Something went wrong. Please try again.");}
         }
       },
     );
@@ -755,7 +756,7 @@ class StoryProvider extends ChangeNotifier {
     String? topicId,
     VoidCallback? onSuccess,
   }) async {
-    if (!forceRegenerate && !_validateCreateStoryInput(context)) return;
+    // if (!forceRegenerate && !_validateCreateStoryInput(context)) return;
     isGenerateStoryIdeasLoading = true;
     generateStoryIdeasError = null;
     _currentStoryIndex = 0;
@@ -893,13 +894,16 @@ class StoryProvider extends ChangeNotifier {
     notifyListeners();
     var ok = false;
     try {
-      final data  = {
+      final data = {
         "quizMcqCount": noOfMcq,
         "quizOpenCount": noOfOpenQuestions,
         "quizTrueFalseCount": noOfTrueFalse,
         "replaceExisting": replaceExisting,
       };
-      final response = await StoryApiService.instance.createQuiz(storyId: storyId, data: data);
+      final response = await StoryApiService.instance.createQuiz(
+        storyId: storyId,
+        data: data,
+      );
       response.fold(
         (l) {
           Logger.error(l.errorMsg);
