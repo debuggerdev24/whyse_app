@@ -69,4 +69,14 @@ class HomeApiService {
       EndPoints.topicProgress(topicId: topicId),
     );
   }
+
+  Future<Either<ApiException, Map<String, dynamic>>> getMyList({
+    int page = 1,
+    int limit = 10,
+    String search = '',
+  }) async {
+    return await BaseApiHelper.instance.get(
+      EndPoints.getMyList(page: page, limit: limit, search: search),
+    );
+  }
 }

@@ -38,6 +38,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
   void callInitApis({required BuildContext context}) {
     context.read<ProfileProvider>().getProfile();
     homeProvider.getMyTopics();
+    homeProvider.getMySeriesList();
     // storyProvider.getAllStories();
 
     storyProvider.getStoryGoals(

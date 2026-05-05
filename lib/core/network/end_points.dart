@@ -63,6 +63,8 @@ class EndPoints {
       "/story/topics?page=$page&limit=$limit&createdBy=self";
   
   static const browseAllTopics = "/story/topics";
+  static String getMyList({int page = 1, int limit = 10, String search = ''}) =>
+      "/story/topics/my-list?page=$page&limit=$limit&search=${Uri.encodeComponent(search)}";
   static String storeImage({required String storyId}) =>
       "/story/mobile-story/$storyId/store-images";
   static String addOrRemoveToMyList({required String topicId}) =>
@@ -75,6 +77,8 @@ class EndPoints {
       "/story/topics/$topicId/progress";
   static String markAsRead({required String storyIdeaId}) =>
       "/story/ideas/$storyIdeaId/mark-read";
+  static String pageProgress({required String storyIdeaId}) =>
+      "/story/ideas/$storyIdeaId/page-progress";
   static String createQuiz({required String storyId}) =>
       "/story/$storyId/quiz/generate";
   static String getQuiz({required String storyId}) => "/story/$storyId/quiz";

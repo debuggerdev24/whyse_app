@@ -8,6 +8,7 @@ import 'package:redstreakapp/core/widgets/global_widgets.dart';
 
 import 'package:redstreakapp/providers/home/reading_appearance_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
+import 'package:redstreakapp/services/home/story_api_service.dart';
 import 'package:redstreakapp/screens/home/story/widget/font_theme_bottom_sheet.dart';
 import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
 import 'package:redstreakapp/screens/home/widgets/story_ui_components.dart';
@@ -15,7 +16,14 @@ import 'package:redstreakapp/screens/home/widgets/story_ui_components.dart';
 import 'package:shimmer/shimmer.dart';
 
 class CreatedStoryReadingScreen extends StatefulWidget {
-  const CreatedStoryReadingScreen({super.key});
+  const CreatedStoryReadingScreen({
+    super.key,
+    this.initialPageIndex = 0,
+    this.storyIdeaId,
+  });
+
+  final int initialPageIndex;
+  final String? storyIdeaId;
 
   @override
   State<CreatedStoryReadingScreen> createState() =>
@@ -23,11 +31,17 @@ class CreatedStoryReadingScreen extends StatefulWidget {
 }
 
 class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
-  int _currentPageIndex = 0;
+  late int _currentPageIndex;
   Timer? _readingTimer;
   int _remainingSeconds = 0;
   bool _hasStartedReading = false;
   bool _isTimerRunning = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentPageIndex = widget.initialPageIndex;
+  }
 
   String _formatDuration(int totalSeconds) {
     final minutes = totalSeconds ~/ 60;
@@ -71,11 +85,21 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
   void _goToNextPage(int totalPages) {
     if (_currentPageIndex >= totalPages - 1) return;
     setState(() => _currentPageIndex++);
+    _reportPageProgress(_currentPageIndex);
   }
 
   void _goToPreviousPage() {
     if (_currentPageIndex <= 0) return;
     setState(() => _currentPageIndex--);
+  }
+
+  void _reportPageProgress(int pageIndex) {
+    final storyIdeaId = widget.storyIdeaId;
+    if (storyIdeaId == null || storyIdeaId.isEmpty) return;
+    StoryApiService.instance.updatePageProgress(
+      storyIdeaId: storyIdeaId,
+      pageIndex: pageIndex,
+    );
   }
 
   @override

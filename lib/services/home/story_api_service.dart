@@ -85,6 +85,16 @@ class StoryApiService {
     );
   }
 
+  Future<Either<ApiException, Map<String, dynamic>>> updatePageProgress({
+    required String storyIdeaId,
+    required int pageIndex,
+  }) async {
+    return BaseApiHelper.instance.post(
+      EndPoints.pageProgress(storyIdeaId: storyIdeaId),
+      data: {"pageIndex": pageIndex},
+    );
+  }
+
   Future<Either<ApiException, Map<String, dynamic>>> createQuiz({
     required String storyId,
     Map<String, dynamic>? data,

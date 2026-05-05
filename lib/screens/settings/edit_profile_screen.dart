@@ -86,6 +86,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       preferredLanguage: profileData.preferredLanguage,
       isPrivate: profileData.isPrivate,
       socialAccounts: profileData.socialAccounts,
+      interests: profileData.interests,
     );
     _firstNameController.text = profileData.firstName;
     _lastNameController.text = profileData.lastName;
@@ -176,7 +177,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 16.verticalSpace,
                 ListTile(
                   contentPadding: EdgeInsets.symmetric(horizontal: 8.w),
-                  leading: Icon(Icons.photo_camera_outlined, color: AppColors.black),
+                  leading: Icon(
+                    Icons.photo_camera_outlined,
+                    color: AppColors.black,
+                  ),
                   title: AppText(
                     text: 'Take photo',
                     style: AppTextStyles.semibold(fontSize: 16.sp),
@@ -188,7 +192,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.symmetric(horizontal: 8.w),
-                  leading: Icon(Icons.photo_library_outlined, color: AppColors.black),
+                  leading: Icon(
+                    Icons.photo_library_outlined,
+                    color: AppColors.black,
+                  ),
                   title: AppText(
                     text: 'Choose from gallery',
                     style: AppTextStyles.semibold(fontSize: 16.sp),
@@ -247,12 +254,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         fit: BoxFit.cover,
         width: double.infinity,
         height: double.infinity,
-        placeholder: (_, __) =>
-            UserAvatarShimmerFill(size: 86.w),
-        errorWidget: (_, __, ___) => Image.asset(
-          AppAssets.profile,
-          fit: BoxFit.cover,
-        ),
+        placeholder: (_, __) => UserAvatarShimmerFill(size: 86.w),
+        errorWidget: (_, __, ___) =>
+            Image.asset(AppAssets.profile, fit: BoxFit.cover),
       );
     }
     return Image.asset(AppAssets.profile, fit: BoxFit.cover);
@@ -463,8 +467,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             child: AppTextField(
                               controller: _phoneController,
                               hintText: 'Phone number',
-                              readOnly: true,
-                              enabled: false,
+                              // readOnly: true,
+                              // enabled: false,
                             ),
                           ),
                           16.verticalSpace,
@@ -518,7 +522,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           8.verticalSpace,
                           GestureDetector(
                             behavior: HitTestBehavior.opaque,
-                            onTap: () {},
+                            onTap: () {
+                              Logger.info('Interests');
+                              context.pushNamed(
+                                AppRoutes.editInterestsScreen.name,
+                              );
+                            },
                             child: Row(
                               children: [
                                 AppText(

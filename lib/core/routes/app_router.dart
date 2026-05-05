@@ -54,6 +54,7 @@ import 'package:redstreakapp/screens/settings/settings_screen.dart';
 import 'package:redstreakapp/screens/settings/preferences_screen.dart';
 import 'package:redstreakapp/screens/settings/settings_notification_screen.dart';
 import 'package:redstreakapp/screens/settings/edit_profile_screen.dart';
+import 'package:redstreakapp/screens/settings/edit_interests_screen.dart';
 import 'package:redstreakapp/screens/your_book/find_your_books_screen.dart';
 import 'package:redstreakapp/screens/your_book/book_details_screen.dart';
 
@@ -376,7 +377,19 @@ class AppRouter {
       path: AppRoutes.createdStoryReadingScreen.path,
       name: AppRoutes.createdStoryReadingScreen.name,
       builder: (context, state) {
-        return const CreatedStoryReadingScreen();
+        final extra = state.extra;
+        String? storyIdeaId;
+        int initialPageIndex = 0;
+        if (extra is Map<String, dynamic>) {
+          storyIdeaId = extra["storyIdeaId"]?.toString();
+          initialPageIndex = extra["initialPageIndex"] is int
+              ? extra["initialPageIndex"] as int
+              : 0;
+        }
+        return CreatedStoryReadingScreen(
+          storyIdeaId: storyIdeaId,
+          initialPageIndex: initialPageIndex,
+        );
       },
     ),
     GoRoute(
@@ -579,6 +592,13 @@ class AppRouter {
           name: AppRoutes.addFriendsScreen.name,
           builder: (context, state) {
             return const AddFriendsScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.editInterestsScreen.name,
+          name: AppRoutes.editInterestsScreen.name,
+          builder: (context, state) {
+            return const EditInterestsScreen();
           },
         ),
       ],

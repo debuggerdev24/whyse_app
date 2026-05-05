@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/global_widgets.dart';
+import 'package:redstreakapp/models/home/saved_series_model.dart';
+import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ShareStoriesInGroupScreen extends StatefulWidget {
@@ -13,49 +15,25 @@ class ShareStoriesInGroupScreen extends StatefulWidget {
 }
 
 class _ShareStoriesInGroupScreenState extends State<ShareStoriesInGroupScreen> {
-  final Set<int> _selectedIndexes = <int>{0};
+  final Set<String> _selectedTopicIds = <String>{};
 
-  static const List<_SeriesItem> _series = [
-    _SeriesItem(
-      title: 'Nature',
-      progressText: '0 out of 50 Readings',
-      imagePath: 'https://picsum.photos/seed/nature/200/300',
-    ),
-    _SeriesItem(
-      title: 'Space',
-      progressText: '0 out of 50 Readings',
-      imagePath: 'https://picsum.photos/seed/space/200/300',
-    ),
-    _SeriesItem(
-      title: 'Nature',
-      progressText: '0 out of 50 Readings',
-      imagePath: 'https://picsum.photos/seed/nature/200/300',
-    ),
-    _SeriesItem(
-      title: 'Ocean',
-      progressText: '0 out of 50 Readings',
-      imagePath: 'https://picsum.photos/seed/ocean/200/300',
-    ),
-    _SeriesItem(
-      title: 'Forest',
-      progressText: '0 out of 50 Readings',
-      imagePath: 'https://picsum.photos/seed/forest/200/300',
-    ),
-    _SeriesItem(
-      title: 'Desert',
-      progressText: '0 out of 50 Readings',
-      imagePath: 'https://picsum.photos/seed/desert/200/300',
-    ),
-  ];
-
-  void _toggleSelection(int index) {
+  void _toggleSelection(String topicId) {
     setState(() {
-      if (_selectedIndexes.contains(index)) {
-        _selectedIndexes.remove(index);
+      if (_selectedTopicIds.contains(topicId)) {
+        _selectedTopicIds.remove(topicId);
       } else {
-        _selectedIndexes.add(index);
+        _selectedTopicIds.add(topicId);
       }
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final homeProvider = context.read<HomeProvider>();
+    if (homeProvider.savedSeriesList == null) {
+      homeProvider.getMySeriesList();
+    }
   }
 
   @override
@@ -80,7 +58,7 @@ class _ShareStoriesInGroupScreenState extends State<ShareStoriesInGroupScreen> {
             padding: EdgeInsets.only(right: 16.w),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: _selectedIndexes.isEmpty
+              onTap: _selectedTopicIds.isEmpty
                   ? null
                   : () {
                       context.pop();
@@ -90,7 +68,7 @@ class _ShareStoriesInGroupScreenState extends State<ShareStoriesInGroupScreen> {
                   text: 'Share with',
                   style: AppTextStyles.bold(
                     fontSize: 14,
-                    color: _selectedIndexes.isEmpty
+                    color: _selectedTopicIds.isEmpty
                         ? AppColors.teal.withValues(alpha: 0.45)
                         : AppColors.teal,
                   ),
@@ -107,40 +85,106 @@ class _ShareStoriesInGroupScreenState extends State<ShareStoriesInGroupScreen> {
           ),
         ),
       ),
-      body: GridView.builder(
-        physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 20.h),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 16.h,
-          crossAxisSpacing: 12.w,
-          childAspectRatio: 0.66,
-        ),
-        itemCount: _series.length,
-        itemBuilder: (context, index) {
-          final item = _series[index];
-          final selected = _selectedIndexes.contains(index);
-          return _SeriesTile(
-            item: item,
-            selected: selected,
-            onTap: () => _toggleSelection(index),
+      body: Consumer<HomeProvider>(
+        builder: (context, homeProvider, child) {
+          final list = homeProvider.savedSeriesList;
+          final isLoading = homeProvider.isSavedSeriesLoading;
+
+          if (isLoading && list == null) {
+            return _buildShimmerGrid();
+          }
+
+          if (list == null || list.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 28.w),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.bookmark_border_rounded,
+                      size: 48.w,
+                      color: AppColors.black.withValues(alpha: 0.3),
+                    ),
+                    16.w.verticalSpace,
+                    AppText(
+                      text: "No saved series yet.\nAdd series to your list to share them.",
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.medium(
+                        fontSize: 16.sp,
+                        color: AppColors.black.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          return GridView.builder(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 20.h),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 16.h,
+              crossAxisSpacing: 12.w,
+              childAspectRatio: 0.66,
+            ),
+            itemCount: list.length,
+            itemBuilder: (context, index) {
+              final item = list[index];
+              final selected = _selectedTopicIds.contains(item.topic.id);
+              return _SeriesTile(
+                item: item,
+                selected: selected,
+                onTap: () => _toggleSelection(item.topic.id),
+              );
+            },
           );
         },
       ),
     );
   }
-}
 
-class _SeriesItem {
-  const _SeriesItem({
-    required this.title,
-    required this.progressText,
-    required this.imagePath,
-  });
-
-  final String title;
-  final String progressText;
-  final String imagePath;
+  Widget _buildShimmerGrid() {
+    return GridView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 20.h),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 16.h,
+        crossAxisSpacing: 12.w,
+        childAspectRatio: 0.66,
+      ),
+      itemCount: 4,
+      itemBuilder: (context, index) {
+        return Shimmer.fromColors(
+          baseColor: AppColors.shimmerBaseColor,
+          highlightColor: AppColors.shimmerHighlightColor,
+          child: Column(
+            children: [
+              Container(
+                height: 200.h,
+                decoration: BoxDecoration(
+                  color: AppColors.shimmerBaseColor,
+                  borderRadius: BorderRadius.circular(18.r),
+                ),
+              ),
+              12.h.verticalSpace,
+              Container(
+                width: 30.h,
+                height: 30.h,
+                decoration: BoxDecoration(
+                  color: AppColors.shimmerBaseColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
 class _SeriesTile extends StatelessWidget {
@@ -150,12 +194,13 @@ class _SeriesTile extends StatelessWidget {
     required this.onTap,
   });
 
-  final _SeriesItem item;
+  final SavedSeriesItem item;
   final bool selected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final topic = item.topic;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
@@ -185,21 +230,23 @@ class _SeriesTile extends StatelessWidget {
                       SizedBox(
                         height: 120.h,
                         width: double.infinity,
-                        child: CachedNetworkImage(
-                          imageUrl: item.imagePath,
-                          fit: BoxFit.cover,
-                          placeholder: (_, __) => Shimmer.fromColors(
-                            baseColor: AppColors.shimmerBaseColor,
-                            highlightColor: AppColors.shimmerHighlightColor,
-                            child: Container(
-                              height: 120.h,
-                              width: double.infinity,
-                              color: AppColors.shimmerBaseColor,
-                            ),
-                          ),
-                          errorWidget: (_, __, ___) =>
-                              const NoImageFound(compact: true, iconOnly: true),
-                        ),
+                        child: topic.thumbnailUrl.isNotEmpty
+                            ? CachedNetworkImage(
+                                imageUrl: topic.thumbnailUrl,
+                                fit: BoxFit.cover,
+                                placeholder: (_, __) => Shimmer.fromColors(
+                                  baseColor: AppColors.shimmerBaseColor,
+                                  highlightColor: AppColors.shimmerHighlightColor,
+                                  child: Container(
+                                    height: 120.h,
+                                    width: double.infinity,
+                                    color: AppColors.shimmerBaseColor,
+                                  ),
+                                ),
+                                errorWidget: (_, __, ___) =>
+                                    const NoImageFound(compact: true, iconOnly: true),
+                              )
+                            : const NoImageFound(compact: true, iconOnly: true),
                       ),
                       Positioned(
                         top: 8.h,
@@ -228,12 +275,14 @@ class _SeriesTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       AppText(
-                        text: item.title,
+                        text: topic.title,
                         style: AppTextStyles.bold(fontSize: 20),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       2.h.verticalSpace,
                       AppText(
-                        text: item.progressText,
+                        text: '${topic.storiesCount} Readings',
                         style: AppTextStyles.semibold(
                           fontSize: 12,
                           color: AppColors.black.setOpacity(0.8),

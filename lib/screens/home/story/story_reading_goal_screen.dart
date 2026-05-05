@@ -182,6 +182,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                             // }
                             provider.setGenerateStoryIdeasLoading(true);
 
+                            context.goNamed(AppRoutes.homeScreen.name);
                             context.pushNamed(
                               AppRoutes.createdIdeasListScreen.name,
                               extra: const {'preferGeneratedData': true},

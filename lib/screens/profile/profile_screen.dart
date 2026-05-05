@@ -4,8 +4,9 @@ import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/global_widgets.dart';
 import 'package:redstreakapp/models/friend/friend_model.dart';
-import 'package:redstreakapp/models/home/story_models/story_topics.dart';
+import 'package:redstreakapp/models/home/saved_series_model.dart';
 import 'package:redstreakapp/providers/friend/friend_provider.dart';
+import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
 import 'package:redstreakapp/screens/profile/widgets/group_block.dart';
 import 'package:redstreakapp/screens/profile/widgets/profile_header_section.dart';
@@ -768,133 +769,130 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _mySeriesListBlock() {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border(
-          top: BorderSide(
-            color: AppColors.black.withValues(alpha: 0.08),
-            width: 1,
-          ),
-        ),
-      ),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                AppText(
-                  text: 'My Series List',
-                  style: AppTextStyles.bold(
-                    fontSize: 20,
-                    color: AppColors.black,
-                  ),
+    return Consumer<HomeProvider>(
+      builder: (context, homeProvider, child) {
+        final list = homeProvider.savedSeriesList;
+        final isLoading = homeProvider.isSavedSeriesLoading;
+
+        if (isLoading && list == null) {
+          return Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              border: Border(
+                top: BorderSide(
+                  color: AppColors.black.withValues(alpha: 0.08),
+                  width: 1,
                 ),
-                GestureDetector(
-                  onTap: () {},
-                  child: AppText(
-                    text: 'View all',
-                    style: AppTextStyles.semibold(
-                      fontSize: 15,
-                      color: AppColors.teal,
+              ),
+            ),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText(
+                    text: 'My Series List',
+                    style: AppTextStyles.bold(fontSize: 20, color: AppColors.black),
+                  ),
+                  12.verticalSpace,
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const NeverScrollableScrollPhysics(),
+                    child: Row(
+                      children: List.generate(
+                        3,
+                        (_) => Padding(
+                          padding: EdgeInsets.only(right: 12.w),
+                          child: Shimmer.fromColors(
+                            baseColor: AppColors.shimmerBaseColor,
+                            highlightColor: AppColors.shimmerHighlightColor,
+                            child: Container(
+                              width: 140.w,
+                              height: 190.w,
+                              decoration: BoxDecoration(
+                                color: AppColors.shimmerBaseColor,
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        if (list == null || list.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        return Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            border: Border(
+              top: BorderSide(
+                color: AppColors.black.withValues(alpha: 0.08),
+                width: 1,
+              ),
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    AppText(
+                      text: 'My Series List',
+                      style: AppTextStyles.bold(fontSize: 20, color: AppColors.black),
+                    ),
+                    GestureDetector(
+                      onTap: () {},
+                      child: AppText(
+                        text: 'View all',
+                        style: AppTextStyles.semibold(fontSize: 15, color: AppColors.teal),
+                      ),
+                    ),
+                  ],
+                ),
+                12.verticalSpace,
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: List.generate(
+                      list.length,
+                      (index) {
+                        final item = list[index];
+                        return _SavedSeriesCard(
+                          item: item,
+                          onTap: () {
+                            homeProvider.generateStoryIdeasForTopic(
+                              topicId: item.topic.id,
+                            );
+                            context.pushNamed(
+                              AppRoutes.createdStorySummaryScreen.name,
+                              extra: item.topic.id,
+                            );
+                          },
+                        );
+                      },
                     ),
                   ),
                 ),
               ],
             ),
-            12.verticalSpace,
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: List.generate(
-                  5,
-                  (index) => _StoryCard(
-                    story: [
-                      CreatedStoryTopicsModel(
-                        id: '1',
-                        topic: 'Story 1',
-                        learningGoal: 'Learning Goal 1',
-                        type: 'Story',
-                        interests: [],
-                        noOfStories: 3,
-                        noOfStoriesGenerated: 2,
-                        createdBy: '',
-                        isOwnTopic: false,
-                        createdOn: DateTime.now().toIso8601String(),
-                        updatedAt: DateTime.now().toIso8601String(),
-                        thumbnailUrl: AppAssets.demoBookImage,
-                      ),
-                      CreatedStoryTopicsModel(
-                        id: '1',
-                        topic: 'Story 2',
-                        learningGoal: 'Learning Goal 2',
-                        type: 'Story',
-                        interests: [],
-                        noOfStories: 3,
-                        noOfStoriesGenerated: 2,
-                        createdBy: '',
-                        isOwnTopic: false,
-                        createdOn: DateTime.now().toIso8601String(),
-                        updatedAt: DateTime.now().toIso8601String(),
-                        thumbnailUrl: AppAssets.demoBookImage,
-                      ),
-                      CreatedStoryTopicsModel(
-                        id: '1',
-                        topic: 'Story 3',
-                        learningGoal: 'Learning Goal 3',
-                        type: 'Story',
-                        interests: [],
-                        noOfStories: 3,
-                        noOfStoriesGenerated: 2,
-                        createdBy: '',
-                        isOwnTopic: false,
-                        createdOn: DateTime.now().toIso8601String(),
-                        updatedAt: DateTime.now().toIso8601String(),
-                        thumbnailUrl: AppAssets.demoBookImage,
-                      ),
-                      CreatedStoryTopicsModel(
-                        id: '1',
-                        topic: 'Story 4',
-                        learningGoal: 'Learning Goal 4',
-                        type: 'Story',
-                        interests: [],
-                        noOfStories: 3,
-                        noOfStoriesGenerated: 2,
-                        createdBy: '',
-                        isOwnTopic: false,
-                        createdOn: DateTime.now().toIso8601String(),
-                        updatedAt: DateTime.now().toIso8601String(),
-                        thumbnailUrl: AppAssets.demoBookImage,
-                      ),
-                      CreatedStoryTopicsModel(
-                        id: '1',
-                        topic: 'Story 5',
-                        learningGoal: 'Learning Goal 5',
-                        type: 'Story',
-                        interests: [],
-                        noOfStories: 3,
-                        noOfStoriesGenerated: 2,
-                        createdBy: '',
-                        isOwnTopic: false,
-                        createdOn: DateTime.now().toIso8601String(),
-                        updatedAt: DateTime.now().toIso8601String(),
-                        thumbnailUrl: AppAssets.demoBookImage,
-                      ),
-                    ][index],
-                    onTap: () {},
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -1004,108 +1002,105 @@ class _ProfileFriendAvatar extends StatelessWidget {
   }
 }
 
-class _StoryCard extends StatelessWidget {
-  const _StoryCard({required this.story, this.onTap});
+class _SavedSeriesCard extends StatelessWidget {
+  const _SavedSeriesCard({required this.item, this.onTap});
 
-  final CreatedStoryTopicsModel story;
+  final SavedSeriesItem item;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final topic = item.topic;
     final subtitleColor = AppColors.black.setOpacity(0.45);
-    final readCount = story.noOfStories;
-    final totalCount = story.noOfStoriesGenerated > 0
-        ? story.noOfStoriesGenerated
-        : readCount;
 
-    return Container(
-      width: 210.w,
-      alignment: Alignment.center,
-      margin: EdgeInsets.only(right: 10.w),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.setOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
-                child: SizedBox(
-                  height: 132.w,
-                  width: double.infinity,
-                  child: story.thumbnailUrl.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: story.thumbnailUrl,
-                          fit: BoxFit.cover,
-                          placeholder: (_, __) => _storyImageShimmer(),
-                          errorWidget: (_, __, ___) =>
-                              const NoImageFound(compact: true, iconOnly: true),
-                        )
-                      : _storyImageShimmer(),
-                ),
-              ),
-              Positioned(
-                top: 0,
-                right: 0,
-                child: Container(
-                  width: 32.h,
-                  height: 32.h,
-                  margin: EdgeInsets.only(top: 10.w, right: 10.w),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: Icon(
-                    Icons.bookmark_rounded,
-                    size: 20.sp,
-                    color: AppColors.black,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 210.w,
+        margin: EdgeInsets.only(right: 10.w),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.black.setOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+                  child: SizedBox(
+                    height: 132.w,
+                    width: double.infinity,
+                    child: topic.thumbnailUrl.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: topic.thumbnailUrl,
+                            fit: BoxFit.cover,
+                            placeholder: (_, __) => _storyImageShimmer(),
+                            errorWidget: (_, __, ___) =>
+                                const NoImageFound(compact: true, iconOnly: true),
+                          )
+                        : _storyImageShimmer(),
                   ),
                 ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(14.w, 13.w, 14.w, 2.w),
-            child: AppText(
-              text: story.topic,
-              style: AppTextStyles.bold(fontSize: 16.sp),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
+                    width: 32.h,
+                    height: 32.h,
+                    margin: EdgeInsets.only(top: 10.w, right: 10.w),
+                    decoration: const BoxDecoration(
+                      color: AppColors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.bookmark_rounded,
+                      size: 20.sp,
+                      color: AppColors.teal,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 14.w),
-            child: AppText(
-              text: '$readCount out of $totalCount Readings',
-              style: AppTextStyles.medium(
-                fontSize: 12.sp,
-                color: subtitleColor,
+            Padding(
+              padding: EdgeInsets.fromLTRB(14.w, 13.w, 14.w, 2.w),
+              child: AppText(
+                text: topic.title,
+                style: AppTextStyles.bold(fontSize: 16.sp),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
-          ),
-          AppButton(
-            margin: EdgeInsets.fromLTRB(14.w, 12.w, 14.w, 16.w),
-            onTap: () {
-              onTap?.call();
-            },
-            text: "Start Reading",
-          ),
-        ],
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 14.w),
+              child: AppText(
+                text: '${topic.storiesCount} Readings',
+                style: AppTextStyles.medium(
+                  fontSize: 12.sp,
+                  color: subtitleColor,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            AppButton(
+              margin: EdgeInsets.fromLTRB(14.w, 12.w, 14.w, 16.w),
+              onTap: () => onTap?.call(),
+              text: "Start Reading",
+            ),
+          ],
+        ),
       ),
     );
   }

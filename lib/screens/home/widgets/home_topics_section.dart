@@ -78,7 +78,7 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
                         (index) => StoryCard(
                           story: list[index],
                           onTap: () {
-                            provider.getStoryIdeasByTopicId(
+                            provider.generateStoryIdeasForTopic(
                               topicId: list[index].id,
                             );
                             context.pushNamed(

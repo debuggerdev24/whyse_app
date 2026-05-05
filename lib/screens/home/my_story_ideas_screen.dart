@@ -71,7 +71,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
           .toList(),
     );
   }
-  
+
   @override
   void initState() {
     super.initState();
@@ -134,6 +134,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
               : (homeProvider.storySummary ?? generatedSummary);
 
           if (homeProvider.isStoryIdeasLoading ||
+              homeProvider.isGenerateSeriesLoading ||
               (summary == null && storyProvider.isGenerateStoryIdeasLoading)) {
             return HomeSectionShimmer.createdStoryIdeasLoadingShimmer();
           }
@@ -141,6 +142,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
           if (summary == null) {
             final errorMsg =
                 storyProvider.generateStoryIdeasError ??
+                homeProvider.generateSeriesError ??
                 homeProvider.storyIdeasError ??
                 "Unable to load stories.";
             return Center(
@@ -329,14 +331,38 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                           if (summary.storyIdeas.isEmpty) return;
                           final storyProvider = context.read<StoryProvider>();
                           storyProvider.setFromStorySummary(summary);
-                          context.pushNamed(
+
+                          int resumeIndex = summary.storyIdeas.indexWhere(
+                            (idea) =>
+                                idea.continueReading != null &&
+                                !idea.continueReading!.isCompleted &&
+                                idea.continueReading!.readPages > 0,
+                          );
+                          if (resumeIndex < 0) {
+                            resumeIndex = summary.storyIdeas.indexWhere(
+                              (idea) =>
+                                  idea.continueReading == null ||
+                                  !idea.continueReading!.isCompleted,
+                            );
+                          }
+                          if (resumeIndex < 0) resumeIndex = 0;
+
+                          final resumeIdea = summary.storyIdeas[resumeIndex];
+                          final initialPageIndex =
+                              resumeIdea
+                                  .continueReading
+                                  ?.continueFromPageIndex ??
+                              0;
+
+                          context.pushReplacementNamed(
                             AppRoutes.createdStoryReadingScreen.name,
                             extra: <String, dynamic>{
-                              "storyIdeaId": summary.storyIdeas.first.id,
+                              "storyIdeaId": resumeIdea.id,
+                              "initialPageIndex": initialPageIndex,
                             },
                           );
                           storyProvider.createStory(
-                            selectedIdeaIndex: 0,
+                            selectedIdeaIndex: resumeIndex,
                             onSuccess: () {},
                             onFailed: (error) {
                               if (!context.mounted) return;
@@ -353,7 +379,9 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                           ),
                           alignment: Alignment.center,
                           child: AppText(
-                            text: 'Continue Reading',
+                            text: summary.storyIdeas.first.isGenerated
+                                ? 'Continue Reading'
+                                : 'Start Reading',
                             style: AppTextStyles.bold(
                               fontSize: 18.sp,
                               color: AppColors.white,
@@ -362,30 +390,62 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                         ),
                       ),
                       18.w.verticalSpace,
-                      Padding(
+                     Padding(
                         padding: EdgeInsets.symmetric(horizontal: 10.w),
                         child: Row(
                           children: [
-                            GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: () {},
-                              child: Column(
-                                children: [
-                                  SvgIcon(
-                                    AppAssets.add,
-                                    size: 20.w,
-                                    color: AppColors.black,
+                            Builder(
+                              builder: (context) {
+                                final homeProvider = context.watch<HomeProvider>();
+                                final isInList = homeProvider.topicIsInMyListOverride(summary.topicId) ?? false;
+                                final isToggling = homeProvider.isTopicListToggling(summary.topicId);
+                                return GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: isToggling ? null : () {
+                                    context.read<HomeProvider>().toggleTopicListById(
+                                      topicId: summary.topicId,
+                                      onFailed: (error) {
+                                        if (!context.mounted) return;
+                                        AppToast.error(context, error);
+                                      },
+                                    ).then((result) {
+                                      if (result == null || !context.mounted) return;
+                                      final msg = result.message ??
+                                          (result.isInMyList ? "Added to My List" : "Removed from My List");
+                                      AppToast.success(context, msg);
+                                    });
+                                  },
+                                  child: Column(
+                                    children: [
+                                      if (isToggling)
+                                        SizedBox(
+                                          width: 20.w,
+                                          height: 20.w,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: AppColors.teal,
+                                          ),
+                                        )
+                                      else
+                                        Icon(
+                                          isInList ? Icons.check_rounded : Icons.add_rounded,
+                                          size: 20.w,
+                                          color: isInList ? AppColors.teal : AppColors.black,
+                                        ),
+                                      2.w.verticalSpace,
+                                      AppText(
+                                        text: isToggling
+                                            ? (isInList ? 'Removing...' : 'Adding...')
+                                            : (isInList ? 'In My List' : 'Add to List'),
+                                        style: AppTextStyles.semibold(
+                                          fontSize: 14,
+                                          color: isInList ? AppColors.teal : AppColors.black,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  2.w.verticalSpace,
-                                  AppText(
-                                    text: 'Add to List',
-                                    style: AppTextStyles.semibold(
-                                      fontSize: 14,
-                                      color: AppColors.black,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                                );
+                              },
                             ),
                             25.w.horizontalSpace,
                             GestureDetector(
@@ -421,8 +481,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                       ),
                       18.w.verticalSpace,
                       AppText(
-                        text:
-                            "${summary.storyIdeas.length} Readings \u2022 10 mins",
+                        text: "${summary.storyIdeas.length} Readings",
                         style: AppTextStyles.bold(
                           fontSize: 16.sp,
                           color: AppColors.black,
@@ -435,20 +494,34 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                           padding: EdgeInsets.only(bottom: 18.w),
                           child: _MyReadingItemTile(
                             index: index + 1,
-                            isSelected: index == 0,
+                            isSelected:
+                                summary
+                                    .storyIdeas[index]
+                                    .continueReading
+                                    ?.isCompleted ??
+                                false,
                             title: summary.storyIdeas[index].storyTitle,
                             description: summary.storyIdeas[index].description,
                             thumbnailUrl:
                                 summary.storyIdeas[index].thumbnailUrl,
                             topicThumbnailUrl: summary.topicThumbnailUrl,
+                            continueReading:
+                                summary.storyIdeas[index].continueReading,
                             onOpenStory: () {
                               final storyProvider = context
                                   .read<StoryProvider>();
                               storyProvider.setFromStorySummary(summary);
+                              final initialPage =
+                                  summary
+                                      .storyIdeas[index]
+                                      .continueReading
+                                      ?.continueFromPageIndex ??
+                                  0;
                               context.pushNamed(
                                 AppRoutes.createdStoryReadingScreen.name,
                                 extra: <String, dynamic>{
                                   "storyIdeaId": summary.storyIdeas[index].id,
+                                  "initialPageIndex": initialPage,
                                 },
                               );
                               storyProvider.createStory(
@@ -502,12 +575,14 @@ class _MyReadingItemTile extends StatelessWidget {
     required this.description,
     required this.thumbnailUrl,
     required this.topicThumbnailUrl,
+    this.continueReading,
   });
 
   final VoidCallback onOpenStory;
   final int index;
   final bool isSelected;
   final String title, description, thumbnailUrl, topicThumbnailUrl;
+  final summary_models.ContinueReading? continueReading;
 
   @override
   Widget build(BuildContext context) {
@@ -589,11 +664,71 @@ class _MyReadingItemTile extends StatelessWidget {
                 text: description,
                 onOpenStory: onOpenStory,
               ),
+              if (continueReading != null) ...[
+                6.w.verticalSpace,
+                _ReadingProgressIndicator(continueReading: continueReading!),
+              ],
             ],
           ),
         ),
       ],
     );
+  }
+}
+
+class _ReadingProgressIndicator extends StatelessWidget {
+  const _ReadingProgressIndicator({required this.continueReading});
+
+  final summary_models.ContinueReading continueReading;
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = continueReading.pageCount > 0
+        ? (continueReading.readPages / continueReading.pageCount).clamp(
+            0.0,
+            1.0,
+          )
+        : 0.0;
+    final label = continueReading.isCompleted
+        ? "Completed"
+        : "${continueReading.readPages}/${continueReading.pageCount} pages";
+
+    return continueReading.isCompleted
+        ? Container()
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10.r),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 4.h,
+                        backgroundColor: AppColors.black.withValues(
+                          alpha: 0.08,
+                        ),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          continueReading.isCompleted
+                              ? AppColors.teal
+                              : AppColors.orangeColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                  8.w.horizontalSpace,
+                  AppText(
+                    text: label,
+                    style: AppTextStyles.medium(
+                      fontSize: 11.sp,
+                      color: AppColors.black.withValues(alpha: 0.5),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
   }
 }
 

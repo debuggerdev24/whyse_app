@@ -24,6 +24,7 @@ class EditProfileProvider extends ChangeNotifier {
   String socialInstagram = '';
   String socialX = '';
   String socialGoogle = '';
+  List<String> interests = [];
 
   /// Picked image; uploaded only when user taps **Update Profile**.
   XFile? pendingAvatarFile;
@@ -45,6 +46,7 @@ class EditProfileProvider extends ChangeNotifier {
     required String preferredLanguage,
     required bool isPrivate,
     required SocialAccounts socialAccounts,
+    required List<String> interests,
   }) {
     this.firstName = firstName;
     this.lastName = lastName;
@@ -54,6 +56,7 @@ class EditProfileProvider extends ChangeNotifier {
     this.phone = phone;
     this.phoneVerified = phoneVerified;
     this.isPrivate = isPrivate;
+    this.interests = List<String>.from(interests);
     socialInstagram = socialAccounts.instagram?.trim() ?? '';
     socialX = socialAccounts.x?.trim() ?? '';
     socialGoogle = socialAccounts.google?.trim() ?? '';
@@ -121,6 +124,11 @@ class EditProfileProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setInterests(List<String> value) {
+    interests = List<String>.from(value);
+    notifyListeners();
+  }
+
   String countryDropdownValue() => country ?? _kSelectCountry;
 
   String languageDropdownValue() =>
@@ -152,6 +160,7 @@ class EditProfileProvider extends ChangeNotifier {
       'country': countryName,
       'preferredLanguage': language,
       'isPrivate': isPrivate,
+      'interests': interests,
       'socialAccounts': {
         'instagram': socialInstagram,
         'x': socialX,

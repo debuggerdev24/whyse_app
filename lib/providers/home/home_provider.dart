@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/models/home/browse_topic_model.dart';
+import 'package:redstreakapp/models/home/saved_series_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_history_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_topics.dart';
 import 'package:redstreakapp/models/home/story_models/story_summary_model.dart';
@@ -47,11 +48,16 @@ class HomeProvider extends ChangeNotifier {
   bool isTopicListToggling(String topicId) =>
       _togglingTopicIds.contains(topicId);
 
-  /// Use when displaying topic in list; falls back to topic.isInMyList if not overridden.
-  bool? topicIsInMyListOverride(String topicId) =>
-      _topicIsInMyListOverrides.containsKey(topicId)
-      ? _topicIsInMyListOverrides[topicId]
-      : null;
+  /// Returns whether topic is in my list. Checks toggle cache first, then saved list.
+  bool? topicIsInMyListOverride(String topicId) {
+    if (_topicIsInMyListOverrides.containsKey(topicId)) {
+      return _topicIsInMyListOverrides[topicId];
+    }
+    if (savedSeriesList != null) {
+      return savedSeriesList!.any((item) => item.topic.id == topicId);
+    }
+    return null;
+  }
 
   Future<void> getMyTopics() async {
     if (isTopicsLoading) return;
@@ -143,6 +149,47 @@ class HomeProvider extends ChangeNotifier {
         }
       },
     );
+    notifyListeners();
+  }
+
+  bool isGenerateSeriesLoading = false;
+  String? generateSeriesError;
+
+  Future<void> generateStoryIdeasForTopic({
+    required String topicId,
+  }) async {
+    isGenerateSeriesLoading = true;
+    generateSeriesError = null;
+    storySummary = null;
+    activeStoryIdeasTopicId = topicId;
+    notifyListeners();
+
+    final response = await StoryApiService.instance.createStoryIdeas(
+      data: {"topicid": topicId},
+    );
+
+    response.fold(
+      (l) {
+        Logger.error(l.errorMsg);
+        generateSeriesError = l.errorMsg;
+        storySummary = null;
+      },
+      (r) {
+        try {
+          final data = r["data"];
+          if (data != null && data is Map<String, dynamic>) {
+            storySummary = StoryIdeaModel.fromGenerateMobileJson(data);
+          } else {
+            generateSeriesError = "Invalid response format.";
+          }
+        } catch (e, stack) {
+          Logger.error("Error parsing generate-mobile response: $e\n$stack");
+          generateSeriesError = "Something went wrong. Please try again.";
+        }
+      },
+    );
+
+    isGenerateSeriesLoading = false;
     notifyListeners();
   }
 
@@ -316,6 +363,47 @@ class HomeProvider extends ChangeNotifier {
   //   );
   // }
 
+  Future<ToggleTopicListResult?> toggleTopicListById({
+    required String topicId,
+    required Function(String error) onFailed,
+  }) async {
+    if (_togglingTopicIds.contains(topicId)) return null;
+
+    _togglingTopicIds.add(topicId);
+    notifyListeners();
+
+    final response = await HomeApiService.instance.toggleTopicList(
+      topicId: topicId,
+    );
+
+    return response.fold(
+      (error) {
+        _togglingTopicIds.remove(topicId);
+        notifyListeners();
+        onFailed.call(error.errorMsg);
+        return null;
+      },
+      (result) async {
+        final data = result["data"] is Map
+            ? Map<String, dynamic>.from(result["data"] as Map)
+            : <String, dynamic>{};
+        final bool isInMyList = data["isInMyList"] == true;
+        final String topicTitle = data["topicTitle"]?.toString() ?? "";
+
+        _togglingTopicIds.remove(topicId);
+        _topicIsInMyListOverrides[topicId] = isInMyList;
+        notifyListeners();
+        await getMySeriesList();
+
+        return ToggleTopicListResult(
+          isInMyList: isInMyList,
+          topicTitle: topicTitle,
+          message: result["message"]?.toString(),
+        );
+      },
+    );
+  }
+
   Future<ToggleTopicListResult?> toggleTopicList({
     required BrowseTopicModel topic,
     required Function(String error) onFailed,
@@ -376,6 +464,42 @@ class HomeProvider extends ChangeNotifier {
     );
   }
 
+  // ─── My Saved Series List ───────────────────────────────────────────
+  List<SavedSeriesItem>? savedSeriesList;
+  bool isSavedSeriesLoading = false;
+
+  Future<void> getMySeriesList() async {
+    if (isSavedSeriesLoading) return;
+    isSavedSeriesLoading = true;
+    notifyListeners();
+
+    final response = await HomeApiService.instance.getMyList();
+
+    isSavedSeriesLoading = false;
+    response.fold(
+      (l) {
+        Logger.error(l.errorMsg);
+        savedSeriesList ??= [];
+      },
+      (r) {
+        try {
+          final data = r["data"];
+          if (data is Map && data.containsKey("items")) {
+            savedSeriesList = (data["items"] as List)
+                .map((e) => SavedSeriesItem.fromJson(e))
+                .toList();
+          } else {
+            savedSeriesList = [];
+          }
+        } catch (e, stack) {
+          Logger.error("Error parsing my-list: $e\n$stack");
+          savedSeriesList = [];
+        }
+      },
+    );
+    notifyListeners();
+  }
+
   void clearSessionData() {
     topicsList = null;
     isTopicsLoading = false;
@@ -391,6 +515,10 @@ class HomeProvider extends ChangeNotifier {
     activeStoryIdeasTopicId = null;
     _storyIdeasCurrentPage = 1;
     isGettingStoryLoading = false;
+    isGenerateSeriesLoading = false;
+    generateSeriesError = null;
+    savedSeriesList = null;
+    isSavedSeriesLoading = false;
     notifyListeners();
   }
 }
