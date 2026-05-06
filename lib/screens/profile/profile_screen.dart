@@ -7,6 +7,7 @@ import 'package:redstreakapp/models/friend/friend_model.dart';
 import 'package:redstreakapp/models/home/saved_series_model.dart';
 import 'package:redstreakapp/providers/friend/friend_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
+import 'package:redstreakapp/providers/home/saved_series_provider.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
 import 'package:redstreakapp/screens/profile/widgets/group_block.dart';
 import 'package:redstreakapp/screens/profile/widgets/profile_header_section.dart';
@@ -769,10 +770,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _mySeriesListBlock() {
-    return Consumer<HomeProvider>(
-      builder: (context, homeProvider, child) {
-        final list = homeProvider.savedSeriesList;
-        final isLoading = homeProvider.isSavedSeriesLoading;
+    return Consumer<SavedSeriesProvider>(
+      builder: (context, savedSeriesProvider, child) {
+        final list = savedSeriesProvider.savedSeriesList;
+        final isLoading = savedSeriesProvider.isSavedSeriesLoading;
 
         if (isLoading && list == null) {
           return Container(
@@ -854,7 +855,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       style: AppTextStyles.bold(fontSize: 20, color: AppColors.black),
                     ),
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () => context.pushNamed(
+                        AppRoutes.mySavedSeriesScreen.name,
+                      ),
                       child: AppText(
                         text: 'View all',
                         style: AppTextStyles.semibold(fontSize: 15, color: AppColors.teal),
@@ -869,13 +872,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: List.generate(
-                      list.length,
+                      list.length > 5 ? 5 : list.length,
                       (index) {
                         final item = list[index];
                         return _SavedSeriesCard(
                           item: item,
                           onTap: () {
-                            homeProvider.generateStoryIdeasForTopic(
+                            context.read<HomeProvider>().generateStoryIdeasForTopic(
                               topicId: item.topic.id,
                             );
                             context.pushNamed(
@@ -1055,20 +1058,59 @@ class _SavedSeriesCard extends StatelessWidget {
                 Positioned(
                   top: 0,
                   right: 0,
-                  child: Container(
-                    width: 32.h,
-                    height: 32.h,
-                    margin: EdgeInsets.only(top: 10.w, right: 10.w),
-                    decoration: const BoxDecoration(
-                      color: AppColors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.bookmark_rounded,
-                      size: 20.sp,
-                      color: AppColors.teal,
-                    ),
+                  child: Builder(
+                    builder: (context) {
+                      final ssp = context.watch<SavedSeriesProvider>();
+                      final isToggling =
+                          ssp.isTopicListToggling(topic.id);
+                      return GestureDetector(
+                        onTap: isToggling
+                            ? null
+                            : () async {
+                                final result =
+                                    await ssp.toggleTopic(
+                                  topicId: topic.id,
+                                  onFailed: (err) {
+                                    if (context.mounted) {
+                                      AppToast.error(context, err);
+                                    }
+                                  },
+                                );
+                                if (result != null && context.mounted) {
+                                  AppToast.success(
+                                    context,
+                                    result.isInMyList
+                                        ? 'Added to your list'
+                                        : 'Removed from your list',
+                                  );
+                                }
+                              },
+                        child: Container(
+                          width: 32.h,
+                          height: 32.h,
+                          margin: EdgeInsets.only(top: 10.w, right: 10.w),
+                          decoration: const BoxDecoration(
+                            color: AppColors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: Alignment.center,
+                          child: isToggling
+                              ? SizedBox(
+                                  width: 16.w,
+                                  height: 16.w,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.teal,
+                                  ),
+                                )
+                              : Icon(
+                                  Icons.bookmark_rounded,
+                                  size: 20.sp,
+                                  color: AppColors.teal,
+                                ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],

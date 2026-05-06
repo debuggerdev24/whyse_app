@@ -72,4 +72,5 @@ enum AppRoutes {
   friendsListScreen,
   addFriendsScreen,
   editInterestsScreen,
+  mySavedSeriesScreen,
 }

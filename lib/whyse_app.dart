@@ -2,6 +2,7 @@ import 'package:redstreakapp/core/auth/session_expiry_notifier.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
+import 'package:redstreakapp/providers/home/saved_series_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/services/deep_link/deep_link_handler.dart';
 
@@ -47,6 +48,7 @@ class _WhyseAppState extends State<WhyseApp> {
     context.read<AuthProvider>().clearAllData();
     context.read<HomeProvider>().clearSessionData();
     context.read<StoryProvider>().clearSessionData();
+    context.read<SavedSeriesProvider>().clearSessionData();
 
     // final rootContext = AppRouter.rootNavigatorKey.currentContext ?? context;
     // AppToast.error(rootContext, "Session expired. Please log in again", 3);

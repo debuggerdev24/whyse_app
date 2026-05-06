@@ -21,6 +21,23 @@ class DateFormatter {
     }
   }
 
+  /// Formats an ISO 8601 date-time string to a time-only string like "6:17 PM".
+  /// Returns [fallback] (default "—") if parsing fails.
+  static String formatTimeFrom(String? isoDateString, {String fallback = '—'}) {
+    if (isoDateString == null || isoDateString.isEmpty) return fallback;
+    try {
+      final dt = DateTime.parse(isoDateString).toLocal();
+      final hour = dt.hour;
+      final minute = dt.minute;
+      final h = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+      final amPm = hour < 12 ? 'AM' : 'PM';
+      final minStr = minute.toString().padLeft(2, '0');
+      return '$h:$minStr $amPm';
+    } catch (_) {
+      return fallback;
+    }
+  }
+
   /// Formats a [DateTime] to a readable string like "Feb 19, 2026, 1:13 PM".
   /// Uses local timezone.
   static String formatDateTimeFrom(DateTime dateTime) {

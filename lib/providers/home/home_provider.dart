@@ -1,25 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
-import 'package:redstreakapp/models/home/browse_topic_model.dart';
-import 'package:redstreakapp/models/home/saved_series_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_history_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_topics.dart';
 import 'package:redstreakapp/models/home/story_models/story_summary_model.dart';
 import 'package:redstreakapp/services/home/home_api_service.dart';
 import 'package:redstreakapp/services/home/story_api_service.dart';
-
-class ToggleTopicListResult {
-  final bool isInMyList;
-  final String topicTitle;
-  final String? message;
-
-  const ToggleTopicListResult({
-    required this.isInMyList,
-    required this.topicTitle,
-    this.message,
-  });
-}
 
 class HomeProvider extends ChangeNotifier {
   static const int storyIdeasPageLimit = 20;
@@ -40,24 +26,6 @@ class HomeProvider extends ChangeNotifier {
   String? storyIdeasError;
   String? activeStoryIdeasTopicId;
   int _storyIdeasCurrentPage = 1;
-  final Set<String> _togglingTopicIds = <String>{};
-
-  /// Cache of isInMyList after toggle so search list and story screen stay in sync.
-  final Map<String, bool> _topicIsInMyListOverrides = <String, bool>{};
-
-  bool isTopicListToggling(String topicId) =>
-      _togglingTopicIds.contains(topicId);
-
-  /// Returns whether topic is in my list. Checks toggle cache first, then saved list.
-  bool? topicIsInMyListOverride(String topicId) {
-    if (_topicIsInMyListOverrides.containsKey(topicId)) {
-      return _topicIsInMyListOverrides[topicId];
-    }
-    if (savedSeriesList != null) {
-      return savedSeriesList!.any((item) => item.topic.id == topicId);
-    }
-    return null;
-  }
 
   Future<void> getMyTopics() async {
     if (isTopicsLoading) return;
@@ -363,93 +331,6 @@ class HomeProvider extends ChangeNotifier {
   //   );
   // }
 
-  Future<ToggleTopicListResult?> toggleTopicListById({
-    required String topicId,
-    required Function(String error) onFailed,
-  }) async {
-    if (_togglingTopicIds.contains(topicId)) return null;
-
-    _togglingTopicIds.add(topicId);
-    notifyListeners();
-
-    final response = await HomeApiService.instance.toggleTopicList(
-      topicId: topicId,
-    );
-
-    return response.fold(
-      (error) {
-        _togglingTopicIds.remove(topicId);
-        notifyListeners();
-        onFailed.call(error.errorMsg);
-        return null;
-      },
-      (result) async {
-        final data = result["data"] is Map
-            ? Map<String, dynamic>.from(result["data"] as Map)
-            : <String, dynamic>{};
-        final bool isInMyList = data["isInMyList"] == true;
-        final String topicTitle = data["topicTitle"]?.toString() ?? "";
-
-        _togglingTopicIds.remove(topicId);
-        _topicIsInMyListOverrides[topicId] = isInMyList;
-        notifyListeners();
-        await getMySeriesList();
-
-        return ToggleTopicListResult(
-          isInMyList: isInMyList,
-          topicTitle: topicTitle,
-          message: result["message"]?.toString(),
-        );
-      },
-    );
-  }
-
-  Future<ToggleTopicListResult?> toggleTopicList({
-    required BrowseTopicModel topic,
-    required Function(String error) onFailed,
-  }) async {
-    if (_togglingTopicIds.contains(topic.id)) {
-      return null;
-    }
-
-    _togglingTopicIds.add(topic.id);
-    notifyListeners();
-
-    final response = await HomeApiService.instance.toggleTopicList(
-      topicId: topic.id,
-    );
-
-    return response.fold(
-      (error) {
-        _togglingTopicIds.remove(topic.id);
-        notifyListeners();
-        onFailed.call(error.errorMsg);
-        return null;
-      },
-      (result) async {
-        final data = result["data"] is Map
-            ? Map<String, dynamic>.from(result["data"] as Map)
-            : <String, dynamic>{};
-        final bool isInMyList = data["isInMyList"] == true;
-        final String topicTitle =
-            data["topicTitle"]?.toString().trim().isNotEmpty == true
-            ? data["topicTitle"].toString()
-            : topic.topic;
-
-        _togglingTopicIds.remove(topic.id);
-        _topicIsInMyListOverrides[topic.id] = isInMyList;
-        notifyListeners();
-        await getMyTopics();
-
-        return ToggleTopicListResult(
-          isInMyList: isInMyList,
-          topicTitle: topicTitle,
-          message: result["message"]?.toString(),
-        );
-      },
-    );
-  }
-
   Future<void> getTopicProgress({
     required String topicId,
     void Function(String errorMsg)? onFailed,
@@ -462,42 +343,6 @@ class HomeProvider extends ChangeNotifier {
       (error) => onFailed?.call(error.errorMsg),
       (result) => onSuccess(result),
     );
-  }
-
-  // ─── My Saved Series List ───────────────────────────────────────────
-  List<SavedSeriesItem>? savedSeriesList;
-  bool isSavedSeriesLoading = false;
-
-  Future<void> getMySeriesList() async {
-    if (isSavedSeriesLoading) return;
-    isSavedSeriesLoading = true;
-    notifyListeners();
-
-    final response = await HomeApiService.instance.getMyList();
-
-    isSavedSeriesLoading = false;
-    response.fold(
-      (l) {
-        Logger.error(l.errorMsg);
-        savedSeriesList ??= [];
-      },
-      (r) {
-        try {
-          final data = r["data"];
-          if (data is Map && data.containsKey("items")) {
-            savedSeriesList = (data["items"] as List)
-                .map((e) => SavedSeriesItem.fromJson(e))
-                .toList();
-          } else {
-            savedSeriesList = [];
-          }
-        } catch (e, stack) {
-          Logger.error("Error parsing my-list: $e\n$stack");
-          savedSeriesList = [];
-        }
-      },
-    );
-    notifyListeners();
   }
 
   void clearSessionData() {
@@ -517,8 +362,6 @@ class HomeProvider extends ChangeNotifier {
     isGettingStoryLoading = false;
     isGenerateSeriesLoading = false;
     generateSeriesError = null;
-    savedSeriesList = null;
-    isSavedSeriesLoading = false;
     notifyListeners();
   }
 }

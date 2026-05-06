@@ -1,10 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/widgets/global_widgets.dart';
+import 'package:redstreakapp/models/group/group_members_model.dart';
+import 'package:redstreakapp/models/group/group_shared_topic_model.dart';
+import 'package:redstreakapp/providers/home/saved_series_provider.dart';
 import 'package:redstreakapp/providers/profile/group_provider.dart';
 import 'package:redstreakapp/screens/group/group_details_tab.dart';
 import 'package:redstreakapp/screens/group/group_screen_params.dart';
 import 'package:redstreakapp/screens/group/widget/group_image_widget.dart';
+import 'package:shimmer/shimmer.dart';
 
 class UnifiedGroupScreen extends StatefulWidget {
   const UnifiedGroupScreen({super.key, required this.params});
@@ -33,7 +38,9 @@ class _UnifiedGroupScreenState extends State<UnifiedGroupScreen>
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context.read<GroupProvider>().getGroupMembers(groupId: widget.params.id);
+      final groupProvider = context.read<GroupProvider>();
+      groupProvider.getGroupMembers(groupId: widget.params.id);
+      groupProvider.getGroupSharedTopics(groupId: widget.params.id);
     });
   }
 
@@ -155,7 +162,7 @@ class _UnifiedGroupScreenState extends State<UnifiedGroupScreen>
               controller: _tabController,
               children: [
                 GroupDetailsTabBody(params: p),
-                const _GroupUpdatesTab(),
+                _GroupUpdatesTab(groupId: p.id),
                 const _GroupStreaksTab(),
               ],
             ),
@@ -172,7 +179,10 @@ class _UnifiedGroupScreenState extends State<UnifiedGroupScreen>
                   color: AppColors.white,
                 ),
                 onTap: () {
-                  context.pushNamed(AppRoutes.shareStoriesInGroupScreen.name);
+                  context.pushNamed(
+                    AppRoutes.shareStoriesInGroupScreen.name,
+                    extra: p.id,
+                  );
                 },
               ),
             ),
@@ -210,60 +220,119 @@ class _GroupTabBar extends StatelessWidget {
 }
 
 class _GroupUpdatesTab extends StatelessWidget {
-  const _GroupUpdatesTab();
+  const _GroupUpdatesTab({required this.groupId});
+
+  final String groupId;
+
+  Widget _buildShimmer() {
+    return ListView.separated(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 20.h),
+      itemCount: 3,
+      separatorBuilder: (_, __) => 20.h.verticalSpace,
+      itemBuilder: (_, __) => Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Shimmer.fromColors(
+            baseColor: AppColors.shimmerBaseColor,
+            highlightColor: AppColors.shimmerHighlightColor,
+            child: Container(
+              width: 36.w,
+              height: 36.w,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          10.w.horizontalSpace,
+          Expanded(
+            child: Shimmer.fromColors(
+              baseColor: AppColors.shimmerBaseColor,
+              highlightColor: AppColors.shimmerHighlightColor,
+              child: Container(
+                height: 200.h,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16.r),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      physics: const BouncingScrollPhysics(),
-      padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 20.h),
-      itemCount: _kGroupFeedItems.length,
-      separatorBuilder: (_, __) => 20.h.verticalSpace,
-      itemBuilder: (_, index) => _GroupFeedCard(item: _kGroupFeedItems[index]),
+    return Consumer<GroupProvider>(
+      builder: (context, groupProvider, _) {
+        final isLoading = groupProvider.isGroupSharedTopicsLoading;
+        final list = groupProvider.groupSharedTopics;
+
+        if (isLoading && list == null) return _buildShimmer();
+
+        if (list == null || list.isEmpty) {
+          return Center(
+            child: AppText(
+              text: 'No series shared in this group yet.',
+              style: AppTextStyles.medium(
+                fontSize: 14.sp,
+                color: AppColors.black.withValues(alpha: 0.45),
+              ),
+            ),
+          );
+        }
+
+        return ListView.separated(
+          physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 20.h),
+          itemCount: list.length,
+          separatorBuilder: (_, __) => 20.h.verticalSpace,
+          itemBuilder: (_, index) {
+            final item = list[index];
+            final member = groupProvider.groupMembersList.firstWhere(
+              (m) => m.userId == item.sharedBy,
+              orElse: () => GroupMember(
+                id: '',
+                groupId: '',
+                userId: '',
+                role: GroupMemberRole.member,
+                joinedAt: DateTime.now(),
+                displayName: 'Unknown',
+                email: '',
+                firstName: 'Unknown',
+                lastName: '',
+              ),
+            );
+            return _GroupFeedCard(
+              topic: item,
+              authorName: member.displayName,
+              sharedTime: DateFormatter.formatTimeFrom(item.sharedAt),
+            );
+          },
+        );
+      },
     );
   }
 }
 
-class _GroupFeedItem {
-  const _GroupFeedItem({
-    required this.author,
-    required this.time,
-    required this.title,
-    required this.progress,
-    required this.imagePath,
+class _GroupFeedCard extends StatelessWidget {
+  const _GroupFeedCard({
+    required this.topic,
+    required this.authorName,
+    required this.sharedTime,
   });
 
-  final String author;
-  final String time;
-  final String title;
-  final String progress;
-  final String imagePath;
-}
-
-const List<_GroupFeedItem> _kGroupFeedItems = [
-  _GroupFeedItem(
-    author: 'Ava Thompson',
-    time: '6:17 PM',
-    title: 'Nature',
-    progress: '0 out of 50 Readings',
-    imagePath: AppAssets.story1,
-  ),
-  _GroupFeedItem(
-    author: 'Liam Kumar',
-    time: '8:24 PM',
-    title: 'Space',
-    progress: '0 out of 50 Readings',
-    imagePath: AppAssets.story2,
-  ),
-];
-
-class _GroupFeedCard extends StatelessWidget {
-  const _GroupFeedCard({required this.item});
-
-  final _GroupFeedItem item;
+  final GroupSharedTopic topic;
+  final String authorName;
+  final String sharedTime;
 
   @override
   Widget build(BuildContext context) {
+    final detail = topic.topic;
+    final progress = detail.readingProgress;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -299,7 +368,7 @@ class _GroupFeedCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: AppText(
-                          text: item.author,
+                          text: authorName,
                           style: AppTextStyles.semibold(
                             fontSize: 15.sp,
                             color: AppColors.black,
@@ -307,7 +376,7 @@ class _GroupFeedCard extends StatelessWidget {
                         ),
                       ),
                       AppText(
-                        text: item.time,
+                        text: sharedTime,
                         style: AppTextStyles.medium(
                           fontSize: 12.sp,
                           color: AppColors.black.withValues(alpha: 0.45),
@@ -320,11 +389,17 @@ class _GroupFeedCard extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 12.w),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10.r),
-                    child: Image.asset(
-                      item.imagePath,
+                    child: CachedNetworkImage(
+                      imageUrl: detail.thumbnailUrl,
                       width: double.infinity,
                       height: 120.h,
                       fit: BoxFit.cover,
+                      placeholder: (_, __) => Shimmer.fromColors(
+                        baseColor: AppColors.shimmerBaseColor,
+                        highlightColor: AppColors.shimmerHighlightColor,
+                        child: Container(color: AppColors.shimmerBaseColor),
+                      ),
+                      errorWidget: (_, __, ___) => const NoImageFound(),
                     ),
                   ),
                 ),
@@ -342,7 +417,7 @@ class _GroupFeedCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         AppText(
-                          text: item.title,
+                          text: detail.title,
                           style: AppTextStyles.bold(
                             fontSize: 16.sp,
                             color: AppColors.black,
@@ -350,7 +425,8 @@ class _GroupFeedCard extends StatelessWidget {
                         ),
                         4.h.verticalSpace,
                         AppText(
-                          text: item.progress,
+                          text:
+                              '${progress.completedStories} out of ${progress.totalStories} Readings',
                           style: AppTextStyles.medium(
                             fontSize: 13.sp,
                             color: AppColors.black.withValues(alpha: 0.72),
@@ -367,15 +443,74 @@ class _GroupFeedCard extends StatelessWidget {
                     right: 12.w,
                     bottom: 12.h,
                   ),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: AppText(
-                      text: 'Add to My List',
-                      style: AppTextStyles.semibold(
-                        fontSize: 14.sp,
-                        color: AppColors.teal,
-                      ),
-                    ),
+                  child: Builder(
+                    builder: (context) {
+                      final ssp = context.watch<SavedSeriesProvider>();
+                      final topicId = detail.id;
+                      final isToggling =
+                          ssp.isTopicListToggling(topicId);
+                      final isInList =
+                          ssp.topicIsInMyListOverride(topicId) ??
+                          false;
+
+                      return GestureDetector(
+                        onTap: isToggling
+                            ? null
+                            : () async {
+                                final result =
+                                    await ssp.toggleTopic(
+                                  topicId: topicId,
+                                  onFailed: (err) {
+                                    if (context.mounted) {
+                                      AppToast.error(context, err);
+                                    }
+                                  },
+                                );
+                                if (result != null && context.mounted) {
+                                  AppToast.success(
+                                    context,
+                                    result.isInMyList
+                                        ? 'Added to your list'
+                                        : 'Removed from your list',
+                                  );
+                                }
+                              },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (isToggling)
+                              SizedBox(
+                                width: 14.w,
+                                height: 14.w,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.teal,
+                                ),
+                              )
+                            else
+                              Icon(
+                                isInList
+                                    ? Icons.bookmark_rounded
+                                    : Icons.bookmark_border_rounded,
+                                size: 16.sp,
+                                color: AppColors.teal,
+                              ),
+                            6.w.horizontalSpace,
+                            AppText(
+                              text: isToggling
+                                  ? (isInList ? 'Removing…' : 'Adding…')
+                                  : (isInList
+                                      ? 'Remove from List'
+                                      : 'Add to My List'),
+                              style: AppTextStyles.semibold(
+                                fontSize: 14.sp,
+                                color: AppColors.teal,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],

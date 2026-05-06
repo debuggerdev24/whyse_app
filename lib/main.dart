@@ -9,6 +9,7 @@ import 'package:redstreakapp/providers/profile/edit_profile_provider.dart';
 import 'package:redstreakapp/providers/profile/group_provider.dart';
 import 'package:redstreakapp/providers/home/curiosity_reading_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
+import 'package:redstreakapp/providers/home/saved_series_provider.dart';
 import 'package:redstreakapp/providers/home/quiz_provider.dart';
 import 'package:redstreakapp/providers/home/reading_appearance_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
@@ -40,6 +41,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => QuizProvider()),
         ChangeNotifierProvider(create: (_) => OnBoardingProvider()),
         ChangeNotifierProvider(create: (_) => HomeProvider()),
+        ChangeNotifierProvider(create: (_) => SavedSeriesProvider()),
         ChangeNotifierProvider(
           create: (_) => ProfileProvider(
             ProfileService(BaseApiHelper.instance),

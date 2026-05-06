@@ -3,7 +3,9 @@ import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/models/group/group_members_model.dart';
 import 'package:redstreakapp/models/group/group_response_model.dart';
+import 'package:redstreakapp/models/group/group_shared_topic_model.dart';
 import 'package:redstreakapp/models/group/search_user_model.dart';
+import 'package:redstreakapp/models/group/shareable_topic_model.dart';
 import 'package:redstreakapp/services/profile/group_api_service.dart';
 
 class GroupProvider extends ChangeNotifier {
@@ -410,5 +412,174 @@ class GroupProvider extends ChangeNotifier {
       );
       notifyListeners();
     }
+  }
+
+  // ---------- Group Shared Topics ----------
+
+  List<GroupSharedTopic>? groupSharedTopics;
+  bool isGroupSharedTopicsLoading = false;
+
+  Future<void> getGroupSharedTopics({required String groupId}) async {
+    groupSharedTopics = null;
+    isGroupSharedTopicsLoading = true;
+    notifyListeners();
+
+    try {
+      final result = await _groupApiService.getGroupSharedTopics(
+        groupId: groupId,
+      );
+      result.fold(
+        (error) {
+          Logger.error(
+            '[GROUP PROVIDER]: error getting shared topics: ${error.errorMsg}',
+          );
+        },
+        (r) {
+          final data = r['data'];
+          final list = data is Map ? data['items'] : data;
+          if (list is List) {
+            groupSharedTopics = list
+                .map((e) => GroupSharedTopic.fromJson(
+                      Map<String, dynamic>.from(e as Map? ?? {}),
+                    ))
+                .toList();
+          } else {
+            groupSharedTopics = [];
+          }
+        },
+      );
+    } catch (e) {
+      Logger.error(
+        '[GROUP PROVIDER]: exception in getting shared topics: $e',
+      );
+      groupSharedTopics = [];
+    } finally {
+      isGroupSharedTopicsLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // ---------- Shareable Topics (Select Series screen) ----------
+
+  List<ShareableTopicItem> shareableTopics = [];
+  bool isShareableTopicsLoading = false;
+  bool isLoadingMoreShareableTopics = false;
+  bool hasMoreShareableTopics = true;
+  int _shareableTopicsPage = 1;
+  bool isSharingTopics = false;
+
+  Future<void> fetchShareableTopics({bool refresh = false}) async {
+    if (isShareableTopicsLoading) return;
+    if (refresh) {
+      _shareableTopicsPage = 1;
+      shareableTopics = [];
+      hasMoreShareableTopics = true;
+    }
+    isShareableTopicsLoading = true;
+    notifyListeners();
+
+    try {
+      final result = await _groupApiService.getShareableTopics(
+        page: _shareableTopicsPage,
+        limit: 10,
+      );
+      result.fold(
+        (error) => Logger.error('[GROUP PROVIDER] shareable topics: ${error.errorMsg}'),
+        (r) {
+          final data = r['data'];
+          if (data is Map) {
+            final items = ((data['items'] as List?) ?? [])
+                .map((e) => ShareableTopicItem.fromJson(
+                      Map<String, dynamic>.from(e as Map? ?? {}),
+                    ))
+                .toList();
+            if (refresh || _shareableTopicsPage == 1) {
+              shareableTopics = items;
+            } else {
+              shareableTopics.addAll(items);
+            }
+            final pagination = data['pagination'] as Map?;
+            final totalPages = pagination?['totalPages'] as int? ?? 1;
+            hasMoreShareableTopics = _shareableTopicsPage < totalPages;
+          }
+        },
+      );
+    } catch (e) {
+      Logger.error('[GROUP PROVIDER] shareable topics exception: $e');
+    } finally {
+      isShareableTopicsLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchMoreShareableTopics() async {
+    if (isLoadingMoreShareableTopics || !hasMoreShareableTopics) return;
+    _shareableTopicsPage++;
+    isLoadingMoreShareableTopics = true;
+    notifyListeners();
+
+    try {
+      final result = await _groupApiService.getShareableTopics(
+        page: _shareableTopicsPage,
+        limit: 10,
+      );
+      result.fold(
+        (error) {
+          _shareableTopicsPage--;
+          Logger.error('[GROUP PROVIDER] load more shareable topics: ${error.errorMsg}');
+        },
+        (r) {
+          final data = r['data'];
+          if (data is Map) {
+            final items = ((data['items'] as List?) ?? [])
+                .map((e) => ShareableTopicItem.fromJson(
+                      Map<String, dynamic>.from(e as Map? ?? {}),
+                    ))
+                .toList();
+            shareableTopics.addAll(items);
+            final pagination = data['pagination'] as Map?;
+            final totalPages = pagination?['totalPages'] as int? ?? 1;
+            hasMoreShareableTopics = _shareableTopicsPage < totalPages;
+          }
+        },
+      );
+    } catch (e) {
+      _shareableTopicsPage--;
+      Logger.error('[GROUP PROVIDER] load more shareable topics exception: $e');
+    } finally {
+      isLoadingMoreShareableTopics = false;
+      notifyListeners();
+    }
+  }
+
+  Future<String?> shareTopicsInGroup({
+    required String groupId,
+    required List<String> topicIds,
+  }) async {
+    isSharingTopics = true;
+    notifyListeners();
+
+    String? message;
+    try {
+      final result = await _groupApiService.shareTopicsInGroup(
+        groupId: groupId,
+        topicIds: topicIds,
+      );
+      result.fold(
+        (error) {
+          Logger.error('[GROUP PROVIDER] share topics: ${error.errorMsg}');
+        },
+        (r) {
+          message = r['message']?.toString();
+          getGroupSharedTopics(groupId: groupId);
+        },
+      );
+    } catch (e) {
+      Logger.error('[GROUP PROVIDER] share topics exception: $e');
+    } finally {
+      isSharingTopics = false;
+      notifyListeners();
+    }
+    return message;
   }
 }

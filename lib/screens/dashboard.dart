@@ -7,6 +7,7 @@ import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
+import 'package:redstreakapp/providers/home/saved_series_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
 import 'package:redstreakapp/core/routes/app_router.dart';
@@ -38,7 +39,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
   void callInitApis({required BuildContext context}) {
     context.read<ProfileProvider>().getProfile();
     homeProvider.getMyTopics();
-    homeProvider.getMySeriesList();
+    context.read<SavedSeriesProvider>().getMySeriesList();
     // storyProvider.getAllStories();
 
     storyProvider.getStoryGoals(

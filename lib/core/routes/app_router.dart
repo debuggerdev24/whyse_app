@@ -24,6 +24,7 @@ import 'package:redstreakapp/screens/group/join_group_screen.dart';
 import 'package:redstreakapp/screens/group/share_stories_in_group_screen.dart';
 import 'package:redstreakapp/screens/profile/friends_list_screen.dart';
 import 'package:redstreakapp/screens/profile/add_friends_screen.dart';
+import 'package:redstreakapp/screens/profile/my_saved_series_screen.dart';
 import 'package:redstreakapp/screens/group/streak_ranking_screen.dart';
 import 'package:redstreakapp/screens/group/view_group_screen.dart';
 import 'package:redstreakapp/screens/home/curiosity_reading/curiosity_reading_screen.dart';
@@ -577,7 +578,8 @@ class AppRouter {
           path: AppRoutes.shareStoriesInGroupScreen.name,
           name: AppRoutes.shareStoriesInGroupScreen.name,
           builder: (context, state) {
-            return const ShareStoriesInGroupScreen();
+            final groupId = state.extra as String? ?? '';
+            return ShareStoriesInGroupScreen(groupId: groupId);
           },
         ),
         GoRoute(
@@ -599,6 +601,13 @@ class AppRouter {
           name: AppRoutes.editInterestsScreen.name,
           builder: (context, state) {
             return const EditInterestsScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.mySavedSeriesScreen.name,
+          name: AppRoutes.mySavedSeriesScreen.name,
+          builder: (context, state) {
+            return const MySavedSeriesScreen();
           },
         ),
       ],

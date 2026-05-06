@@ -104,4 +104,13 @@ class EndPoints {
 
   static String removeFriend({required String friendshipId}) =>
       "/mobile/friends/$friendshipId";
+
+  static String groupSharedTopics({required String groupId}) =>
+      "/mobile/groups/$groupId/topics/shared";
+
+  static String shareTopicsInGroup({required String groupId}) =>
+      "/mobile/groups/$groupId/topics/share";
+
+  static String getShareableTopics({int page = 1, int limit = 10}) =>
+      "/mobile/groups/shareable-topics?page=$page&limit=$limit";
 }

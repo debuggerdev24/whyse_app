@@ -81,4 +81,31 @@ class GroupApiService {
       EndPoints.searchUsers(page: page, limit: limit, q: q),
     );
   }
+
+  Future<Either<ApiException, Map<String, dynamic>>> getGroupSharedTopics({
+    required String groupId,
+  }) async {
+    return await _apiHelper.get(
+      EndPoints.groupSharedTopics(groupId: groupId),
+    );
+  }
+
+  Future<Either<ApiException, Map<String, dynamic>>> shareTopicsInGroup({
+    required String groupId,
+    required List<String> topicIds,
+  }) async {
+    return await _apiHelper.post(
+      EndPoints.shareTopicsInGroup(groupId: groupId),
+      data: {"topicIds": topicIds},
+    );
+  }
+
+  Future<Either<ApiException, Map<String, dynamic>>> getShareableTopics({
+    int page = 1,
+    int limit = 10,
+  }) async {
+    return await _apiHelper.get(
+      EndPoints.getShareableTopics(page: page, limit: limit),
+    );
+  }
 }

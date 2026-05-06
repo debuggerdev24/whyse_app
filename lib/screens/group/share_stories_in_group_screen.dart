@@ -1,21 +1,48 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/global_widgets.dart';
-import 'package:redstreakapp/models/home/saved_series_model.dart';
-import 'package:redstreakapp/providers/home/home_provider.dart';
+import 'package:redstreakapp/models/group/shareable_topic_model.dart';
+import 'package:redstreakapp/providers/profile/group_provider.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ShareStoriesInGroupScreen extends StatefulWidget {
-  const ShareStoriesInGroupScreen({super.key});
+  const ShareStoriesInGroupScreen({super.key, required this.groupId});
+
+  final String groupId;
 
   @override
   State<ShareStoriesInGroupScreen> createState() =>
       _ShareStoriesInGroupScreenState();
 }
 
-class _ShareStoriesInGroupScreenState extends State<ShareStoriesInGroupScreen> {
+class _ShareStoriesInGroupScreenState
+    extends State<ShareStoriesInGroupScreen> {
   final Set<String> _selectedTopicIds = <String>{};
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<GroupProvider>().fetchShareableTopics(refresh: true);
+    });
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      context.read<GroupProvider>().fetchMoreShareableTopics();
+    }
+  }
 
   void _toggleSelection(String topicId) {
     setState(() {
@@ -27,12 +54,18 @@ class _ShareStoriesInGroupScreenState extends State<ShareStoriesInGroupScreen> {
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    final homeProvider = context.read<HomeProvider>();
-    if (homeProvider.savedSeriesList == null) {
-      homeProvider.getMySeriesList();
+  Future<void> _shareTopics() async {
+    final groupProvider = context.read<GroupProvider>();
+    final message = await groupProvider.shareTopicsInGroup(
+      groupId: widget.groupId,
+      topicIds: _selectedTopicIds.toList(),
+    );
+    if (!mounted) return;
+    if (message != null) {
+      AppToast.success(context, message);
+      context.pop();
+    } else {
+      AppToast.error(context, 'Failed to share. Please try again.');
     }
   }
 
@@ -56,24 +89,36 @@ class _ShareStoriesInGroupScreenState extends State<ShareStoriesInGroupScreen> {
         actions: [
           Padding(
             padding: EdgeInsets.only(right: 16.w),
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: _selectedTopicIds.isEmpty
-                  ? null
-                  : () {
-                      context.pop();
-                    },
-              child: Center(
-                child: AppText(
-                  text: 'Share with',
-                  style: AppTextStyles.bold(
-                    fontSize: 14,
-                    color: _selectedTopicIds.isEmpty
-                        ? AppColors.teal.withValues(alpha: 0.45)
-                        : AppColors.teal,
+            child: Selector<GroupProvider, bool>(
+              selector: (_, gp) => gp.isSharingTopics,
+              builder: (context, isSharingTopics, _) {
+                final canShare =
+                    _selectedTopicIds.isNotEmpty && !isSharingTopics;
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: canShare ? _shareTopics : null,
+                  child: Center(
+                    child: isSharingTopics
+                        ? SizedBox(
+                            width: 18.w,
+                            height: 18.w,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.teal,
+                            ),
+                          )
+                        : AppText(
+                            text: 'Share',
+                            style: AppTextStyles.bold(
+                              fontSize: 14,
+                              color: canShare
+                                  ? AppColors.teal
+                                  : AppColors.teal.withValues(alpha: 0.45),
+                            ),
+                          ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ),
         ],
@@ -85,16 +130,13 @@ class _ShareStoriesInGroupScreenState extends State<ShareStoriesInGroupScreen> {
           ),
         ),
       ),
-      body: Consumer<HomeProvider>(
-        builder: (context, homeProvider, child) {
-          final list = homeProvider.savedSeriesList;
-          final isLoading = homeProvider.isSavedSeriesLoading;
-
-          if (isLoading && list == null) {
+      body: Consumer<GroupProvider>(
+        builder: (context, gp, _) {
+          if (gp.isShareableTopicsLoading && gp.shareableTopics.isEmpty) {
             return _buildShimmerGrid();
           }
 
-          if (list == null || list.isEmpty) {
+          if (gp.shareableTopics.isEmpty) {
             return Center(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 28.w),
@@ -102,13 +144,13 @@ class _ShareStoriesInGroupScreenState extends State<ShareStoriesInGroupScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons.bookmark_border_rounded,
+                      Icons.auto_stories_rounded,
                       size: 48.w,
                       color: AppColors.black.withValues(alpha: 0.3),
                     ),
                     16.w.verticalSpace,
                     AppText(
-                      text: "No saved series yet.\nAdd series to your list to share them.",
+                      text: "No series available to share.",
                       textAlign: TextAlign.center,
                       style: AppTextStyles.medium(
                         fontSize: 16.sp,
@@ -122,22 +164,27 @@ class _ShareStoriesInGroupScreenState extends State<ShareStoriesInGroupScreen> {
           }
 
           return GridView.builder(
+            controller: _scrollController,
             physics: const BouncingScrollPhysics(),
             padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 20.h),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               mainAxisSpacing: 16.h,
               crossAxisSpacing: 12.w,
-              childAspectRatio: 0.66,
+              childAspectRatio: 0.62,
             ),
-            itemCount: list.length,
+            itemCount: gp.shareableTopics.length +
+                (gp.isLoadingMoreShareableTopics ? 2 : 0),
             itemBuilder: (context, index) {
-              final item = list[index];
-              final selected = _selectedTopicIds.contains(item.topic.id);
+              if (index >= gp.shareableTopics.length) {
+                return _buildShimmerTile();
+              }
+              final item = gp.shareableTopics[index];
+              final selected = _selectedTopicIds.contains(item.id);
               return _SeriesTile(
                 item: item,
                 selected: selected,
-                onTap: () => _toggleSelection(item.topic.id),
+                onTap: () => _toggleSelection(item.id),
               );
             },
           );
@@ -154,35 +201,38 @@ class _ShareStoriesInGroupScreenState extends State<ShareStoriesInGroupScreen> {
         crossAxisCount: 2,
         mainAxisSpacing: 16.h,
         crossAxisSpacing: 12.w,
-        childAspectRatio: 0.66,
+        childAspectRatio: 0.62,
       ),
-      itemCount: 4,
-      itemBuilder: (context, index) {
-        return Shimmer.fromColors(
-          baseColor: AppColors.shimmerBaseColor,
-          highlightColor: AppColors.shimmerHighlightColor,
-          child: Column(
-            children: [
-              Container(
-                height: 200.h,
-                decoration: BoxDecoration(
-                  color: AppColors.shimmerBaseColor,
-                  borderRadius: BorderRadius.circular(18.r),
-                ),
+      itemCount: 6,
+      itemBuilder: (_, __) => _buildShimmerTile(),
+    );
+  }
+
+  Widget _buildShimmerTile() {
+    return Shimmer.fromColors(
+      baseColor: AppColors.shimmerBaseColor,
+      highlightColor: AppColors.shimmerHighlightColor,
+      child: Column(
+        children: [
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.shimmerBaseColor,
+                borderRadius: BorderRadius.circular(18.r),
               ),
-              12.h.verticalSpace,
-              Container(
-                width: 30.h,
-                height: 30.h,
-                decoration: BoxDecoration(
-                  color: AppColors.shimmerBaseColor,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ],
+            ),
           ),
-        );
-      },
+          12.h.verticalSpace,
+          Container(
+            width: 30.h,
+            height: 30.h,
+            decoration: BoxDecoration(
+              color: AppColors.shimmerBaseColor,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -194,104 +244,113 @@ class _SeriesTile extends StatelessWidget {
     required this.onTap,
   });
 
-  final SavedSeriesItem item;
+  final ShareableTopicItem item;
   final bool selected;
   final VoidCallback onTap;
 
+  String _resolveImageUrl(String? raw) {
+    if (raw == null || raw.isEmpty) return '';
+    if (raw.startsWith('http')) return raw;
+    final base = dotenv.env['BASE_URL'] ?? '';
+    return '$base$raw';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final topic = item.topic;
+    final imageUrl = _resolveImageUrl(item.thumbnailUrl);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Column(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(18.r),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.black.withValues(alpha: 0.07),
-                  blurRadius: 14,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(20.r),
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(18.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.black.withValues(alpha: 0.07),
+                    blurRadius: 14,
+                    offset: const Offset(0, 6),
                   ),
-                  child: Stack(
-                    children: [
-                      SizedBox(
-                        height: 120.h,
-                        width: double.infinity,
-                        child: topic.thumbnailUrl.isNotEmpty
-                            ? CachedNetworkImage(
-                                imageUrl: topic.thumbnailUrl,
-                                fit: BoxFit.cover,
-                                placeholder: (_, __) => Shimmer.fromColors(
-                                  baseColor: AppColors.shimmerBaseColor,
-                                  highlightColor: AppColors.shimmerHighlightColor,
-                                  child: Container(
-                                    height: 120.h,
-                                    width: double.infinity,
-                                    color: AppColors.shimmerBaseColor,
+                ],
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: imageUrl.isNotEmpty
+                              ? CachedNetworkImage(
+                                  imageUrl: imageUrl,
+                                  fit: BoxFit.cover,
+                                  placeholder: (_, __) => Shimmer.fromColors(
+                                    baseColor: AppColors.shimmerBaseColor,
+                                    highlightColor:
+                                        AppColors.shimmerHighlightColor,
+                                    child: Container(
+                                      color: AppColors.shimmerBaseColor,
+                                    ),
                                   ),
-                                ),
-                                errorWidget: (_, __, ___) =>
-                                    const NoImageFound(compact: true, iconOnly: true),
-                              )
-                            : const NoImageFound(compact: true, iconOnly: true),
-                      ),
-                      Positioned(
-                        top: 8.h,
-                        right: 8.w,
-                        child: Container(
-                          width: 32.w,
-                          height: 32.w,
-                          decoration: const BoxDecoration(
-                            color: AppColors.white,
-                            shape: BoxShape.circle,
+                                  errorWidget: (_, __, ___) =>
+                                      const NoImageFound(
+                                    compact: true,
+                                    iconOnly: true,
+                                  ),
+                                )
+                              : const NoImageFound(compact: true, iconOnly: true),
+                        ),
+                        if (item.isSavedTopic)
+                          Positioned(
+                            top: 8.h,
+                            right: 8.w,
+                            child: Container(
+                              width: 30.w,
+                              height: 30.w,
+                              decoration: const BoxDecoration(
+                                color: AppColors.white,
+                                shape: BoxShape.circle,
+                              ),
+                              alignment: Alignment.center,
+                              child: SvgIcon(
+                                AppAssets.bookmark,
+                                size: 18.sp,
+                                color: AppColors.teal,
+                              ),
+                            ),
                           ),
-                          alignment: Alignment.center,
-                          child: SvgIcon(
-                            AppAssets.bookmark,
-                            size: 20.sp,
-                            color: AppColors.black,
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(14.w, 10.h, 14.w, 12.h),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AppText(
+                          text: item.title,
+                          style: AppTextStyles.bold(fontSize: 16.sp),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        3.h.verticalSpace,
+                        AppText(
+                          text:
+                              '${item.readingProgress.totalReadings} Readings',
+                          style: AppTextStyles.medium(
+                            fontSize: 12.sp,
+                            color: AppColors.black.setOpacity(0.5),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(18.w, 12.h, 14.w, 14.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AppText(
-                        text: topic.title,
-                        style: AppTextStyles.bold(fontSize: 20),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      2.h.verticalSpace,
-                      AppText(
-                        text: '${topic.storiesCount} Readings',
-                        style: AppTextStyles.semibold(
-                          fontSize: 12,
-                          color: AppColors.black.setOpacity(0.8),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           12.h.verticalSpace,
@@ -304,7 +363,7 @@ class _SeriesTile extends StatelessWidget {
               border: Border.all(
                 color: selected
                     ? AppColors.teal
-                    : AppColors.black.withValues(alpha: 0.1),
+                    : AppColors.black.withValues(alpha: 0.12),
               ),
             ),
             child: selected

@@ -11,6 +11,7 @@ import 'package:redstreakapp/core/utils/custom_loader.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/models/home/browse_topic_model.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
+import 'package:redstreakapp/providers/home/saved_series_provider.dart';
 import 'package:redstreakapp/core/routes/app_router.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/screens/dashboard.dart';
@@ -287,13 +288,15 @@ class _SearchScreenState extends State<SearchScreen> {
   // }
 
   Future<void> _handleTopicListToggle(BrowseTopicModel topic) async {
-    final result = await context.read<HomeProvider>().toggleTopicList(
-      topic: topic,
+    final result = await context.read<SavedSeriesProvider>().toggleTopic(
+      topicId: topic.id,
+      fallbackTitle: topic.topic,
       onFailed: (error) {
         if (mounted) {
           AppToast.error(context, error);
         }
       },
+      postToggleCallback: context.read<HomeProvider>().getMyTopics,
     );
 
     if (!mounted || result == null) return;
@@ -321,7 +324,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final homeProvider = context.watch<HomeProvider>();
+    final savedSeriesProvider = context.watch<SavedSeriesProvider>();
     final visibleTopics = _visibleTopics;
 
     return PopScope(
@@ -395,7 +398,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         visibleTopics.length,
                         (index) {                          
                           final topic = visibleTopics[index];
-                          final isInMyList = homeProvider
+                          final isInMyList = savedSeriesProvider
                                   .topicIsInMyListOverride(topic.id) ??
                               topic.isInMyList;
                           final topicWithSync = topic.copyWith(isInMyList: isInMyList);
@@ -403,7 +406,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             topic: topicWithSync,
                             onTap: () => _openTopicProgress(topicWithSync),
                             onToggleMyList: () => _handleTopicListToggle(topicWithSync),
-                            isToggleLoading: homeProvider
+                            isToggleLoading: savedSeriesProvider
                                 .isTopicListToggling(topic.id),
                           );
                         },

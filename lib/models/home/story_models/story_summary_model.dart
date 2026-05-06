@@ -1,3 +1,55 @@
+class TopicInterest {
+    String id;
+    String name;
+
+    TopicInterest({required this.id, required this.name});
+
+    factory TopicInterest.fromJson(Map<String, dynamic> json) => TopicInterest(
+        id: json["id"]?.toString() ?? "",
+        name: json["name"]?.toString() ?? "",
+    );
+}
+
+class SubjectItem {
+    String id;
+    String name;
+
+    SubjectItem({required this.id, required this.name});
+
+    factory SubjectItem.fromJson(Map<String, dynamic> json) => SubjectItem(
+        id: json["id"]?.toString() ?? "",
+        name: json["name"]?.toString() ?? "",
+    );
+}
+
+class SubjectsData {
+    List<SubjectItem> all;
+    List<String> allIds;
+    String type;
+
+    SubjectsData({
+        required this.all,
+        required this.allIds,
+        required this.type,
+    });
+
+    factory SubjectsData.fromJson(Map<String, dynamic> json) => SubjectsData(
+        all: json["all"] is List
+            ? (json["all"] as List)
+                .map((e) => SubjectItem.fromJson(
+                      Map<String, dynamic>.from(e as Map? ?? {}),
+                    ))
+                .toList()
+            : [],
+        allIds: json["allIds"] is List
+            ? List<String>.from(
+                (json["allIds"] as List).map((x) => x.toString()),
+              )
+            : [],
+        type: json["type"]?.toString() ?? "",
+    );
+}
+
 class StoryIdeaModel {
     String topicId;
     String topicTitle;
@@ -7,6 +59,19 @@ class StoryIdeaModel {
     String topicThumbnailUrl;
     List<StoryIdea> storyIdeas;
     OverallProgress? overallProgress;
+    // Top-level generate-mobile fields
+    String? promptType;
+    String? grade;
+    String? mustIncludeWords;
+    // Extended topic fields
+    List<TopicInterest> topicInterests;
+    String? topicCreatedAt;
+    String? topicThumbnailSource;
+    String? topicThumbnailLicense;
+    String? topicThumbnailAttribution;
+    String? topicThumbnailSearchEntity;
+    // Subjects from data.subjects
+    SubjectsData? subjects;
 
     StoryIdeaModel({
         required this.topicId,
@@ -17,7 +82,17 @@ class StoryIdeaModel {
         required this.topicThumbnailUrl,
         required this.storyIdeas,
         this.overallProgress,
-    });
+        this.promptType,
+        this.grade,
+        this.mustIncludeWords,
+        List<TopicInterest>? topicInterests,
+        this.topicCreatedAt,
+        this.topicThumbnailSource,
+        this.topicThumbnailLicense,
+        this.topicThumbnailAttribution,
+        this.topicThumbnailSearchEntity,
+        this.subjects,
+    }) : topicInterests = topicInterests ?? [];
 
     factory StoryIdeaModel.fromJson(Map<String, dynamic> json) => StoryIdeaModel(
         topicId: json["topicId"]?.toString() ?? "",
@@ -58,6 +133,26 @@ class StoryIdeaModel {
             overallProgress: progress != null
                 ? OverallProgress.fromJson(progress)
                 : null,
+            promptType: json["promptType"]?.toString(),
+            grade: json["grade"]?.toString(),
+            mustIncludeWords: json["mustIncludeWords"]?.toString(),
+            topicInterests: topic["interests"] is List
+                ? (topic["interests"] as List)
+                    .map((e) => TopicInterest.fromJson(
+                          Map<String, dynamic>.from(e as Map? ?? {}),
+                        ))
+                    .toList()
+                : [],
+            topicCreatedAt: topic["createdAt"]?.toString(),
+            topicThumbnailSource: topic["thumbnailSource"]?.toString(),
+            topicThumbnailLicense: topic["thumbnailLicense"]?.toString(),
+            topicThumbnailAttribution: topic["thumbnailAttribution"]?.toString(),
+            topicThumbnailSearchEntity: topic["thumbnailSearchEntity"]?.toString(),
+            subjects: json["subjects"] is Map
+                ? SubjectsData.fromJson(
+                    Map<String, dynamic>.from(json["subjects"] as Map),
+                  )
+                : null,
         );
     }
 }
@@ -75,6 +170,14 @@ class StoryIdea {
     bool isGenerated;
     bool hasStory;
     ContinueReading? continueReading;
+    // Extended fields from generate-mobile response
+    String? sampleQuestion;
+    List<String> subjectIds;
+    List<String> extraSubjectTags;
+    String? thumbnailSource;
+    String? thumbnailLicense;
+    String? thumbnailAttribution;
+    String? thumbnailSearchEntity;
 
     StoryIdea({
         required this.id,
@@ -94,7 +197,15 @@ class StoryIdea {
         required this.createdOn,
         required this.updatedAt,
         this.continueReading,
-    });
+        this.sampleQuestion,
+        List<String>? subjectIds,
+        List<String>? extraSubjectTags,
+        this.thumbnailSource,
+        this.thumbnailLicense,
+        this.thumbnailAttribution,
+        this.thumbnailSearchEntity,
+    })  : subjectIds = subjectIds ?? [],
+          extraSubjectTags = extraSubjectTags ?? [];
 
     factory StoryIdea.fromJson(Map<String, dynamic> json) => StoryIdea(
         id: json["id"]?.toString() ?? "",
@@ -131,9 +242,9 @@ class StoryIdea {
             ? json["sequenceIndex"] as int
             : int.tryParse(json["sequenceIndex"]?.toString() ?? "") ?? 0,
         grade: "",
-        tags: json["tags"] == null
-            ? []
-            : List<String>.from(json["tags"].map((x) => x.toString())),
+        tags: json["tags"] is List
+            ? List<String>.from((json["tags"] as List).map((x) => x.toString()))
+            : [],
         age: "",
         language: "",
         topic: "",
@@ -146,6 +257,21 @@ class StoryIdea {
         continueReading: json["continueReading"] != null
             ? ContinueReading.fromJson(json["continueReading"])
             : null,
+        sampleQuestion: json["sampleQuestion"]?.toString(),
+        subjectIds: json["subjectIds"] is List
+            ? List<String>.from(
+                (json["subjectIds"] as List).map((x) => x.toString()),
+              )
+            : [],
+        extraSubjectTags: json["extraSubjectTags"] is List
+            ? List<String>.from(
+                (json["extraSubjectTags"] as List).map((x) => x.toString()),
+              )
+            : [],
+        thumbnailSource: json["thumbnailSource"]?.toString(),
+        thumbnailLicense: json["thumbnailLicense"]?.toString(),
+        thumbnailAttribution: json["thumbnailAttribution"]?.toString(),
+        thumbnailSearchEntity: json["thumbnailSearchEntity"]?.toString(),
     );
 }
 

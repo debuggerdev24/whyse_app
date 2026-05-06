@@ -17,6 +17,7 @@ import 'package:redstreakapp/models/home/story_models/story_idea_model.dart'
 import 'package:redstreakapp/models/home/story_models/story_summary_model.dart'
     as summary_models;
 import 'package:redstreakapp/providers/home/home_provider.dart';
+import 'package:redstreakapp/providers/home/saved_series_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/screens/home/widgets/story_ui_components.dart';
 import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
@@ -86,7 +87,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
       ..dispose();
     super.dispose();
   }
-
+ 
   void _onScroll() {
     if (!_scrollController.hasClients) return;
     final provider = context.read<HomeProvider>();
@@ -260,6 +261,8 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
               : 'Nature';
           final topicDescription = summary.topicLearningGoal;
           final topicThumb = summary.topicThumbnailUrl;
+          final tags = summary.subjects?.all.map((e) => e.name).toList() ?? [];
+          tags.addAll(summary.topicInterests.map((e) => e.name).toList());
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -307,23 +310,13 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                         text: topicDescription,
                         title: topicTitle,
                         description: topicDescription,
-                        tags: [
-                          '12-15 years',
-                          'CEFR A2',
-                          'Reading',
-                          'Writing',
-                          'Speaking',
-                          'Listening',
-                        ],
+                        tags: tags,
                       ),
                       10.w.verticalSpace,
+                      // show first two tags
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          _infoChip('12-15 years'),
-                          8.w.horizontalSpace,
-                          _infoChip('CEFR A2'),
-                        ],
+                        children: tags.take(2).map((e) => _infoChip(e)).toList(),
                       ),
                       20.w.verticalSpace,
                       GestureDetector(
@@ -390,31 +383,50 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                         ),
                       ),
                       18.w.verticalSpace,
-                     Padding(
+                      Padding(
                         padding: EdgeInsets.symmetric(horizontal: 10.w),
                         child: Row(
                           children: [
                             Builder(
                               builder: (context) {
-                                final homeProvider = context.watch<HomeProvider>();
-                                final isInList = homeProvider.topicIsInMyListOverride(summary.topicId) ?? false;
-                                final isToggling = homeProvider.isTopicListToggling(summary.topicId);
+                                final ssp = context
+                                    .watch<SavedSeriesProvider>();
+                                final isInList =
+                                    ssp.topicIsInMyListOverride(
+                                      summary.topicId,
+                                    ) ??
+                                    false;
+                                final isToggling = ssp
+                                    .isTopicListToggling(summary.topicId);
                                 return GestureDetector(
                                   behavior: HitTestBehavior.opaque,
-                                  onTap: isToggling ? null : () {
-                                    context.read<HomeProvider>().toggleTopicListById(
-                                      topicId: summary.topicId,
-                                      onFailed: (error) {
-                                        if (!context.mounted) return;
-                                        AppToast.error(context, error);
-                                      },
-                                    ).then((result) {
-                                      if (result == null || !context.mounted) return;
-                                      final msg = result.message ??
-                                          (result.isInMyList ? "Added to My List" : "Removed from My List");
-                                      AppToast.success(context, msg);
-                                    });
-                                  },
+                                  onTap: isToggling
+                                      ? null
+                                      : () {
+                                          context
+                                              .read<SavedSeriesProvider>()
+                                              .toggleTopic(
+                                                topicId: summary.topicId,
+                                                onFailed: (error) {
+                                                  if (!context.mounted) return;
+                                                  AppToast.error(
+                                                    context,
+                                                    error,
+                                                  );
+                                                },
+                                              )
+                                              .then((result) {
+                                                if (result == null ||
+                                                    !context.mounted)
+                                                  {return;}
+                                                final msg =
+                                                    result.message ??
+                                                    (result.isInMyList
+                                                        ? "Added to My List"
+                                                        : "Removed from My List");
+                                                AppToast.success(context, msg);
+                                              });
+                                        },
                                   child: Column(
                                     children: [
                                       if (isToggling)
@@ -428,18 +440,28 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                                         )
                                       else
                                         Icon(
-                                          isInList ? Icons.check_rounded : Icons.add_rounded,
+                                          isInList
+                                              ? Icons.check_rounded
+                                              : Icons.add_rounded,
                                           size: 20.w,
-                                          color: isInList ? AppColors.teal : AppColors.black,
+                                          color: isInList
+                                              ? AppColors.teal
+                                              : AppColors.black,
                                         ),
                                       2.w.verticalSpace,
                                       AppText(
                                         text: isToggling
-                                            ? (isInList ? 'Removing...' : 'Adding...')
-                                            : (isInList ? 'In My List' : 'Add to List'),
+                                            ? (isInList
+                                                  ? 'Removing...'
+                                                  : 'Adding...')
+                                            : (isInList
+                                                  ? 'In My List'
+                                                  : 'Add to List'),
                                         style: AppTextStyles.semibold(
                                           fontSize: 14,
-                                          color: isInList ? AppColors.teal : AppColors.black,
+                                          color: isInList
+                                              ? AppColors.teal
+                                              : AppColors.black,
                                         ),
                                       ),
                                     ],
