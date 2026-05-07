@@ -22,12 +22,14 @@ class QuizCompletedScreen extends StatelessWidget {
   final int score;
   final int total;
   final String storyTitle;
+  final String? storyImageUrl;
 
   const QuizCompletedScreen({
     super.key,
     required this.score,
     required this.total,
     this.storyTitle = "",
+    this.storyImageUrl,
   });
 
   @override
@@ -45,29 +47,69 @@ class QuizCompletedScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Spacer(flex: 2),
-                  // Success Image
-                  Image.asset(AppAssets.quizcomplete),
-                  19.w.verticalSpace,
-                  AppText(
-                    text: "Quiz Completed!",
-                    style: AppTextStyles.medium(
-                      fontSize: 12.sp,
-                      color: AppColors.black.withValues(alpha: 0.8),
+
+                  // Story thumbnail card
+                  Container(
+                    padding: EdgeInsets.all(12.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 12,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  // Title
-                  AppText(
-                    text: storyTitle,
-                    style: AppTextStyles.semibold(
-                      fontSize: 20.sp,
-                      color: AppColors.black,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10.r),
+                          child: storyImageUrl != null &&
+                                  storyImageUrl!.isNotEmpty
+                              ? Image.network(
+                                  storyImageUrl!,
+                                  width: 72.w,
+                                  height: 72.w,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) =>
+                                      Image.asset(AppAssets.quizcomplete,
+                                          width: 72.w, height: 72.w, fit: BoxFit.cover),
+                                )
+                              : Image.asset(
+                                  AppAssets.quizcomplete,
+                                  width: 72.w,
+                                  height: 72.w,
+                                  fit: BoxFit.cover,
+                                ),
+                        ),
+                        8.w.verticalSpace,
+                        AppText(
+                          text: "AI Generated Text",
+                          style: AppTextStyles.regular(
+                            fontSize: 10.sp,
+                            color: AppColors.black.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        4.w.verticalSpace,
+                        AppText(
+                          text: storyTitle.isNotEmpty ? storyTitle : "Story",
+                          style: AppTextStyles.semibold(
+                            fontSize: 14.sp,
+                            color: AppColors.black,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
-                    textAlign: TextAlign.center,
                   ),
-                  15.w.verticalSpace,
-                  SvgIcon(AppAssets.correctoption, size: 24.w),
-                  12.w.verticalSpace,
+                  16.w.verticalSpace,
+
+                  SvgIcon(AppAssets.correctoption, size: 28.w),
+                  20.w.verticalSpace,
+
                   AppText(
                     text: "Quiz Completed!",
                     style: AppTextStyles.semibold(
@@ -76,7 +118,7 @@ class QuizCompletedScreen extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  10.w.verticalSpace,
+                  20.w.verticalSpace,
                   AppText(
                     text: "Your Score:",
                     style: AppTextStyles.bold(
@@ -88,7 +130,7 @@ class QuizCompletedScreen extends StatelessWidget {
                   AppText(
                     text: "$score/$total",
                     style: AppTextStyles.bold(
-                      fontSize: 20.sp,
+                      fontSize: 24.sp,
                       color: AppColors.black,
                     ),
                   ),
@@ -100,7 +142,7 @@ class QuizCompletedScreen extends StatelessWidget {
                       color: AppColors.black.withValues(alpha: 0.6),
                     ),
                   ),
-                  20.w.verticalSpace,
+                  12.w.verticalSpace,
                   Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 14.w,
@@ -134,13 +176,13 @@ class QuizCompletedScreen extends StatelessWidget {
                     ),
                   ),
                   Spacer(flex: 2),
-    
+
                   if ((provider.storyIdeas?.storyIdeas.length ?? provider.stories.length) - 1 > provider.currentStoryIndex)
                     AppFilledButton(
                       text: "See Next Story",
                       onTap: () {
                         final nextIndex = provider.currentStoryIndex + 1;
-                        
+
                         if (nextIndex < provider.stories.length) {
                           provider.setCurrentStoryIndex = nextIndex;
                           if (!context.mounted) return;
@@ -160,16 +202,13 @@ class QuizCompletedScreen extends StatelessWidget {
                       fixedSize: Size(348, 42.h),
                     )
                   else
-                  //
                     AppFilledButton(
-                      text: "Home",
+                      text: "Continue",
                       onTap: () async {
                         if (!context.mounted) return;
                         AppRouter.indexedStackNavigationShell?.goBranch(0);
-                        // context.goNamed(AppRoutes.homeScreen.name);
                         context.read<HomeProvider>().getMyTopics();
                         provider.clareStoryData();
-                        
                         provider.setCurrentStoryIndex = 0;
                       },
                       backgroundColor: AppColors.teal,

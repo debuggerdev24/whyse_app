@@ -266,26 +266,30 @@ class OptionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     Color borderColor = Colors.black.withValues(alpha: 0.1);
     Color backgroundColor = Colors.white;
-    Color textColor = Colors.black;
+    Color textColor = AppColors.black;
     Widget? trailingIcon;
 
     if (isChecked) {
       if (isCorrect) {
         borderColor = Color(0xFF4CAF50);
         backgroundColor = Color(0xFFE8F5E9);
+        textColor = Color(0xFF2E7D32);
         trailingIcon = SvgIcon(AppAssets.correctoption, size: 24.w);
       } else if (isSelected && !isCorrect) {
         borderColor = AppColors.redColor;
         backgroundColor = Color(0xFFFFEBEE);
+        textColor = AppColors.redColor;
         trailingIcon = SvgIcon(AppAssets.canceloption, size: 24.w);
       } else {
         borderColor = Colors.black.withValues(alpha: 0.1);
         backgroundColor = Colors.white;
+        textColor = AppColors.black;
       }
     } else {
       if (isSelected) {
         borderColor = AppColors.teal;
         backgroundColor = AppColors.teal.withValues(alpha: 0.1);
+        textColor = AppColors.teal;
       }
     }
 

@@ -13,8 +13,6 @@ import 'package:redstreakapp/screens/profile/widgets/group_block.dart';
 import 'package:redstreakapp/screens/profile/widgets/profile_header_section.dart';
 import 'package:shimmer/shimmer.dart';
 
-const List<String> _kProfileInterests = ['Nature', 'Mystery', 'Adventure'];
-
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -27,7 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      context.read<FriendProvider>().getFriends();  
+      context.read<FriendProvider>().getFriends();
     });
   }
 
@@ -472,54 +470,179 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _interestsBlock() {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border(
-          top: BorderSide(color: AppColors.black.setOpacity(0.08), width: 1),
-        ),
-      ),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AppText(
-              text: 'Interests',
-              style: AppTextStyles.bold(fontSize: 20, color: AppColors.black),
-            ),
-            16.w.verticalSpace,
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              child: Row(
-                children: [
-                  for (var i = 0; i < _kProfileInterests.length; i++) ...[
-                    if (i > 0) 16.w.horizontalSpace,
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 18.w,
-                        vertical: 10.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.extealighttealcolor,
-                        borderRadius: BorderRadius.circular(24.r),
-                      ),
-                      child: AppText(
-                        text: _kProfileInterests[i],
-                        style: AppTextStyles.semibold(
-                          fontSize: 14,
-                          color: AppColors.teal,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
+    return Consumer<ProfileProvider>(
+      builder: (context, provider, _) {
+        return Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            border: Border(
+              top: BorderSide(
+                color: AppColors.black.setOpacity(0.08),
+                width: 1,
               ),
             ),
-          ],
-        ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppText(
+                  text: 'Interests',
+                  style: AppTextStyles.bold(
+                    fontSize: 20,
+                    color: AppColors.black,
+                  ),
+                ),
+                16.w.verticalSpace,
+                _buildInterestsContent(context, provider),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildInterestsContent(
+    BuildContext context,
+    ProfileProvider provider,
+  ) {
+    if (provider.getProfileState == DataState.loading) {
+      return _buildInterestsShimmer();
+    }
+
+    if (provider.getProfileState == DataState.failed) {
+      return _buildInterestsError(context, provider);
+    }
+
+    final interests = provider.profileData?.interests ?? [];
+    if (interests.isEmpty) {
+      return _buildInterestsEmpty();
+    }
+
+    return Wrap(
+      spacing: 8.r,
+      runSpacing: 12.r,
+      children: interests
+          .map(
+            (interest) => Container(
+              padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
+              decoration: BoxDecoration(
+                color: AppColors.extealighttealcolor,
+                borderRadius: BorderRadius.circular(24.r),
+              ),
+              child: AppText(
+                text: interest,
+                style: AppTextStyles.semibold(
+                  fontSize: 13,
+                  color: AppColors.teal,
+                ),
+              ),
+            ),
+          )
+          .toList(),
+    );
+  }
+
+  Widget _buildInterestsShimmer() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const NeverScrollableScrollPhysics(),
+      child: Row(
+        children: List.generate(4, (i) {
+          final widths = [72.0, 88.0, 64.0, 80.0];
+          return Padding(
+            padding: EdgeInsets.only(right: i < 3 ? 12.w : 0),
+            child: Shimmer.fromColors(
+              baseColor: AppColors.shimmerBaseColor,
+              highlightColor: AppColors.shimmerHighlightColor,
+              child: Container(
+                width: widths[i].w,
+                height: 38.h,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24.r),
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _buildInterestsError(BuildContext context, ProfileProvider provider) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 16.h),
+      child: Column(
+        children: [
+          Icon(
+            Icons.wifi_off_rounded,
+            size: 30.w,
+            color: AppColors.black.setOpacity(0.25),
+          ),
+          8.h.verticalSpace,
+          AppText(
+            text: provider.getProfileError ?? 'Failed to load interests',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.medium(
+              fontSize: 13,
+              color: AppColors.black.setOpacity(0.5),
+            ),
+          ),
+          12.h.verticalSpace,
+          GestureDetector(
+            onTap: () => context.read<ProfileProvider>().getProfile(),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20.r),
+                border: Border.all(color: AppColors.teal.setOpacity(0.4)),
+              ),
+              child: AppText(
+                text: 'Retry',
+                style: AppTextStyles.semibold(
+                  fontSize: 13,
+                  color: AppColors.teal,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInterestsEmpty() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 16.h),
+      child: Column(
+        children: [
+          Icon(
+            Icons.interests_outlined,
+            size: 34.w,
+            color: AppColors.black.setOpacity(0.2),
+          ),
+          8.h.verticalSpace,
+          AppText(
+            text: 'No interests added yet',
+            style: AppTextStyles.semibold(
+              fontSize: 14,
+              color: AppColors.black.setOpacity(0.45),
+            ),
+          ),
+          4.h.verticalSpace,
+          AppText(
+            text: 'Add interests to personalise your experience',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.medium(
+              fontSize: 12,
+              color: AppColors.black.setOpacity(0.35),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -771,65 +894,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _mySeriesListBlock() {
     return Consumer<SavedSeriesProvider>(
-      builder: (context, savedSeriesProvider, child) {
-        final list = savedSeriesProvider.savedSeriesList;
-        final isLoading = savedSeriesProvider.isSavedSeriesLoading;
-
-        if (isLoading && list == null) {
-          return Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              border: Border(
-                top: BorderSide(
-                  color: AppColors.black.withValues(alpha: 0.08),
-                  width: 1,
-                ),
-              ),
-            ),
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AppText(
-                    text: 'My Series List',
-                    style: AppTextStyles.bold(fontSize: 20, color: AppColors.black),
-                  ),
-                  12.verticalSpace,
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    physics: const NeverScrollableScrollPhysics(),
-                    child: Row(
-                      children: List.generate(
-                        3,
-                        (_) => Padding(
-                          padding: EdgeInsets.only(right: 12.w),
-                          child: Shimmer.fromColors(
-                            baseColor: AppColors.shimmerBaseColor,
-                            highlightColor: AppColors.shimmerHighlightColor,
-                            child: Container(
-                              width: 140.w,
-                              height: 190.w,
-                              decoration: BoxDecoration(
-                                color: AppColors.shimmerBaseColor,
-                                borderRadius: BorderRadius.circular(12.r),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
-        if (list == null || list.isEmpty) {
-          return const SizedBox.shrink();
-        }
+      builder: (context, provider, _) {
+        final list = provider.savedSeriesList;
+        final isLoading = provider.isSavedSeriesLoading;
+        final hasFailed = provider.savedSeriesFailed;
+        final hasItems = list != null && list.isNotEmpty;
 
         return Container(
           width: double.infinity,
@@ -848,54 +917,183 @@ class _ProfileScreenState extends State<ProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     AppText(
                       text: 'My Series List',
-                      style: AppTextStyles.bold(fontSize: 20, color: AppColors.black),
-                    ),
-                    GestureDetector(
-                      onTap: () => context.pushNamed(
-                        AppRoutes.mySavedSeriesScreen.name,
-                      ),
-                      child: AppText(
-                        text: 'View all',
-                        style: AppTextStyles.semibold(fontSize: 15, color: AppColors.teal),
+                      style: AppTextStyles.bold(
+                        fontSize: 20,
+                        color: AppColors.black,
                       ),
                     ),
+                    const Spacer(),
+                    if (hasItems)
+                      GestureDetector(
+                        onTap: () => context.pushNamed(
+                          AppRoutes.mySavedSeriesScreen.name,
+                        ),
+                        child: AppText(
+                          text: 'See all',
+                          style: AppTextStyles.semibold(
+                            fontSize: 15,
+                            color: AppColors.teal,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
                 12.verticalSpace,
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: List.generate(
-                      list.length > 5 ? 5 : list.length,
-                      (index) {
-                        final item = list[index];
-                        return _SavedSeriesCard(
-                          item: item,
-                          onTap: () {
-                            context.read<HomeProvider>().generateStoryIdeasForTopic(
-                              topicId: item.topic.id,
-                            );
-                            context.pushNamed(
-                              AppRoutes.createdStorySummaryScreen.name,
-                              extra: item.topic.id,
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
+                _buildSeriesContent(
+                  context,
+                  provider,
+                  list,
+                  isLoading,
+                  hasFailed,
                 ),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildSeriesContent(
+    BuildContext context,
+    SavedSeriesProvider provider,
+    List<SavedSeriesItem>? list,
+    bool isLoading,
+    bool hasFailed,
+  ) {
+    if (isLoading && list == null) {
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const NeverScrollableScrollPhysics(),
+        child: Row(
+          children: List.generate(
+            3,
+            (i) => Padding(
+              padding: EdgeInsets.only(right: 12.w),
+              child: Shimmer.fromColors(
+                baseColor: AppColors.shimmerBaseColor,
+                highlightColor: AppColors.shimmerHighlightColor,
+                child: Container(
+                  width: 210.w,
+                  height: 240.w,
+                  decoration: BoxDecoration(
+                    color: AppColors.shimmerBaseColor,
+                    borderRadius: BorderRadius.circular(16.r),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (hasFailed) {
+      return Center(
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 20.h),
+          child: Column(
+            children: [
+              Icon(
+                Icons.wifi_off_rounded,
+                size: 32.w,
+                color: AppColors.black.setOpacity(0.25),
+              ),
+              8.h.verticalSpace,
+              AppText(
+                text:
+                    provider.savedSeriesError ?? 'Failed to load saved series',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.medium(
+                  fontSize: 13,
+                  color: AppColors.black.setOpacity(0.5),
+                ),
+              ),
+              12.h.verticalSpace,
+              GestureDetector(
+                onTap: () =>
+                    context.read<SavedSeriesProvider>().getMySeriesList(),
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 20.w,
+                    vertical: 8.h,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20.r),
+                    border: Border.all(color: AppColors.teal.setOpacity(0.4)),
+                  ),
+                  child: AppText(
+                    text: 'Retry',
+                    style: AppTextStyles.semibold(
+                      fontSize: 13,
+                      color: AppColors.teal,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (list == null || list.isEmpty) {
+      return Center(
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 16.h),
+          child: Column(
+            children: [
+              Icon(
+                Icons.bookmark_border_rounded,
+                size: 36.w,
+                color: AppColors.black.setOpacity(0.2),
+              ),
+              8.h.verticalSpace,
+              AppText(
+                text: 'No saved series yet',
+                style: AppTextStyles.semibold(
+                  fontSize: 14,
+                  color: AppColors.black.setOpacity(0.45),
+                ),
+              ),
+              4.h.verticalSpace,
+              AppText(
+                text: 'Series you save will appear here',
+                style: AppTextStyles.medium(
+                  fontSize: 12,
+                  color: AppColors.black.setOpacity(0.35),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: List.generate(list.length > 5 ? 5 : list.length, (index) {
+          final item = list[index];
+          return _SavedSeriesCard(
+            item: item,
+            onTap: () {
+              context.read<HomeProvider>().generateStoryIdeasForTopic(
+                topicId: item.topic.id,
+              );
+              context.pushNamed(
+                AppRoutes.createdStorySummaryScreen.name,
+                extra: item.topic.id,
+              );
+            },
+          );
+        }),
+      ),
     );
   }
 
@@ -1040,7 +1238,9 @@ class _SavedSeriesCard extends StatelessWidget {
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(16.r),
+                  ),
                   child: SizedBox(
                     height: 132.w,
                     width: double.infinity,
@@ -1049,8 +1249,10 @@ class _SavedSeriesCard extends StatelessWidget {
                             imageUrl: topic.thumbnailUrl,
                             fit: BoxFit.cover,
                             placeholder: (_, __) => _storyImageShimmer(),
-                            errorWidget: (_, __, ___) =>
-                                const NoImageFound(compact: true, iconOnly: true),
+                            errorWidget: (_, __, ___) => const NoImageFound(
+                              compact: true,
+                              iconOnly: true,
+                            ),
                           )
                         : _storyImageShimmer(),
                   ),
@@ -1061,14 +1263,12 @@ class _SavedSeriesCard extends StatelessWidget {
                   child: Builder(
                     builder: (context) {
                       final ssp = context.watch<SavedSeriesProvider>();
-                      final isToggling =
-                          ssp.isTopicListToggling(topic.id);
+                      final isToggling = ssp.isTopicListToggling(topic.id);
                       return GestureDetector(
                         onTap: isToggling
                             ? null
                             : () async {
-                                final result =
-                                    await ssp.toggleTopic(
+                                final result = await ssp.toggleTopic(
                                   topicId: topic.id,
                                   onFailed: (err) {
                                     if (context.mounted) {

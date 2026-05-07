@@ -17,6 +17,7 @@ import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
+import 'package:toastification/toastification.dart';
 
 import '../../../core/widgets/dropdown_textfiled.dart';
 import '../../../models/home/story_models/story_enums.dart';
@@ -182,6 +183,18 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                             // }
                             provider.setGenerateStoryIdeasLoading(true);
 
+                            // Capture HomeProvider before navigating away so
+                            // the reference stays valid after this screen is unmounted.
+                            final homeProvider =
+                                context.read<HomeProvider>();
+
+                            // Dismiss any visible toasts before navigating so
+                            // their internal Dismissible widgets don't crash
+                            // when the overlay is replaced by the new route.
+                            toastification.dismissAll(
+                              delayForAnimation: false,
+                            );
+
                             context.goNamed(AppRoutes.homeScreen.name);
                             context.pushNamed(
                               AppRoutes.createdIdeasListScreen.name,
@@ -199,13 +212,15 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                                   provider.forceRegenerateTopicId != null,
                               topicId: provider.forceRegenerateTopicId,
                               onSuccess: () {
-                                AppToast.success(
-                                  context,
-                                  "Story Ideas created successfully.",
-                                );
                                 if (context.mounted) {
-                                  context.read<HomeProvider>().getMyTopics();
+                                  AppToast.success(
+                                    context,
+                                    "Story Ideas created successfully.",
+                                  );
                                 }
+                                // Always refresh the home series list regardless
+                                // of whether this screen is still mounted.
+                                homeProvider.getMyTopics();
                               },
                             );
                           });

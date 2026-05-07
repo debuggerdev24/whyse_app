@@ -884,8 +884,12 @@ class _StoryViewerState extends State<_StoryViewer> {
 
   void _openQuiz() {
     context.pushNamed(
-      AppRoutes.enterQuizNumbersScreen.name,
-      extra: {'storyId': widget.story.id},
+      AppRoutes.startQuizScreen.name,
+      extra: {
+        'storyId': widget.story.id,
+        'storyTitle': widget.story.title,
+        'storyImageUrl': widget.story.thumbnailUrl,
+      },
     );
   }
 

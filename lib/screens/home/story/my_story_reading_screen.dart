@@ -248,7 +248,16 @@ class _MyStoryReadingScreenState extends State<MyStoryReadingScreen> {
                     else ...[
                       AppButton(
                         text: isLastPage ? "Take Quiz" : "Next Page",
-                        onTap: isLastPage ? () {} : () => _goToNextPage(pages.length),
+                        onTap: isLastPage
+                            ? () => context.pushNamed(
+                                  AppRoutes.startQuizScreen.name,
+                                  extra: {
+                                    'storyId': story.id,
+                                    'storyTitle': story.title,
+                                    'storyImageUrl': story.thumbnailUrl,
+                                  },
+                                )
+                            : () => _goToNextPage(pages.length),
                         fontSize: 14.sp,
                       ),
                       if (!isFirstPage) ...[

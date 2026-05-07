@@ -264,61 +264,64 @@ class CalendarStrip extends StatelessWidget {
         // ),
         13.w.verticalSpace,
         Container(
-          height: 85.h,
           decoration: BoxDecoration(
             border: Border.all(color: AppColors.black.withValues(alpha: 0.12)),
           ),
-          padding: EdgeInsets.only(top: 10.w, bottom: 10.w),
-          child: ListView.separated(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            controller: scrollController,
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            itemCount: monthDates.length,
-            separatorBuilder: (_, __) => 5.w.horizontalSpace,
-            itemBuilder: (context, index) {
-              final date = monthDates[index];
-              final isToday =
-                  date.year == now.year &&
-                  date.month == now.month &&
-                  date.day == now.day;
-              return SizedBox(
-                width: 52.w,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    AppText(
-                      text: _weekdayShort(date),
-                      style: AppTextStyles.bold(
-                        fontSize: 14.sp,
-                        color: AppColors.black.withValues(alpha: 0.35),
-                      ),
-                    ),
-                    5.h.verticalSpace,
-                    Container(
-                      width: 35.h,
-                      height: 35.h,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isToday
-                            ? AppColors.orangeColor
-                            : Colors.transparent,
-                      ),
-                      child: AppText(
-                        text: date.day.toString(),
+          padding: EdgeInsets.symmetric(vertical: 10.w),
+          child: SizedBox(
+            height: 60.w,
+            child: ListView.separated(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              controller: scrollController,
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              itemCount: monthDates.length,
+              separatorBuilder: (_, __) => 5.w.horizontalSpace,
+              itemBuilder: (context, index) {
+                final date = monthDates[index];
+                final isToday =
+                    date.year == now.year &&
+                    date.month == now.month &&
+                    date.day == now.day;
+                return SizedBox(
+                  width: 52.w,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AppText(
+                        text: _weekdayShort(date),
                         style: AppTextStyles.bold(
-                          fontSize: 14,
-                          color: isToday
-                              ? AppColors.black
-                              : AppColors.black.withValues(alpha: 0.55),
+                          fontSize: 13.sp,
+                          color: AppColors.black.withValues(alpha: 0.35),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              );
-            },
+                      4.w.verticalSpace,
+                      Container(
+                        width: 34.w,
+                        height: 34.w,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isToday
+                              ? AppColors.orangeColor
+                              : Colors.transparent,
+                        ),
+                        child: AppText(
+                          text: date.day.toString(),
+                          style: AppTextStyles.bold(
+                            fontSize: 13.sp,
+                            color: isToday
+                                ? AppColors.black
+                                : AppColors.black.withValues(alpha: 0.55),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ],

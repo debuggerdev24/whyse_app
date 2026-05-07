@@ -346,11 +346,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         surfaceTintColor: Colors.transparent,
         leading: Align(
           alignment: Alignment.centerLeft,
-          child: Padding(
-            padding: const EdgeInsets.only(left: 18),
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => context.pop(),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => context.pop(),
+            child: Container(
+              padding: const EdgeInsets.only(left: 18, right: 18),
               child: SvgIcon(AppAssets.backButton, size: 13.sp),
             ),
           ),

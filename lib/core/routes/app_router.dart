@@ -248,6 +248,7 @@ class AppRouter {
         return StartQuizScreen(
           storyId: extra["storyId"] as String? ?? "",
           storyTitle: extra["storyTitle"] as String? ?? "",
+          storyImageUrl: extra["storyImageUrl"] as String?,
         );
       },
     ),
@@ -259,7 +260,12 @@ class AppRouter {
         final extra = state.extra as Map<String, dynamic>?;
         final quizzes = extra?['quizzes'] as List<StoryQuiz>? ?? [];
         final storyTitle = extra?['storyTitle'] as String? ?? "";
-        return QuizQuestionScreen(quizzes: quizzes, storyTitle: storyTitle);
+        final storyImageUrl = extra?['storyImageUrl'] as String?;
+        return QuizQuestionScreen(
+          quizzes: quizzes,
+          storyTitle: storyTitle,
+          storyImageUrl: storyImageUrl,
+        );
       },
     ),
     GoRoute(
@@ -270,10 +276,12 @@ class AppRouter {
         final score = extra?['score'] as int? ?? 0;
         final total = extra?['total'] as int? ?? 0;
         final storyTitle = extra?['storyTitle'] as String? ?? "";
+        final storyImageUrl = extra?['storyImageUrl'] as String?;
         return QuizCompletedScreen(
           score: score,
           total: total,
           storyTitle: storyTitle,
+          storyImageUrl: storyImageUrl,
         );
       },
     ),

@@ -15,11 +15,11 @@ class SettingsScreen extends StatelessWidget {
         appBar: AppBar(
           leading: Align(
             alignment: Alignment.centerLeft,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 25),
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => context.pop(),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => context.pop(),
+              child: Container(
+                padding: const EdgeInsets.only(left: 25),
                 child: SvgIcon(AppAssets.backButton, size: 13.sp),
               ),
             ),

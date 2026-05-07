@@ -17,19 +17,63 @@ import '../../../providers/home/quiz_provider.dart';
 class QuizQuestionScreen extends StatefulWidget {
   final List<StoryQuiz>? quizzes;
   final String? storyTitle;
+  final String? storyImageUrl;
 
-  const QuizQuestionScreen({super.key, this.quizzes, this.storyTitle});
+  const QuizQuestionScreen({
+    super.key,
+    this.quizzes,
+    this.storyTitle,
+    this.storyImageUrl,
+  });
 
   @override
   State<QuizQuestionScreen> createState() => _QuizQuestionScreenState();
 }
+
+// Dummy quiz data used when no real quizzes are provided
+List<StoryQuiz> _dummyQuizzes() => [
+      StoryQuiz(
+        question: "Where did dinosaurs live?",
+        options: [
+          "Only in forests",
+          "Forests, swamps, and deserts",
+          "Only in deserts",
+          "In cities",
+        ],
+        answer: "Forests, swamps, and deserts",
+        correctAnswer: 1,
+        questionType: "multiple_choice",
+      ),
+      StoryQuiz(
+        question: "What did some dinosaurs eat?",
+        options: ["Only meat", "Only plants", "Plants or meat", "Only fish"],
+        answer: "Plants or meat",
+        correctAnswer: 2,
+        questionType: "multiple_choice",
+      ),
+      StoryQuiz(
+        question: "What do scientists study to learn about dinosaurs?",
+        options: [
+          "Their fossils and bones",
+          "Their pictures",
+          "Their houses",
+          "Their clothes",
+        ],
+        answer: "Their fossils and bones",
+        correctAnswer: 0,
+        questionType: "multiple_choice",
+      ),
+    ];
 
 class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<QuizProvider>().initQuiz(widget.quizzes!);
+      final quizzes = (widget.quizzes == null || widget.quizzes!.isEmpty)
+          ? _dummyQuizzes()
+          : widget.quizzes!;
+      context.read<QuizProvider>().initQuiz(quizzes);
     });
   }
 
@@ -37,6 +81,16 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
   Widget build(BuildContext context) {
     return Consumer<QuizProvider>(
       builder: (context, quiz, _) {
+        if (quiz.questions.isEmpty) {
+          return AppLayout(
+            body: Center(
+              child: CircularProgressIndicator(
+                color: AppColors.teal,
+              ),
+            ),
+          );
+        }
+
         final currentQuestion = quiz.questions[quiz.currentQuestionIndex];
         final options = currentQuestion['options'] as List<String>;
         final correctIndex = currentQuestion['correctIndex'] as int;
@@ -153,6 +207,7 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                                   'score': quiz.score,
                                   'total': quiz.questions.length,
                                   'storyTitle': widget.storyTitle,
+                                  'storyImageUrl': widget.storyImageUrl,
                                 },
                               );
                             }

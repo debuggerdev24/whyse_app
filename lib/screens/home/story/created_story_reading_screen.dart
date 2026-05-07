@@ -364,12 +364,14 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                         if (isLastPage)
                           _BottomPrimaryButton(
                             text: "Take Quiz",
-                            onTap: () {
-                              // context.pushNamed(
-                              //   AppRoutes.enterQuizNumbersScreen.name,
-                              //   extra: {'storyId': stories.id},
-                              // );
-                            },
+                            onTap: () => context.pushNamed(
+                              AppRoutes.startQuizScreen.name,
+                              extra: {
+                                'storyId': stories.id,
+                                'storyTitle': stories.title,
+                                'storyImageUrl': stories.thumbnailUrl,
+                              },
+                            ),
                           )
                         else
                           _BottomPrimaryButton(

@@ -36,6 +36,11 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _waitingForGeneratedFirstResponse = true;
 
+  // Set to true after the user has returned from the reading screen at least
+  // once, so we switch to showing fresh API data (which includes read progress)
+  // rather than the stale generated snapshot.
+  bool _hasReadAStory = false;
+
   summary_models.StoryIdeaModel? _mapGeneratedIdeasToSummary(
     generated_models.StoryIdeasModel? storyIdeas,
   ) {
@@ -105,9 +110,65 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
     }
   }
 
+  // When opened from the generation flow (preferGeneratedData == true), the
+  // back button should always go home, not back to the 4 input screens.
+  void _handleBack() {
+    if (widget.preferGeneratedData) {
+      context.goNamed(AppRoutes.homeScreen.name);
+    } else if (context.canPop()) {
+      context.pop();
+    } else {
+      context.goNamed(AppRoutes.homeScreen.name);
+    }
+  }
+
+  // Push the reading screen, then refresh story ideas (with progress) on return.
+  void _openReading({
+    required summary_models.StoryIdeaModel summary,
+    required String storyIdeaId,
+    required int ideaIndex,
+    required int initialPageIndex,
+  }) {
+    final storyProvider = context.read<StoryProvider>();
+    storyProvider.setFromStorySummary(summary);
+    storyProvider.createStory(
+      selectedIdeaIndex: ideaIndex,
+      onSuccess: () {},
+      onFailed: (error) {
+        if (!mounted) return;
+        AppToast.error(context, error);
+      },
+    );
+    context
+        .pushNamed(
+          AppRoutes.createdStoryReadingScreen.name,
+          extra: <String, dynamic>{
+            "storyIdeaId": storyIdeaId,
+            "initialPageIndex": initialPageIndex,
+          },
+        )
+        .then((_) {
+          if (!mounted) return;
+          setState(() => _hasReadAStory = true);
+          final hp = context.read<HomeProvider>();
+          final topicId = hp.activeStoryIdeasTopicId;
+          if (topicId != null) {
+            hp.generateStoryIdeasForTopic(topicId: topicId);
+          }
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+      // When opened from the generation flow, disable the default pop so we can
+      // intercept the system back button and go to home instead of the input screens.
+      canPop: !widget.preferGeneratedData,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _handleBack();
+      },
+      child: Scaffold(
       backgroundColor: AppColors.white,
       body: Consumer2<HomeProvider, StoryProvider>(
         builder: (context, homeProvider, storyProvider, child) {
@@ -130,9 +191,14 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
             return HomeSectionShimmer.createdStoryIdeasLoadingShimmer();
           }
 
-          final summary = widget.preferGeneratedData
-              ? (generatedSummary ?? homeProvider.storySummary)
-              : (homeProvider.storySummary ?? generatedSummary);
+          // After returning from reading, prefer fresh API data (includes progress).
+          // Otherwise keep the original priority (generated data first for new series,
+          // API data first for existing series opened from home/profile).
+          final summary = _hasReadAStory
+              ? (homeProvider.storySummary ?? generatedSummary)
+              : (widget.preferGeneratedData
+                  ? (generatedSummary ?? homeProvider.storySummary)
+                  : (homeProvider.storySummary ?? generatedSummary));
 
           if (homeProvider.isStoryIdeasLoading ||
               homeProvider.isGenerateSeriesLoading ||
@@ -219,13 +285,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                     ),
                     16.w.verticalSpace,
                     GestureDetector(
-                      onTap: () {
-                        if (context.canPop()) {
-                          context.pop();
-                        } else {
-                          context.goNamed(AppRoutes.homeScreen.name);
-                        }
-                      },
+                      onTap: _handleBack,
                       child: AppText(
                         text: "Go Back",
                         style: AppTextStyles.semibold(
@@ -272,13 +332,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                   imageUrl: topicThumb,
                   title: topicTitle,
                   topLeft: StoryCircleButton(
-                    onTap: () {
-                      if (context.canPop()) {
-                        context.pop();
-                      } else {
-                        context.goNamed(AppRoutes.homeScreen.name);
-                      }
-                    },
+                    onTap: _handleBack,
                     child: Icon(
                       Icons.chevron_left_rounded,
                       size: 19.w,
@@ -322,8 +376,6 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                       GestureDetector(
                         onTap: () {
                           if (summary.storyIdeas.isEmpty) return;
-                          final storyProvider = context.read<StoryProvider>();
-                          storyProvider.setFromStorySummary(summary);
 
                           int resumeIndex = summary.storyIdeas.indexWhere(
                             (idea) =>
@@ -347,20 +399,11 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                                   ?.continueFromPageIndex ??
                               0;
 
-                          context.pushReplacementNamed(
-                            AppRoutes.createdStoryReadingScreen.name,
-                            extra: <String, dynamic>{
-                              "storyIdeaId": resumeIdea.id,
-                              "initialPageIndex": initialPageIndex,
-                            },
-                          );
-                          storyProvider.createStory(
-                            selectedIdeaIndex: resumeIndex,
-                            onSuccess: () {},
-                            onFailed: (error) {
-                              if (!context.mounted) return;
-                              AppToast.error(context, error);
-                            },
+                          _openReading(
+                            summary: summary,
+                            storyIdeaId: resumeIdea.id,
+                            ideaIndex: resumeIndex,
+                            initialPageIndex: initialPageIndex,
                           );
                         },
                         child: Container(
@@ -530,29 +573,17 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                             continueReading:
                                 summary.storyIdeas[index].continueReading,
                             onOpenStory: () {
-                              final storyProvider = context
-                                  .read<StoryProvider>();
-                              storyProvider.setFromStorySummary(summary);
                               final initialPage =
                                   summary
                                       .storyIdeas[index]
                                       .continueReading
                                       ?.continueFromPageIndex ??
                                   0;
-                              context.pushNamed(
-                                AppRoutes.createdStoryReadingScreen.name,
-                                extra: <String, dynamic>{
-                                  "storyIdeaId": summary.storyIdeas[index].id,
-                                  "initialPageIndex": initialPage,
-                                },
-                              );
-                              storyProvider.createStory(
-                                selectedIdeaIndex: index,
-                                onSuccess: () {},
-                                onFailed: (error) {
-                                  if (!context.mounted) return;
-                                  AppToast.error(context, error);
-                                },
+                              _openReading(
+                                summary: summary,
+                                storyIdeaId: summary.storyIdeas[index].id,
+                                ideaIndex: index,
+                                initialPageIndex: initialPage,
                               );
                             },
                           ),
@@ -569,6 +600,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
             ],
           );
         },
+      ),
       ),
     );
   }

@@ -37,10 +37,14 @@ class SavedSeriesProvider extends ChangeNotifier {
   // ─── Profile preview (top 5) ──────────────────────────────────────
   List<SavedSeriesItem>? savedSeriesList;
   bool isSavedSeriesLoading = false;
+  bool savedSeriesFailed = false;
+  String? savedSeriesError;
 
   Future<void> getMySeriesList() async {
     if (isSavedSeriesLoading) return;
     isSavedSeriesLoading = true;
+    savedSeriesFailed = false;
+    savedSeriesError = null;
     notifyListeners();
 
     final response = await SavedSeriesService.instance.getMyList(limit: 5);
@@ -49,6 +53,8 @@ class SavedSeriesProvider extends ChangeNotifier {
     response.fold(
       (l) {
         Logger.error(l.errorMsg);
+        savedSeriesFailed = true;
+        savedSeriesError = l.errorMsg;
         savedSeriesList ??= [];
       },
       (r) {
@@ -61,9 +67,12 @@ class SavedSeriesProvider extends ChangeNotifier {
           } else {
             savedSeriesList = [];
           }
+          savedSeriesFailed = false;
         } catch (e, stack) {
           Logger.error("Error parsing my-list: $e\n$stack");
           savedSeriesList = [];
+          savedSeriesFailed = true;
+          savedSeriesError = 'Failed to load series';
         }
       },
     );
@@ -215,6 +224,8 @@ class SavedSeriesProvider extends ChangeNotifier {
     _topicIsInMyListOverrides.clear();
     savedSeriesList = null;
     isSavedSeriesLoading = false;
+    savedSeriesFailed = false;
+    savedSeriesError = null;
     allSavedSeriesList = [];
     isAllSavedSeriesLoading = false;
     isLoadingMoreSavedSeries = false;

@@ -170,11 +170,11 @@ class _EditInterestsScreenState extends State<EditInterestsScreen> {
         surfaceTintColor: Colors.transparent,
         leading: Align(
           alignment: Alignment.centerLeft,
-          child: Padding(
-            padding: const EdgeInsets.only(left: 18),
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => context.pop(),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => context.pop(),
+            child: Container(
+              padding: const EdgeInsets.only(left: 18),
               child: SvgIcon(AppAssets.backButton, size: 13.sp),
             ),
           ),
@@ -208,89 +208,88 @@ class _EditInterestsScreenState extends State<EditInterestsScreen> {
             }
 
             return Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          AppText(
-                            text: "Pick Your Interests",
-                            style: AppTextStyles.bold(fontSize: 28.sp),
-                          ),
-                          10.h.verticalSpace,
-                          AppText(
-                            text:
-                                "Choose topics you love to personalize your reading journey.",
-                            style: AppTextStyles.medium(
-                              fontSize: 15.sp,
-                              color: AppColors.black.withValues(alpha: 0.8),
-                            ),
-                          ),
-                        ],
+              children: [
+                Padding(
+                  padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AppText(
+                        text: "Pick Your Interests",
+                        style: AppTextStyles.bold(fontSize: 28.sp),
                       ),
-                    ),
-                    20.h.verticalSpace,
-                    Expanded(
-                      child: ListView(
-                        padding: EdgeInsets.symmetric(horizontal: 24.w),
-                        physics: const BouncingScrollPhysics(),
-                        children: [
-                          ...provider.interestsList.map((interest) {
-                            final id = interest['id'];
-                            final name = interest['name'];
-                            return SelectionOption(
-                              label: name,
-                              isSelected: _selectedInterestIds.contains(id),
-                              onTap: () => _toggleApiInterest(id),
-                              iconPath: _getIconForInterest(name),
-                            );
-                          }),
-                          ..._customInterests.map((name) {
-                            return SelectionOption(
-                              label: name,
-                              isSelected:
-                                  _selectedCustomInterests.contains(name),
-                              onTap: () => _toggleCustomInterest(name),
-                              iconPath: AppAssets.adventure,
-                            );
-                          }),
-                          Padding(
-                            padding: EdgeInsets.only(top: 10.h, bottom: 20.h),
-                            child: AppTextField(
-                              controller: _customInterestController,
-                              hintText: "Add Custom Interest...",
-                              onSubmit: (val) => _addCustomInterest(val),
-                            ),
-                          ),
-                        ],
+                      10.h.verticalSpace,
+                      AppText(
+                        text:
+                            "Choose topics you love to personalize your reading journey.",
+                        style: AppTextStyles.medium(
+                          fontSize: 15.sp,
+                          color: AppColors.black.withValues(alpha: 0.8),
+                        ),
                       ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 12.h),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _saveInterests,
-                          style: ElevatedButton.styleFrom(
-                            elevation: 0,
-                            backgroundColor: AppColors.orangeColor,
-                            foregroundColor: AppColors.white,
-                            padding: EdgeInsets.symmetric(vertical: 14.h),
-                            shape: const StadiumBorder(),
-                          ),
-                          child: AppText(
-                            text: 'Save',
-                            style: AppTextStyles.semibold(
-                              fontSize: 16,
-                              color: AppColors.white,
-                            ),
-                          ),
+                    ],
+                  ),
+                ),
+                20.h.verticalSpace,
+                Expanded(
+                  child: ListView(
+                    padding: EdgeInsets.symmetric(horizontal: 24.w),
+                    physics: const BouncingScrollPhysics(),
+                    children: [
+                      ...provider.interestsList.map((interest) {
+                        final id = interest['id'];
+                        final name = interest['name'];
+                        return SelectionOption(
+                          label: name,
+                          isSelected: _selectedInterestIds.contains(id),
+                          onTap: () => _toggleApiInterest(id),
+                          iconPath: _getIconForInterest(name),
+                        );
+                      }),
+                      ..._customInterests.map((name) {
+                        return SelectionOption(
+                          label: name,
+                          isSelected: _selectedCustomInterests.contains(name),
+                          onTap: () => _toggleCustomInterest(name),
+                          iconPath: AppAssets.adventure,
+                        );
+                      }),
+                      Padding(
+                        padding: EdgeInsets.only(top: 10.h, bottom: 20.h),
+                        child: AppTextField(
+                          controller: _customInterestController,
+                          hintText: "Add Custom Interest...",
+                          onSubmit: (val) => _addCustomInterest(val),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 12.h),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _saveInterests,
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: AppColors.orangeColor,
+                        foregroundColor: AppColors.white,
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                        shape: const StadiumBorder(),
+                      ),
+                      child: AppText(
+                        text: 'Save',
+                        style: AppTextStyles.semibold(
+                          fontSize: 16,
+                          color: AppColors.white,
                         ),
                       ),
                     ),
-                  ],
-                );
+                  ),
+                ),
+              ],
+            );
           },
         ),
       ),
