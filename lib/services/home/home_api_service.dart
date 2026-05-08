@@ -79,4 +79,12 @@ class HomeApiService {
       EndPoints.getMyList(page: page, limit: limit, search: search),
     );
   }
+
+  Future<Either<ApiException, Map<String, dynamic>>> getMobileTopicStoryIdeas({
+    required String topicId,
+  }) async {
+    return await BaseApiHelper.instance.get(
+      EndPoints.getMobileTopicStoryIdeas(topicId: topicId),
+    );
+  }
 }

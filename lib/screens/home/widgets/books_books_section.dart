@@ -3,6 +3,12 @@ import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:shimmer/shimmer.dart';
 
+/// Must match title [TextStyle.height] and two lines in [_ShelfBookTile].
+const _kShelfTitleLineHeight = 1.2;
+
+/// Must match author [TextStyle.height] in [_ShelfBookTile].
+const _kShelfAuthorLineHeight = 1.35;
+
 /// Horizontal "Ebooks" and "Books" shelves matching the home design reference.
 class BooksBooksHomeSections extends StatelessWidget {
   const BooksBooksHomeSections({super.key});
@@ -90,7 +96,21 @@ class _BookShelfRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final coverWidth = 95.h;
     final coverHeight = 100.h * 1.48;
-    final listHeight = coverHeight + 8.h + 34.h + 4.h + 18.h;
+    final textScaler = MediaQuery.textScalerOf(context);
+    // Reserve vertical space from the same font metrics as [_ShelfBookTile] (not
+    // mixed .h guesses): .sp vs .h scale differently and cause bottom overflow.
+    final titleFontSize = 14.sp;
+    final authorFontSize = 12.sp;
+    final titleBlockHeight =
+        textScaler.scale(titleFontSize * _kShelfTitleLineHeight * 2);
+    final authorBlockHeight =
+        textScaler.scale(authorFontSize * _kShelfAuthorLineHeight);
+    final listHeight = coverHeight +
+        8.h +
+        titleBlockHeight +
+        4.h +
+        authorBlockHeight +
+        12;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,7 +232,7 @@ class _ShelfBookTile extends StatelessWidget {
             style: AppTextStyles.bold(
               fontSize: 14.sp,
               color: AppColors.black,
-              height: 1.2,
+              height: _kShelfTitleLineHeight,
             ),
           ),
           4.h.verticalSpace,
@@ -222,9 +242,8 @@ class _ShelfBookTile extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: AppTextStyles.semiBold(
               fontSize: 12.sp,
-
               color: AppColors.black.setOpacity(0.8),
-            ),
+            ).copyWith(height: _kShelfAuthorLineHeight),
           ),
         ],
       ),

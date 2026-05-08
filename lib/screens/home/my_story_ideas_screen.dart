@@ -16,6 +16,7 @@ import 'package:redstreakapp/models/home/story_models/story_idea_model.dart'
     as generated_models;
 import 'package:redstreakapp/models/home/story_models/story_summary_model.dart'
     as summary_models;
+import 'package:redstreakapp/models/home/story_models/reading_exit_snapshot.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/saved_series_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
@@ -46,6 +47,23 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
   ) {
     if (storyIdeas == null) return null;
 
+    // Convert topic interests to summary model type.
+    final topicInterests = storyIdeas.topic.interests
+        .map((i) => summary_models.TopicInterest(id: i.id, name: i.name))
+        .toList();
+
+    // Convert subjects list to summary SubjectsData.
+    final summarySubjectItems = storyIdeas.subjects
+        .map((s) => summary_models.SubjectItem(id: s.id, name: s.name))
+        .toList();
+    final subjectsData = summarySubjectItems.isNotEmpty
+        ? summary_models.SubjectsData(
+            all: summarySubjectItems,
+            allIds: summarySubjectItems.map((s) => s.id).toList(),
+            type: 'primary',
+          )
+        : null;
+
     return summary_models.StoryIdeaModel(
       topicId: storyIdeas.topic.id,
       topicTitle: storyIdeas.topic.title,
@@ -53,6 +71,8 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
       isOwnTopic: true,
       topicLearningGoal: storyIdeas.topic.learningGoal,
       topicThumbnailUrl: storyIdeas.topic.thumbnailUrl,
+      topicInterests: topicInterests,
+      subjects: subjectsData,
       storyIdeas: storyIdeas.storyIdeas
           .map(
             (idea) => summary_models.StoryIdea(
@@ -62,7 +82,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
               thumbnailUrl: (idea.thumbnailUrl ?? '').toString(),
               sequenceIndex: idea.sequenceIndex,
               grade: '',
-              tags: const [],
+              tags: idea.tags,
               age: '',
               language: '',
               topic: storyIdeas.topic.title,
@@ -92,7 +112,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
       ..dispose();
     super.dispose();
   }
- 
+
   void _onScroll() {
     if (!_scrollController.hasClients) return;
     final provider = context.read<HomeProvider>();
@@ -128,6 +148,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
     required String storyIdeaId,
     required int ideaIndex,
     required int initialPageIndex,
+    int? initialConfirmedPageIndex,
   }) {
     final storyProvider = context.read<StoryProvider>();
     storyProvider.setFromStorySummary(summary);
@@ -145,15 +166,29 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
           extra: <String, dynamic>{
             "storyIdeaId": storyIdeaId,
             "initialPageIndex": initialPageIndex,
+            "initialConfirmedPageIndex": initialConfirmedPageIndex,
           },
         )
-        .then((_) {
+        .then((result) {
           if (!mounted) return;
           setState(() => _hasReadAStory = true);
           final hp = context.read<HomeProvider>();
           final topicId = hp.activeStoryIdeasTopicId;
           if (topicId != null) {
-            hp.generateStoryIdeasForTopic(topicId: topicId);
+            if (result is ReadingExitSnapshot &&
+                result.hasValidCounts) {
+              hp.applyLocalReadingProgressFromReadingSession(
+                storyIdeaId: result.storyIdeaId,
+                lastPageIndex: result.lastPageIndex,
+                pageCount: result.pageCount,
+              );
+              hp.getTopicStoryDetails(
+                topicId: topicId,
+                showLoadingUi: false,
+              );
+            } else {
+              hp.getTopicStoryDetails(topicId: topicId);
+            }
           }
         });
   }
@@ -169,438 +204,483 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
         _handleBack();
       },
       child: Scaffold(
-      backgroundColor: AppColors.white,
-      body: Consumer2<HomeProvider, StoryProvider>(
-        builder: (context, homeProvider, storyProvider, child) {
-          final generatedSummary = _mapGeneratedIdeasToSummary(
-            storyProvider.storyIdeas,
-          );
+        backgroundColor: AppColors.white,
+        body: Consumer2<HomeProvider, StoryProvider>(
+          builder: (context, homeProvider, storyProvider, child) {
+            final generatedSummary = _mapGeneratedIdeasToSummary(
+              storyProvider.storyIdeas,
+            );
 
-          if (widget.preferGeneratedData && _waitingForGeneratedFirstResponse) {
-            if (generatedSummary != null) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (!mounted) return;
-                setState(() => _waitingForGeneratedFirstResponse = false);
-              });
-            } else if (!storyProvider.isGenerateStoryIdeasLoading) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (!mounted) return;
-                setState(() => _waitingForGeneratedFirstResponse = false);
-              });
+            if (widget.preferGeneratedData &&
+                _waitingForGeneratedFirstResponse) {
+              if (generatedSummary != null) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted) return;
+                  setState(() => _waitingForGeneratedFirstResponse = false);
+                });
+              } else if (!storyProvider.isGenerateStoryIdeasLoading) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted) return;
+                  setState(() => _waitingForGeneratedFirstResponse = false);
+                });
+              }
+              return HomeSectionShimmer.createdStoryIdeasLoadingShimmer();
             }
-            return HomeSectionShimmer.createdStoryIdeasLoadingShimmer();
-          }
 
-          // After returning from reading, prefer fresh API data (includes progress).
-          // Otherwise keep the original priority (generated data first for new series,
-          // API data first for existing series opened from home/profile).
-          final summary = _hasReadAStory
-              ? (homeProvider.storySummary ?? generatedSummary)
-              : (widget.preferGeneratedData
-                  ? (generatedSummary ?? homeProvider.storySummary)
-                  : (homeProvider.storySummary ?? generatedSummary));
+            // For the new-generation flow (preferGeneratedData == true):
+            //   Before any reading: show ONLY the freshly generated data.
+            //   Falling back to homeProvider.storySummary would show stale data
+            //   from a previous topic if generation failed or is still loading.
+            //   After returning from a reading session: prefer the refreshed API
+            //   data (which includes read-progress) then fall back to generated.
+            // For existing topics (preferGeneratedData == false):
+            //   Use homeProvider.storySummary only — ignore any leftover
+            //   generatedSummary from a previous generation flow.
+            final summary = widget.preferGeneratedData
+                ? (_hasReadAStory
+                      ? (homeProvider.storySummary ?? generatedSummary)
+                      : generatedSummary)
+                : homeProvider.storySummary;
 
-          if (homeProvider.isStoryIdeasLoading ||
-              homeProvider.isGenerateSeriesLoading ||
-              (summary == null && storyProvider.isGenerateStoryIdeasLoading)) {
-            return HomeSectionShimmer.createdStoryIdeasLoadingShimmer();
-          }
+            if (homeProvider.isStoryIdeasLoading ||
+                homeProvider.isGenerateSeriesLoading ||
+                homeProvider.isRefreshingStoryIdeas ||
+                (summary == null &&
+                    storyProvider.isGenerateStoryIdeasLoading)) {
+              return HomeSectionShimmer.createdStoryIdeasLoadingShimmer();
+            }
 
-          if (summary == null) {
-            final errorMsg =
-                storyProvider.generateStoryIdeasError ??
-                homeProvider.generateSeriesError ??
-                homeProvider.storyIdeasError ??
-                "Unable to load stories.";
-            return Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 28.w),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.error_outline_rounded,
-                      size: 48.w,
-                      color: AppColors.black.withValues(alpha: 0.3),
-                    ),
-                    16.w.verticalSpace,
-                    AppText(
-                      text: errorMsg,
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.medium(
-                        fontSize: 16.sp,
-                        color: AppColors.black.withValues(alpha: 0.7),
-                      ),
-                    ),
-                    24.w.verticalSpace,
-                    GestureDetector(
-                      onTap: () {
-                        storyProvider.createStoryIdeas(
-                          context: context,
-                          forceRegenerate:
-                              storyProvider.forceRegenerateTopicId != null,
-                          topicId: storyProvider.forceRegenerateTopicId,
-                          onFailed: (error) {
-                            if (!context.mounted) return;
-                            AppToast.error(context, error);
-                          },
-                          onSuccess: () {
-                            if (!context.mounted) return;
-                            AppToast.success(
-                              context,
-                              "Story Ideas created successfully.",
-                            );
-                            context.read<HomeProvider>().getMyTopics();
-                          },
-                        );
-                      },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 24.w,
-                          vertical: 12.w,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.teal,
-                          borderRadius: BorderRadius.circular(30.r),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.refresh_rounded,
-                              size: 20.w,
-                              color: AppColors.white,
-                            ),
-                            8.w.horizontalSpace,
-                            AppText(
-                              text: "Retry",
-                              style: AppTextStyles.semibold(
-                                fontSize: 16.sp,
-                                color: AppColors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    16.w.verticalSpace,
-                    GestureDetector(
-                      onTap: _handleBack,
-                      child: AppText(
-                        text: "Go Back",
-                        style: AppTextStyles.semibold(
-                          fontSize: 14.sp,
-                          color: AppColors.black.withValues(alpha: 0.5),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
-          if (summary.storyIdeas.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 28.w),
-                child: AppText(
-                  text: "No stories available.",
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.medium(
-                    fontSize: 16.sp,
-                    color: AppColors.black.withValues(alpha: 0.7),
-                  ),
-                ),
-              ),
-            );
-          }
-
-          final topicTitle = summary.topicTitle.isNotEmpty
-              ? summary.topicTitle
-              : 'Nature';
-          final topicDescription = summary.topicLearningGoal;
-          final topicThumb = summary.topicThumbnailUrl;
-          final tags = summary.subjects?.all.map((e) => e.name).toList() ?? [];
-          tags.addAll(summary.topicInterests.map((e) => e.name).toList());
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                child: StoryHeroHeader(
-                  imageUrl: topicThumb,
-                  title: topicTitle,
-                  topLeft: StoryCircleButton(
-                    onTap: _handleBack,
-                    child: Icon(
-                      Icons.chevron_left_rounded,
-                      size: 19.w,
-                      color: AppColors.black,
-                    ),
-                  ),
-                  bottomRight: StoryCircleButton(
-                    onTap: () {},
-                    child: Icon(
-                      Icons.more_vert,
-                      size: 18.w,
-                      color: AppColors.black,
-                    ),
-                  ),
-                  titleStyle: AppTextStyles.bold(
-                    fontSize: 24.sp,
-                    color: AppColors.white,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+            if (summary == null) {
+              final errorMsg =
+                  storyProvider.generateStoryIdeasError ??
+                  homeProvider.generateSeriesError ??
+                  homeProvider.storyIdeasError ??
+                  "Unable to load stories.";
+              return Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 28.w),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      18.w.verticalSpace,
-                      _MyExpandableDescription(
-                        text: topicDescription,
-                        title: topicTitle,
-                        description: topicDescription,
-                        tags: tags,
+                      Icon(
+                        Icons.error_outline_rounded,
+                        size: 48.w,
+                        color: AppColors.black.withValues(alpha: 0.3),
                       ),
-                      10.w.verticalSpace,
-                      // show first two tags
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: tags.take(2).map((e) => _infoChip(e)).toList(),
+                      16.w.verticalSpace,
+                      AppText(
+                        text: errorMsg,
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.medium(
+                          fontSize: 16.sp,
+                          color: AppColors.black.withValues(alpha: 0.7),
+                        ),
                       ),
-                      20.w.verticalSpace,
+                      24.w.verticalSpace,
                       GestureDetector(
                         onTap: () {
-                          if (summary.storyIdeas.isEmpty) return;
-
-                          int resumeIndex = summary.storyIdeas.indexWhere(
-                            (idea) =>
-                                idea.continueReading != null &&
-                                !idea.continueReading!.isCompleted &&
-                                idea.continueReading!.readPages > 0,
-                          );
-                          if (resumeIndex < 0) {
-                            resumeIndex = summary.storyIdeas.indexWhere(
-                              (idea) =>
-                                  idea.continueReading == null ||
-                                  !idea.continueReading!.isCompleted,
+                          if (widget.preferGeneratedData) {
+                            // New-generation flow: re-run the generate API.
+                            storyProvider.createStoryIdeas(
+                              context: context,
+                              forceRegenerate:
+                                  storyProvider.forceRegenerateTopicId != null,
+                              topicId: storyProvider.forceRegenerateTopicId,
+                              onFailed: (error) {
+                                if (!context.mounted) return;
+                                AppToast.error(context, error);
+                              },
+                              onSuccess: () {
+                                if (!context.mounted) return;
+                                AppToast.success(
+                                  context,
+                                  "Story Ideas created successfully.",
+                                );
+                                context.read<HomeProvider>().getMyTopics();
+                              },
                             );
+                          } else {
+                            // Existing topic: re-fetch via the mobile GET endpoint.
+                            final topicId =
+                                homeProvider.activeStoryIdeasTopicId;
+                            if (topicId != null) {
+                              homeProvider.getTopicStoryDetails(
+                                topicId: topicId,
+                              );
+                            }
                           }
-                          if (resumeIndex < 0) resumeIndex = 0;
-
-                          final resumeIdea = summary.storyIdeas[resumeIndex];
-                          final initialPageIndex =
-                              resumeIdea
-                                  .continueReading
-                                  ?.continueFromPageIndex ??
-                              0;
-
-                          _openReading(
-                            summary: summary,
-                            storyIdeaId: resumeIdea.id,
-                            ideaIndex: resumeIndex,
-                            initialPageIndex: initialPageIndex,
-                          );
                         },
                         child: Container(
-                          width: double.infinity,
-                          height: 48.w,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 24.w,
+                            vertical: 12.w,
+                          ),
                           decoration: BoxDecoration(
-                            color: AppColors.black,
+                            color: AppColors.teal,
                             borderRadius: BorderRadius.circular(30.r),
                           ),
-                          alignment: Alignment.center,
-                          child: AppText(
-                            text: summary.storyIdeas.first.isGenerated
-                                ? 'Continue Reading'
-                                : 'Start Reading',
-                            style: AppTextStyles.bold(
-                              fontSize: 18.sp,
-                              color: AppColors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                      18.w.verticalSpace,
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10.w),
-                        child: Row(
-                          children: [
-                            Builder(
-                              builder: (context) {
-                                final ssp = context
-                                    .watch<SavedSeriesProvider>();
-                                final isInList =
-                                    ssp.topicIsInMyListOverride(
-                                      summary.topicId,
-                                    ) ??
-                                    false;
-                                final isToggling = ssp
-                                    .isTopicListToggling(summary.topicId);
-                                return GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: isToggling
-                                      ? null
-                                      : () {
-                                          context
-                                              .read<SavedSeriesProvider>()
-                                              .toggleTopic(
-                                                topicId: summary.topicId,
-                                                onFailed: (error) {
-                                                  if (!context.mounted) return;
-                                                  AppToast.error(
-                                                    context,
-                                                    error,
-                                                  );
-                                                },
-                                              )
-                                              .then((result) {
-                                                if (result == null ||
-                                                    !context.mounted)
-                                                  {return;}
-                                                final msg =
-                                                    result.message ??
-                                                    (result.isInMyList
-                                                        ? "Added to My List"
-                                                        : "Removed from My List");
-                                                AppToast.success(context, msg);
-                                              });
-                                        },
-                                  child: Column(
-                                    children: [
-                                      if (isToggling)
-                                        SizedBox(
-                                          width: 20.w,
-                                          height: 20.w,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: AppColors.teal,
-                                          ),
-                                        )
-                                      else
-                                        Icon(
-                                          isInList
-                                              ? Icons.check_rounded
-                                              : Icons.add_rounded,
-                                          size: 20.w,
-                                          color: isInList
-                                              ? AppColors.teal
-                                              : AppColors.black,
-                                        ),
-                                      2.w.verticalSpace,
-                                      AppText(
-                                        text: isToggling
-                                            ? (isInList
-                                                  ? 'Removing...'
-                                                  : 'Adding...')
-                                            : (isInList
-                                                  ? 'In My List'
-                                                  : 'Add to List'),
-                                        style: AppTextStyles.semibold(
-                                          fontSize: 14,
-                                          color: isInList
-                                              ? AppColors.teal
-                                              : AppColors.black,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                            25.w.horizontalSpace,
-                            GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: () =>
-                                  shareTopicLink(topicId: summary.topicId),
-                              child: Column(
-                                children: [
-                                  SvgIcon(
-                                    AppAssets.shareIcon,
-                                    size: 18.w,
-                                    color: AppColors.black,
-                                  ),
-                                  4.w.verticalSpace,
-                                  AppText(
-                                    text: 'Share',
-                                    style: AppTextStyles.semibold(
-                                      fontSize: 14,
-                                      color: AppColors.black,
-                                    ),
-                                  ),
-                                ],
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.refresh_rounded,
+                                size: 20.w,
+                                color: AppColors.white,
                               ),
-                            ),
-                          ],
+                              8.w.horizontalSpace,
+                              AppText(
+                                text: "Retry",
+                                style: AppTextStyles.semibold(
+                                  fontSize: 16.sp,
+                                  color: AppColors.white,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       16.w.verticalSpace,
-                      Divider(
-                        height: 1.w,
-                        thickness: 1.w,
-                        color: AppColors.black.withValues(alpha: 0.1),
-                      ),
-                      18.w.verticalSpace,
-                      AppText(
-                        text: "${summary.storyIdeas.length} Readings",
-                        style: AppTextStyles.bold(
-                          fontSize: 16.sp,
-                          color: AppColors.black,
-                        ),
-                      ),
-                      18.w.verticalSpace,
-                      ...List.generate(
-                        summary.storyIdeas.length,
-                        (index) => Padding(
-                          padding: EdgeInsets.only(bottom: 18.w),
-                          child: _MyReadingItemTile(
-                            index: index + 1,
-                            isSelected:
-                                summary
-                                    .storyIdeas[index]
-                                    .continueReading
-                                    ?.isCompleted ??
-                                false,
-                            title: summary.storyIdeas[index].storyTitle,
-                            description: summary.storyIdeas[index].description,
-                            thumbnailUrl:
-                                summary.storyIdeas[index].thumbnailUrl,
-                            topicThumbnailUrl: summary.topicThumbnailUrl,
-                            continueReading:
-                                summary.storyIdeas[index].continueReading,
-                            onOpenStory: () {
-                              final initialPage =
-                                  summary
-                                      .storyIdeas[index]
-                                      .continueReading
-                                      ?.continueFromPageIndex ??
-                                  0;
-                              _openReading(
-                                summary: summary,
-                                storyIdeaId: summary.storyIdeas[index].id,
-                                ideaIndex: index,
-                                initialPageIndex: initialPage,
-                              );
-                            },
+                      GestureDetector(
+                        onTap: _handleBack,
+                        child: AppText(
+                          text: "Go Back",
+                          style: AppTextStyles.semibold(
+                            fontSize: 14.sp,
+                            color: AppColors.black.withValues(alpha: 0.5),
                           ),
                         ),
                       ),
-                      if (homeProvider.isStoryIdeasLoadingMore) ...[
-                        4.w.verticalSpace,
-                        HomeSectionShimmer.createdStoryIdeasLoadMoreShimmer(),
-                      ],
                     ],
                   ),
                 ),
-              ),
-            ],
-          );
-        },
-      ),
+              );
+            }
+
+            if (summary.storyIdeas.isEmpty) {
+              return Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 28.w),
+                  child: AppText(
+                    text: "No stories available.",
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.medium(
+                      fontSize: 16.sp,
+                      color: AppColors.black.withValues(alpha: 0.7),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            final topicTitle = summary.topicTitle.isNotEmpty
+                ? summary.topicTitle
+                : 'Nature';
+            final topicDescription = summary.topicLearningGoal;
+            final topicThumb = summary.topicThumbnailUrl;
+            final tags =
+                summary.subjects?.all.map((e) => e.name).toList() ?? [];
+            tags.addAll(summary.topicInterests.map((e) => e.name).toList());
+
+            print("tags: $tags");
+            print("summary: ${summary.subjects?.all}");
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  child: StoryHeroHeader(
+                    imageUrl: topicThumb,
+                    title: topicTitle,
+                    topLeft: StoryCircleButton(
+                      onTap: _handleBack,
+                      child: Icon(
+                        Icons.chevron_left_rounded,
+                        size: 19.w,
+                        color: AppColors.black,
+                      ),
+                    ),
+                    // bottomRight: StoryCircleButton(
+                    //   onTap: () {},
+                    //   child: Icon(
+                    //     Icons.more_vert,
+                    //     size: 18.w,
+                    //     color: AppColors.black,
+                    //   ),
+                    // ),
+                    titleStyle: AppTextStyles.bold(
+                      fontSize: 24.sp,
+                      color: AppColors.white,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        18.w.verticalSpace,
+                        _MyExpandableDescription(
+                          text: topicDescription,
+                          title: topicTitle,
+                          description: topicDescription,
+                          tags: tags,
+                        ),
+                        10.w.verticalSpace,
+                        // show first two tags
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: tags
+                              .take(2)
+                              .map(
+                                (e) => Padding(
+                                  padding: EdgeInsets.only(right: 10.r),
+                                  child: _infoChip(e),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                        20.w.verticalSpace,
+                        GestureDetector(
+                          onTap: () {
+                            if (summary.storyIdeas.isEmpty) return;
+
+                            int resumeIndex = summary.storyIdeas.indexWhere(
+                              (idea) =>
+                                  idea.continueReading != null &&
+                                  !idea.continueReading!.isCompleted &&
+                                  idea.continueReading!.readPages > 0,
+                            );
+                            if (resumeIndex < 0) {
+                              resumeIndex = summary.storyIdeas.indexWhere(
+                                (idea) =>
+                                    idea.continueReading == null ||
+                                    !idea.continueReading!.isCompleted,
+                              );
+                            }
+                            if (resumeIndex < 0) resumeIndex = 0;
+
+                            final resumeIdea = summary.storyIdeas[resumeIndex];
+                            final initialPageIndex =
+                                resumeIdea
+                                    .continueReading
+                                    ?.continueFromPageIndex ??
+                                0;
+                            final initialConfirmedPageIndex =
+                                resumeIdea.continueReading?.lastPageIndex ??
+                                    (initialPageIndex - 1);
+
+                            _openReading(
+                              summary: summary,
+                              storyIdeaId: resumeIdea.id,
+                              ideaIndex: resumeIndex,
+                              initialPageIndex: initialPageIndex,
+                              initialConfirmedPageIndex:
+                                  initialConfirmedPageIndex,
+                            );
+                          },
+                          child: Container(
+                            width: double.infinity,
+                            height: 48.w,
+                            decoration: BoxDecoration(
+                              color: AppColors.black,
+                              borderRadius: BorderRadius.circular(30.r),
+                            ),
+                            alignment: Alignment.center,
+                            child: AppText(
+                              text: summary.storyIdeas.first.isGenerated
+                                  ? 'Continue Reading'
+                                  : 'Start Reading',
+                              style: AppTextStyles.bold(
+                                fontSize: 18.sp,
+                                color: AppColors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                        18.w.verticalSpace,
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10.w),
+                          child: Row(
+                            children: [
+                              Builder(
+                                builder: (context) {
+                                  final ssp = context
+                                      .watch<SavedSeriesProvider>();
+                                  final isInList =
+                                      ssp.topicIsInMyListOverride(
+                                        summary.topicId,
+                                      ) ??
+                                      false;
+                                  final isToggling = ssp.isTopicListToggling(
+                                    summary.topicId,
+                                  );
+                                  return GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: isToggling
+                                        ? null
+                                        : () {
+                                            context
+                                                .read<SavedSeriesProvider>()
+                                                .toggleTopic(
+                                                  topicId: summary.topicId,
+                                                  onFailed: (error) {
+                                                    if (!context.mounted)
+                                                      return;
+                                                    AppToast.error(
+                                                      context,
+                                                      error,
+                                                    );
+                                                  },
+                                                )
+                                                .then((result) {
+                                                  if (result == null ||
+                                                      !context.mounted) {
+                                                    return;
+                                                  }
+                                                  final msg =
+                                                      result.message ??
+                                                      (result.isInMyList
+                                                          ? "Added to My List"
+                                                          : "Removed from My List");
+                                                  AppToast.success(
+                                                    context,
+                                                    msg,
+                                                  );
+                                                });
+                                          },
+                                    child: Column(
+                                      children: [
+                                        if (isToggling)
+                                          SizedBox(
+                                            width: 20.w,
+                                            height: 20.w,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: AppColors.teal,
+                                            ),
+                                          )
+                                        else
+                                          Icon(
+                                            isInList
+                                                ? Icons.check_rounded
+                                                : Icons.add_rounded,
+                                            size: 20.w,
+                                            color: isInList
+                                                ? AppColors.teal
+                                                : AppColors.black,
+                                          ),
+                                        2.w.verticalSpace,
+                                        AppText(
+                                          text: isToggling
+                                              ? (isInList
+                                                    ? 'Removing...'
+                                                    : 'Adding...')
+                                              : (isInList
+                                                    ? 'In My List'
+                                                    : 'Add to List'),
+                                          style: AppTextStyles.semibold(
+                                            fontSize: 14,
+                                            color: isInList
+                                                ? AppColors.teal
+                                                : AppColors.black,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                              25.w.horizontalSpace,
+                              GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () =>
+                                    shareTopicLink(topicId: summary.topicId),
+                                child: Column(
+                                  children: [
+                                    SvgIcon(
+                                      AppAssets.shareIcon,
+                                      size: 18.w,
+                                      color: AppColors.black,
+                                    ),
+                                    4.w.verticalSpace,
+                                    AppText(
+                                      text: 'Share',
+                                      style: AppTextStyles.semibold(
+                                        fontSize: 14,
+                                        color: AppColors.black,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        16.w.verticalSpace,
+                        Divider(
+                          height: 1.w,
+                          thickness: 1.w,
+                          color: AppColors.black.withValues(alpha: 0.1),
+                        ),
+                        18.w.verticalSpace,
+                        AppText(
+                          text: "${summary.storyIdeas.length} Readings",
+                          style: AppTextStyles.bold(
+                            fontSize: 16.sp,
+                            color: AppColors.black,
+                          ),
+                        ),
+                        18.w.verticalSpace,
+                        ...List.generate(
+                          summary.storyIdeas.length,
+                          (index) => Padding(
+                            padding: EdgeInsets.only(bottom: 18.w),
+                            child: _MyReadingItemTile(
+                              index: index + 1,
+                              isSelected:
+                                  summary
+                                      .storyIdeas[index]
+                                      .continueReading
+                                      ?.isCompleted ??
+                                  false,
+                              title: summary.storyIdeas[index].storyTitle,
+                              description:
+                                  summary.storyIdeas[index].description,
+                              thumbnailUrl:
+                                  summary.storyIdeas[index].thumbnailUrl,
+                              topicThumbnailUrl: summary.topicThumbnailUrl,
+                              continueReading:
+                                  summary.storyIdeas[index].continueReading,
+                              onOpenStory: () {
+                                final initialPage =
+                                    summary
+                                        .storyIdeas[index]
+                                        .continueReading
+                                        ?.continueFromPageIndex ??
+                                    0;
+                                _openReading(
+                                  summary: summary,
+                                  storyIdeaId: summary.storyIdeas[index].id,
+                                  ideaIndex: index,
+                                  initialPageIndex: initialPage,
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                        if (homeProvider.isStoryIdeasLoadingMore) ...[
+                          4.w.verticalSpace,
+                          HomeSectionShimmer.createdStoryIdeasLoadMoreShimmer(),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

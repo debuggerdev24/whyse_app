@@ -6,6 +6,7 @@ import 'package:redstreakapp/core/utils/share_helper.dart';
 
 import 'package:redstreakapp/core/widgets/global_widgets.dart';
 
+import 'package:redstreakapp/models/home/story_models/reading_exit_snapshot.dart';
 import 'package:redstreakapp/providers/home/reading_appearance_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/services/home/story_api_service.dart';
@@ -19,10 +20,14 @@ class CreatedStoryReadingScreen extends StatefulWidget {
   const CreatedStoryReadingScreen({
     super.key,
     this.initialPageIndex = 0,
+    this.initialConfirmedPageIndex,
     this.storyIdeaId,
   });
 
   final int initialPageIndex;
+  /// The last page index that was already confirmed as read (saved on server).
+  /// This prevents counting the currently shown page as read just by viewing it.
+  final int? initialConfirmedPageIndex;
   final String? storyIdeaId;
 
   @override
@@ -31,8 +36,14 @@ class CreatedStoryReadingScreen extends StatefulWidget {
 }
 
 class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
+  /// Batches rapid "Next Page" taps into one API call (latest page wins).
+  static const _progressDebounce = Duration(milliseconds: 450);
+
   late int _currentPageIndex;
   Timer? _readingTimer;
+  Timer? _progressDebounceTimer;
+  int _queuedProgressPageIndex = -1;
+  int _maxConfirmedPageIndex = -1;
   int _remainingSeconds = 0;
   bool _hasStartedReading = false;
   bool _isTimerRunning = false;
@@ -41,6 +52,9 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
   void initState() {
     super.initState();
     _currentPageIndex = widget.initialPageIndex;
+    final initialConfirmed = widget.initialConfirmedPageIndex ??
+        (widget.initialPageIndex - 1);
+    _maxConfirmedPageIndex = initialConfirmed;
   }
 
   String _formatDuration(int totalSeconds) {
@@ -84,8 +98,10 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
 
   void _goToNextPage(int totalPages) {
     if (_currentPageIndex >= totalPages - 1) return;
+    final completedPageIndex = _currentPageIndex;
     setState(() => _currentPageIndex++);
-    _reportPageProgress(_currentPageIndex);
+    // Mark the page we are leaving as read (not the page we are navigating to).
+    _schedulePageProgressReport(completedPageIndex);
   }
 
   void _goToPreviousPage() {
@@ -93,18 +109,78 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
     setState(() => _currentPageIndex--);
   }
 
-  void _reportPageProgress(int pageIndex) {
+  void _schedulePageProgressReport(int pageIndex) {
     final storyIdeaId = widget.storyIdeaId;
     if (storyIdeaId == null || storyIdeaId.isEmpty) return;
+    if (pageIndex < 0) return;
+    _queuedProgressPageIndex = pageIndex;
+    if (pageIndex > _maxConfirmedPageIndex) {
+      _maxConfirmedPageIndex = pageIndex;
+    }
+    _progressDebounceTimer?.cancel();
+    _progressDebounceTimer = Timer(_progressDebounce, _flushQueuedPageProgress);
+  }
+
+  void _flushQueuedPageProgress() {
+    _progressDebounceTimer?.cancel();
+    final storyIdeaId = widget.storyIdeaId;
+    if (storyIdeaId == null || storyIdeaId.isEmpty) return;
+    if (_queuedProgressPageIndex < 0) return;
+    StoryApiService.instance.updatePageProgress(
+      storyIdeaId: storyIdeaId,
+      pageIndex: _queuedProgressPageIndex,
+    );
+    _queuedProgressPageIndex = -1;
+  }
+
+  void _syncPageProgressImmediately(int pageIndex) {
+    final storyIdeaId = widget.storyIdeaId;
+    if (storyIdeaId == null || storyIdeaId.isEmpty) return;
+    if (pageIndex < 0) return;
+    _progressDebounceTimer?.cancel();
+    _queuedProgressPageIndex = -1;
+    if (pageIndex > _maxConfirmedPageIndex) {
+      _maxConfirmedPageIndex = pageIndex;
+    }
     StoryApiService.instance.updatePageProgress(
       storyIdeaId: storyIdeaId,
       pageIndex: pageIndex,
     );
   }
 
+  ReadingExitSnapshot? _snapshotForPop(StoryProvider storyProvider) {
+    final id = widget.storyIdeaId;
+    if (id == null || id.isEmpty) return null;
+    final pages = storyProvider.stories.isEmpty
+        ? null
+        : storyProvider.stories.first.pages;
+    final pageCount = pages?.length ?? 0;
+    if (pageCount <= 0) return null;
+    final confirmed = _maxConfirmedPageIndex.clamp(-1, pageCount - 1);
+    if (confirmed < 0) return null;
+    return ReadingExitSnapshot(
+      storyIdeaId: id,
+      lastPageIndex: confirmed,
+      pageCount: pageCount,
+    );
+  }
+
+  void _leaveReader(BuildContext context, StoryProvider storyProvider) {
+    _flushQueuedPageProgress();
+    final snap = _snapshotForPop(storyProvider);
+    if (!context.mounted) return;
+    if (context.canPop()) {
+      context.pop(snap);
+    } else {
+      context.goNamed(AppRoutes.homeScreen.name);
+    }
+  }
+
   @override
   void dispose() {
     _readingTimer?.cancel();
+    _progressDebounceTimer?.cancel();
+    _flushQueuedPageProgress();
     super.dispose();
   }
 
@@ -114,8 +190,16 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
       value: const SystemUiOverlayStyle(
         statusBarIconBrightness: Brightness.light,
       ),
-      child: AppLayout(
-        body: Consumer2<StoryProvider, ReadingAppearanceProvider>(
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (!mounted) return;
+          final sp = context.read<StoryProvider>();
+          _leaveReader(context, sp);
+        },
+        child: AppLayout(
+          body: Consumer2<StoryProvider, ReadingAppearanceProvider>(
           builder: (context, provider, appearance, child) {
             final storyLoading =
                 provider.isCreateStoryLoading ||
@@ -154,13 +238,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                   title:
                       '${safePageIndex + 1}. ${stories.title.isNotEmpty ? stories.title : 'Exploring the wonders of Nature'}',
                   topLeft: StoryCircleButton(
-                    onTap: () {
-                      if (context.canPop()) {
-                        context.pop();
-                      } else {
-                        context.goNamed(AppRoutes.homeScreen.name);
-                      }
-                    },
+                    onTap: () => _leaveReader(context, provider),
                     child: Icon(
                       Icons.chevron_left_rounded,
                       size: 19.w,
@@ -329,7 +407,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                               height: 1.6,
                             ),
                           ),
-                        20.w.verticalSpace,
+                          20.w.verticalSpace,
                           CachedNetworkImage(
                             imageUrl: story.imageUrl,
                             height: 210.w,
@@ -338,8 +416,9 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                             placeholder: (context, url) => Shimmer.fromColors(
                               baseColor: AppColors.shimmerBaseColor,
                               highlightColor: AppColors.shimmerHighlightColor,
-                              child:
-                                  Container(color: AppColors.shimmerBaseColor),
+                              child: Container(
+                                color: AppColors.shimmerBaseColor,
+                              ),
                             ),
                             errorWidget: (context, url, error) =>
                                 const NoImageFound(),
@@ -364,14 +443,17 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                         if (isLastPage)
                           _BottomPrimaryButton(
                             text: "Take Quiz",
-                            onTap: () => context.pushNamed(
-                              AppRoutes.startQuizScreen.name,
-                              extra: {
-                                'storyId': stories.id,
-                                'storyTitle': stories.title,
-                                'storyImageUrl': stories.thumbnailUrl,
-                              },
-                            ),
+                            onTap: () {
+                              _syncPageProgressImmediately(safePageIndex);
+                              context.pushNamed(
+                                AppRoutes.startQuizScreen.name,
+                                extra: {
+                                  'storyId': stories.id,
+                                  'storyTitle': stories.title,
+                                  'storyImageUrl': stories.thumbnailUrl,
+                                },
+                              );
+                            },
                           )
                         else
                           _BottomPrimaryButton(
@@ -402,6 +484,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
             );
           },
         ),
+      ),
       ),
     );
   }

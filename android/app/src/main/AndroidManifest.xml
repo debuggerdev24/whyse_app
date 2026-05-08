@@ -18,7 +18,7 @@
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:label="Whyse App">
+        android:label="@string/app_name">
 
         <!--Added for the google sign in-->
         <activity

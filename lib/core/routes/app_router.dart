@@ -389,15 +389,23 @@ class AppRouter {
         final extra = state.extra;
         String? storyIdeaId;
         int initialPageIndex = 0;
+        int? initialConfirmedPageIndex;
         if (extra is Map<String, dynamic>) {
           storyIdeaId = extra["storyIdeaId"]?.toString();
           initialPageIndex = extra["initialPageIndex"] is int
               ? extra["initialPageIndex"] as int
               : 0;
+          final rawConfirmed = extra["initialConfirmedPageIndex"];
+          if (rawConfirmed is int) {
+            initialConfirmedPageIndex = rawConfirmed;
+          } else if (rawConfirmed != null) {
+            initialConfirmedPageIndex = int.tryParse(rawConfirmed.toString());
+          }
         }
         return CreatedStoryReadingScreen(
           storyIdeaId: storyIdeaId,
           initialPageIndex: initialPageIndex,
+          initialConfirmedPageIndex: initialConfirmedPageIndex,
         );
       },
     ),

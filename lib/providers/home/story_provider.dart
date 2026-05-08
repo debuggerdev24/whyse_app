@@ -757,6 +757,17 @@ class StoryProvider extends ChangeNotifier {
     VoidCallback? onSuccess,
   }) async {
     // if (!forceRegenerate && !_validateCreateStoryInput(context)) return;
+
+    // Derive _lessonDuration from the user's UI selection every time so we
+    // don't rely on validateCreateStoryInput (which is currently bypassed).
+    if (selectedReadingDuration.toLowerCase() == AppEnum.custom.name) {
+      _lessonDuration =
+          int.tryParse(customReadingDurationCtr.text.trim()) ?? 0;
+    } else {
+      _lessonDuration =
+          int.tryParse(selectedReadingDuration.split(' ')[0]) ?? 0;
+    }
+
     isGenerateStoryIdeasLoading = true;
     generateStoryIdeasError = null;
     _currentStoryIndex = 0;

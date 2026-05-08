@@ -4,6 +4,8 @@ class StoryIdeasModel {
     dynamic mustIncludeWords;
     Topic topic;
     List<StoryIdea> storyIdeas;
+    // Subjects from the "subjects" block in the generate-mobile response.
+    List<SubjectItem> subjects;
 
     StoryIdeasModel({
         required this.promptType,
@@ -11,14 +13,41 @@ class StoryIdeasModel {
         required this.mustIncludeWords,
         required this.topic,
         required this.storyIdeas,
-    });
+        List<SubjectItem>? subjects,
+    }) : subjects = subjects ?? [];
 
     factory StoryIdeasModel.fromJson(Map<String, dynamic> json) => StoryIdeasModel(
-        promptType: json["promptType"],
+        promptType: json["promptType"]?.toString() ?? "",
         grade: json["grade"],
         mustIncludeWords: json["mustIncludeWords"],
-        topic: Topic.fromJson(json["topic"]),
-        storyIdeas: List<StoryIdea>.from(json["storyIdeas"].map((x) => StoryIdea.fromJson(x))),
+        topic: Topic.fromJson(
+          json["topic"] is Map
+              ? Map<String, dynamic>.from(json["topic"] as Map)
+              : <String, dynamic>{},
+        ),
+        storyIdeas: json["storyIdeas"] is List
+            ? List<StoryIdea>.from(
+                (json["storyIdeas"] as List).map(
+                  (x) => StoryIdea.fromJson(
+                    x is Map ? Map<String, dynamic>.from(x) : <String, dynamic>{},
+                  ),
+                ),
+              )
+            : [],
+        subjects: () {
+          final s = json["subjects"];
+          if (s is Map) {
+            final all = s["all"];
+            if (all is List) {
+              return all
+                  .map((x) => SubjectItem.fromJson(
+                        x is Map ? Map<String, dynamic>.from(x) : <String, dynamic>{},
+                      ))
+                  .toList();
+            }
+          }
+          return <SubjectItem>[];
+        }(),
     );
 }
 
@@ -29,6 +58,7 @@ class StoryIdea {
     dynamic thumbnailUrl;
     DateTime createdAt;
     int sequenceIndex;
+    List<String> tags;
     /// When false, story is not generated yet (e.g. shared link). UI can show lock icon.
     bool isGenerated;
 
@@ -39,16 +69,26 @@ class StoryIdea {
         required this.thumbnailUrl,
         required this.createdAt,
         required this.sequenceIndex,
+        List<String>? tags,
         this.isGenerated = true,
-    });
+    }) : tags = tags ?? [];
 
     factory StoryIdea.fromJson(Map<String, dynamic> json) => StoryIdea(
-        id: json["id"],
-        title: json["title"],
-        description: json["description"],
+        id: json["id"]?.toString() ?? "",
+        title: json["title"]?.toString() ?? "",
+        description: json["description"]?.toString() ?? "",
         thumbnailUrl: json["thumbnailUrl"],
-        createdAt: DateTime.parse(json["createdAt"]),
-        sequenceIndex: json["sequenceIndex"],
+        createdAt: json["createdAt"] != null
+            ? DateTime.tryParse(json["createdAt"].toString()) ?? DateTime.now()
+            : DateTime.now(),
+        sequenceIndex: json["sequenceIndex"] is int
+            ? json["sequenceIndex"] as int
+            : int.tryParse(json["sequenceIndex"]?.toString() ?? "") ?? 0,
+        tags: json["tags"] is List
+            ? List<String>.from(
+                (json["tags"] as List).map((x) => x.toString()),
+              )
+            : [],
         isGenerated: json["isGenerated"] != false,
     );
 }
@@ -71,12 +111,22 @@ class Topic {
     });
 
     factory Topic.fromJson(Map<String, dynamic> json) => Topic(
-        id: json["id"],
-        title: json["title"],
-        learningGoal: json["learningGoal"],
-        interests: List<Interest>.from(json["interests"].map((x) => Interest.fromJson(x))),
-        createdAt: DateTime.parse(json["createdAt"]),
-        thumbnailUrl: json["thumbnailUrl"] ?? "",
+        id: json["id"]?.toString() ?? "",
+        title: json["title"]?.toString() ?? "",
+        learningGoal: json["learningGoal"]?.toString() ?? "",
+        interests: json["interests"] is List
+            ? List<Interest>.from(
+                (json["interests"] as List).map(
+                  (x) => Interest.fromJson(
+                    x is Map ? Map<String, dynamic>.from(x) : <String, dynamic>{},
+                  ),
+                ),
+              )
+            : [],
+        createdAt: json["createdAt"] != null
+            ? DateTime.tryParse(json["createdAt"].toString()) ?? DateTime.now()
+            : DateTime.now(),
+        thumbnailUrl: json["thumbnailUrl"]?.toString() ?? "",
     );
 
     Map<String, dynamic> toJson() => {
@@ -99,12 +149,24 @@ class Interest {
     });
 
     factory Interest.fromJson(Map<String, dynamic> json) => Interest(
-        id: json["id"],
-        name: json["name"],
+        id: json["id"]?.toString() ?? "",
+        name: json["name"]?.toString() ?? "",
     );
 
     Map<String, dynamic> toJson() => {
         "id": id,
         "name": name,
     };
+}
+
+class SubjectItem {
+    String id;
+    String name;
+
+    SubjectItem({required this.id, required this.name});
+
+    factory SubjectItem.fromJson(Map<String, dynamic> json) => SubjectItem(
+        id: json["id"]?.toString() ?? "",
+        name: json["name"]?.toString() ?? "",
+    );
 }

@@ -203,7 +203,7 @@ class _MySavedSeriesScreenState extends State<MySavedSeriesScreen> {
                     return _SavedSeriesCard(
                       item: item,
                       onTap: () {
-                        context.read<HomeProvider>().generateStoryIdeasForTopic(
+                        context.read<HomeProvider>().getTopicStoryDetails(
                           topicId: item.topic.id,
                         );
                         context.pushNamed(

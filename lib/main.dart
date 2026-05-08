@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:redstreakapp/core/config/flavor_config.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/core/utils/shared_pref.dart';
@@ -24,7 +25,7 @@ import 'package:toastification/toastification.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
+  await dotenv.load(fileName: flavorEnvFileName());
   await LocalStorageService.instance.init();
   DioClient.instance.initialize();
   SystemChrome.setPreferredOrientations([

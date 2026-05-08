@@ -26,6 +26,22 @@ android {
         versionName = flutter.versionName
     }
 
+    flavorDimensions += "environment"
+    productFlavors {
+        create("local") {
+            dimension = "environment"
+            resValue("string", "app_name", "Whyse (Local)")
+        }
+        create("staging") {
+            dimension = "environment"
+            resValue("string", "app_name", "Whyse (Pre-release)")
+        }
+        create("production") {
+            dimension = "environment"
+            resValue("string", "app_name", "Whyse App")
+        }
+    }
+
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("debug")

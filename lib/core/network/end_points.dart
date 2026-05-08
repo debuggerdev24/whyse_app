@@ -46,6 +46,7 @@ class EndPoints {
     buffer.write('&q=${Uri.encodeComponent(searchValue)}');
     return buffer.toString();
   }
+
   static String getGroupMembers({required String groupId}) =>
       "/groups/$groupId/members";
   static String addGroupMembers({required String groupId}) =>
@@ -53,15 +54,14 @@ class EndPoints {
   static String removeGroupMember({
     required String groupId,
     required String userId,
-  }) =>
-      "/groups/$groupId/members/$userId";
+  }) => "/groups/$groupId/members/$userId";
   static String leaveGroup({required String groupId}) =>
       "/mobile/groups/$groupId/leave";
-  
+
   // get home screen topics list, (user generated)s
   static String getMyTopics({int page = 1, int limit = 20}) =>
       "/story/topics?page=$page&limit=$limit&createdBy=self";
-  
+
   static const browseAllTopics = "/story/topics";
   static String getMyList({int page = 1, int limit = 10, String search = ''}) =>
       "/story/topics/my-list?page=$page&limit=$limit&search=${Uri.encodeComponent(search)}";
@@ -71,6 +71,11 @@ class EndPoints {
       "/story/topics/$topicId/toggle-list";
   static String getStoryIdeasByTopicId({required String topicId}) =>
       "/story/topics/$topicId/story-ideas";
+
+  // Returns already-generated story ideas in the same format as the
+  // generate-mobile endpoint (used for refreshing after a reading session).
+  static String getMobileTopicStoryIdeas({required String topicId}) =>
+      "/story/mobile/topics/$topicId/story-ideas";
   static String getStoryByStoryIdea({required String storyIdea}) =>
       "/story/ideas/$storyIdea/story";
   static String topicProgress({required String topicId}) =>
@@ -87,7 +92,9 @@ class EndPoints {
       "/mobile/friends?page=$page&limit=$limit";
 
   static String searchFriends({int page = 1, int limit = 20, String? q}) {
-    final buffer = StringBuffer('/mobile/friends/search?page=$page&limit=$limit');
+    final buffer = StringBuffer(
+      '/mobile/friends/search?page=$page&limit=$limit',
+    );
     if (q != null && q.trim().isNotEmpty) {
       buffer.write('&q=${Uri.encodeComponent(q.trim())}');
     }

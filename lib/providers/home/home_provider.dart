@@ -225,6 +225,120 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // True while [getTopicStoryDetails] is in progress.
+  bool isRefreshingStoryIdeas = false;
+
+  // Fetches already-generated story ideas for a topic using the mobile GET
+  // endpoint (/story/mobile/topics/{id}/story-ideas).
+  // When [topicId] differs from [activeStoryIdeasTopicId] the existing
+  // storySummary is cleared so the ideas screen shows a loading shimmer.
+  // When [topicId] matches, storySummary is kept until the response arrives;
+  // MyStoryIdeasScreen shows a full-page shimmer while [isRefreshingStoryIdeas]
+  // is true so users do not see stale data during refresh.
+  //
+  /// [showLoadingUi]: when false (e.g. after reading), skips loading shimmer and
+  /// only merges server data when the response arrives — list already updated
+  /// optimistically via [applyLocalReadingProgressFromReadingSession].
+  Future<void> getTopicStoryDetails({
+    required String topicId,
+    bool showLoadingUi = true,
+  }) async {
+    if (showLoadingUi && isRefreshingStoryIdeas) return;
+
+    final isSameTopic = activeStoryIdeasTopicId == topicId;
+    if (showLoadingUi && !isSameTopic) {
+      // Different topic — clear stale data so the ideas screen shows a shimmer.
+      storySummary = null;
+      storyIdeasError = null;
+      activeStoryIdeasTopicId = topicId;
+    }
+
+    if (showLoadingUi) {
+      isRefreshingStoryIdeas = true;
+      notifyListeners();
+    }
+
+    final response = await HomeApiService.instance.getMobileTopicStoryIdeas(
+      topicId: topicId,
+    );
+
+    response.fold(
+      (l) {
+        Logger.error(l.errorMsg);
+        if (showLoadingUi && !isSameTopic) {
+          storyIdeasError = l.errorMsg;
+        }
+      },
+      (r) {
+        try {
+          final data = r["data"];
+          if (data != null && data is Map<String, dynamic>) {
+            storySummary = StoryIdeaModel.fromGenerateMobileJson(data);
+            activeStoryIdeasTopicId = topicId;
+            storyIdeasError = null;
+          }
+        } catch (e, stack) {
+          Logger.error("Error parsing mobile story-ideas: $e\n$stack");
+          if (showLoadingUi && !isSameTopic) {
+            storyIdeasError = "Something went wrong. Please try again.";
+          }
+        }
+      },
+    );
+
+    if (showLoadingUi) {
+      isRefreshingStoryIdeas = false;
+    }
+    notifyListeners();
+  }
+
+  /// Updates [storySummary] in memory so UI matches the reader before the
+  /// server acknowledges [updatePageProgress] / topic refetch completes.
+  void applyLocalReadingProgressFromReadingSession({
+    required String storyIdeaId,
+    required int lastPageIndex,
+    required int pageCount,
+  }) {
+    final summary = storySummary;
+    if (summary == null || pageCount <= 0) return;
+
+    final index = summary.storyIdeas.indexWhere((e) => e.id == storyIdeaId);
+    if (index < 0) return;
+
+    final idea = summary.storyIdeas[index];
+    final prev = idea.continueReading;
+    final currentLast = lastPageIndex.clamp(0, pageCount - 1);
+
+    final prevLastIdx = prev?.lastPageIndex ?? -1;
+    final farthestIdx =
+        currentLast > prevLastIdx ? currentLast : prevLastIdx;
+
+    var readPagesFromFarthest = farthestIdx + 1;
+    if (prev != null && prev.readPages > readPagesFromFarthest) {
+      readPagesFromFarthest = prev.readPages;
+    }
+    final effectiveFarthest =
+        (readPagesFromFarthest - 1).clamp(0, pageCount - 1);
+
+    idea.continueReading = ContinueReading(
+      pageCount: pageCount,
+      readPages: readPagesFromFarthest,
+      remainingPages:
+          (pageCount - readPagesFromFarthest).clamp(0, pageCount),
+      lastPageIndex: effectiveFarthest,
+      continueFromPageIndex: effectiveFarthest.clamp(0, pageCount - 1),
+      percentComplete: pageCount <= 0
+          ? 0
+          : ((readPagesFromFarthest / pageCount) * 100).round().clamp(0, 100),
+      lastReadAt:
+          prev?.lastReadAt ?? DateTime.now().toUtc().toIso8601String(),
+      completedAt: prev?.completedAt,
+      isCompleted:
+          readPagesFromFarthest >= pageCount || (prev?.isCompleted ?? false),
+    );
+    notifyListeners();
+  }
+
   bool isGettingStoryLoading = false;
   Future<void> getStoryByIdea({
     required BuildContext context,
@@ -362,6 +476,7 @@ class HomeProvider extends ChangeNotifier {
     isGettingStoryLoading = false;
     isGenerateSeriesLoading = false;
     generateSeriesError = null;
+    isRefreshingStoryIdeas = false;
     notifyListeners();
   }
 }
