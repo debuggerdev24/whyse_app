@@ -1,5 +1,6 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/home_widgets.dart';
+import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/screens/home/widgets/continue_reading_section.dart';
 import 'package:redstreakapp/screens/home/widgets/curiosity_reading_section.dart';
 import 'package:redstreakapp/screens/home/widgets/books_books_section.dart';
@@ -12,7 +13,29 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with RouteAware {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      AppRouter.routeObserver.subscribe(this, route);
+    }
+  }
+
+  @override
+  void dispose() {
+    AppRouter.routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    // Returned to Home from another screen (story ideas / reader etc).
+    if (!mounted) return;
+    context.read<HomeProvider>().getContinueReading(force: true);
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppLayout(

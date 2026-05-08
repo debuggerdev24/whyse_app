@@ -7,6 +7,7 @@ import 'package:redstreakapp/core/utils/share_helper.dart';
 import 'package:redstreakapp/core/widgets/global_widgets.dart';
 
 import 'package:redstreakapp/models/home/story_models/reading_exit_snapshot.dart';
+import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/reading_appearance_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/services/home/story_api_service.dart';
@@ -25,6 +26,7 @@ class CreatedStoryReadingScreen extends StatefulWidget {
   });
 
   final int initialPageIndex;
+
   /// The last page index that was already confirmed as read (saved on server).
   /// This prevents counting the currently shown page as read just by viewing it.
   final int? initialConfirmedPageIndex;
@@ -47,14 +49,125 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
   int _remainingSeconds = 0;
   bool _hasStartedReading = false;
   bool _isTimerRunning = false;
+  bool _timeUpDialogShown = false;
 
   @override
   void initState() {
     super.initState();
     _currentPageIndex = widget.initialPageIndex;
-    final initialConfirmed = widget.initialConfirmedPageIndex ??
-        (widget.initialPageIndex - 1);
+    final initialConfirmed =
+        widget.initialConfirmedPageIndex ?? (widget.initialPageIndex - 1);
     _maxConfirmedPageIndex = initialConfirmed;
+
+    // If we navigated here before fetching the story (Continue Reading),
+    // kick off a fetch in the background. UI already shows shimmer while loading.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final sp = context.read<StoryProvider>();
+      if (sp.stories.isNotEmpty) return;
+      final id = widget.storyIdeaId;
+      if (id == null || id.isEmpty) return;
+      context.read<HomeProvider>().getStoryByIdea(
+        context: context,
+        storyIdea: id,
+        fetchOnly: true,
+        onStoryNotGenerated: () {},
+        onSuccess: (history) {
+          if (!mounted) return;
+          context.read<StoryProvider>().addStoryFromHistory(history, 0);
+        },
+      );
+    });
+  }
+
+  String _friendlyErrorMessage(String? raw) {
+    final msg = (raw ?? '').trim();
+    if (msg.isEmpty) return "We couldn’t load this story right now.";
+    final lower = msg.toLowerCase();
+    if (lower.contains('timeout') || lower.contains('timed out')) {
+      return "This is taking longer than expected. Please try again.";
+    }
+    if (lower.contains('socket') ||
+        lower.contains('network') ||
+        lower.contains('internet') ||
+        lower.contains('connection')) {
+      return "No internet connection. Please check your network and try again.";
+    }
+    return "We couldn’t load this story right now. Please try again.";
+  }
+
+  Widget _storyLoadErrorView({
+    required String message,
+    required VoidCallback onRetry,
+    required VoidCallback onBack,
+  }) {
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 24.w),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.wifi_off_rounded,
+                size: 56.w,
+                color: AppColors.black.withValues(alpha: 0.35),
+              ),
+              14.w.verticalSpace,
+              AppText(
+                text: message,
+                textAlign: TextAlign.center,
+                style: AppTextStyles.medium(
+                  fontSize: 16.sp,
+                  color: AppColors.black.withValues(alpha: 0.75),
+                ),
+              ),
+              20.w.verticalSpace,
+              Row(
+                children: [
+                  Expanded(
+                    child: AppFilledButton(
+                      text: "Back",
+                      onTap: onBack,
+                      backgroundColor: AppColors.black.withValues(alpha: 0.08),
+                      textStyle: AppTextStyles.semibold(
+                        fontSize: 16.sp,
+                        color: AppColors.black,
+                      ),
+                      fixedSize: Size(double.infinity, 44.h),
+                    ),
+                  ),
+                  12.w.horizontalSpace,
+                  Expanded(
+                    child: AppFilledButton(
+                      text: "Retry",
+                      onTap: onRetry,
+                      backgroundColor: AppColors.teal,
+                      fixedSize: Size(double.infinity, 44.h),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _retryLoadStory() {
+    final id = widget.storyIdeaId;
+    if (id == null || id.isEmpty) return;
+    context.read<HomeProvider>().getStoryByIdea(
+      context: context,
+      storyIdea: id,
+      fetchOnly: true,
+      onStoryNotGenerated: () {},
+      onSuccess: (history) {
+        if (!mounted) return;
+        context.read<StoryProvider>().addStoryFromHistory(history, 0);
+      },
+    );
   }
 
   String _formatDuration(int totalSeconds) {
@@ -83,10 +196,60 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
           _remainingSeconds = 0;
           _isTimerRunning = false;
         });
+        _showTimeUpDialog();
         return;
       }
       setState(() => _remainingSeconds--);
     });
+  }
+
+  void _showTimeUpDialog() {
+    if (!mounted) return;
+    if (_timeUpDialogShown) return;
+    _timeUpDialogShown = true;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppColors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          titlePadding: EdgeInsets.fromLTRB(20.w, 18.w, 20.w, 0),
+          contentPadding: EdgeInsets.fromLTRB(20.w, 10.w, 20.w, 0),
+          actionsPadding: EdgeInsets.fromLTRB(20.w, 16.w, 20.w, 20.w),
+          title: AppText(
+            text: "Time’s up",
+            style: AppTextStyles.bold(
+              fontSize: 18.sp,
+              color: AppColors.black,
+            ),
+          ),
+          content: AppText(
+            text: "We’ll save your progress and take you back.",
+            style: AppTextStyles.medium(
+              fontSize: 14.sp,
+              color: AppColors.black.withValues(alpha: 0.7),
+            ),
+          ),
+          actions: [
+            AppFilledButton(
+              text: "Save & exit",
+              onTap: () {
+                dialogContext.pop();
+                if (!mounted) return;
+                final sp = context.read<StoryProvider>();
+                _leaveReader(context, sp);
+              },
+              backgroundColor: AppColors.teal,
+              fixedSize: Size(double.infinity, 44.h),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _togglePauseResume() {
@@ -133,21 +296,6 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
     _queuedProgressPageIndex = -1;
   }
 
-  void _syncPageProgressImmediately(int pageIndex) {
-    final storyIdeaId = widget.storyIdeaId;
-    if (storyIdeaId == null || storyIdeaId.isEmpty) return;
-    if (pageIndex < 0) return;
-    _progressDebounceTimer?.cancel();
-    _queuedProgressPageIndex = -1;
-    if (pageIndex > _maxConfirmedPageIndex) {
-      _maxConfirmedPageIndex = pageIndex;
-    }
-    StoryApiService.instance.updatePageProgress(
-      storyIdeaId: storyIdeaId,
-      pageIndex: pageIndex,
-    );
-  }
-
   ReadingExitSnapshot? _snapshotForPop(StoryProvider storyProvider) {
     final id = widget.storyIdeaId;
     if (id == null || id.isEmpty) return null;
@@ -166,7 +314,24 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
   }
 
   void _leaveReader(BuildContext context, StoryProvider storyProvider) {
+    // If the user exits mid-reading (without tapping Next), count the current
+    // page as read for non-last pages. This matches the common expectation that
+    // "I read this page" should reflect in progress when going back.
+    final pages = storyProvider.stories.isEmpty
+        ? const []
+        : storyProvider.stories.first.pages;
+    final totalPages = pages.length;
+    final isLastPage = totalPages > 0 && _currentPageIndex >= totalPages - 1;
+    if (_hasStartedReading &&
+        totalPages > 0 &&
+        !isLastPage &&
+        _currentPageIndex > _maxConfirmedPageIndex) {
+      _queuedProgressPageIndex = _currentPageIndex;
+      _maxConfirmedPageIndex = _currentPageIndex;
+      _flushQueuedPageProgress();
+    } else {
     _flushQueuedPageProgress();
+    }
     final snap = _snapshotForPop(storyProvider);
     if (!context.mounted) return;
     if (context.canPop()) {
@@ -199,292 +364,312 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
           _leaveReader(context, sp);
         },
         child: AppLayout(
-          body: Consumer2<StoryProvider, ReadingAppearanceProvider>(
-          builder: (context, provider, appearance, child) {
-            final storyLoading =
-                provider.isCreateStoryLoading ||
-                provider.isGenerateSingleStoryLoading;
-            if (storyLoading) {
-              return HomeSectionShimmer.createdStoryReadingUIShimmer();
-            }
-            if (provider.stories.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
-            }
+          body: Consumer3<HomeProvider, StoryProvider, ReadingAppearanceProvider>(
+            builder: (context, homeProvider, provider, appearance, child) {
+              final storyLoading =
+                  homeProvider.isGettingStoryLoading ||
+                  provider.isCreateStoryLoading ||
+                  provider.isGenerateSingleStoryLoading;
+              if (storyLoading) {
+                return HomeSectionShimmer.createdStoryReadingUIShimmer();
+              }
+              if (provider.stories.isEmpty) {
+                final msg = _friendlyErrorMessage(homeProvider.getStoryError);
+                return _storyLoadErrorView(
+                  message: msg,
+                  onRetry: _retryLoadStory,
+                  onBack: () {
+                    if (!context.mounted) return;
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.goNamed(AppRoutes.homeScreen.name);
+                    }
+                  },
+                );
+              }
 
-            final stories = provider.stories.first;
-            final pages = stories.pages;
-            if (pages.isEmpty) {
-              return Center(
-                child: AppText(
-                  text: "No pages available",
-                  style: AppTextStyles.medium(
-                    fontSize: 14,
-                    color: AppColors.black,
-                  ),
-                ),
-              );
-            }
-
-            final safePageIndex = _currentPageIndex.clamp(0, pages.length - 1);
-            final story = pages[safePageIndex];
-            final isFirstPage = safePageIndex == 0;
-            final isLastPage = safePageIndex == pages.length - 1;
-            final theme = appearance.activeTheme;
-            return Column(
-              children: [
-                //*top image content
-                StoryHeroHeader(
-                  imageUrl: stories.thumbnailUrl,
-                  title:
-                      '${safePageIndex + 1}. ${stories.title.isNotEmpty ? stories.title : 'Exploring the wonders of Nature'}',
-                  topLeft: StoryCircleButton(
-                    onTap: () => _leaveReader(context, provider),
-                    child: Icon(
-                      Icons.chevron_left_rounded,
-                      size: 19.w,
+              final stories = provider.stories.first;
+              final pages = stories.pages;
+              if (pages.isEmpty) {
+                return Center(
+                  child: AppText(
+                    text: "No pages available",
+                    style: AppTextStyles.medium(
+                      fontSize: 14,
                       color: AppColors.black,
                     ),
                   ),
-                  titleStyle: AppTextStyles.bold(
-                    fontSize: 20,
-                    height: 1.2,
-                    color: AppColors.white,
-                  ),
-                  titleBottomSpacing: 10.w,
-                  bottomWidget: !_hasStartedReading
-                      ? Row(
-                          children: [
-                            SvgIcon(
-                              AppAssets.page,
-                              size: 16.sp,
-                              color: AppColors.white,
-                            ),
-                            6.w.horizontalSpace,
-                            AppText(
-                              text: '${pages.length} Pages',
-                              style: AppTextStyles.semiBold(
-                                fontSize: 12,
+                );
+              }
+
+              final safePageIndex = _currentPageIndex.clamp(
+                0,
+                pages.length - 1,
+              );
+              final story = pages[safePageIndex];
+              final isFirstPage = safePageIndex == 0;
+              final isLastPage = safePageIndex == pages.length - 1;
+              final theme = appearance.activeTheme;
+              return Column(
+                children: [
+                  //*top image content
+                  StoryHeroHeader(
+                    imageUrl: stories.thumbnailUrl,
+                    title:
+                        '${safePageIndex + 1}. ${stories.title.isNotEmpty ? stories.title : 'Exploring the wonders of Nature'}',
+                    topLeft: StoryCircleButton(
+                      onTap: () => _leaveReader(context, provider),
+                      child: Icon(
+                        Icons.chevron_left_rounded,
+                        size: 19.w,
+                        color: AppColors.black,
+                      ),
+                    ),
+                    titleStyle: AppTextStyles.bold(
+                      fontSize: 20,
+                      height: 1.2,
+                      color: AppColors.white,
+                    ),
+                    titleBottomSpacing: 10.w,
+                    bottomWidget: !_hasStartedReading
+                        ? Row(
+                            children: [
+                              SvgIcon(
+                                AppAssets.page,
+                                size: 16.sp,
                                 color: AppColors.white,
                               ),
-                            ),
-                            14.w.horizontalSpace,
-                            SvgIcon(
-                              AppAssets.clock,
-                              size: 16.sp,
-                              color: AppColors.white,
-                            ),
-                            6.w.horizontalSpace,
-                            AppText(
-                              text: '${stories.lessonDuration ?? 0} min',
-                              style: AppTextStyles.semiBold(
-                                fontSize: 12,
-                                color: AppColors.white,
-                              ),
-                            ),
-                          ],
-                        )
-                      : Row(
-                          children: [
-                            AppText(
-                              text:
-                                  'Page ${safePageIndex + 1} of ${pages.length}',
-                              style: AppTextStyles.bold(
-                                fontSize: 13.sp,
-                                color: AppColors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                  bottomRight: _hasStartedReading
-                      ? Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            StoryCircleButton(
-                              onTap: () {
-                                showFontThemeBottomSheet(context);
-                              },
-                              child: AppText(
-                                text: 'Aa',
-                                style: AppTextStyles.bold(
-                                  fontSize: 13.sp,
-                                  color: AppColors.black,
+                              6.w.horizontalSpace,
+                              AppText(
+                                text: '${pages.length} Pages',
+                                style: AppTextStyles.semiBold(
+                                  fontSize: 12,
+                                  color: AppColors.white,
                                 ),
                               ),
-                            ),
-                            8.w.horizontalSpace,
-                            StoryCircleButton(
-                              onTap: _togglePauseResume,
-                              child: Icon(
-                                _isTimerRunning
-                                    ? Icons.pause_rounded
-                                    : Icons.play_arrow_rounded,
-                                size: 18.w,
-                                color: AppColors.black,
-                              ),
-                            ),
-                            8.w.horizontalSpace,
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 14.w,
-                                vertical: 8.w,
-                              ),
-                              decoration: BoxDecoration(
+                              14.w.horizontalSpace,
+                              SvgIcon(
+                                AppAssets.clock,
+                                size: 16.sp,
                                 color: AppColors.white,
-                                borderRadius: BorderRadius.circular(999),
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.access_time_rounded,
-                                    size: 17.sp,
+                              6.w.horizontalSpace,
+                              AppText(
+                                text: '${stories.lessonDuration ?? 0} min',
+                                style: AppTextStyles.semiBold(
+                                  fontSize: 12,
+                                  color: AppColors.white,
+                                ),
+                              ),
+                            ],
+                          )
+                        : Row(
+                            children: [
+                              AppText(
+                                text:
+                                    'Page ${safePageIndex + 1} of ${pages.length}',
+                                style: AppTextStyles.bold(
+                                  fontSize: 13.sp,
+                                  color: AppColors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                    bottomRight: _hasStartedReading
+                        ? Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              StoryCircleButton(
+                                onTap: () {
+                                  showFontThemeBottomSheet(context);
+                                },
+                                child: AppText(
+                                  text: 'Aa',
+                                  style: AppTextStyles.bold(
+                                    fontSize: 13.sp,
                                     color: AppColors.black,
                                   ),
-                                  6.w.horizontalSpace,
-                                  AppText(
-                                    text: _formatDuration(_remainingSeconds),
-                                    style: AppTextStyles.bold(
-                                      fontSize: 15.sp,
-                                      color: AppColors.black,
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
-                            ),
-                          ],
-                        )
-                      : Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            StoryCircleButton(
-                              onTap: () {
-                                showFontThemeBottomSheet(context);
-                              },
-                              child: AppText(
-                                text: 'Aa',
-                                style: AppTextStyles.bold(
-                                  fontSize: 13.sp,
+                              8.w.horizontalSpace,
+                              StoryCircleButton(
+                                onTap: _togglePauseResume,
+                                child: Icon(
+                                  _isTimerRunning
+                                      ? Icons.pause_rounded
+                                      : Icons.play_arrow_rounded,
+                                  size: 18.w,
                                   color: AppColors.black,
                                 ),
                               ),
-                            ),
-                            8.w.horizontalSpace,
-                            StoryCircleButton(
-                              onTap: () {
-                                shareSingleStory(storyIdeaId: stories.id);
-                              },
-                              child: SvgIcon(
-                                AppAssets.shareIcon,
-                                size: 18.w,
-                                color: AppColors.black,
+                              8.w.horizontalSpace,
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 14.w,
+                                  vertical: 8.w,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.white,
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.access_time_rounded,
+                                      size: 17.sp,
+                                      color: AppColors.black,
+                                    ),
+                                    6.w.horizontalSpace,
+                                    AppText(
+                                      text: _formatDuration(_remainingSeconds),
+                                      style: AppTextStyles.bold(
+                                        fontSize: 15.sp,
+                                        color: AppColors.black,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          )
+                        : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              StoryCircleButton(
+                                onTap: () {
+                                  showFontThemeBottomSheet(context);
+                                },
+                                child: AppText(
+                                  text: 'Aa',
+                                  style: AppTextStyles.bold(
+                                    fontSize: 13.sp,
+                                    color: AppColors.black,
+                                  ),
+                                ),
+                              ),
+                              8.w.horizontalSpace,
+                              StoryCircleButton(
+                                onTap: () {
+                                  shareSingleStory(storyIdeaId: stories.id);
+                                },
+                                child: SvgIcon(
+                                  AppAssets.shareIcon,
+                                  size: 18.w,
+                                  color: AppColors.black,
+                                ),
+                              ),
+                              8.w.horizontalSpace,
+                              StoryCircleButton(
+                                onTap: () {},
+                                child: Icon(
+                                  Icons.more_vert_rounded,
+                                  size: 19.w,
+                                  color: AppColors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
+                  //*story content
+                  Expanded(
+                    child: ColoredBox(
+                      color: theme.background,
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.fromLTRB(16.w, 16.w, 16.w, 14.w),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AppText(
+                              text: story.text,
+                              style: appearance.storyBodyTextStyle(
+                                color: theme.text,
+                                height: 1.6,
                               ),
                             ),
-                            8.w.horizontalSpace,
-                            StoryCircleButton(
-                              onTap: () {},
-                              child: Icon(
-                                Icons.more_vert_rounded,
-                                size: 19.w,
-                                color: AppColors.black,
+                            20.w.verticalSpace,
+                            CachedNetworkImage(
+                              imageUrl: story.imageUrl,
+                              height: 210.w,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Shimmer.fromColors(
+                                baseColor: AppColors.shimmerBaseColor,
+                                highlightColor: AppColors.shimmerHighlightColor,
+                                child: Container(
+                                  color: AppColors.shimmerBaseColor,
+                                ),
                               ),
+                              errorWidget: (context, url, error) =>
+                                  const NoImageFound(),
                             ),
                           ],
                         ),
-                ),
-                //*story content
-                Expanded(
-                  child: ColoredBox(
-                    color: theme.background,
-                    child: SingleChildScrollView(
-                      padding: EdgeInsets.fromLTRB(16.w, 16.w, 16.w, 14.w),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          AppText(
-                            text: story.text,
-                            style: appearance.storyBodyTextStyle(
-                              color: theme.text,
-                              height: 1.6,
-                            ),
-                          ),
-                          20.w.verticalSpace,
-                          CachedNetworkImage(
-                            imageUrl: story.imageUrl,
-                            height: 210.w,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Shimmer.fromColors(
-                              baseColor: AppColors.shimmerBaseColor,
-                              highlightColor: AppColors.shimmerHighlightColor,
-                              child: Container(
-                                color: AppColors.shimmerBaseColor,
-                              ),
-                            ),
-                            errorWidget: (context, url, error) =>
-                                const NoImageFound(),
-                          ),
-                        ],
                       ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (!_hasStartedReading)
-                        _BottomPrimaryButton(
-                          text: 'Start Reading',
-                          onTap: () =>
-                              _startReadingTimer(stories.lessonDuration ?? 10),
-                        )
-                      else ...[
-                        if (isLastPage)
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (!_hasStartedReading)
                           _BottomPrimaryButton(
-                            text: "Take Quiz",
-                            onTap: () {
-                              _syncPageProgressImmediately(safePageIndex);
-                              context.pushNamed(
-                                AppRoutes.startQuizScreen.name,
-                                extra: {
-                                  'storyId': stories.id,
-                                  'storyTitle': stories.title,
-                                  'storyImageUrl': stories.thumbnailUrl,
-                                },
-                              );
-                            },
+                            text: 'Start Reading',
+                            onTap: () => _startReadingTimer(
+                              stories.lessonDuration ?? 10,
+                            ),
                           )
-                        else
-                          _BottomPrimaryButton(
-                            text: "Next Page",
-                            onTap: () => _goToNextPage(pages.length),
-                          ),
-                        if (!isFirstPage) ...[
-                          12.w.verticalSpace,
-                          GestureDetector(
-                            onTap: _goToPreviousPage,
-                            child: AppText(
-                              text: "Previous Page",
-                              style: AppTextStyles.semibold(
-                                fontSize: 15.sp,
-                                color: AppColors.teal,
+                        else ...[
+                          if (isLastPage)
+                            _BottomPrimaryButton(
+                              text: "Take Quiz",
+                              onTap: () {
+                                // Do NOT mark the last page as read just by opening the quiz.
+                                // The server will finalize completion when quiz is submitted.
+                                _schedulePageProgressReport(safePageIndex);
+                                context.pushNamed(
+                                  AppRoutes.startQuizScreen.name,
+                                  extra: {
+                                    'storyId': stories.id,
+                                    'storyTitle': stories.title,
+                                    'storyImageUrl': stories.thumbnailUrl,
+                                    'storyIdeaId': widget.storyIdeaId,
+                                  },
+                                );
+                              },
+                            )
+                          else
+                            _BottomPrimaryButton(
+                              text: "Next Page",
+                              onTap: () => _goToNextPage(pages.length),
+                            ),
+                          if (!isFirstPage) ...[
+                            12.w.verticalSpace,
+                            GestureDetector(
+                              onTap: _goToPreviousPage,
+                              child: AppText(
+                                text: "Previous Page",
+                                style: AppTextStyles.semibold(
+                                  fontSize: 15.sp,
+                                  color: AppColors.teal,
+                                ),
                               ),
                             ),
-                          ),
+                          ],
                         ],
+                        (MediaQuery.paddingOf(context).bottom + 15)
+                            .w
+                            .verticalSpace,
                       ],
-                      (MediaQuery.paddingOf(context).bottom + 15)
-                          .w
-                          .verticalSpace,
-                    ],
+                    ),
                   ),
-                ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
         ),
-      ),
       ),
     );
   }

@@ -81,10 +81,17 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
                             provider.getTopicStoryDetails(
                               topicId: list[index].id,
                             );
-                            context.pushNamed(
-                              AppRoutes.createdStorySummaryScreen.name,
-                              extra: list[index].id,
-                            );
+                            context
+                                .pushNamed(
+                                  AppRoutes.createdStorySummaryScreen.name,
+                                  extra: list[index].id,
+                                )
+                                .then((_) {
+                              if (!context.mounted) return;
+                              context
+                                  .read<HomeProvider>()
+                                  .getContinueReading(force: true);
+                            });
                           },
                         ),
                       ),

@@ -70,11 +70,14 @@ import '../../models/home/story_models/story_model.dart';
 
 class AppRouter {
   static final rootNavigatorKey = GlobalKey<NavigatorState>();
+  static final RouteObserver<ModalRoute<void>> routeObserver =
+      RouteObserver<ModalRoute<void>>();
 
   static StatefulNavigationShell? indexedStackNavigationShell;
 
   static final GoRouter goRouter = GoRouter(
     navigatorKey: rootNavigatorKey,
+    observers: [routeObserver],
 
     initialLocation: AppRoutes.splashScreen.path,
     routes: [
@@ -249,6 +252,7 @@ class AppRouter {
           storyId: extra["storyId"] as String? ?? "",
           storyTitle: extra["storyTitle"] as String? ?? "",
           storyImageUrl: extra["storyImageUrl"] as String?,
+          storyIdeaId: extra["storyIdeaId"] as String?,
         );
       },
     ),
@@ -265,6 +269,8 @@ class AppRouter {
           quizzes: quizzes,
           storyTitle: storyTitle,
           storyImageUrl: storyImageUrl,
+          storyIdeaId: extra?['storyIdeaId'] as String?,
+          storyId: extra?['storyId'] as String?,
         );
       },
     ),
@@ -282,6 +288,8 @@ class AppRouter {
           total: total,
           storyTitle: storyTitle,
           storyImageUrl: storyImageUrl,
+          storyIdeaId: extra?['storyIdeaId'] as String?,
+          storyId: extra?['storyId'] as String?,
         );
       },
     ),

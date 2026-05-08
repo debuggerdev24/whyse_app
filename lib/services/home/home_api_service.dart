@@ -87,4 +87,13 @@ class HomeApiService {
       EndPoints.getMobileTopicStoryIdeas(topicId: topicId),
     );
   }
+
+  Future<Either<ApiException, Map<String, dynamic>>> getContinueReading({
+    int page = 1,
+    int limit = 10,
+  }) async {
+    return await BaseApiHelper.instance.get(
+      EndPoints.getContinueReading(page: page, limit: limit),
+    );
+  }
 }

@@ -55,7 +55,10 @@ class StoryProvider extends ChangeNotifier {
   StoryModel? _story;
   StoryIdeasModel? storyIdeas;
   QuizModel? quiz;
+  List<StoryQuiz> quizMcqQuestions = [];
+  String? quizError;
   bool isCreateQuizLoading = false;
+  bool isSubmitQuizLoading = false;
 
   /// Set when entering story from search; used to show add/remove from my list toggle.
   BrowseTopicModel? _topicFromSearch;
@@ -894,6 +897,60 @@ class StoryProvider extends ChangeNotifier {
   }
 
   //* create and quiz
+  Future<List<StoryQuiz>?> generateMcqQuiz({
+    required String storyId,
+    required int quizMcqCount,
+    bool replaceExisting = false,
+  }) async {
+    isCreateQuizLoading = true;
+    quizError = null;
+    quizMcqQuestions = [];
+    notifyListeners();
+    try {
+      final data = {
+        "quizMcqCount": quizMcqCount,
+        "replaceExisting": replaceExisting,
+      };
+      final response = await StoryApiService.instance.createQuiz(
+        storyId: storyId,
+        data: data,
+      );
+      List<StoryQuiz>? parsed;
+      response.fold(
+        (l) {
+          Logger.error(l.errorMsg);
+          quizError = l.errorMsg;
+          parsed = null;
+        },
+        (r) {
+          try {
+            final data = r["data"] as Map? ?? {};
+            final questionsRaw = (data["questions"] as List?) ?? const [];
+            final quizzes = questionsRaw
+                .whereType<Map>()
+                .map((e) => StoryQuiz.fromJson(Map<String, dynamic>.from(e)))
+                .toList();
+            quizMcqQuestions = quizzes;
+            quiz = QuizModel.fromJson(
+              Map<String, dynamic>.from(data),
+            );
+            parsed = quizzes;
+          } catch (e, st) {
+            Logger.error("Quiz parse error: $e\n$st");
+            quizError = "Unable to parse quiz.";
+            parsed = null;
+          }
+        },
+      );
+      return parsed;
+    } finally {
+      isCreateQuizLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Backward compatible wrapper used by `EnterQuizNumbersScreen`.
+  /// The mobile API currently supports MCQ generation; other counts are ignored.
   Future<bool> createQuiz({
     required String storyId,
     required int noOfMcq,
@@ -901,35 +958,46 @@ class StoryProvider extends ChangeNotifier {
     required int noOfTrueFalse,
     bool replaceExisting = false,
   }) async {
-    isCreateQuizLoading = true;
+    final result = await generateMcqQuiz(
+      storyId: storyId,
+      quizMcqCount: noOfMcq,
+      replaceExisting: replaceExisting,
+    );
+    return result != null && result.isNotEmpty;
+  }
+
+  Future<Map<String, dynamic>?> submitQuizResult({
+    required String storyId,
+    required int correctAnswers,
+    required int totalQuestions,
+  }) async {
+    isSubmitQuizLoading = true;
+    quizError = null;
     notifyListeners();
-    var ok = false;
     try {
-      final data = {
-        "quizMcqCount": noOfMcq,
-        "quizOpenCount": noOfOpenQuestions,
-        "quizTrueFalseCount": noOfTrueFalse,
-        "replaceExisting": replaceExisting,
-      };
-      final response = await StoryApiService.instance.createQuiz(
+      final response = await StoryApiService.instance.submitQuiz(
         storyId: storyId,
-        data: data,
+        data: {
+          "correctAnswers": correctAnswers,
+          "totalQuestions": totalQuestions,
+        },
       );
+      Map<String, dynamic>? parsed;
       response.fold(
         (l) {
-          Logger.error(l.errorMsg);
-          ok = false;
+          quizError = l.errorMsg;
+          parsed = null;
         },
         (r) {
-          quiz = QuizModel.fromJson(r["data"]);
-          ok = true;
+          final data = r["data"];
+          parsed = data is Map ? Map<String, dynamic>.from(data) : null;
         },
       );
+      return parsed;
     } finally {
-      isCreateQuizLoading = false;
+      isSubmitQuizLoading = false;
       notifyListeners();
     }
-    return ok;
   }
 
   Future<void> getQuiz({required String storyId}) async {

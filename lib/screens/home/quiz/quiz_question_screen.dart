@@ -18,12 +18,16 @@ class QuizQuestionScreen extends StatefulWidget {
   final List<StoryQuiz>? quizzes;
   final String? storyTitle;
   final String? storyImageUrl;
+  final String? storyIdeaId;
+  final String? storyId;
 
   const QuizQuestionScreen({
     super.key,
     this.quizzes,
     this.storyTitle,
     this.storyImageUrl,
+    this.storyIdeaId,
+    this.storyId,
   });
 
   @override
@@ -152,32 +156,41 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
 
                   19.w.verticalSpace,
 
-                  /// Question
-                  AppText(
-                    text: currentQuestion['question'],
-                    style: AppTextStyles.bold(
-                      fontSize: 32.sp,
-                      color: AppColors.black,
-                    ).copyWith(height: 1.2),
-                  ),
+                  /// Scrollable content (question + options)
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.only(bottom: 12.h),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          /// Question
+                          AppText(
+                            text: currentQuestion['question'],
+                            style: AppTextStyles.bold(
+                              fontSize: 32.sp,
+                              color: AppColors.black,
+                            ).copyWith(height: 1.2),
+                          ),
 
-                  31.w.verticalSpace,
+                          31.w.verticalSpace,
 
-                  /// Options
-                  ...List.generate(
-                    options.length,
-                    (index) => OptionCard(
-                      text: options[index],
-                      isSelected: quiz.selectedOptionIndex == index,
-                      isCorrect: index == correctIndex,
-                      isChecked: quiz.isChecked,
-                      onTap: !quiz.isChecked
-                          ? () => quiz.selectOption(index)
-                          : null,
+                          /// Options
+                          ...List.generate(
+                            options.length,
+                            (index) => OptionCard(
+                              text: options[index],
+                              isSelected: quiz.selectedOptionIndex == index,
+                              isCorrect: index == correctIndex,
+                              isChecked: quiz.isChecked,
+                              onTap: !quiz.isChecked
+                                  ? () => quiz.selectOption(index)
+                                  : null,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-
-                  Spacer(),
 
                   Center(
                     child: AppText(
@@ -201,13 +214,15 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                                 quiz.questions.length - 1) {
                               quiz.continueQuiz();
                             } else {
-                              context.goNamed(
+                              context.pushReplacementNamed(
                                 AppRoutes.quizCompletedScreen.name,
                                 extra: {
                                   'score': quiz.score,
                                   'total': quiz.questions.length,
                                   'storyTitle': widget.storyTitle,
                                   'storyImageUrl': widget.storyImageUrl,
+                                  'storyIdeaId': widget.storyIdeaId,
+                                  'storyId': widget.storyId,
                                 },
                               );
                             }

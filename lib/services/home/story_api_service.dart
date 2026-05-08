@@ -110,4 +110,16 @@ class StoryApiService {
   }) async {
     return BaseApiHelper.instance.get(EndPoints.getQuiz(storyId: storyId));
   }
+
+  Future<Either<ApiException, Map<String, dynamic>>> submitQuiz({
+    required String storyId,
+    required Map<String, dynamic> data,
+  }) async {
+    return BaseApiHelper.instance.post(
+      EndPoints.submitQuiz(storyId: storyId),
+      data: data,
+      // Idempotent for same inputs; allow retry on transient null responses.
+      options: Options(extra: {"retryOnNullData": true}),
+    );
+  }
 }

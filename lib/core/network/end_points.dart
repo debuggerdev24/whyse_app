@@ -85,8 +85,15 @@ class EndPoints {
   static String pageProgress({required String storyIdeaId}) =>
       "/story/ideas/$storyIdeaId/page-progress";
   static String createQuiz({required String storyId}) =>
-      "/story/$storyId/quiz/generate";
-  static String getQuiz({required String storyId}) => "/story/$storyId/quiz";
+      "/story/mobile/$storyId/quiz/generate";
+  static String getQuiz({required String storyId}) => "/story/mobile/$storyId/quiz";
+  static String submitQuiz({required String storyId}) =>
+      "/story/mobile/$storyId/quiz/submit";
+
+  /// Home → Continue Reading shelf.
+  /// Backend returns `data.items` with pagination.
+  static String getContinueReading({int page = 1, int limit = 10}) =>
+      "/story/ideas/continue-reading?page=$page&limit=$limit";
 
   static String getFriends({int page = 1, int limit = 20}) =>
       "/mobile/friends?page=$page&limit=$limit";

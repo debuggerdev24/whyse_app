@@ -221,6 +221,109 @@ class BaseApiHelper {
   static final BaseApiHelper _instance = BaseApiHelper._();
   static BaseApiHelper get instance => _instance;
   final Dio _dio = DioClient.instance.dio;
+
+  static const int _nullDataMaxRetries = 1;
+  static const Duration _nullDataRetryDelay = Duration(milliseconds: 350);
+
+  bool _shouldRetryNullData({
+    required String method,
+    required int attempt,
+    required Options? options,
+  }) {
+    if (attempt >= _nullDataMaxRetries) return false;
+    final retryDisabled = options?.extra?["retryOnNullData"] == false;
+    if (retryDisabled) return false;
+    // Default safety: auto-retry GET/DELETE only. For POST/PATCH, opt-in by
+    // passing options.extra["retryOnNullData"]=true on that call site.
+    final normalized = method.toUpperCase();
+    final optIn = options?.extra?["retryOnNullData"] == true;
+    if (normalized == "GET" || normalized == "DELETE") return true;
+    return optIn;
+  }
+
+  Future<Response<dynamic>> _requestWithNullDataRetry({
+    required String method,
+    required String path,
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+  }) async {
+    DioException? lastDioError;
+    for (var attempt = 0;; attempt++) {
+      try {
+        late final Response<dynamic> response;
+        switch (method.toUpperCase()) {
+          case "GET":
+            response = await _dio.get(
+              path,
+              queryParameters: queryParameters,
+              options: options,
+            );
+            break;
+          case "POST":
+            response = await _dio.post(
+              path,
+              data: data,
+              queryParameters: queryParameters,
+              options: options,
+            );
+            break;
+          case "PATCH":
+            response = await _dio.patch(
+              path,
+              data: data,
+              queryParameters: queryParameters,
+              options: options,
+            );
+            break;
+          case "DELETE":
+            response = await _dio.delete(
+              path,
+              data: data,
+              queryParameters: queryParameters,
+              options: options,
+            );
+            break;
+          default:
+            response = await _dio.request(
+              path,
+              data: data,
+              queryParameters: queryParameters,
+              options: (options ?? Options()).copyWith(method: method),
+            );
+        }
+
+        // Retry once when backend returns success but data is null.
+        if (response.data == null &&
+            _shouldRetryNullData(method: method, attempt: attempt, options: options)) {
+          Logger.warning(
+            "Null API response data for $method $path. Retrying (${attempt + 1}/$_nullDataMaxRetries)...",
+          );
+          await Future<void>.delayed(_nullDataRetryDelay);
+          continue;
+        }
+        return response;
+      } on DioException catch (e) {
+        lastDioError = e;
+        // Some backends return DioExceptionType.unknown with null message/data on transient disconnects.
+        // We only auto-retry these for GET/DELETE unless opted in.
+        final isNullLike = e.response == null && (e.message == null || e.message!.trim().isEmpty);
+        if (isNullLike &&
+            _shouldRetryNullData(method: method, attempt: attempt, options: options)) {
+          Logger.warning(
+            "Unknown Dio error for $method $path (null response). Retrying (${attempt + 1}/$_nullDataMaxRetries)...",
+          );
+          await Future<void>.delayed(_nullDataRetryDelay);
+          continue;
+        }
+        rethrow;
+      }
+    }
+    // Unreachable but keeps analyzer happy.
+    // ignore: dead_code
+    throw lastDioError!;
+  }
+
   Future<Either<ApiException, T>> get<T>(
     String path, {
     dynamic data,
@@ -229,12 +332,12 @@ class BaseApiHelper {
     T Function(dynamic)? parser,
   }) async {
     try {
-      final response = await _dio.get(
-        path,
+      final response = await _requestWithNullDataRetry(
+        method: "GET",
+        path: path,
         queryParameters: queryParameters,
         options: options,
       );
-      // final result = _handleResponse(response);
       final result = response.data;
       if (parser != null) {
         return Right(parser(result));
@@ -268,8 +371,9 @@ class BaseApiHelper {
     T Function(dynamic)? parser,
   }) async {
     try {
-      final response = await _dio.post(
-        path,
+      final response = await _requestWithNullDataRetry(
+        method: "POST",
+        path: path,
         data: data,
         queryParameters: queryParameters,
         options: options,
@@ -309,8 +413,9 @@ class BaseApiHelper {
     T Function(dynamic)? parser,
   }) async {
     try {
-      final response = await _dio.delete(
-        path,
+      final response = await _requestWithNullDataRetry(
+        method: "DELETE",
+        path: path,
         data: data,
         queryParameters: queryParameters,
         options: options,
@@ -349,8 +454,9 @@ class BaseApiHelper {
     T Function(dynamic)? parser,
   }) async {
     try {
-      final response = await _dio.patch(
-        path,
+      final response = await _requestWithNullDataRetry(
+        method: "PATCH",
+        path: path,
         data: data,
         queryParameters: queryParameters,
         options: options,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
+import 'package:redstreakapp/models/home/continue_reading_item_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_history_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_topics.dart';
 import 'package:redstreakapp/models/home/story_models/story_summary_model.dart';
@@ -10,6 +11,7 @@ import 'package:redstreakapp/services/home/story_api_service.dart';
 class HomeProvider extends ChangeNotifier {
   static const int storyIdeasPageLimit = 20;
   static const int topicsPageLimit = 8;
+  static const int continueReadingPageLimit = 10;
 
   List<CreatedStoryTopicsModel>? topicsList;
   bool isTopicsLoading = false;
@@ -26,6 +28,46 @@ class HomeProvider extends ChangeNotifier {
   String? storyIdeasError;
   String? activeStoryIdeasTopicId;
   int _storyIdeasCurrentPage = 1;
+
+  // ---------------- Continue Reading (Home shelf) ----------------
+  List<ContinueReadingItemModel>? continueReadingItems;
+  bool isContinueReadingLoading = false;
+  String? continueReadingError;
+
+  Future<void> getContinueReading({bool force = false}) async {
+    if (isContinueReadingLoading) return;
+    if (!force && continueReadingItems != null) return;
+    isContinueReadingLoading = true;
+    continueReadingError = null;
+    if (force) continueReadingItems = null;
+    notifyListeners();
+
+    final response = await HomeApiService.instance.getContinueReading(
+      page: 1,
+      limit: continueReadingPageLimit,
+    );
+
+    response.fold(
+      (l) {
+        continueReadingError = l.errorMsg;
+        continueReadingItems = [];
+      },
+      (r) {
+        try {
+          final model = ContinueReadingListModel.fromResponse(r);
+          continueReadingItems = model.items;
+          continueReadingError = null;
+        } catch (e, stack) {
+          Logger.error("Error parsing continue reading: $e\n$stack");
+          continueReadingError = "Unable to load continue reading.";
+          continueReadingItems = [];
+        }
+      },
+    );
+
+    isContinueReadingLoading = false;
+    notifyListeners();
+  }
 
   Future<void> getMyTopics() async {
     if (isTopicsLoading) return;
@@ -123,9 +165,7 @@ class HomeProvider extends ChangeNotifier {
   bool isGenerateSeriesLoading = false;
   String? generateSeriesError;
 
-  Future<void> generateStoryIdeasForTopic({
-    required String topicId,
-  }) async {
+  Future<void> generateStoryIdeasForTopic({required String topicId}) async {
     isGenerateSeriesLoading = true;
     generateSeriesError = null;
     storySummary = null;
@@ -310,36 +350,76 @@ class HomeProvider extends ChangeNotifier {
     final currentLast = lastPageIndex.clamp(0, pageCount - 1);
 
     final prevLastIdx = prev?.lastPageIndex ?? -1;
-    final farthestIdx =
-        currentLast > prevLastIdx ? currentLast : prevLastIdx;
+    final farthestIdx = currentLast > prevLastIdx ? currentLast : prevLastIdx;
 
     var readPagesFromFarthest = farthestIdx + 1;
     if (prev != null && prev.readPages > readPagesFromFarthest) {
       readPagesFromFarthest = prev.readPages;
     }
-    final effectiveFarthest =
-        (readPagesFromFarthest - 1).clamp(0, pageCount - 1);
+    final effectiveFarthest = (readPagesFromFarthest - 1).clamp(
+      0,
+      pageCount - 1,
+    );
 
     idea.continueReading = ContinueReading(
       pageCount: pageCount,
       readPages: readPagesFromFarthest,
-      remainingPages:
-          (pageCount - readPagesFromFarthest).clamp(0, pageCount),
+      remainingPages: (pageCount - readPagesFromFarthest).clamp(0, pageCount),
       lastPageIndex: effectiveFarthest,
       continueFromPageIndex: effectiveFarthest.clamp(0, pageCount - 1),
       percentComplete: pageCount <= 0
           ? 0
           : ((readPagesFromFarthest / pageCount) * 100).round().clamp(0, 100),
-      lastReadAt:
-          prev?.lastReadAt ?? DateTime.now().toUtc().toIso8601String(),
+      lastReadAt: prev?.lastReadAt ?? DateTime.now().toUtc().toIso8601String(),
       completedAt: prev?.completedAt,
-      isCompleted:
-          readPagesFromFarthest >= pageCount || (prev?.isCompleted ?? false),
+      // Completion now depends on quiz completion (when quizProgress exists).
+      isCompleted: (readPagesFromFarthest >= pageCount) &&
+              ((prev?.quizProgress == null) ||
+                  (prev?.quizProgress?.isCompleted == true)) ||
+          (prev?.isCompleted ?? false),
     );
     notifyListeners();
   }
 
+  void applyLocalQuizProgress({
+    required String storyIdeaId,
+    required int totalQuestions,
+    required int correctAnswers,
+    required bool isCompleted,
+    String? completedAt,
+  }) {
+    final summary = storySummary;
+    if (summary == null) return;
+    final index = summary.storyIdeas.indexWhere((e) => e.id == storyIdeaId);
+    if (index < 0) return;
+    final idea = summary.storyIdeas[index];
+    final cr = idea.continueReading;
+    if (cr == null) return;
+
+    cr.quizProgress = QuizProgress(
+      totalQuestions: totalQuestions,
+      correctAnswers: correctAnswers,
+      isCompleted: isCompleted,
+      completedAt: completedAt,
+    );
+
+    // If quiz is completed, finalize the story locally immediately.
+    // This prevents the UI from waiting for a topic refetch to reflect completion.
+    if (isCompleted && cr.pageCount > 0) {
+      // If the user reached quiz from the last page, they effectively completed reading too.
+      cr.readPages = cr.pageCount;
+      cr.remainingPages = 0;
+      cr.lastPageIndex = cr.pageCount - 1;
+      cr.continueFromPageIndex = (cr.pageCount - 1).clamp(0, cr.pageCount - 1);
+      cr.percentComplete = 100;
+      cr.isCompleted = true;
+      cr.completedAt = completedAt ?? DateTime.now().toUtc().toIso8601String();
+    }
+    notifyListeners();
+  }
+
   bool isGettingStoryLoading = false;
+  String? getStoryError;
   Future<void> getStoryByIdea({
     required BuildContext context,
     required String storyIdea,
@@ -349,6 +429,7 @@ class HomeProvider extends ChangeNotifier {
   }) async {
     story = null;
     isGettingStoryLoading = true;
+    getStoryError = null;
     notifyListeners();
     final response = await HomeApiService.instance.getStoryByStoryId(
       storyIdea: storyIdea,
@@ -356,6 +437,7 @@ class HomeProvider extends ChangeNotifier {
     response.fold(
       (l) {
         Logger.error(l.errorMsg);
+        getStoryError = l.errorMsg;
         isGettingStoryLoading = false;
         notifyListeners();
       },
@@ -383,7 +465,8 @@ class HomeProvider extends ChangeNotifier {
             data: {"storyIdeaId": storyIdea},
           );
           createResponse.fold(
-            (_) {
+            (l) {
+              getStoryError = l.errorMsg;
               isGettingStoryLoading = false;
               notifyListeners();
               onStoryNotGenerated?.call();
@@ -392,7 +475,8 @@ class HomeProvider extends ChangeNotifier {
               final retryResponse = await HomeApiService.instance
                   .getStoryByStoryId(storyIdea: storyIdea);
               retryResponse.fold(
-                (__) {
+                (l) {
+                  getStoryError = l.errorMsg;
                   isGettingStoryLoading = false;
                   notifyListeners();
                   onStoryNotGenerated?.call();
@@ -410,6 +494,7 @@ class HomeProvider extends ChangeNotifier {
                       Map<String, dynamic>.from(retryData as Map),
                     );
                     onSuccess.call(story!);
+                    getStoryError = null;
                   } else {
                     onStoryNotGenerated?.call();
                   }
@@ -425,6 +510,7 @@ class HomeProvider extends ChangeNotifier {
           Map<String, dynamic>.from(storyData as Map),
         );
         onSuccess.call(story!);
+        getStoryError = null;
         isGettingStoryLoading = false;
         notifyListeners();
       },
@@ -477,6 +563,9 @@ class HomeProvider extends ChangeNotifier {
     isGenerateSeriesLoading = false;
     generateSeriesError = null;
     isRefreshingStoryIdeas = false;
+    continueReadingItems = null;
+    isContinueReadingLoading = false;
+    continueReadingError = null;
     notifyListeners();
   }
 }

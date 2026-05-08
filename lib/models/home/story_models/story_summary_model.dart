@@ -303,6 +303,7 @@ class ContinueReading {
     String? lastReadAt;
     String? completedAt;
     bool isCompleted;
+    QuizProgress? quizProgress;
 
     ContinueReading({
         required this.pageCount,
@@ -314,18 +315,93 @@ class ContinueReading {
         this.lastReadAt,
         this.completedAt,
         required this.isCompleted,
+        this.quizProgress,
     });
 
-    factory ContinueReading.fromJson(Map<String, dynamic> json) => ContinueReading(
-        pageCount: json["pageCount"] ?? 0,
-        readPages: json["readPages"] ?? 0,
-        remainingPages: json["remainingPages"] ?? 0,
-        lastPageIndex: json["lastPageIndex"],
-        continueFromPageIndex: json["continueFromPageIndex"] ?? 0,
-        percentComplete: json["percentComplete"] ?? 0,
-        lastReadAt: json["lastReadAt"]?.toString(),
-        completedAt: json["completedAt"]?.toString(),
+    bool get isReadingComplete => pageCount > 0 && readPages >= pageCount;
+
+    /// UI-level completion: a reading is considered completed only when both
+    /// reading and quiz are completed. We intentionally do NOT trust the backend
+    /// `isCompleted` flag because it can be inconsistent.
+    bool get isFullyCompleted {
+      final qp = quizProgress;
+      if (!isReadingComplete) return false;
+      if (qp == null) return false;
+      // Guard: backend sometimes sends totalQuestions=0 with isCompleted=true.
+      if (qp.totalQuestions <= 0) return false;
+      return qp.isCompleted == true;
+    }
+
+    factory ContinueReading.fromJson(Map<String, dynamic> json) {
+      final pageCount = json["pageCount"] is int
+          ? json["pageCount"] as int
+          : int.tryParse(json["pageCount"]?.toString() ?? "") ?? 0;
+      final readPages = json["readPages"] is int
+          ? json["readPages"] as int
+          : int.tryParse(json["readPages"]?.toString() ?? "") ?? 0;
+      final remainingPages = json["remainingPages"] is int
+          ? json["remainingPages"] as int
+          : int.tryParse(json["remainingPages"]?.toString() ?? "") ?? 0;
+      final lastPageIndex = json["lastPageIndex"] is int
+          ? json["lastPageIndex"] as int
+          : int.tryParse(json["lastPageIndex"]?.toString() ?? "");
+      final continueFromPageIndex = json["continueFromPageIndex"] is int
+          ? json["continueFromPageIndex"] as int
+          : int.tryParse(json["continueFromPageIndex"]?.toString() ?? "") ?? 0;
+      final percentComplete = json["percentComplete"] is int
+          ? json["percentComplete"] as int
+          : int.tryParse(json["percentComplete"]?.toString() ?? "") ?? 0;
+      final lastReadAt = json["lastReadAt"]?.toString();
+      final completedAt = json["completedAt"]?.toString();
+      final qp = json["quizProgress"] is Map
+          ? QuizProgress.fromJson(
+              Map<String, dynamic>.from(json["quizProgress"] as Map),
+            )
+          : null;
+
+      final isReadingComplete = pageCount > 0 && readPages >= pageCount;
+      final isQuizComplete =
+          qp != null && qp.isCompleted == true && qp.totalQuestions > 0;
+      final isCompleted = isReadingComplete && isQuizComplete;
+
+      return ContinueReading(
+        pageCount: pageCount,
+        readPages: readPages,
+        remainingPages: remainingPages,
+        lastPageIndex: lastPageIndex,
+        continueFromPageIndex: continueFromPageIndex,
+        percentComplete: percentComplete,
+        lastReadAt: lastReadAt,
+        // Keep server completedAt if provided, else null.
+        completedAt: isCompleted ? (completedAt ?? qp.completedAt) : null,
+        isCompleted: isCompleted,
+        quizProgress: qp,
+      );
+    }
+}
+
+class QuizProgress {
+    int totalQuestions;
+    int correctAnswers;
+    bool isCompleted;
+    String? completedAt;
+
+    QuizProgress({
+        required this.totalQuestions,
+        required this.correctAnswers,
+        required this.isCompleted,
+        this.completedAt,
+    });
+
+    factory QuizProgress.fromJson(Map<String, dynamic> json) => QuizProgress(
+        totalQuestions: json["totalQuestions"] is int
+            ? json["totalQuestions"] as int
+            : int.tryParse(json["totalQuestions"]?.toString() ?? "") ?? 0,
+        correctAnswers: json["correctAnswers"] is int
+            ? json["correctAnswers"] as int
+            : int.tryParse(json["correctAnswers"]?.toString() ?? "") ?? 0,
         isCompleted: json["isCompleted"] == true,
+        completedAt: json["completedAt"]?.toString(),
     );
 }
 

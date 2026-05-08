@@ -17,6 +17,7 @@ import 'package:redstreakapp/models/home/story_models/story_idea_model.dart'
 import 'package:redstreakapp/models/home/story_models/story_summary_model.dart'
     as summary_models;
 import 'package:redstreakapp/models/home/story_models/reading_exit_snapshot.dart';
+import 'package:redstreakapp/models/home/story_models/quiz_exit_snapshot.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/saved_series_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
@@ -36,11 +37,33 @@ class MyStoryIdeasScreen extends StatefulWidget {
 class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _waitingForGeneratedFirstResponse = true;
+  String? _topicIdForScreen;
+
+  // Local progress overlay used in the generation flow before the API summary
+  // (with continueReading) comes back. Keyed by storyIdeaId.
+  final Map<String, summary_models.ContinueReading> _localContinueReading =
+      <String, summary_models.ContinueReading>{};
 
   // Set to true after the user has returned from the reading screen at least
   // once, so we switch to showing fresh API data (which includes read progress)
   // rather than the stale generated snapshot.
   bool _hasReadAStory = false;
+
+  int _resumePageIndex(summary_models.ContinueReading? cr) {
+    if (cr == null) return 0;
+    final pageCount = cr.pageCount;
+    if (pageCount <= 0) return 0;
+
+    // If backend mistakenly sends a non-zero continueFromPageIndex while
+    // readPages is 0, always start at page 0.
+    if (cr.readPages <= 0) return 0;
+
+    final last = cr.lastPageIndex;
+    if (last != null) {
+      return (last + 1).clamp(0, pageCount - 1);
+    }
+    return cr.continueFromPageIndex.clamp(0, pageCount - 1);
+  }
 
   summary_models.StoryIdeaModel? _mapGeneratedIdeasToSummary(
     generated_models.StoryIdeasModel? storyIdeas,
@@ -98,6 +121,62 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
     );
   }
 
+  summary_models.StoryIdeaModel _applyLocalReadingOverlay(
+    summary_models.StoryIdeaModel base,
+  ) {
+    if (_localContinueReading.isEmpty) return base;
+
+    final nextIdeas = base.storyIdeas.map((idea) {
+      final local = _localContinueReading[idea.id];
+      if (local == null) return idea;
+
+      final existing = idea.continueReading;
+      final shouldOverride =
+          existing == null || local.readPages > existing.readPages;
+      if (!shouldOverride) return idea;
+
+      return summary_models.StoryIdea(
+        id: idea.id,
+        storyTitle: idea.storyTitle,
+        description: idea.description,
+        thumbnailUrl: idea.thumbnailUrl,
+        sequenceIndex: idea.sequenceIndex,
+        grade: idea.grade,
+        tags: idea.tags,
+        age: idea.age,
+        language: idea.language,
+        topic: idea.topic,
+        topicType: idea.topicType,
+        source: idea.source,
+        isGenerated: idea.isGenerated,
+        hasStory: idea.hasStory,
+        createdOn: idea.createdOn,
+        updatedAt: idea.updatedAt,
+        continueReading: local,
+        sampleQuestion: idea.sampleQuestion,
+        subjectIds: idea.subjectIds,
+        extraSubjectTags: idea.extraSubjectTags,
+        thumbnailSource: idea.thumbnailSource,
+        thumbnailLicense: idea.thumbnailLicense,
+        thumbnailAttribution: idea.thumbnailAttribution,
+        thumbnailSearchEntity: idea.thumbnailSearchEntity,
+      );
+    }).toList();
+
+    return summary_models.StoryIdeaModel(
+      topicId: base.topicId,
+      topicTitle: base.topicTitle,
+      topicType: base.topicType,
+      isOwnTopic: base.isOwnTopic,
+      topicLearningGoal: base.topicLearningGoal,
+      topicThumbnailUrl: base.topicThumbnailUrl,
+      topicInterests: base.topicInterests,
+      subjects: base.subjects,
+      overallProgress: base.overallProgress,
+      storyIdeas: nextIdeas,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -133,12 +212,22 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
   // When opened from the generation flow (preferGeneratedData == true), the
   // back button should always go home, not back to the 4 input screens.
   void _handleBack() {
+    final hp = context.read<HomeProvider>();
     if (widget.preferGeneratedData) {
+      // After generating a new series, ensure Home shelves (Continue Reading)
+      // are refreshed immediately when we return.
+      //
+      // Schedule the refresh on a microtask so it still runs even if this route
+      // is disposed immediately by goNamed().
       context.goNamed(AppRoutes.homeScreen.name);
+      Future.microtask(() => hp.getContinueReading(force: true));
     } else if (context.canPop()) {
       context.pop();
+      // Returning back to Home: refresh Continue Reading list.
+      Future.microtask(() => hp.getContinueReading(force: true));
     } else {
       context.goNamed(AppRoutes.homeScreen.name);
+      Future.microtask(() => hp.getContinueReading(force: true));
     }
   }
 
@@ -173,19 +262,44 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
           if (!mounted) return;
           setState(() => _hasReadAStory = true);
           final hp = context.read<HomeProvider>();
-          final topicId = hp.activeStoryIdeasTopicId;
+          final topicId = _topicIdForScreen ?? hp.activeStoryIdeasTopicId;
           if (topicId != null) {
-            if (result is ReadingExitSnapshot &&
-                result.hasValidCounts) {
+            if (result is ReadingExitSnapshot && result.hasValidCounts) {
+              // Optimistic local progress update (especially important for the
+              // generation flow where the initial summary snapshot has no
+              // continueReading info until the API refresh completes).
+              final readPages =
+                  (result.lastPageIndex + 1).clamp(0, result.pageCount);
+              final remainingPages =
+                  (result.pageCount - readPages).clamp(0, result.pageCount);
+              final percent = result.pageCount > 0
+                  ? ((readPages / result.pageCount) * 100)
+                      .round()
+                      .clamp(0, 100)
+                  : 0;
+              setState(() {
+                _localContinueReading[result.storyIdeaId] =
+                    summary_models.ContinueReading(
+                  pageCount: result.pageCount,
+                  readPages: readPages,
+                  remainingPages: remainingPages,
+                  lastPageIndex: result.lastPageIndex,
+                  continueFromPageIndex:
+                      result.lastPageIndex.clamp(0, result.pageCount - 1),
+                  percentComplete: percent,
+                  lastReadAt: DateTime.now().toIso8601String(),
+                  completedAt: null,
+                  isCompleted: false,
+                  quizProgress: null,
+                );
+              });
+
               hp.applyLocalReadingProgressFromReadingSession(
                 storyIdeaId: result.storyIdeaId,
                 lastPageIndex: result.lastPageIndex,
                 pageCount: result.pageCount,
               );
-              hp.getTopicStoryDetails(
-                topicId: topicId,
-                showLoadingUi: false,
-              );
+              hp.getTopicStoryDetails(topicId: topicId, showLoadingUi: false);
             } else {
               hp.getTopicStoryDetails(topicId: topicId);
             }
@@ -200,7 +314,13 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
       // intercept the system back button and go to home instead of the input screens.
       canPop: !widget.preferGeneratedData,
       onPopInvokedWithResult: (didPop, _) {
-        if (didPop) return;
+        if (didPop) {
+          // System back / gesture pop happened. Refresh Continue Reading when
+          // we land back on Home.
+          final hp = context.read<HomeProvider>();
+          Future.microtask(() => hp.getContinueReading(force: true));
+          return;
+        }
         _handleBack();
       },
       child: Scaffold(
@@ -210,6 +330,18 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
             final generatedSummary = _mapGeneratedIdeasToSummary(
               storyProvider.storyIdeas,
             );
+            // Track the topic this screen should operate on (especially important
+            // for generation flow where HomeProvider may still hold an old topic id).
+            _topicIdForScreen ??= generatedSummary?.topicId ??
+                homeProvider.storySummary?.topicId;
+            if (generatedSummary != null) {
+              _topicIdForScreen = generatedSummary.topicId;
+              if (widget.preferGeneratedData &&
+                  homeProvider.activeStoryIdeasTopicId !=
+                      generatedSummary.topicId) {
+                homeProvider.activeStoryIdeasTopicId = generatedSummary.topicId;
+              }
+            }
 
             if (widget.preferGeneratedData &&
                 _waitingForGeneratedFirstResponse) {
@@ -236,21 +368,33 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
             // For existing topics (preferGeneratedData == false):
             //   Use homeProvider.storySummary only — ignore any leftover
             //   generatedSummary from a previous generation flow.
-            final summary = widget.preferGeneratedData
+            final apiSummaryMatchesGenerated = homeProvider.storySummary != null &&
+                generatedSummary != null &&
+                homeProvider.storySummary!.topicId == generatedSummary.topicId;
+
+            final selectedSummary = widget.preferGeneratedData
                 ? (_hasReadAStory
-                      ? (homeProvider.storySummary ?? generatedSummary)
-                      : generatedSummary)
+                    ? ((apiSummaryMatchesGenerated ? homeProvider.storySummary : null) ??
+                        generatedSummary)
+                    : generatedSummary)
                 : homeProvider.storySummary;
+
+            // If we're still showing the generated snapshot, overlay the local
+            // reading progress so the UI updates instantly on return.
+            final displaySummary =
+                (selectedSummary != null && selectedSummary == generatedSummary)
+                    ? _applyLocalReadingOverlay(selectedSummary)
+                    : selectedSummary;
 
             if (homeProvider.isStoryIdeasLoading ||
                 homeProvider.isGenerateSeriesLoading ||
                 homeProvider.isRefreshingStoryIdeas ||
-                (summary == null &&
+                (displaySummary == null &&
                     storyProvider.isGenerateStoryIdeasLoading)) {
               return HomeSectionShimmer.createdStoryIdeasLoadingShimmer();
             }
 
-            if (summary == null) {
+            if (displaySummary == null) {
               final errorMsg =
                   storyProvider.generateStoryIdeasError ??
                   homeProvider.generateSeriesError ??
@@ -355,6 +499,8 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                 ),
               );
             }
+
+            final summary = displaySummary;
 
             if (summary.storyIdeas.isEmpty) {
               return Center(
@@ -461,14 +607,103 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                             if (resumeIndex < 0) resumeIndex = 0;
 
                             final resumeIdea = summary.storyIdeas[resumeIndex];
-                            final initialPageIndex =
-                                resumeIdea
-                                    .continueReading
-                                    ?.continueFromPageIndex ??
-                                0;
+                            final cr = resumeIdea.continueReading;
+                            final pageCount = cr?.pageCount ?? 0;
+                            final readPages = cr?.readPages ?? 0;
+                            final quizDone =
+                                cr?.quizProgress?.isCompleted == true;
+
+                            // If all pages are read but quiz isn't completed, jump to quiz flow.
+                            if (pageCount > 0 &&
+                                readPages >= pageCount &&
+                                !quizDone) {
+                              final sp = context.read<StoryProvider>();
+                              final hp = context.read<HomeProvider>();
+                              final story = sp.stories.isEmpty
+                                  ? null
+                                  : sp.stories.first;
+
+                              void openQuiz(
+                                String storyId, {
+                                String? storyTitle,
+                                String? storyImageUrl,
+                              }) {
+                                context
+                                    .pushNamed(
+                                      AppRoutes.startQuizScreen.name,
+                                      extra: {
+                                        'storyId': storyId,
+                                        'storyTitle':
+                                            storyTitle ?? resumeIdea.storyTitle,
+                                        'storyImageUrl':
+                                            storyImageUrl ??
+                                            resumeIdea.thumbnailUrl,
+                                        'storyIdeaId': resumeIdea.id,
+                                      },
+                                    )
+                                    .then((result) {
+                                      if (!mounted) return;
+                                      if (result is QuizExitSnapshot) {
+                                        hp.applyLocalQuizProgress(
+                                          storyIdeaId: result.storyIdeaId,
+                                          totalQuestions: result.totalQuestions,
+                                          correctAnswers: result.correctAnswers,
+                                          isCompleted: result.isCompleted,
+                                          completedAt: result.completedAt,
+                                        );
+                                        final topicId =
+                                            hp.activeStoryIdeasTopicId;
+                                        if (topicId != null) {
+                                          hp.getTopicStoryDetails(
+                                            topicId: topicId,
+                                            showLoadingUi: false,
+                                          );
+                                        }
+                                      }
+                                    });
+                              }
+
+                              // If we already have the story loaded, we have a storyId.
+                              final storyId = story?.id ?? '';
+                              if (storyId.isNotEmpty) {
+                                openQuiz(
+                                  storyId,
+                                  storyTitle: story?.title,
+                                  storyImageUrl: story?.thumbnailUrl,
+                                );
+                                return;
+                              }
+
+                              // Otherwise fetch the story first (silent), then open quiz.
+                              hp.getStoryByIdea(
+                                context: context,
+                                storyIdea: resumeIdea.id,
+                                fetchOnly: true,
+                                onStoryNotGenerated: () {
+                                  if (!mounted) return;
+                                  AppToast.info(
+                                    context: context,
+                                    durationSecond: 3,
+                                    message:
+                                        "Story is not ready yet. Please try again in a moment.",
+                                  );
+                                },
+                                onSuccess: (history) {
+                                  sp.addStoryFromHistory(history, 0);
+                                  if (!mounted) return;
+                                  openQuiz(
+                                    history.id,
+                                    storyTitle: history.title,
+                                    storyImageUrl: history.thumbnailUrl,
+                                  );
+                                },
+                              );
+                              return;
+                            }
+
+                            final initialPageIndex = _resumePageIndex(cr);
                             final initialConfirmedPageIndex =
-                                resumeIdea.continueReading?.lastPageIndex ??
-                                    (initialPageIndex - 1);
+                                cr?.lastPageIndex ?? (initialPageIndex - 1);
 
                             _openReading(
                               summary: summary,
@@ -639,11 +874,17 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                             child: _MyReadingItemTile(
                               index: index + 1,
                               isSelected:
-                                  summary
-                                      .storyIdeas[index]
-                                      .continueReading
-                                      ?.isCompleted ??
-                                  false,
+                                  (summary
+                                          .storyIdeas[index]
+                                          .continueReading
+                                          ?.isCompleted ??
+                                      false) &&
+                                  (summary
+                                          .storyIdeas[index]
+                                          .continueReading
+                                          ?.quizProgress
+                                          ?.isCompleted ??
+                                      false),
                               title: summary.storyIdeas[index].storyTitle,
                               description:
                                   summary.storyIdeas[index].description,
@@ -653,12 +894,9 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                               continueReading:
                                   summary.storyIdeas[index].continueReading,
                               onOpenStory: () {
-                                final initialPage =
-                                    summary
-                                        .storyIdeas[index]
-                                        .continueReading
-                                        ?.continueFromPageIndex ??
-                                    0;
+                                final initialPage = _resumePageIndex(
+                                  summary.storyIdeas[index].continueReading,
+                                );
                                 _openReading(
                                   summary: summary,
                                   storyIdeaId: summary.storyIdeas[index].id,
