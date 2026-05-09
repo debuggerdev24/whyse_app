@@ -1,3 +1,5 @@
+import 'package:redstreakapp/core/utils/network_image_url.dart';
+
 /// API: GET /story/topics/:topicId/progress
 class TopicProgressModel {
   final TopicProgressTopic topic;
@@ -82,7 +84,8 @@ class TopicProgressTopic {
       title: json["title"]?.toString() ?? "",
       learningGoal: json["learningGoal"]?.toString() ?? "",
       type: json["type"]?.toString() ?? "",
-      thumbnailUrl: json["thumbnailUrl"]?.toString() ?? "",
+      thumbnailUrl:
+          resolveNetworkImageUrl(json["thumbnailUrl"]?.toString() ?? ""),
       thumbnailSource: json["thumbnailSource"]?.toString() ?? "",
       thumbnailLicense: json["thumbnailLicense"]?.toString() ?? "",
       thumbnailAttribution: json["thumbnailAttribution"]?.toString() ?? "",
@@ -149,7 +152,9 @@ class TopicProgressReadingItem {
       isGenerated: json["isGenerated"] == true,
       storyId: json["storyId"]?.toString(),
       storyTitle: json["storyTitle"]?.toString(),
-      thumbnailUrl: json["thumbnailUrl"]?.toString(),
+      thumbnailUrl: resolveNullableNetworkImageUrl(
+        json["thumbnailUrl"]?.toString(),
+      ),
     );
   }
 }

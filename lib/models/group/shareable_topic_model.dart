@@ -1,3 +1,5 @@
+import 'package:redstreakapp/core/utils/network_image_url.dart';
+
 class ShareableTopicItem {
   final String id;
   final String title;
@@ -22,7 +24,8 @@ class ShareableTopicItem {
       id: json['id']?.toString() ?? '',
       title: json['title']?.toString() ?? '',
       type: json['type']?.toString() ?? '',
-      thumbnailUrl: json['thumbnailUrl']?.toString(),
+      thumbnailUrl:
+          resolveNullableNetworkImageUrl(json['thumbnailUrl']?.toString()),
       isOwnTopic: json['isOwnTopic'] == true,
       isSavedTopic: json['isSavedTopic'] == true,
       readingProgress: ShareableReadingProgress.fromJson(

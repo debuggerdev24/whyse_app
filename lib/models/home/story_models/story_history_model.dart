@@ -1,3 +1,4 @@
+import 'package:redstreakapp/core/utils/network_image_url.dart';
 import 'package:redstreakapp/models/home/story_models/readable_story.dart';
 import 'package:redstreakapp/models/home/story_models/story_model.dart';
 
@@ -49,7 +50,7 @@ class StoryHistoryModel implements IReadableStory {
     metadata: Metadata.fromJson(json["metadata"]),
     createdAt: DateTime.parse(json["createdAt"]),
     updatedAt: DateTime.parse(json["updatedAt"]),
-    thumbnailUrl: json["thumbnailUrl"] ?? '',
+    thumbnailUrl: resolveNetworkImageUrl(json["thumbnailUrl"]?.toString() ?? ''),
   );
 }
 

@@ -1,3 +1,5 @@
+import 'package:redstreakapp/core/utils/network_image_url.dart';
+
 class GroupSharedTopic {
   final String shareId;
   final String sharedAt;
@@ -41,7 +43,8 @@ class SharedTopicDetail {
       SharedTopicDetail(
         id: json['id']?.toString() ?? '',
         title: json['title']?.toString() ?? '',
-        thumbnailUrl: json['thumbnailUrl']?.toString() ?? '',
+        thumbnailUrl:
+            resolveNetworkImageUrl(json['thumbnailUrl']?.toString() ?? ''),
         readingProgress: json['readingProgress'] is Map
             ? SharedTopicReadingProgress.fromJson(
                 Map<String, dynamic>.from(json['readingProgress'] as Map),

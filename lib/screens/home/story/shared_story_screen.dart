@@ -3,8 +3,8 @@ import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 
-import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/utils/network_image_url.dart';
 
 import 'package:redstreakapp/core/utils/share_helper.dart';
 
@@ -623,9 +623,10 @@ class _StoryIdeaTile extends StatelessWidget {
 
   String get _imageUrl {
     final url = idea.thumbnailUrl;
-    if (url == null || url.toString().isEmpty) return topicImageUrl;
-    final s = url.toString();
-    return s.startsWith('http') ? s : DioClient.baseUrl + s;
+    if (url == null || url.toString().isEmpty) {
+      return resolveNetworkImageUrl(topicImageUrl);
+    }
+    return resolveNetworkImageUrl(url.toString());
   }
 
   @override
@@ -1007,12 +1008,7 @@ class _StoryPage extends StatelessWidget {
     required this.onHome,
   });
 
-  static String _resolveImageUrl(String url) {
-    final s = url.trim();
-    if (s.isEmpty) return '';
-    if (s.startsWith('http://') || s.startsWith('https://')) return s;
-    return DioClient.baseUrl + s;
-  }
+  static String _resolveImageUrl(String url) => resolveNetworkImageUrl(url);
 
   List<TextSpan> _buildTextSpans(
     String text,

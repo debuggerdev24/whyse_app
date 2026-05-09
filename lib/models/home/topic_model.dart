@@ -1,3 +1,5 @@
+import 'package:redstreakapp/core/utils/network_image_url.dart';
+
 class TopicModel {
   String id,title,learningGoal;
   dynamic adminPromptId;
@@ -30,7 +32,7 @@ class TopicModel {
         : [],
     createdAt: DateTime.parse(json["createdAt"]),
     updatedAt: DateTime.parse(json["updatedAt"]),
-    thumbnailUrl: json["thumbnailUrl"] ?? "",
+    thumbnailUrl: resolveNetworkImageUrl(json["thumbnailUrl"]?.toString() ?? ""),
   );
 }
 

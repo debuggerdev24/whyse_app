@@ -1,4 +1,5 @@
 import 'package:redstreakapp/core/constants/app_constants.dart';
+import 'package:redstreakapp/core/utils/network_image_url.dart';
 
 /// User profile from `GET /mobile/profile/me` (and merged PATCH `data`).
 class ProfileDataModel {
@@ -92,7 +93,7 @@ class ProfileDataModel {
       lastName: last,
       displayName: resolvedDisplay.isNotEmpty ? resolvedDisplay : first,
       username: json['username']?.toString() ?? '',
-      avatarUrl: json['avatarUrl'] as String?,
+      avatarUrl: resolveNullableNetworkImageUrl(json['avatarUrl'] as String?),
       phone: json['phone']?.toString() ?? '',
       pendingPhone: json['pendingPhone']?.toString(),
       phoneVerified: json['phoneVerified'] ?? false,
@@ -134,7 +135,7 @@ class ProfileDataModel {
       displayName: displayName,
       username: data['username']?.toString() ?? base.username,
       avatarUrl: data.containsKey('avatarUrl')
-          ? data['avatarUrl'] as String?
+          ? resolveNullableNetworkImageUrl(data['avatarUrl'] as String?)
           : base.avatarUrl,
       phone: data['phone']?.toString() ?? base.phone,
       pendingPhone: data.containsKey('pendingPhone')
@@ -240,7 +241,7 @@ class Group {
       id: json['id'],
       title: json['title'],
       type: json['type'],
-      thumbnailUrl: json['thumbnailUrl'],
+      thumbnailUrl: resolveNullableNetworkImageUrl(json['thumbnailUrl']?.toString()),
       myRole: json['myRole'],
       joinedAt: DateTime.parse(json['joinedAt']),
       createdBy: json['createdBy'],
@@ -266,7 +267,7 @@ class Creator {
       userId: json['userId'],
       displayName: json['displayName'],
       username: json['username'],
-      avatarUrl: json['avatarUrl'],
+      avatarUrl: resolveNullableNetworkImageUrl(json['avatarUrl']?.toString()),
     );
   }
 }
@@ -289,7 +290,7 @@ class Friend {
       userId: json['userId'],
       displayName: json['displayName'],
       username: json['username'],
-      avatarUrl: json['avatarUrl'],
+      avatarUrl: resolveNullableNetworkImageUrl(json['avatarUrl']?.toString()),
     );
   }
 }

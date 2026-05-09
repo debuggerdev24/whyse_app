@@ -1,3 +1,5 @@
+import 'package:redstreakapp/core/utils/network_image_url.dart';
+
 class CreatedStoryTopicsModel {
     String id,topic,learningGoal,type,updatedAt,createdOn,createdBy,thumbnailUrl;
     List<String> interests;
@@ -30,7 +32,7 @@ class CreatedStoryTopicsModel {
           'imageUrl',
         ]) {
           final v = json[key]?.toString().trim();
-          if (v != null && v.isNotEmpty) return v;
+          if (v != null && v.isNotEmpty) return resolveNetworkImageUrl(v);
         }
         return '';
       }

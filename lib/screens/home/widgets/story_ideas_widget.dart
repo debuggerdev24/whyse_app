@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
-import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/core/utils/date_formatter.dart';
+import 'package:redstreakapp/core/utils/network_image_url.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/models/home/story_models/story_summary_model.dart';
 import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
@@ -406,12 +406,5 @@ class _StoryIdeasArtwork extends StatelessWidget {
     return NoImageFound(subtitle: title);
   }
 
-  String _resolveImageUrl(String url) {
-    final trimmedUrl = url.trim();
-    if (trimmedUrl.isEmpty) return "";
-    if (trimmedUrl.startsWith("http://") || trimmedUrl.startsWith("https://")) {
-      return trimmedUrl;
-    }
-    return DioClient.baseUrl + trimmedUrl;
-  }
+  String _resolveImageUrl(String url) => resolveNetworkImageUrl(url);
 }

@@ -1,3 +1,5 @@
+import 'package:redstreakapp/core/utils/network_image_url.dart';
+
 class ContinueReadingTopic {
   ContinueReadingTopic({
     required this.id,
@@ -13,7 +15,8 @@ class ContinueReadingTopic {
     return ContinueReadingTopic(
       id: json['id']?.toString() ?? '',
       title: json['title']?.toString() ?? '',
-      thumbnailUrl: json['thumbnailUrl']?.toString() ?? '',
+      thumbnailUrl:
+          resolveNetworkImageUrl(json['thumbnailUrl']?.toString() ?? ''),
     );
   }
 }
@@ -68,7 +71,8 @@ class ContinueReadingItemModel {
       topic: ContinueReadingTopic.fromJson(
         Map<String, dynamic>.from(json['topic'] as Map? ?? {}),
       ),
-      thumbnailUrl: json['thumbnailUrl']?.toString() ?? '',
+      thumbnailUrl:
+          resolveNetworkImageUrl(json['thumbnailUrl']?.toString() ?? ''),
       pageCount: json['pageCount'] is int
           ? json['pageCount'] as int
           : int.tryParse(json['pageCount']?.toString() ?? '') ?? 0,
@@ -122,10 +126,7 @@ class ContinueReadingPagination {
 }
 
 class ContinueReadingListModel {
-  ContinueReadingListModel({
-    required this.items,
-    this.pagination,
-  });
+  ContinueReadingListModel({required this.items, this.pagination});
 
   final List<ContinueReadingItemModel> items;
   final ContinueReadingPagination? pagination;
@@ -137,9 +138,10 @@ class ContinueReadingListModel {
     return ContinueReadingListModel(
       items: itemsRaw
           .whereType<Map>()
-          .map((e) => ContinueReadingItemModel.fromJson(
-                Map<String, dynamic>.from(e),
-              ))
+          .map(
+            (e) =>
+                ContinueReadingItemModel.fromJson(Map<String, dynamic>.from(e)),
+          )
           .toList(),
       pagination: paginationRaw is Map
           ? ContinueReadingPagination.fromJson(
@@ -149,4 +151,3 @@ class ContinueReadingListModel {
     );
   }
 }
-

@@ -2,16 +2,11 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/core/network/end_points.dart';
+import 'package:redstreakapp/core/utils/network_image_url.dart';
 
 /// Builds a displayable image URL when the API returns a relative path.
-String profileAvatarAbsoluteUrl(String? pathOrUrl) {
-  if (pathOrUrl == null || pathOrUrl.isEmpty) return '';
-  final s = pathOrUrl.trim();
-  if (s.startsWith('http://') || s.startsWith('https://')) return s;
-  final base = DioClient.baseUrl.replaceAll(RegExp(r'/$'), '');
-  final p = s.startsWith('/') ? s : '/$s';
-  return '$base$p';
-}
+String profileAvatarAbsoluteUrl(String? pathOrUrl) =>
+    resolveNullableNetworkImageUrl(pathOrUrl) ?? '';
 
 String _basenameFromPath(String path) {
   final i = path.lastIndexOf(RegExp(r'[/\\]'));

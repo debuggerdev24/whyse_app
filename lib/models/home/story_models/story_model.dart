@@ -1,4 +1,4 @@
-
+import 'package:redstreakapp/core/utils/network_image_url.dart';
 
 class StoryModel {
   final String id, title, content,thumbnailUrl;
@@ -54,7 +54,7 @@ class StoryModel {
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
       pages: json['pages'] != null ? (json['pages'] as List).map((i) => StoryPages.fromJson(i)).toList() : []
-      ,thumbnailUrl: json["thumbnailUrl"] ?? '',
+      ,thumbnailUrl: resolveNetworkImageUrl(json["thumbnailUrl"]?.toString() ?? ''),
     );
   }
 }
@@ -120,7 +120,7 @@ class StoryPages {
         pageIndex: pageIndex,
         text: stripHtml(json["text"]?.toString() ?? ''),
         primaryEntity: json["primaryEntity"]?.toString() ?? '',
-        imageUrl: json["imageUrl"]?.toString() ?? '',
+        imageUrl: resolveNetworkImageUrl(json["imageUrl"]?.toString() ?? ''),
         imageSource: json["imageSource"]?.toString() ?? '',
         license: json["license"]?.toString() ?? '',
         attribution: json["attribution"]?.toString() ?? '',

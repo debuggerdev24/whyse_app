@@ -1,3 +1,5 @@
+import 'package:redstreakapp/core/utils/network_image_url.dart';
+
 // ================= ENUMS =================
 
 enum GroupType { private, public }
@@ -124,7 +126,7 @@ class Group {
       id: json['id'],
       title: json['title'],
       description: json['description'],
-      thumbnailUrl: json['thumbnailUrl'],
+      thumbnailUrl: resolveNullableNetworkImageUrl(json['thumbnailUrl']?.toString()),
       type: GroupTypeX.fromString(json['type']),
       createdBy: json['createdBy'],
       joinCode: json['joinCode'],
@@ -188,7 +190,7 @@ class Creator {
       lastName: json['lastName'],
       email: json['email'],
       username: json['username'],
-      avatarUrl: json['avatarUrl'],
+      avatarUrl: resolveNullableNetworkImageUrl(json['avatarUrl']?.toString()),
       displayName: json['displayName'],
     );
   }

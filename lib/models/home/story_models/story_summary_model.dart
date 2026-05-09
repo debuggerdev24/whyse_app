@@ -1,3 +1,5 @@
+import 'package:redstreakapp/core/utils/network_image_url.dart';
+
 class TopicInterest {
     String id;
     String name;
@@ -102,9 +104,11 @@ class StoryIdeaModel {
         topicLearningGoal: json["topicLearningGoal"]?.toString() ??
             json["learningGoal"]?.toString() ??
             "",
-        topicThumbnailUrl: json["topicThumbnailUrl"]?.toString() ??
-            json["thumbnailUrl"]?.toString() ??
-            "",
+        topicThumbnailUrl: resolveNetworkImageUrl(
+          json["topicThumbnailUrl"]?.toString() ??
+              json["thumbnailUrl"]?.toString() ??
+              "",
+        ),
         storyIdeas: json["storyIdeas"] == null
             ? []
             : List<StoryIdea>.from(
@@ -124,7 +128,8 @@ class StoryIdeaModel {
             topicType: topic["type"]?.toString() ?? "",
             isOwnTopic: true,
             topicLearningGoal: topic["learningGoal"]?.toString() ?? "",
-            topicThumbnailUrl: topic["thumbnailUrl"]?.toString() ?? "",
+            topicThumbnailUrl:
+                resolveNetworkImageUrl(topic["thumbnailUrl"]?.toString() ?? ""),
             storyIdeas: json["storyIdeas"] == null
                 ? []
                 : List<StoryIdea>.from(
@@ -211,7 +216,9 @@ class StoryIdea {
         id: json["id"]?.toString() ?? "",
         storyTitle: json["storyTitle"]?.toString() ?? "",
         description: json["description"]?.toString() ?? "",
-        thumbnailUrl: json["thumbnailUrl"]?.toString() ?? "",
+        thumbnailUrl: resolveNetworkImageUrl(
+          json["thumbnailUrl"]?.toString() ?? "",
+        ),
         sequenceIndex: json["sequenceIndex"] is int
             ? json["sequenceIndex"] as int
             : int.tryParse(json["sequenceIndex"]?.toString() ?? "") ?? 0,
@@ -237,7 +244,9 @@ class StoryIdea {
         id: json["id"]?.toString() ?? "",
         storyTitle: json["title"]?.toString() ?? "",
         description: json["description"]?.toString() ?? "",
-        thumbnailUrl: json["thumbnailUrl"]?.toString() ?? "",
+        thumbnailUrl: resolveNetworkImageUrl(
+          json["thumbnailUrl"]?.toString() ?? "",
+        ),
         sequenceIndex: json["sequenceIndex"] is int
             ? json["sequenceIndex"] as int
             : int.tryParse(json["sequenceIndex"]?.toString() ?? "") ?? 0,

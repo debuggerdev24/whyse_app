@@ -1,3 +1,5 @@
+import 'package:redstreakapp/core/utils/network_image_url.dart';
+
 class BrowseTopicModel {
   final String id;
   final String topic;
@@ -59,7 +61,8 @@ class BrowseTopicModel {
       isInMyList: json["isInMyList"],
       createdOn: DateTime.tryParse(json["createdOn"]?.toString() ?? ""),
       updatedAt: DateTime.tryParse(json["updatedAt"]?.toString() ?? ""),
-      thumbnailUrl: json["thumbnailUrl"]?.toString() ?? "",
+      thumbnailUrl:
+          resolveNetworkImageUrl(json["thumbnailUrl"]?.toString() ?? ""),
       thumbnailSource: json["thumbnailSource"]?.toString() ?? "",
       thumbnailLicense: json["thumbnailLicense"]?.toString() ?? "",
       thumbnailAttribution: json["thumbnailAttribution"]?.toString() ?? "",

@@ -1,3 +1,5 @@
+import 'package:redstreakapp/core/utils/network_image_url.dart';
+
 class SavedSeriesItem {
   final String savedAt;
   final SavedTopicDetail topic;
@@ -41,7 +43,7 @@ class SavedTopicDetail {
     title: json["title"]?.toString() ?? "",
     learningGoal: json["learningGoal"]?.toString() ?? "",
     type: json["type"]?.toString() ?? "",
-    thumbnailUrl: json["thumbnailUrl"]?.toString() ?? "",
+    thumbnailUrl: resolveNetworkImageUrl(json["thumbnailUrl"]?.toString() ?? ""),
     createdAt: json["createdAt"]?.toString() ?? "",
     storiesCount: json["storiesCount"] ?? 0,
     storyIdeas: json["storyIdeas"] == null
@@ -77,7 +79,7 @@ class SavedStoryIdea {
     description: json["description"]?.toString() ?? "",
     sequenceIndex: json["sequenceIndex"] ?? 0,
     isGenerated: json["isGenerated"] == true,
-    thumbnailUrl: json["thumbnailUrl"]?.toString() ?? "",
+    thumbnailUrl: resolveNetworkImageUrl(json["thumbnailUrl"]?.toString() ?? ""),
     createdAt: json["createdAt"]?.toString() ?? "",
   );
 }

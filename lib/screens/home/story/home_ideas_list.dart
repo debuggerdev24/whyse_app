@@ -6,8 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
-import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/core/utils/date_formatter.dart';
+import 'package:redstreakapp/core/utils/network_image_url.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/models/home/story_models/story_idea_model.dart';
@@ -268,12 +268,9 @@ class _IdeaCard extends StatelessWidget {
   String get _imageUrl {
     final url = idea.thumbnailUrl;
     if (url == null || url.toString().trim().isEmpty) {
-      final t = topicThumbUrl.trim();
-      if (t.isEmpty) return '';
-      return t.startsWith('http') ? t : DioClient.baseUrl + t;
+      return resolveNetworkImageUrl(topicThumbUrl);
     }
-    final s = url.toString().trim();
-    return s.startsWith('http') ? s : DioClient.baseUrl + s;
+    return resolveNetworkImageUrl(url.toString());
   }
 
   @override

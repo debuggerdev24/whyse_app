@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/utils/network_image_url.dart';
 import 'package:redstreakapp/core/widgets/global_widgets.dart';
 import 'package:redstreakapp/models/group/shareable_topic_model.dart';
 import 'package:redstreakapp/providers/profile/group_provider.dart';
@@ -248,12 +248,7 @@ class _SeriesTile extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  String _resolveImageUrl(String? raw) {
-    if (raw == null || raw.isEmpty) return '';
-    if (raw.startsWith('http')) return raw;
-    final base = dotenv.env['BASE_URL'] ?? '';
-    return '$base$raw';
-  }
+  String _resolveImageUrl(String? raw) => resolveNullableNetworkImageUrl(raw) ?? '';
 
   @override
   Widget build(BuildContext context) {

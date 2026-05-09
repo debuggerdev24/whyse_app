@@ -268,30 +268,34 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
               // Optimistic local progress update (especially important for the
               // generation flow where the initial summary snapshot has no
               // continueReading info until the API refresh completes).
-              final readPages =
-                  (result.lastPageIndex + 1).clamp(0, result.pageCount);
-              final remainingPages =
-                  (result.pageCount - readPages).clamp(0, result.pageCount);
+              final readPages = (result.lastPageIndex + 1).clamp(
+                0,
+                result.pageCount,
+              );
+              final remainingPages = (result.pageCount - readPages).clamp(
+                0,
+                result.pageCount,
+              );
               final percent = result.pageCount > 0
-                  ? ((readPages / result.pageCount) * 100)
-                      .round()
-                      .clamp(0, 100)
+                  ? ((readPages / result.pageCount) * 100).round().clamp(0, 100)
                   : 0;
               setState(() {
                 _localContinueReading[result.storyIdeaId] =
                     summary_models.ContinueReading(
-                  pageCount: result.pageCount,
-                  readPages: readPages,
-                  remainingPages: remainingPages,
-                  lastPageIndex: result.lastPageIndex,
-                  continueFromPageIndex:
-                      result.lastPageIndex.clamp(0, result.pageCount - 1),
-                  percentComplete: percent,
-                  lastReadAt: DateTime.now().toIso8601String(),
-                  completedAt: null,
-                  isCompleted: false,
-                  quizProgress: null,
-                );
+                      pageCount: result.pageCount,
+                      readPages: readPages,
+                      remainingPages: remainingPages,
+                      lastPageIndex: result.lastPageIndex,
+                      continueFromPageIndex: result.lastPageIndex.clamp(
+                        0,
+                        result.pageCount - 1,
+                      ),
+                      percentComplete: percent,
+                      lastReadAt: DateTime.now().toIso8601String(),
+                      completedAt: null,
+                      isCompleted: false,
+                      quizProgress: null,
+                    );
               });
 
               hp.applyLocalReadingProgressFromReadingSession(
@@ -332,8 +336,8 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
             );
             // Track the topic this screen should operate on (especially important
             // for generation flow where HomeProvider may still hold an old topic id).
-            _topicIdForScreen ??= generatedSummary?.topicId ??
-                homeProvider.storySummary?.topicId;
+            _topicIdForScreen ??=
+                generatedSummary?.topicId ?? homeProvider.storySummary?.topicId;
             if (generatedSummary != null) {
               _topicIdForScreen = generatedSummary.topicId;
               if (widget.preferGeneratedData &&
@@ -368,23 +372,26 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
             // For existing topics (preferGeneratedData == false):
             //   Use homeProvider.storySummary only — ignore any leftover
             //   generatedSummary from a previous generation flow.
-            final apiSummaryMatchesGenerated = homeProvider.storySummary != null &&
+            final apiSummaryMatchesGenerated =
+                homeProvider.storySummary != null &&
                 generatedSummary != null &&
                 homeProvider.storySummary!.topicId == generatedSummary.topicId;
 
             final selectedSummary = widget.preferGeneratedData
                 ? (_hasReadAStory
-                    ? ((apiSummaryMatchesGenerated ? homeProvider.storySummary : null) ??
-                        generatedSummary)
-                    : generatedSummary)
+                      ? ((apiSummaryMatchesGenerated
+                                ? homeProvider.storySummary
+                                : null) ??
+                            generatedSummary)
+                      : generatedSummary)
                 : homeProvider.storySummary;
 
             // If we're still showing the generated snapshot, overlay the local
             // reading progress so the UI updates instantly on return.
             final displaySummary =
                 (selectedSummary != null && selectedSummary == generatedSummary)
-                    ? _applyLocalReadingOverlay(selectedSummary)
-                    : selectedSummary;
+                ? _applyLocalReadingOverlay(selectedSummary)
+                : selectedSummary;
 
             if (homeProvider.isStoryIdeasLoading ||
                 homeProvider.isGenerateSeriesLoading ||
@@ -527,9 +534,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                 summary.subjects?.all.map((e) => e.name).toList() ?? [];
             tags.addAll(summary.topicInterests.map((e) => e.name).toList());
 
-            print("tags: $tags");
-            print("summary: ${summary.subjects?.all}");
-
+          
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -608,15 +613,14 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
 
                             final resumeIdea = summary.storyIdeas[resumeIndex];
                             final cr = resumeIdea.continueReading;
-                            final pageCount = cr?.pageCount ?? 0;
-                            final readPages = cr?.readPages ?? 0;
+                            // final pageCount = cr?.pageCount ?? 0;
+                            // final readPages = cr?.readPages ?? 0;
                             final quizDone =
                                 cr?.quizProgress?.isCompleted == true;
 
+                            final percentComplete = cr?.percentComplete ?? 0;
                             // If all pages are read but quiz isn't completed, jump to quiz flow.
-                            if (pageCount > 0 &&
-                                readPages >= pageCount &&
-                                !quizDone) {
+                            if (percentComplete >= 100 && !quizDone) {
                               final sp = context.read<StoryProvider>();
                               final hp = context.read<HomeProvider>();
                               final story = sp.stories.isEmpty
@@ -761,7 +765,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                                                   topicId: summary.topicId,
                                                   onFailed: (error) {
                                                     if (!context.mounted)
-                                                      return;
+                                                      {return;}
                                                     AppToast.error(
                                                       context,
                                                       error,
@@ -875,16 +879,17 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                               index: index + 1,
                               isSelected:
                                   (summary
-                                          .storyIdeas[index]
-                                          .continueReading
-                                          ?.isCompleted ??
-                                      false) &&
+                                              .storyIdeas[index]
+                                              .continueReading
+                                              ?.percentComplete ??
+                                          0) >=
+                                      100 &&
                                   (summary
                                           .storyIdeas[index]
                                           .continueReading
                                           ?.quizProgress
-                                          ?.isCompleted ??
-                                      false),
+                                          ?.completedAt !=
+                                      null),
                               title: summary.storyIdeas[index].storyTitle,
                               description:
                                   summary.storyIdeas[index].description,
@@ -1061,7 +1066,9 @@ class _ReadingProgressIndicator extends StatelessWidget {
             1.0,
           )
         : 0.0;
-    final label = continueReading.isCompleted
+    final label =
+        continueReading.isCompleted &&
+            (continueReading.quizProgress?.completedAt != null)
         ? "Completed"
         : "${continueReading.readPages}/${continueReading.pageCount} pages";
 

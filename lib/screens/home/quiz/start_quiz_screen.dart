@@ -1,6 +1,5 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
-import 'package:redstreakapp/screens/home/quiz/quiz_question_screen.dart';
 
 class StartQuizScreen extends StatefulWidget {
   final String storyId;
@@ -49,15 +48,16 @@ class _StartQuizScreenState extends State<StartQuizScreen> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        showLeaveQuizConfirmation(context: context);
-      },
+      // canPop: false,
+      // onPopInvokedWithResult: (didPop, result) {
+      //   showLeaveQuizConfirmation(context: context);
+      // },
       child: AppLayout(
         appBar: AppBar(
           backgroundColor: AppColors.backgroundColor,
           leading: IconButton(
-            onPressed: () => showLeaveQuizConfirmation(context: context),
+            // onPressed: () => showLeaveQuizConfirmation(context: context),
+            onPressed: () => context.pop(),
             icon: const Icon(Icons.close),
           ),
         ),
