@@ -1,17 +1,15 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
-import 'package:redstreakapp/core/utils/network_image_url.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/models/home/story_models/story_topics.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
-import 'package:redstreakapp/core/widgets/global_widgets.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -516,16 +514,12 @@ Widget _buildTopicCover(
   bool compact = false,
   bool iconOnly = false,
 }) {
-  final resolved = resolveNetworkImageUrl(rawThumbnailUrl);
-  if (resolved.isEmpty) {
-    return NoImageFound(compact: compact, iconOnly: iconOnly);
-  }
-  return CachedNetworkImage(
-    imageUrl: resolved,
-    fit: BoxFit.cover,
-    placeholder: (_, __) => shimmer,
-    errorWidget: (_, __, ___) =>
-        NoImageFound(compact: compact, iconOnly: iconOnly),
+  return AppNetworkImage(
+    imageUrl: rawThumbnailUrl,
+    tag: 'HomeTopics.cover',
+    placeholder: (_) => shimmer,
+    errorCompact: compact,
+    errorIconOnly: iconOnly,
   );
 }
 

@@ -1,7 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/providers/home/curiosity_reading_provider.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -96,14 +96,14 @@ class CuriosityReadingScreen extends StatelessWidget {
       child: Stack(
         children: [
           Positioned.fill(
-            child: CachedNetworkImage(
+            child: AppNetworkImage(
               imageUrl: imageUrl,
-              placeholder: (context, url) => Shimmer.fromColors(
+              tag: 'CuriosityReading.hero',
+              placeholder: (_) => Shimmer.fromColors(
                 baseColor: Colors.grey[300]!,
                 highlightColor: Colors.grey[100]!,
                 child: Container(color: Colors.white),
               ),
-              fit: BoxFit.cover,
             ).animate().fadeIn(delay: 200.ms),
           ),
           Positioned.fill(

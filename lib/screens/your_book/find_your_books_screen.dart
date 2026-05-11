@@ -1,6 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/screens/your_book/widget/search_books_field.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -452,17 +452,15 @@ class _SearchResultBookTile extends StatelessWidget {
                 ),
               ],
             ),
-            child: ClipRRect(
+            child: AppNetworkImage(
+              imageUrl: book.coverUrl,
+              tag: 'FindYourBooks.searchResult',
               borderRadius: BorderRadius.circular(8.r),
-              child: CachedNetworkImage(
-                imageUrl: book.coverUrl,
-                fit: BoxFit.cover,
-                placeholder: (_, __) => _ShelfImageShimmer(
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                errorWidget: (_, __, ___) =>
-                    _ShelfImageError(borderRadius: BorderRadius.circular(8.r)),
+              placeholder: (_) => _ShelfImageShimmer(
+                borderRadius: BorderRadius.circular(8.r),
               ),
+              errorBuilder: (_, __, ___) =>
+                  _ShelfImageError(borderRadius: BorderRadius.circular(8.r)),
             ),
           ),
             12.w.horizontalSpace,
@@ -566,19 +564,17 @@ class _RecommendedBookTile extends StatelessWidget {
                 ),
               ],
             ),
-            child: ClipRRect(
+            child: AppNetworkImage(
+              imageUrl: book.coverUrl,
+              tag: 'FindYourBooks.recommended',
+              width: imageWidth,
+              height: imageHeight,
               borderRadius: BorderRadius.circular(10.r),
-              child: CachedNetworkImage(
-                imageUrl: book.coverUrl,
-                width: imageWidth,
-                height: imageHeight,
-                fit: BoxFit.cover,
-                placeholder: (_, __) => _ShelfImageShimmer(
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-                errorWidget: (_, __, ___) =>
-                    _ShelfImageError(borderRadius: BorderRadius.circular(10.r)),
+              placeholder: (_) => _ShelfImageShimmer(
+                borderRadius: BorderRadius.circular(10.r),
               ),
+              errorBuilder: (_, __, ___) =>
+                  _ShelfImageError(borderRadius: BorderRadius.circular(10.r)),
             ),
           ),
             16.w.horizontalSpace,
@@ -662,19 +658,17 @@ class _ShelfBookTile extends StatelessWidget {
                 ),
               ],
             ),
-            child: ClipRRect(
+            child: AppNetworkImage(
+              imageUrl: book.coverUrl,
+              tag: 'FindYourBooks.shelfCover',
+              width: coverWidth,
+              height: coverHeight,
               borderRadius: BorderRadius.circular(14.r),
-              child: CachedNetworkImage(
-                imageUrl: book.coverUrl,
-                width: coverWidth,
-                height: coverHeight,
-                fit: BoxFit.cover,
-                placeholder: (_, __) => _ShelfImageShimmer(
-                  borderRadius: BorderRadius.circular(14.r),
-                ),
-                errorWidget: (_, __, ___) =>
-                    _ShelfImageError(borderRadius: BorderRadius.circular(14.r)),
+              placeholder: (_) => _ShelfImageShimmer(
+                borderRadius: BorderRadius.circular(14.r),
               ),
+              errorBuilder: (_, __, ___) =>
+                  _ShelfImageError(borderRadius: BorderRadius.circular(14.r)),
             ),
           ),
           8.h.verticalSpace,

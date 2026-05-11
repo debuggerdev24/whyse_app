@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/models/home/continue_reading_item_model.dart';
-import 'package:redstreakapp/models/home/story_models/story_history_model.dart';
+import 'package:redstreakapp/models/home/story_models/get_story_by_idea_response.dart';
 import 'package:redstreakapp/models/home/story_models/story_topics.dart';
 import 'package:redstreakapp/models/home/story_models/story_summary_model.dart';
 import 'package:redstreakapp/services/home/home_api_service.dart';
@@ -21,7 +21,7 @@ class HomeProvider extends ChangeNotifier {
 
   // String? topicId;
   StoryIdeaModel? storySummary;
-  StoryHistoryModel? story;
+  GetStoryByIdeaData? story;
   bool isStoryIdeasLoading = false;
   bool isStoryIdeasLoadingMore = false;
   bool hasMoreStoryIdeas = true;
@@ -373,7 +373,8 @@ class HomeProvider extends ChangeNotifier {
       lastReadAt: prev?.lastReadAt ?? DateTime.now().toUtc().toIso8601String(),
       completedAt: prev?.completedAt,
       // Completion now depends on quiz completion (when quizProgress exists).
-      isCompleted: (readPagesFromFarthest >= pageCount) &&
+      isCompleted:
+          (readPagesFromFarthest >= pageCount) &&
               ((prev?.quizProgress == null) ||
                   (prev?.quizProgress?.isCompleted == true)) ||
           (prev?.isCompleted ?? false),
@@ -423,7 +424,7 @@ class HomeProvider extends ChangeNotifier {
   Future<void> getStoryByIdea({
     required BuildContext context,
     required String storyIdea,
-    required Function(StoryHistoryModel story) onSuccess,
+    required void Function(GetStoryByIdeaData data) onSuccess,
     void Function()? onStoryNotGenerated,
     bool fetchOnly = false,
   }) async {
@@ -482,19 +483,23 @@ class HomeProvider extends ChangeNotifier {
                   onStoryNotGenerated?.call();
                 },
                 (rr) {
-                  final retryData = rr["data"] is Map
-                      ? rr["data"]["story"]
+                  final retryDataMap = rr["data"] is Map
+                      ? Map<String, dynamic>.from(rr["data"] as Map)
                       : null;
                   final retryGenerated =
-                      rr["data"] is Map &&
-                      (rr["data"]["storyIdea"] is Map) &&
-                      rr["data"]["storyIdea"]["isGenerated"] == true;
-                  if (retryData != null && retryGenerated) {
-                    story = StoryHistoryModel.fromJson(
-                      Map<String, dynamic>.from(retryData as Map),
-                    );
-                    onSuccess.call(story!);
-                    getStoryError = null;
+                      retryDataMap != null &&
+                      (retryDataMap["storyIdea"] is Map) &&
+                      retryDataMap["storyIdea"]["isGenerated"] == true;
+                  if (retryDataMap != null &&
+                      retryGenerated &&
+                      retryDataMap["story"] != null) {
+                    try {
+                      story = GetStoryByIdeaData.fromDataMap(retryDataMap);
+                      onSuccess.call(story!);
+                      getStoryError = null;
+                    } catch (_) {
+                      onStoryNotGenerated?.call();
+                    }
                   } else {
                     onStoryNotGenerated?.call();
                   }
@@ -506,8 +511,8 @@ class HomeProvider extends ChangeNotifier {
           );
           return;
         }
-        story = StoryHistoryModel.fromJson(
-          Map<String, dynamic>.from(storyData as Map),
+        story = GetStoryByIdeaData.fromDataMap(
+          Map<String, dynamic>.from(data as Map),
         );
         onSuccess.call(story!);
         getStoryError = null;

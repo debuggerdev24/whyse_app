@@ -1,7 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/services/profile/profile_service.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -58,13 +58,13 @@ class UserAvatarImage extends StatelessWidget {
         height: size,
       );
     }
-    return CachedNetworkImage(
+    return AppNetworkImage(
       imageUrl: url,
-      fit: BoxFit.cover,
+      tag: 'UserAvatarImage',
       width: size,
       height: size,
-      placeholder: (_, __) => UserAvatarShimmerFill(size: size),
-      errorWidget: (_, __, ___) => Image.asset(
+      placeholder: (_) => UserAvatarShimmerFill(size: size),
+      errorBuilder: (_, __, ___) => Image.asset(
         AppAssets.profile,
         fit: BoxFit.cover,
         width: size,

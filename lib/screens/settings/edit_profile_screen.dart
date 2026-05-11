@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/core/widgets/user_avatar_image.dart';
 import 'package:redstreakapp/core/widgets/loading_dialog.dart';
@@ -249,13 +249,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
     final url = profileAvatarAbsoluteUrl(provider.avatarUrl);
     if (url.isNotEmpty) {
-      return CachedNetworkImage(
+      return AppNetworkImage(
         imageUrl: url,
-        fit: BoxFit.cover,
+        tag: 'EditProfile.avatar',
         width: double.infinity,
         height: double.infinity,
-        placeholder: (_, __) => UserAvatarShimmerFill(size: 86.w),
-        errorWidget: (_, __, ___) =>
+        placeholder: (_) => UserAvatarShimmerFill(size: 86.w),
+        errorBuilder: (_, __, ___) =>
             Image.asset(AppAssets.profile, fit: BoxFit.cover),
       );
     }

@@ -1,6 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 
 /// Must match title [TextStyle.height] and two lines in [_ShelfBookTile].
@@ -209,19 +209,17 @@ class _ShelfBookTile extends StatelessWidget {
                 ),
               ],
             ),
-            child: ClipRRect(
+            child: AppNetworkImage(
+              imageUrl: book.coverUrl,
+              tag: 'BooksShelf.cover',
+              width: coverWidth,
+              height: coverHeight,
               borderRadius: BorderRadius.circular(14.r),
-              child: CachedNetworkImage(
-                imageUrl: book.coverUrl,
-                width: coverWidth,
-                height: coverHeight,
-                fit: BoxFit.cover,
-                placeholder: (_, __) => _ShelfImageShimmer(
-                  borderRadius: BorderRadius.circular(14.r),
-                ),
-                errorWidget: (_, __, ___) =>
-                    _ShelfImageError(borderRadius: BorderRadius.circular(14.r)),
+              placeholder: (_) => _ShelfImageShimmer(
+                borderRadius: BorderRadius.circular(14.r),
               ),
+              errorBuilder: (_, __, ___) =>
+                  _ShelfImageError(borderRadius: BorderRadius.circular(14.r)),
             ),
           ),
           8.h.verticalSpace,

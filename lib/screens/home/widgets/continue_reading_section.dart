@@ -1,5 +1,5 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/home/continue_reading_item_model.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
@@ -59,17 +59,17 @@ class _ContinueReadingSectionState extends State<ContinueReadingSection>
     if (!context.mounted) return;
     context
         .pushNamed(
-      AppRoutes.createdStoryReadingScreen.name,
-      extra: <String, dynamic>{
-        "storyIdeaId": item.storyIdeaId,
-        "initialPageIndex": item.continueFromPageIndex,
-        "initialConfirmedPageIndex": item.lastPageIndex,
-      },
-    )
+          AppRoutes.createdStoryReadingScreen.name,
+          extra: <String, dynamic>{
+            "storyIdeaId": item.storyIdeaId,
+            "initialPageIndex": item.continueFromPageIndex,
+            "initialConfirmedPageIndex": item.lastPageIndex,
+          },
+        )
         .then((_) {
-      if (!mounted) return;
-      context.read<HomeProvider>().getContinueReading(force: true);
-    });
+          if (!mounted) return;
+          context.read<HomeProvider>().getContinueReading(force: true);
+        });
 
     // Fire-and-forget fetch; reader will rebuild when StoryProvider updates.
     // ignore: unawaited_futures
@@ -85,8 +85,8 @@ class _ContinueReadingSectionState extends State<ContinueReadingSection>
           message: "Story is not ready yet. Please try again in a moment.",
         );
       },
-      onSuccess: (history) {
-        storyProvider.addStoryFromHistory(history, 0);
+      onSuccess: (payload) {
+        storyProvider.addStoryFromGetStoryByIdeaData(payload, 0);
       },
     );
   }
@@ -162,6 +162,8 @@ class _ContinueReadingCard extends StatelessWidget {
     final pageCount = item.pageCount <= 0 ? 0 : item.pageCount;
     final readPages = item.readPages;
 
+    Logger.info('continue reading image home screen: ${item.thumbnailUrl}');
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
@@ -185,27 +187,25 @@ class _ContinueReadingCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20.r),
-                  topRight: Radius.circular(20.r),
-                ),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: CachedNetworkImage(
-                    imageUrl: item.thumbnailUrl,
-                    fit: BoxFit.cover,
-                    placeholder: (_, __) => _ImageShimmerPlaceholder(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20.r),
-                        topRight: Radius.circular(20.r),
-                      ),
+              child: SizedBox(
+                width: double.infinity,
+                child: AppNetworkImage(
+                  imageUrl: item.thumbnailUrl,
+                  tag: 'ContinueReading.card',
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20.r),
+                    topRight: Radius.circular(20.r),
+                  ),
+                  placeholder: (_) => _ImageShimmerPlaceholder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20.r),
+                      topRight: Radius.circular(20.r),
                     ),
-                    errorWidget: (_, __, ___) => _ImageErrorPlaceholder(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20.r),
-                        topRight: Radius.circular(20.r),
-                      ),
+                  ),
+                  errorBuilder: (_, __, ___) => _ImageErrorPlaceholder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20.r),
+                      topRight: Radius.circular(20.r),
                     ),
                   ),
                 ),
@@ -220,6 +220,8 @@ class _ContinueReadingCard extends StatelessWidget {
                     text: item.topic.title.isNotEmpty
                         ? item.topic.title
                         : 'Story',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.semiBold(
                       fontSize: 12.sp,
                       color: AppColors.black.withValues(alpha: 0.6),

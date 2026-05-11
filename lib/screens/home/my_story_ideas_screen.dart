@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -9,9 +8,9 @@ import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/core/utils/share_helper.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
-import 'package:redstreakapp/core/widgets/global_widgets.dart';
 import 'package:redstreakapp/models/home/story_models/story_idea_model.dart'
     as generated_models;
 import 'package:redstreakapp/models/home/story_models/story_summary_model.dart'
@@ -23,7 +22,6 @@ import 'package:redstreakapp/providers/home/saved_series_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/screens/home/widgets/story_ui_components.dart';
 import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
-import 'package:shimmer/shimmer.dart';
 
 class MyStoryIdeasScreen extends StatefulWidget {
   const MyStoryIdeasScreen({super.key, this.preferGeneratedData = false});
@@ -534,7 +532,6 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                 summary.subjects?.all.map((e) => e.name).toList() ?? [];
             tags.addAll(summary.topicInterests.map((e) => e.name).toList());
 
-          
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -692,13 +689,13 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                                         "Story is not ready yet. Please try again in a moment.",
                                   );
                                 },
-                                onSuccess: (history) {
-                                  sp.addStoryFromHistory(history, 0);
+                                onSuccess: (payload) {
+                                  sp.addStoryFromGetStoryByIdeaData(payload, 0);
                                   if (!mounted) return;
                                   openQuiz(
-                                    history.id,
-                                    storyTitle: history.title,
-                                    storyImageUrl: history.thumbnailUrl,
+                                    payload.story.id,
+                                    storyTitle: payload.story.title,
+                                    storyImageUrl: payload.heroThumbnailUrl,
                                   );
                                 },
                               );
@@ -764,8 +761,9 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                                                 .toggleTopic(
                                                   topicId: summary.topicId,
                                                   onFailed: (error) {
-                                                    if (!context.mounted)
-                                                      {return;}
+                                                    if (!context.mounted) {
+                                                      return;
+                                                    }
                                                     AppToast.error(
                                                       context,
                                                       error,
@@ -972,31 +970,19 @@ class _MyReadingItemTile extends StatelessWidget {
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              ClipRRect(
+              AppNetworkImage(
+                imageUrl: thumbnailUrl,
+                tag: 'MyStoryIdeas.thumbnail (primary)',
+                width: 122.w,
+                height: 84.w,
                 borderRadius: BorderRadius.circular(16.r),
-                child: SizedBox(
+                errorBuilder: (_, __, ___) => AppNetworkImage(
+                  imageUrl: topicThumbnailUrl,
+                  tag: 'MyStoryIdeas.thumbnail (fallback)',
                   width: 122.w,
                   height: 84.w,
-                  child: CachedNetworkImage(
-                    imageUrl: thumbnailUrl,
-                    fit: BoxFit.cover,
-                    placeholder: (_, __) => Shimmer.fromColors(
-                      baseColor: AppColors.shimmerBaseColor,
-                      highlightColor: AppColors.shimmerHighlightColor,
-                      child: Container(color: AppColors.shimmerBaseColor),
-                    ),
-                    errorWidget: (_, __, ___) => CachedNetworkImage(
-                      imageUrl: topicThumbnailUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Shimmer.fromColors(
-                        baseColor: AppColors.shimmerBaseColor,
-                        highlightColor: AppColors.shimmerHighlightColor,
-                        child: Container(color: AppColors.shimmerBaseColor),
-                      ),
-                      errorWidget: (_, __, ___) =>
-                          const NoImageFound(compact: true),
-                    ),
-                  ),
+                  borderRadius: BorderRadius.circular(16.r),
+                  errorCompact: true,
                 ),
               ),
               if (isSelected)

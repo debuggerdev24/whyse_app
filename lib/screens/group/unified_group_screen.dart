@@ -1,7 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
-import 'package:redstreakapp/core/widgets/global_widgets.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/group/group_members_model.dart';
 import 'package:redstreakapp/models/group/group_shared_topic_model.dart';
 import 'package:redstreakapp/providers/home/saved_series_provider.dart';
@@ -387,20 +386,12 @@ class _GroupFeedCard extends StatelessWidget {
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 12.w),
-                  child: ClipRRect(
+                  child: AppNetworkImage(
+                    imageUrl: detail.thumbnailUrl,
+                    tag: 'UnifiedGroup.detailThumbnail',
+                    width: double.infinity,
+                    height: 120.h,
                     borderRadius: BorderRadius.circular(10.r),
-                    child: CachedNetworkImage(
-                      imageUrl: detail.thumbnailUrl,
-                      width: double.infinity,
-                      height: 120.h,
-                      fit: BoxFit.cover,
-                      placeholder: (_, __) => Shimmer.fromColors(
-                        baseColor: AppColors.shimmerBaseColor,
-                        highlightColor: AppColors.shimmerHighlightColor,
-                        child: Container(color: AppColors.shimmerBaseColor),
-                      ),
-                      errorWidget: (_, __, ___) => const NoImageFound(),
-                    ),
                   ),
                 ),
                 10.h.verticalSpace,
@@ -676,29 +667,27 @@ class _StreakRankingRow extends StatelessWidget {
           ),
           14.w.horizontalSpace,
           ClipOval(
-            child: SizedBox(
+            child: AppNetworkImage(
+              imageUrl: entry.avatarUrl,
+              tag: 'UnifiedGroup.memberAvatar',
               width: avatarSize,
               height: avatarSize,
-              child: CachedNetworkImage(
-                imageUrl: entry.avatarUrl,
-                fit: BoxFit.cover,
-                placeholder: (_, __) => Container(
-                  color: AppColors.lighttealcolor,
-                  alignment: Alignment.center,
-                  child: Icon(
-                    Icons.person_rounded,
-                    size: 22.sp,
-                    color: AppColors.teal,
-                  ),
+              placeholder: (_) => Container(
+                color: AppColors.lighttealcolor,
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.person_rounded,
+                  size: 22.sp,
+                  color: AppColors.teal,
                 ),
-                errorWidget: (_, __, ___) => Container(
-                  color: AppColors.lighttealcolor,
-                  alignment: Alignment.center,
-                  child: Icon(
-                    Icons.person_rounded,
-                    size: 22.sp,
-                    color: AppColors.teal,
-                  ),
+              ),
+              errorBuilder: (_, __, ___) => Container(
+                color: AppColors.lighttealcolor,
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.person_rounded,
+                  size: 22.sp,
+                  color: AppColors.teal,
                 ),
               ),
             ),

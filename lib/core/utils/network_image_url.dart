@@ -1,3 +1,4 @@
+import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/network/base_api_service.dart';
 
 /// Turns API thumbnail paths into a full URL [CachedNetworkImage] can load.
@@ -28,4 +29,29 @@ String? resolveNullableNetworkImageUrl(String? url) {
   final trimmed = url.trim();
   if (trimmed.isEmpty) return null;
   return resolveNetworkImageUrl(trimmed);
+}
+
+/// Logs a failed network image load with the URL and the underlying error.
+///
+/// Call this from `CachedNetworkImage`'s `errorWidget` callback so we can see
+/// in the console which URL failed and why (404, DNS error, malformed URL,
+/// etc.). The optional [tag] helps identify where the image is rendered.
+///
+/// Example:
+/// ```dart
+/// errorWidget: (context, url, error) {
+///   logNetworkImageError(tag: 'ContinueReading.card', url: url, error: error);
+///   return _ImageErrorPlaceholder(...);
+/// },
+/// ```
+void logNetworkImageError({
+  String? tag,
+  required String url,
+  required Object error,
+}) {
+  final prefix = (tag == null || tag.isEmpty) ? '' : '[$tag] ';
+  Logger.error(
+    '${prefix}Image failed to load → url="$url" | error=$error',
+    tag: 'NetworkImage',
+  );
 }

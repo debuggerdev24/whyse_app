@@ -82,6 +82,7 @@ flutter:
 
   # default-flavor: local
   default-flavor: staging
+  # default-flavor: production
 
   # To add assets to your application, add an assets section, like this:
   assets:

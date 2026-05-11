@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/utils/network_image_url.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 
 import 'package:redstreakapp/core/utils/share_helper.dart';
 
@@ -127,8 +128,10 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
                   context: context,
                   storyIdea: firstIdeaId,
                   fetchOnly: true,
-                  onSuccess: (story) {
-                    if (context.mounted) provider.addStoryFromHistory(story, 0);
+                  onSuccess: (payload) {
+                    if (context.mounted) {
+                      provider.addStoryFromGetStoryByIdeaData(payload, 0);
+                    }
                   },
                   onStoryNotGenerated: () {},
                 );
@@ -199,10 +202,10 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
                                     context: context,
                                     storyIdea: currentIdeaId,
                                     fetchOnly: true,
-                                    onSuccess: (story) {
+                                    onSuccess: (payload) {
                                       if (context.mounted) {
-                                        provider.addStoryFromHistory(
-                                          story,
+                                        provider.addStoryFromGetStoryByIdeaData(
+                                          payload,
                                           currentIndex,
                                         );
                                       }
@@ -398,10 +401,10 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
                                         context: context,
                                         storyIdea: ideas[index].id,
                                         fetchOnly: true,
-                                        onSuccess: (story) {
+                                        onSuccess: (payload) {
                                           if (context.mounted) {
-                                            provider.addStoryFromHistory(
-                                              story,
+                                            provider.addStoryFromGetStoryByIdeaData(
+                                              payload,
                                               index,
                                             );
                                           }
@@ -648,17 +651,15 @@ class _StoryIdeaTile extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8.r),
                     child: _imageUrl.isNotEmpty
-                        ? CachedNetworkImage(
+                        ? AppNetworkImage(
                             imageUrl: _imageUrl,
+                            tag: 'SharedStory.thumbnail',
                             width: 120.w,
                             height: 80.h,
-                            fit: BoxFit.cover,
-                            placeholder: (_, __) =>
+                            placeholder: (_) =>
                                 _buildThumbnailPlaceholder(),
-                            errorWidget: (_, __, ___) => const NoImageFound(
-                              compact: true,
-                              iconOnly: true,
-                            ),
+                            errorCompact: true,
+                            errorIconOnly: true,
                           )
                         : _buildThumbnailPlaceholder(),
                   ),
@@ -1398,7 +1399,14 @@ class _StoryImage extends StatelessWidget {
               width: double.infinity,
               progressIndicatorBuilder: (_, __, progress) =>
                   _loadingProgress(height, progress.progress),
-              errorWidget: (_, __, ___) => _placeholder(height),
+              errorWidget: (_, url, error) {
+                logNetworkImageError(
+                  tag: 'SharedStory.hero',
+                  url: url,
+                  error: error,
+                );
+                return _placeholder(height);
+              },
               imageBuilder: (context, imageProvider) => Stack(
                 fit: StackFit.expand,
                 children: [

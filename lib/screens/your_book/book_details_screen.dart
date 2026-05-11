@@ -1,6 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 
 class BookDetailsScreen extends StatelessWidget {
@@ -102,17 +102,15 @@ class _BookHeaderSection extends StatelessWidget {
                 ),
               ],
             ),
-            child: ClipRRect(
+            child: AppNetworkImage(
+              imageUrl: book.coverUrl,
+              tag: 'BookDetails.cover',
               borderRadius: BorderRadius.circular(14.r),
-              child: CachedNetworkImage(
-                imageUrl: book.coverUrl,
-                fit: BoxFit.cover,
-                placeholder: (_, __) => const _ImageShimmer(
-                  radius: BorderRadius.all(Radius.circular(14)),
-                ),
-                errorWidget: (_, __, ___) => const _ImageError(
-                  radius: BorderRadius.all(Radius.circular(14)),
-                ),
+              placeholder: (_) => const _ImageShimmer(
+                radius: BorderRadius.all(Radius.circular(14)),
+              ),
+              errorBuilder: (_, __, ___) => const _ImageError(
+                radius: BorderRadius.all(Radius.circular(14)),
               ),
             ),
           ),

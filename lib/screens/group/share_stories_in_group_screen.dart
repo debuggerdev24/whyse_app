@@ -1,8 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/utils/network_image_url.dart';
-import 'package:redstreakapp/core/widgets/global_widgets.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/group/shareable_topic_model.dart';
 import 'package:redstreakapp/providers/profile/group_provider.dart';
 import 'package:shimmer/shimmer.dart';
@@ -279,25 +278,12 @@ class _SeriesTile extends StatelessWidget {
                     child: Stack(
                       children: [
                         Positioned.fill(
-                          child: imageUrl.isNotEmpty
-                              ? CachedNetworkImage(
-                                  imageUrl: imageUrl,
-                                  fit: BoxFit.cover,
-                                  placeholder: (_, __) => Shimmer.fromColors(
-                                    baseColor: AppColors.shimmerBaseColor,
-                                    highlightColor:
-                                        AppColors.shimmerHighlightColor,
-                                    child: Container(
-                                      color: AppColors.shimmerBaseColor,
-                                    ),
-                                  ),
-                                  errorWidget: (_, __, ___) =>
-                                      const NoImageFound(
-                                    compact: true,
-                                    iconOnly: true,
-                                  ),
-                                )
-                              : const NoImageFound(compact: true, iconOnly: true),
+                          child: AppNetworkImage(
+                            imageUrl: imageUrl,
+                            tag: 'ShareStoriesInGroup.tile',
+                            errorCompact: true,
+                            errorIconOnly: true,
+                          ),
                         ),
                         if (item.isSavedTopic)
                           Positioned(

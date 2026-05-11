@@ -1,14 +1,12 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/utils/date_formatter.dart';
-import 'package:redstreakapp/core/utils/network_image_url.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/models/home/story_models/story_summary_model.dart';
 import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
-import 'package:redstreakapp/core/widgets/global_widgets.dart';
 
 class StoryIdeasHeaderCard extends StatelessWidget {
   final StoryIdeaModel summary;
@@ -393,18 +391,11 @@ class _StoryIdeasArtwork extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolvedImageUrl = _resolveImageUrl(imageUrl);
-    if (resolvedImageUrl.isNotEmpty) {
-      return CachedNetworkImage(
-        imageUrl: resolvedImageUrl,
-        fit: BoxFit.cover,
-        placeholder: (context, url) => const StoryIdeasImageShimmer(),
-        errorWidget: (context, url, error) =>
-            NoImageFound(subtitle: title),
-      );
-    }
-    return NoImageFound(subtitle: title);
+    return AppNetworkImage(
+      imageUrl: imageUrl,
+      tag: 'StoryIdeas.artwork',
+      placeholder: (_) => const StoryIdeasImageShimmer(),
+      errorSubtitle: title,
+    );
   }
-
-  String _resolveImageUrl(String url) => resolveNetworkImageUrl(url);
 }

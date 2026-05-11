@@ -14,7 +14,7 @@ import '../../core/enums/app_enums.dart';
 import '../../core/helper/log_helper.dart';
 import '../../models/home/goal_model.dart';
 import '../../models/home/interest_model.dart';
-import '../../models/home/story_models/story_history_model.dart';
+import '../../models/home/story_models/get_story_by_idea_response.dart';
 import '../../models/home/story_models/story_model.dart';
 import '../../models/home/topic_model.dart';
 import '../../services/home/home_api_service.dart';
@@ -576,11 +576,11 @@ class StoryProvider extends ChangeNotifier {
         }
 
         try {
-          final history = StoryHistoryModel.fromJson(
-            Map<String, dynamic>.from(storyData),
+          final payload = GetStoryByIdeaData.fromDataMap(
+            Map<String, dynamic>.from(data!),
           );
           final index = insertAtIndex ?? 0;
-          addStoryFromHistory(history, index);
+          addStoryFromGetStoryByIdeaData(payload, index);
           isGenerateSingleStoryLoading = false;
           notifyListeners();
           onSuccess?.call();
@@ -675,8 +675,10 @@ class StoryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Converts [StoryHistoryModel] (from getStoryByStoryIdea) to [StoryModel] and adds at [index]. Used when opening from deep link (fetch only).
-  void addStoryFromHistory(StoryHistoryModel h, int index) {
+  /// Converts [GetStoryByIdeaData] (from `GET .../ideas/:id/story`) to [StoryModel] at [index].
+  void addStoryFromGetStoryByIdeaData(GetStoryByIdeaData payload, int index) {
+    final h = payload.story;
+    final meta = h.metadata;
     final m = StoryModel(
       id: h.id,
       title: h.title,
@@ -685,16 +687,16 @@ class StoryProvider extends ChangeNotifier {
       quiz: h.quiz,
       pages: h.pages,
       lessonDuration: h.lessonDuration,
-      readingTopic: h.metadata.readingTopic,
-      readingLevel: h.metadata.readingLevel,
-      readingSkillFocus: h.metadata.readingSkillFocus,
-      age: h.metadata.age,
-      language: h.metadata.language,
-      textType: h.metadata.textType,
-      tags: h.metadata.tags,
+      readingTopic: meta.readingTopic,
+      readingLevel: meta.readingLevel,
+      readingSkillFocus: meta.readingSkillFocus,
+      age: meta.age,
+      language: meta.language,
+      textType: meta.textType,
+      tags: meta.tags,
       createdAt: h.createdAt.toIso8601String(),
       updatedAt: h.updatedAt.toIso8601String(),
-      thumbnailUrl: h.thumbnailUrl,
+      thumbnailUrl: payload.heroThumbnailUrl,
     );
     _addStoryAtIndex(m, index);
     _currentStoryIndex = index;

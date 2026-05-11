@@ -1,6 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/providers/home/curiosity_reading_provider.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -101,13 +101,13 @@ class ArticleCard extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               // Background image
-              CachedNetworkImage(
+              AppNetworkImage(
                 imageUrl: item.imageUrl,
-                fit: BoxFit.cover,
-                placeholder: (_, __) => _ImageShimmerPlaceholder(
+                tag: 'CuriosityReading.card',
+                placeholder: (_) => _ImageShimmerPlaceholder(
                   borderRadius: BorderRadius.circular(20),
                 ),
-                errorWidget: (_, __, ___) => _ImageErrorPlaceholder(
+                errorBuilder: (_, __, ___) => _ImageErrorPlaceholder(
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),

@@ -1,7 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/core/widgets/global_widgets.dart';
 import 'package:redstreakapp/models/friend/friend_model.dart';
 import 'package:redstreakapp/models/home/saved_series_model.dart';
@@ -1244,17 +1244,13 @@ class _SavedSeriesCard extends StatelessWidget {
                   child: SizedBox(
                     height: 132.w,
                     width: double.infinity,
-                    child: topic.thumbnailUrl.isNotEmpty
-                        ? CachedNetworkImage(
-                            imageUrl: topic.thumbnailUrl,
-                            fit: BoxFit.cover,
-                            placeholder: (_, __) => _storyImageShimmer(),
-                            errorWidget: (_, __, ___) => const NoImageFound(
-                              compact: true,
-                              iconOnly: true,
-                            ),
-                          )
-                        : _storyImageShimmer(),
+                    child: AppNetworkImage(
+                      imageUrl: topic.thumbnailUrl,
+                      tag: 'Profile.savedTopic',
+                      placeholder: (_) => _storyImageShimmer(),
+                      errorCompact: true,
+                      errorIconOnly: true,
+                    ),
                   ),
                 ),
                 Positioned(

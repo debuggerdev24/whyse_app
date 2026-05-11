@@ -1,9 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
-import 'package:redstreakapp/core/widgets/global_widgets.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 
 class StoryHeroHeader extends StatelessWidget {
   const StoryHeroHeader({
@@ -36,19 +34,10 @@ class StoryHeroHeader extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          if (imageUrl.isNotEmpty)
-            CachedNetworkImage(
-              imageUrl: imageUrl,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => Shimmer.fromColors(
-                baseColor: AppColors.shimmerBaseColor,
-                highlightColor: AppColors.shimmerHighlightColor,
-                child: Container(color: AppColors.shimmerBaseColor),
-              ),
-              errorWidget: (context, url, error) => const NoImageFound(),
-            )
-          else
-            const NoImageFound(),
+          AppNetworkImage(
+            imageUrl: imageUrl,
+            tag: 'StoryHeroHeader',
+          ),
           SafeArea(
             child: Padding(
               padding: EdgeInsets.fromLTRB(14.w, 18.w, 14.w, 14.w),

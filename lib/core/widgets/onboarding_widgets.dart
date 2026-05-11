@@ -1,12 +1,11 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
-import 'package:redstreakapp/core/widgets/global_widgets.dart';
 
 class OnboardingHeader extends StatelessWidget {
   final int currentStep;
@@ -209,14 +208,14 @@ class TopicCard extends StatelessWidget {
               ),
             ),
             if (_isNetworkUrl(imagePath))
-              CachedNetworkImage(
+              AppNetworkImage(
                 imageUrl: imagePath,
-                fit: BoxFit.cover,
+                tag: 'Onboarding.image',
                 width: double.infinity,
                 height: double.infinity,
-                placeholder: (_, __) => _buildShimmerPlaceholder(),
-                errorWidget: (_, __, ___) =>
-                    const NoImageFound(compact: true, iconOnly: true),
+                placeholder: (_) => _buildShimmerPlaceholder(),
+                errorCompact: true,
+                errorIconOnly: true,
               )
             else
               Image.asset(

@@ -1,8 +1,7 @@
 import 'dart:async';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
-import 'package:redstreakapp/core/widgets/global_widgets.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/home/saved_series_model.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/saved_series_provider.dart';
@@ -305,23 +304,12 @@ class _SavedSeriesCard extends StatelessWidget {
                     child: SizedBox(
                       width: double.infinity,
                       height: double.infinity,
-                      child: topic.thumbnailUrl.isNotEmpty
-                          ? CachedNetworkImage(
-                              imageUrl: topic.thumbnailUrl,
-                              fit: BoxFit.cover,
-                              placeholder: (_, __) => Shimmer.fromColors(
-                                baseColor: AppColors.shimmerBaseColor,
-                                highlightColor: AppColors.shimmerHighlightColor,
-                                child: Container(
-                                  color: AppColors.shimmerBaseColor,
-                                ),
-                              ),
-                              errorWidget: (_, __, ___) => const NoImageFound(
-                                compact: true,
-                                iconOnly: true,
-                              ),
-                            )
-                          : const NoImageFound(compact: true, iconOnly: true),
+                      child: AppNetworkImage(
+                        imageUrl: topic.thumbnailUrl,
+                        tag: 'MySavedSeries.thumbnail',
+                        errorCompact: true,
+                        errorIconOnly: true,
+                      ),
                     ),
                   ),
                   Positioned(

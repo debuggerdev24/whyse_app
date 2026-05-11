@@ -1,5 +1,5 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/screens/home/widgets/story_ui_components.dart';
 import 'package:shimmer/shimmer.dart';
@@ -340,29 +340,18 @@ class _ReadingItemTile extends StatelessWidget {
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              ClipRRect(
+              AppNetworkImage(
+                imageUrl: thumbnailUrl,
+                tag: 'CreatedIdeas.thumbnail (primary)',
+                width: 122.w,
+                height: 84.w,
                 borderRadius: BorderRadius.circular(16.r),
-                child: SizedBox(
+                errorBuilder: (_, __, ___) => AppNetworkImage(
+                  imageUrl: topicThumbnailUrl,
+                  tag: 'CreatedIdeas.thumbnail (fallback)',
                   width: 122.w,
                   height: 84.w,
-                  child: CachedNetworkImage(
-                    imageUrl: thumbnailUrl,
-                    fit: BoxFit.cover,
-                    placeholder: (_, __) => Shimmer.fromColors(
-                      baseColor: AppColors.shimmerBaseColor,
-                      highlightColor: AppColors.shimmerHighlightColor,
-                      child: Container(color: AppColors.shimmerBaseColor),
-                    ),
-                    errorWidget: (_, __, ___) => CachedNetworkImage(
-                      imageUrl: topicThumbnailUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Shimmer.fromColors(
-                        baseColor: AppColors.shimmerBaseColor,
-                        highlightColor: AppColors.shimmerHighlightColor,
-                        child: Container(color: AppColors.shimmerBaseColor),
-                      ),
-                    ),
-                  ),
+                  borderRadius: BorderRadius.circular(16.r),
                 ),
               ),
               if (isSelected)

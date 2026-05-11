@@ -1,7 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/group/group_response_model.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
 import 'package:redstreakapp/screens/group/group_details_screen.dart';
@@ -164,13 +164,11 @@ class GroupItem extends StatelessWidget {
               child: imageUrl == null
                   ? const Icon(Icons.group)
                   : ClipOval(
-                      child: CachedNetworkImage(
+                      child: AppNetworkImage(
                         imageUrl: imageUrl,
-                        fit: BoxFit.cover,
-                        placeholder: (_, __) => const _ImageShimmer(),
-                        // errorWidget: (_, __, ___) =>
-                        //     const NoImageFound(compact: true, iconOnly: true),
-                        errorWidget: (_, __, ___) => Container(
+                        tag: 'GroupBlock.thumbnail',
+                        placeholder: (_) => const _ImageShimmer(),
+                        errorBuilder: (_, __, ___) => Container(
                           width: 64.w,
                           height: 64.w,
                           decoration: BoxDecoration(

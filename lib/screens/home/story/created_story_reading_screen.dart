@@ -1,10 +1,8 @@
 import 'dart:async';
 
 import 'package:redstreakapp/core/utils/app_imports.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:redstreakapp/core/utils/share_helper.dart';
-
-import 'package:redstreakapp/core/widgets/global_widgets.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 
 import 'package:redstreakapp/models/home/story_models/reading_exit_snapshot.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
@@ -14,8 +12,6 @@ import 'package:redstreakapp/services/home/story_api_service.dart';
 import 'package:redstreakapp/screens/home/story/widget/font_theme_bottom_sheet.dart';
 import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
 import 'package:redstreakapp/screens/home/widgets/story_ui_components.dart';
-
-import 'package:shimmer/shimmer.dart';
 
 class CreatedStoryReadingScreen extends StatefulWidget {
   const CreatedStoryReadingScreen({
@@ -72,9 +68,12 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
         storyIdea: id,
         fetchOnly: true,
         onStoryNotGenerated: () {},
-        onSuccess: (history) {
+        onSuccess: (payload) {
           if (!mounted) return;
-          context.read<StoryProvider>().addStoryFromHistory(history, 0);
+          context.read<StoryProvider>().addStoryFromGetStoryByIdeaData(
+            payload,
+            0,
+          );
         },
       );
     });
@@ -163,9 +162,12 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
       storyIdea: id,
       fetchOnly: true,
       onStoryNotGenerated: () {},
-      onSuccess: (history) {
+      onSuccess: (payload) {
         if (!mounted) return;
-        context.read<StoryProvider>().addStoryFromHistory(history, 0);
+        context.read<StoryProvider>().addStoryFromGetStoryByIdeaData(
+          payload,
+          0,
+        );
       },
     );
   }
@@ -222,10 +224,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
           actionsPadding: EdgeInsets.fromLTRB(20.w, 16.w, 20.w, 20.w),
           title: AppText(
             text: "Time’s up",
-            style: AppTextStyles.bold(
-              fontSize: 18.sp,
-              color: AppColors.black,
-            ),
+            style: AppTextStyles.bold(fontSize: 18.sp, color: AppColors.black),
           ),
           content: AppText(
             text: "We’ll save your progress and take you back.",
@@ -330,7 +329,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
       _maxConfirmedPageIndex = _currentPageIndex;
       _flushQueuedPageProgress();
     } else {
-    _flushQueuedPageProgress();
+      _flushQueuedPageProgress();
     }
     final snap = _snapshotForPop(storyProvider);
     if (!context.mounted) return;
@@ -417,7 +416,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                   StoryHeroHeader(
                     imageUrl: stories.thumbnailUrl,
                     title:
-                        '${safePageIndex + 1}. ${stories.title.isNotEmpty ? stories.title : 'Exploring the wonders of Nature'}',
+                        '${safePageIndex + 1}. ${stories.title.isNotEmpty ? stories.title : ''}',
                     topLeft: StoryCircleButton(
                       onTap: () => _leaveReader(context, provider),
                       child: Icon(
@@ -589,20 +588,11 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                               ),
                             ),
                             20.w.verticalSpace,
-                            CachedNetworkImage(
+                            AppNetworkImage(
                               imageUrl: story.imageUrl,
+                              tag: 'CreatedStoryReading.pageImage',
                               height: 210.w,
                               width: double.infinity,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => Shimmer.fromColors(
-                                baseColor: AppColors.shimmerBaseColor,
-                                highlightColor: AppColors.shimmerHighlightColor,
-                                child: Container(
-                                  color: AppColors.shimmerBaseColor,
-                                ),
-                              ),
-                              errorWidget: (context, url, error) =>
-                                  const NoImageFound(),
                             ),
                           ],
                         ),

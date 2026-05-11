@@ -1,12 +1,11 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
-import 'package:redstreakapp/core/widgets/global_widgets.dart';
 import 'package:redstreakapp/models/home/browse_topic_model.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -524,11 +523,11 @@ class TopicArt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (topic.hasThumbnail) {
-      return CachedNetworkImage(
+      return AppNetworkImage(
         imageUrl: topic.thumbnailUrl,
-        fit: BoxFit.cover,
-        placeholder: (context, url) => const ImageShimmer(),
-        errorWidget: (context, url, error) => const NoImageFound(compact: true),
+        tag: 'SearchBooksField.topicThumbnail',
+        placeholder: (_) => const ImageShimmer(),
+        errorCompact: true,
       );
     }
 

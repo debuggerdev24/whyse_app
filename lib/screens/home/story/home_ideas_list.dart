@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -9,12 +8,12 @@ import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/utils/date_formatter.dart';
 import 'package:redstreakapp/core/utils/network_image_url.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/models/home/story_models/story_idea_model.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
-import 'package:redstreakapp/core/widgets/global_widgets.dart';
 
 class HomeIdeasListScreen extends StatelessWidget {
   const HomeIdeasListScreen({super.key});
@@ -307,14 +306,13 @@ class _IdeaCard extends StatelessWidget {
                               color: AppColors.black.withValues(alpha: 0.2),
                             ),
                           )
-                        : CachedNetworkImage(
+                        : AppNetworkImage(
                             imageUrl: _imageUrl,
-                            fit: BoxFit.cover,
-                            placeholder: (_, __) => Container(
+                            tag: 'HomeIdeasList.thumbnail',
+                            placeholder: (_) => Container(
                               color: AppColors.shimmerBaseColor,
                             ),
-                            errorWidget: (_, __, ___) =>
-                                const NoImageFound(compact: true),
+                            errorCompact: true,
                           ),
                   ),
                   Positioned.fill(
