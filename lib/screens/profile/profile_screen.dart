@@ -2,7 +2,6 @@ import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
-import 'package:redstreakapp/core/widgets/global_widgets.dart';
 import 'package:redstreakapp/models/friend/friend_model.dart';
 import 'package:redstreakapp/models/home/saved_series_model.dart';
 import 'package:redstreakapp/providers/friend/friend_provider.dart';
