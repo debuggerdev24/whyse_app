@@ -50,7 +50,6 @@ class _ContinueReadingSectionState extends State<ContinueReadingSection>
     BuildContext context,
     ContinueReadingItemModel item,
   ) async {
-    final homeProvider = context.read<HomeProvider>();
     final storyProvider = context.read<StoryProvider>();
 
     // Navigate immediately; the reading screen already shows a shimmer while
@@ -73,7 +72,7 @@ class _ContinueReadingSectionState extends State<ContinueReadingSection>
 
     // Fire-and-forget fetch; reader will rebuild when StoryProvider updates.
     // ignore: unawaited_futures
-    homeProvider.getStoryByIdea(
+    storyProvider.getStoryByIdea(
       context: context,
       storyIdea: item.storyIdeaId,
       fetchOnly: true,

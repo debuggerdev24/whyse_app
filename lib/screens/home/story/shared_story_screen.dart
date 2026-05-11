@@ -11,13 +11,12 @@ import 'package:redstreakapp/core/utils/share_helper.dart';
 
 import 'package:redstreakapp/models/home/story_models/story_idea_model.dart';
 import 'package:redstreakapp/models/home/story_models/story_model.dart';
-import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/screens/dashboard.dart';
 import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
 import 'package:redstreakapp/core/widgets/global_widgets.dart';
 
-/// Screen for viewing shared topic (from link). Uses getStoryByIdea (fetch only), no generate-from-idea API.
+/// Screen for viewing shared topic (from link). Uses [StoryProvider.getStoryByIdea] (fetch only), no generate-from-idea API.
 class SharedStoryScreen extends StatefulWidget {
   const SharedStoryScreen({super.key});
 
@@ -107,8 +106,8 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
   Widget build(BuildContext context) {
     return AppLayout(
       body: SafeArea(
-        child: Consumer2<StoryProvider, HomeProvider>(
-          builder: (context, provider, homeProvider, child) {
+        child: Consumer<StoryProvider>(
+          builder: (context, provider, child) {
             Logger.info("${provider.lessonDuration}");
             if (!context.mounted) return const SizedBox.shrink();
             final storyIdea = provider.storyIdeas;
@@ -124,7 +123,7 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
               final firstIdeaId = ideas.first.id;
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (!context.mounted) return;
-                homeProvider.getStoryByIdea(
+                provider.getStoryByIdea(
                   context: context,
                   storyIdea: firstIdeaId,
                   fetchOnly: true,
@@ -152,7 +151,7 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
             final shouldShowFullScreenShimmer =
                 provider.isGenerateStoryIdeasLoading ||
                 provider.isGenerateSingleStoryLoading ||
-                homeProvider.isGettingStoryLoading;
+                provider.isGettingStoryByIdeaLoading;
 
             if (shouldShowFullScreenShimmer) {
               return Container(
@@ -198,7 +197,7 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
                           onPressed: (currentIdeaId == null || isNotGenerated)
                               ? null
                               : () {
-                                  homeProvider.getStoryByIdea(
+                                  provider.getStoryByIdea(
                                     context: context,
                                     storyIdea: currentIdeaId,
                                     fetchOnly: true,
@@ -397,7 +396,7 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
                                         return;
                                       }
                                       provider.setCurrentStoryIndex = index;
-                                      homeProvider.getStoryByIdea(
+                                      provider.getStoryByIdea(
                                         context: context,
                                         storyIdea: ideas[index].id,
                                         fetchOnly: true,
@@ -422,7 +421,7 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
                                     });
                                   },
                                   isGenerating:
-                                      homeProvider.isGettingStoryLoading &&
+                                      provider.isGettingStoryByIdeaLoading &&
                                       index == provider.currentStoryIndex,
                                 );
                               }),

@@ -676,7 +676,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                               }
 
                               // Otherwise fetch the story first (silent), then open quiz.
-                              hp.getStoryByIdea(
+                              sp.getStoryByIdea(
                                 context: context,
                                 storyIdea: resumeIdea.id,
                                 fetchOnly: true,

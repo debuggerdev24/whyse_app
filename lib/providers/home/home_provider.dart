@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
-import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/models/home/continue_reading_item_model.dart';
-import 'package:redstreakapp/models/home/story_models/get_story_by_idea_response.dart';
 import 'package:redstreakapp/models/home/story_models/story_topics.dart';
 import 'package:redstreakapp/models/home/story_models/story_summary_model.dart';
 import 'package:redstreakapp/services/home/home_api_service.dart';
@@ -21,7 +19,6 @@ class HomeProvider extends ChangeNotifier {
 
   // String? topicId;
   StoryIdeaModel? storySummary;
-  GetStoryByIdeaData? story;
   bool isStoryIdeasLoading = false;
   bool isStoryIdeasLoadingMore = false;
   bool hasMoreStoryIdeas = true;
@@ -419,108 +416,6 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool isGettingStoryLoading = false;
-  String? getStoryError;
-  Future<void> getStoryByIdea({
-    required BuildContext context,
-    required String storyIdea,
-    required void Function(GetStoryByIdeaData data) onSuccess,
-    void Function()? onStoryNotGenerated,
-    bool fetchOnly = false,
-  }) async {
-    story = null;
-    isGettingStoryLoading = true;
-    getStoryError = null;
-    notifyListeners();
-    final response = await HomeApiService.instance.getStoryByStoryId(
-      storyIdea: storyIdea,
-    );
-    response.fold(
-      (l) {
-        Logger.error(l.errorMsg);
-        getStoryError = l.errorMsg;
-        isGettingStoryLoading = false;
-        notifyListeners();
-      },
-      (r) async {
-        final data = r["data"] is Map ? r["data"] as Map : null;
-        final storyData = data?["story"];
-        final storyIdeaMap = data?["storyIdea"] is Map
-            ? data!["storyIdea"] as Map
-            : null;
-        final isGenerated =
-            storyIdeaMap != null && storyIdeaMap["isGenerated"] == true;
-        if (storyData == null || !isGenerated) {
-          if (fetchOnly) {
-            isGettingStoryLoading = false;
-            notifyListeners();
-            onStoryNotGenerated?.call();
-            return;
-          }
-          AppToast.info(
-            context: context,
-            durationSecond: 3,
-            message: "It can take few seconds to generate the story.",
-          );
-          final createResponse = await StoryApiService.instance.createStory(
-            data: {"storyIdeaId": storyIdea},
-          );
-          createResponse.fold(
-            (l) {
-              getStoryError = l.errorMsg;
-              isGettingStoryLoading = false;
-              notifyListeners();
-              onStoryNotGenerated?.call();
-            },
-            (_) async {
-              final retryResponse = await HomeApiService.instance
-                  .getStoryByStoryId(storyIdea: storyIdea);
-              retryResponse.fold(
-                (l) {
-                  getStoryError = l.errorMsg;
-                  isGettingStoryLoading = false;
-                  notifyListeners();
-                  onStoryNotGenerated?.call();
-                },
-                (rr) {
-                  final retryDataMap = rr["data"] is Map
-                      ? Map<String, dynamic>.from(rr["data"] as Map)
-                      : null;
-                  final retryGenerated =
-                      retryDataMap != null &&
-                      (retryDataMap["storyIdea"] is Map) &&
-                      retryDataMap["storyIdea"]["isGenerated"] == true;
-                  if (retryDataMap != null &&
-                      retryGenerated &&
-                      retryDataMap["story"] != null) {
-                    try {
-                      story = GetStoryByIdeaData.fromDataMap(retryDataMap);
-                      onSuccess.call(story!);
-                      getStoryError = null;
-                    } catch (_) {
-                      onStoryNotGenerated?.call();
-                    }
-                  } else {
-                    onStoryNotGenerated?.call();
-                  }
-                  isGettingStoryLoading = false;
-                  notifyListeners();
-                },
-              );
-            },
-          );
-          return;
-        }
-        story = GetStoryByIdeaData.fromDataMap(
-          Map<String, dynamic>.from(data as Map),
-        );
-        onSuccess.call(story!);
-        getStoryError = null;
-        isGettingStoryLoading = false;
-        notifyListeners();
-      },
-    );
-  }
   // Future<void> deleteStory({required String storyIdea}) async {
   //   final response = await HomeApiService.instance.deleteStory(
   //     storyIdea: storyIdea,
@@ -557,14 +452,12 @@ class HomeProvider extends ChangeNotifier {
     hasMoreTopics = true;
     _topicsCurrentPage = 1;
     storySummary = null;
-    story = null;
     isStoryIdeasLoading = false;
     isStoryIdeasLoadingMore = false;
     hasMoreStoryIdeas = true;
     storyIdeasError = null;
     activeStoryIdeasTopicId = null;
     _storyIdeasCurrentPage = 1;
-    isGettingStoryLoading = false;
     isGenerateSeriesLoading = false;
     generateSeriesError = null;
     isRefreshingStoryIdeas = false;

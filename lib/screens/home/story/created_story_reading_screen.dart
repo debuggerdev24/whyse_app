@@ -5,7 +5,6 @@ import 'package:redstreakapp/core/utils/share_helper.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 
 import 'package:redstreakapp/models/home/story_models/reading_exit_snapshot.dart';
-import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/reading_appearance_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/services/home/story_api_service.dart';
@@ -63,7 +62,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
       if (sp.stories.isNotEmpty) return;
       final id = widget.storyIdeaId;
       if (id == null || id.isEmpty) return;
-      context.read<HomeProvider>().getStoryByIdea(
+      context.read<StoryProvider>().getStoryByIdea(
         context: context,
         storyIdea: id,
         fetchOnly: true,
@@ -157,7 +156,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
   void _retryLoadStory() {
     final id = widget.storyIdeaId;
     if (id == null || id.isEmpty) return;
-    context.read<HomeProvider>().getStoryByIdea(
+    context.read<StoryProvider>().getStoryByIdea(
       context: context,
       storyIdea: id,
       fetchOnly: true,
@@ -363,17 +362,17 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
           _leaveReader(context, sp);
         },
         child: AppLayout(
-          body: Consumer3<HomeProvider, StoryProvider, ReadingAppearanceProvider>(
-            builder: (context, homeProvider, provider, appearance, child) {
+          body: Consumer2<StoryProvider, ReadingAppearanceProvider>(
+            builder: (context, provider, appearance, child) {
               final storyLoading =
-                  homeProvider.isGettingStoryLoading ||
+                  provider.isGettingStoryByIdeaLoading ||
                   provider.isCreateStoryLoading ||
                   provider.isGenerateSingleStoryLoading;
               if (storyLoading) {
                 return HomeSectionShimmer.createdStoryReadingUIShimmer();
               }
               if (provider.stories.isEmpty) {
-                final msg = _friendlyErrorMessage(homeProvider.getStoryError);
+                final msg = _friendlyErrorMessage(provider.getStoryByIdeaError);
                 return _storyLoadErrorView(
                   message: msg,
                   onRetry: _retryLoadStory,
