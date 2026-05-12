@@ -68,34 +68,36 @@ class _UserDashBoardState extends State<UserDashBoard> {
       builder: (context, value, child) => Scaffold(
         backgroundColor: AppColors.backgroundColor,
         body: widget.navigationShell,
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: tabIndex.value,
-          onTap: (index) {
-            tabIndex.value = index;
-            AppRouter.indexedStackNavigationShell?.goBranch(index);
-          },
-          items: [
-            BottomNavItem(
-              icon: AppAssets.note,
-              isSelected: value == 0,
-              index: 0,
-            ),
-            BottomNavItem(
-              icon: AppAssets.searchIcon,
-              isSelected: value == 1,
-              index: 1,
-            ),
-            BottomNavItem(
-              icon: AppAssets.dumble,
-              isSelected: value == 2,
-              index: 2,
-            ),
-            BottomNavItem(
-              icon: AppAssets.star,
-              isSelected: value == 3,
-              index: 3,
-            ),
-          ],
+        bottomNavigationBar: SafeArea(
+          child: BottomNavigationBar(
+            currentIndex: tabIndex.value,
+            onTap: (index) {
+              tabIndex.value = index;
+              AppRouter.indexedStackNavigationShell?.goBranch(index);
+            },
+            items: [
+              BottomNavItem(
+                icon: AppAssets.note,
+                isSelected: value == 0,
+                index: 0,
+              ),
+              BottomNavItem(
+                icon: AppAssets.searchIcon,
+                isSelected: value == 1,
+                index: 1,
+              ),
+              BottomNavItem(
+                icon: AppAssets.dumble,
+                isSelected: value == 2,
+                index: 2,
+              ),
+              BottomNavItem(
+                icon: AppAssets.star,
+                isSelected: value == 3,
+                index: 3,
+              ),
+            ],
+          ),
         ),
       ),
     );

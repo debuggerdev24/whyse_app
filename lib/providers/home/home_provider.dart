@@ -32,7 +32,8 @@ class HomeProvider extends ChangeNotifier {
   String? continueReadingError;
 
   Future<void> getContinueReading({bool force = false}) async {
-    if (isContinueReadingLoading) return;
+    // Allow [force] refetch even while a request is in flight (e.g. after quiz → home).
+    if (isContinueReadingLoading && !force) return;
     if (!force && continueReadingItems != null) return;
     isContinueReadingLoading = true;
     continueReadingError = null;

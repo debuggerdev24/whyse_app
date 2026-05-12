@@ -16,8 +16,7 @@ class ShareStoriesInGroupScreen extends StatefulWidget {
       _ShareStoriesInGroupScreenState();
 }
 
-class _ShareStoriesInGroupScreenState
-    extends State<ShareStoriesInGroupScreen> {
+class _ShareStoriesInGroupScreenState extends State<ShareStoriesInGroupScreen> {
   final Set<String> _selectedTopicIds = <String>{};
   final ScrollController _scrollController = ScrollController();
 
@@ -172,7 +171,8 @@ class _ShareStoriesInGroupScreenState
               crossAxisSpacing: 12.w,
               childAspectRatio: 0.62,
             ),
-            itemCount: gp.shareableTopics.length +
+            itemCount:
+                gp.shareableTopics.length +
                 (gp.isLoadingMoreShareableTopics ? 2 : 0),
             itemBuilder: (context, index) {
               if (index >= gp.shareableTopics.length) {
@@ -247,7 +247,8 @@ class _SeriesTile extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  String _resolveImageUrl(String? raw) => resolveNullableNetworkImageUrl(raw) ?? '';
+  String _resolveImageUrl(String? raw) =>
+      resolveNullableNetworkImageUrl(raw) ?? '';
 
   @override
   Widget build(BuildContext context) {
@@ -297,8 +298,8 @@ class _SeriesTile extends StatelessWidget {
                                 shape: BoxShape.circle,
                               ),
                               alignment: Alignment.center,
-                              child: SvgIcon(
-                                AppAssets.bookmark,
+                              child: Icon(
+                                Icons.bookmark,
                                 size: 18.sp,
                                 color: AppColors.teal,
                               ),

@@ -87,4 +87,9 @@ class CuriosityReadingProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  void resetForNewSession() {
+    _currentIndex = 0;
+    notifyListeners();
+  }
 }

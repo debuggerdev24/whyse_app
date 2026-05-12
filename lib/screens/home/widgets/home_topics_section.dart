@@ -85,11 +85,11 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
                                   extra: list[index].id,
                                 )
                                 .then((_) {
-                              if (!context.mounted) return;
-                              context
-                                  .read<HomeProvider>()
-                                  .getContinueReading(force: true);
-                            });
+                                  if (!context.mounted) return;
+                                  context
+                                      .read<HomeProvider>()
+                                      .getContinueReading(force: true);
+                                });
                           },
                         ),
                       ),
@@ -775,7 +775,7 @@ class StoryCard extends StatelessWidget {
       margin: EdgeInsets.only(right: 10.w),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(1-6.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.08),
@@ -814,7 +814,7 @@ class StoryCard extends StatelessWidget {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 14.w),
             child: AppText(
-              text: '$readCount out of $totalCount Readings',
+              text: '$totalCount out of $readCount Readings',
               style: AppTextStyles.medium(
                 fontSize: 12.sp,
                 color: subtitleColor,

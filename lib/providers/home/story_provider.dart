@@ -105,7 +105,14 @@ class StoryProvider extends ChangeNotifier {
   //* topics field
   String _selectedTextType = "", _selectedAgeRange = "", _selectedLanguage = "";
   List<TopicModel> topicsList = [];
+  /// Kept for backwards compatibility; prefer [topicsList] (same API as browse/search).
   List<SearchTopicModel> searchedTopicsList = [];
+  static const int storyTopicsPageLimit = 20;
+  int _storyTopicsLoadedPage = 0;
+  String _storyTopicsActiveSearch = '';
+  int _storyTopicsBrowseRequestId = 0;
+  bool topicsHasMore = false;
+  bool isLoadingMoreStoryTopics = false;
   final List<String> customTopics = [];
   String selectedTopicId = "",
       selectedTopicTitle = "",
@@ -260,60 +267,136 @@ class StoryProvider extends ChangeNotifier {
   }
 
   bool isGetTopicsLoading = false;
+  /// Legacy flag: search now uses the same browse endpoint as [getStoryTopics].
+  bool get isGetSearchedTopicsLoading => isGetTopicsLoading;
+
   Future<void> getStoryTopics({
     required Function(String error) onFailed,
   }) async {
-    isGetTopicsLoading = true;
+    await _fetchStoryFlowTopicsPage(resetList: true, onFailed: onFailed);
+  }
+
+  Future<void> getSearchedStoryTopics({
+    required Function(String error) onFailed,
+  }) async {
+    await _fetchStoryFlowTopicsPage(resetList: true, onFailed: onFailed);
+  }
+
+  Future<void> loadMoreStoryTopics({
+    required Function(String error) onFailed,
+  }) async {
+    await _fetchStoryFlowTopicsPage(resetList: false, onFailed: onFailed);
+  }
+
+  Future<void> _fetchStoryFlowTopicsPage({
+    required bool resetList,
+    required Function(String error) onFailed,
+  }) async {
+    int? browseRequestId;
+    if (resetList) {
+      isGetTopicsLoading = true;
+      _storyTopicsLoadedPage = 0;
+      topicsHasMore = true;
+      _storyTopicsActiveSearch = searchTopicCtr.text.trim();
+      browseRequestId = ++_storyTopicsBrowseRequestId;
+    } else {
+      if (isLoadingMoreStoryTopics ||
+          !topicsHasMore ||
+          isGetTopicsLoading ||
+          _storyTopicsLoadedPage < 1) {
+        return;
+      }
+      isLoadingMoreStoryTopics = true;
+    }
     notifyListeners();
 
-    final response = await StoryApiService.instance.getTopics();
+    final page = resetList ? 1 : _storyTopicsLoadedPage + 1;
+    final search = _storyTopicsActiveSearch;
+    final response = await StoryApiService.instance.getStoryFlowTopics(
+      search: search.isEmpty ? null : search,
+      page: page,
+      limit: storyTopicsPageLimit,
+    );
+
     response.fold(
       (l) {
-        onFailed.call(l.errorMsg);
+        if (resetList) {
+          if (browseRequestId == null ||
+              browseRequestId == _storyTopicsBrowseRequestId) {
+            onFailed.call(l.errorMsg);
+          }
+        }
+        if (resetList) {
+          if (browseRequestId == null ||
+              browseRequestId == _storyTopicsBrowseRequestId) {
+            isGetTopicsLoading = false;
+          }
+        } else {
+          isLoadingMoreStoryTopics = false;
+        }
+        notifyListeners();
       },
       (r) {
+        if (resetList &&
+            browseRequestId != null &&
+            browseRequestId != _storyTopicsBrowseRequestId) {
+          return;
+        }
         try {
-          final dataMap = r["data"];
-          final data = dataMap['userTopics'] ?? dataMap['topics'];
-          if (data is List) {
-            topicsList = data.map((e) => TopicModel.fromJson(e)).toList();
+          final dataMap = r['data'];
+          if (dataMap is! Map) {
+            throw StateError('invalid data');
           }
+          final topicsRaw =
+              dataMap['topics'] ?? dataMap['userTopics'] ?? dataMap['user_topics'];
+          final List<TopicModel> pageTopics = topicsRaw is List
+              ? topicsRaw
+                    .map(
+                      (e) => TopicModel.fromJson(
+                        Map<String, dynamic>.from(e as Map),
+                      ),
+                    )
+                    .toList()
+              : [];
+
+          final pagination = dataMap['pagination'];
+          bool hasMore = false;
+          int loadedPage = page;
+          if (pagination is Map) {
+            hasMore = pagination['hasMore'] == true;
+            final p = pagination['page'];
+            if (p is num) loadedPage = p.toInt();
+          } else {
+            hasMore = pageTopics.length >= storyTopicsPageLimit;
+          }
+
+          if (resetList) {
+            topicsList = pageTopics;
+            searchedTopicsList = [];
+          } else {
+            topicsList = [...topicsList, ...pageTopics];
+          }
+          _storyTopicsLoadedPage = loadedPage;
+          topicsHasMore = hasMore;
         } catch (_) {
-          topicsList = [];
+          if (resetList) {
+            topicsList = [];
+            _storyTopicsActiveSearch = '';
+            _storyTopicsLoadedPage = 0;
+            topicsHasMore = false;
+          }
+        }
+        if (resetList) {
+          if (browseRequestId == null ||
+              browseRequestId == _storyTopicsBrowseRequestId) {
+            isGetTopicsLoading = false;
+          }
+        } else {
+          isLoadingMoreStoryTopics = false;
         }
         notifyListeners();
       },
     );
-
-    isGetTopicsLoading = false;
-    notifyListeners();
-  }
-
-  bool isGetSearchedTopicsLoading = false;
-  Future<void> getSearchedStoryTopics({
-    required Function(String error) onFailed,
-  }) async {
-    isGetSearchedTopicsLoading = true;
-    notifyListeners();
-
-    final response = await StoryApiService.instance.getSearchedTopics(
-      queryParams: {"search": searchTopicCtr.text.trim()},
-    );
-    response.fold(
-      (l) {
-        onFailed.call(l.errorMsg);
-      },
-      (r) {
-        final data = r["data"]["topics"];
-        searchedTopicsList = (data as List)
-            .map((e) => SearchTopicModel.fromJson(json: e))
-            .toList();
-        notifyListeners();
-      },
-    );
-
-    isGetSearchedTopicsLoading = false;
-    notifyListeners();
   }
 
   void toggleApiTopic(String id, String title) {
@@ -1164,9 +1247,38 @@ class StoryProvider extends ChangeNotifier {
     isGenerateSingleStoryLoading = false;
     isGettingStoryByIdeaLoading = false;
     getStoryByIdeaError = null;
+    generateStoryError = null;
     isGenerateStoryIdeasLoading = false;
     generateStoryIdeasError = null;
     isCreateQuizLoading = false;
+    isSubmitQuizLoading = false;
+    isGetStoryLoading = false;
+    isGetGoalsLoading = false;
+    isGetInterestLoading = false;
+    isGetTopicsLoading = false;
+    isLoadingMoreStoryTopics = false;
+    topicsHasMore = false;
+    _storyTopicsLoadedPage = 0;
+    _storyTopicsActiveSearch = '';
+    quiz = null;
+    quizMcqQuestions.clear();
+    quizError = null;
+    clearTopicFromSearch();
+    clearForceRegenerateTopicId();
+    topicsList.clear();
+    searchedTopicsList.clear();
+    customTopics.clear();
+    selectedCustomTopics.clear();
+    customInterestsList.clear();
+    selectedCustomInterests.clear();
+    interestsList.clear();
+    goalsList.clear();
+    searchTopicCtr.clear();
+    customInterestCtr.clear();
+    customReadingDurationCtr.clear();
+    goalTitleController.clear();
+    goalDesController.clear();
+    isCustomGoalSelected = false;
     _currentStoryIndex = 0;
     _currentStoryPageIndex = 0;
     clareStoryData();

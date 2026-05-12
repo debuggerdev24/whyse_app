@@ -90,4 +90,14 @@ class ProfileProvider extends ChangeNotifier {
     profileData = ProfileDataModel.mergeFromUpdate(data, profileData!);
     notifyListeners();
   }
+
+  void clearSessionData() {
+    getGroupListState = DataState.loading;
+    getProfileState = DataState.loading;
+    getGroupsListError = null;
+    getProfileError = null;
+    _myGroupsList = [];
+    profileData = null;
+    notifyListeners();
+  }
 }

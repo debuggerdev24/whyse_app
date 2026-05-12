@@ -26,6 +26,7 @@ class QuizCompletedScreen extends StatelessWidget {
   final String? storyImageUrl;
   final String? storyIdeaId;
   final String? storyId;
+  final bool fromContinueReading;
 
   const QuizCompletedScreen({
     super.key,
@@ -35,6 +36,7 @@ class QuizCompletedScreen extends StatelessWidget {
     this.storyImageUrl,
     this.storyIdeaId,
     this.storyId,
+    this.fromContinueReading = false,
   });
 
   @override
@@ -327,15 +329,22 @@ class QuizCompletedScreen extends StatelessWidget {
     );
 
     final topicId = hp.activeStoryIdeasTopicId;
-    if (topicId != null) {
+    if (!fromContinueReading && topicId != null) {
       // Silent refresh for any derived fields.
       // ignore: unawaited_futures
       hp.getTopicStoryDetails(topicId: topicId, showLoadingUi: false);
     }
 
     if (!context.mounted) return;
-    // Navigate back to the story ideas screen (instead of the reader).
-    context.goNamed(AppRoutes.createdStorySummaryScreen.name);
+    if (fromContinueReading) {
+      context.read<StoryProvider>().clareStoryData();
+      await hp.getContinueReading(force: true);
+      if (!context.mounted) return;
+      context.goNamed(AppRoutes.homeScreen.name);
+    } else {
+      // Navigate back to the story ideas screen (instead of the reader).
+      context.goNamed(AppRoutes.createdStorySummaryScreen.name);
+    }
   }
 }
 

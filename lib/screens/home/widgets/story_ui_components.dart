@@ -15,6 +15,7 @@ class StoryHeroHeader extends StatelessWidget {
     this.titleStyle,
     this.titleBottomSpacing,
     this.bottomWidget,
+    this.contentBottomPadding,
   });
 
   final String imageUrl;
@@ -27,6 +28,9 @@ class StoryHeroHeader extends StatelessWidget {
   final double? titleBottomSpacing;
   final Widget? bottomWidget;
 
+  /// Inset below the title / bottom row before the hero edge (vertical).
+  final double? contentBottomPadding;
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -34,47 +38,50 @@ class StoryHeroHeader extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          AppNetworkImage(
-            imageUrl: imageUrl,
-            tag: 'StoryHeroHeader',
-          ),
-          SafeArea(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(14.w, 18.w, 14.w, 14.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+          AppNetworkImage(imageUrl: imageUrl, tag: 'StoryHeroHeader'),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              14.w,
+              18.w,
+              14.w,
+              contentBottomPadding ?? 14.w,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SafeArea(
+                  child: Row(
                     children: [
                       topLeft,
                       const Spacer(),
                       if (topRight != null) topRight!,
                     ],
                   ),
-                  const Spacer(),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(title, style: titleStyle),
-                            if (titleBottomSpacing != null)
-                              SizedBox(height: titleBottomSpacing),
-                            if (bottomWidget != null) bottomWidget!,
-                          ],
-                        ),
+                ),
+                const Spacer(),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(title, style: titleStyle),
+                          if (titleBottomSpacing != null)
+                            SizedBox(height: titleBottomSpacing),
+                          if (bottomWidget != null) bottomWidget!,
+                        ],
                       ),
-                      if (bottomRight != null) ...[
-                        10.w.horizontalSpace,
-                        bottomRight!,
-                      ],
+                    ),
+                    if (bottomRight != null) ...[
+                      10.w.horizontalSpace,
+                      bottomRight!,
                     ],
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],

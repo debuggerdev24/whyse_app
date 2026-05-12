@@ -63,6 +63,7 @@ class _ContinueReadingSectionState extends State<ContinueReadingSection>
             "storyIdeaId": item.storyIdeaId,
             "initialPageIndex": item.continueFromPageIndex,
             "initialConfirmedPageIndex": item.lastPageIndex,
+            "fromContinueReading": true,
           },
         )
         .then((_) {

@@ -51,4 +51,13 @@ class QuizProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  void clearSessionData() {
+    selectedOptionIndex = null;
+    isChecked = false;
+    currentQuestionIndex = 0;
+    score = 0;
+    questions = [];
+    notifyListeners();
+  }
 }

@@ -6,6 +6,7 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:redstreakapp/core/auth/session_expiry_notifier.dart';
 import 'package:redstreakapp/core/network/end_points.dart';
 import 'package:redstreakapp/core/utils/shared_pref.dart';
+import 'package:redstreakapp/core/utils/user_facing_message.dart';
 import '../helper/log_helper.dart';
 
 class DioClient {
@@ -339,6 +340,16 @@ class BaseApiHelper {
         options: options,
       );
       final result = response.data;
+      if (result is String && isUnsuitableUserFacingText(result)) {
+        return Left(
+          ApiException(
+            errorMsg:
+                'Could not reach the server. Please check your connection and try again.',
+            code: response.statusCode?.toString(),
+            apiErrorMsg: 'non_json_response',
+          ),
+        );
+      }
       if (parser != null) {
         return Right(parser(result));
       } else {
@@ -356,6 +367,15 @@ class BaseApiHelper {
       return Left(
         ApiException(
           errorMsg: 'Somethign went wrong',
+          apiErrorMsg: e.toString(),
+          code: '',
+        ),
+      );
+    } catch (e) {
+      Logger.error(':x: API get unexpected: $e');
+      return Left(
+        ApiException(
+          errorMsg: 'Something went wrong. Please try again.',
           apiErrorMsg: e.toString(),
           code: '',
         ),
@@ -379,6 +399,16 @@ class BaseApiHelper {
         options: options,
       );
       final result = response.data;
+      if (result is String && isUnsuitableUserFacingText(result)) {
+        return Left(
+          ApiException(
+            errorMsg:
+                'Could not reach the server. Please check your connection and try again.',
+            code: response.statusCode?.toString(),
+            apiErrorMsg: 'non_json_response',
+          ),
+        );
+      }
       if (parser != null) {
         return Right(parser(result));
       } else {
@@ -421,6 +451,16 @@ class BaseApiHelper {
         options: options,
       );
       final result = response.data;
+      if (result is String && isUnsuitableUserFacingText(result)) {
+        return Left(
+          ApiException(
+            errorMsg:
+                'Could not reach the server. Please check your connection and try again.',
+            code: response.statusCode?.toString(),
+            apiErrorMsg: 'non_json_response',
+          ),
+        );
+      }
       if (parser != null) {
         return Right(parser(result));
       } else {
@@ -462,6 +502,16 @@ class BaseApiHelper {
         options: options,
       );
       final result = response.data;
+      if (result is String && isUnsuitableUserFacingText(result)) {
+        return Left(
+          ApiException(
+            errorMsg:
+                'Could not reach the server. Please check your connection and try again.',
+            code: response.statusCode?.toString(),
+            apiErrorMsg: 'non_json_response',
+          ),
+        );
+      }
       if (parser != null) {
         return Right(parser(result));
       } else {
@@ -556,42 +606,71 @@ class BaseApiHelper {
     if (e.type == DioExceptionType.receiveTimeout) {
       return 'Receive timeout';
     }
-    if (e.response != null) {
-      final data = e.response?.data;
-      if (e.response!.statusCode! >= 400 || e.response!.statusCode! < 500) {
-        if (data is Map) {
-          final errorContent = data['error'] ?? data['errors'];
-          // If we found 'error' or 'errors' and it's a map
-          if (errorContent is Map && errorContent.isNotEmpty) {
-            final firstKey = errorContent.keys.first;
-            Logger.info("[Base Api Helper] --- first key: $firstKey");
-            final errorValue = errorContent[firstKey];
-            if (errorValue is List && errorValue.isNotEmpty) {
-              return errorValue.first.toString();
-            } else if (errorValue is String) {
-              return errorValue;
+    final response = e.response;
+    if (response == null) {
+      return userFacingMessage(e.message, fallback: 'Unknown error occurred');
+    }
+
+    final data = response.data;
+    final statusCode = response.statusCode;
+
+    if (statusCode == 401) {
+      return 'Something went wrong. Please restart again.';
+    }
+
+    if (statusCode != null && statusCode >= 400 && statusCode < 500) {
+      if (data is Map) {
+        final errorContent = data['error'] ?? data['errors'];
+        if (errorContent is Map && errorContent.isNotEmpty) {
+          final firstKey = errorContent.keys.first;
+          Logger.info('[Base Api Helper] --- first key: $firstKey');
+          final errorValue = errorContent[firstKey];
+          if (errorValue is List && errorValue.isNotEmpty) {
+            final first = errorValue.first;
+            if (first is Map && first['msg'] != null) {
+              return userFacingMessage(first['msg']?.toString());
             }
+            return userFacingMessage(first.toString());
+          } else if (errorValue is String) {
+            return userFacingMessage(errorValue);
           }
-          // If 'message' exists
-          if (data.containsKey('message')) {
-            return data['message'].toString();
-          }
-          // Try generic key-based parsing (Django/DRF style)
-          final firstKey = data.keys.firstOrNull;
+        }
+        if (data.containsKey('message')) {
+          return userFacingMessage(data['message']?.toString());
+        }
+        if (data.isNotEmpty) {
+          final firstKey = data.keys.first;
           final errorList = data[firstKey];
           if (errorList is List && errorList.isNotEmpty) {
-            return errorList.first['msg'];
+            final first = errorList.first;
+            if (first is Map && first['msg'] != null) {
+              return userFacingMessage(first['msg']?.toString());
+            }
           }
-        } else if (data is String) {
-          return data;
         }
-        return 'Invalid request (400)';
-      } else if (e.response?.statusCode == 401) {
-        return "Something went wrong. Please restart again."; //'Unauthorized. Please log in again.';
+      } else if (data is String) {
+        return userFacingMessage(
+          data,
+          fallback: 'Could not reach the server. Please try again.',
+        );
       }
-      return data[1] ?? 'Unexpected server response';
+      return userFacingMessage(
+        null,
+        fallback: 'Invalid request. Please try again.',
+      );
     }
-    return e.message ?? 'Unknown error occurred';
+
+    if (statusCode != null && statusCode >= 500) {
+      return userFacingMessage(
+        null,
+        fallback: 'Server error. Please try again later.',
+      );
+    }
+
+    return userFacingMessage(
+      response.statusMessage,
+      fallback: 'Unexpected server response',
+    );
   }
 }
 

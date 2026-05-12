@@ -87,51 +87,47 @@ class _GroupList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (vm.isLoading) {
-      return SizedBox(
-        height: 92.w,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          physics: const BouncingScrollPhysics(),
-          child: const _ShimmerList(),
-        ),
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        child: const _ShimmerList(),
       );
     }
     if (vm.isError) {
       return SizedBox(
-        height: 92.w,
+        height: 100.h,
         child: Center(child: _ErrorWidget(message: vm.error)),
       );
     }
     if (vm.groups.isEmpty) {
       return const _EmptyState();
     }
-    return SizedBox(
-      height: 92.w,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        child: Row(
-          children: vm.groups
-              .map(
-                (g) => Padding(
-                  padding: EdgeInsets.only(right: 16.w),
-                  child: GroupItem(group: g.group),
-                ),
-              )
-              .toList(),
-        ),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: vm.groups
+            .map(
+              (g) => Padding(
+                padding: EdgeInsets.only(right: 16.w),
+                child: GroupItem(groupResponse: g),
+              ),
+            )
+            .toList(),
       ),
     );
   }
 }
 
 class GroupItem extends StatelessWidget {
-  final Group group;
+  final GroupResponse groupResponse;
 
-  const GroupItem({super.key, required this.group});
+  const GroupItem({super.key, required this.groupResponse});
 
   @override
   Widget build(BuildContext context) {
+    final group = groupResponse.group;
     final imageUrl = group.thumbnailUrl;
 
     return GestureDetector(
@@ -144,12 +140,15 @@ class GroupItem extends StatelessWidget {
             thumbnail: group.thumbnailUrl,
             description: group.description,
             inviteCode: group.joinCode,
+            myRole: groupResponse.myRole,
           ),
         );
       },
       child: SizedBox(
         width: 72.w,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
               width: 64.w,
@@ -181,7 +180,7 @@ class GroupItem extends StatelessWidget {
                       ),
                     ),
             ),
-            8.w.verticalSpace,
+            8.h.verticalSpace,
             AppText(
               text: group.title,
               maxLines: 1,
@@ -231,6 +230,7 @@ class _ShimmerList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: List.generate(5, (i) {
         return Padding(
           padding: EdgeInsets.only(right: 16.w),

@@ -1,3 +1,5 @@
+import 'package:redstreakapp/models/group/group_response_model.dart';
+
 /// Route / navigation params for group hub (details, updates, streaks).
 class GroupDetailsScreenParams {
   GroupDetailsScreenParams({
@@ -7,6 +9,7 @@ class GroupDetailsScreenParams {
     this.description,
     this.initialTab = 0,
     required this.inviteCode,
+    this.myRole,
   });
 
   final String id;
@@ -19,6 +22,10 @@ class GroupDetailsScreenParams {
 
   /// Shown as `#inviteCode` with copy; if null, a short code is derived from [id].
   final String? inviteCode;
+
+  /// Current user's role in this group (from list APIs). Used when member list
+  /// is truncated or not loaded yet.
+  final UserRole? myRole;
 
   String get displayInviteCode {
     if (inviteCode != null && inviteCode!.isNotEmpty) {

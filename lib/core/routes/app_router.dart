@@ -55,6 +55,7 @@ import 'package:redstreakapp/screens/settings/settings_screen.dart';
 import 'package:redstreakapp/screens/settings/preferences_screen.dart';
 import 'package:redstreakapp/screens/settings/settings_notification_screen.dart';
 import 'package:redstreakapp/screens/settings/edit_profile_screen.dart';
+import 'package:redstreakapp/screens/settings/verify_profile_contact_screen.dart';
 import 'package:redstreakapp/screens/settings/edit_interests_screen.dart';
 import 'package:redstreakapp/screens/your_book/find_your_books_screen.dart';
 import 'package:redstreakapp/screens/your_book/book_details_screen.dart';
@@ -253,6 +254,7 @@ class AppRouter {
           storyTitle: extra["storyTitle"] as String? ?? "",
           storyImageUrl: extra["storyImageUrl"] as String?,
           storyIdeaId: extra["storyIdeaId"] as String?,
+          fromContinueReading: extra["fromContinueReading"] == true,
         );
       },
     ),
@@ -271,6 +273,7 @@ class AppRouter {
           storyImageUrl: storyImageUrl,
           storyIdeaId: extra?['storyIdeaId'] as String?,
           storyId: extra?['storyId'] as String?,
+          fromContinueReading: extra?['fromContinueReading'] == true,
         );
       },
     ),
@@ -290,6 +293,7 @@ class AppRouter {
           storyImageUrl: storyImageUrl,
           storyIdeaId: extra?['storyIdeaId'] as String?,
           storyId: extra?['storyId'] as String?,
+          fromContinueReading: extra?['fromContinueReading'] == true,
         );
       },
     ),
@@ -398,6 +402,7 @@ class AppRouter {
         String? storyIdeaId;
         int initialPageIndex = 0;
         int? initialConfirmedPageIndex;
+        var fromContinueReading = false;
         if (extra is Map<String, dynamic>) {
           storyIdeaId = extra["storyIdeaId"]?.toString();
           initialPageIndex = extra["initialPageIndex"] is int
@@ -409,11 +414,13 @@ class AppRouter {
           } else if (rawConfirmed != null) {
             initialConfirmedPageIndex = int.tryParse(rawConfirmed.toString());
           }
+          fromContinueReading = extra["fromContinueReading"] == true;
         }
         return CreatedStoryReadingScreen(
           storyIdeaId: storyIdeaId,
           initialPageIndex: initialPageIndex,
           initialConfirmedPageIndex: initialConfirmedPageIndex,
+          fromContinueReading: fromContinueReading,
         );
       },
     ),
@@ -513,6 +520,23 @@ class AppRouter {
           name: AppRoutes.editProfileScreen.name,
           builder: (context, state) {
             return const EditProfileScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.verifyProfileContactScreen.name,
+          name: AppRoutes.verifyProfileContactScreen.name,
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            final kind = extra?['kind']?.toString() ?? 'email';
+            final destination = extra?['destination']?.toString() ?? '';
+            final otpLen = extra?['otpLength'] is int
+                ? extra!['otpLength'] as int
+                : 6;
+            return VerifyProfileContactScreen(
+              kind: kind,
+              destination: destination,
+              otpLength: otpLen.clamp(4, 8),
+            );
           },
         ),
         GoRoute(

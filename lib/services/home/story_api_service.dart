@@ -18,16 +18,23 @@ class StoryApiService {
     return await BaseApiHelper.instance.get(EndPoints.getStoryInterest);
   }
 
-  Future<Either<ApiException, Map<String, dynamic>>> getTopics() async {
-    return await BaseApiHelper.instance.get(EndPoints.getStoryTopics);
-  }
-
-  Future<Either<ApiException, Map<String, dynamic>>> getSearchedTopics({
-    required Map<String, dynamic> queryParams,
+  /// `GET /story-flow/topics` with optional `search`, `page`, and `limit`.
+  Future<Either<ApiException, Map<String, dynamic>>> getStoryFlowTopics({
+    String? search,
+    int page = 1,
+    int limit = 20,
   }) async {
+    final query = <String, dynamic>{
+      'page': page,
+      'limit': limit,
+    };
+    final q = search?.trim();
+    if (q != null && q.isNotEmpty) {
+      query['search'] = q;
+    }
     return await BaseApiHelper.instance.get(
-      EndPoints.getSearchTopics,
-      queryParameters: queryParams,
+      EndPoints.getStoryTopics,
+      queryParameters: query,
     );
   }
 

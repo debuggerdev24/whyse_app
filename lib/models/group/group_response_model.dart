@@ -1,4 +1,5 @@
 import 'package:redstreakapp/core/utils/network_image_url.dart';
+import 'package:redstreakapp/core/utils/user_facing_message.dart';
 
 // ================= ENUMS =================
 
@@ -125,7 +126,7 @@ class Group {
     return Group(
       id: json['id'],
       title: json['title'],
-      description: json['description'],
+      description: safeDescriptionForUi(json['description']?.toString()),
       thumbnailUrl: resolveNullableNetworkImageUrl(json['thumbnailUrl']?.toString()),
       type: GroupTypeX.fromString(json['type']),
       createdBy: json['createdBy'],

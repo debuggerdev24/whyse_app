@@ -1,6 +1,9 @@
 import 'dart:io';
 
+import 'package:dartz/dartz.dart' hide State;
 import 'package:image_picker/image_picker.dart';
+import 'package:redstreakapp/core/enums/data_status.dart';
+import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
@@ -70,6 +73,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
 
+  late String _initialEmail;
+  late String _initialPhone;
+  String? _sessionVerifiedEmail;
+  String? _sessionVerifiedPhone;
+
+  void _onContactFieldChanged() {
+    if (mounted) setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
@@ -93,10 +105,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _usernameController.text = profileData.username;
     _emailController.text = profileData.email;
     _phoneController.text = profileData.phone;
+    _initialEmail = profileData.email.trim();
+    _initialPhone = _normalizePhoneForE164(profileData.phone);
+    _emailController.addListener(_onContactFieldChanged);
+    _phoneController.addListener(_onContactFieldChanged);
   }
 
   @override
   void dispose() {
+    _emailController.removeListener(_onContactFieldChanged);
+    _phoneController.removeListener(_onContactFieldChanged);
     _firstNameController.dispose();
     _lastNameController.dispose();
     _usernameController.dispose();
@@ -105,31 +123,279 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.dispose();
   }
 
+  bool _emailsMatch(String a, String b) =>
+      a.trim().toLowerCase() == b.trim().toLowerCase();
+
+  /// Strips separators, maps `00…` → `+…`, and prefixes `+` when the rest is digits only.
+  static String _normalizePhoneForE164(String raw) {
+    var s = raw.trim();
+    s = s.replaceAll(RegExp(r'[\s\-\(\)\.]'), '');
+    if (s.startsWith('00')) {
+      s = '+${s.substring(2)}';
+    }
+    if (s.isNotEmpty &&
+        !s.startsWith('+') &&
+        RegExp(r'^[0-9]+$').hasMatch(s)) {
+      s = '+$s';
+    }
+    return s;
+  }
+
+  bool _phonesMatch(String a, String b) =>
+      _normalizePhoneForE164(a) == _normalizePhoneForE164(b);
+
+  bool get _emailUnchangedFromInitial =>
+      _emailsMatch(_emailController.text, _initialEmail);
+
+  bool get _phoneUnchangedFromInitial =>
+      _phonesMatch(_phoneController.text, _initialPhone);
+
+  bool get _emailVerifiedForCurrent =>
+      _sessionVerifiedEmail != null &&
+      _emailsMatch(_emailController.text, _sessionVerifiedEmail!);
+
+  bool get _phoneVerifiedForCurrent =>
+      _sessionVerifiedPhone != null &&
+      _phonesMatch(_phoneController.text, _sessionVerifiedPhone!);
+
+  Widget _buildEmailVerificationFooter() {
+    if (_emailUnchangedFromInitial) return const SizedBox.shrink();
+    if (_emailVerifiedForCurrent) {
+      return Padding(
+        padding: EdgeInsets.only(top: 6.h),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: AppText(
+            text: 'Verified',
+            style: AppTextStyles.semibold(
+              fontSize: 13.sp,
+              color: AppColors.teal,
+            ),
+          ),
+        ),
+      );
+    }
+    return Padding(
+      padding: EdgeInsets.only(top: 6.h),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: TextButton(
+          onPressed: _onVerifyEmail,
+          style: TextButton.styleFrom(
+            minimumSize: Size.zero,
+            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          child: AppText(
+            text: 'Verify email',
+            style: AppTextStyles.semibold(
+              fontSize: 14.sp,
+              color: AppColors.teal,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPhoneVerificationFooter() {
+    if (_phoneUnchangedFromInitial) return const SizedBox.shrink();
+    if (_phoneVerifiedForCurrent) {
+      return Padding(
+        padding: EdgeInsets.only(top: 6.h),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: AppText(
+            text: 'Verified',
+            style: AppTextStyles.semibold(
+              fontSize: 13.sp,
+              color: AppColors.teal,
+            ),
+          ),
+        ),
+      );
+    }
+    return Padding(
+      padding: EdgeInsets.only(top: 6.h),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: TextButton(
+          onPressed: _onVerifyPhone,
+          style: TextButton.styleFrom(
+            minimumSize: Size.zero,
+            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          child: AppText(
+            text: 'Verify phone number',
+            style: AppTextStyles.semibold(
+              fontSize: 14.sp,
+              color: AppColors.teal,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onVerifyEmail() async {
+    final email = _emailController.text.trim();
+    final err = _validateEmail(email);
+    if (err != null) {
+      AppToast.error(context, err);
+      return;
+    }
+    if (!mounted) return;
+    showLoadingDialog(context);
+    late final Either<ApiException, Map<String, dynamic>> result;
+    try {
+      result =
+          await context.read<EditProfileProvider>().requestEmailChange(email);
+    } finally {
+      if (mounted) context.pop();
+    }
+    if (!mounted) return;
+    final errMsg = result.fold<String?>(
+      (e) => e.errorMsg.trim().isEmpty ? 'Could not send verification code' : e.errorMsg,
+      (_) => null,
+    );
+    if (errMsg != null) {
+      AppToast.error(context, errMsg);
+      return;
+    }
+    final verified = await context.pushNamed<bool>(
+      AppRoutes.verifyProfileContactScreen.name,
+      extra: <String, dynamic>{
+        'kind': 'email',
+        'destination': email,
+        'otpLength': 6,
+      },
+    );
+    if (!mounted) return;
+    if (verified == true) {
+      setState(() => _sessionVerifiedEmail = email);
+    }
+  }
+
+  Future<void> _onVerifyPhone() async {
+    final phone = _normalizePhoneForE164(_phoneController.text);
+    final err = _validatePhoneField(phone);
+    if (err != null) {
+      AppToast.error(context, err);
+      return;
+    }
+    if (!mounted) return;
+    showLoadingDialog(context);
+    late final Either<ApiException, Map<String, dynamic>> result;
+    try {
+      result =
+          await context.read<EditProfileProvider>().requestPhoneChange(phone);
+    } finally {
+      if (mounted) context.pop();
+    }
+    if (!mounted) return;
+    final errMsg = result.fold<String?>(
+      (e) => e.errorMsg.trim().isEmpty ? 'Could not send verification code' : e.errorMsg,
+      (_) => null,
+    );
+    if (errMsg != null) {
+      AppToast.error(context, errMsg);
+      return;
+    }
+    final verified = await context.pushNamed<bool>(
+      AppRoutes.verifyProfileContactScreen.name,
+      extra: <String, dynamic>{
+        'kind': 'phone',
+        'destination': phone,
+        'otpLength': 6,
+      },
+    );
+    if (!mounted) return;
+    if (verified == true) {
+      setState(() {
+        _sessionVerifiedPhone = phone;
+        if (_phoneController.text.trim() != phone) {
+          _phoneController.text = phone;
+          _phoneController.selection = TextSelection.collapsed(
+            offset: _phoneController.text.length,
+          );
+        }
+      });
+    }
+  }
+
+  /// International (E.164-style): 7–15 digits after optional `+` (added automatically when omitted).
+  String? _validatePhoneField(String? v) {
+    final t = _normalizePhoneForE164(v ?? '');
+    if (t.isEmpty) {
+      return _normalizePhoneForE164(_initialPhone).isEmpty
+          ? null
+          : 'Please enter your phone number';
+    }
+    if (!RegExp(r'^\+[1-9]\d{6,14}$').hasMatch(t)) {
+      return 'Enter a valid phone number with country code (7–15 digits)';
+    }
+    return null;
+  }
+
+  static String? _validateEmail(String? v) {
+    final t = (v ?? '').trim();
+    if (t.isEmpty) return 'Please enter your email';
+    if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(t)) {
+      return 'Enter a valid email address';
+    }
+    return null;
+  }
+
   Future<void> _onUpdateProfile() async {
     final edit = context.read<EditProfileProvider>();
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
+    final emailOk =
+        _emailUnchangedFromInitial || _emailVerifiedForCurrent;
+    final phoneOk =
+        _phoneUnchangedFromInitial || _phoneVerifiedForCurrent;
+    if (!emailOk || !phoneOk) {
+      final String msg;
+      if (!emailOk && !phoneOk) {
+        msg = 'Please verify email and phone number first';
+      } else if (!emailOk) {
+        msg = 'Please verify email';
+      } else {
+        msg = 'Please verify phone number';
+      }
+      AppToast.error(context, msg);
+      return;
+    }
+
     edit.firstName = _firstNameController.text;
     edit.lastName = _lastNameController.text;
     edit.username = _usernameController.text;
+    edit.email = _emailController.text.trim();
+    edit.phone = _normalizePhoneForE164(_phoneController.text);
 
     showLoadingDialog(context);
     final result = await edit.submitUpdate();
     if (!mounted) return;
     context.pop();
 
-    result.fold(
-      (err) {
+    await result.fold<Future<void>>(
+      (err) async {
         final msg = err.errorMsg.trim();
         AppToast.error(
           context,
           msg.isEmpty ? 'Could not update your profile. Please try again' : msg,
         );
       },
-      (raw) {
-        final data = raw['data'];
-        if (data is Map<String, dynamic>) {
-          context.read<ProfileProvider>().applyProfileAfterUpdate(data);
+      (raw) async {
+        final profile = context.read<ProfileProvider>();
+        await profile.getProfile();
+        if (!mounted) return;
+        if (profile.getProfileState == DataState.failed) {
+          final data = raw['data'];
+          if (data is Map<String, dynamic>) {
+            profile.applyProfileAfterUpdate(data);
+          }
         }
         final message = raw['message']?.toString().trim();
         AppToast.success(
@@ -295,8 +561,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final t = (v ?? '').trim();
     if (t.isEmpty) return 'Please enter your first name';
     if (t.length > 50) return 'First name must be at most 50 characters';
-    if (!RegExp(r"^[a-zA-Z\s'-]+$").hasMatch(t)) {
-      return 'Use letters, spaces, hyphens, or apostrophes only';
+    if (!RegExp(r"^[a-zA-Z0-9\s'-]+$").hasMatch(t)) {
+      return 'Use letters, numbers, spaces, hyphens, or apostrophes only';
     }
     return null;
   }
@@ -305,8 +571,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final t = (v ?? '').trim();
     if (t.isEmpty) return 'Please enter your last name';
     if (t.length > 50) return 'Last name must be at most 50 characters';
-    if (!RegExp(r"^[a-zA-Z\s'-]+$").hasMatch(t)) {
-      return 'Use letters, spaces, hyphens, or apostrophes only';
+    if (!RegExp(r"^[a-zA-Z0-9\s'-]+$").hasMatch(t)) {
+      return 'Use letters, numbers, spaces, hyphens, or apostrophes only';
     }
     return null;
   }
@@ -454,21 +720,34 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           14.verticalSpace,
                           _FieldBlock(
                             label: 'Email',
-                            child: AppTextField(
-                              controller: _emailController,
-                              hintText: 'Email',
-                              readOnly: true,
-                              enabled: false,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                AppTextField(
+                                  controller: _emailController,
+                                  hintText: 'Email',
+                                  keyboardType: TextInputType.emailAddress,
+                                  validator: _validateEmail,
+                                ),
+                                _buildEmailVerificationFooter(),
+                              ],
                             ),
                           ),
                           14.verticalSpace,
                           _FieldBlock(
                             label: 'Phone',
-                            child: AppTextField(
-                              controller: _phoneController,
-                              hintText: 'Phone number',
-                              // readOnly: true,
-                              // enabled: false,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                AppTextField(
+                                  controller: _phoneController,
+                                  hintText:
+                                      'Country code and number (spaces ok)',
+                                  keyboardType: TextInputType.phone,
+                                  validator: _validatePhoneField,
+                                ),
+                                _buildPhoneVerificationFooter(),
+                              ],
                             ),
                           ),
                           16.verticalSpace,

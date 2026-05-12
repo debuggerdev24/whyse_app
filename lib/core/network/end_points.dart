@@ -4,6 +4,12 @@ class EndPoints {
   EndPoints._();
   static const profile = "/mobile/profile/me";
   static const profileAvatar = "/mobile/profile/me/avatar";
+  /// Initial OTP: `{ "channel": "email", "email" }` or `{ "channel": "phone", "phone" }`.
+  static const profileContactRequest = "/mobile/profile/me/contact/request";
+  /// Resend OTP: same body as [profileContactRequest].
+  static const profileContactResend = "/mobile/profile/me/contact/resend";
+  /// Verify OTP: `{ "channel": "email"|"phone", "email"|"phone", "otp" }`.
+  static const profileContactVerify = "/mobile/profile/me/contact/verify";
   static const startOnBoarding = "/mobile/auth/start-onboarding";
   static const onBoardingProgress = "/mobile/auth/onboarding-progress";
   static const getDefaultInterest = "/mobile/auth/default-interests";

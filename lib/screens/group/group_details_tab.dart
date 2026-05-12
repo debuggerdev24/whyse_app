@@ -1,32 +1,86 @@
 import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/utils/shared_pref.dart';
+import 'package:redstreakapp/core/utils/user_facing_message.dart';
 import 'package:redstreakapp/core/widgets/loading_dialog.dart';
 import 'package:redstreakapp/models/group/group_members_model.dart';
+import 'package:redstreakapp/models/group/group_response_model.dart';
 import 'package:redstreakapp/providers/profile/group_provider.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
 import 'package:redstreakapp/screens/group/group_screen_params.dart';
 import 'package:shimmer/shimmer.dart';
 
+/// Current user first, then owners, then admins, then regular members
+/// (alphabetical by display name within each tier).
+List<GroupMember> _sortedMembersForDisplay(
+  List<GroupMember> members,
+  String myUserId,
+) {
+  if (members.isEmpty) return members;
+
+  GroupMember? self;
+  final others = <GroupMember>[];
+  for (final m in members) {
+    if (myUserId.isNotEmpty && m.userId == myUserId) {
+      self = m;
+    } else {
+      others.add(m);
+    }
+  }
+
+  int privilegeRank(GroupMember m) {
+    if (m.isOwner) return 0;
+    if (m.isAdmin) return 1;
+    return 2;
+  }
+
+  others.sort((a, b) {
+    final byRole = privilegeRank(a).compareTo(privilegeRank(b));
+    if (byRole != 0) return byRole;
+    return a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase());
+  });
+
+  return [if (self != null) self, ...others];
+}
+
 class _GroupDetailsTabVM {
   final DataState state;
   final List<GroupMember> members;
   final String? error;
+  final bool canAddMembers;
 
   _GroupDetailsTabVM({
     required this.state,
     required this.members,
     required this.error,
+    required this.canAddMembers,
   });
 
   bool get isLoading => state == DataState.loading;
   bool get isError => state == DataState.failed;
 
-  factory _GroupDetailsTabVM.fromProvider(GroupProvider p) {
+  factory _GroupDetailsTabVM.fromProvider(
+    GroupProvider p,
+    GroupDetailsScreenParams params,
+  ) {
+    final myUserId = LocalStorageService.instance.getLoggedInUserId;
+    final members = p.groupMembersList;
+    final inMemberList = myUserId.isNotEmpty &&
+        members.any(
+          (m) => m.userId == myUserId && (m.isOwner || m.isAdmin),
+        );
+    final role = params.myRole;
+    final fromParamsRole =
+        role == UserRole.owner || role == UserRole.admin;
+    final canAddMembers = inMemberList || fromParamsRole;
+
     return _GroupDetailsTabVM(
       state: p.getGroupMembersState,
-      members: p.groupMembersList,
-      error: p.getGroupMembersError,
+      members: members,
+      error: p.getGroupMembersError != null
+          ? userFacingMessage(p.getGroupMembersError)
+          : null,
+      canAddMembers: canAddMembers,
     );
   }
 }
@@ -45,10 +99,21 @@ class GroupDetailsTabBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (params.description != null && params.description!.isNotEmpty)
-            _DescriptionCard(description: params.description!),
-          if (params.description != null && params.description!.isNotEmpty)
-            14.h.verticalSpace,
+          Builder(
+            builder: (context) {
+              final desc = safeDescriptionForUi(params.description);
+              if (desc == null || desc.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _DescriptionCard(description: desc),
+                  14.h.verticalSpace,
+                ],
+              );
+            },
+          ),
           _MembersCard(params: params),
         ],
       ),
@@ -90,6 +155,7 @@ class _DescriptionCard extends StatelessWidget {
           10.h.verticalSpace,
           AppText(
             text: description,
+            maxLines: 48,
             overflow: TextOverflow.ellipsis,
             style: AppTextStyles.medium(
               fontSize: 14.sp,
@@ -122,154 +188,176 @@ class _MembersCard extends StatelessWidget {
         ],
       ),
       padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 12.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppOutlinedButton(
-            onTap: () {
-              context.pushNamed(
-                AppRoutes.addMembersScreen.name,
-                extra: params.id,
-              );
-            },
-            margin: EdgeInsets.only(bottom: 14.h),
-            borderColor: AppColors.black.withValues(alpha: 0.14),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SvgIcon(
-                  AppAssets.addMembers,
-                  size: 22.sp,
-                  color: AppColors.black,
+      child: Selector<GroupProvider, _GroupDetailsTabVM>(
+        selector: (_, p) => _GroupDetailsTabVM.fromProvider(p, params),
+        builder: (context, value, _) {
+          late final Widget listSection;
+          if (value.isLoading) {
+            listSection = Column(
+              children: List.generate(5, (index) {
+                return Column(
+                  children: [
+                    Shimmer.fromColors(
+                      baseColor: AppColors.shimmerBaseColor,
+                      highlightColor: AppColors.shimmerHighlightColor,
+                      child: Container(
+                        height: 30,
+                        width: double.maxFinite,
+                        decoration: BoxDecoration(
+                          color: AppColors.white,
+                          borderRadius: BorderRadius.circular(10.r),
+                          border: Border.all(
+                            color: AppColors.black.withValues(alpha: 0.10),
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (index != 4)
+                      Divider(
+                        height: 28.w,
+                        color: AppColors.black.withValues(alpha: 0.08),
+                      ),
+                  ],
+                );
+              }),
+            );
+          } else if (value.isError) {
+            listSection = Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                child: Text(
+                  userFacingMessage(
+                    value.error,
+                    fallback: 'Something went wrong',
+                  ),
+                  maxLines: 4,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.medium(
+                    fontSize: 14.sp,
+                    color: AppColors.black.withValues(alpha: 0.55),
+                  ),
                 ),
-                6.w.horizontalSpace,
+              ),
+            );
+          } else if (value.members.isEmpty) {
+            listSection = const SizedBox.shrink();
+          } else {
+            final myUserId = LocalStorageService.instance.getLoggedInUserId;
+            final orderedMembers = _sortedMembersForDisplay(
+              value.members,
+              myUserId,
+            );
+            final amIOwner = orderedMembers.any(
+              (m) => m.userId == myUserId && m.isOwner,
+            );
+
+            listSection = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 AppText(
-                  text: 'Add Members',
+                  text: 'Members',
                   style: AppTextStyles.semibold(
-                    fontSize: 15.sp,
+                    fontSize: 19.sp,
                     color: AppColors.black,
                   ),
                 ),
+                12.h.verticalSpace,
+                ...List.generate(orderedMembers.length, (index) {
+                  final member = orderedMembers[index];
+                  final isMe = member.userId == myUserId;
+
+                  return Column(
+                    children: [
+                      GroupMemberRow(
+                        item: member,
+                        isMe: isMe,
+                        amIOwner: amIOwner,
+                        onLeave: () {
+                          showLoadingDialog(context);
+                          context.read<GroupProvider>().leaveGroup(
+                            groupId: member.groupId,
+                            onError: (error) {
+                              context.pop();
+                              AppToast.error(context, error);
+                            },
+                            onSuccess: () {
+                              context.pop();
+                              AppToast.success(context, 'Left Group');
+                              context.read<ProfileProvider>().getGroupsList();
+                              context.read<GroupProvider>().getGroupsList();
+                              context.pop();
+                            },
+                          );
+                        },
+                        onRemove: () {
+                          showLoadingDialog(context);
+                          context.read<GroupProvider>().removeMemberFromGroup(
+                            groupId: member.groupId,
+                            userId: member.userId,
+                            onError: (error) {
+                              context.pop();
+                              AppToast.error(context, error);
+                            },
+                            onSuccess: () {
+                              context.pop();
+                              AppToast.success(
+                                context,
+                                'Member removed successfully',
+                              );
+                            },
+                          );
+                        },
+                      ),
+                      if (index != orderedMembers.length - 1)
+                        Divider(
+                          height: 28.w,
+                          color: AppColors.black.withValues(alpha: 0.08),
+                        ),
+                    ],
+                  );
+                }),
               ],
-            ),
-          ),
-          Selector<GroupProvider, _GroupDetailsTabVM>(
-            selector: (_, p) => _GroupDetailsTabVM.fromProvider(p),
-            builder: (context, value, _) {
-              if (value.isLoading) {
-                return Column(
-                  children: List.generate(5, (index) {
-                    return Column(
-                      children: [
-                        Shimmer.fromColors(
-                          baseColor: AppColors.shimmerBaseColor,
-                          highlightColor: AppColors.shimmerHighlightColor,
-                          child: Container(
-                            height: 30,
-                            width: double.maxFinite,
-                            decoration: BoxDecoration(
-                              color: AppColors.white,
-                              borderRadius: BorderRadius.circular(10.r),
-                              border: Border.all(
-                                color: AppColors.black.withValues(alpha: 0.10),
-                              ),
-                            ),
-                          ),
-                        ),
-                        if (index != 4)
-                          Divider(
-                            height: 28.w,
-                            color: AppColors.black.withValues(alpha: 0.08),
-                          ),
-                      ],
+            );
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (value.canAddMembers) ...[
+                AppOutlinedButton(
+                  onTap: () {
+                    context.pushNamed(
+                      AppRoutes.addMembersScreen.name,
+                      extra: params.id,
                     );
-                  }),
-                );
-              }
-              if (value.isError) {
-                return Center(
-                  child: Text(value.error ?? 'Something went wrong'),
-                );
-              }
-              if (value.members.isEmpty) {
-                return const SizedBox.shrink();
-              }
-
-              final myUserId = LocalStorageService.instance.getLoggedInUserId;
-              final amIOwner = value.members.any(
-                (m) => m.userId == myUserId && m.isOwner,
-              );
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AppText(
-                    text: 'Members',
-                    style: AppTextStyles.semibold(
-                      fontSize: 19.sp,
-                      color: AppColors.black,
-                    ),
+                  },
+                  margin: EdgeInsets.only(bottom: 14.h),
+                  borderColor: AppColors.black.withValues(alpha: 0.14),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SvgIcon(
+                        AppAssets.addMembers,
+                        size: 22.sp,
+                        color: AppColors.black,
+                      ),
+                      6.w.horizontalSpace,
+                      AppText(
+                        text: 'Add Members',
+                        style: AppTextStyles.semibold(
+                          fontSize: 15.sp,
+                          color: AppColors.black,
+                        ),
+                      ),
+                    ],
                   ),
-                  12.h.verticalSpace,
-                  ...List.generate(value.members.length, (index) {
-                    final member = value.members[index];
-                    final isMe = member.userId == myUserId;
-
-                    return Column(
-                      children: [
-                        GroupMemberRow(
-                          item: member,
-                          isMe: isMe,
-                          amIOwner: amIOwner,
-                          onLeave: () {
-                            showLoadingDialog(context);
-                            context.read<GroupProvider>().leaveGroup(
-                              groupId: member.groupId,
-                              onError: (error) {
-                                context.pop();
-                                AppToast.error(context, error);
-                              },
-                              onSuccess: () {
-                                context.pop();
-                                AppToast.success(context, 'Left Group');
-                                context.read<ProfileProvider>().getGroupsList();
-                                context.read<GroupProvider>().getGroupsList();
-                                context.pop();
-                              },
-                            );
-                          },
-                          onRemove: () {
-                            showLoadingDialog(context);
-                            context.read<GroupProvider>().removeMemberFromGroup(
-                              groupId: member.groupId,
-                              userId: member.userId,
-                              onError: (error) {
-                                context.pop();
-                                AppToast.error(context, error);
-                              },
-                              onSuccess: () {
-                                context.pop();
-                                AppToast.success(
-                                  context,
-                                  'Member removed successfully',
-                                );
-                              },
-                            );
-                          },
-                        ),
-                        if (index != value.members.length - 1)
-                          Divider(
-                            height: 28.w,
-                            color: AppColors.black.withValues(alpha: 0.08),
-                          ),
-                      ],
-                    );
-                  }),
-                ],
-              );
-            },
-          ),
-        ],
+                ),
+              ],
+              listSection,
+            ],
+          );
+        },
       ),
     );
   }

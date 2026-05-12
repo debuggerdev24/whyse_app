@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:redstreakapp/core/session/app_session_reset.dart';
 import 'package:redstreakapp/core/utils/shared_pref.dart';
 import 'package:redstreakapp/core/utils/field_validator.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
@@ -1477,6 +1478,7 @@ class AuthProvider with ChangeNotifier {
     LocalStorageService.instance.saveParentConsentStatus(status: false);
 
     clearAllData();
+    resetAppProvidersForNewUser();
     notifyListeners();
 
     isLogOutLoading = false;

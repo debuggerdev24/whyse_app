@@ -392,4 +392,29 @@ class FriendProvider extends ChangeNotifier {
       );
     }
   }
+
+  void clearSessionData() {
+    getFriendsState = DataState.loading;
+    getFriendsError = null;
+    _friendsList = [];
+    _currentPage = 1;
+    _totalPages = 1;
+    _isLoadingMore = false;
+
+    searchUsersState = DataState.loading;
+    searchUsersError = null;
+    _searchUsersList = [];
+    _searchCurrentPage = 1;
+    _searchTotalPages = 1;
+    _isSearchLoadingMore = false;
+    _searchQuery = '';
+
+    _isSendingRequest = false;
+
+    getRequestsState = DataState.loading;
+    getRequestsError = null;
+    _requestsList = [];
+
+    notifyListeners();
+  }
 }

@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
-import 'package:redstreakapp/core/utils/custom_loader.dart';
 import 'package:redstreakapp/core/utils/de_bouncing.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
@@ -27,9 +26,13 @@ class StoryTopicsScreen extends StatefulWidget {
 }
 
 class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
+  late final ScrollController _topicsScrollController;
+
   @override
   void initState() {
     super.initState();
+    _topicsScrollController = ScrollController();
+    _topicsScrollController.addListener(_onTopicsScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final story = context.read<StoryProvider>();
       if (story.topicsList.isEmpty && !story.isGetTopicsLoading) {
@@ -38,8 +41,18 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
     });
   }
 
+  void _onTopicsScroll() {
+    if (!_topicsScrollController.hasClients || !mounted) return;
+    final pos = _topicsScrollController.position;
+    if (pos.maxScrollExtent <= 0) return;
+    if (pos.pixels < pos.maxScrollExtent - 320) return;
+    context.read<StoryProvider>().loadMoreStoryTopics(onFailed: (_) {});
+  }
+
   @override
   void dispose() {
+    _topicsScrollController.removeListener(_onTopicsScroll);
+    _topicsScrollController.dispose();
     super.dispose();
   }
 
@@ -105,11 +118,9 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
         bottom: (Platform.isIOS) ? false : true,
         child: Consumer<StoryProvider>(
           builder: (context, storyProvider, child) {
-            final searchEmpty = storyProvider.searchTopicCtr.text
-                .trim()
-                .isEmpty;
-            final showDefaultTopics =
-                searchEmpty && !storyProvider.isGetSearchedTopicsLoading;
+            final hasSearchQuery =
+                storyProvider.searchTopicCtr.text.trim().isNotEmpty;
+            final isTopicsApiLoading = storyProvider.isGetTopicsLoading;
 
             return Padding(
               padding: EdgeInsets.fromLTRB(24.w, 10.w, 24.w, 0),
@@ -150,7 +161,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                     hintText: "Search Topic...",
                     onChanged: (value) {
                       deBouncer.run(() {
-                        storyProvider.getSearchedStoryTopics(
+                        storyProvider.getStoryTopics(
                           onFailed: (error) {
                             AppToast.error(context, error);
                           },
@@ -159,91 +170,71 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                     },
                   ),
                   18.w.verticalSpace,
-                  if (showDefaultTopics) ...[
-                    Expanded(
-                      child: storyProvider.isGetTopicsLoading
-                          ? Center(child: ApiLoadingIndicator())
-                          : storyProvider.topicsList.isEmpty
-                          ? Padding(
-                              padding: EdgeInsets.only(top: 50.h),
-                              child: Align(
-                                alignment: Alignment.topCenter,
-                                child: Text("No topics available"),
-                              ),
-                            )
-                          : GridView.builder(
-                              padding: EdgeInsets.only(
-                                left: 10.w,
-                                right: 10.w,
-                                bottom: 20.w,
-                              ),
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2,
-                                    crossAxisSpacing: 20.w,
-                                    mainAxisSpacing: 25.h,
-                                    childAspectRatio: 1.4,
-                                  ),
-                              itemCount: storyProvider.topicsList.length,
-                              itemBuilder: (context, index) {
-                                final topic = storyProvider.topicsList[index];
-                                final title = topic.title;
-                                final id = topic.id;
-                                final thumb =
-                                    topic.thumbnailUrl.trim().isNotEmpty
-                                    ? topic.thumbnailUrl
-                                    : null;
-                                return TopicCard(
-                                  label: title,
-                                  imagePath: thumb ?? _getIconForTopic(title),
-                                  isSelected:
-                                      storyProvider.selectedTopicId == id,
-                                  onTap: () =>
-                                      storyProvider.toggleApiTopic(id, title),
-                                );
-                              },
-                            ),
-                    ),
-                  ] else if (storyProvider.isGetSearchedTopicsLoading)
-                    Expanded(child: _shimmer())
-                  else if (storyProvider.searchedTopicsList.isNotEmpty)
-                    Expanded(
-                      child: GridView(
-                        padding: EdgeInsets.only(
-                          left: 10.w,
-                          right: 10.w,
-                          bottom: 20.w,
-                        ),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 20.w,
-                          mainAxisSpacing: 25.h,
-                          childAspectRatio: 1.4,
-                        ),
-                        children: [
-                          ...storyProvider.searchedTopicsList.map((topic) {
-                            final title = topic.title;
-                            return TopicCard(
-                              label: title,
-                              imagePath: _getIconForTopic(title),
-                              isSelected:
-                                  storyProvider.selectedTopicId == topic.id,
-                              onTap: () =>
-                                  storyProvider.toggleApiTopic(topic.id, title),
-                            );
-                          }),
-                        ],
-                      ),
-                    )
-                  else if (storyProvider.searchedTopicsList.isEmpty &&
-                      storyProvider.searchTopicCtr.text.trim().isNotEmpty)
+                  if (isTopicsApiLoading)
+                    Expanded(child: _topicsBrowseShimmer())
+                  else if (storyProvider.topicsList.isEmpty)
                     Expanded(
                       child: Padding(
                         padding: EdgeInsets.only(top: 50.h),
                         child: Align(
                           alignment: Alignment.topCenter,
-                          child: Text("No Topics Found!"),
+                          child: Text(
+                            hasSearchQuery
+                                ? "No Topics Found!"
+                                : "No topics available",
+                          ),
                         ),
+                      ),
+                    )
+                  else
+                    Expanded(
+                      child: GridView.builder(
+                        controller: _topicsScrollController,
+                        padding: EdgeInsets.only(
+                          left: 10.w,
+                          right: 10.w,
+                          bottom: 20.w,
+                        ),
+                        gridDelegate:
+                            SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 20.w,
+                              mainAxisSpacing: 25.h,
+                              childAspectRatio: 1.4,
+                            ),
+                        itemCount:
+                            storyProvider.topicsList.length +
+                            (storyProvider.isLoadingMoreStoryTopics ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (index >= storyProvider.topicsList.length) {
+                            return Center(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 12.h),
+                                child: SizedBox(
+                                  width: 28.w,
+                                  height: 28.w,
+                                  child: const CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                          final topic = storyProvider.topicsList[index];
+                          final title = topic.title;
+                          final id = topic.id;
+                          final thumb =
+                              topic.thumbnailUrl.trim().isNotEmpty
+                              ? topic.thumbnailUrl
+                              : null;
+                          return TopicCard(
+                            label: title,
+                            imagePath: thumb ?? _getIconForTopic(title),
+                            isSelected: storyProvider.selectedTopicId == id,
+                            onTap: () =>
+                                storyProvider.toggleApiTopic(id, title),
+                          );
+                        },
                       ),
                     ),
 
@@ -272,19 +263,21 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
     );
   }
 
-  Widget _shimmer() {
+  /// Shown while `GET /story-flow/topics` (browse or search) is in flight.
+  Widget _topicsBrowseShimmer() {
     return Shimmer.fromColors(
       baseColor: AppColors.shimmerBaseColor,
       highlightColor: AppColors.shimmerHighlightColor,
       child: GridView.builder(
         physics: const NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.only(left: 10.w, right: 10.w, bottom: 20.w),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 20.w,
           mainAxisSpacing: 25.h,
           childAspectRatio: 1.4,
         ),
-        itemCount: 6, // ✅ 6 shimmer items
+        itemCount: 6,
         itemBuilder: (context, index) {
           return Container(
             decoration: BoxDecoration(

@@ -18,6 +18,7 @@ class ViewGroupScreen extends StatelessWidget {
         description: params.description,
         initialTab: 1,
         inviteCode: params.inviteCode,
+        myRole: params.myRole,
       ),
     );
   }

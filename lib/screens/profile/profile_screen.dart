@@ -216,64 +216,62 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildFriendsList(List<FriendResponse> friends) {
-    return SizedBox(
-      height: 92.h,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        child: Row(
-          children: [
-            for (var i = 0; i < friends.length; i++) ...[
-              if (i > 0) 16.w.horizontalSpace,
-              _ProfileFriendAvatar(friend: friends[i].friend),
-            ],
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (var i = 0; i < friends.length; i++) ...[
+            if (i > 0) 16.w.horizontalSpace,
+            _ProfileFriendAvatar(friend: friends[i].friend),
           ],
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildFriendsShimmer() {
-    return SizedBox(
-      height: 92.h,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        physics: const NeverScrollableScrollPhysics(),
-        child: Row(
-          children: [
-            for (var i = 0; i < 5; i++) ...[
-              if (i > 0) 16.w.horizontalSpace,
-              Shimmer.fromColors(
-                baseColor: AppColors.shimmerBaseColor,
-                highlightColor: AppColors.shimmerHighlightColor,
-                child: SizedBox(
-                  width: 72.w,
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 64.w,
-                        height: 64.w,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                        ),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const NeverScrollableScrollPhysics(),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (var i = 0; i < 5; i++) ...[
+            if (i > 0) 16.w.horizontalSpace,
+            Shimmer.fromColors(
+              baseColor: AppColors.shimmerBaseColor,
+              highlightColor: AppColors.shimmerHighlightColor,
+              child: SizedBox(
+                width: 72.w,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 64.w,
+                      height: 64.w,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
                       ),
-                      8.w.verticalSpace,
-                      Container(
-                        width: 52.w,
-                        height: 12.h,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(4.r),
-                        ),
+                    ),
+                    8.h.verticalSpace,
+                    Container(
+                      width: 52.w,
+                      height: 12.h,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4.r),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -1174,6 +1172,8 @@ class _ProfileFriendAvatar extends StatelessWidget {
     return SizedBox(
       width: 72.w,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
             width: 64.w,
@@ -1188,7 +1188,7 @@ class _ProfileFriendAvatar extends StatelessWidget {
               ),
             ),
           ),
-          8.w.verticalSpace,
+          8.h.verticalSpace,
           AppText(
             text: name,
             maxLines: 1,

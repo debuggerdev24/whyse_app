@@ -39,4 +39,8 @@ class YourBooksProvider extends ChangeNotifier {
     _selectedBookIndexes.clear();
     notifyListeners();
   }
+
+  void clearSessionData() {
+    setOptionMode(OptionMode.none);
+  }
 }

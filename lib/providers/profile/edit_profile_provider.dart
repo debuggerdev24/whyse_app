@@ -131,25 +131,50 @@ class EditProfileProvider extends ChangeNotifier {
 
   String countryDropdownValue() => country ?? _kSelectCountry;
 
-  String languageDropdownValue() =>
-      preferredLanguage ?? _kSelectLanguage;
+  String languageDropdownValue() => preferredLanguage ?? _kSelectLanguage;
 
   static List<String> countryMenuItems() => [
-        _kSelectCountry,
-        ...AppConstants.countries,
-      ];
+    _kSelectCountry,
+    ...AppConstants.countries,
+  ];
 
   static List<String> languageMenuItems() => [
-        _kSelectLanguage,
-        ...AppConstants.preferredLanguages,
-      ];
+    _kSelectLanguage,
+    ...AppConstants.preferredLanguages,
+  ];
+
+  Future<Either<ApiException, Map<String, dynamic>>> requestEmailChange(
+    String email,
+  ) => _profileService.requestEmailChange(email);
+
+  Future<Either<ApiException, Map<String, dynamic>>> requestPhoneChange(
+    String phone,
+  ) => _profileService.requestPhoneChange(phone);
+
+  Future<Either<ApiException, Map<String, dynamic>>> verifyEmailChange({
+    required String email,
+    required String otp,
+  }) => _profileService.verifyEmailChange(email: email, otp: otp);
+
+  Future<Either<ApiException, Map<String, dynamic>>> verifyPhoneChange({
+    required String phone,
+    required String otp,
+  }) => _profileService.verifyPhoneChange(phone: phone, otp: otp);
+
+  Future<Either<ApiException, Map<String, dynamic>>> resendEmailOtp(
+    String email,
+  ) => _profileService.resendEmailOtp(email);
+
+  Future<Either<ApiException, Map<String, dynamic>>> resendPhoneOtp(
+    String phone,
+  ) => _profileService.resendPhoneOtp(phone);
 
   Future<Either<ApiException, Map<String, dynamic>>> submitUpdate() async {
     final countryName = (country == null || country == _kSelectCountry)
         ? ''
         : country!.trim();
-    final language = (preferredLanguage == null ||
-            preferredLanguage == _kSelectLanguage)
+    final language =
+        (preferredLanguage == null || preferredLanguage == _kSelectLanguage)
         ? ''
         : preferredLanguage!.trim();
 
@@ -157,6 +182,7 @@ class EditProfileProvider extends ChangeNotifier {
       'username': username.trim(),
       'firstName': firstName.trim(),
       'lastName': lastName.trim(),
+      'email': email.trim(),
       'country': countryName,
       'preferredLanguage': language,
       'isPrivate': isPrivate,
@@ -167,6 +193,10 @@ class EditProfileProvider extends ChangeNotifier {
         'google': socialGoogle,
       },
     };
+    final phoneTrimmed = phone.trim();
+    if (phoneTrimmed.isNotEmpty) {
+      body['phone'] = phoneTrimmed;
+    }
 
     _avatarRelativeFromLastUpload = null;
 
@@ -196,10 +226,7 @@ class EditProfileProvider extends ChangeNotifier {
         final out = Map<String, dynamic>.from(raw as Map);
         final inner = out['data'];
         if (inner is Map<String, dynamic>) {
-          out['data'] = {
-            ...inner,
-            'avatarUrl': _avatarRelativeFromLastUpload,
-          };
+          out['data'] = {...inner, 'avatarUrl': _avatarRelativeFromLastUpload};
         } else {
           out['data'] = {'avatarUrl': _avatarRelativeFromLastUpload};
         }
@@ -208,5 +235,25 @@ class EditProfileProvider extends ChangeNotifier {
       }
       return Right(raw);
     });
+  }
+
+  void clearSessionData() {
+    firstName = '';
+    lastName = '';
+    username = '';
+    avatarUrl = null;
+    email = '';
+    phone = '';
+    phoneVerified = false;
+    country = null;
+    preferredLanguage = null;
+    isPrivate = false;
+    socialInstagram = '';
+    socialX = '';
+    socialGoogle = '';
+    interests = [];
+    pendingAvatarFile = null;
+    _avatarRelativeFromLastUpload = null;
+    notifyListeners();
   }
 }

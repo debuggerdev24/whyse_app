@@ -201,8 +201,7 @@ class GroupProvider extends ChangeNotifier {
         },
         (r) {
           _groupMembersList = (r['data']['members'] as List)
-              .take(5)
-              .map((e) => GroupMember.fromJson(e))
+              .map((e) => GroupMember.fromJson(e as Map<String, dynamic>))
               .toList();
           getGroupMembersState = DataState.success;
         },
@@ -581,5 +580,35 @@ class GroupProvider extends ChangeNotifier {
       notifyListeners();
     }
     return message;
+  }
+
+  void clearSessionData() {
+    getGroupListState = DataState.loading;
+    getGroupsListError = null;
+    getGroupMembersState = DataState.loading;
+    getGroupMembersError = null;
+    getAllUsersState = DataState.loading;
+    getAllUsersError = null;
+    _allUsersList = [];
+    _usersCurrentPage = 1;
+    _usersHasNextPage = true;
+    _isLoadingMoreUsers = false;
+    _usersSearchQuery = '';
+    _selectedUserIds.clear();
+    _addMembersLoading = false;
+    _joinGroupLoading = false;
+    _createGroupLoading = false;
+    _leaveGroupLoading = false;
+    _myGroupsList = [];
+    _groupMembersList = [];
+    groupSharedTopics = null;
+    isGroupSharedTopicsLoading = false;
+    shareableTopics = [];
+    isShareableTopicsLoading = false;
+    isLoadingMoreShareableTopics = false;
+    hasMoreShareableTopics = true;
+    _shareableTopicsPage = 1;
+    isSharingTopics = false;
+    notifyListeners();
   }
 }

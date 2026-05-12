@@ -1,9 +1,7 @@
 import 'dart:async';
-
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/utils/share_helper.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
-
 import 'package:redstreakapp/models/home/story_models/reading_exit_snapshot.dart';
 import 'package:redstreakapp/providers/home/reading_appearance_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
@@ -18,6 +16,7 @@ class CreatedStoryReadingScreen extends StatefulWidget {
     this.initialPageIndex = 0,
     this.initialConfirmedPageIndex,
     this.storyIdeaId,
+    this.fromContinueReading = false,
   });
 
   final int initialPageIndex;
@@ -26,6 +25,9 @@ class CreatedStoryReadingScreen extends StatefulWidget {
   /// This prevents counting the currently shown page as read just by viewing it.
   final int? initialConfirmedPageIndex;
   final String? storyIdeaId;
+
+  /// When true, user opened this reader from the home Continue Reading shelf (not My Stories).
+  final bool fromContinueReading;
 
   @override
   State<CreatedStoryReadingScreen> createState() =>
@@ -312,24 +314,9 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
   }
 
   void _leaveReader(BuildContext context, StoryProvider storyProvider) {
-    // If the user exits mid-reading (without tapping Next), count the current
-    // page as read for non-last pages. This matches the common expectation that
-    // "I read this page" should reflect in progress when going back.
-    final pages = storyProvider.stories.isEmpty
-        ? const []
-        : storyProvider.stories.first.pages;
-    final totalPages = pages.length;
-    final isLastPage = totalPages > 0 && _currentPageIndex >= totalPages - 1;
-    if (_hasStartedReading &&
-        totalPages > 0 &&
-        !isLastPage &&
-        _currentPageIndex > _maxConfirmedPageIndex) {
-      _queuedProgressPageIndex = _currentPageIndex;
-      _maxConfirmedPageIndex = _currentPageIndex;
-      _flushQueuedPageProgress();
-    } else {
-      _flushQueuedPageProgress();
-    }
+    // Progress is saved only when the user taps "Next Page" (leaving a page) or
+    // "Take Quiz" on the last page — not when opening a page or closing the reader.
+    _flushQueuedPageProgress();
     final snap = _snapshotForPop(storyProvider);
     if (!context.mounted) return;
     if (context.canPop()) {
@@ -413,6 +400,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                 children: [
                   //*top image content
                   StoryHeroHeader(
+                    contentBottomPadding: 18.h,
                     imageUrl: stories.thumbnailUrl,
                     title:
                         '${safePageIndex + 1}. ${stories.title.isNotEmpty ? stories.title : ''}',
@@ -603,6 +591,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        12.w.verticalSpace,
                         if (!_hasStartedReading)
                           _BottomPrimaryButton(
                             text: 'Start Reading',
@@ -625,6 +614,8 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                                     'storyTitle': stories.title,
                                     'storyImageUrl': stories.thumbnailUrl,
                                     'storyIdeaId': widget.storyIdeaId,
+                                    'fromContinueReading':
+                                        widget.fromContinueReading,
                                   },
                                 );
                               },

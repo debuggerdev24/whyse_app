@@ -1,5 +1,6 @@
 import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/utils/user_facing_message.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/group/group_members_model.dart';
 import 'package:redstreakapp/models/group/group_shared_topic_model.dart';
@@ -100,14 +101,31 @@ class _UnifiedGroupScreenState extends State<UnifiedGroupScreen>
                     ),
                     6.w.horizontalSpace,
                     GestureDetector(
+                      behavior: HitTestBehavior.opaque,
                       onTap: () async {
-                        final code = p.displayInviteCode.replaceFirst('#', '');
+                        var code = p.displayInviteCode.trim();
+                        if (code.startsWith('#')) {
+                          code = code.substring(1);
+                        }
+                        code = code.trim();
+                        if (code.isEmpty) {
+                          if (context.mounted) {
+                            AppToast.error(context, 'No invite code to copy');
+                          }
+                          return;
+                        }
                         await Clipboard.setData(ClipboardData(text: code));
+                        if (!context.mounted) return;
+                        HapticFeedback.selectionClick();
+                        AppToast.success(context, 'Invite code copied');
                       },
-                      child: SvgIcon(
-                        AppAssets.copy,
-                        size: 16.sp,
-                        color: AppColors.black,
+                      child: Padding(
+                        padding: EdgeInsets.all(12.w),
+                        child: SvgIcon(
+                          AppAssets.copy,
+                          size: 16.sp,
+                          color: AppColors.black,
+                        ),
                       ),
                     ),
                   ],
@@ -134,7 +152,12 @@ class _UnifiedGroupScreenState extends State<UnifiedGroupScreen>
                     }
                     if (vm.state == DataState.failed) {
                       return AppText(
-                        text: vm.err ?? 'Members unavailable',
+                        text: userFacingMessage(
+                          vm.err,
+                          fallback: 'Members unavailable',
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.medium(
                           fontSize: 12.sp,
                           color: AppColors.black.withValues(alpha: 0.5),
