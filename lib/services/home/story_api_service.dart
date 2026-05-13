@@ -38,12 +38,20 @@ class StoryApiService {
     );
   }
 
+  /// No per-request timeouts — generation can run as long as the server needs.
+  static final Options _generateMobileOptions = Options(
+    receiveTimeout: Duration.zero,
+    sendTimeout: Duration.zero,
+    connectTimeout: Duration.zero,
+  );
+
   Future<Either<ApiException, Map<String, dynamic>>> createStoryIdeas({
     required Map<String, dynamic> data,
   }) async {
     return await BaseApiHelper.instance.post(
       EndPoints.createStoryIdea,
       data: data,
+      options: _generateMobileOptions,
     );
   }
 

@@ -8,7 +8,7 @@ import 'package:redstreakapp/services/home/story_api_service.dart';
 
 class HomeProvider extends ChangeNotifier {
   static const int storyIdeasPageLimit = 20;
-  static const int topicsPageLimit = 8;
+  static const int topicsPageLimit = 10;
   static const int continueReadingPageLimit = 10;
 
   List<CreatedStoryTopicsModel>? topicsList;
@@ -16,6 +16,23 @@ class HomeProvider extends ChangeNotifier {
   bool isTopicsLoadingMore = false;
   bool hasMoreTopics = true;
   int _topicsCurrentPage = 1;
+
+  /// When [data] is a map with `pagination.hasMore`, uses the API flag; otherwise
+  /// assumes more pages exist if we received a full page.
+  static bool _inferHasMoreTopics(
+    Map<dynamic, dynamic>? dataMap,
+    int itemsInPage,
+    int pageLimit,
+  ) {
+    if (itemsInPage <= 0) return false;
+    if (dataMap != null) {
+      final p = dataMap['pagination'];
+      if (p is Map && p['hasMore'] != null) {
+        return p['hasMore'] == true;
+      }
+    }
+    return itemsInPage >= pageLimit;
+  }
 
   // String? topicId;
   StoryIdeaModel? storySummary;
@@ -85,6 +102,7 @@ class HomeProvider extends ChangeNotifier {
       (l) {
         Logger.error(l.errorMsg);
         topicsList = [];
+        hasMoreTopics = false;
       },
       (r) {
         try {
@@ -93,17 +111,29 @@ class HomeProvider extends ChangeNotifier {
             topicsList = data
                 .map((e) => CreatedStoryTopicsModel.fromJson(e))
                 .toList();
+            hasMoreTopics = _inferHasMoreTopics(
+              null,
+              topicsList!.length,
+              topicsPageLimit,
+            );
           } else if (data is Map && data.containsKey("topics")) {
+            final map = Map<dynamic, dynamic>.from(data);
             topicsList = (data["topics"] as List)
                 .map((e) => CreatedStoryTopicsModel.fromJson(e))
                 .toList();
+            hasMoreTopics = _inferHasMoreTopics(
+              map,
+              topicsList!.length,
+              topicsPageLimit,
+            );
           } else {
             topicsList = [];
+            hasMoreTopics = false;
           }
-          hasMoreTopics = (topicsList?.length ?? 0) >= topicsPageLimit;
         } catch (e, stack) {
           Logger.error("Error parsing topics: $e\n$stack");
           topicsList = [];
+          hasMoreTopics = false;
         }
       },
     );
@@ -123,7 +153,10 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
 
     final nextPage = _topicsCurrentPage + 1;
-    final response = await HomeApiService.instance.getMyTopics(page: nextPage);
+    final response = await HomeApiService.instance.getMyTopics(
+      page: nextPage,
+      limit: topicsPageLimit,
+    );
 
     isTopicsLoadingMore = false;
     response.fold(
@@ -135,19 +168,33 @@ class HomeProvider extends ChangeNotifier {
         try {
           final data = r["data"];
           List<CreatedStoryTopicsModel>? nextList;
+          Map<dynamic, dynamic>? dataMap;
           if (data is List) {
             nextList = data
                 .map((e) => CreatedStoryTopicsModel.fromJson(e))
                 .toList();
           } else if (data is Map && data.containsKey("topics")) {
+            dataMap = Map<dynamic, dynamic>.from(data);
             nextList = (data["topics"] as List)
                 .map((e) => CreatedStoryTopicsModel.fromJson(e))
                 .toList();
           }
           if (nextList != null && nextList.isNotEmpty) {
-            topicsList = [...(topicsList ?? []), ...nextList];
-            _topicsCurrentPage = nextPage;
-            hasMoreTopics = nextList.length >= topicsPageLimit;
+            final existingIds = topicsList!.map((e) => e.id).toSet();
+            final unique = nextList
+                .where((e) => !existingIds.contains(e.id))
+                .toList();
+            if (unique.isEmpty) {
+              hasMoreTopics = false;
+            } else {
+              topicsList = [...topicsList!, ...unique];
+              _topicsCurrentPage = nextPage;
+              hasMoreTopics = _inferHasMoreTopics(
+                dataMap,
+                nextList.length,
+                topicsPageLimit,
+              );
+            }
           } else {
             hasMoreTopics = false;
           }

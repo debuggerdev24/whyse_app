@@ -33,15 +33,21 @@ class OnboardingHeader extends StatelessWidget {
         Row(
           spacing: 16.w,
           children: [
-            //todo back button
             GestureDetector(
+              behavior: HitTestBehavior.opaque,
               onTap: currentStep == 0 ? null : onBack,
-              child: Opacity(
-                opacity: currentStep == 0 ? 0.3 : 1,
-                child: SvgIcon(
-                  backIcon,
-                  size: backIconSize.sp,
-                  color: currentStep == 0 ? Colors.grey : AppColors.black,
+              child: SizedBox(
+                width: 48.w,
+                height: 48.w,
+                child: Center(
+                  child: Opacity(
+                    opacity: currentStep == 0 ? 0.3 : 1,
+                    child: SvgIcon(
+                      backIcon,
+                      size: backIconSize.sp,
+                      color: currentStep == 0 ? Colors.grey : AppColors.black,
+                    ),
+                  ),
                 ),
               ),
             ),

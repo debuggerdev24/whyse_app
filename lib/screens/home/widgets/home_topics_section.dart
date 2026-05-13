@@ -66,32 +66,64 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: List.generate(
-                        list.length,
-                        (index) => StoryCard(
-                          story: list[index],
-                          onTap: () {
-                            provider.getTopicStoryDetails(
-                              topicId: list[index].id,
-                            );
-                            context
-                                .pushNamed(
-                                  AppRoutes.createdStorySummaryScreen.name,
-                                  extra: list[index].id,
-                                )
-                                .then((_) {
-                                  if (!context.mounted) return;
-                                  context
-                                      .read<HomeProvider>()
-                                      .getContinueReading(force: true);
-                                });
-                          },
-                        ),
+                  NotificationListener<ScrollNotification>(
+                    onNotification: (ScrollNotification notification) {
+                      if (!provider.hasMoreTopics ||
+                          provider.isTopicsLoadingMore ||
+                          provider.isTopicsLoading) {
+                        return false;
+                      }
+                      final m = notification.metrics;
+                      if (m.axis != Axis.horizontal ||
+                          m.maxScrollExtent <= 0) {
+                        return false;
+                      }
+                      if (m.pixels >= m.maxScrollExtent - 160.w) {
+                        provider.getMyTopicsLoadMore();
+                      }
+                      return false;
+                    },
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ...List.generate(
+                            list.length,
+                            (index) => StoryCard(
+                              story: list[index],
+                              onTap: () {
+                                provider.getTopicStoryDetails(
+                                  topicId: list[index].id,
+                                );
+                                context
+                                    .pushNamed(
+                                      AppRoutes.createdStorySummaryScreen
+                                          .name,
+                                      extra: list[index].id,
+                                    )
+                                    .then((_) {
+                                      if (!context.mounted) return;
+                                      context
+                                          .read<HomeProvider>()
+                                          .getContinueReading(force: true);
+                                    });
+                              },
+                            ),
+                          ),
+                          if (provider.isTopicsLoadingMore)
+                            ...List.generate(
+                              2,
+                              (i) => Padding(
+                                padding: EdgeInsets.only(right: 10.w),
+                                child: SizedBox(
+                                  width: 210.w,
+                                  child: const _StoryCardShimmer(),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ),
@@ -775,7 +807,7 @@ class StoryCard extends StatelessWidget {
       margin: EdgeInsets.only(right: 10.w),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(1-6.r),
+        borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.08),

@@ -12,10 +12,8 @@ import '../helper/log_helper.dart';
 class DioClient {
   DioClient._();
   static final _instance = DioClient._();
-  // static const baseUrl = "https://whyse.com"; //"http://167.172.45.71";
-  // static const apiBaseUrl = "$baseUrl/api/v1";
   static String get baseUrl =>
-      dotenv.env['BASE_URL']!; //?? 'https://whyse.com';
+      dotenv.env['BASE_URL']!;
   static String get apiBaseUrl => '$baseUrl/api/v1';
   static DioClient get instance => _instance;
   late Dio _dio;
@@ -27,7 +25,7 @@ class DioClient {
       BaseOptions(
         baseUrl: apiBaseUrl,
         connectTimeout: const Duration(seconds: 60),
-        receiveTimeout: const Duration(seconds: 180),
+        receiveTimeout: const Duration(seconds: 300),
         sendTimeout: const Duration(seconds: 120),
         headers: {"Content-Type": "application/json"},
       ),

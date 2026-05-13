@@ -63,6 +63,8 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: const HomeStoryTopics(),
             ),
+
+            24.w.verticalSpace,
             const BooksBooksHomeSections(),
             24.w.verticalSpace,
           ],
@@ -71,3 +73,5 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     );
   }
 }
+
+

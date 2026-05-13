@@ -68,36 +68,34 @@ class _UserDashBoardState extends State<UserDashBoard> {
       builder: (context, value, child) => Scaffold(
         backgroundColor: AppColors.backgroundColor,
         body: widget.navigationShell,
-        bottomNavigationBar: SafeArea(
-          child: BottomNavigationBar(
-            currentIndex: tabIndex.value,
-            onTap: (index) {
-              tabIndex.value = index;
-              AppRouter.indexedStackNavigationShell?.goBranch(index);
-            },
-            items: [
-              BottomNavItem(
-                icon: AppAssets.note,
-                isSelected: value == 0,
-                index: 0,
-              ),
-              BottomNavItem(
-                icon: AppAssets.searchIcon,
-                isSelected: value == 1,
-                index: 1,
-              ),
-              BottomNavItem(
-                icon: AppAssets.dumble,
-                isSelected: value == 2,
-                index: 2,
-              ),
-              BottomNavItem(
-                icon: AppAssets.star,
-                isSelected: value == 3,
-                index: 3,
-              ),
-            ],
-          ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: tabIndex.value,
+          onTap: (index) {
+            tabIndex.value = index;
+            AppRouter.indexedStackNavigationShell?.goBranch(index);
+          },
+          items: [
+            BottomNavItem(
+              icon: AppAssets.note,
+              isSelected: value == 0,
+              index: 0,
+            ),
+            BottomNavItem(
+              icon: AppAssets.searchIcon,
+              isSelected: value == 1,
+              index: 1,
+            ),
+            BottomNavItem(
+              icon: AppAssets.dumble,
+              isSelected: value == 2,
+              index: 2,
+            ),
+            BottomNavItem(
+              icon: AppAssets.star,
+              isSelected: value == 3,
+              index: 3,
+            ),
+          ],
         ),
       ),
     );
@@ -119,9 +117,12 @@ class BottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: EdgeInsets.only(
+        top: 18.r,
+        bottom: MediaQuery.of(context).padding.bottom + 10.r,
+      ),
       decoration: BoxDecoration(
         color: AppColors.white,
-
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.3),
@@ -131,7 +132,6 @@ class BottomNavigationBar extends StatelessWidget {
           ),
         ],
       ),
-      height: 80.w,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: List.generate(
@@ -152,7 +152,6 @@ class BottomNavItem extends StatelessWidget {
     required this.icon,
     required this.isSelected,
     required this.index,
-
   });
 
   final String icon;
