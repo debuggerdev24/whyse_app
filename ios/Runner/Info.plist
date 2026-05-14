@@ -23,30 +23,54 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
-    <array>
-      <dict>
-        <key>CFBundleTypeRole</key>
-        <string>Editor</string>
-        <key>CFBundleURLSchemes</key>
-        <array>
-          <string>com.googleusercontent.apps.1072520967140-6hu941fhtps4i2sjkl1gf31l395j2ia2</string>
-        </array>
-      </dict>
-    </array>
-
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.1072520967140-6hu941fhtps4i2sjkl1gf31l395j2ia2</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>FlutterDeepLinkingEnabled</key>
-    <false/>
+	<false/>
 	<key>GIDClientID</key>
-    <string>1072520967140-6hu941fhtps4i2sjkl1gf31l395j2ia2.apps.googleusercontent.com</string>
-    <key>LSApplicationQueriesSchemes</key>
-    <array>
-       <string>https</string>
-       <string>googlegmail</string>
-    </array>
+	<string>1072520967140-6hu941fhtps4i2sjkl1gf31l395j2ia2.apps.googleusercontent.com</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>https</string>
+		<string>googlegmail</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>We need access to your camera so you can take a new profile picture.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need access to your photo library so you can choose a profile picture.</string>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneClassName</key>
+					<string>UIWindowScene</string>
+					<key>UISceneConfigurationName</key>
+					<string>flutter</string>
+					<key>UISceneDelegateClassName</key>
+					<string>FlutterSceneDelegate</string>
+					<key>UISceneStoryboardFile</key>
+					<string>Main</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -57,10 +81,6 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>We need access to your photo library so you can choose a profile picture.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>We need access to your camera so you can take a new profile picture.</string>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationLandscapeLeft</string>

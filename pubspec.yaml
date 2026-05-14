@@ -80,58 +80,26 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # default-flavor: local
-  # default-flavor: staging
-  default-flavor: production
-
-  # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
     - assets/icons/
     - assets/lottie/
     - .env
-    - .env.staging
-    - .env.production
 
-
-  #   - images/a_dot_ham.jpeg
-
-  # An image asset can refer to one or more resolution-specific "variants", see
-  # https://flutter.dev/to/resolution-aware-images
-
-  # For details regarding adding assets from package dependencies, see
-  # https://flutter.dev/to/asset-from-package
-
-  # To add custom fonts to your application, add a fonts section here,
-  # in this "flutter" section. Each entry in this list should have a
-  # "family" key with the font family name, and a "fonts" key with a
-  # list giving the asset and other descriptors for the font.
-fonts:
-  - family: SFProDisplay
-    fonts:
-      - asset: assets/fonts/SFPRODISPLAYBLACKITALIC.OTF
-        weight: 900
-      - asset: assets/fonts/SFPRODISPLAYBOLD.OTF
-        weight: 700
-      - asset: assets/fonts/SFPRODISPLAYHEAVYITALIC.OTF
-        weight: 800
-      - asset: assets/fonts/SFPRODISPLAYREGULAR.OTF
-        weight: 400
-      - asset: assets/fonts/SFPRODISPLAYSEMIBOLDITALIC.OTF
-        weight: 600
-      - asset: assets/fonts/SFPRODISPLAYTHINITALIC.OTF
-        weight: 300
-      - asset: assets/fonts/SFPRODISPLAYMEDIUM.OTF
-        weight: 500
-
-   
-  #   - family: SFProText
-  #     fonts:
-  #       - asset: assets/fonts/SF-Pro-Text-Regular.otf
-  #         weight: 400
-  #       - asset: assets/fonts/SF-Pro-Text-Medium.otf
-  #         weight: 500
-  #       - asset: assets/fonts/SF-Pro-Text-Semibold.otf
-  #         weight: 600
-  #       - asset: assets/fonts/SF-Pro-Text-Bold.otf
-  #         weight: 700
+  fonts:
+    - family: SFProDisplay
+      fonts:
+        - asset: assets/fonts/SFPRODISPLAYBLACKITALIC.OTF
+          weight: 900
+        - asset: assets/fonts/SFPRODISPLAYBOLD.OTF
+          weight: 700
+        - asset: assets/fonts/SFPRODISPLAYHEAVYITALIC.OTF
+          weight: 800
+        - asset: assets/fonts/SFPRODISPLAYREGULAR.OTF
+          weight: 400
+        - asset: assets/fonts/SFPRODISPLAYSEMIBOLDITALIC.OTF
+          weight: 600
+        - asset: assets/fonts/SFPRODISPLAYTHINITALIC.OTF
+          weight: 300
+        - asset: assets/fonts/SFPRODISPLAYMEDIUM.OTF
+          weight: 500
