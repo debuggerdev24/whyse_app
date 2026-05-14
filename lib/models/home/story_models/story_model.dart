@@ -15,6 +15,9 @@ class StoryModel {
   final int? lessonDuration, age;
   final List<String>? tags;
 
+  /// Order of this story in its topic (from `storyIdea.sequenceIndex` / `priority`).
+  final int? sequenceIndex;
+
   StoryModel({
     required this.id,
     required this.title,
@@ -30,8 +33,10 @@ class StoryModel {
     this.lessonDuration,
     this.tags,
     this.createdAt,
-    this.updatedAt, required this.pages,
+    this.updatedAt,
+    required this.pages,
     required this.thumbnailUrl,
+    this.sequenceIndex,
   });
 
   factory StoryModel.fromJson(Map<String, dynamic> json) {
@@ -53,8 +58,16 @@ class StoryModel {
       tags: json['tags'] != null ? List<String>.from(json['tags']) : [],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
-      pages: json['pages'] != null ? (json['pages'] as List).map((i) => StoryPages.fromJson(i)).toList() : []
-      ,thumbnailUrl: resolveNetworkImageUrl(json["thumbnailUrl"]?.toString() ?? ''),
+      pages: json['pages'] != null
+          ? (json['pages'] as List)
+              .map((i) => StoryPages.fromJson(i))
+              .toList()
+          : [],
+      thumbnailUrl:
+          resolveNetworkImageUrl(json["thumbnailUrl"]?.toString() ?? ''),
+      sequenceIndex: json['sequenceIndex'] is int
+          ? json['sequenceIndex'] as int
+          : int.tryParse(json['sequenceIndex']?.toString() ?? ''),
     );
   }
 }

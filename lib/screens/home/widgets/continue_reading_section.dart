@@ -5,6 +5,9 @@ import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:shimmer/shimmer.dart';
 
+/// Card width (matches Series [StoryCard]) + trailing gap between slots.
+double _continueReadingSlotExtent() => 210.w + 10.w;
+
 class ContinueReadingSection extends StatefulWidget {
   const ContinueReadingSection({super.key});
 
@@ -64,31 +67,28 @@ class _ContinueReadingSectionState extends State<ContinueReadingSection>
             "initialPageIndex": item.continueFromPageIndex,
             "initialConfirmedPageIndex": item.lastPageIndex,
             "fromContinueReading": true,
+            "continueReadingTopicId": item.topic.id,
+            "resumeStoryIsGenerated": item.isGenerated,
           },
         )
         .then((_) {
           if (!mounted) return;
           context.read<HomeProvider>().getContinueReading(force: true);
         });
+  }
 
-    // Fire-and-forget fetch; reader will rebuild when StoryProvider updates.
-    // ignore: unawaited_futures
-    storyProvider.getStoryByIdea(
-      context: context,
-      storyIdea: item.storyIdeaId,
-      fetchOnly: true,
-      onStoryNotGenerated: () {
-        if (!context.mounted) return;
-        AppToast.info(
-          context: context,
-          durationSecond: 3,
-          message: "Story is not ready yet. Please try again in a moment.",
-        );
-      },
-      onSuccess: (payload) {
-        storyProvider.addStoryFromGetStoryByIdeaData(payload, 0);
-      },
-    );
+  void _openTopicDetails(BuildContext context, ContinueReadingItemModel item) {
+    final topicId = item.topic.id;
+    if (topicId.isEmpty) return;
+    final hp = context.read<HomeProvider>();
+    hp.getTopicStoryDetails(topicId: topicId);
+    if (!context.mounted) return;
+    context
+        .pushNamed(AppRoutes.createdStorySummaryScreen.name, extra: topicId)
+        .then((_) {
+          if (!context.mounted) return;
+          hp.getContinueReading(force: true);
+        });
   }
 
   @override
@@ -127,20 +127,59 @@ class _ContinueReadingSectionState extends State<ContinueReadingSection>
               return const _ContinueReadingEmptyState();
             }
 
-            return SizedBox(
-              height: 292.h,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                padding: EdgeInsets.only(left: 12.w, right: 20.w),
-                itemCount: items.length,
-                separatorBuilder: (_, __) => 14.w.horizontalSpace,
-                itemBuilder: (_, index) {
-                  return _ContinueReadingCard(
-                    item: items[index],
-                    onTap: () => _openContinueReading(context, items[index]),
-                  );
-                },
+            final tailShimmer =
+                provider.isContinueReadingLoadingMore &&
+                    provider.hasMoreContinueReading
+                ? 2
+                : 0;
+
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              child: SizedBox(
+                height: 280.w,
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: (ScrollNotification notification) {
+                    if (!provider.hasMoreContinueReading ||
+                        provider.isContinueReadingLoadingMore ||
+                        provider.isContinueReadingLoading) {
+                      return false;
+                    }
+                    final m = notification.metrics;
+                    if (m.axis != Axis.horizontal || m.maxScrollExtent <= 0) {
+                      return false;
+                    }
+                    if (m.pixels >= m.maxScrollExtent - 160.w) {
+                      provider.getContinueReadingLoadMore();
+                    }
+                    return false;
+                  },
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    padding: EdgeInsets.zero,
+                    itemExtent: _continueReadingSlotExtent(),
+                    itemCount: items.length + tailShimmer,
+                    itemBuilder: (_, index) {
+                      return Padding(
+                        padding: EdgeInsets.only(right: 18.w),
+                        child: SizedBox(
+                          width: 210.w,
+                          child: index >= items.length
+                              ? const _ContinueReadingCardShimmer()
+                              : _ContinueReadingCard(
+                                  item: items[index],
+                                  onOpenDetails: () =>
+                                      _openTopicDetails(context, items[index]),
+                                  onContinueReading: () => _openContinueReading(
+                                    context,
+                                    items[index],
+                                  ),
+                                ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ),
             );
           },
@@ -151,110 +190,144 @@ class _ContinueReadingSectionState extends State<ContinueReadingSection>
 }
 
 class _ContinueReadingCard extends StatelessWidget {
-  const _ContinueReadingCard({required this.item, required this.onTap});
+  const _ContinueReadingCard({
+    required this.item,
+    required this.onOpenDetails,
+    required this.onContinueReading,
+  });
 
   final ContinueReadingItemModel item;
-  final VoidCallback onTap;
+  final VoidCallback onOpenDetails;
+  final VoidCallback onContinueReading;
 
   @override
   Widget build(BuildContext context) {
-    final progressValue = item.progressValue;
-    final pageCount = item.pageCount <= 0 ? 0 : item.pageCount;
-    final readPages = item.readPages;
+    final subtitleColor = AppColors.black.withValues(alpha: 0.45);
+    final useTopicShelfCounts = item.displayReadingsDen != null &&
+        item.displayReadingsDen! > 0;
+    final pageCount = useTopicShelfCounts
+        ? item.displayReadingsDen!
+        : (item.pageCount <= 0 ? 0 : item.pageCount);
+    final readPages = useTopicShelfCounts
+        ? (item.displayReadingsNum ?? 0)
+        : item.readPages;
+    final displayTitle = item.topic.title.isEmpty
+        ? item.storyIdeaTitle.isEmpty
+            ? item.storyTitle
+            : item.storyIdeaTitle
+        : item.topic.title;
 
-    Logger.info('continue reading image home screen: ${item.thumbnailUrl}');
-
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
+    return SizedBox(
+      width: 210.w, 
+      height: 268.w,
       child: Container(
-        width: 200.w,
-        margin: EdgeInsets.all(6),
-        padding: EdgeInsets.all(0),
+        alignment: Alignment.center,
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 5,
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 12,
               offset: const Offset(0, 4),
             ),
           ],
         ),
-
+        clipBehavior: Clip.antiAlias,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: SizedBox(
-                width: double.infinity,
-                child: AppNetworkImage(
-                  imageUrl: item.thumbnailUrl,
-                  tag: 'ContinueReading.card',
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20.r),
-                    topRight: Radius.circular(20.r),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onOpenDetails,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(16.r),
                   ),
-                  placeholder: (_) => _ImageShimmerPlaceholder(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20.r),
-                      topRight: Radius.circular(20.r),
-                    ),
-                  ),
-                  errorBuilder: (_, __, ___) => _ImageErrorPlaceholder(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20.r),
-                      topRight: Radius.circular(20.r),
-                    ),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final w = constraints.maxWidth;
+                      final h = constraints.maxHeight;
+                      return AppNetworkImage(
+                        imageUrl: item.topic.thumbnailUrl.isEmpty
+                            ? item.thumbnailUrl
+                            : item.topic.thumbnailUrl,
+                        tag: 'ContinueReading.card',
+                        width: w,
+                        height: h,
+                        fit: BoxFit.cover,
+                        placeholder: (_) => Shimmer.fromColors(
+                          baseColor: AppColors.shimmerBaseColor,
+                          highlightColor: AppColors.shimmerHighlightColor,
+                          child: ColoredBox(
+                            color: AppColors.shimmerBaseColor,
+                            child: SizedBox(width: w, height: h),
+                          ),
+                        ),
+                        errorCompact: true,
+                        errorIconOnly: true,
+                      );
+                    },
                   ),
                 ),
               ),
             ),
             Padding(
-              padding: EdgeInsets.all(13),
+              padding: EdgeInsets.fromLTRB(14.w, 10.w, 14.w, 12.w),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  AppText(
-                    text: item.topic.title.isNotEmpty
-                        ? item.topic.title
-                        : 'Story',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.semiBold(
-                      fontSize: 12.sp,
-                      color: AppColors.black.withValues(alpha: 0.6),
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: onOpenDetails,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Align(
+                          alignment: Alignment.topLeft,
+                          child: AppText(
+                            text: displayTitle.isNotEmpty
+                                ? displayTitle
+                                : 'Story',
+                            style: AppTextStyles.bold(
+                              fontSize: 16.sp,
+                              height: 1.22,
+                            ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        SizedBox(height: 6.w),
+                        SizedBox(
+                          height: 16.sp,
+                          width: double.infinity,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: AppText(
+                              text: pageCount > 0
+                                  ? '$readPages out of $pageCount Readings'
+                                  : '0 out of 0 Readings',
+                              style: AppTextStyles.medium(
+                                fontSize: 12.sp,
+                                height: 1.2,
+                                color: subtitleColor,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  0.h.verticalSpace,
-                  AppText(
-                    text: item.storyTitle.isNotEmpty
-                        ? item.storyTitle
-                        : item.storyIdeaTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.bold(fontSize: 20, height: 1.2),
-                  ),
-                  8.h.verticalSpace,
-                  AppText(
-                    text: "$readPages/$pageCount Pages Read",
-                    style: AppTextStyles.semiBold(
-                      fontSize: 12.sp,
-                      color: AppColors.black.withValues(alpha: 0.8),
-                    ),
-                  ),
-                  5.h.verticalSpace,
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(20.r),
-                    child: LinearProgressIndicator(
-                      value: progressValue,
-                      minHeight: 5.h,
-                      backgroundColor: const Color(0xFFEBEBEB),
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        AppColors.orangeColor,
-                      ),
-                    ),
+                  SizedBox(height: 10.w),
+                  AppButton(
+                    margin: EdgeInsets.zero,
+                    onTap: onContinueReading,
+                    text: "Continue Reading",
                   ),
                 ],
               ),
@@ -271,67 +344,92 @@ class _ContinueReadingShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 292.h,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.only(left: 12.w, right: 20.w),
-        itemCount: 3,
-        separatorBuilder: (_, __) => 14.w.horizontalSpace,
-        itemBuilder: (_, __) => Container(
-          width: 200.w,
-          margin: EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(20.r),
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      child: SizedBox(
+        height: 280.w,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.zero,
+          itemExtent: _continueReadingSlotExtent(),
+          itemCount: 3,
+          itemBuilder: (_, __) => Padding(
+            padding: EdgeInsets.only(right: 10.w),
+            child: SizedBox(width: 210.w, child: _ContinueReadingCardShimmer()),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Shimmer matching Series [StoryCard] layout.
+class _ContinueReadingCardShimmer extends StatelessWidget {
+  const _ContinueReadingCardShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: AppColors.shimmerBaseColor,
+      highlightColor: AppColors.shimmerHighlightColor,
+      child: SizedBox(
+        width: 210.w,
+        height: 268.w,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.06),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          clipBehavior: Clip.antiAlias,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child: Shimmer.fromColors(
-                  baseColor: const Color(0xFFE7E9EC),
-                  highlightColor: const Color(0xFFF5F6F8),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE7E9EC),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20.r),
-                        topRight: Radius.circular(20.r),
-                      ),
-                    ),
-                  ),
+                child: ColoredBox(
+                  color: AppColors.shimmerBaseColor,
+                  child: const SizedBox.expand(),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(13),
-                child: Shimmer.fromColors(
-                  baseColor: const Color(0xFFE7E9EC),
-                  highlightColor: const Color(0xFFF5F6F8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(height: 12.h, width: 90.w, color: Colors.white),
-                      10.h.verticalSpace,
-                      Container(
-                        height: 18.h,
-                        width: 140.w,
-                        color: Colors.white,
+                padding: EdgeInsets.fromLTRB(14.w, 10.w, 14.w, 12.w),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      height: 54.w,
+                      width: 140.w,
+                      decoration: BoxDecoration(
+                        color: AppColors.shimmerBaseColor,
+                        borderRadius: BorderRadius.circular(4.r),
                       ),
-                      12.h.verticalSpace,
-                      Container(
-                        height: 12.h,
-                        width: 120.w,
-                        color: Colors.white,
+                    ),
+                    SizedBox(height: 6.w),
+                    Container(
+                      height: 16.sp,
+                      width: 120.w,
+                      decoration: BoxDecoration(
+                        color: AppColors.shimmerBaseColor,
+                        borderRadius: BorderRadius.circular(4.r),
                       ),
-                      10.h.verticalSpace,
-                      Container(
-                        height: 5.h,
-                        width: double.infinity,
-                        color: Colors.white,
+                    ),
+                    SizedBox(height: 10.w),
+                    Container(
+                      height: 44.w,
+                      decoration: BoxDecoration(
+                        color: AppColors.shimmerBaseColor,
+                        borderRadius: BorderRadius.circular(30.r),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -459,61 +557,6 @@ class _ContinueReadingErrorState extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ImageShimmerPlaceholder extends StatelessWidget {
-  const _ImageShimmerPlaceholder({required this.borderRadius});
-
-  final BorderRadius borderRadius;
-
-  @override
-  Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: const Color(0xFFE7E9EC),
-      highlightColor: const Color(0xFFF5F6F8),
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFFE7E9EC),
-          borderRadius: borderRadius,
-        ),
-      ),
-    );
-  }
-}
-
-class _ImageErrorPlaceholder extends StatelessWidget {
-  const _ImageErrorPlaceholder({required this.borderRadius});
-
-  final BorderRadius borderRadius;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFECEFF3),
-        borderRadius: borderRadius,
-      ),
-      alignment: Alignment.center,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.broken_image_outlined,
-            color: AppColors.black.withValues(alpha: 0.4),
-            size: 30.w,
-          ),
-          6.h.verticalSpace,
-          AppText(
-            text: 'Image unavailable',
-            style: AppTextStyles.semiBold(
-              fontSize: 11.sp,
-              color: AppColors.black.withValues(alpha: 0.45),
-            ),
-          ),
-        ],
       ),
     );
   }

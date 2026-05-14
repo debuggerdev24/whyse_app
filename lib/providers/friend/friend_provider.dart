@@ -35,23 +35,58 @@ class FriendProvider extends ChangeNotifier {
 
   String _searchQuery = '';
 
+  /// Re-fetches page 1. If we already have a successful load, updates in the
+  /// background without clearing the list (avoids full-screen shimmer on revisit).
   Future<void> getFriends() async {
-    try {
+    final hasSuccessCache = getFriendsState == DataState.success;
+
+    if (hasSuccessCache) {
+      await _fetchFriendsFirstPage(
+        showLoading: false,
+        clearListOnStart: false,
+        preserveListOnFailure: true,
+      );
+      return;
+    }
+
+    await _fetchFriendsFirstPage(
+      showLoading: true,
+      clearListOnStart: true,
+      preserveListOnFailure: false,
+    );
+  }
+
+  Future<void> _fetchFriendsFirstPage({
+    required bool showLoading,
+    required bool clearListOnStart,
+    required bool preserveListOnFailure,
+  }) async {
+    if (showLoading) {
       getFriendsState = DataState.loading;
       getFriendsError = null;
-      _friendsList = [];
+      if (clearListOnStart) {
+        _friendsList = [];
+      }
       _currentPage = 1;
       _totalPages = 1;
       notifyListeners();
+    }
 
+    try {
       final result = await FriendApiService.instance.getFriends(page: 1);
       result.fold(
         (l) {
-          getFriendsState = DataState.failed;
-          getFriendsError = l.errorMsg;
-          Logger.error(
-            '[FRIEND PROVIDER]: error getting friends: ${l.errorMsg}',
-          );
+          if (preserveListOnFailure && _friendsList.isNotEmpty) {
+            Logger.error(
+              '[FRIEND PROVIDER]: silent friends refresh failed: ${l.errorMsg}',
+            );
+          } else {
+            getFriendsState = DataState.failed;
+            getFriendsError = l.errorMsg;
+            Logger.error(
+              '[FRIEND PROVIDER]: error getting friends: ${l.errorMsg}',
+            );
+          }
         },
         (r) {
           final data = r['data'] as Map<String, dynamic>;
@@ -63,6 +98,7 @@ class FriendProvider extends ChangeNotifier {
           _currentPage = pagination['page'] as int;
           _totalPages = pagination['totalPages'] as int;
           getFriendsState = DataState.success;
+          getFriendsError = null;
           Logger.info(
             '[FRIEND PROVIDER]: friends fetched: ${_friendsList.length}',
           );
@@ -70,11 +106,17 @@ class FriendProvider extends ChangeNotifier {
       );
       notifyListeners();
     } catch (e) {
-      getFriendsState = DataState.failed;
-      getFriendsError = e.toString();
-      Logger.error(
-        '[FRIEND PROVIDER]: exception getting friends: ${e.toString()}',
-      );
+      if (preserveListOnFailure && _friendsList.isNotEmpty) {
+        Logger.error(
+          '[FRIEND PROVIDER]: silent friends refresh exception: ${e.toString()}',
+        );
+      } else {
+        getFriendsState = DataState.failed;
+        getFriendsError = e.toString();
+        Logger.error(
+          '[FRIEND PROVIDER]: exception getting friends: ${e.toString()}',
+        );
+      }
       notifyListeners();
     }
   }

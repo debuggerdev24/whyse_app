@@ -46,16 +46,42 @@ class HomeProvider extends ChangeNotifier {
   // ---------------- Continue Reading (Home shelf) ----------------
   List<ContinueReadingItemModel>? continueReadingItems;
   bool isContinueReadingLoading = false;
+  bool isContinueReadingLoadingMore = false;
+  bool hasMoreContinueReading = false;
+  int _continueReadingPage = 1;
   String? continueReadingError;
+
+  void _mergeContinueReadingUnique(List<ContinueReadingItemModel> pageItems) {
+    final merged = List<ContinueReadingItemModel>.from(
+      continueReadingItems ?? const [],
+    );
+    final ids = merged.map((e) => e.storyIdeaId).toSet();
+    for (final e in pageItems) {
+      if (e.storyIdeaId.isEmpty || ids.contains(e.storyIdeaId)) continue;
+      merged.add(e);
+      ids.add(e.storyIdeaId);
+    }
+    ContinueReadingItemModel.sortByLastReadDesc(merged);
+    continueReadingItems = merged;
+  }
 
   Future<void> getContinueReading({bool force = false}) async {
     // Allow [force] refetch even while a request is in flight (e.g. after quiz → home).
     if (isContinueReadingLoading && !force) return;
     if (!force && continueReadingItems != null) return;
     isContinueReadingLoading = true;
+    isContinueReadingLoadingMore = false;
     continueReadingError = null;
-    if (force) continueReadingItems = null;
+    if (force) {
+      continueReadingItems = null;
+      _continueReadingPage = 1;
+      hasMoreContinueReading = true;
+    }
     notifyListeners();
+
+    // Load Series (topics) in parallel with Continue Reading — same moment, not after.
+    // ignore: unawaited_futures
+    getMyTopics();
 
     final response = await HomeApiService.instance.getContinueReading(
       page: 1,
@@ -66,21 +92,62 @@ class HomeProvider extends ChangeNotifier {
       (l) {
         continueReadingError = l.errorMsg;
         continueReadingItems = [];
+        hasMoreContinueReading = false;
       },
       (r) {
         try {
           final model = ContinueReadingListModel.fromResponse(r);
           continueReadingItems = model.items;
           continueReadingError = null;
+          _continueReadingPage = 1;
+          hasMoreContinueReading = model.pagination?.hasMore ?? false;
         } catch (e, stack) {
           Logger.error("Error parsing continue reading: $e\n$stack");
           continueReadingError = "Unable to load continue reading.";
           continueReadingItems = [];
+          hasMoreContinueReading = false;
         }
       },
     );
 
     isContinueReadingLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> getContinueReadingLoadMore() async {
+    if (!hasMoreContinueReading ||
+        isContinueReadingLoading ||
+        isContinueReadingLoadingMore ||
+        continueReadingItems == null) {
+      return;
+    }
+
+    isContinueReadingLoadingMore = true;
+    notifyListeners();
+
+    final nextPage = _continueReadingPage + 1;
+    final response = await HomeApiService.instance.getContinueReading(
+      page: nextPage,
+      limit: continueReadingPageLimit,
+    );
+
+    response.fold(
+      (l) {
+        Logger.error('Continue reading load more: ${l.errorMsg}');
+      },
+      (r) {
+        try {
+          final model = ContinueReadingListModel.fromResponse(r);
+          _mergeContinueReadingUnique(model.items);
+          _continueReadingPage = nextPage;
+          hasMoreContinueReading = model.pagination?.hasMore ?? false;
+        } catch (e, stack) {
+          Logger.error("Error parsing continue reading (more): $e\n$stack");
+        }
+      },
+    );
+
+    isContinueReadingLoadingMore = false;
     notifyListeners();
   }
 
@@ -511,6 +578,9 @@ class HomeProvider extends ChangeNotifier {
     isRefreshingStoryIdeas = false;
     continueReadingItems = null;
     isContinueReadingLoading = false;
+    isContinueReadingLoadingMore = false;
+    hasMoreContinueReading = false;
+    _continueReadingPage = 1;
     continueReadingError = null;
     notifyListeners();
   }

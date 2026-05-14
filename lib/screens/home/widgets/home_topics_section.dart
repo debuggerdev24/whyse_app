@@ -74,8 +74,7 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
                         return false;
                       }
                       final m = notification.metrics;
-                      if (m.axis != Axis.horizontal ||
-                          m.maxScrollExtent <= 0) {
+                      if (m.axis != Axis.horizontal || m.maxScrollExtent <= 0) {
                         return false;
                       }
                       if (m.pixels >= m.maxScrollExtent - 160.w) {
@@ -99,8 +98,7 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
                                 );
                                 context
                                     .pushNamed(
-                                      AppRoutes.createdStorySummaryScreen
-                                          .name,
+                                      AppRoutes.createdStorySummaryScreen.name,
                                       extra: list[index].id,
                                     )
                                     .then((_) {
@@ -116,7 +114,7 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
                             ...List.generate(
                               2,
                               (i) => Padding(
-                                padding: EdgeInsets.only(right: 10.w),
+                                padding: EdgeInsets.only(right: 18.w),
                                 child: SizedBox(
                                   width: 210.w,
                                   child: const _StoryCardShimmer(),
@@ -204,7 +202,7 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AppText(
-          text: "Your Story Topics",
+          text: "Series",
           style: AppTextStyles.semibold(fontSize: 20.sp),
         ),
         16.w.verticalSpace,
@@ -804,7 +802,7 @@ class StoryCard extends StatelessWidget {
     return Container(
       width: 210.w,
       alignment: Alignment.center,
-      margin: EdgeInsets.only(right: 10.w),
+      margin: EdgeInsets.only(right: 18.w),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16.r),

@@ -807,6 +807,12 @@ class _StoryViewerState extends State<_StoryViewer> {
   void initState() {
     super.initState();
     _resetReadingSession();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final id = widget.story.id;
+      if (id.isEmpty) return;
+      context.read<StoryProvider>().prefetchMcqQuizForReading(storyId: id);
+    });
   }
 
   @override
@@ -816,6 +822,12 @@ class _StoryViewerState extends State<_StoryViewer> {
         oldWidget.lessonDuration != widget.lessonDuration) {
       _currentPageIndex = 0;
       _resetReadingSession();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final id = widget.story.id;
+        if (id.isEmpty) return;
+        context.read<StoryProvider>().prefetchMcqQuizForReading(storyId: id);
+      });
     }
   }
 
@@ -920,7 +932,11 @@ class _StoryViewerState extends State<_StoryViewer> {
           page: page,
           pageIndex: index,
           totalPages: pages.length,
-          storyTitle: widget.story.title,
+          storyTitle: () {
+            final n = widget.story.sequenceIndex;
+            final prefix = n != null && n > 0 ? '$n. ' : '';
+            return '$prefix${widget.story.title}';
+          }(),
           storyIdeaId: widget.storyIdeaId,
           topicId: widget.topicId,
           topicTitle: widget.topicTitle,

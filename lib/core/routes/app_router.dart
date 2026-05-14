@@ -255,6 +255,8 @@ class AppRouter {
           storyImageUrl: extra["storyImageUrl"] as String?,
           storyIdeaId: extra["storyIdeaId"] as String?,
           fromContinueReading: extra["fromContinueReading"] == true,
+          continueReadingTopicId:
+              extra["continueReadingTopicId"]?.toString().trim(),
         );
       },
     ),
@@ -274,6 +276,8 @@ class AppRouter {
           storyIdeaId: extra?['storyIdeaId'] as String?,
           storyId: extra?['storyId'] as String?,
           fromContinueReading: extra?['fromContinueReading'] == true,
+          continueReadingTopicId:
+              extra?['continueReadingTopicId']?.toString().trim(),
         );
       },
     ),
@@ -294,6 +298,8 @@ class AppRouter {
           storyIdeaId: extra?['storyIdeaId'] as String?,
           storyId: extra?['storyId'] as String?,
           fromContinueReading: extra?['fromContinueReading'] == true,
+          continueReadingTopicId:
+              extra?['continueReadingTopicId']?.toString().trim(),
         );
       },
     ),
@@ -403,6 +409,8 @@ class AppRouter {
         int initialPageIndex = 0;
         int? initialConfirmedPageIndex;
         var fromContinueReading = false;
+        String? continueReadingTopicId;
+        bool? resumeStoryIsGenerated;
         if (extra is Map<String, dynamic>) {
           storyIdeaId = extra["storyIdeaId"]?.toString();
           initialPageIndex = extra["initialPageIndex"] is int
@@ -415,12 +423,25 @@ class AppRouter {
             initialConfirmedPageIndex = int.tryParse(rawConfirmed.toString());
           }
           fromContinueReading = extra["fromContinueReading"] == true;
+          continueReadingTopicId =
+              extra["continueReadingTopicId"]?.toString().trim();
+          if (continueReadingTopicId != null && continueReadingTopicId.isEmpty) {
+            continueReadingTopicId = null;
+          }
+          final rawGen = extra["resumeStoryIsGenerated"];
+          if (rawGen is bool) {
+            resumeStoryIsGenerated = rawGen;
+          } else if (rawGen != null) {
+            resumeStoryIsGenerated = rawGen == true || rawGen.toString() == 'true';
+          }
         }
         return CreatedStoryReadingScreen(
           storyIdeaId: storyIdeaId,
           initialPageIndex: initialPageIndex,
           initialConfirmedPageIndex: initialConfirmedPageIndex,
           fromContinueReading: fromContinueReading,
+          continueReadingTopicId: continueReadingTopicId,
+          resumeStoryIsGenerated: resumeStoryIsGenerated,
         );
       },
     ),

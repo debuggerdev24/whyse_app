@@ -17,6 +17,8 @@ class CreatedStoryReadingScreen extends StatefulWidget {
     this.initialConfirmedPageIndex,
     this.storyIdeaId,
     this.fromContinueReading = false,
+    this.continueReadingTopicId,
+    this.resumeStoryIsGenerated,
   });
 
   final int initialPageIndex;
@@ -29,6 +31,13 @@ class CreatedStoryReadingScreen extends StatefulWidget {
   /// When true, user opened this reader from the home Continue Reading shelf (not My Stories).
   final bool fromContinueReading;
 
+  /// Topic id for returning to [MyStoryIdeasScreen] after quiz when "See Next Story".
+  final String? continueReadingTopicId;
+
+  /// From Continue Reading API: resume target story's `isGenerated`. When false,
+  /// [getStoryByIdea] runs generation; when null, only fetch (legacy / other entry).
+  final bool? resumeStoryIsGenerated;
+
   @override
   State<CreatedStoryReadingScreen> createState() =>
       _CreatedStoryReadingScreenState();
@@ -37,6 +46,8 @@ class CreatedStoryReadingScreen extends StatefulWidget {
 class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
   /// Batches rapid "Next Page" taps into one API call (latest page wins).
   static const _progressDebounce = Duration(milliseconds: 450);
+
+  String? _prefetchedMcqQuizForStoryId;
 
   late int _currentPageIndex;
   Timer? _readingTimer;
@@ -67,7 +78,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
       context.read<StoryProvider>().getStoryByIdea(
         context: context,
         storyIdea: id,
-        fetchOnly: true,
+        fetchOnly: widget.resumeStoryIsGenerated != false,
         onStoryNotGenerated: () {},
         onSuccess: (payload) {
           if (!mounted) return;
@@ -77,6 +88,23 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
           );
         },
       );
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant CreatedStoryReadingScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.storyIdeaId != oldWidget.storyIdeaId) {
+      _prefetchedMcqQuizForStoryId = null;
+    }
+  }
+
+  void _scheduleMcqQuizPrefetch(String storyId) {
+    if (storyId.isEmpty || _prefetchedMcqQuizForStoryId == storyId) return;
+    _prefetchedMcqQuizForStoryId = storyId;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<StoryProvider>().prefetchMcqQuizForReading(storyId: storyId);
     });
   }
 
@@ -161,7 +189,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
     context.read<StoryProvider>().getStoryByIdea(
       context: context,
       storyIdea: id,
-      fetchOnly: true,
+      fetchOnly: widget.resumeStoryIsGenerated != false,
       onStoryNotGenerated: () {},
       onSuccess: (payload) {
         if (!mounted) return;
@@ -396,14 +424,20 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
               final isFirstPage = safePageIndex == 0;
               final isLastPage = safePageIndex == pages.length - 1;
               final theme = appearance.activeTheme;
+              final storyOrder = stories.sequenceIndex;
+              final titlePrefix = storyOrder != null && storyOrder > 0
+                  ? '$storyOrder. '
+                  : '';
+              final heroTitle =
+                  '$titlePrefix${stories.title.isNotEmpty ? stories.title : ''}';
+              _scheduleMcqQuizPrefetch(stories.id);
               return Column(
                 children: [
                   //*top image content
                   StoryHeroHeader(
                     contentBottomPadding: 18.h,
                     imageUrl: stories.thumbnailUrl,
-                    title:
-                        '${safePageIndex + 1}. ${stories.title.isNotEmpty ? stories.title : ''}',
+                    title: heroTitle,
                     topLeft: StoryCircleButton(
                       onTap: () => _leaveReader(context, provider),
                       child: Icon(
@@ -616,6 +650,10 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                                     'storyIdeaId': widget.storyIdeaId,
                                     'fromContinueReading':
                                         widget.fromContinueReading,
+                                    if ((widget.continueReadingTopicId ?? '')
+                                        .isNotEmpty)
+                                      'continueReadingTopicId':
+                                          widget.continueReadingTopicId,
                                   },
                                 );
                               },

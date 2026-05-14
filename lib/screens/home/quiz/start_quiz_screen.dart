@@ -7,6 +7,7 @@ class StartQuizScreen extends StatefulWidget {
   final String? storyImageUrl;
   final String? storyIdeaId;
   final bool fromContinueReading;
+  final String? continueReadingTopicId;
 
   const StartQuizScreen({
     super.key,
@@ -15,6 +16,7 @@ class StartQuizScreen extends StatefulWidget {
     this.storyImageUrl,
     this.storyIdeaId,
     this.fromContinueReading = false,
+    this.continueReadingTopicId,
   });
 
   @override
@@ -44,6 +46,8 @@ class _StartQuizScreenState extends State<StartQuizScreen> {
         'storyIdeaId': widget.storyIdeaId,
         'storyId': widget.storyId,
         'fromContinueReading': widget.fromContinueReading,
+        if ((widget.continueReadingTopicId ?? '').isNotEmpty)
+          'continueReadingTopicId': widget.continueReadingTopicId,
       },
     );
   }

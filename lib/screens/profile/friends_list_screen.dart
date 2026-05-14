@@ -73,8 +73,15 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
                   final itemCount =
                       vm.friends.length + (vm.hasNextPage ? 1 : 0);
 
-                  return ListView.separated(
-                    controller: _scrollController,
+                  return RefreshIndicator(
+                    color: AppColors.teal,
+                    onRefresh: () =>
+                        context.read<FriendProvider>().getFriends(),
+                    child: ListView.separated(
+                      controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(
+                        parent: BouncingScrollPhysics(),
+                      ),
                     itemCount: itemCount,
                     separatorBuilder: (_, __) => Divider(
                       height: 24.w,
@@ -104,6 +111,7 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
                         friendshipId: friendResponse.friendshipId,
                       );
                     },
+                  ),
                   );
                 },
               ),

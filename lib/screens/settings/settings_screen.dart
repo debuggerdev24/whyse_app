@@ -19,7 +19,7 @@ class SettingsScreen extends StatelessWidget {
               behavior: HitTestBehavior.opaque,
               onTap: () => context.pop(),
               child: Container(
-                padding: const EdgeInsets.only(left: 25),
+                padding: const EdgeInsets.only(left: 25, right: 10),
                 child: SvgIcon(AppAssets.backButton, size: 13.sp),
               ),
             ),

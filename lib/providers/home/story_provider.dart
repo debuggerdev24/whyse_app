@@ -58,6 +58,11 @@ class StoryProvider extends ChangeNotifier {
   List<StoryQuiz> quizMcqQuestions = [];
   String? quizError;
   bool isCreateQuizLoading = false;
+
+  /// Server MCQ set for [storyId]; reused by Start Quiz after [prefetchMcqQuizForReading].
+  String? _mcqQuizCacheStoryId;
+  Future<List<StoryQuiz>?>? _mcqQuizInFlightFuture;
+  String? _mcqQuizInFlightStoryId;
   bool isSubmitQuizLoading = false;
 
   /// Set when entering story from search; used to show add/remove from my list toggle.
@@ -605,6 +610,7 @@ class StoryProvider extends ChangeNotifier {
     pages: [],
     thumbnailUrl: '',
     lessonDuration: 0,
+    sequenceIndex: null,
   );
 
   Future<void> fetchSingleStoryByIdea({
@@ -890,6 +896,8 @@ class StoryProvider extends ChangeNotifier {
       createdAt: h.createdAt.toIso8601String(),
       updatedAt: h.updatedAt.toIso8601String(),
       thumbnailUrl: payload.heroThumbnailUrl,
+      sequenceIndex: payload.storyIdea?.sequenceIndex ??
+          payload.storyIdea?.priority,
     );
     _addStoryAtIndex(m, index);
     _currentStoryIndex = index;
@@ -1091,53 +1099,140 @@ class StoryProvider extends ChangeNotifier {
     }
   }
 
+  /// Starts loading quiz questions in the background while the reader is open.
+  void prefetchMcqQuizForReading({
+    required String storyId,
+    int quizMcqCount = 5,
+  }) {
+    if (storyId.isEmpty) return;
+    unawaited(
+      _ensureMcqQuizLoaded(
+        storyId: storyId,
+        quizMcqCount: quizMcqCount,
+        replaceExisting: false,
+      ).then((_) => notifyListeners()),
+    );
+  }
+
+  Future<List<StoryQuiz>?> _ensureMcqQuizLoaded({
+    required String storyId,
+    required int quizMcqCount,
+    required bool replaceExisting,
+  }) async {
+    if (storyId.isEmpty) return null;
+
+    if (!replaceExisting &&
+        storyId == _mcqQuizCacheStoryId &&
+        quizMcqQuestions.isNotEmpty) {
+      return List<StoryQuiz>.from(quizMcqQuestions);
+    }
+
+    if (_mcqQuizInFlightFuture != null &&
+        _mcqQuizInFlightStoryId == storyId &&
+        !replaceExisting) {
+      return await _mcqQuizInFlightFuture!;
+    }
+
+    if (replaceExisting && _mcqQuizInFlightFuture != null) {
+      await _mcqQuizInFlightFuture;
+      _mcqQuizInFlightFuture = null;
+      _mcqQuizInFlightStoryId = null;
+    }
+
+    if (replaceExisting) {
+      quizMcqQuestions = [];
+      quiz = null;
+      quizError = null;
+      _mcqQuizCacheStoryId = null;
+    } else if (_mcqQuizCacheStoryId != null && _mcqQuizCacheStoryId != storyId) {
+      quizMcqQuestions = [];
+      quiz = null;
+      quizError = null;
+      _mcqQuizCacheStoryId = null;
+    }
+
+    Future<List<StoryQuiz>?> work() async {
+      quizError = null;
+      try {
+        final data = {
+          "quizMcqCount": quizMcqCount,
+          "replaceExisting": replaceExisting,
+        };
+        final response = await StoryApiService.instance.createQuiz(
+          storyId: storyId,
+          data: data,
+        );
+        List<StoryQuiz>? parsed;
+        response.fold(
+          (l) {
+            Logger.error(l.errorMsg);
+            quizError = l.errorMsg;
+            parsed = null;
+          },
+          (r) {
+            try {
+              final dataMap = r["data"] as Map? ?? {};
+              final questionsRaw = (dataMap["questions"] as List?) ?? const [];
+              final quizzes = questionsRaw
+                  .whereType<Map>()
+                  .map((e) => StoryQuiz.fromJson(Map<String, dynamic>.from(e)))
+                  .toList();
+              quizMcqQuestions = quizzes;
+              quiz = QuizModel.fromJson(
+                Map<String, dynamic>.from(dataMap),
+              );
+              parsed = quizzes;
+              if (quizzes.isNotEmpty) {
+                _mcqQuizCacheStoryId = storyId;
+              }
+            } catch (e, st) {
+              Logger.error("Quiz parse error: $e\n$st");
+              quizError = "Unable to parse quiz.";
+              parsed = null;
+            }
+          },
+        );
+        return parsed;
+      } catch (e, st) {
+        Logger.error("Quiz load error: $e\n$st");
+        quizError ??= "Unable to load quiz.";
+        return null;
+      }
+    }
+
+    final fut = work();
+    _mcqQuizInFlightFuture = fut;
+    _mcqQuizInFlightStoryId = storyId;
+    try {
+      return await fut;
+    } finally {
+      _mcqQuizInFlightFuture = null;
+      _mcqQuizInFlightStoryId = null;
+    }
+  }
+
   //* create and quiz
   Future<List<StoryQuiz>?> generateMcqQuiz({
     required String storyId,
     required int quizMcqCount,
     bool replaceExisting = false,
   }) async {
+    if (!replaceExisting &&
+        storyId.isNotEmpty &&
+        storyId == _mcqQuizCacheStoryId &&
+        quizMcqQuestions.isNotEmpty) {
+      return List<StoryQuiz>.from(quizMcqQuestions);
+    }
+
     isCreateQuizLoading = true;
     quizError = null;
-    quizMcqQuestions = [];
     notifyListeners();
     try {
-      final data = {
-        "quizMcqCount": quizMcqCount,
-        "replaceExisting": replaceExisting,
-      };
-      final response = await StoryApiService.instance.createQuiz(
+      return await _ensureMcqQuizLoaded(
         storyId: storyId,
-        data: data,
+        quizMcqCount: quizMcqCount,
+        replaceExisting: replaceExisting,
       );
-      List<StoryQuiz>? parsed;
-      response.fold(
-        (l) {
-          Logger.error(l.errorMsg);
-          quizError = l.errorMsg;
-          parsed = null;
-        },
-        (r) {
-          try {
-            final data = r["data"] as Map? ?? {};
-            final questionsRaw = (data["questions"] as List?) ?? const [];
-            final quizzes = questionsRaw
-                .whereType<Map>()
-                .map((e) => StoryQuiz.fromJson(Map<String, dynamic>.from(e)))
-                .toList();
-            quizMcqQuestions = quizzes;
-            quiz = QuizModel.fromJson(
-              Map<String, dynamic>.from(data),
-            );
-            parsed = quizzes;
-          } catch (e, st) {
-            Logger.error("Quiz parse error: $e\n$st");
-            quizError = "Unable to parse quiz.";
-            parsed = null;
-          }
-        },
-      );
-      return parsed;
     } finally {
       isCreateQuizLoading = false;
       notifyListeners();
@@ -1240,6 +1335,12 @@ class StoryProvider extends ChangeNotifier {
     dataToSendCreateStory = {};
     _markingReadStoryIdeaIds.clear();
     _markedReadStoryIdeaIds.clear();
+    _mcqQuizCacheStoryId = null;
+    _mcqQuizInFlightFuture = null;
+    _mcqQuizInFlightStoryId = null;
+    quizMcqQuestions = [];
+    quiz = null;
+    quizError = null;
   }
 
   void clearSessionData() {
@@ -1263,6 +1364,9 @@ class StoryProvider extends ChangeNotifier {
     quiz = null;
     quizMcqQuestions.clear();
     quizError = null;
+    _mcqQuizCacheStoryId = null;
+    _mcqQuizInFlightFuture = null;
+    _mcqQuizInFlightStoryId = null;
     clearTopicFromSearch();
     clearForceRegenerateTopicId();
     topicsList.clear();

@@ -29,16 +29,21 @@ class CuriosityReadingSection extends StatelessWidget {
             ],
           ),
         ),
-        6.w.verticalSpace,
+        // 6.w.verticalSpace,
         Consumer<CuriosityReadingProvider>(
           builder: (context, provider, child) {
             return SizedBox(
               height: 280.w,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                padding: EdgeInsets.only(left: 10.w, right: 20.w),
+                padding: EdgeInsets.only(
+                  left: 10.w,
+                  right: 18.w,
+                  top: 0,
+                  bottom: 0,
+                ),
                 physics: const BouncingScrollPhysics(),
-                itemCount: provider.curiosityReadingList.length,
+                itemCount: provider.curiosityReadingList.length,  
                 itemBuilder: (context, index) {
                   return ArticleCard(
                     onReadTap: () {
@@ -118,10 +123,7 @@ class ArticleCard extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.setOpacity(0.65),
-                    ],
+                    colors: [Colors.transparent, Colors.black.setOpacity(0.65)],
                     stops: const [0.35, 1.0],
                   ),
                 ),

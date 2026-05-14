@@ -224,7 +224,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           for (var i = 0; i < friends.length; i++) ...[
             if (i > 0) 16.w.horizontalSpace,
-            _ProfileFriendAvatar(friend: friends[i].friend),
+            GestureDetector(
+              onTap: () => context.pushNamed(AppRoutes.friendsListScreen.name),
+              child: _ProfileFriendAvatar(friend: friends[i].friend),
+            ),
           ],
         ],
       ),

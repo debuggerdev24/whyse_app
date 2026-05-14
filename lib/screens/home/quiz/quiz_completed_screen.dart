@@ -27,6 +27,7 @@ class QuizCompletedScreen extends StatelessWidget {
   final String? storyIdeaId;
   final String? storyId;
   final bool fromContinueReading;
+  final String? continueReadingTopicId;
 
   const QuizCompletedScreen({
     super.key,
@@ -37,6 +38,7 @@ class QuizCompletedScreen extends StatelessWidget {
     this.storyIdeaId,
     this.storyId,
     this.fromContinueReading = false,
+    this.continueReadingTopicId,
   });
 
   @override
@@ -281,7 +283,7 @@ class QuizCompletedScreen extends StatelessWidget {
     final ideaId = storyIdeaId;
     if (sId == null || sId.isEmpty || ideaId == null || ideaId.isEmpty) {
       if (!context.mounted) return;
-      context.pop(  
+      context.pop(
         QuizExitSnapshot(
           storyIdeaId: ideaId ?? '',
           totalQuestions: totalQuestions,
@@ -338,9 +340,20 @@ class QuizCompletedScreen extends StatelessWidget {
     if (!context.mounted) return;
     if (fromContinueReading) {
       context.read<StoryProvider>().clareStoryData();
-      await hp.getContinueReading(force: true);
+      // Refresh home shelf in background; do not block navigation.
+      // ignore: unawaited_futures
+      hp.getContinueReading(force: true);
       if (!context.mounted) return;
-      context.goNamed(AppRoutes.homeScreen.name);
+      final tid = continueReadingTopicId;
+      if (tid != null && tid.isNotEmpty) {
+        // Summary screen shows its own shimmer while this request completes.
+        // ignore: unawaited_futures
+        hp.getTopicStoryDetails(topicId: tid);
+        if (!context.mounted) return;
+        context.goNamed(AppRoutes.createdStorySummaryScreen.name, extra: tid);
+      } else {
+        context.goNamed(AppRoutes.homeScreen.name);
+      }
     } else {
       // Navigate back to the story ideas screen (instead of the reader).
       context.goNamed(AppRoutes.createdStorySummaryScreen.name);

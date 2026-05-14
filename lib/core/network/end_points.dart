@@ -68,6 +68,9 @@ class EndPoints {
   static String getMyTopics({int page = 1, int limit = 20}) =>
       "/story/topics?page=$page&limit=$limit&createdBy=self";
 
+  static String getMyCompletedTopics({int page = 1, int limit = 20}) =>
+      "/story/topics?page=$page&limit=$limit&createdBy=self&completed=true";
+
   static const browseAllTopics = "/story/topics";
   static String getMyList({int page = 1, int limit = 10, String search = ''}) =>
       "/story/topics/my-list?page=$page&limit=$limit&search=${Uri.encodeComponent(search)}";
