@@ -13,6 +13,7 @@ class AppAssets {
 
   static const google = "$_iconPath/google.svg";
   static const instagramLogo = "$_iconPath/instagram_logo.svg";
+
   /// Asset filename is `x_logo.svg.svg` in the repo.
   static const xLogo = "$_iconPath/x_logo.svg.svg";
   static const backButton = "$_iconPath/backbutton.svg";
@@ -58,8 +59,9 @@ class AppAssets {
   static const homeIcon = "$_iconPath/home.svg";
   static const shareIcon = "$_iconPath/share.svg";
   static const addMembers = "$_iconPath/addMember.svg";
-
   static const font = "$_iconPath/font.svg";
+  static const document = "$_iconPath/document.svg";
+  static const dumbbell = "$_iconPath/dumbbell.svg";
 
   // images
   static const _imagePath = "assets/images";
@@ -101,7 +103,9 @@ class SvgIcon extends StatelessWidget {
       iconPath,
       width: width,
       height: height,
-      colorFilter: color == null ? null : ColorFilter.mode(color!, BlendMode.srcIn),
+      colorFilter: color == null
+          ? null
+          : ColorFilter.mode(color!, BlendMode.srcIn),
     );
   }
 }

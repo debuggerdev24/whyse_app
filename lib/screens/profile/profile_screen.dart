@@ -4,11 +4,16 @@ import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/friend/friend_model.dart';
 import 'package:redstreakapp/models/home/saved_series_model.dart';
+import 'package:redstreakapp/providers/family/family_provider.dart';
 import 'package:redstreakapp/providers/friend/friend_provider.dart';
+import 'package:redstreakapp/models/family/family_member_model.dart';
+import 'package:redstreakapp/screens/profile/widgets/profile_family_member_avatar.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/saved_series_provider.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
+import 'package:redstreakapp/screens/profile/friend_details_screen.dart';
 import 'package:redstreakapp/screens/profile/widgets/group_block.dart';
+import 'package:redstreakapp/screens/profile/widgets/profile_friend_avatar.dart';
 import 'package:redstreakapp/screens/profile/widgets/profile_header_section.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -25,6 +30,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     Future.microtask(() {
       context.read<FriendProvider>().getFriends();
+      context.read<FamilyProvider>().seedDemoMembers();
     });
   }
 
@@ -43,6 +49,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _profileDetailsBlock(context),
+                    _familyMembersBlock(context),
                     _friendsBlock(context),
                     GroupBlock(),
                     _overviewBlock(),
@@ -142,6 +149,174 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Widget _familyMembersBlock(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        border: Border(
+          top: BorderSide(color: AppColors.black.setOpacity(0.08), width: 1),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                AppText(
+                  text: 'Family Members',
+                  style: AppTextStyles.bold(
+                    fontSize: 20,
+                    color: AppColors.black,
+                  ),
+                ),
+                const Spacer(),
+                Consumer<FamilyProvider>(
+                  builder: (context, provider, _) {
+                    if (provider.familyMembers.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+                    return GestureDetector(
+                      onTap: () => context.pushNamed(
+                        AppRoutes.familyMembersListScreen.name,
+                      ),
+                      child: AppText(
+                        text: 'View all',
+                        style: AppTextStyles.semibold(
+                          fontSize: 15,
+                          color: AppColors.teal,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+            16.w.verticalSpace,
+            Consumer<FamilyProvider>(
+              builder: (context, provider, _) {
+                return _buildFamilyMembersContent(context, provider);
+              },
+            ),
+            16.w.verticalSpace,
+            _addFamilyMemberButton(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFamilyMembersContent(
+    BuildContext context,
+    FamilyProvider provider,
+  ) {
+    final members = provider.familyMembers;
+    if (members.isEmpty) {
+      return _buildFamilyMembersEmpty();
+    }
+    return _buildFamilyMembersList(context, members);
+  }
+
+  Widget _buildFamilyMembersList(
+    BuildContext context,
+    List<FamilyMember> members,
+  ) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (var i = 0; i < members.length; i++) ...[
+            if (i > 0) 16.w.horizontalSpace,
+            ProfileFamilyMemberAvatar(
+              familyMember: members[i],
+              onTap: () => context.pushNamed(
+                AppRoutes.friendDetailsScreen.name,
+                extra: FriendDetailsScreenParams(
+                  friend: members[i].member,
+                  isFriend: true,
+                  isFamilyMember: true,
+                  familyRole: members[i].relationship,
+                  gender: members[i].member.gender,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFamilyMembersEmpty() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 16.h),
+      child: Column(
+        children: [
+          Icon(
+            Icons.family_restroom_outlined,
+            size: 36.w,
+            color: AppColors.black.setOpacity(0.2),
+          ),
+          8.h.verticalSpace,
+          AppText(
+            text: 'No family members yet',
+            style: AppTextStyles.semibold(
+              fontSize: 14,
+              color: AppColors.black.setOpacity(0.45),
+            ),
+          ),
+          4.h.verticalSpace,
+          AppText(
+            text: 'Add family from a friend\'s profile',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.medium(
+              fontSize: 12,
+              color: AppColors.black.setOpacity(0.35),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _addFamilyMemberButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton(
+        onPressed: () => context.pushNamed(AppRoutes.friendsListScreen.name),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.black,
+          backgroundColor: AppColors.white,
+          side: BorderSide(color: AppColors.black.setOpacity(0.15)),
+          padding: EdgeInsets.symmetric(vertical: 14.h),
+          shape: const StadiumBorder(),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.family_restroom_outlined,
+              size: 22.sp,
+              color: AppColors.black,
+            ),
+            16.w.horizontalSpace,
+            AppText(
+              text: 'Add Family Member',
+              style: AppTextStyles.semibold(
+                fontSize: 16,
+                color: AppColors.black,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _friendsBlock(BuildContext context) {
     return Container(
       width: double.infinity,
@@ -225,8 +400,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           for (var i = 0; i < friends.length; i++) ...[
             if (i > 0) 16.w.horizontalSpace,
             GestureDetector(
-              onTap: () => context.pushNamed(AppRoutes.friendsListScreen.name),
-              child: _ProfileFriendAvatar(friend: friends[i].friend),
+              onTap: () => context.pushNamed(
+                AppRoutes.friendDetailsScreen.name,
+                extra: FriendDetailsScreenParams(
+                  friend: friends[i].friend,
+                  friendshipId: friends[i].friendshipId,
+                ),
+              ),
+              child: ProfileFriendAvatar(friend: friends[i].friend),
             ),
           ],
         ],
@@ -1143,63 +1324,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ProfileFriendAvatar extends StatelessWidget {
-  const _ProfileFriendAvatar({required this.friend});
-
-  final FriendUser friend;
-
-  static const List<Color> _avatarColors = [
-    Color(0xFF167C80),
-    Color(0xFFE8D9C4),
-    Color(0xFFFFB37A),
-    Color(0xFFFFA8C5),
-    Color(0xFF6B8E9B),
-    Color(0xFF53C3BF),
-    Color(0xFFD7B086),
-    Color(0xFF66C99D),
-  ];
-
-  Color get _color {
-    final hash = friend.id.codeUnits.fold<int>(0, (prev, c) => prev + c);
-    return _avatarColors[hash % _avatarColors.length];
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final name = friend.displayName ?? friend.username ?? '';
-    return SizedBox(
-      width: 72.w,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: 64.w,
-            height: 64.w,
-            decoration: BoxDecoration(shape: BoxShape.circle, color: _color),
-            alignment: Alignment.center,
-            child: AppText(
-              text: friend.initials,
-              style: AppTextStyles.bold(
-                fontSize: 22.sp,
-                color: AppColors.white.setOpacity(0.92),
-              ),
-            ),
-          ),
-          8.h.verticalSpace,
-          AppText(
-            text: name,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.medium(fontSize: 12, color: AppColors.black),
-          ),
-        ],
       ),
     );
   }

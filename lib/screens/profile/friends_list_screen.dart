@@ -3,10 +3,16 @@ import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/models/friend/friend_model.dart';
 import 'package:redstreakapp/providers/friend/friend_provider.dart';
+import 'package:redstreakapp/screens/profile/friend_details_screen.dart';
+import 'package:redstreakapp/screens/profile/friends_list_screen_params.dart';
 import 'package:shimmer/shimmer.dart';
 
 class FriendsListScreen extends StatefulWidget {
-  const FriendsListScreen({super.key});
+  const FriendsListScreen({super.key, this.params});
+
+  final FriendsListScreenParams? params;
+
+  bool get _isPreviewMode => params != null;
 
   @override
   State<FriendsListScreen> createState() => _FriendsListScreenState();
@@ -15,16 +21,21 @@ class FriendsListScreen extends StatefulWidget {
 class _FriendsListScreenState extends State<FriendsListScreen> {
   final ScrollController _scrollController = ScrollController();
 
+  bool get _isPreviewMode => widget._isPreviewMode;
+
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
-    Future.microtask(() {
-      context.read<FriendProvider>().getFriends();
-    });
+    if (!_isPreviewMode) {
+      _scrollController.addListener(_onScroll);
+      Future.microtask(() {
+        context.read<FriendProvider>().getFriends();
+      });
+    }
   }
 
   void _onScroll() {
+    if (_isPreviewMode) return;
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       context.read<FriendProvider>().loadMoreFriends();
@@ -44,7 +55,7 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.backgroundColor,
         surfaceTintColor: Colors.transparent,
-        title: const AppText(text: 'Friends'),
+        title: AppText(text: widget.params?.title ?? 'Friends'),
         leading: IconButton(
           onPressed: () => context.pop(),
           icon: const Icon(Icons.chevron_left_rounded),
@@ -56,69 +67,97 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
           Expanded(
             child: Padding(
               padding: EdgeInsets.fromLTRB(24.w, 14.w, 24.w, 0),
-              child: Selector<FriendProvider, _FriendsListVM>(
-                selector: (_, p) => _FriendsListVM.fromProvider(p),
-                builder: (context, vm, _) {
-                  if (vm.isLoading) return const _LoadingList();
-                  if (vm.isError) {
-                    return _ErrorState(
-                      message: vm.error,
-                      onRetry: () {
-                        context.read<FriendProvider>().getFriends();
-                      },
-                    );
-                  }
-                  if (vm.friends.isEmpty) return const _EmptyState();
+              child: _isPreviewMode
+                  ? _buildPreviewList()
+                  : Selector<FriendProvider, _FriendsListVM>(
+                      selector: (_, p) => _FriendsListVM.fromProvider(p),
+                      builder: (context, vm, _) {
+                        if (vm.isLoading) return const _LoadingList();
+                        if (vm.isError) {
+                          return _ErrorState(
+                            message: vm.error,
+                            onRetry: () {
+                              context.read<FriendProvider>().getFriends();
+                            },
+                          );
+                        }
+                        if (vm.friends.isEmpty) return const _EmptyState();
 
-                  final itemCount =
-                      vm.friends.length + (vm.hasNextPage ? 1 : 0);
+                        final itemCount =
+                            vm.friends.length + (vm.hasNextPage ? 1 : 0);
 
-                  return RefreshIndicator(
-                    color: AppColors.teal,
-                    onRefresh: () =>
-                        context.read<FriendProvider>().getFriends(),
-                    child: ListView.separated(
-                      controller: _scrollController,
-                      physics: const AlwaysScrollableScrollPhysics(
-                        parent: BouncingScrollPhysics(),
-                      ),
-                    itemCount: itemCount,
-                    separatorBuilder: (_, __) => Divider(
-                      height: 24.w,
-                      thickness: 1,
-                      color: AppColors.black.setOpacity(0.08),
-                    ),
-                    itemBuilder: (context, index) {
-                      if (index == vm.friends.length) {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12.h),
-                          child: Center(
-                            child: SizedBox(
-                              width: 24.sp,
-                              height: 24.sp,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: AppColors.teal,
-                              ),
+                        return RefreshIndicator(
+                          color: AppColors.teal,
+                          onRefresh: () =>
+                              context.read<FriendProvider>().getFriends(),
+                          child: ListView.separated(
+                            controller: _scrollController,
+                            physics: const AlwaysScrollableScrollPhysics(
+                              parent: BouncingScrollPhysics(),
                             ),
+                            itemCount: itemCount,
+                            separatorBuilder: (_, __) => Divider(
+                              height: 24.w,
+                              thickness: 1,
+                              color: AppColors.black.setOpacity(0.08),
+                            ),
+                            itemBuilder: (context, index) {
+                              if (index == vm.friends.length) {
+                                return Padding(
+                                  padding:
+                                      EdgeInsets.symmetric(vertical: 12.h),
+                                  child: Center(
+                                    child: SizedBox(
+                                      width: 24.sp,
+                                      height: 24.sp,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        color: AppColors.teal,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
+                              final friendResponse = vm.friends[index];
+                              return _FriendTile(
+                                key: ValueKey(friendResponse.friendshipId),
+                                friend: friendResponse.friend,
+                                friendshipId: friendResponse.friendshipId,
+                              );
+                            },
                           ),
                         );
-                      }
-                      final friendResponse = vm.friends[index];
-                      return _FriendTile(
-                        key: ValueKey(friendResponse.friendshipId),
-                        friend: friendResponse.friend,
-                        friendshipId: friendResponse.friendshipId,
-                      );
-                    },
-                  ),
-                  );
-                },
-              ),
+                      },
+                    ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPreviewList() {
+    final friends = widget.params!.friends;
+    if (friends.isEmpty) return const _EmptyState();
+
+    return ListView.separated(
+      controller: _scrollController,
+      physics: const BouncingScrollPhysics(),
+      itemCount: friends.length,
+      separatorBuilder: (_, __) => Divider(
+        height: 24.w,
+        thickness: 1,
+        color: AppColors.black.setOpacity(0.08),
+      ),
+      itemBuilder: (context, index) {
+        final friendUser = friends[index];
+        return _FriendTile(
+          key: ValueKey(friendUser.id),
+          friend: friendUser,
+          friendshipId: friendUser.id,
+          viewOnly: widget.params!.viewOnly,
+        );
+      },
     );
   }
 }
@@ -154,10 +193,12 @@ class _FriendTile extends StatefulWidget {
     super.key,
     required this.friend,
     required this.friendshipId,
+    this.viewOnly = false,
   });
 
   final FriendUser friend;
   final String friendshipId;
+  final bool viewOnly;
 
   @override
   State<_FriendTile> createState() => _FriendTileState();
@@ -305,13 +346,26 @@ class _FriendTileState extends State<_FriendTile> {
     );
   }
 
+  void _openFriendDetails() {
+    context.pushNamed(
+      AppRoutes.friendDetailsScreen.name,
+      extra: FriendDetailsScreenParams(
+        friend: widget.friend,
+        friendshipId: widget.friendshipId,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Opacity(
       opacity: _isRemoving ? 0.5 : 1.0,
       child: Row(
         children: [
-          CircleAvatar(
+          GestureDetector(
+            onTap: _isRemoving ? null : _openFriendDetails,
+            behavior: HitTestBehavior.opaque,
+            child: CircleAvatar(
             radius: 24.r,
             backgroundColor: _avatarColor,
             child: AppText(
@@ -322,65 +376,71 @@ class _FriendTileState extends State<_FriendTile> {
               ),
             ),
           ),
+          ),
           16.w.horizontalSpace,
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText(
-                  text: widget.friend.displayName ??
-                      widget.friend.username ??
-                      '',
-                  style: AppTextStyles.semibold(
-                    fontSize: 16.sp,
-                    color: AppColors.black,
-                  ),
-                ),
-                if (widget.friend.username != null &&
-                    widget.friend.username!.isNotEmpty) ...[
-                  2.h.verticalSpace,
+            child: GestureDetector(
+              onTap: _isRemoving ? null : _openFriendDetails,
+              behavior: HitTestBehavior.opaque,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   AppText(
-                    text: '@${widget.friend.username}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.medium(
-                      fontSize: 13.sp,
-                      color: AppColors.black.setOpacity(0.5),
+                    text: widget.friend.displayName ??
+                        widget.friend.username ??
+                        '',
+                    style: AppTextStyles.semibold(
+                      fontSize: 16.sp,
+                      color: AppColors.black,
                     ),
                   ),
-                ],
-              ],
-            ),
-          ),
-          GestureDetector(
-            onTap: _isRemoving ? null : _showRemoveDialog,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.w),
-              decoration: BoxDecoration(
-                color: Colors.red.setOpacity(0.08),
-                borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(
-                  color: Colors.red.setOpacity(0.2),
-                ),
-              ),
-              child: _isRemoving
-                  ? SizedBox(
-                      width: 14.sp,
-                      height: 14.sp,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.red,
-                      ),
-                    )
-                  : AppText(
-                      text: 'Remove',
-                      style: AppTextStyles.semibold(
-                        fontSize: 12.sp,
-                        color: Colors.red,
+                  if (widget.friend.username != null &&
+                      widget.friend.username!.isNotEmpty) ...[
+                    2.h.verticalSpace,
+                    AppText(
+                      text: '@${widget.friend.username}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.medium(
+                        fontSize: 13.sp,
+                        color: AppColors.black.setOpacity(0.5),
                       ),
                     ),
+                  ],
+                ],
+              ),
             ),
           ),
+          if (!widget.viewOnly)
+            GestureDetector(
+              onTap: _isRemoving ? null : _showRemoveDialog,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.w),
+                decoration: BoxDecoration(
+                  color: Colors.red.setOpacity(0.08),
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(
+                    color: Colors.red.setOpacity(0.2),
+                  ),
+                ),
+                child: _isRemoving
+                    ? SizedBox(
+                        width: 14.sp,
+                        height: 14.sp,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.red,
+                        ),
+                      )
+                    : AppText(
+                        text: 'Remove',
+                        style: AppTextStyles.semibold(
+                          fontSize: 12.sp,
+                          color: Colors.red,
+                        ),
+                      ),
+              ),
+            ),
         ],
       ),
     );

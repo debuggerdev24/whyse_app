@@ -22,7 +22,10 @@ import 'package:redstreakapp/screens/group/group_details_screen.dart';
 import 'package:redstreakapp/screens/group/group_list_screen.dart';
 import 'package:redstreakapp/screens/group/join_group_screen.dart';
 import 'package:redstreakapp/screens/group/share_stories_in_group_screen.dart';
+import 'package:redstreakapp/screens/profile/family_members_list_screen.dart';
 import 'package:redstreakapp/screens/profile/friends_list_screen.dart';
+import 'package:redstreakapp/screens/profile/friends_list_screen_params.dart';
+import 'package:redstreakapp/screens/profile/friend_details_screen.dart';
 import 'package:redstreakapp/screens/profile/add_friends_screen.dart';
 import 'package:redstreakapp/screens/profile/my_saved_series_screen.dart';
 import 'package:redstreakapp/screens/group/streak_ranking_screen.dart';
@@ -655,7 +658,26 @@ class AppRouter {
           path: AppRoutes.friendsListScreen.name,
           name: AppRoutes.friendsListScreen.name,
           builder: (context, state) {
-            return const FriendsListScreen();
+            final params = state.extra as FriendsListScreenParams?;
+            return FriendsListScreen(params: params);
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.familyMembersListScreen.name,
+          name: AppRoutes.familyMembersListScreen.name,
+          builder: (context, state) => const FamilyMembersListScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.friendDetailsScreen.name,
+          name: AppRoutes.friendDetailsScreen.name,
+          builder: (context, state) {
+            final params = state.extra as FriendDetailsScreenParams?;
+            if (params == null) {
+              return const Scaffold(
+                body: Center(child: Text('Friend not found')),
+              );
+            }
+            return FriendDetailsScreen(params: params);
           },
         ),
         GoRoute(

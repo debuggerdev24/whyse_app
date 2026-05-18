@@ -15,6 +15,7 @@ import 'package:redstreakapp/providers/home/reading_appearance_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/providers/on_boarding/on_boarding_provider.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
+import 'package:redstreakapp/providers/family/family_provider.dart';
 import 'package:redstreakapp/providers/friend/friend_provider.dart';
 import 'package:redstreakapp/providers/profile/your_books_provider.dart';
 import 'package:redstreakapp/services/profile/group_api_service.dart';
@@ -54,6 +55,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => CuriosityReadingProvider()),
         ChangeNotifierProvider(create: (_) => YourBooksProvider()),
         ChangeNotifierProvider(create: (_) => FriendProvider()),
+        ChangeNotifierProvider(create: (_) => FamilyProvider()),
         ChangeNotifierProvider(
           create: (_) =>
               EditProfileProvider(ProfileService(BaseApiHelper.instance)),

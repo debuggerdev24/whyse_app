@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/routes/app_router.dart';
+import 'package:redstreakapp/providers/family/family_provider.dart';
 import 'package:redstreakapp/providers/friend/friend_provider.dart';
 import 'package:redstreakapp/providers/home/curiosity_reading_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
@@ -26,6 +27,7 @@ void resetAppProvidersForNewUser([BuildContext? context]) {
   ctx.read<ProfileProvider>().clearSessionData();
   ctx.read<GroupProvider>().clearSessionData();
   ctx.read<FriendProvider>().clearSessionData();
+  ctx.read<FamilyProvider>().clear();
   ctx.read<QuizProvider>().clearSessionData();
   ctx.read<EditProfileProvider>().clearSessionData();
   ctx.read<YourBooksProvider>().clearSessionData();

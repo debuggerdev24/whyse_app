@@ -1,3 +1,5 @@
+import 'package:redstreakapp/core/enums/user_gender.dart';
+
 class FriendResponse {
   final String friendshipId;
   final String status;
@@ -24,6 +26,7 @@ class FriendUser {
   final String? email;
   final String? username;
   final String? phone;
+  final UserGender? gender;
 
   const FriendUser({
     required this.id,
@@ -31,6 +34,7 @@ class FriendUser {
     this.email,
     this.username,
     this.phone,
+    this.gender,
   });
 
   factory FriendUser.fromJson(Map<String, dynamic> json) {
@@ -40,6 +44,7 @@ class FriendUser {
       email: json['email'] as String?,
       username: json['username'] as String?,
       phone: json['phone'] as String?,
+      gender: UserGender.fromApi(json['gender']),
     );
   }
 
