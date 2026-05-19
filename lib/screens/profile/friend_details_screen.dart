@@ -11,6 +11,8 @@ import 'package:redstreakapp/providers/profile/profile_provider.dart';
 import 'package:redstreakapp/screens/group/widget/group_image_widget.dart';
 import 'package:redstreakapp/services/profile/friend_api_service.dart';
 import 'package:redstreakapp/screens/profile/friends_list_screen_params.dart';
+import 'package:redstreakapp/screens/profile/user_profile_groups_list_screen_params.dart';
+import 'package:redstreakapp/screens/profile/user_profile_topics_list_screen_params.dart';
 import 'package:redstreakapp/screens/profile/widgets/add_family_member_bottom_sheet.dart';
 import 'package:redstreakapp/screens/profile/widgets/friend_details_header.dart';
 import 'package:redstreakapp/screens/profile/widgets/friend_preview_avatar.dart';
@@ -58,18 +60,20 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     });
   }
 
-  bool _isFriend(FriendDetailsData details) => details.profile.isFriend;
+  bool _hasPendingFriendRequest(FriendProfile profile) =>
+      profile.friendRequestSent || _requestSent;
 
-  bool _isOwnProfile(ProfileProvider profileProvider) {
+  bool _isOwnProfile(ProfileProvider profileProvider, FriendProfile profile) {
     final currentUserId = profileProvider.profileData?.userId;
-    return currentUserId != null && currentUserId == friendId;
+    if (currentUserId == null || currentUserId.isEmpty) return false;
+    return currentUserId == profile.userId;
   }
 
-  bool _isFamilyMember(FamilyProvider familyProvider) =>
-      familyProvider.isFamilyMember(friendId);
+  bool _isFamilyMember(FamilyProvider familyProvider, String userId) =>
+      familyProvider.isFamilyMember(userId);
 
-  String? _familyRole(FamilyProvider familyProvider) =>
-      familyProvider.relationshipFor(friendId);
+  String? _familyRole(FamilyProvider familyProvider, String userId) =>
+      familyProvider.relationshipFor(userId);
 
   @override
   Widget build(BuildContext context) {
@@ -234,17 +238,25 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
           16.h.verticalSpace,
           Row(
             children: [
-              Expanded(child: _shimmerBox(height: 88.h, radius: 12.r)),
+              Expanded(
+                child: _shimmerBox(height: 88.h, radius: 12.r),
+              ),
               16.w.horizontalSpace,
-              Expanded(child: _shimmerBox(height: 88.h, radius: 12.r)),
+              Expanded(
+                child: _shimmerBox(height: 88.h, radius: 12.r),
+              ),
             ],
           ),
           16.h.verticalSpace,
           Row(
             children: [
-              Expanded(child: _shimmerBox(height: 88.h, radius: 12.r)),
+              Expanded(
+                child: _shimmerBox(height: 88.h, radius: 12.r),
+              ),
               16.w.horizontalSpace,
-              Expanded(child: _shimmerBox(height: 88.h, radius: 12.r)),
+              Expanded(
+                child: _shimmerBox(height: 88.h, radius: 12.r),
+              ),
             ],
           ),
         ],
@@ -340,7 +352,7 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
 
     return Consumer<FamilyProvider>(
       builder: (context, familyProvider, _) {
-        final familyRole = _familyRole(familyProvider);
+        final familyRole = _familyRole(familyProvider, profile.userId);
 
         return Container(
           padding: EdgeInsets.fromLTRB(27.w, 20.h, 27.w, 20.h),
@@ -374,22 +386,25 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
                   ],
                 ),
               ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AppText(
-                text: '$friendsCount',
-                style: AppTextStyles.bold(fontSize: 20, color: AppColors.black),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText(
+                    text: '$friendsCount',
+                    style: AppTextStyles.bold(
+                      fontSize: 20,
+                      color: AppColors.black,
+                    ),
+                  ),
+                  AppText(
+                    text: 'Friends',
+                    style: AppTextStyles.bold(
+                      fontSize: 14,
+                      color: AppColors.black.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ],
               ),
-              AppText(
-                text: 'Friends',
-                style: AppTextStyles.bold(
-                  fontSize: 14,
-                  color: AppColors.black.withValues(alpha: 0.6),
-                ),
-              ),
-            ],
-          ),
             ],
           ),
         );
@@ -403,24 +418,25 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
   ) {
     return Consumer3<FriendProvider, ProfileProvider, FamilyProvider>(
       builder: (context, friendProvider, profileProvider, familyProvider, _) {
-        if (_isOwnProfile(profileProvider)) return const SizedBox.shrink();
-        if (_isFamilyMember(familyProvider)) return const SizedBox.shrink();
+        if (_isOwnProfile(profileProvider, profile)) {
+          return const SizedBox.shrink();
+        }
 
-        final isFriend = _isFriend(details);
+        final Widget actionButton;
+        if (profile.isFriend) {
+          if (_isFamilyMember(familyProvider, profile.userId)) {
+            return const SizedBox.shrink();
+          }
+          actionButton = _buildAddToFamilyButton(profile);
+        } else if (_hasPendingFriendRequest(profile)) {
+          actionButton = _buildRequestSentButton();
+        } else {
+          actionButton = _buildAddToFriendButton(friendProvider, profile);
+        }
 
         return Padding(
-          padding: EdgeInsets.fromLTRB(27.w, 4.h, 27.w, 8.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (isFriend)
-                _buildAddToFamilyButton(profile)
-              else if (_requestSent)
-                _buildRequestSentButton()
-              else
-                _buildAddToFriendButton(friendProvider, profile),
-            ],
-          ),
+          padding: EdgeInsets.fromLTRB(27.w, 4.h, 27.w, 12.h),
+          child: actionButton,
         );
       },
     );
@@ -533,7 +549,11 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.family_restroom_rounded, size: 22.sp, color: AppColors.white),
+            Icon(
+              Icons.family_restroom_rounded,
+              size: 22.sp,
+              color: AppColors.white,
+            ),
             16.w.horizontalSpace,
             AppText(
               text: 'Add to Family',
@@ -551,7 +571,10 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
   void _sendFriendRequest(FriendProfile profile) {
     final email = profile.email;
     if (email == null || email.isEmpty) {
-      AppToast.error(context, 'This user does not have an email on their profile');
+      AppToast.error(
+        context,
+        'This user does not have an email on their profile',
+      );
       return;
     }
 
@@ -590,13 +613,12 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
         children: [
           _sectionTitleRow(
             title: 'Friends',
-            showViewAll: visibleFriends.isNotEmpty,
+            showViewAll: details.friendsPreview.totalCount > 0,
             onViewAll: () => context.pushNamed(
               AppRoutes.friendsListScreen.name,
-              extra: FriendsListScreenParams.fromPreviews(
-                friendPreviews: visibleFriends,
+              extra: FriendsListScreenParams.forUserProfile(
+                userId: details.profile.userId,
                 title: friendsListTitle,
-                viewOnly: true,
               ),
             ),
           ),
@@ -628,6 +650,7 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
 
   Widget _groupsBlock(BuildContext context, FriendDetailsData details) {
     final groups = details.groupsPreview.items;
+    final groupsListTitle = _groupsListTitle(details.profile);
 
     return _sectionContainer(
       child: Column(
@@ -635,8 +658,14 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
         children: [
           _sectionTitleRow(
             title: 'Groups',
-            showViewAll: groups.isNotEmpty,
-            onViewAll: () => context.pushNamed(AppRoutes.groupListScreen.name),
+            showViewAll: details.groupsPreview.totalCount > 0,
+            onViewAll: () => context.pushNamed(
+              AppRoutes.userProfileGroupsListScreen.name,
+              extra: UserProfileGroupsListScreenParams(
+                userId: details.profile.userId,
+                title: groupsListTitle,
+              ),
+            ),
           ),
           16.w.verticalSpace,
           if (groups.isEmpty)
@@ -845,36 +874,46 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
 
   Widget _mySeriesListBlock(FriendDetailsData details) {
     final topics = details.topicsPreview.items;
-    if (topics.isEmpty) return const SizedBox.shrink();
+    final topicsListTitle = _topicsListTitle(details.profile);
 
     return _sectionContainer(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText(
-            text: 'My Series List',
-            style: AppTextStyles.bold(fontSize: 18, color: AppColors.black),
-          ),
-          12.verticalSpace,
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                for (var i = 0; i < topics.length; i++)
-                  _ViewOnlySeriesCard(
-                    title: topics[i].title ?? 'Untitled',
-                    readingsCount: topics[i].noOfReadings,
-                    subtitle: topics[i].subtitle,
-                    imageUrl: resolveNullableNetworkImageUrl(
-                      topics[i].topicImage,
-                    ),
-                    imageSeed: 'friend-series-${topics[i].id}',
-                  ),
-              ],
+          _sectionTitleRow(
+            title: 'Series Followed',
+            showViewAll: details.topicsPreview.totalCount > 0,
+            onViewAll: () => context.pushNamed(
+              AppRoutes.userProfileTopicsListScreen.name,
+              extra: UserProfileTopicsListScreenParams(
+                userId: details.profile.userId,
+                title: topicsListTitle,
+              ),
             ),
           ),
+          16.w.verticalSpace,
+          if (topics.isEmpty)
+            _buildTopicsEmpty()
+          else
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (var i = 0; i < topics.length; i++)
+                    _ViewOnlySeriesCard(
+                      title: topics[i].title ?? 'Untitled',
+                      readingsCount: topics[i].noOfReadings,
+                      subtitle: topics[i].subtitle,
+                      imageUrl: resolveNullableNetworkImageUrl(
+                        topics[i].topicImage,
+                      ),
+                      imageSeed: 'friend-series-${topics[i].id}',
+                    ),
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -884,6 +923,18 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     final name = profile.displayName ?? profile.username;
     if (name == null || name.isEmpty) return 'Friends';
     return "$name's Friends";
+  }
+
+  String _groupsListTitle(FriendProfile profile) {
+    final name = profile.displayName ?? profile.username;
+    if (name == null || name.isEmpty) return 'Groups';
+    return "$name's Groups";
+  }
+
+  String _topicsListTitle(FriendProfile profile) {
+    final name = profile.displayName ?? profile.username;
+    if (name == null || name.isEmpty) return 'Series Followed';
+    return "$name's Series";
   }
 
   void _openFriendProfile(BuildContext context, String targetId) {
@@ -1033,6 +1084,30 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     );
   }
 
+  Widget _buildTopicsEmpty() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 16.h),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.auto_stories_outlined,
+            size: 36.w,
+            color: AppColors.black.setOpacity(0.2),
+          ),
+          8.h.verticalSpace,
+          AppText(
+            text: 'No series yet',
+            style: AppTextStyles.semibold(
+              fontSize: 14,
+              color: AppColors.black.setOpacity(0.45),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _GroupAvatar extends StatelessWidget {
@@ -1053,10 +1128,7 @@ class _GroupAvatar extends StatelessWidget {
             child: SizedBox(
               width: 64.w,
               height: 64.w,
-              child: GroupImageWidget(
-                imageUrl: thumbnailUrl,
-                size: 64.w,
-              ),
+              child: GroupImageWidget(imageUrl: thumbnailUrl, size: 64.w),
             ),
           ),
           8.h.verticalSpace,
@@ -1117,7 +1189,8 @@ class _ViewOnlySeriesCard extends StatelessWidget {
               height: 132.w,
               width: double.infinity,
               child: AppNetworkImage(
-                imageUrl: imageUrl ?? 'https://picsum.photos/seed/$imageSeed/700/500',
+                imageUrl:
+                    imageUrl ?? 'https://picsum.photos/seed/$imageSeed/700/500',
                 tag: 'FriendDetails.series',
                 placeholder: (_) => _storyImageShimmer(),
                 errorCompact: true,
@@ -1197,10 +1270,7 @@ class _FamilyRoleBadge extends StatelessWidget {
           6.w.horizontalSpace,
           AppText(
             text: role,
-            style: AppTextStyles.semibold(
-              fontSize: 13,
-              color: AppColors.teal,
-            ),
+            style: AppTextStyles.semibold(fontSize: 13, color: AppColors.teal),
           ),
         ],
       ),

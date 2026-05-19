@@ -50,6 +50,7 @@ abstract class FriendProfile with _$FriendProfile {
     int? dailyReadingGoal,
     @Default(false) bool isPrivate,
     @Default(false) bool isFriend,
+    @Default(false) bool friendRequestSent,
   }) = _FriendProfile;
 
   factory FriendProfile.fromJson(Map<String, dynamic> json) =>
@@ -146,6 +147,107 @@ abstract class TopicPreviewItem with _$TopicPreviewItem {
 }
 
 @freezed
+abstract class FriendProfileListResponse with _$FriendProfileListResponse {
+  const factory FriendProfileListResponse({
+    required bool success,
+    required String message,
+    required FriendProfileListData data,
+  }) = _FriendProfileListResponse;
+
+  factory FriendProfileListResponse.fromJson(Map<String, dynamic> json) =>
+      _$FriendProfileListResponseFromJson(json);
+}
+
+@freezed
+abstract class FriendProfileListData with _$FriendProfileListData {
+  const factory FriendProfileListData({
+    required String section,
+    @Default([]) List<FriendProfileListItem> items,
+    required FriendProfileListPagination pagination,
+  }) = _FriendProfileListData;
+
+  factory FriendProfileListData.fromJson(Map<String, dynamic> json) =>
+      _$FriendProfileListDataFromJson(json);
+}
+
+@freezed
+abstract class FriendProfileListItem with _$FriendProfileListItem {
+  const factory FriendProfileListItem({
+    required String id,
+    String? displayName,
+    String? username,
+    String? avatarUrl,
+    @Default(false) bool isFriend,
+    @Default(false) bool friendRequestSent,
+  }) = _FriendProfileListItem;
+
+  factory FriendProfileListItem.fromJson(Map<String, dynamic> json) =>
+      _$FriendProfileListItemFromJson(json);
+}
+
+@freezed
+abstract class FriendProfileListPagination with _$FriendProfileListPagination {
+  const factory FriendProfileListPagination({
+    @Default(1) int page,
+    @Default(20) int limit,
+    @Default(0) int total,
+    @Default(0) int totalPages,
+  }) = _FriendProfileListPagination;
+
+  factory FriendProfileListPagination.fromJson(Map<String, dynamic> json) =>
+      _$FriendProfileListPaginationFromJson(json);
+}
+
+@freezed
+abstract class UserProfileGroupsListResponse with _$UserProfileGroupsListResponse {
+  const factory UserProfileGroupsListResponse({
+    required bool success,
+    required String message,
+    required UserProfileGroupsListData data,
+  }) = _UserProfileGroupsListResponse;
+
+  factory UserProfileGroupsListResponse.fromJson(Map<String, dynamic> json) =>
+      _$UserProfileGroupsListResponseFromJson(json);
+}
+
+@freezed
+abstract class UserProfileGroupsListData with _$UserProfileGroupsListData {
+  const factory UserProfileGroupsListData({
+    required String section,
+    @Default([]) List<GroupPreviewItem> items,
+    required FriendProfileListPagination pagination,
+    FriendDetailsFilters? filters,
+  }) = _UserProfileGroupsListData;
+
+  factory UserProfileGroupsListData.fromJson(Map<String, dynamic> json) =>
+      _$UserProfileGroupsListDataFromJson(json);
+}
+
+@freezed
+abstract class UserProfileTopicsListResponse with _$UserProfileTopicsListResponse {
+  const factory UserProfileTopicsListResponse({
+    required bool success,
+    required String message,
+    required UserProfileTopicsListData data,
+  }) = _UserProfileTopicsListResponse;
+
+  factory UserProfileTopicsListResponse.fromJson(Map<String, dynamic> json) =>
+      _$UserProfileTopicsListResponseFromJson(json);
+}
+
+@freezed
+abstract class UserProfileTopicsListData with _$UserProfileTopicsListData {
+  const factory UserProfileTopicsListData({
+    required String section,
+    @Default([]) List<TopicPreviewItem> items,
+    required FriendProfileListPagination pagination,
+  }) = _UserProfileTopicsListData;
+
+  factory UserProfileTopicsListData.fromJson(Map<String, dynamic> json) =>
+      _$UserProfileTopicsListDataFromJson(json);
+}
+
+@freezed
 abstract class FriendDetailsFilters with _$FriendDetailsFilters {
   const factory FriendDetailsFilters({
     String? groupType,
@@ -184,6 +286,13 @@ extension FriendProfileUi on FriendProfile {
 }
 
 extension FriendPreviewItemUi on FriendPreviewItem {
+  String get initials =>
+      _initialsFromName(displayName, username);
+
+  String get displayLabel => displayName ?? username ?? '';
+}
+
+extension FriendProfileListItemUi on FriendProfileListItem {
   String get initials =>
       _initialsFromName(displayName, username);
 

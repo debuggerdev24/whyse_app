@@ -71,6 +71,8 @@ enum AppRoutes {
   bookDetailsScreen,
   shareStoriesInGroupScreen,
   friendsListScreen,
+  userProfileGroupsListScreen,
+  userProfileTopicsListScreen,
   familyMembersListScreen,
   friendDetailsScreen,
   addFriendsScreen,

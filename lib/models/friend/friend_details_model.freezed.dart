@@ -667,7 +667,7 @@ $FriendDetailsFiltersCopyWith<$Res> get filters {
 /// @nodoc
 mixin _$FriendProfile {
 
- String get userId; String? get firstName; String? get lastName; String? get displayName; String? get username; String? get avatarUrl; String? get phone; String? get pendingPhone; bool get phoneVerified; String? get email;@JsonKey(fromJson: _socialAccountsFromJson, toJson: _socialAccountsToJson) FriendSocialAccounts? get socialAccounts; List<String> get interests; String? get country; String? get preferredLanguage; int? get dailyReadingGoal; bool get isPrivate; bool get isFriend;
+ String get userId; String? get firstName; String? get lastName; String? get displayName; String? get username; String? get avatarUrl; String? get phone; String? get pendingPhone; bool get phoneVerified; String? get email;@JsonKey(fromJson: _socialAccountsFromJson, toJson: _socialAccountsToJson) FriendSocialAccounts? get socialAccounts; List<String> get interests; String? get country; String? get preferredLanguage; int? get dailyReadingGoal; bool get isPrivate; bool get isFriend; bool get friendRequestSent;
 /// Create a copy of FriendProfile
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -680,16 +680,16 @@ $FriendProfileCopyWith<FriendProfile> get copyWith => _$FriendProfileCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FriendProfile&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.username, username) || other.username == username)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.pendingPhone, pendingPhone) || other.pendingPhone == pendingPhone)&&(identical(other.phoneVerified, phoneVerified) || other.phoneVerified == phoneVerified)&&(identical(other.email, email) || other.email == email)&&(identical(other.socialAccounts, socialAccounts) || other.socialAccounts == socialAccounts)&&const DeepCollectionEquality().equals(other.interests, interests)&&(identical(other.country, country) || other.country == country)&&(identical(other.preferredLanguage, preferredLanguage) || other.preferredLanguage == preferredLanguage)&&(identical(other.dailyReadingGoal, dailyReadingGoal) || other.dailyReadingGoal == dailyReadingGoal)&&(identical(other.isPrivate, isPrivate) || other.isPrivate == isPrivate)&&(identical(other.isFriend, isFriend) || other.isFriend == isFriend));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FriendProfile&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.username, username) || other.username == username)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.pendingPhone, pendingPhone) || other.pendingPhone == pendingPhone)&&(identical(other.phoneVerified, phoneVerified) || other.phoneVerified == phoneVerified)&&(identical(other.email, email) || other.email == email)&&(identical(other.socialAccounts, socialAccounts) || other.socialAccounts == socialAccounts)&&const DeepCollectionEquality().equals(other.interests, interests)&&(identical(other.country, country) || other.country == country)&&(identical(other.preferredLanguage, preferredLanguage) || other.preferredLanguage == preferredLanguage)&&(identical(other.dailyReadingGoal, dailyReadingGoal) || other.dailyReadingGoal == dailyReadingGoal)&&(identical(other.isPrivate, isPrivate) || other.isPrivate == isPrivate)&&(identical(other.isFriend, isFriend) || other.isFriend == isFriend)&&(identical(other.friendRequestSent, friendRequestSent) || other.friendRequestSent == friendRequestSent));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,userId,firstName,lastName,displayName,username,avatarUrl,phone,pendingPhone,phoneVerified,email,socialAccounts,const DeepCollectionEquality().hash(interests),country,preferredLanguage,dailyReadingGoal,isPrivate,isFriend);
+int get hashCode => Object.hash(runtimeType,userId,firstName,lastName,displayName,username,avatarUrl,phone,pendingPhone,phoneVerified,email,socialAccounts,const DeepCollectionEquality().hash(interests),country,preferredLanguage,dailyReadingGoal,isPrivate,isFriend,friendRequestSent);
 
 @override
 String toString() {
-  return 'FriendProfile(userId: $userId, firstName: $firstName, lastName: $lastName, displayName: $displayName, username: $username, avatarUrl: $avatarUrl, phone: $phone, pendingPhone: $pendingPhone, phoneVerified: $phoneVerified, email: $email, socialAccounts: $socialAccounts, interests: $interests, country: $country, preferredLanguage: $preferredLanguage, dailyReadingGoal: $dailyReadingGoal, isPrivate: $isPrivate, isFriend: $isFriend)';
+  return 'FriendProfile(userId: $userId, firstName: $firstName, lastName: $lastName, displayName: $displayName, username: $username, avatarUrl: $avatarUrl, phone: $phone, pendingPhone: $pendingPhone, phoneVerified: $phoneVerified, email: $email, socialAccounts: $socialAccounts, interests: $interests, country: $country, preferredLanguage: $preferredLanguage, dailyReadingGoal: $dailyReadingGoal, isPrivate: $isPrivate, isFriend: $isFriend, friendRequestSent: $friendRequestSent)';
 }
 
 
@@ -700,7 +700,7 @@ abstract mixin class $FriendProfileCopyWith<$Res>  {
   factory $FriendProfileCopyWith(FriendProfile value, $Res Function(FriendProfile) _then) = _$FriendProfileCopyWithImpl;
 @useResult
 $Res call({
- String userId, String? firstName, String? lastName, String? displayName, String? username, String? avatarUrl, String? phone, String? pendingPhone, bool phoneVerified, String? email,@JsonKey(fromJson: _socialAccountsFromJson, toJson: _socialAccountsToJson) FriendSocialAccounts? socialAccounts, List<String> interests, String? country, String? preferredLanguage, int? dailyReadingGoal, bool isPrivate, bool isFriend
+ String userId, String? firstName, String? lastName, String? displayName, String? username, String? avatarUrl, String? phone, String? pendingPhone, bool phoneVerified, String? email,@JsonKey(fromJson: _socialAccountsFromJson, toJson: _socialAccountsToJson) FriendSocialAccounts? socialAccounts, List<String> interests, String? country, String? preferredLanguage, int? dailyReadingGoal, bool isPrivate, bool isFriend, bool friendRequestSent
 });
 
 
@@ -717,7 +717,7 @@ class _$FriendProfileCopyWithImpl<$Res>
 
 /// Create a copy of FriendProfile
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? userId = null,Object? firstName = freezed,Object? lastName = freezed,Object? displayName = freezed,Object? username = freezed,Object? avatarUrl = freezed,Object? phone = freezed,Object? pendingPhone = freezed,Object? phoneVerified = null,Object? email = freezed,Object? socialAccounts = freezed,Object? interests = null,Object? country = freezed,Object? preferredLanguage = freezed,Object? dailyReadingGoal = freezed,Object? isPrivate = null,Object? isFriend = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? userId = null,Object? firstName = freezed,Object? lastName = freezed,Object? displayName = freezed,Object? username = freezed,Object? avatarUrl = freezed,Object? phone = freezed,Object? pendingPhone = freezed,Object? phoneVerified = null,Object? email = freezed,Object? socialAccounts = freezed,Object? interests = null,Object? country = freezed,Object? preferredLanguage = freezed,Object? dailyReadingGoal = freezed,Object? isPrivate = null,Object? isFriend = null,Object? friendRequestSent = null,}) {
   return _then(_self.copyWith(
 userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,firstName: freezed == firstName ? _self.firstName : firstName // ignore: cast_nullable_to_non_nullable
@@ -736,6 +736,7 @@ as String?,preferredLanguage: freezed == preferredLanguage ? _self.preferredLang
 as String?,dailyReadingGoal: freezed == dailyReadingGoal ? _self.dailyReadingGoal : dailyReadingGoal // ignore: cast_nullable_to_non_nullable
 as int?,isPrivate: null == isPrivate ? _self.isPrivate : isPrivate // ignore: cast_nullable_to_non_nullable
 as bool,isFriend: null == isFriend ? _self.isFriend : isFriend // ignore: cast_nullable_to_non_nullable
+as bool,friendRequestSent: null == friendRequestSent ? _self.friendRequestSent : friendRequestSent // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -833,10 +834,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String userId,  String? firstName,  String? lastName,  String? displayName,  String? username,  String? avatarUrl,  String? phone,  String? pendingPhone,  bool phoneVerified,  String? email, @JsonKey(fromJson: _socialAccountsFromJson, toJson: _socialAccountsToJson)  FriendSocialAccounts? socialAccounts,  List<String> interests,  String? country,  String? preferredLanguage,  int? dailyReadingGoal,  bool isPrivate,  bool isFriend)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String userId,  String? firstName,  String? lastName,  String? displayName,  String? username,  String? avatarUrl,  String? phone,  String? pendingPhone,  bool phoneVerified,  String? email, @JsonKey(fromJson: _socialAccountsFromJson, toJson: _socialAccountsToJson)  FriendSocialAccounts? socialAccounts,  List<String> interests,  String? country,  String? preferredLanguage,  int? dailyReadingGoal,  bool isPrivate,  bool isFriend,  bool friendRequestSent)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FriendProfile() when $default != null:
-return $default(_that.userId,_that.firstName,_that.lastName,_that.displayName,_that.username,_that.avatarUrl,_that.phone,_that.pendingPhone,_that.phoneVerified,_that.email,_that.socialAccounts,_that.interests,_that.country,_that.preferredLanguage,_that.dailyReadingGoal,_that.isPrivate,_that.isFriend);case _:
+return $default(_that.userId,_that.firstName,_that.lastName,_that.displayName,_that.username,_that.avatarUrl,_that.phone,_that.pendingPhone,_that.phoneVerified,_that.email,_that.socialAccounts,_that.interests,_that.country,_that.preferredLanguage,_that.dailyReadingGoal,_that.isPrivate,_that.isFriend,_that.friendRequestSent);case _:
   return orElse();
 
 }
@@ -854,10 +855,10 @@ return $default(_that.userId,_that.firstName,_that.lastName,_that.displayName,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String userId,  String? firstName,  String? lastName,  String? displayName,  String? username,  String? avatarUrl,  String? phone,  String? pendingPhone,  bool phoneVerified,  String? email, @JsonKey(fromJson: _socialAccountsFromJson, toJson: _socialAccountsToJson)  FriendSocialAccounts? socialAccounts,  List<String> interests,  String? country,  String? preferredLanguage,  int? dailyReadingGoal,  bool isPrivate,  bool isFriend)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String userId,  String? firstName,  String? lastName,  String? displayName,  String? username,  String? avatarUrl,  String? phone,  String? pendingPhone,  bool phoneVerified,  String? email, @JsonKey(fromJson: _socialAccountsFromJson, toJson: _socialAccountsToJson)  FriendSocialAccounts? socialAccounts,  List<String> interests,  String? country,  String? preferredLanguage,  int? dailyReadingGoal,  bool isPrivate,  bool isFriend,  bool friendRequestSent)  $default,) {final _that = this;
 switch (_that) {
 case _FriendProfile():
-return $default(_that.userId,_that.firstName,_that.lastName,_that.displayName,_that.username,_that.avatarUrl,_that.phone,_that.pendingPhone,_that.phoneVerified,_that.email,_that.socialAccounts,_that.interests,_that.country,_that.preferredLanguage,_that.dailyReadingGoal,_that.isPrivate,_that.isFriend);case _:
+return $default(_that.userId,_that.firstName,_that.lastName,_that.displayName,_that.username,_that.avatarUrl,_that.phone,_that.pendingPhone,_that.phoneVerified,_that.email,_that.socialAccounts,_that.interests,_that.country,_that.preferredLanguage,_that.dailyReadingGoal,_that.isPrivate,_that.isFriend,_that.friendRequestSent);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -874,10 +875,10 @@ return $default(_that.userId,_that.firstName,_that.lastName,_that.displayName,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String userId,  String? firstName,  String? lastName,  String? displayName,  String? username,  String? avatarUrl,  String? phone,  String? pendingPhone,  bool phoneVerified,  String? email, @JsonKey(fromJson: _socialAccountsFromJson, toJson: _socialAccountsToJson)  FriendSocialAccounts? socialAccounts,  List<String> interests,  String? country,  String? preferredLanguage,  int? dailyReadingGoal,  bool isPrivate,  bool isFriend)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String userId,  String? firstName,  String? lastName,  String? displayName,  String? username,  String? avatarUrl,  String? phone,  String? pendingPhone,  bool phoneVerified,  String? email, @JsonKey(fromJson: _socialAccountsFromJson, toJson: _socialAccountsToJson)  FriendSocialAccounts? socialAccounts,  List<String> interests,  String? country,  String? preferredLanguage,  int? dailyReadingGoal,  bool isPrivate,  bool isFriend,  bool friendRequestSent)?  $default,) {final _that = this;
 switch (_that) {
 case _FriendProfile() when $default != null:
-return $default(_that.userId,_that.firstName,_that.lastName,_that.displayName,_that.username,_that.avatarUrl,_that.phone,_that.pendingPhone,_that.phoneVerified,_that.email,_that.socialAccounts,_that.interests,_that.country,_that.preferredLanguage,_that.dailyReadingGoal,_that.isPrivate,_that.isFriend);case _:
+return $default(_that.userId,_that.firstName,_that.lastName,_that.displayName,_that.username,_that.avatarUrl,_that.phone,_that.pendingPhone,_that.phoneVerified,_that.email,_that.socialAccounts,_that.interests,_that.country,_that.preferredLanguage,_that.dailyReadingGoal,_that.isPrivate,_that.isFriend,_that.friendRequestSent);case _:
   return null;
 
 }
@@ -889,7 +890,7 @@ return $default(_that.userId,_that.firstName,_that.lastName,_that.displayName,_t
 @JsonSerializable()
 
 class _FriendProfile implements FriendProfile {
-  const _FriendProfile({required this.userId, this.firstName, this.lastName, this.displayName, this.username, this.avatarUrl, this.phone, this.pendingPhone, this.phoneVerified = false, this.email, @JsonKey(fromJson: _socialAccountsFromJson, toJson: _socialAccountsToJson) this.socialAccounts, final  List<String> interests = const [], this.country, this.preferredLanguage, this.dailyReadingGoal, this.isPrivate = false, this.isFriend = false}): _interests = interests;
+  const _FriendProfile({required this.userId, this.firstName, this.lastName, this.displayName, this.username, this.avatarUrl, this.phone, this.pendingPhone, this.phoneVerified = false, this.email, @JsonKey(fromJson: _socialAccountsFromJson, toJson: _socialAccountsToJson) this.socialAccounts, final  List<String> interests = const [], this.country, this.preferredLanguage, this.dailyReadingGoal, this.isPrivate = false, this.isFriend = false, this.friendRequestSent = false}): _interests = interests;
   factory _FriendProfile.fromJson(Map<String, dynamic> json) => _$FriendProfileFromJson(json);
 
 @override final  String userId;
@@ -915,6 +916,7 @@ class _FriendProfile implements FriendProfile {
 @override final  int? dailyReadingGoal;
 @override@JsonKey() final  bool isPrivate;
 @override@JsonKey() final  bool isFriend;
+@override@JsonKey() final  bool friendRequestSent;
 
 /// Create a copy of FriendProfile
 /// with the given fields replaced by the non-null parameter values.
@@ -929,16 +931,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FriendProfile&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.username, username) || other.username == username)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.pendingPhone, pendingPhone) || other.pendingPhone == pendingPhone)&&(identical(other.phoneVerified, phoneVerified) || other.phoneVerified == phoneVerified)&&(identical(other.email, email) || other.email == email)&&(identical(other.socialAccounts, socialAccounts) || other.socialAccounts == socialAccounts)&&const DeepCollectionEquality().equals(other._interests, _interests)&&(identical(other.country, country) || other.country == country)&&(identical(other.preferredLanguage, preferredLanguage) || other.preferredLanguage == preferredLanguage)&&(identical(other.dailyReadingGoal, dailyReadingGoal) || other.dailyReadingGoal == dailyReadingGoal)&&(identical(other.isPrivate, isPrivate) || other.isPrivate == isPrivate)&&(identical(other.isFriend, isFriend) || other.isFriend == isFriend));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FriendProfile&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.username, username) || other.username == username)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.pendingPhone, pendingPhone) || other.pendingPhone == pendingPhone)&&(identical(other.phoneVerified, phoneVerified) || other.phoneVerified == phoneVerified)&&(identical(other.email, email) || other.email == email)&&(identical(other.socialAccounts, socialAccounts) || other.socialAccounts == socialAccounts)&&const DeepCollectionEquality().equals(other._interests, _interests)&&(identical(other.country, country) || other.country == country)&&(identical(other.preferredLanguage, preferredLanguage) || other.preferredLanguage == preferredLanguage)&&(identical(other.dailyReadingGoal, dailyReadingGoal) || other.dailyReadingGoal == dailyReadingGoal)&&(identical(other.isPrivate, isPrivate) || other.isPrivate == isPrivate)&&(identical(other.isFriend, isFriend) || other.isFriend == isFriend)&&(identical(other.friendRequestSent, friendRequestSent) || other.friendRequestSent == friendRequestSent));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,userId,firstName,lastName,displayName,username,avatarUrl,phone,pendingPhone,phoneVerified,email,socialAccounts,const DeepCollectionEquality().hash(_interests),country,preferredLanguage,dailyReadingGoal,isPrivate,isFriend);
+int get hashCode => Object.hash(runtimeType,userId,firstName,lastName,displayName,username,avatarUrl,phone,pendingPhone,phoneVerified,email,socialAccounts,const DeepCollectionEquality().hash(_interests),country,preferredLanguage,dailyReadingGoal,isPrivate,isFriend,friendRequestSent);
 
 @override
 String toString() {
-  return 'FriendProfile(userId: $userId, firstName: $firstName, lastName: $lastName, displayName: $displayName, username: $username, avatarUrl: $avatarUrl, phone: $phone, pendingPhone: $pendingPhone, phoneVerified: $phoneVerified, email: $email, socialAccounts: $socialAccounts, interests: $interests, country: $country, preferredLanguage: $preferredLanguage, dailyReadingGoal: $dailyReadingGoal, isPrivate: $isPrivate, isFriend: $isFriend)';
+  return 'FriendProfile(userId: $userId, firstName: $firstName, lastName: $lastName, displayName: $displayName, username: $username, avatarUrl: $avatarUrl, phone: $phone, pendingPhone: $pendingPhone, phoneVerified: $phoneVerified, email: $email, socialAccounts: $socialAccounts, interests: $interests, country: $country, preferredLanguage: $preferredLanguage, dailyReadingGoal: $dailyReadingGoal, isPrivate: $isPrivate, isFriend: $isFriend, friendRequestSent: $friendRequestSent)';
 }
 
 
@@ -949,7 +951,7 @@ abstract mixin class _$FriendProfileCopyWith<$Res> implements $FriendProfileCopy
   factory _$FriendProfileCopyWith(_FriendProfile value, $Res Function(_FriendProfile) _then) = __$FriendProfileCopyWithImpl;
 @override @useResult
 $Res call({
- String userId, String? firstName, String? lastName, String? displayName, String? username, String? avatarUrl, String? phone, String? pendingPhone, bool phoneVerified, String? email,@JsonKey(fromJson: _socialAccountsFromJson, toJson: _socialAccountsToJson) FriendSocialAccounts? socialAccounts, List<String> interests, String? country, String? preferredLanguage, int? dailyReadingGoal, bool isPrivate, bool isFriend
+ String userId, String? firstName, String? lastName, String? displayName, String? username, String? avatarUrl, String? phone, String? pendingPhone, bool phoneVerified, String? email,@JsonKey(fromJson: _socialAccountsFromJson, toJson: _socialAccountsToJson) FriendSocialAccounts? socialAccounts, List<String> interests, String? country, String? preferredLanguage, int? dailyReadingGoal, bool isPrivate, bool isFriend, bool friendRequestSent
 });
 
 
@@ -966,7 +968,7 @@ class __$FriendProfileCopyWithImpl<$Res>
 
 /// Create a copy of FriendProfile
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? userId = null,Object? firstName = freezed,Object? lastName = freezed,Object? displayName = freezed,Object? username = freezed,Object? avatarUrl = freezed,Object? phone = freezed,Object? pendingPhone = freezed,Object? phoneVerified = null,Object? email = freezed,Object? socialAccounts = freezed,Object? interests = null,Object? country = freezed,Object? preferredLanguage = freezed,Object? dailyReadingGoal = freezed,Object? isPrivate = null,Object? isFriend = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? userId = null,Object? firstName = freezed,Object? lastName = freezed,Object? displayName = freezed,Object? username = freezed,Object? avatarUrl = freezed,Object? phone = freezed,Object? pendingPhone = freezed,Object? phoneVerified = null,Object? email = freezed,Object? socialAccounts = freezed,Object? interests = null,Object? country = freezed,Object? preferredLanguage = freezed,Object? dailyReadingGoal = freezed,Object? isPrivate = null,Object? isFriend = null,Object? friendRequestSent = null,}) {
   return _then(_FriendProfile(
 userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,firstName: freezed == firstName ? _self.firstName : firstName // ignore: cast_nullable_to_non_nullable
@@ -985,6 +987,7 @@ as String?,preferredLanguage: freezed == preferredLanguage ? _self.preferredLang
 as String?,dailyReadingGoal: freezed == dailyReadingGoal ? _self.dailyReadingGoal : dailyReadingGoal // ignore: cast_nullable_to_non_nullable
 as int?,isPrivate: null == isPrivate ? _self.isPrivate : isPrivate // ignore: cast_nullable_to_non_nullable
 as bool,isFriend: null == isFriend ? _self.isFriend : isFriend // ignore: cast_nullable_to_non_nullable
+as bool,friendRequestSent: null == friendRequestSent ? _self.friendRequestSent : friendRequestSent // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -2918,6 +2921,2323 @@ as bool,
 }
 
 
+}
+
+
+/// @nodoc
+mixin _$FriendProfileListResponse {
+
+ bool get success; String get message; FriendProfileListData get data;
+/// Create a copy of FriendProfileListResponse
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FriendProfileListResponseCopyWith<FriendProfileListResponse> get copyWith => _$FriendProfileListResponseCopyWithImpl<FriendProfileListResponse>(this as FriendProfileListResponse, _$identity);
+
+  /// Serializes this FriendProfileListResponse to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FriendProfileListResponse&&(identical(other.success, success) || other.success == success)&&(identical(other.message, message) || other.message == message)&&(identical(other.data, data) || other.data == data));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,success,message,data);
+
+@override
+String toString() {
+  return 'FriendProfileListResponse(success: $success, message: $message, data: $data)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FriendProfileListResponseCopyWith<$Res>  {
+  factory $FriendProfileListResponseCopyWith(FriendProfileListResponse value, $Res Function(FriendProfileListResponse) _then) = _$FriendProfileListResponseCopyWithImpl;
+@useResult
+$Res call({
+ bool success, String message, FriendProfileListData data
+});
+
+
+$FriendProfileListDataCopyWith<$Res> get data;
+
+}
+/// @nodoc
+class _$FriendProfileListResponseCopyWithImpl<$Res>
+    implements $FriendProfileListResponseCopyWith<$Res> {
+  _$FriendProfileListResponseCopyWithImpl(this._self, this._then);
+
+  final FriendProfileListResponse _self;
+  final $Res Function(FriendProfileListResponse) _then;
+
+/// Create a copy of FriendProfileListResponse
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? success = null,Object? message = null,Object? data = null,}) {
+  return _then(_self.copyWith(
+success: null == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
+as bool,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
+as FriendProfileListData,
+  ));
+}
+/// Create a copy of FriendProfileListResponse
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$FriendProfileListDataCopyWith<$Res> get data {
+  
+  return $FriendProfileListDataCopyWith<$Res>(_self.data, (value) {
+    return _then(_self.copyWith(data: value));
+  });
+}
+}
+
+
+/// Adds pattern-matching-related methods to [FriendProfileListResponse].
+extension FriendProfileListResponsePatterns on FriendProfileListResponse {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _FriendProfileListResponse value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _FriendProfileListResponse() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _FriendProfileListResponse value)  $default,){
+final _that = this;
+switch (_that) {
+case _FriendProfileListResponse():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _FriendProfileListResponse value)?  $default,){
+final _that = this;
+switch (_that) {
+case _FriendProfileListResponse() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool success,  String message,  FriendProfileListData data)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _FriendProfileListResponse() when $default != null:
+return $default(_that.success,_that.message,_that.data);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool success,  String message,  FriendProfileListData data)  $default,) {final _that = this;
+switch (_that) {
+case _FriendProfileListResponse():
+return $default(_that.success,_that.message,_that.data);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool success,  String message,  FriendProfileListData data)?  $default,) {final _that = this;
+switch (_that) {
+case _FriendProfileListResponse() when $default != null:
+return $default(_that.success,_that.message,_that.data);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _FriendProfileListResponse implements FriendProfileListResponse {
+  const _FriendProfileListResponse({required this.success, required this.message, required this.data});
+  factory _FriendProfileListResponse.fromJson(Map<String, dynamic> json) => _$FriendProfileListResponseFromJson(json);
+
+@override final  bool success;
+@override final  String message;
+@override final  FriendProfileListData data;
+
+/// Create a copy of FriendProfileListResponse
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$FriendProfileListResponseCopyWith<_FriendProfileListResponse> get copyWith => __$FriendProfileListResponseCopyWithImpl<_FriendProfileListResponse>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$FriendProfileListResponseToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FriendProfileListResponse&&(identical(other.success, success) || other.success == success)&&(identical(other.message, message) || other.message == message)&&(identical(other.data, data) || other.data == data));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,success,message,data);
+
+@override
+String toString() {
+  return 'FriendProfileListResponse(success: $success, message: $message, data: $data)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$FriendProfileListResponseCopyWith<$Res> implements $FriendProfileListResponseCopyWith<$Res> {
+  factory _$FriendProfileListResponseCopyWith(_FriendProfileListResponse value, $Res Function(_FriendProfileListResponse) _then) = __$FriendProfileListResponseCopyWithImpl;
+@override @useResult
+$Res call({
+ bool success, String message, FriendProfileListData data
+});
+
+
+@override $FriendProfileListDataCopyWith<$Res> get data;
+
+}
+/// @nodoc
+class __$FriendProfileListResponseCopyWithImpl<$Res>
+    implements _$FriendProfileListResponseCopyWith<$Res> {
+  __$FriendProfileListResponseCopyWithImpl(this._self, this._then);
+
+  final _FriendProfileListResponse _self;
+  final $Res Function(_FriendProfileListResponse) _then;
+
+/// Create a copy of FriendProfileListResponse
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? success = null,Object? message = null,Object? data = null,}) {
+  return _then(_FriendProfileListResponse(
+success: null == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
+as bool,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
+as FriendProfileListData,
+  ));
+}
+
+/// Create a copy of FriendProfileListResponse
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$FriendProfileListDataCopyWith<$Res> get data {
+  
+  return $FriendProfileListDataCopyWith<$Res>(_self.data, (value) {
+    return _then(_self.copyWith(data: value));
+  });
+}
+}
+
+
+/// @nodoc
+mixin _$FriendProfileListData {
+
+ String get section; List<FriendProfileListItem> get items; FriendProfileListPagination get pagination;
+/// Create a copy of FriendProfileListData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FriendProfileListDataCopyWith<FriendProfileListData> get copyWith => _$FriendProfileListDataCopyWithImpl<FriendProfileListData>(this as FriendProfileListData, _$identity);
+
+  /// Serializes this FriendProfileListData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FriendProfileListData&&(identical(other.section, section) || other.section == section)&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.pagination, pagination) || other.pagination == pagination));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,section,const DeepCollectionEquality().hash(items),pagination);
+
+@override
+String toString() {
+  return 'FriendProfileListData(section: $section, items: $items, pagination: $pagination)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FriendProfileListDataCopyWith<$Res>  {
+  factory $FriendProfileListDataCopyWith(FriendProfileListData value, $Res Function(FriendProfileListData) _then) = _$FriendProfileListDataCopyWithImpl;
+@useResult
+$Res call({
+ String section, List<FriendProfileListItem> items, FriendProfileListPagination pagination
+});
+
+
+$FriendProfileListPaginationCopyWith<$Res> get pagination;
+
+}
+/// @nodoc
+class _$FriendProfileListDataCopyWithImpl<$Res>
+    implements $FriendProfileListDataCopyWith<$Res> {
+  _$FriendProfileListDataCopyWithImpl(this._self, this._then);
+
+  final FriendProfileListData _self;
+  final $Res Function(FriendProfileListData) _then;
+
+/// Create a copy of FriendProfileListData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? section = null,Object? items = null,Object? pagination = null,}) {
+  return _then(_self.copyWith(
+section: null == section ? _self.section : section // ignore: cast_nullable_to_non_nullable
+as String,items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
+as List<FriendProfileListItem>,pagination: null == pagination ? _self.pagination : pagination // ignore: cast_nullable_to_non_nullable
+as FriendProfileListPagination,
+  ));
+}
+/// Create a copy of FriendProfileListData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$FriendProfileListPaginationCopyWith<$Res> get pagination {
+  
+  return $FriendProfileListPaginationCopyWith<$Res>(_self.pagination, (value) {
+    return _then(_self.copyWith(pagination: value));
+  });
+}
+}
+
+
+/// Adds pattern-matching-related methods to [FriendProfileListData].
+extension FriendProfileListDataPatterns on FriendProfileListData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _FriendProfileListData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _FriendProfileListData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _FriendProfileListData value)  $default,){
+final _that = this;
+switch (_that) {
+case _FriendProfileListData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _FriendProfileListData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _FriendProfileListData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String section,  List<FriendProfileListItem> items,  FriendProfileListPagination pagination)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _FriendProfileListData() when $default != null:
+return $default(_that.section,_that.items,_that.pagination);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String section,  List<FriendProfileListItem> items,  FriendProfileListPagination pagination)  $default,) {final _that = this;
+switch (_that) {
+case _FriendProfileListData():
+return $default(_that.section,_that.items,_that.pagination);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String section,  List<FriendProfileListItem> items,  FriendProfileListPagination pagination)?  $default,) {final _that = this;
+switch (_that) {
+case _FriendProfileListData() when $default != null:
+return $default(_that.section,_that.items,_that.pagination);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _FriendProfileListData implements FriendProfileListData {
+  const _FriendProfileListData({required this.section, final  List<FriendProfileListItem> items = const [], required this.pagination}): _items = items;
+  factory _FriendProfileListData.fromJson(Map<String, dynamic> json) => _$FriendProfileListDataFromJson(json);
+
+@override final  String section;
+ final  List<FriendProfileListItem> _items;
+@override@JsonKey() List<FriendProfileListItem> get items {
+  if (_items is EqualUnmodifiableListView) return _items;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_items);
+}
+
+@override final  FriendProfileListPagination pagination;
+
+/// Create a copy of FriendProfileListData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$FriendProfileListDataCopyWith<_FriendProfileListData> get copyWith => __$FriendProfileListDataCopyWithImpl<_FriendProfileListData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$FriendProfileListDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FriendProfileListData&&(identical(other.section, section) || other.section == section)&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.pagination, pagination) || other.pagination == pagination));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,section,const DeepCollectionEquality().hash(_items),pagination);
+
+@override
+String toString() {
+  return 'FriendProfileListData(section: $section, items: $items, pagination: $pagination)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$FriendProfileListDataCopyWith<$Res> implements $FriendProfileListDataCopyWith<$Res> {
+  factory _$FriendProfileListDataCopyWith(_FriendProfileListData value, $Res Function(_FriendProfileListData) _then) = __$FriendProfileListDataCopyWithImpl;
+@override @useResult
+$Res call({
+ String section, List<FriendProfileListItem> items, FriendProfileListPagination pagination
+});
+
+
+@override $FriendProfileListPaginationCopyWith<$Res> get pagination;
+
+}
+/// @nodoc
+class __$FriendProfileListDataCopyWithImpl<$Res>
+    implements _$FriendProfileListDataCopyWith<$Res> {
+  __$FriendProfileListDataCopyWithImpl(this._self, this._then);
+
+  final _FriendProfileListData _self;
+  final $Res Function(_FriendProfileListData) _then;
+
+/// Create a copy of FriendProfileListData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? section = null,Object? items = null,Object? pagination = null,}) {
+  return _then(_FriendProfileListData(
+section: null == section ? _self.section : section // ignore: cast_nullable_to_non_nullable
+as String,items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
+as List<FriendProfileListItem>,pagination: null == pagination ? _self.pagination : pagination // ignore: cast_nullable_to_non_nullable
+as FriendProfileListPagination,
+  ));
+}
+
+/// Create a copy of FriendProfileListData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$FriendProfileListPaginationCopyWith<$Res> get pagination {
+  
+  return $FriendProfileListPaginationCopyWith<$Res>(_self.pagination, (value) {
+    return _then(_self.copyWith(pagination: value));
+  });
+}
+}
+
+
+/// @nodoc
+mixin _$FriendProfileListItem {
+
+ String get id; String? get displayName; String? get username; String? get avatarUrl; bool get isFriend; bool get friendRequestSent;
+/// Create a copy of FriendProfileListItem
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FriendProfileListItemCopyWith<FriendProfileListItem> get copyWith => _$FriendProfileListItemCopyWithImpl<FriendProfileListItem>(this as FriendProfileListItem, _$identity);
+
+  /// Serializes this FriendProfileListItem to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FriendProfileListItem&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.username, username) || other.username == username)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.isFriend, isFriend) || other.isFriend == isFriend)&&(identical(other.friendRequestSent, friendRequestSent) || other.friendRequestSent == friendRequestSent));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,displayName,username,avatarUrl,isFriend,friendRequestSent);
+
+@override
+String toString() {
+  return 'FriendProfileListItem(id: $id, displayName: $displayName, username: $username, avatarUrl: $avatarUrl, isFriend: $isFriend, friendRequestSent: $friendRequestSent)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FriendProfileListItemCopyWith<$Res>  {
+  factory $FriendProfileListItemCopyWith(FriendProfileListItem value, $Res Function(FriendProfileListItem) _then) = _$FriendProfileListItemCopyWithImpl;
+@useResult
+$Res call({
+ String id, String? displayName, String? username, String? avatarUrl, bool isFriend, bool friendRequestSent
+});
+
+
+
+
+}
+/// @nodoc
+class _$FriendProfileListItemCopyWithImpl<$Res>
+    implements $FriendProfileListItemCopyWith<$Res> {
+  _$FriendProfileListItemCopyWithImpl(this._self, this._then);
+
+  final FriendProfileListItem _self;
+  final $Res Function(FriendProfileListItem) _then;
+
+/// Create a copy of FriendProfileListItem
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? displayName = freezed,Object? username = freezed,Object? avatarUrl = freezed,Object? isFriend = null,Object? friendRequestSent = null,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
+as String?,username: freezed == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
+as String?,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ignore: cast_nullable_to_non_nullable
+as String?,isFriend: null == isFriend ? _self.isFriend : isFriend // ignore: cast_nullable_to_non_nullable
+as bool,friendRequestSent: null == friendRequestSent ? _self.friendRequestSent : friendRequestSent // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [FriendProfileListItem].
+extension FriendProfileListItemPatterns on FriendProfileListItem {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _FriendProfileListItem value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _FriendProfileListItem() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _FriendProfileListItem value)  $default,){
+final _that = this;
+switch (_that) {
+case _FriendProfileListItem():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _FriendProfileListItem value)?  $default,){
+final _that = this;
+switch (_that) {
+case _FriendProfileListItem() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? displayName,  String? username,  String? avatarUrl,  bool isFriend,  bool friendRequestSent)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _FriendProfileListItem() when $default != null:
+return $default(_that.id,_that.displayName,_that.username,_that.avatarUrl,_that.isFriend,_that.friendRequestSent);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? displayName,  String? username,  String? avatarUrl,  bool isFriend,  bool friendRequestSent)  $default,) {final _that = this;
+switch (_that) {
+case _FriendProfileListItem():
+return $default(_that.id,_that.displayName,_that.username,_that.avatarUrl,_that.isFriend,_that.friendRequestSent);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? displayName,  String? username,  String? avatarUrl,  bool isFriend,  bool friendRequestSent)?  $default,) {final _that = this;
+switch (_that) {
+case _FriendProfileListItem() when $default != null:
+return $default(_that.id,_that.displayName,_that.username,_that.avatarUrl,_that.isFriend,_that.friendRequestSent);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _FriendProfileListItem implements FriendProfileListItem {
+  const _FriendProfileListItem({required this.id, this.displayName, this.username, this.avatarUrl, this.isFriend = false, this.friendRequestSent = false});
+  factory _FriendProfileListItem.fromJson(Map<String, dynamic> json) => _$FriendProfileListItemFromJson(json);
+
+@override final  String id;
+@override final  String? displayName;
+@override final  String? username;
+@override final  String? avatarUrl;
+@override@JsonKey() final  bool isFriend;
+@override@JsonKey() final  bool friendRequestSent;
+
+/// Create a copy of FriendProfileListItem
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$FriendProfileListItemCopyWith<_FriendProfileListItem> get copyWith => __$FriendProfileListItemCopyWithImpl<_FriendProfileListItem>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$FriendProfileListItemToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FriendProfileListItem&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.username, username) || other.username == username)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.isFriend, isFriend) || other.isFriend == isFriend)&&(identical(other.friendRequestSent, friendRequestSent) || other.friendRequestSent == friendRequestSent));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,displayName,username,avatarUrl,isFriend,friendRequestSent);
+
+@override
+String toString() {
+  return 'FriendProfileListItem(id: $id, displayName: $displayName, username: $username, avatarUrl: $avatarUrl, isFriend: $isFriend, friendRequestSent: $friendRequestSent)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$FriendProfileListItemCopyWith<$Res> implements $FriendProfileListItemCopyWith<$Res> {
+  factory _$FriendProfileListItemCopyWith(_FriendProfileListItem value, $Res Function(_FriendProfileListItem) _then) = __$FriendProfileListItemCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String? displayName, String? username, String? avatarUrl, bool isFriend, bool friendRequestSent
+});
+
+
+
+
+}
+/// @nodoc
+class __$FriendProfileListItemCopyWithImpl<$Res>
+    implements _$FriendProfileListItemCopyWith<$Res> {
+  __$FriendProfileListItemCopyWithImpl(this._self, this._then);
+
+  final _FriendProfileListItem _self;
+  final $Res Function(_FriendProfileListItem) _then;
+
+/// Create a copy of FriendProfileListItem
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? displayName = freezed,Object? username = freezed,Object? avatarUrl = freezed,Object? isFriend = null,Object? friendRequestSent = null,}) {
+  return _then(_FriendProfileListItem(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
+as String?,username: freezed == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
+as String?,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ignore: cast_nullable_to_non_nullable
+as String?,isFriend: null == isFriend ? _self.isFriend : isFriend // ignore: cast_nullable_to_non_nullable
+as bool,friendRequestSent: null == friendRequestSent ? _self.friendRequestSent : friendRequestSent // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$FriendProfileListPagination {
+
+ int get page; int get limit; int get total; int get totalPages;
+/// Create a copy of FriendProfileListPagination
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FriendProfileListPaginationCopyWith<FriendProfileListPagination> get copyWith => _$FriendProfileListPaginationCopyWithImpl<FriendProfileListPagination>(this as FriendProfileListPagination, _$identity);
+
+  /// Serializes this FriendProfileListPagination to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FriendProfileListPagination&&(identical(other.page, page) || other.page == page)&&(identical(other.limit, limit) || other.limit == limit)&&(identical(other.total, total) || other.total == total)&&(identical(other.totalPages, totalPages) || other.totalPages == totalPages));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,page,limit,total,totalPages);
+
+@override
+String toString() {
+  return 'FriendProfileListPagination(page: $page, limit: $limit, total: $total, totalPages: $totalPages)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FriendProfileListPaginationCopyWith<$Res>  {
+  factory $FriendProfileListPaginationCopyWith(FriendProfileListPagination value, $Res Function(FriendProfileListPagination) _then) = _$FriendProfileListPaginationCopyWithImpl;
+@useResult
+$Res call({
+ int page, int limit, int total, int totalPages
+});
+
+
+
+
+}
+/// @nodoc
+class _$FriendProfileListPaginationCopyWithImpl<$Res>
+    implements $FriendProfileListPaginationCopyWith<$Res> {
+  _$FriendProfileListPaginationCopyWithImpl(this._self, this._then);
+
+  final FriendProfileListPagination _self;
+  final $Res Function(FriendProfileListPagination) _then;
+
+/// Create a copy of FriendProfileListPagination
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? page = null,Object? limit = null,Object? total = null,Object? totalPages = null,}) {
+  return _then(_self.copyWith(
+page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
+as int,limit: null == limit ? _self.limit : limit // ignore: cast_nullable_to_non_nullable
+as int,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
+as int,totalPages: null == totalPages ? _self.totalPages : totalPages // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [FriendProfileListPagination].
+extension FriendProfileListPaginationPatterns on FriendProfileListPagination {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _FriendProfileListPagination value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _FriendProfileListPagination() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _FriendProfileListPagination value)  $default,){
+final _that = this;
+switch (_that) {
+case _FriendProfileListPagination():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _FriendProfileListPagination value)?  $default,){
+final _that = this;
+switch (_that) {
+case _FriendProfileListPagination() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int page,  int limit,  int total,  int totalPages)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _FriendProfileListPagination() when $default != null:
+return $default(_that.page,_that.limit,_that.total,_that.totalPages);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int page,  int limit,  int total,  int totalPages)  $default,) {final _that = this;
+switch (_that) {
+case _FriendProfileListPagination():
+return $default(_that.page,_that.limit,_that.total,_that.totalPages);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int page,  int limit,  int total,  int totalPages)?  $default,) {final _that = this;
+switch (_that) {
+case _FriendProfileListPagination() when $default != null:
+return $default(_that.page,_that.limit,_that.total,_that.totalPages);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _FriendProfileListPagination implements FriendProfileListPagination {
+  const _FriendProfileListPagination({this.page = 1, this.limit = 20, this.total = 0, this.totalPages = 0});
+  factory _FriendProfileListPagination.fromJson(Map<String, dynamic> json) => _$FriendProfileListPaginationFromJson(json);
+
+@override@JsonKey() final  int page;
+@override@JsonKey() final  int limit;
+@override@JsonKey() final  int total;
+@override@JsonKey() final  int totalPages;
+
+/// Create a copy of FriendProfileListPagination
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$FriendProfileListPaginationCopyWith<_FriendProfileListPagination> get copyWith => __$FriendProfileListPaginationCopyWithImpl<_FriendProfileListPagination>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$FriendProfileListPaginationToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FriendProfileListPagination&&(identical(other.page, page) || other.page == page)&&(identical(other.limit, limit) || other.limit == limit)&&(identical(other.total, total) || other.total == total)&&(identical(other.totalPages, totalPages) || other.totalPages == totalPages));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,page,limit,total,totalPages);
+
+@override
+String toString() {
+  return 'FriendProfileListPagination(page: $page, limit: $limit, total: $total, totalPages: $totalPages)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$FriendProfileListPaginationCopyWith<$Res> implements $FriendProfileListPaginationCopyWith<$Res> {
+  factory _$FriendProfileListPaginationCopyWith(_FriendProfileListPagination value, $Res Function(_FriendProfileListPagination) _then) = __$FriendProfileListPaginationCopyWithImpl;
+@override @useResult
+$Res call({
+ int page, int limit, int total, int totalPages
+});
+
+
+
+
+}
+/// @nodoc
+class __$FriendProfileListPaginationCopyWithImpl<$Res>
+    implements _$FriendProfileListPaginationCopyWith<$Res> {
+  __$FriendProfileListPaginationCopyWithImpl(this._self, this._then);
+
+  final _FriendProfileListPagination _self;
+  final $Res Function(_FriendProfileListPagination) _then;
+
+/// Create a copy of FriendProfileListPagination
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? page = null,Object? limit = null,Object? total = null,Object? totalPages = null,}) {
+  return _then(_FriendProfileListPagination(
+page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
+as int,limit: null == limit ? _self.limit : limit // ignore: cast_nullable_to_non_nullable
+as int,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
+as int,totalPages: null == totalPages ? _self.totalPages : totalPages // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$UserProfileGroupsListResponse {
+
+ bool get success; String get message; UserProfileGroupsListData get data;
+/// Create a copy of UserProfileGroupsListResponse
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$UserProfileGroupsListResponseCopyWith<UserProfileGroupsListResponse> get copyWith => _$UserProfileGroupsListResponseCopyWithImpl<UserProfileGroupsListResponse>(this as UserProfileGroupsListResponse, _$identity);
+
+  /// Serializes this UserProfileGroupsListResponse to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserProfileGroupsListResponse&&(identical(other.success, success) || other.success == success)&&(identical(other.message, message) || other.message == message)&&(identical(other.data, data) || other.data == data));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,success,message,data);
+
+@override
+String toString() {
+  return 'UserProfileGroupsListResponse(success: $success, message: $message, data: $data)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $UserProfileGroupsListResponseCopyWith<$Res>  {
+  factory $UserProfileGroupsListResponseCopyWith(UserProfileGroupsListResponse value, $Res Function(UserProfileGroupsListResponse) _then) = _$UserProfileGroupsListResponseCopyWithImpl;
+@useResult
+$Res call({
+ bool success, String message, UserProfileGroupsListData data
+});
+
+
+$UserProfileGroupsListDataCopyWith<$Res> get data;
+
+}
+/// @nodoc
+class _$UserProfileGroupsListResponseCopyWithImpl<$Res>
+    implements $UserProfileGroupsListResponseCopyWith<$Res> {
+  _$UserProfileGroupsListResponseCopyWithImpl(this._self, this._then);
+
+  final UserProfileGroupsListResponse _self;
+  final $Res Function(UserProfileGroupsListResponse) _then;
+
+/// Create a copy of UserProfileGroupsListResponse
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? success = null,Object? message = null,Object? data = null,}) {
+  return _then(_self.copyWith(
+success: null == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
+as bool,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
+as UserProfileGroupsListData,
+  ));
+}
+/// Create a copy of UserProfileGroupsListResponse
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$UserProfileGroupsListDataCopyWith<$Res> get data {
+  
+  return $UserProfileGroupsListDataCopyWith<$Res>(_self.data, (value) {
+    return _then(_self.copyWith(data: value));
+  });
+}
+}
+
+
+/// Adds pattern-matching-related methods to [UserProfileGroupsListResponse].
+extension UserProfileGroupsListResponsePatterns on UserProfileGroupsListResponse {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _UserProfileGroupsListResponse value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _UserProfileGroupsListResponse() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _UserProfileGroupsListResponse value)  $default,){
+final _that = this;
+switch (_that) {
+case _UserProfileGroupsListResponse():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _UserProfileGroupsListResponse value)?  $default,){
+final _that = this;
+switch (_that) {
+case _UserProfileGroupsListResponse() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool success,  String message,  UserProfileGroupsListData data)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _UserProfileGroupsListResponse() when $default != null:
+return $default(_that.success,_that.message,_that.data);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool success,  String message,  UserProfileGroupsListData data)  $default,) {final _that = this;
+switch (_that) {
+case _UserProfileGroupsListResponse():
+return $default(_that.success,_that.message,_that.data);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool success,  String message,  UserProfileGroupsListData data)?  $default,) {final _that = this;
+switch (_that) {
+case _UserProfileGroupsListResponse() when $default != null:
+return $default(_that.success,_that.message,_that.data);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _UserProfileGroupsListResponse implements UserProfileGroupsListResponse {
+  const _UserProfileGroupsListResponse({required this.success, required this.message, required this.data});
+  factory _UserProfileGroupsListResponse.fromJson(Map<String, dynamic> json) => _$UserProfileGroupsListResponseFromJson(json);
+
+@override final  bool success;
+@override final  String message;
+@override final  UserProfileGroupsListData data;
+
+/// Create a copy of UserProfileGroupsListResponse
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$UserProfileGroupsListResponseCopyWith<_UserProfileGroupsListResponse> get copyWith => __$UserProfileGroupsListResponseCopyWithImpl<_UserProfileGroupsListResponse>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$UserProfileGroupsListResponseToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserProfileGroupsListResponse&&(identical(other.success, success) || other.success == success)&&(identical(other.message, message) || other.message == message)&&(identical(other.data, data) || other.data == data));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,success,message,data);
+
+@override
+String toString() {
+  return 'UserProfileGroupsListResponse(success: $success, message: $message, data: $data)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$UserProfileGroupsListResponseCopyWith<$Res> implements $UserProfileGroupsListResponseCopyWith<$Res> {
+  factory _$UserProfileGroupsListResponseCopyWith(_UserProfileGroupsListResponse value, $Res Function(_UserProfileGroupsListResponse) _then) = __$UserProfileGroupsListResponseCopyWithImpl;
+@override @useResult
+$Res call({
+ bool success, String message, UserProfileGroupsListData data
+});
+
+
+@override $UserProfileGroupsListDataCopyWith<$Res> get data;
+
+}
+/// @nodoc
+class __$UserProfileGroupsListResponseCopyWithImpl<$Res>
+    implements _$UserProfileGroupsListResponseCopyWith<$Res> {
+  __$UserProfileGroupsListResponseCopyWithImpl(this._self, this._then);
+
+  final _UserProfileGroupsListResponse _self;
+  final $Res Function(_UserProfileGroupsListResponse) _then;
+
+/// Create a copy of UserProfileGroupsListResponse
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? success = null,Object? message = null,Object? data = null,}) {
+  return _then(_UserProfileGroupsListResponse(
+success: null == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
+as bool,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
+as UserProfileGroupsListData,
+  ));
+}
+
+/// Create a copy of UserProfileGroupsListResponse
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$UserProfileGroupsListDataCopyWith<$Res> get data {
+  
+  return $UserProfileGroupsListDataCopyWith<$Res>(_self.data, (value) {
+    return _then(_self.copyWith(data: value));
+  });
+}
+}
+
+
+/// @nodoc
+mixin _$UserProfileGroupsListData {
+
+ String get section; List<GroupPreviewItem> get items; FriendProfileListPagination get pagination; FriendDetailsFilters? get filters;
+/// Create a copy of UserProfileGroupsListData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$UserProfileGroupsListDataCopyWith<UserProfileGroupsListData> get copyWith => _$UserProfileGroupsListDataCopyWithImpl<UserProfileGroupsListData>(this as UserProfileGroupsListData, _$identity);
+
+  /// Serializes this UserProfileGroupsListData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserProfileGroupsListData&&(identical(other.section, section) || other.section == section)&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.pagination, pagination) || other.pagination == pagination)&&(identical(other.filters, filters) || other.filters == filters));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,section,const DeepCollectionEquality().hash(items),pagination,filters);
+
+@override
+String toString() {
+  return 'UserProfileGroupsListData(section: $section, items: $items, pagination: $pagination, filters: $filters)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $UserProfileGroupsListDataCopyWith<$Res>  {
+  factory $UserProfileGroupsListDataCopyWith(UserProfileGroupsListData value, $Res Function(UserProfileGroupsListData) _then) = _$UserProfileGroupsListDataCopyWithImpl;
+@useResult
+$Res call({
+ String section, List<GroupPreviewItem> items, FriendProfileListPagination pagination, FriendDetailsFilters? filters
+});
+
+
+$FriendProfileListPaginationCopyWith<$Res> get pagination;$FriendDetailsFiltersCopyWith<$Res>? get filters;
+
+}
+/// @nodoc
+class _$UserProfileGroupsListDataCopyWithImpl<$Res>
+    implements $UserProfileGroupsListDataCopyWith<$Res> {
+  _$UserProfileGroupsListDataCopyWithImpl(this._self, this._then);
+
+  final UserProfileGroupsListData _self;
+  final $Res Function(UserProfileGroupsListData) _then;
+
+/// Create a copy of UserProfileGroupsListData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? section = null,Object? items = null,Object? pagination = null,Object? filters = freezed,}) {
+  return _then(_self.copyWith(
+section: null == section ? _self.section : section // ignore: cast_nullable_to_non_nullable
+as String,items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
+as List<GroupPreviewItem>,pagination: null == pagination ? _self.pagination : pagination // ignore: cast_nullable_to_non_nullable
+as FriendProfileListPagination,filters: freezed == filters ? _self.filters : filters // ignore: cast_nullable_to_non_nullable
+as FriendDetailsFilters?,
+  ));
+}
+/// Create a copy of UserProfileGroupsListData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$FriendProfileListPaginationCopyWith<$Res> get pagination {
+  
+  return $FriendProfileListPaginationCopyWith<$Res>(_self.pagination, (value) {
+    return _then(_self.copyWith(pagination: value));
+  });
+}/// Create a copy of UserProfileGroupsListData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$FriendDetailsFiltersCopyWith<$Res>? get filters {
+    if (_self.filters == null) {
+    return null;
+  }
+
+  return $FriendDetailsFiltersCopyWith<$Res>(_self.filters!, (value) {
+    return _then(_self.copyWith(filters: value));
+  });
+}
+}
+
+
+/// Adds pattern-matching-related methods to [UserProfileGroupsListData].
+extension UserProfileGroupsListDataPatterns on UserProfileGroupsListData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _UserProfileGroupsListData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _UserProfileGroupsListData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _UserProfileGroupsListData value)  $default,){
+final _that = this;
+switch (_that) {
+case _UserProfileGroupsListData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _UserProfileGroupsListData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _UserProfileGroupsListData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String section,  List<GroupPreviewItem> items,  FriendProfileListPagination pagination,  FriendDetailsFilters? filters)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _UserProfileGroupsListData() when $default != null:
+return $default(_that.section,_that.items,_that.pagination,_that.filters);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String section,  List<GroupPreviewItem> items,  FriendProfileListPagination pagination,  FriendDetailsFilters? filters)  $default,) {final _that = this;
+switch (_that) {
+case _UserProfileGroupsListData():
+return $default(_that.section,_that.items,_that.pagination,_that.filters);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String section,  List<GroupPreviewItem> items,  FriendProfileListPagination pagination,  FriendDetailsFilters? filters)?  $default,) {final _that = this;
+switch (_that) {
+case _UserProfileGroupsListData() when $default != null:
+return $default(_that.section,_that.items,_that.pagination,_that.filters);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _UserProfileGroupsListData implements UserProfileGroupsListData {
+  const _UserProfileGroupsListData({required this.section, final  List<GroupPreviewItem> items = const [], required this.pagination, this.filters}): _items = items;
+  factory _UserProfileGroupsListData.fromJson(Map<String, dynamic> json) => _$UserProfileGroupsListDataFromJson(json);
+
+@override final  String section;
+ final  List<GroupPreviewItem> _items;
+@override@JsonKey() List<GroupPreviewItem> get items {
+  if (_items is EqualUnmodifiableListView) return _items;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_items);
+}
+
+@override final  FriendProfileListPagination pagination;
+@override final  FriendDetailsFilters? filters;
+
+/// Create a copy of UserProfileGroupsListData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$UserProfileGroupsListDataCopyWith<_UserProfileGroupsListData> get copyWith => __$UserProfileGroupsListDataCopyWithImpl<_UserProfileGroupsListData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$UserProfileGroupsListDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserProfileGroupsListData&&(identical(other.section, section) || other.section == section)&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.pagination, pagination) || other.pagination == pagination)&&(identical(other.filters, filters) || other.filters == filters));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,section,const DeepCollectionEquality().hash(_items),pagination,filters);
+
+@override
+String toString() {
+  return 'UserProfileGroupsListData(section: $section, items: $items, pagination: $pagination, filters: $filters)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$UserProfileGroupsListDataCopyWith<$Res> implements $UserProfileGroupsListDataCopyWith<$Res> {
+  factory _$UserProfileGroupsListDataCopyWith(_UserProfileGroupsListData value, $Res Function(_UserProfileGroupsListData) _then) = __$UserProfileGroupsListDataCopyWithImpl;
+@override @useResult
+$Res call({
+ String section, List<GroupPreviewItem> items, FriendProfileListPagination pagination, FriendDetailsFilters? filters
+});
+
+
+@override $FriendProfileListPaginationCopyWith<$Res> get pagination;@override $FriendDetailsFiltersCopyWith<$Res>? get filters;
+
+}
+/// @nodoc
+class __$UserProfileGroupsListDataCopyWithImpl<$Res>
+    implements _$UserProfileGroupsListDataCopyWith<$Res> {
+  __$UserProfileGroupsListDataCopyWithImpl(this._self, this._then);
+
+  final _UserProfileGroupsListData _self;
+  final $Res Function(_UserProfileGroupsListData) _then;
+
+/// Create a copy of UserProfileGroupsListData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? section = null,Object? items = null,Object? pagination = null,Object? filters = freezed,}) {
+  return _then(_UserProfileGroupsListData(
+section: null == section ? _self.section : section // ignore: cast_nullable_to_non_nullable
+as String,items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
+as List<GroupPreviewItem>,pagination: null == pagination ? _self.pagination : pagination // ignore: cast_nullable_to_non_nullable
+as FriendProfileListPagination,filters: freezed == filters ? _self.filters : filters // ignore: cast_nullable_to_non_nullable
+as FriendDetailsFilters?,
+  ));
+}
+
+/// Create a copy of UserProfileGroupsListData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$FriendProfileListPaginationCopyWith<$Res> get pagination {
+  
+  return $FriendProfileListPaginationCopyWith<$Res>(_self.pagination, (value) {
+    return _then(_self.copyWith(pagination: value));
+  });
+}/// Create a copy of UserProfileGroupsListData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$FriendDetailsFiltersCopyWith<$Res>? get filters {
+    if (_self.filters == null) {
+    return null;
+  }
+
+  return $FriendDetailsFiltersCopyWith<$Res>(_self.filters!, (value) {
+    return _then(_self.copyWith(filters: value));
+  });
+}
+}
+
+
+/// @nodoc
+mixin _$UserProfileTopicsListResponse {
+
+ bool get success; String get message; UserProfileTopicsListData get data;
+/// Create a copy of UserProfileTopicsListResponse
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$UserProfileTopicsListResponseCopyWith<UserProfileTopicsListResponse> get copyWith => _$UserProfileTopicsListResponseCopyWithImpl<UserProfileTopicsListResponse>(this as UserProfileTopicsListResponse, _$identity);
+
+  /// Serializes this UserProfileTopicsListResponse to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserProfileTopicsListResponse&&(identical(other.success, success) || other.success == success)&&(identical(other.message, message) || other.message == message)&&(identical(other.data, data) || other.data == data));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,success,message,data);
+
+@override
+String toString() {
+  return 'UserProfileTopicsListResponse(success: $success, message: $message, data: $data)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $UserProfileTopicsListResponseCopyWith<$Res>  {
+  factory $UserProfileTopicsListResponseCopyWith(UserProfileTopicsListResponse value, $Res Function(UserProfileTopicsListResponse) _then) = _$UserProfileTopicsListResponseCopyWithImpl;
+@useResult
+$Res call({
+ bool success, String message, UserProfileTopicsListData data
+});
+
+
+$UserProfileTopicsListDataCopyWith<$Res> get data;
+
+}
+/// @nodoc
+class _$UserProfileTopicsListResponseCopyWithImpl<$Res>
+    implements $UserProfileTopicsListResponseCopyWith<$Res> {
+  _$UserProfileTopicsListResponseCopyWithImpl(this._self, this._then);
+
+  final UserProfileTopicsListResponse _self;
+  final $Res Function(UserProfileTopicsListResponse) _then;
+
+/// Create a copy of UserProfileTopicsListResponse
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? success = null,Object? message = null,Object? data = null,}) {
+  return _then(_self.copyWith(
+success: null == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
+as bool,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
+as UserProfileTopicsListData,
+  ));
+}
+/// Create a copy of UserProfileTopicsListResponse
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$UserProfileTopicsListDataCopyWith<$Res> get data {
+  
+  return $UserProfileTopicsListDataCopyWith<$Res>(_self.data, (value) {
+    return _then(_self.copyWith(data: value));
+  });
+}
+}
+
+
+/// Adds pattern-matching-related methods to [UserProfileTopicsListResponse].
+extension UserProfileTopicsListResponsePatterns on UserProfileTopicsListResponse {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _UserProfileTopicsListResponse value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _UserProfileTopicsListResponse() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _UserProfileTopicsListResponse value)  $default,){
+final _that = this;
+switch (_that) {
+case _UserProfileTopicsListResponse():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _UserProfileTopicsListResponse value)?  $default,){
+final _that = this;
+switch (_that) {
+case _UserProfileTopicsListResponse() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool success,  String message,  UserProfileTopicsListData data)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _UserProfileTopicsListResponse() when $default != null:
+return $default(_that.success,_that.message,_that.data);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool success,  String message,  UserProfileTopicsListData data)  $default,) {final _that = this;
+switch (_that) {
+case _UserProfileTopicsListResponse():
+return $default(_that.success,_that.message,_that.data);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool success,  String message,  UserProfileTopicsListData data)?  $default,) {final _that = this;
+switch (_that) {
+case _UserProfileTopicsListResponse() when $default != null:
+return $default(_that.success,_that.message,_that.data);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _UserProfileTopicsListResponse implements UserProfileTopicsListResponse {
+  const _UserProfileTopicsListResponse({required this.success, required this.message, required this.data});
+  factory _UserProfileTopicsListResponse.fromJson(Map<String, dynamic> json) => _$UserProfileTopicsListResponseFromJson(json);
+
+@override final  bool success;
+@override final  String message;
+@override final  UserProfileTopicsListData data;
+
+/// Create a copy of UserProfileTopicsListResponse
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$UserProfileTopicsListResponseCopyWith<_UserProfileTopicsListResponse> get copyWith => __$UserProfileTopicsListResponseCopyWithImpl<_UserProfileTopicsListResponse>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$UserProfileTopicsListResponseToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserProfileTopicsListResponse&&(identical(other.success, success) || other.success == success)&&(identical(other.message, message) || other.message == message)&&(identical(other.data, data) || other.data == data));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,success,message,data);
+
+@override
+String toString() {
+  return 'UserProfileTopicsListResponse(success: $success, message: $message, data: $data)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$UserProfileTopicsListResponseCopyWith<$Res> implements $UserProfileTopicsListResponseCopyWith<$Res> {
+  factory _$UserProfileTopicsListResponseCopyWith(_UserProfileTopicsListResponse value, $Res Function(_UserProfileTopicsListResponse) _then) = __$UserProfileTopicsListResponseCopyWithImpl;
+@override @useResult
+$Res call({
+ bool success, String message, UserProfileTopicsListData data
+});
+
+
+@override $UserProfileTopicsListDataCopyWith<$Res> get data;
+
+}
+/// @nodoc
+class __$UserProfileTopicsListResponseCopyWithImpl<$Res>
+    implements _$UserProfileTopicsListResponseCopyWith<$Res> {
+  __$UserProfileTopicsListResponseCopyWithImpl(this._self, this._then);
+
+  final _UserProfileTopicsListResponse _self;
+  final $Res Function(_UserProfileTopicsListResponse) _then;
+
+/// Create a copy of UserProfileTopicsListResponse
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? success = null,Object? message = null,Object? data = null,}) {
+  return _then(_UserProfileTopicsListResponse(
+success: null == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
+as bool,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
+as UserProfileTopicsListData,
+  ));
+}
+
+/// Create a copy of UserProfileTopicsListResponse
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$UserProfileTopicsListDataCopyWith<$Res> get data {
+  
+  return $UserProfileTopicsListDataCopyWith<$Res>(_self.data, (value) {
+    return _then(_self.copyWith(data: value));
+  });
+}
+}
+
+
+/// @nodoc
+mixin _$UserProfileTopicsListData {
+
+ String get section; List<TopicPreviewItem> get items; FriendProfileListPagination get pagination;
+/// Create a copy of UserProfileTopicsListData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$UserProfileTopicsListDataCopyWith<UserProfileTopicsListData> get copyWith => _$UserProfileTopicsListDataCopyWithImpl<UserProfileTopicsListData>(this as UserProfileTopicsListData, _$identity);
+
+  /// Serializes this UserProfileTopicsListData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserProfileTopicsListData&&(identical(other.section, section) || other.section == section)&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.pagination, pagination) || other.pagination == pagination));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,section,const DeepCollectionEquality().hash(items),pagination);
+
+@override
+String toString() {
+  return 'UserProfileTopicsListData(section: $section, items: $items, pagination: $pagination)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $UserProfileTopicsListDataCopyWith<$Res>  {
+  factory $UserProfileTopicsListDataCopyWith(UserProfileTopicsListData value, $Res Function(UserProfileTopicsListData) _then) = _$UserProfileTopicsListDataCopyWithImpl;
+@useResult
+$Res call({
+ String section, List<TopicPreviewItem> items, FriendProfileListPagination pagination
+});
+
+
+$FriendProfileListPaginationCopyWith<$Res> get pagination;
+
+}
+/// @nodoc
+class _$UserProfileTopicsListDataCopyWithImpl<$Res>
+    implements $UserProfileTopicsListDataCopyWith<$Res> {
+  _$UserProfileTopicsListDataCopyWithImpl(this._self, this._then);
+
+  final UserProfileTopicsListData _self;
+  final $Res Function(UserProfileTopicsListData) _then;
+
+/// Create a copy of UserProfileTopicsListData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? section = null,Object? items = null,Object? pagination = null,}) {
+  return _then(_self.copyWith(
+section: null == section ? _self.section : section // ignore: cast_nullable_to_non_nullable
+as String,items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
+as List<TopicPreviewItem>,pagination: null == pagination ? _self.pagination : pagination // ignore: cast_nullable_to_non_nullable
+as FriendProfileListPagination,
+  ));
+}
+/// Create a copy of UserProfileTopicsListData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$FriendProfileListPaginationCopyWith<$Res> get pagination {
+  
+  return $FriendProfileListPaginationCopyWith<$Res>(_self.pagination, (value) {
+    return _then(_self.copyWith(pagination: value));
+  });
+}
+}
+
+
+/// Adds pattern-matching-related methods to [UserProfileTopicsListData].
+extension UserProfileTopicsListDataPatterns on UserProfileTopicsListData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _UserProfileTopicsListData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _UserProfileTopicsListData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _UserProfileTopicsListData value)  $default,){
+final _that = this;
+switch (_that) {
+case _UserProfileTopicsListData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _UserProfileTopicsListData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _UserProfileTopicsListData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String section,  List<TopicPreviewItem> items,  FriendProfileListPagination pagination)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _UserProfileTopicsListData() when $default != null:
+return $default(_that.section,_that.items,_that.pagination);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String section,  List<TopicPreviewItem> items,  FriendProfileListPagination pagination)  $default,) {final _that = this;
+switch (_that) {
+case _UserProfileTopicsListData():
+return $default(_that.section,_that.items,_that.pagination);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String section,  List<TopicPreviewItem> items,  FriendProfileListPagination pagination)?  $default,) {final _that = this;
+switch (_that) {
+case _UserProfileTopicsListData() when $default != null:
+return $default(_that.section,_that.items,_that.pagination);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _UserProfileTopicsListData implements UserProfileTopicsListData {
+  const _UserProfileTopicsListData({required this.section, final  List<TopicPreviewItem> items = const [], required this.pagination}): _items = items;
+  factory _UserProfileTopicsListData.fromJson(Map<String, dynamic> json) => _$UserProfileTopicsListDataFromJson(json);
+
+@override final  String section;
+ final  List<TopicPreviewItem> _items;
+@override@JsonKey() List<TopicPreviewItem> get items {
+  if (_items is EqualUnmodifiableListView) return _items;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_items);
+}
+
+@override final  FriendProfileListPagination pagination;
+
+/// Create a copy of UserProfileTopicsListData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$UserProfileTopicsListDataCopyWith<_UserProfileTopicsListData> get copyWith => __$UserProfileTopicsListDataCopyWithImpl<_UserProfileTopicsListData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$UserProfileTopicsListDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserProfileTopicsListData&&(identical(other.section, section) || other.section == section)&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.pagination, pagination) || other.pagination == pagination));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,section,const DeepCollectionEquality().hash(_items),pagination);
+
+@override
+String toString() {
+  return 'UserProfileTopicsListData(section: $section, items: $items, pagination: $pagination)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$UserProfileTopicsListDataCopyWith<$Res> implements $UserProfileTopicsListDataCopyWith<$Res> {
+  factory _$UserProfileTopicsListDataCopyWith(_UserProfileTopicsListData value, $Res Function(_UserProfileTopicsListData) _then) = __$UserProfileTopicsListDataCopyWithImpl;
+@override @useResult
+$Res call({
+ String section, List<TopicPreviewItem> items, FriendProfileListPagination pagination
+});
+
+
+@override $FriendProfileListPaginationCopyWith<$Res> get pagination;
+
+}
+/// @nodoc
+class __$UserProfileTopicsListDataCopyWithImpl<$Res>
+    implements _$UserProfileTopicsListDataCopyWith<$Res> {
+  __$UserProfileTopicsListDataCopyWithImpl(this._self, this._then);
+
+  final _UserProfileTopicsListData _self;
+  final $Res Function(_UserProfileTopicsListData) _then;
+
+/// Create a copy of UserProfileTopicsListData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? section = null,Object? items = null,Object? pagination = null,}) {
+  return _then(_UserProfileTopicsListData(
+section: null == section ? _self.section : section // ignore: cast_nullable_to_non_nullable
+as String,items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
+as List<TopicPreviewItem>,pagination: null == pagination ? _self.pagination : pagination // ignore: cast_nullable_to_non_nullable
+as FriendProfileListPagination,
+  ));
+}
+
+/// Create a copy of UserProfileTopicsListData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$FriendProfileListPaginationCopyWith<$Res> get pagination {
+  
+  return $FriendProfileListPaginationCopyWith<$Res>(_self.pagination, (value) {
+    return _then(_self.copyWith(pagination: value));
+  });
+}
 }
 
 

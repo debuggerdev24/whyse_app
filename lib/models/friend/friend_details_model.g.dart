@@ -71,6 +71,7 @@ _FriendProfile _$FriendProfileFromJson(Map<String, dynamic> json) =>
       dailyReadingGoal: (json['dailyReadingGoal'] as num?)?.toInt(),
       isPrivate: json['isPrivate'] as bool? ?? false,
       isFriend: json['isFriend'] as bool? ?? false,
+      friendRequestSent: json['friendRequestSent'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$FriendProfileToJson(_FriendProfile instance) =>
@@ -92,6 +93,7 @@ Map<String, dynamic> _$FriendProfileToJson(_FriendProfile instance) =>
       'dailyReadingGoal': instance.dailyReadingGoal,
       'isPrivate': instance.isPrivate,
       'isFriend': instance.isFriend,
+      'friendRequestSent': instance.friendRequestSent,
     };
 
 _FriendSocialAccounts _$FriendSocialAccountsFromJson(
@@ -217,6 +219,170 @@ Map<String, dynamic> _$TopicPreviewItemToJson(_TopicPreviewItem instance) =>
       'isOwnTopic': instance.isOwnTopic,
       'isSavedTopic': instance.isSavedTopic,
     };
+
+_FriendProfileListResponse _$FriendProfileListResponseFromJson(
+  Map<String, dynamic> json,
+) => _FriendProfileListResponse(
+  success: json['success'] as bool,
+  message: json['message'] as String,
+  data: FriendProfileListData.fromJson(json['data'] as Map<String, dynamic>),
+);
+
+Map<String, dynamic> _$FriendProfileListResponseToJson(
+  _FriendProfileListResponse instance,
+) => <String, dynamic>{
+  'success': instance.success,
+  'message': instance.message,
+  'data': instance.data,
+};
+
+_FriendProfileListData _$FriendProfileListDataFromJson(
+  Map<String, dynamic> json,
+) => _FriendProfileListData(
+  section: json['section'] as String,
+  items:
+      (json['items'] as List<dynamic>?)
+          ?.map(
+            (e) => FriendProfileListItem.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      const [],
+  pagination: FriendProfileListPagination.fromJson(
+    json['pagination'] as Map<String, dynamic>,
+  ),
+);
+
+Map<String, dynamic> _$FriendProfileListDataToJson(
+  _FriendProfileListData instance,
+) => <String, dynamic>{
+  'section': instance.section,
+  'items': instance.items,
+  'pagination': instance.pagination,
+};
+
+_FriendProfileListItem _$FriendProfileListItemFromJson(
+  Map<String, dynamic> json,
+) => _FriendProfileListItem(
+  id: json['id'] as String,
+  displayName: json['displayName'] as String?,
+  username: json['username'] as String?,
+  avatarUrl: json['avatarUrl'] as String?,
+  isFriend: json['isFriend'] as bool? ?? false,
+  friendRequestSent: json['friendRequestSent'] as bool? ?? false,
+);
+
+Map<String, dynamic> _$FriendProfileListItemToJson(
+  _FriendProfileListItem instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'displayName': instance.displayName,
+  'username': instance.username,
+  'avatarUrl': instance.avatarUrl,
+  'isFriend': instance.isFriend,
+  'friendRequestSent': instance.friendRequestSent,
+};
+
+_FriendProfileListPagination _$FriendProfileListPaginationFromJson(
+  Map<String, dynamic> json,
+) => _FriendProfileListPagination(
+  page: (json['page'] as num?)?.toInt() ?? 1,
+  limit: (json['limit'] as num?)?.toInt() ?? 20,
+  total: (json['total'] as num?)?.toInt() ?? 0,
+  totalPages: (json['totalPages'] as num?)?.toInt() ?? 0,
+);
+
+Map<String, dynamic> _$FriendProfileListPaginationToJson(
+  _FriendProfileListPagination instance,
+) => <String, dynamic>{
+  'page': instance.page,
+  'limit': instance.limit,
+  'total': instance.total,
+  'totalPages': instance.totalPages,
+};
+
+_UserProfileGroupsListResponse _$UserProfileGroupsListResponseFromJson(
+  Map<String, dynamic> json,
+) => _UserProfileGroupsListResponse(
+  success: json['success'] as bool,
+  message: json['message'] as String,
+  data: UserProfileGroupsListData.fromJson(
+    json['data'] as Map<String, dynamic>,
+  ),
+);
+
+Map<String, dynamic> _$UserProfileGroupsListResponseToJson(
+  _UserProfileGroupsListResponse instance,
+) => <String, dynamic>{
+  'success': instance.success,
+  'message': instance.message,
+  'data': instance.data,
+};
+
+_UserProfileGroupsListData _$UserProfileGroupsListDataFromJson(
+  Map<String, dynamic> json,
+) => _UserProfileGroupsListData(
+  section: json['section'] as String,
+  items:
+      (json['items'] as List<dynamic>?)
+          ?.map((e) => GroupPreviewItem.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  pagination: FriendProfileListPagination.fromJson(
+    json['pagination'] as Map<String, dynamic>,
+  ),
+  filters: json['filters'] == null
+      ? null
+      : FriendDetailsFilters.fromJson(json['filters'] as Map<String, dynamic>),
+);
+
+Map<String, dynamic> _$UserProfileGroupsListDataToJson(
+  _UserProfileGroupsListData instance,
+) => <String, dynamic>{
+  'section': instance.section,
+  'items': instance.items,
+  'pagination': instance.pagination,
+  'filters': instance.filters,
+};
+
+_UserProfileTopicsListResponse _$UserProfileTopicsListResponseFromJson(
+  Map<String, dynamic> json,
+) => _UserProfileTopicsListResponse(
+  success: json['success'] as bool,
+  message: json['message'] as String,
+  data: UserProfileTopicsListData.fromJson(
+    json['data'] as Map<String, dynamic>,
+  ),
+);
+
+Map<String, dynamic> _$UserProfileTopicsListResponseToJson(
+  _UserProfileTopicsListResponse instance,
+) => <String, dynamic>{
+  'success': instance.success,
+  'message': instance.message,
+  'data': instance.data,
+};
+
+_UserProfileTopicsListData _$UserProfileTopicsListDataFromJson(
+  Map<String, dynamic> json,
+) => _UserProfileTopicsListData(
+  section: json['section'] as String,
+  items:
+      (json['items'] as List<dynamic>?)
+          ?.map((e) => TopicPreviewItem.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  pagination: FriendProfileListPagination.fromJson(
+    json['pagination'] as Map<String, dynamic>,
+  ),
+);
+
+Map<String, dynamic> _$UserProfileTopicsListDataToJson(
+  _UserProfileTopicsListData instance,
+) => <String, dynamic>{
+  'section': instance.section,
+  'items': instance.items,
+  'pagination': instance.pagination,
+};
 
 _FriendDetailsFilters _$FriendDetailsFiltersFromJson(
   Map<String, dynamic> json,

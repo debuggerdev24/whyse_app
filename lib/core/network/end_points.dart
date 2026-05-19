@@ -143,4 +143,14 @@ class EndPoints {
 
   static String getFriendsDetails({required String friendId}) =>
       '/mobile/friends/users/$friendId/profile?groupType=all';
+
+  static String getUserProfileSectionList({
+    required String userId,
+    required String section,
+    int page = 1,
+    int limit = 20,
+    String groupType = 'all',
+  }) =>
+      '/mobile/friends/users/$userId/profile/list?section=$section&page=$page&limit=$limit&groupType=$groupType';
 }
+  

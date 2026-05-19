@@ -73,4 +73,58 @@ class FriendApiService {
           FriendDetailsResponse.fromJson(result as Map<String, dynamic>),
     );
   }
+
+  Future<Either<ApiException, FriendProfileListResponse>>
+      getUserProfileFriendsList({
+    required String userId,
+    int page = 1,
+    int limit = 20,
+  }) async {
+    return BaseApiHelper.instance.get<FriendProfileListResponse>(
+      EndPoints.getUserProfileSectionList(
+        userId: userId,
+        section: 'friends',
+        page: page,
+        limit: limit,
+      ),
+      parser: (result) =>
+          FriendProfileListResponse.fromJson(result as Map<String, dynamic>),
+    );
+  }
+
+  Future<Either<ApiException, UserProfileGroupsListResponse>>
+      getUserProfileGroupsList({
+    required String userId,
+    int page = 1,
+    int limit = 20,
+  }) async {
+    return BaseApiHelper.instance.get<UserProfileGroupsListResponse>(
+      EndPoints.getUserProfileSectionList(
+        userId: userId,
+        section: 'groups',
+        page: page,
+        limit: limit,
+      ),
+      parser: (result) =>
+          UserProfileGroupsListResponse.fromJson(result as Map<String, dynamic>),
+    );
+  }
+
+  Future<Either<ApiException, UserProfileTopicsListResponse>>
+      getUserProfileTopicsList({
+    required String userId,
+    int page = 1,
+    int limit = 20,
+  }) async {
+    return BaseApiHelper.instance.get<UserProfileTopicsListResponse>(
+      EndPoints.getUserProfileSectionList(
+        userId: userId,
+        section: 'topics',
+        page: page,
+        limit: limit,
+      ),
+      parser: (result) =>
+          UserProfileTopicsListResponse.fromJson(result as Map<String, dynamic>),
+    );
+  }
 }

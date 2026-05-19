@@ -1,11 +1,15 @@
 import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/utils/network_image_url.dart';
+import 'package:redstreakapp/core/utils/user_facing_message.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/friend/friend_details_model.dart';
 import 'package:redstreakapp/models/friend/friend_model.dart';
 import 'package:redstreakapp/providers/friend/friend_provider.dart';
 import 'package:redstreakapp/screens/profile/friend_details_screen.dart';
 import 'package:redstreakapp/screens/profile/friends_list_screen_params.dart';
+import 'package:redstreakapp/services/profile/friend_api_service.dart';
 import 'package:shimmer/shimmer.dart';
 
 class FriendsListScreen extends StatefulWidget {
@@ -13,7 +17,10 @@ class FriendsListScreen extends StatefulWidget {
 
   final FriendsListScreenParams? params;
 
-  bool get _isPreviewMode => params != null;
+  bool get _isUserProfileMode => params?.isUserProfileFriendsList ?? false;
+
+  bool get _isPreviewMode =>
+      params != null && !(params!.isUserProfileFriendsList);
 
   @override
   State<FriendsListScreen> createState() => _FriendsListScreenState();
@@ -22,13 +29,24 @@ class FriendsListScreen extends StatefulWidget {
 class _FriendsListScreenState extends State<FriendsListScreen> {
   final ScrollController _scrollController = ScrollController();
 
+  bool get _isUserProfileMode => widget._isUserProfileMode;
   bool get _isPreviewMode => widget._isPreviewMode;
+
+  // User profile friends list state
+  DataState _userFriendsState = DataState.loading;
+  String? _userFriendsError;
+  List<FriendProfileListItem> _userFriends = [];
+  int _userFriendsPage = 1;
+  int _userFriendsTotalPages = 1;
+  bool _isLoadingMoreUserFriends = false;
 
   @override
   void initState() {
     super.initState();
-    if (!_isPreviewMode) {
-      _scrollController.addListener(_onScroll);
+    _scrollController.addListener(_onScroll);
+    if (_isUserProfileMode) {
+      _loadUserProfileFriends(page: 1);
+    } else if (!_isPreviewMode) {
       Future.microtask(() {
         context.read<FriendProvider>().getFriends();
       });
@@ -36,11 +54,74 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
   }
 
   void _onScroll() {
-    if (_isPreviewMode) return;
-    if (_scrollController.position.pixels >=
+    if (_scrollController.position.pixels <
         _scrollController.position.maxScrollExtent - 200) {
+      return;
+    }
+    if (_isUserProfileMode) {
+      _loadMoreUserProfileFriends();
+    } else if (!_isPreviewMode) {
       context.read<FriendProvider>().loadMoreFriends();
     }
+  }
+
+  Future<void> _loadUserProfileFriends({required int page}) async {
+    final userId = widget.params!.userId!;
+    final isFirstPage = page == 1;
+
+    if (isFirstPage) {
+      setState(() {
+        _userFriendsState = DataState.loading;
+        _userFriendsError = null;
+        _userFriends = [];
+        _userFriendsPage = 1;
+        _userFriendsTotalPages = 1;
+      });
+    } else {
+      if (_isLoadingMoreUserFriends) return;
+      setState(() => _isLoadingMoreUserFriends = true);
+    }
+
+    final result = await FriendApiService.instance.getUserProfileFriendsList(
+      userId: userId,
+      page: page,
+    );
+
+    if (!mounted) return;
+
+    result.fold(
+      (failure) {
+        setState(() {
+          if (isFirstPage) {
+            _userFriendsState = DataState.failed;
+            _userFriendsError = userFacingMessage(failure.errorMsg);
+          }
+          _isLoadingMoreUserFriends = false;
+        });
+      },
+      (response) {
+        final data = response.data;
+        setState(() {
+          if (isFirstPage) {
+            _userFriends = List.of(data.items);
+            _userFriendsState = DataState.success;
+            _userFriendsError = null;
+          } else {
+            _userFriends = [..._userFriends, ...data.items];
+          }
+          _userFriendsPage = data.pagination.page;
+          _userFriendsTotalPages = data.pagination.totalPages;
+          _isLoadingMoreUserFriends = false;
+        });
+      },
+    );
+  }
+
+  void _loadMoreUserProfileFriends() {
+    if (_userFriendsState != DataState.success) return;
+    if (_isLoadingMoreUserFriends) return;
+    if (_userFriendsPage >= _userFriendsTotalPages) return;
+    _loadUserProfileFriends(page: _userFriendsPage + 1);
   }
 
   @override
@@ -68,71 +149,125 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
           Expanded(
             child: Padding(
               padding: EdgeInsets.fromLTRB(24.w, 14.w, 24.w, 0),
-              child: _isPreviewMode
-                  ? _buildPreviewList()
-                  : Selector<FriendProvider, _FriendsListVM>(
-                      selector: (_, p) => _FriendsListVM.fromProvider(p),
-                      builder: (context, vm, _) {
-                        if (vm.isLoading) return const _LoadingList();
-                        if (vm.isError) {
-                          return _ErrorState(
-                            message: vm.error,
-                            onRetry: () {
-                              context.read<FriendProvider>().getFriends();
-                            },
-                          );
-                        }
-                        if (vm.friends.isEmpty) return const _EmptyState();
-
-                        final itemCount =
-                            vm.friends.length + (vm.hasNextPage ? 1 : 0);
-
-                        return RefreshIndicator(
-                          color: AppColors.teal,
-                          onRefresh: () =>
-                              context.read<FriendProvider>().getFriends(),
-                          child: ListView.separated(
-                            controller: _scrollController,
-                            physics: const AlwaysScrollableScrollPhysics(
-                              parent: BouncingScrollPhysics(),
-                            ),
-                            itemCount: itemCount,
-                            separatorBuilder: (_, __) => Divider(
-                              height: 24.w,
-                              thickness: 1,
-                              color: AppColors.black.setOpacity(0.08),
-                            ),
-                            itemBuilder: (context, index) {
-                              if (index == vm.friends.length) {
-                                return Padding(
-                                  padding:
-                                      EdgeInsets.symmetric(vertical: 12.h),
-                                  child: Center(
-                                    child: SizedBox(
-                                      width: 24.sp,
-                                      height: 24.sp,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.5,
-                                        color: AppColors.teal,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              }
-                              final friendResponse = vm.friends[index];
-                              return _FriendTile(
-                                key: ValueKey(friendResponse.friendshipId),
-                                friend: friendResponse.friend,
-                                friendshipId: friendResponse.friendshipId,
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
+              child: _buildBody(),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isUserProfileMode) return _buildUserProfileFriendsList();
+    if (_isPreviewMode) return _buildPreviewList();
+    return Selector<FriendProvider, _FriendsListVM>(
+      selector: (_, p) => _FriendsListVM.fromProvider(p),
+      builder: (context, vm, _) {
+        if (vm.isLoading) return const _LoadingList();
+        if (vm.isError) {
+          return _ErrorState(
+            message: vm.error,
+            onRetry: () => context.read<FriendProvider>().getFriends(),
+          );
+        }
+        if (vm.friends.isEmpty) return const _EmptyState();
+
+        final itemCount = vm.friends.length + (vm.hasNextPage ? 1 : 0);
+
+        return RefreshIndicator(
+          color: AppColors.teal,
+          onRefresh: () => context.read<FriendProvider>().getFriends(),
+          child: ListView.separated(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+            itemCount: itemCount,
+            separatorBuilder: (_, __) => Divider(
+              height: 24.w,
+              thickness: 1,
+              color: AppColors.black.setOpacity(0.08),
+            ),
+            itemBuilder: (context, index) {
+              if (index == vm.friends.length) {
+                return Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12.h),
+                  child: Center(
+                    child: SizedBox(
+                      width: 24.sp,
+                      height: 24.sp,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: AppColors.teal,
+                      ),
+                    ),
+                  ),
+                );
+              }
+              final friendResponse = vm.friends[index];
+              return _FriendTile(
+                key: ValueKey(friendResponse.friendshipId),
+                friend: friendResponse.friend,
+                friendshipId: friendResponse.friendshipId,
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildUserProfileFriendsList() {
+    if (_userFriendsState == DataState.loading) {
+      return const _LoadingList();
+    }
+    if (_userFriendsState == DataState.failed) {
+      return _ErrorState(
+        message: _userFriendsError,
+        onRetry: () => _loadUserProfileFriends(page: 1),
+      );
+    }
+    if (_userFriends.isEmpty) return const _EmptyState();
+
+    final hasNextPage = _userFriendsPage < _userFriendsTotalPages;
+    final itemCount = _userFriends.length + (hasNextPage ? 1 : 0);
+
+    return RefreshIndicator(
+      color: AppColors.teal,
+      onRefresh: () => _loadUserProfileFriends(page: 1),
+      child: ListView.separated(
+        controller: _scrollController,
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
+        itemCount: itemCount,
+        separatorBuilder: (_, __) => Divider(
+          height: 24.w,
+          thickness: 1,
+          color: AppColors.black.setOpacity(0.08),
+        ),
+        itemBuilder: (context, index) {
+          if (index == _userFriends.length) {
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: 12.h),
+              child: Center(
+                child: SizedBox(
+                  width: 24.sp,
+                  height: 24.sp,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: AppColors.teal,
+                  ),
+                ),
+              ),
+            );
+          }
+          final friend = _userFriends[index];
+          return _UserProfileFriendTile(
+            key: ValueKey(friend.id),
+            friend: friend,
+          );
+        },
       ),
     );
   }
@@ -209,6 +344,103 @@ class _FriendsListVM {
       friends: p.friendsList,
       error: p.getFriendsError,
       hasNextPage: p.hasNextPage,
+    );
+  }
+}
+
+class _UserProfileFriendTile extends StatelessWidget {
+  const _UserProfileFriendTile({super.key, required this.friend});
+
+  final FriendProfileListItem friend;
+
+  static const List<Color> _avatarColors = [
+    Color(0xFF53C3BF),
+    Color(0xFFD7B086),
+    Color(0xFF66C99D),
+    Color(0xFF7B9FD4),
+    Color(0xFFD48B8B),
+    Color(0xFFA68BD4),
+    Color(0xFFD4C36A),
+    Color(0xFF6AC8D4),
+  ];
+
+  Color get _avatarColor {
+    final hash = friend.id.codeUnits.fold<int>(0, (prev, c) => prev + c);
+    return _avatarColors[hash % _avatarColors.length];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final avatarUrl = resolveNullableNetworkImageUrl(friend.avatarUrl);
+
+    return GestureDetector(
+      onTap: () => context.pushNamed(
+        AppRoutes.friendDetailsScreen.name,
+        extra: FriendDetailsScreenParams(friendId: friend.id),
+      ),
+      behavior: HitTestBehavior.opaque,
+      child: Row(
+        children: [
+          Container(
+            width: 48.w,
+            height: 48.w,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _avatarColor,
+            ),
+            clipBehavior: Clip.antiAlias,
+            alignment: Alignment.center,
+            child: avatarUrl != null
+                ? AppNetworkImage(
+                    imageUrl: avatarUrl,
+                    tag: 'UserProfileFriendsList.avatar',
+                    width: 48.w,
+                    height: 48.w,
+                    fit: BoxFit.cover,
+                    errorCompact: true,
+                    errorIconOnly: true,
+                    errorBuilder: (_, __, ___) => _initials(),
+                  )
+                : _initials(),
+          ),
+          16.w.horizontalSpace,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppText(
+                  text: friend.displayLabel,
+                  style: AppTextStyles.semibold(
+                    fontSize: 16.sp,
+                    color: AppColors.black,
+                  ),
+                ),
+                if (friend.username != null &&
+                    friend.username!.isNotEmpty) ...[
+                  2.h.verticalSpace,
+                  AppText(
+                    text: '@${friend.username}',
+                    style: AppTextStyles.medium(
+                      fontSize: 13.sp,
+                      color: AppColors.black.setOpacity(0.5),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _initials() {
+    return AppText(
+      text: friend.initials,
+      style: AppTextStyles.bold(
+        fontSize: 14.sp,
+        color: AppColors.white,
+      ),
     );
   }
 }
@@ -461,16 +693,16 @@ class _FriendTileState extends State<_FriendTile> {
             onTap: _isRemoving ? null : _openFriendDetails,
             behavior: HitTestBehavior.opaque,
             child: CircleAvatar(
-            radius: 24.r,
-            backgroundColor: _avatarColor,
-            child: AppText(
-              text: widget.friend.initials,
-              style: AppTextStyles.bold(
-                fontSize: 14.sp,
-                color: AppColors.white,
+              radius: 24.r,
+              backgroundColor: _avatarColor,
+              child: AppText(
+                text: widget.friend.initials,
+                style: AppTextStyles.bold(
+                  fontSize: 14.sp,
+                  color: AppColors.white,
+                ),
               ),
             ),
-          ),
           ),
           16.w.horizontalSpace,
           Expanded(
@@ -596,14 +828,6 @@ class _ShimmerTile extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-          ),
-          Container(
-            width: 70.w,
-            height: 28.h,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20.r),
             ),
           ),
         ],

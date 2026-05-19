@@ -28,6 +28,10 @@ import 'package:redstreakapp/screens/profile/friends_list_screen_params.dart';
 import 'package:redstreakapp/screens/profile/friend_details_screen.dart';
 import 'package:redstreakapp/screens/profile/add_friends_screen.dart';
 import 'package:redstreakapp/screens/profile/my_saved_series_screen.dart';
+import 'package:redstreakapp/screens/profile/user_profile_groups_list_screen.dart';
+import 'package:redstreakapp/screens/profile/user_profile_groups_list_screen_params.dart';
+import 'package:redstreakapp/screens/profile/user_profile_topics_list_screen.dart';
+import 'package:redstreakapp/screens/profile/user_profile_topics_list_screen_params.dart';
 import 'package:redstreakapp/screens/group/streak_ranking_screen.dart';
 import 'package:redstreakapp/screens/group/view_group_screen.dart';
 import 'package:redstreakapp/screens/home/curiosity_reading/curiosity_reading_screen.dart';
@@ -660,6 +664,32 @@ class AppRouter {
           builder: (context, state) {
             final params = state.extra as FriendsListScreenParams?;
             return FriendsListScreen(params: params);
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.userProfileGroupsListScreen.name,
+          name: AppRoutes.userProfileGroupsListScreen.name,
+          builder: (context, state) {
+            final params = state.extra as UserProfileGroupsListScreenParams?;
+            if (params == null) {
+              return const Scaffold(
+                body: Center(child: Text('Groups not found')),
+              );
+            }
+            return UserProfileGroupsListScreen(params: params);
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.userProfileTopicsListScreen.name,
+          name: AppRoutes.userProfileTopicsListScreen.name,
+          builder: (context, state) {
+            final params = state.extra as UserProfileTopicsListScreenParams?;
+            if (params == null) {
+              return const Scaffold(
+                body: Center(child: Text('Topics not found')),
+              );
+            }
+            return UserProfileTopicsListScreen(params: params);
           },
         ),
         GoRoute(

@@ -8,10 +8,7 @@ import 'package:shimmer/shimmer.dart';
 const Color friendDetailsHeaderBg = Color(0xFFE8D9C4);
 
 class FriendDetailsHeader extends StatelessWidget {
-  const FriendDetailsHeader({
-    super.key,
-    required this.profile,
-  });
+  const FriendDetailsHeader({super.key, required this.profile});
 
   final FriendProfile profile;
 
@@ -20,7 +17,7 @@ class FriendDetailsHeader extends StatelessWidget {
     return ColoredBox(
       color: friendDetailsHeaderBg,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(14.w, 10.w, 14.w, 0.w),
+        padding: EdgeInsets.fromLTRB(14.w, 15.w, 14.w, 20.w),
         child: Column(
           children: [
             SafeArea(
@@ -61,8 +58,10 @@ class _ProfileAvatar extends StatelessWidget {
   final FriendProfile profile;
 
   Color get _fallbackColor {
-    return ProfileFriendAvatar.avatarColors[profile.userId.codeUnits
-            .fold<int>(0, (prev, c) => prev + c) %
+    return ProfileFriendAvatar.avatarColors[profile.userId.codeUnits.fold<int>(
+          0,
+          (prev, c) => prev + c,
+        ) %
         ProfileFriendAvatar.avatarColors.length];
   }
 
