@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/core/network/end_points.dart';
+import 'package:redstreakapp/models/friend/friend_details_model.dart';
 
 class FriendApiService {
   FriendApiService._();
@@ -60,6 +61,16 @@ class FriendApiService {
   }) async {
     return await BaseApiHelper.instance.delete(
       EndPoints.removeFriend(friendshipId: friendshipId),
+    );
+  }
+
+  Future<Either<ApiException, FriendDetailsResponse>> getFriendsDetails({
+    required String friendId,
+  }) async {
+    return BaseApiHelper.instance.get<FriendDetailsResponse>(
+      EndPoints.getFriendsDetails(friendId: friendId),
+      parser: (result) =>
+          FriendDetailsResponse.fromJson(result as Map<String, dynamic>),
     );
   }
 }

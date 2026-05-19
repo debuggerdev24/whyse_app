@@ -1,41 +1,25 @@
-import 'package:redstreakapp/core/enums/user_gender.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
-import 'package:redstreakapp/models/friend/friend_model.dart';
+import 'package:redstreakapp/core/network/base_api_service.dart';
+import 'package:redstreakapp/core/utils/network_image_url.dart';
+import 'package:redstreakapp/core/utils/user_facing_message.dart';
+import 'package:redstreakapp/models/friend/friend_details_model.dart';
 import 'package:redstreakapp/providers/family/family_provider.dart';
 import 'package:redstreakapp/providers/friend/friend_provider.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
+import 'package:redstreakapp/screens/group/widget/group_image_widget.dart';
+import 'package:redstreakapp/services/profile/friend_api_service.dart';
 import 'package:redstreakapp/screens/profile/friends_list_screen_params.dart';
 import 'package:redstreakapp/screens/profile/widgets/add_family_member_bottom_sheet.dart';
 import 'package:redstreakapp/screens/profile/widgets/friend_details_header.dart';
-import 'package:redstreakapp/screens/profile/widgets/profile_friend_avatar.dart';
+import 'package:redstreakapp/screens/profile/widgets/friend_preview_avatar.dart';
 import 'package:shimmer/shimmer.dart';
 
 class FriendDetailsScreenParams {
-  const FriendDetailsScreenParams({
-    required this.friend,
-    this.friendshipId,
-    this.isFriend,
-    this.gender,
-    this.familyRole,
-    this.isFamilyMember = false,
-  });
+  const FriendDetailsScreenParams({required this.friendId});
 
-  final FriendUser friend;
-  final String? friendshipId;
-
-  /// When set, overrides friendship detection from [friendshipId] / provider.
-  final bool? isFriend;
-
-  /// When set, overrides [friend.gender] for family relationship options.
-  final UserGender? gender;
-
-  /// e.g. Father, Sister — shown on family member profiles.
-  final String? familyRole;
-
-  /// When true, hides add-friend / add-to-family actions.
-  final bool isFamilyMember;
+  final String friendId;
 }
 
 class FriendDetailsScreen extends StatefulWidget {
@@ -50,70 +34,237 @@ class FriendDetailsScreen extends StatefulWidget {
 class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
   bool _requestSent = false;
   bool _isSendingRequest = false;
+  late Future<FriendDetailsData> _detailsFuture;
 
   FriendDetailsScreenParams get params => widget.params;
-  FriendUser get friend => params.friend;
+  String get friendId => params.friendId;
 
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-      if (!mounted) return;
-      context.read<FriendProvider>().getFriends();
+    _detailsFuture = _fetchFriendDetails();
+  }
+
+  Future<FriendDetailsData> _fetchFriendDetails() async {
+    final result = await FriendApiService.instance.getFriendsDetails(
+      friendId: friendId,
+    );
+    return result.fold((failure) => throw failure, (response) => response.data);
+  }
+
+  void _reloadDetails() {
+    setState(() {
+      _detailsFuture = _fetchFriendDetails();
     });
   }
 
-  bool _isFriend(FriendProvider friendProvider) {
-    if (params.isFriend != null) return params.isFriend!;
-    if (params.friendshipId != null && params.friendshipId!.isNotEmpty) {
-      return true;
-    }
-    return friendProvider.friendsList.any((f) => f.friend.id == friend.id);
-  }
+  bool _isFriend(FriendDetailsData details) => details.profile.isFriend;
 
   bool _isOwnProfile(ProfileProvider profileProvider) {
     final currentUserId = profileProvider.profileData?.userId;
-    return currentUserId != null && currentUserId == friend.id;
+    return currentUserId != null && currentUserId == friendId;
   }
 
-  bool _isFamilyMember(FamilyProvider familyProvider) {
-    if (params.isFamilyMember) return true;
-    return familyProvider.isFamilyMember(friend.id);
-  }
+  bool _isFamilyMember(FamilyProvider familyProvider) =>
+      familyProvider.isFamilyMember(friendId);
 
-  String? _familyRole(FamilyProvider familyProvider) {
-    if (params.familyRole != null && params.familyRole!.isNotEmpty) {
-      return params.familyRole;
-    }
-    return familyProvider.relationshipFor(friend.id);
-  }
+  String? _familyRole(FamilyProvider familyProvider) =>
+      familyProvider.relationshipFor(friendId);
 
   @override
   Widget build(BuildContext context) {
     return AppLayout(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          FriendDetailsHeader(friend: friend),
-          Expanded(
-            child: ColoredBox(
-              color: AppColors.white,
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _profileDetailsBlock(),
-                    _relationshipActionsBlock(),
-                    _friendsBlock(context),
-                    _groupsBlock(context),
-                    _overviewBlock(),
-                    _interestsBlock(),
-                    _yourBooksBlock(),
-                    _mySeriesListBlock(),
-                    SizedBox(height: 24.w),
-                  ],
+      body: FutureBuilder<FriendDetailsData>(
+        future: _detailsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const FriendDetailsHeaderShimmer(),
+                Expanded(child: _buildShimmerBody()),
+              ],
+            );
+          }
+
+          if (snapshot.hasError) {
+            final message = snapshot.error is ApiException
+                ? userFacingMessage((snapshot.error! as ApiException).errorMsg)
+                : userFacingMessage(snapshot.error.toString());
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const FriendDetailsHeaderShimmer(),
+                Expanded(child: _buildErrorBody(message)),
+              ],
+            );
+          }
+
+          final details = snapshot.data!;
+          final profile = details.profile;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              FriendDetailsHeader(profile: profile),
+              Expanded(
+                child: ColoredBox(
+                  color: AppColors.white,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _profileDetailsBlock(details),
+                        _relationshipActionsBlock(details, profile),
+                        _friendsBlock(context, details),
+                        _groupsBlock(context, details),
+                        _overviewBlock(),
+                        _interestsBlock(details),
+                        _yourBooksBlock(),
+                        _mySeriesListBlock(details),
+                        SizedBox(height: 24.w),
+                      ],
+                    ),
+                  ),
                 ),
               ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildShimmerBody() {
+    return ColoredBox(
+      color: AppColors.white,
+      child: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _shimmerProfileDetailsBlock(),
+            _shimmerActionButton(),
+            _shimmerHorizontalSection(avatarCount: 4),
+            _shimmerHorizontalSection(avatarCount: 3, circleSize: 64),
+            _shimmerOverviewBlock(),
+            _shimmerInterestsBlock(),
+            SizedBox(height: 24.w),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _shimmerProfileDetailsBlock() {
+    return Container(
+      padding: EdgeInsets.fromLTRB(27.w, 20.h, 27.w, 20.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _shimmerBox(width: 180.w, height: 22.h, radius: 6.r),
+                10.h.verticalSpace,
+                _shimmerBox(width: 120.w, height: 16.h, radius: 6.r),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              _shimmerBox(width: 36.w, height: 22.h, radius: 6.r),
+              6.h.verticalSpace,
+              _shimmerBox(width: 52.w, height: 14.h, radius: 6.r),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _shimmerActionButton() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(27.w, 4.h, 27.w, 8.h),
+      child: _shimmerBox(height: 48.h, radius: 24.r),
+    );
+  }
+
+  Widget _shimmerHorizontalSection({
+    required int avatarCount,
+    double circleSize = 64,
+  }) {
+    return _sectionContainer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _shimmerBox(width: 90.w, height: 20.h, radius: 6.r),
+          16.h.verticalSpace,
+          Row(
+            children: [
+              for (var i = 0; i < avatarCount; i++) ...[
+                if (i > 0) 16.w.horizontalSpace,
+                Column(
+                  children: [
+                    _shimmerBox(
+                      width: circleSize.w,
+                      height: circleSize.w,
+                      radius: circleSize.w / 2,
+                    ),
+                    8.h.verticalSpace,
+                    _shimmerBox(width: circleSize.w, height: 12.h, radius: 4.r),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _shimmerOverviewBlock() {
+    return _sectionContainer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _shimmerBox(width: 100.w, height: 20.h, radius: 6.r),
+          16.h.verticalSpace,
+          Row(
+            children: [
+              Expanded(child: _shimmerBox(height: 88.h, radius: 12.r)),
+              16.w.horizontalSpace,
+              Expanded(child: _shimmerBox(height: 88.h, radius: 12.r)),
+            ],
+          ),
+          16.h.verticalSpace,
+          Row(
+            children: [
+              Expanded(child: _shimmerBox(height: 88.h, radius: 12.r)),
+              16.w.horizontalSpace,
+              Expanded(child: _shimmerBox(height: 88.h, radius: 12.r)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _shimmerInterestsBlock() {
+    return _sectionContainer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _shimmerBox(width: 90.w, height: 20.h, radius: 6.r),
+          16.h.verticalSpace,
+          Wrap(
+            spacing: 8.w,
+            runSpacing: 12.h,
+            children: List.generate(
+              4,
+              (_) => _shimmerBox(width: 100.w, height: 36.h, radius: 24.r),
             ),
           ),
         ],
@@ -121,9 +272,71 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     );
   }
 
-  Widget _profileDetailsBlock() {
-    final displayName = friend.displayName ?? friend.username ?? '';
-    final username = friend.username;
+  Widget _shimmerBox({
+    double? width,
+    required double height,
+    double radius = 8,
+  }) {
+    return Shimmer.fromColors(
+      baseColor: AppColors.shimmerBaseColor,
+      highlightColor: AppColors.shimmerHighlightColor,
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: AppColors.shimmerBaseColor,
+          borderRadius: BorderRadius.circular(radius),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorBody(String message) {
+    return ColoredBox(
+      color: AppColors.white,
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 32.w),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error_outline_rounded,
+                size: 48.w,
+                color: AppColors.black.setOpacity(0.25),
+              ),
+              16.h.verticalSpace,
+              AppText(
+                text: message,
+                textAlign: TextAlign.center,
+                style: AppTextStyles.semibold(
+                  fontSize: 15,
+                  color: AppColors.black.setOpacity(0.6),
+                ),
+              ),
+              20.h.verticalSpace,
+              TextButton(
+                onPressed: _reloadDetails,
+                child: AppText(
+                  text: 'Try again',
+                  style: AppTextStyles.semibold(
+                    fontSize: 16,
+                    color: AppColors.teal,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _profileDetailsBlock(FriendDetailsData details) {
+    final profile = details.profile;
+    final displayName = profile.displayName ?? profile.username ?? '';
+    final username = profile.username;
+    final friendsCount = details.friendsPreview.totalCount;
 
     return Consumer<FamilyProvider>(
       builder: (context, familyProvider, _) {
@@ -165,7 +378,7 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AppText(
-                text: '${_visibleFriends.length}',
+                text: '$friendsCount',
                 style: AppTextStyles.bold(fontSize: 20, color: AppColors.black),
               ),
               AppText(
@@ -184,13 +397,16 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     );
   }
 
-  Widget _relationshipActionsBlock() {
+  Widget _relationshipActionsBlock(
+    FriendDetailsData details,
+    FriendProfile profile,
+  ) {
     return Consumer3<FriendProvider, ProfileProvider, FamilyProvider>(
       builder: (context, friendProvider, profileProvider, familyProvider, _) {
         if (_isOwnProfile(profileProvider)) return const SizedBox.shrink();
         if (_isFamilyMember(familyProvider)) return const SizedBox.shrink();
 
-        final isFriend = _isFriend(friendProvider);
+        final isFriend = _isFriend(details);
 
         return Padding(
           padding: EdgeInsets.fromLTRB(27.w, 4.h, 27.w, 8.h),
@@ -198,11 +414,11 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (isFriend)
-                _buildAddToFamilyButton()
+                _buildAddToFamilyButton(profile)
               else if (_requestSent)
                 _buildRequestSentButton()
               else
-                _buildAddToFriendButton(friendProvider),
+                _buildAddToFriendButton(friendProvider, profile),
             ],
           ),
         );
@@ -210,13 +426,16 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     );
   }
 
-  Widget _buildAddToFriendButton(FriendProvider friendProvider) {
+  Widget _buildAddToFriendButton(
+    FriendProvider friendProvider,
+    FriendProfile profile,
+  ) {
     final isLoading = _isSendingRequest || friendProvider.isSendingRequest;
 
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton(
-        onPressed: isLoading ? null : () => _sendFriendRequest(),
+        onPressed: isLoading ? null : () => _sendFriendRequest(profile),
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.black,
           backgroundColor: AppColors.white,
@@ -278,30 +497,31 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     );
   }
 
-  void _showAddToFamilySheet() {
-    final memberName = friend.displayName ?? friend.username ?? 'this user';
+  void _showAddToFamilySheet(FriendProfile profile) {
+    final memberName = profile.displayLabel.isNotEmpty
+        ? profile.displayLabel
+        : 'this user';
     showAddFamilyMemberBottomSheet(
       context,
       memberName: memberName,
-      memberGender: params.gender ?? friend.gender,
       onConfirm: (relationship) {
-        context.read<FamilyProvider>().addFamilyMember(
-          member: friend,
+        context.read<FamilyProvider>().addFamilyMemberFromProfile(
+          profile: profile,
           relationship: relationship,
         );
         AppToast.success(
           context,
-          '${friend.displayName ?? memberName} added as $relationship',
+          '${profile.displayName ?? memberName} added as $relationship',
         );
       },
     );
   }
 
-  Widget _buildAddToFamilyButton() {
+  Widget _buildAddToFamilyButton(FriendProfile profile) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: _showAddToFamilySheet,
+        onPressed: () => _showAddToFamilySheet(profile),
         style: ElevatedButton.styleFrom(
           elevation: 0,
           backgroundColor: AppColors.black,
@@ -328,8 +548,8 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     );
   }
 
-  void _sendFriendRequest() {
-    final email = friend.email;
+  void _sendFriendRequest(FriendProfile profile) {
+    final email = profile.email;
     if (email == null || email.isEmpty) {
       AppToast.error(context, 'This user does not have an email on their profile');
       return;
@@ -347,7 +567,7 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
         });
         AppToast.success(
           context,
-          'Friend request sent to ${friend.displayName ?? 'user'}',
+          'Friend request sent to ${profile.displayName ?? 'user'}',
         );
       },
       onError: (error) {
@@ -358,25 +578,30 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     );
   }
 
-  Widget _friendsBlock(BuildContext context) {
+  Widget _friendsBlock(BuildContext context, FriendDetailsData details) {
+    final visibleFriends = details.friendsPreview.items
+        .where((item) => item.id != details.profile.userId)
+        .toList(growable: false);
+    final friendsListTitle = _friendsListTitle(details.profile);
+
     return _sectionContainer(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _sectionTitleRow(
             title: 'Friends',
-            showViewAll: _visibleFriends.isNotEmpty,
+            showViewAll: visibleFriends.isNotEmpty,
             onViewAll: () => context.pushNamed(
               AppRoutes.friendsListScreen.name,
-              extra: FriendsListScreenParams(
-                friends: _visibleFriends,
-                title: _friendsListTitle,
+              extra: FriendsListScreenParams.fromPreviews(
+                friendPreviews: visibleFriends,
+                title: friendsListTitle,
                 viewOnly: true,
               ),
             ),
           ),
           16.w.verticalSpace,
-          if (_visibleFriends.isEmpty)
+          if (visibleFriends.isEmpty)
             _buildFriendsEmpty()
           else
             SingleChildScrollView(
@@ -385,11 +610,12 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  for (var i = 0; i < _visibleFriends.length; i++) ...[
+                  for (var i = 0; i < visibleFriends.length; i++) ...[
                     if (i > 0) 16.w.horizontalSpace,
-                    ProfileFriendAvatar(
-                      friend: _visibleFriends[i],
-                      onTap: () => _openFriendProfile(context, _visibleFriends[i]),
+                    FriendPreviewAvatar(
+                      friend: visibleFriends[i],
+                      onTap: () =>
+                          _openFriendProfile(context, visibleFriends[i].id),
                     ),
                   ],
                 ],
@@ -400,18 +626,20 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     );
   }
 
-  Widget _groupsBlock(BuildContext context) {
+  Widget _groupsBlock(BuildContext context, FriendDetailsData details) {
+    final groups = details.groupsPreview.items;
+
     return _sectionContainer(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _sectionTitleRow(
             title: 'Groups',
-            showViewAll: _demoGroups.isNotEmpty,
+            showViewAll: groups.isNotEmpty,
             onViewAll: () => context.pushNamed(AppRoutes.groupListScreen.name),
           ),
           16.w.verticalSpace,
-          if (_demoGroups.isEmpty)
+          if (groups.isEmpty)
             _buildGroupsEmpty()
           else
             SingleChildScrollView(
@@ -420,9 +648,12 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  for (var i = 0; i < _demoGroups.length; i++) ...[
+                  for (var i = 0; i < groups.length; i++) ...[
                     if (i > 0) 16.w.horizontalSpace,
-                    _GroupAvatar(title: _demoGroups[i]),
+                    _GroupAvatar(
+                      title: groups[i].title ?? 'Group',
+                      thumbnailUrl: groups[i].thumbnailUrl,
+                    ),
                   ],
                 ],
               ),
@@ -508,8 +739,10 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     );
   }
 
-  Widget _interestsBlock() {
-    const interests = ['Adventure', 'Science', 'History', 'Fantasy'];
+  Widget _interestsBlock(FriendDetailsData details) {
+    final interests = details.profile.interests;
+
+    if (interests.isEmpty) return const SizedBox.shrink();
 
     return _sectionContainer(
       child: Column(
@@ -610,7 +843,10 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     );
   }
 
-  Widget _mySeriesListBlock() {
+  Widget _mySeriesListBlock(FriendDetailsData details) {
+    final topics = details.topicsPreview.items;
+    if (topics.isEmpty) return const SizedBox.shrink();
+
     return _sectionContainer(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -625,13 +861,18 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
             physics: const BouncingScrollPhysics(),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: List.generate(3, (index) {
-                return _ViewOnlySeriesCard(
-                  title: _demoSeriesTitles[index],
-                  readingsCount: 12 + index * 4,
-                  imageSeed: 'friend-series-$index',
-                );
-              }),
+              children: [
+                for (var i = 0; i < topics.length; i++)
+                  _ViewOnlySeriesCard(
+                    title: topics[i].title ?? 'Untitled',
+                    readingsCount: topics[i].noOfReadings,
+                    subtitle: topics[i].subtitle,
+                    imageUrl: resolveNullableNetworkImageUrl(
+                      topics[i].topicImage,
+                    ),
+                    imageSeed: 'friend-series-${topics[i].id}',
+                  ),
+              ],
             ),
           ),
         ],
@@ -639,21 +880,17 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     );
   }
 
-  List<FriendUser> get _visibleFriends => _demoFriends
-      .where((f) => f.id != friend.id)
-      .toList(growable: false);
-
-  String get _friendsListTitle {
-    final name = friend.displayName ?? friend.username;
+  String _friendsListTitle(FriendProfile profile) {
+    final name = profile.displayName ?? profile.username;
     if (name == null || name.isEmpty) return 'Friends';
     return "$name's Friends";
   }
 
-  void _openFriendProfile(BuildContext context, FriendUser target) {
-    if (target.id == friend.id) return;
+  void _openFriendProfile(BuildContext context, String targetId) {
+    if (targetId == friendId) return;
     context.pushNamed(
       AppRoutes.friendDetailsScreen.name,
-      extra: FriendDetailsScreenParams(friend: target),
+      extra: FriendDetailsScreenParams(friendId: targetId),
     );
   }
 
@@ -796,57 +1033,13 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     );
   }
 
-  static final List<FriendUser> _demoFriends = [
-    const FriendUser(
-      id: 'demo-1',
-      displayName: 'Alex Rivera',
-      username: 'alex',
-      gender: UserGender.male,
-    ),
-    const FriendUser(
-      id: 'demo-2',
-      displayName: 'Jamie Lee',
-      username: 'jamie',
-      gender: UserGender.female,
-    ),
-    const FriendUser(
-      id: 'demo-3',
-      displayName: 'Sam Patel',
-      username: 'sam',
-      gender: UserGender.male,
-    ),
-    const FriendUser(
-      id: 'demo-4',
-      displayName: 'Taylor Kim',
-      username: 'taylor',
-      gender: UserGender.female,
-    ),
-    const FriendUser(
-      id: 'demo-5',
-      displayName: 'Jordan Fox',
-      username: 'jordan',
-      gender: UserGender.male,
-    ),
-  ];
-
-  static const List<String> _demoGroups = [
-    'Book Club',
-    'Reading Squad',
-    'Story Time',
-    'Weekend Readers',
-  ];
-
-  static const List<String> _demoSeriesTitles = [
-    'Mystery of the Lost City',
-    'Ocean Explorers',
-    'Space Adventures',
-  ];
 }
 
 class _GroupAvatar extends StatelessWidget {
-  const _GroupAvatar({required this.title});
+  const _GroupAvatar({required this.title, this.thumbnailUrl});
 
   final String title;
+  final String? thumbnailUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -856,15 +1049,15 @@ class _GroupAvatar extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            width: 64.w,
-            height: 64.w,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.black.setOpacity(0.1),
+          ClipOval(
+            child: SizedBox(
+              width: 64.w,
+              height: 64.w,
+              child: GroupImageWidget(
+                imageUrl: thumbnailUrl,
+                size: 64.w,
+              ),
             ),
-            alignment: Alignment.center,
-            child: Icon(Icons.group, size: 28.sp, color: AppColors.black),
           ),
           8.h.verticalSpace,
           AppText(
@@ -885,11 +1078,15 @@ class _ViewOnlySeriesCard extends StatelessWidget {
     required this.title,
     required this.readingsCount,
     required this.imageSeed,
+    this.subtitle,
+    this.imageUrl,
   });
 
   final String title;
   final int readingsCount;
   final String imageSeed;
+  final String? subtitle;
+  final String? imageUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -920,7 +1117,7 @@ class _ViewOnlySeriesCard extends StatelessWidget {
               height: 132.w,
               width: double.infinity,
               child: AppNetworkImage(
-                imageUrl: 'https://picsum.photos/seed/$imageSeed/700/500',
+                imageUrl: imageUrl ?? 'https://picsum.photos/seed/$imageSeed/700/500',
                 tag: 'FriendDetails.series',
                 placeholder: (_) => _storyImageShimmer(),
                 errorCompact: true,
@@ -940,7 +1137,9 @@ class _ViewOnlySeriesCard extends StatelessWidget {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 14.w),
             child: AppText(
-              text: '$readingsCount Readings',
+              text: subtitle?.trim().isNotEmpty == true
+                  ? subtitle!
+                  : '$readingsCount Readings',
               style: AppTextStyles.medium(
                 fontSize: 12.sp,
                 color: subtitleColor,

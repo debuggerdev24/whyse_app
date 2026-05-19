@@ -1,6 +1,7 @@
 import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/models/friend/friend_details_model.dart';
 import 'package:redstreakapp/models/friend/friend_model.dart';
 import 'package:redstreakapp/providers/friend/friend_provider.dart';
 import 'package:redstreakapp/screens/profile/friend_details_screen.dart';
@@ -137,7 +138,31 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
   }
 
   Widget _buildPreviewList() {
-    final friends = widget.params!.friends;
+    final params = widget.params!;
+    if (params.usesPreviews) {
+      final previews = params.friendPreviews!;
+      if (previews.isEmpty) return const _EmptyState();
+
+      return ListView.separated(
+        controller: _scrollController,
+        physics: const BouncingScrollPhysics(),
+        itemCount: previews.length,
+        separatorBuilder: (_, __) => Divider(
+          height: 24.w,
+          thickness: 1,
+          color: AppColors.black.setOpacity(0.08),
+        ),
+        itemBuilder: (context, index) {
+          final preview = previews[index];
+          return _PreviewFriendTile(
+            key: ValueKey(preview.id),
+            friend: preview,
+          );
+        },
+      );
+    }
+
+    final friends = params.friends!;
     if (friends.isEmpty) return const _EmptyState();
 
     return ListView.separated(
@@ -184,6 +209,79 @@ class _FriendsListVM {
       friends: p.friendsList,
       error: p.getFriendsError,
       hasNextPage: p.hasNextPage,
+    );
+  }
+}
+
+class _PreviewFriendTile extends StatelessWidget {
+  const _PreviewFriendTile({super.key, required this.friend});
+
+  final FriendPreviewItem friend;
+
+  static const List<Color> _avatarColors = [
+    Color(0xFF53C3BF),
+    Color(0xFFD7B086),
+    Color(0xFF66C99D),
+    Color(0xFF7B9FD4),
+    Color(0xFFD48B8B),
+    Color(0xFFA68BD4),
+    Color(0xFFD4C36A),
+    Color(0xFF6AC8D4),
+  ];
+
+  Color get _avatarColor {
+    final hash = friend.id.codeUnits.fold<int>(0, (prev, c) => prev + c);
+    return _avatarColors[hash % _avatarColors.length];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.pushNamed(
+        AppRoutes.friendDetailsScreen.name,
+        extra: FriendDetailsScreenParams(friendId: friend.id),
+      ),
+      behavior: HitTestBehavior.opaque,
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 24.r,
+            backgroundColor: _avatarColor,
+            child: AppText(
+              text: friend.initials,
+              style: AppTextStyles.bold(
+                fontSize: 14.sp,
+                color: AppColors.white,
+              ),
+            ),
+          ),
+          16.w.horizontalSpace,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppText(
+                  text: friend.displayLabel,
+                  style: AppTextStyles.semibold(
+                    fontSize: 16.sp,
+                    color: AppColors.black,
+                  ),
+                ),
+                if (friend.username != null && friend.username!.isNotEmpty) ...[
+                  2.h.verticalSpace,
+                  AppText(
+                    text: '@${friend.username}',
+                    style: AppTextStyles.medium(
+                      fontSize: 13.sp,
+                      color: AppColors.black.setOpacity(0.5),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -349,10 +447,7 @@ class _FriendTileState extends State<_FriendTile> {
   void _openFriendDetails() {
     context.pushNamed(
       AppRoutes.friendDetailsScreen.name,
-      extra: FriendDetailsScreenParams(
-        friend: widget.friend,
-        friendshipId: widget.friendshipId,
-      ),
+      extra: FriendDetailsScreenParams(friendId: widget.friend.id),
     );
   }
 

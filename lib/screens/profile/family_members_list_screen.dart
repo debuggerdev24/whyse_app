@@ -73,13 +73,7 @@ class _FamilyMemberTile extends StatelessWidget {
   void _openProfile(BuildContext context) {
     context.pushNamed(
       AppRoutes.friendDetailsScreen.name,
-      extra: FriendDetailsScreenParams(
-        friend: member.member,
-        isFriend: true,
-        isFamilyMember: true,
-        familyRole: member.relationship,
-        gender: member.member.gender,
-      ),
+      extra: FriendDetailsScreenParams(friendId: member.member.id),
     );
   }
 

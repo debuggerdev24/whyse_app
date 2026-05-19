@@ -54,10 +54,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      88.w.verticalSpace,
-
                       SvgIcon(AppAssets.welcome),
-                      36.w.verticalSpace,
+                      20.w.verticalSpace,
 
                       AppText(
                         text: 'Welcome Back!',
@@ -66,7 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: AppColors.teal,
                         ),
                       ),
-                      15.w.verticalSpace,
+                      10.w.verticalSpace,
                       AppText(
                         text: 'Login',
                         style: AppTextStyles.semibold(
@@ -75,8 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
 
-                      37.w.verticalSpace,
-                      8.w.verticalSpace,
+                      20.w.verticalSpace,
 
                       Column(
                         children: [
@@ -361,4 +358,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-

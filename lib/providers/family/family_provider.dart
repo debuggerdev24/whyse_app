@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:redstreakapp/core/enums/user_gender.dart';
 import 'package:redstreakapp/models/family/family_member_model.dart';
+import 'package:redstreakapp/models/friend/friend_details_model.dart';
 import 'package:redstreakapp/models/friend/friend_model.dart';
 
 class FamilyProvider extends ChangeNotifier {
@@ -18,6 +19,22 @@ class FamilyProvider extends ChangeNotifier {
     } catch (_) {
       return null;
     }
+  }
+
+  void addFamilyMemberFromProfile({
+    required FriendProfile profile,
+    required String relationship,
+  }) {
+    addFamilyMember(
+      member: FriendUser(
+        id: profile.userId,
+        displayName: profile.displayName,
+        email: profile.email,
+        username: profile.username,
+        phone: profile.phone,
+      ),
+      relationship: relationship,
+    );
   }
 
   void addFamilyMember({

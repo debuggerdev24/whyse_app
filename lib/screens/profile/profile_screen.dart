@@ -236,11 +236,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onTap: () => context.pushNamed(
                 AppRoutes.friendDetailsScreen.name,
                 extra: FriendDetailsScreenParams(
-                  friend: members[i].member,
-                  isFriend: true,
-                  isFamilyMember: true,
-                  familyRole: members[i].relationship,
-                  gender: members[i].member.gender,
+                  friendId: members[i].member.id,
                 ),
               ),
             ),
@@ -403,8 +399,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onTap: () => context.pushNamed(
                 AppRoutes.friendDetailsScreen.name,
                 extra: FriendDetailsScreenParams(
-                  friend: friends[i].friend,
-                  friendshipId: friends[i].friendshipId,
+                  friendId: friends[i].friend.id,
                 ),
               ),
               child: ProfileFriendAvatar(friend: friends[i].friend),

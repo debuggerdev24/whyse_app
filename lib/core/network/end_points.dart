@@ -4,10 +4,13 @@ class EndPoints {
   EndPoints._();
   static const profile = "/mobile/profile/me";
   static const profileAvatar = "/mobile/profile/me/avatar";
+
   /// Initial OTP: `{ "channel": "email", "email" }` or `{ "channel": "phone", "phone" }`.
   static const profileContactRequest = "/mobile/profile/me/contact/request";
+
   /// Resend OTP: same body as [profileContactRequest].
   static const profileContactResend = "/mobile/profile/me/contact/resend";
+
   /// Verify OTP: `{ "channel": "email"|"phone", "email"|"phone", "otp" }`.
   static const profileContactVerify = "/mobile/profile/me/contact/verify";
   static const startOnBoarding = "/mobile/auth/start-onboarding";
@@ -95,7 +98,8 @@ class EndPoints {
       "/story/ideas/$storyIdeaId/page-progress";
   static String createQuiz({required String storyId}) =>
       "/story/mobile/$storyId/quiz/generate";
-  static String getQuiz({required String storyId}) => "/story/mobile/$storyId/quiz";
+  static String getQuiz({required String storyId}) =>
+      "/story/mobile/$storyId/quiz";
   static String submitQuiz({required String storyId}) =>
       "/story/mobile/$storyId/quiz/submit";
 
@@ -136,4 +140,7 @@ class EndPoints {
 
   static String getShareableTopics({int page = 1, int limit = 10}) =>
       "/mobile/groups/shareable-topics?page=$page&limit=$limit";
+
+  static String getFriendsDetails({required String friendId}) =>
+      '/mobile/friends/users/$friendId/profile?groupType=all';
 }
