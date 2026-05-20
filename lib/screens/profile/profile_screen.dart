@@ -30,7 +30,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     Future.microtask(() {
       context.read<FriendProvider>().getFriends();
-      context.read<FamilyProvider>().seedDemoMembers();
+      context.read<FamilyProvider>().getFamilyMembersPreview();
     });
   }
 
@@ -173,24 +173,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 const Spacer(),
-                Consumer<FamilyProvider>(
-                  builder: (context, provider, _) {
-                    if (provider.familyMembers.isEmpty) {
-                      return const SizedBox.shrink();
-                    }
-                    return GestureDetector(
-                      onTap: () => context.pushNamed(
-                        AppRoutes.familyMembersListScreen.name,
-                      ),
-                      child: AppText(
-                        text: 'View all',
-                        style: AppTextStyles.semibold(
-                          fontSize: 15,
-                          color: AppColors.teal,
-                        ),
-                      ),
-                    );
-                  },
+                GestureDetector(
+                  onTap: () => context.pushNamed(
+                    AppRoutes.familyMembersListScreen.name,
+                  ),
+                  child: AppText(
+                    text: 'View all',
+                    style: AppTextStyles.semibold(
+                      fontSize: 15,
+                      color: AppColors.teal,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -212,11 +205,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     BuildContext context,
     FamilyProvider provider,
   ) {
-    final members = provider.familyMembers;
-    if (members.isEmpty) {
-      return _buildFamilyMembersEmpty();
+    switch (provider.familyMembersState) {
+      case DataState.loading:
+        return _buildFamilyMembersShimmer();
+      case DataState.failed:
+        return _buildFamilyMembersError(context, provider);
+      case DataState.success:
+        final members = provider.profileFamilyMembers;
+        if (members.isEmpty) {
+          return _buildFamilyMembersEmpty();
+        }
+        return _buildFamilyMembersList(context, members);
     }
-    return _buildFamilyMembersList(context, members);
   }
 
   Widget _buildFamilyMembersList(
@@ -241,6 +241,89 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFamilyMembersShimmer() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const NeverScrollableScrollPhysics(),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (var i = 0; i < 5; i++) ...[
+            if (i > 0) 16.w.horizontalSpace,
+            Shimmer.fromColors(
+              baseColor: AppColors.shimmerBaseColor,
+              highlightColor: AppColors.shimmerHighlightColor,
+              child: SizedBox(
+                width: 72.w,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 64.w,
+                      height: 64.w,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                      ),
+                    ),
+                    8.h.verticalSpace,
+                    Container(
+                      width: 52.w,
+                      height: 12.h,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                    ),
+                    4.h.verticalSpace,
+                    Container(
+                      width: 40.w,
+                      height: 10.h,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFamilyMembersError(
+    BuildContext context,
+    FamilyProvider provider,
+  ) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 16.h),
+      child: Column(
+        children: [
+          AppText(
+            text: provider.familyMembersError ?? 'Failed to load family members',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.medium(
+              fontSize: 13,
+              color: AppColors.black.setOpacity(0.5),
+            ),
+          ),
+          8.h.verticalSpace,
+          GestureDetector(
+            onTap: () => provider.getFamilyMembersPreview(forceRefresh: true),
+            child: AppText(
+              text: 'Retry',
+              style: AppTextStyles.semibold(fontSize: 14, color: AppColors.teal),
+            ),
+          ),
         ],
       ),
     );
@@ -282,7 +365,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton(
-        onPressed: () => context.pushNamed(AppRoutes.friendsListScreen.name),
+        onPressed: () =>
+            context.pushNamed(AppRoutes.addFamilyMemberScreen.name),
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.black,
           backgroundColor: AppColors.white,

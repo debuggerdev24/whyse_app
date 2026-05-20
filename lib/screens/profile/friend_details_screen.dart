@@ -520,15 +520,21 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     showAddFamilyMemberBottomSheet(
       context,
       memberName: memberName,
-      onConfirm: (relationship) {
-        context.read<FamilyProvider>().addFamilyMemberFromProfile(
+      onConfirm: (role) async {
+        final error =
+            await context.read<FamilyProvider>().addFamilyMemberFromProfile(
           profile: profile,
-          relationship: relationship,
+          role: role,
         );
-        AppToast.success(
-          context,
-          '${profile.displayName ?? memberName} added as $relationship',
-        );
+        if (!mounted) return error;
+        if (error == null) {
+          AppToast.success(
+            context,
+            '${profile.displayName ?? memberName} added as ${role.label}',
+          );
+          setState(() {});
+        }
+        return error;
       },
     );
   }
@@ -895,23 +901,26 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
           if (topics.isEmpty)
             _buildTopicsEmpty()
           else
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (var i = 0; i < topics.length; i++)
-                    _ViewOnlySeriesCard(
-                      title: topics[i].title ?? 'Untitled',
-                      readingsCount: topics[i].noOfReadings,
-                      subtitle: topics[i].subtitle,
-                      imageUrl: resolveNullableNetworkImageUrl(
-                        topics[i].topicImage,
+            SizedBox(
+              height: 228.h,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (var i = 0; i < topics.length; i++)
+                      _ViewOnlySeriesCard(
+                        title: topics[i].title ?? 'Untitled',
+                        readingsCount: topics[i].noOfReadings,
+                        subtitle: topics[i].subtitle,
+                        imageUrl: resolveNullableNetworkImageUrl(
+                          topics[i].topicImage,
+                        ),
+                        imageSeed: 'friend-series-${topics[i].id}',
                       ),
-                      imageSeed: 'friend-series-${topics[i].id}',
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
         ],
@@ -1163,9 +1172,13 @@ class _ViewOnlySeriesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final subtitleColor = AppColors.black.setOpacity(0.45);
+    final subtitleText = subtitle?.trim().isNotEmpty == true
+        ? subtitle!
+        : '$readingsCount Readings';
 
     return Container(
       width: 210.w,
+      height: 228.h,
       margin: EdgeInsets.only(right: 10.w),
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -1180,63 +1193,44 @@ class _ViewOnlySeriesCard extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
-            child: SizedBox(
-              height: 132.w,
+          Expanded(
+            child: AppNetworkImage(
+              imageUrl:
+                  imageUrl ?? 'https://picsum.photos/seed/$imageSeed/700/500',
+              tag: 'FriendDetails.series',
               width: double.infinity,
-              child: AppNetworkImage(
-                imageUrl:
-                    imageUrl ?? 'https://picsum.photos/seed/$imageSeed/700/500',
-                tag: 'FriendDetails.series',
-                placeholder: (_) => _storyImageShimmer(),
-                errorCompact: true,
-                errorIconOnly: true,
-              ),
+              height: double.infinity,
+              fit: BoxFit.cover,
+              placeholder: (_) => _storyImageShimmer(),
+              errorCompact: true,
+              errorIconOnly: true,
             ),
           ),
           Padding(
-            padding: EdgeInsets.fromLTRB(14.w, 13.w, 14.w, 2.w),
-            child: AppText(
-              text: title,
-              style: AppTextStyles.bold(fontSize: 16.sp),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 14.w),
-            child: AppText(
-              text: subtitle?.trim().isNotEmpty == true
-                  ? subtitle!
-                  : '$readingsCount Readings',
-              style: AppTextStyles.medium(
-                fontSize: 12.sp,
-                color: subtitleColor,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(14.w, 12.w, 14.w, 16.w),
-            child: Container(
-              padding: EdgeInsets.symmetric(vertical: 12.h),
-              decoration: BoxDecoration(
-                color: AppColors.black.setOpacity(0.06),
-                borderRadius: BorderRadius.circular(24.r),
-              ),
-              alignment: Alignment.center,
-              child: AppText(
-                text: 'Start Reading',
-                style: AppTextStyles.semibold(
-                  fontSize: 14.sp,
-                  color: AppColors.black.setOpacity(0.35),
+            padding: EdgeInsets.fromLTRB(14.w, 10.h, 14.w, 12.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppText(
+                  text: title,
+                  style: AppTextStyles.bold(fontSize: 16.sp),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
+                4.h.verticalSpace,
+                AppText(
+                  text: subtitleText,
+                  style: AppTextStyles.medium(
+                    fontSize: 12.sp,
+                    color: subtitleColor,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
         ],
@@ -1284,7 +1278,7 @@ Shimmer _storyImageShimmer() {
     highlightColor: AppColors.shimmerHighlightColor,
     child: Container(
       width: double.infinity,
-      height: 132.w,
+      height: double.infinity,
       color: AppColors.shimmerBaseColor,
     ),
   );

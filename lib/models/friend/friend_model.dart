@@ -1,3 +1,4 @@
+import 'package:redstreakapp/core/constants/app_constants.dart';
 import 'package:redstreakapp/core/enums/user_gender.dart';
 
 class FriendResponse {
@@ -26,6 +27,7 @@ class FriendUser {
   final String? email;
   final String? username;
   final String? phone;
+  final String? avatarUrl;
   final UserGender? gender;
 
   const FriendUser({
@@ -35,6 +37,7 @@ class FriendUser {
     this.username,
     this.phone,
     this.gender,
+    this.avatarUrl,
   });
 
   factory FriendUser.fromJson(Map<String, dynamic> json) {
@@ -45,6 +48,9 @@ class FriendUser {
       username: json['username'] as String?,
       phone: json['phone'] as String?,
       gender: UserGender.fromApi(json['gender']),
+      avatarUrl: json['avatarUrl'] != null
+          ? '${AppConstants.imageBaseUrl}${json['avatarUrl']}'
+          : null,
     );
   }
 

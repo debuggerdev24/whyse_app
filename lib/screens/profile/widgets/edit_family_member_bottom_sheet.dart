@@ -1,72 +1,86 @@
 import 'package:redstreakapp/core/enums/data_status.dart';
-import 'package:redstreakapp/core/enums/user_gender.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/utils/user_facing_message.dart';
+import 'package:redstreakapp/models/family/family_member_model.dart';
 import 'package:redstreakapp/models/family/family_role_model.dart';
 import 'package:redstreakapp/providers/family/family_provider.dart';
+import 'package:redstreakapp/screens/profile/widgets/add_family_member_bottom_sheet.dart';
 import 'package:shimmer/shimmer.dart';
 
-void showAddFamilyMemberBottomSheet(
+void showEditFamilyMemberBottomSheet(
   BuildContext context, {
-  required String memberName,
-  UserGender? memberGender,
-  required Future<String?> Function(FamilyRole role) onConfirm,
+  required FamilyMember member,
 }) {
-  context.read<FamilyProvider>().getFamilyRoles();
+  final provider = context.read<FamilyProvider>();
+  provider.resetEditFamilyRoles();
+  provider.getFamilyRolesForEdit(excludeFamilyMemberId: member.id);
 
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    isDismissible: true,
-    enableDrag: true,
     builder: (sheetContext) {
-      return AddFamilyMemberBottomSheet(
-        memberName: memberName,
-        memberGender: memberGender,
-        onConfirm: onConfirm,
-      );
+      return EditFamilyMemberBottomSheet(member: member);
     },
   );
 }
 
-class AddFamilyMemberBottomSheet extends StatefulWidget {
-  const AddFamilyMemberBottomSheet({
-    super.key,
-    required this.memberName,
-    this.memberGender,
-    required this.onConfirm,
-  });
+class EditFamilyMemberBottomSheet extends StatefulWidget {
+  const EditFamilyMemberBottomSheet({super.key, required this.member});
 
-  final String memberName;
-  final UserGender? memberGender;
-  final Future<String?> Function(FamilyRole role) onConfirm;
+  final FamilyMember member;
 
   @override
-  State<AddFamilyMemberBottomSheet> createState() =>
-      _AddFamilyMemberBottomSheetState();
+  State<EditFamilyMemberBottomSheet> createState() =>
+      _EditFamilyMemberBottomSheetState();
 }
 
-class _AddFamilyMemberBottomSheetState extends State<AddFamilyMemberBottomSheet> {
+class _EditFamilyMemberBottomSheetState extends State<EditFamilyMemberBottomSheet> {
   FamilyRole? _selectedRole;
-  bool _isSubmitting = false;
+  bool _isSaving = false;
 
-  Future<void> _submit() async {
+  @override
+  void initState() {
+    super.initState();
+    _selectedRole = FamilyRole(
+      value: widget.member.role,
+      label: widget.member.relationship,
+      unique: false,
+    );
+  }
+
+  String get _memberName =>
+      widget.member.member.displayName ??
+      widget.member.member.username ??
+      'this member';
+
+  void _saveRole() {
     final role = _selectedRole;
-    if (role == null || _isSubmitting) return;
-
-    setState(() => _isSubmitting = true);
-    final error = await widget.onConfirm(role);
-    if (!mounted) return;
-
-    if (error == null) {
+    if (role == null || _isSaving) return;
+    if (role.value == widget.member.role) {
       Navigator.of(context).pop();
       return;
     }
 
-    setState(() => _isSubmitting = false);
-    AppToast.error(context, userFacingMessage(error));
+    setState(() => _isSaving = true);
+    context.read<FamilyProvider>().updateFamilyMemberRole(
+      familyMemberId: widget.member.id,
+      role: role.value,
+      onSuccess: () {
+        if (!mounted) return;
+        Navigator.of(context).pop();
+        AppToast.success(
+          context,
+          '$_memberName updated to ${role.label}',
+        );
+      },
+      onError: (error) {
+        if (!mounted) return;
+        setState(() => _isSaving = false);
+        AppToast.error(context, userFacingMessage(error));
+      },
+    );
   }
 
   @override
@@ -90,7 +104,7 @@ class _AddFamilyMemberBottomSheetState extends State<AddFamilyMemberBottomSheet>
               child: Column(
                 children: [
                   AppText(
-                    text: 'Add to Family',
+                    text: 'Edit Family Role',
                     style: AppTextStyles.bold(
                       fontSize: 20,
                       color: AppColors.black,
@@ -98,7 +112,7 @@ class _AddFamilyMemberBottomSheetState extends State<AddFamilyMemberBottomSheet>
                   ),
                   6.h.verticalSpace,
                   AppText(
-                    text: 'How is ${widget.memberName} related to you?',
+                    text: 'Update how $_memberName is related to you',
                     textAlign: TextAlign.center,
                     style: AppTextStyles.medium(
                       fontSize: 14,
@@ -109,22 +123,13 @@ class _AddFamilyMemberBottomSheetState extends State<AddFamilyMemberBottomSheet>
               ),
             ),
             16.h.verticalSpace,
-            Flexible(
-              child: AbsorbPointer(
-                absorbing: _isSubmitting,
-                child: Opacity(
-                  opacity: _isSubmitting ? 0.5 : 1,
-                  child: _buildRolesList(),
-                ),
-              ),
-            ),
+            Flexible(child: _buildRolesList()),
             Padding(
               padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed:
-                      _selectedRole == null || _isSubmitting ? null : _submit,
+                  onPressed: _selectedRole == null || _isSaving ? null : _saveRole,
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
                     backgroundColor: AppColors.black,
@@ -134,7 +139,7 @@ class _AddFamilyMemberBottomSheetState extends State<AddFamilyMemberBottomSheet>
                     padding: EdgeInsets.symmetric(vertical: 14.h),
                     shape: const StadiumBorder(),
                   ),
-                  child: _isSubmitting
+                  child: _isSaving
                       ? SizedBox(
                           width: 22.sp,
                           height: 22.sp,
@@ -144,7 +149,7 @@ class _AddFamilyMemberBottomSheetState extends State<AddFamilyMemberBottomSheet>
                           ),
                         )
                       : AppText(
-                          text: 'Add Family Member',
+                          text: 'Save',
                           style: AppTextStyles.semibold(
                             fontSize: 16,
                             color: AppColors.white,
@@ -162,19 +167,21 @@ class _AddFamilyMemberBottomSheetState extends State<AddFamilyMemberBottomSheet>
   Widget _buildRolesList() {
     return Consumer<FamilyProvider>(
       builder: (context, provider, _) {
-        switch (provider.familyRolesState) {
+        switch (provider.editFamilyRolesState) {
           case DataState.loading:
-            return const _RolesLoadingList();
+            return const _EditRolesLoadingList();
           case DataState.failed:
-            return _RolesErrorState(
-              message: userFacingMessage(provider.familyRolesError),
-              onRetry: () => provider.getFamilyRoles(forceRefresh: true),
+            return _EditRolesErrorState(
+              message: userFacingMessage(provider.editFamilyRolesError),
+              onRetry: () => provider.getFamilyRolesForEdit(
+                excludeFamilyMemberId: widget.member.id,
+                forceRefresh: true,
+              ),
             );
           case DataState.success:
-            final roles =
-                provider.relationshipOptionsFor(widget.memberGender);
+            final roles = provider.editFamilyRoles;
             if (roles.isEmpty) {
-              return const _RolesEmptyState();
+              return const _EditRolesEmptyState();
             }
             return ListView.separated(
               shrinkWrap: true,
@@ -197,8 +204,8 @@ class _AddFamilyMemberBottomSheetState extends State<AddFamilyMemberBottomSheet>
   }
 }
 
-class _RolesLoadingList extends StatelessWidget {
-  const _RolesLoadingList();
+class _EditRolesLoadingList extends StatelessWidget {
+  const _EditRolesLoadingList();
 
   @override
   Widget build(BuildContext context) {
@@ -207,13 +214,13 @@ class _RolesLoadingList extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       itemCount: 8,
       separatorBuilder: (_, __) => SizedBox(height: 8.h),
-      itemBuilder: (_, __) => const _RoleShimmerTile(),
+      itemBuilder: (_, __) => const _EditRoleShimmerTile(),
     );
   }
 }
 
-class _RoleShimmerTile extends StatelessWidget {
-  const _RoleShimmerTile();
+class _EditRoleShimmerTile extends StatelessWidget {
+  const _EditRoleShimmerTile();
 
   @override
   Widget build(BuildContext context) {
@@ -231,8 +238,8 @@ class _RoleShimmerTile extends StatelessWidget {
   }
 }
 
-class _RolesErrorState extends StatelessWidget {
-  const _RolesErrorState({required this.message, required this.onRetry});
+class _EditRolesErrorState extends StatelessWidget {
+  const _EditRolesErrorState({required this.message, required this.onRetry});
 
   final String? message;
   final VoidCallback onRetry;
@@ -284,8 +291,8 @@ class _RolesErrorState extends StatelessWidget {
   }
 }
 
-class _RolesEmptyState extends StatelessWidget {
-  const _RolesEmptyState();
+class _EditRolesEmptyState extends StatelessWidget {
+  const _EditRolesEmptyState();
 
   @override
   Widget build(BuildContext context) {
@@ -300,82 +307,6 @@ class _RolesEmptyState extends StatelessWidget {
             color: AppColors.black.setOpacity(0.55),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class FamilyRelationshipTile extends StatelessWidget {
-  const FamilyRelationshipTile({
-    super.key,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12.r),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: isSelected
-                ? AppColors.extealighttealcolor
-                : AppColors.lightwhiteColor,
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(
-              color: isSelected
-                  ? AppColors.teal.setOpacity(0.45)
-                  : AppColors.black.setOpacity(0.08),
-            ),
-          ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-            child: Row(
-              children: [
-                Expanded(
-                  child: AppText(
-                    text: label,
-                    style: AppTextStyles.semibold(
-                      fontSize: 16,
-                      color: isSelected ? AppColors.teal : AppColors.black,
-                    ),
-                  ),
-                ),
-                if (isSelected)
-                  Icon(
-                    Icons.check_circle_rounded,
-                    size: 22.sp,
-                    color: AppColors.teal,
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class FamilySheetHandle extends StatelessWidget {
-  const FamilySheetHandle({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 40.w,
-      height: 4.h,
-      margin: EdgeInsets.only(top: 12.h, bottom: 4.h),
-      decoration: BoxDecoration(
-        color: AppColors.black.setOpacity(0.15),
-        borderRadius: BorderRadius.circular(10.r),
       ),
     );
   }

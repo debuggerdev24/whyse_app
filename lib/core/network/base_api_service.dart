@@ -13,7 +13,7 @@ class DioClient {
   DioClient._();
   static final _instance = DioClient._();
   static String get baseUrl =>
-      dotenv.env['BASE_URL']!;
+      dotenv.env['BASE_URL'] ?? 'https://whyse.com';
   static String get apiBaseUrl => '$baseUrl/api/v1';
   static DioClient get instance => _instance;
   late Dio _dio;

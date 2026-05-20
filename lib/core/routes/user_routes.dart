@@ -74,6 +74,7 @@ enum AppRoutes {
   userProfileGroupsListScreen,
   userProfileTopicsListScreen,
   familyMembersListScreen,
+  addFamilyMemberScreen,
   friendDetailsScreen,
   addFriendsScreen,
   editInterestsScreen,

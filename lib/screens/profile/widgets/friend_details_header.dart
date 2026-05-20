@@ -89,7 +89,18 @@ class _ProfileAvatar extends StatelessWidget {
               width: 120.w,
               height: 120.w,
               fit: BoxFit.cover,
-              placeholder: (_) => _initialsLabel(),
+              placeholder: (_) => Shimmer.fromColors(
+                baseColor: AppColors.shimmerBaseColor,
+                highlightColor: AppColors.shimmerHighlightColor,
+                child: Container(
+                  width: 120.w,
+                  height: 120.w,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.shimmerBaseColor,
+                  ),
+                ),
+              ),
               errorCompact: true,
               errorIconOnly: true,
               errorBuilder: (_, __, ___) => _initialsLabel(),
@@ -99,11 +110,13 @@ class _ProfileAvatar extends StatelessWidget {
   }
 
   Widget _initialsLabel() {
-    return AppText(
-      text: profile.initials,
-      style: AppTextStyles.bold(
-        fontSize: 40.sp,
-        color: AppColors.white.withValues(alpha: 0.92),
+    return Center(
+      child: AppText(
+        text: profile.initials,
+        style: AppTextStyles.bold(
+          fontSize: 40.sp,
+          color: AppColors.white.withValues(alpha: 0.92),
+        ),
       ),
     );
   }

@@ -6,18 +6,15 @@ import 'package:redstreakapp/models/friend/friend_details_model.dart';
 import 'package:redstreakapp/screens/profile/widgets/profile_friend_avatar.dart';
 
 class FriendPreviewAvatar extends StatelessWidget {
-  const FriendPreviewAvatar({
-    super.key,
-    required this.friend,
-    this.onTap,
-  });
+  const FriendPreviewAvatar({super.key, required this.friend, this.onTap});
 
   final FriendPreviewItem friend;
   final VoidCallback? onTap;
 
   Color get _color {
     final hash = friend.id.codeUnits.fold<int>(0, (prev, c) => prev + c);
-    return ProfileFriendAvatar.avatarColors[hash % ProfileFriendAvatar.avatarColors.length];
+    return ProfileFriendAvatar.avatarColors[hash %
+        ProfileFriendAvatar.avatarColors.length];
   }
 
   @override
@@ -70,11 +67,13 @@ class FriendPreviewAvatar extends StatelessWidget {
   }
 
   Widget _initials() {
-    return AppText(
-      text: friend.initials,
-      style: AppTextStyles.bold(
-        fontSize: 22.sp,
-        color: AppColors.white.setOpacity(0.92),
+    return Center(
+      child: AppText(
+        text: friend.initials,
+        style: AppTextStyles.bold(
+          fontSize: 22.sp,
+          color: AppColors.white.setOpacity(0.92),
+        ),
       ),
     );
   }

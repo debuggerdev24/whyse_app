@@ -22,6 +22,7 @@ import 'package:redstreakapp/screens/group/group_details_screen.dart';
 import 'package:redstreakapp/screens/group/group_list_screen.dart';
 import 'package:redstreakapp/screens/group/join_group_screen.dart';
 import 'package:redstreakapp/screens/group/share_stories_in_group_screen.dart';
+import 'package:redstreakapp/screens/profile/add_family_member_screen.dart';
 import 'package:redstreakapp/screens/profile/family_members_list_screen.dart';
 import 'package:redstreakapp/screens/profile/friends_list_screen.dart';
 import 'package:redstreakapp/screens/profile/friends_list_screen_params.dart';
@@ -696,6 +697,11 @@ class AppRouter {
           path: AppRoutes.familyMembersListScreen.name,
           name: AppRoutes.familyMembersListScreen.name,
           builder: (context, state) => const FamilyMembersListScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.addFamilyMemberScreen.name,
+          name: AppRoutes.addFamilyMemberScreen.name,
+          builder: (context, state) => const AddFamilyMemberScreen(),
         ),
         GoRoute(
           path: AppRoutes.friendDetailsScreen.name,

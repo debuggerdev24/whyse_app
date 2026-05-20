@@ -48,7 +48,26 @@ class EndPoints {
   static const refreshToken = "/mobile/auth/refresh-token";
   static const getMyGroups = "/mobile/groups";
   static const joinGroupByCode = "/mobile/groups/join-by-code";
-  static String createGroup = '/mobile/groups';
+  static const String createGroup = '/mobile/groups';
+  static String getFriendsExcludingFamily({int page = 1, int limit = 20}) =>
+      '/mobile/friends?page=$page&limit=$limit&excludeFamilyMembers=true';
+  static const String addFamilyMember = '/mobile/family';
+  static const String getFamilyMembersRoles = '/mobile/family/roles';
+
+  static String getFamilyMembersRolesForEdit({
+    required String excludeFamilyMemberId,
+  }) =>
+      '/mobile/family/roles?excludeFamilyMemberId=$excludeFamilyMemberId';
+
+  static String getFamilyMembers({int page = 1, int limit = 20}) =>
+      '/mobile/family?page=$page&limit=$limit';
+
+  static String updateFamilyMember({required String familyMemberId}) =>
+      '/mobile/family/$familyMemberId';
+
+  static String removeFamilyMember({required String familyMemberId}) =>
+      '/mobile/family/$familyMemberId';
+
   static String searchUsers({int page = 1, int limit = 20, String? q}) {
     final buffer = StringBuffer('/users/search?page=$page&limit=$limit');
     final searchValue = (q ?? '').trim();
@@ -153,4 +172,3 @@ class EndPoints {
   }) =>
       '/mobile/friends/users/$userId/profile/list?section=$section&page=$page&limit=$limit&groupType=$groupType';
 }
-  

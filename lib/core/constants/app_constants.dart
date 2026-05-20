@@ -6,6 +6,7 @@ class AppConstants {
   static String get serverClientId => dotenv.env['SERVER_CLIENT_ID']!;
   // ??"1072520967140-7566tlns04ge757cqiailkl8j405a9am.apps.googleusercontent.com";
   static String get clientIdIos => dotenv.env['CLIENT_ID_IOS']!;
+  static String get imageBaseUrl => dotenv.env['IMAGE_BASE_URL'] ?? 'https://whyse.com';
   // ??
   // "1072520967140-6hu941fhtps4i2sjkl1gf31l395j2ia2.apps.googleusercontent.com";
   //*===============================
