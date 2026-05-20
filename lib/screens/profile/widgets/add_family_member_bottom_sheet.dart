@@ -97,7 +97,7 @@ class _AddFamilyMemberBottomSheetState extends State<AddFamilyMemberBottomSheet>
                     ),
                   ),
                   6.h.verticalSpace,
-                  AppText(
+                  AppText(  
                     text: 'How is ${widget.memberName} related to you?',
                     textAlign: TextAlign.center,
                     style: AppTextStyles.medium(

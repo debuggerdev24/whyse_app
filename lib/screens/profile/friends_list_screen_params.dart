@@ -5,29 +5,27 @@ import 'package:redstreakapp/models/friend/friend_model.dart';
 class FriendsListScreenParams {
   /// Current user's friends list (fetched via [FriendProvider]).
   const FriendsListScreenParams({
-    required List<FriendUser> friends,
+    required List<FriendUser> this.friends,
     this.title,
     this.viewOnly = true,
-  })  : friends = friends,
-        friendPreviews = null,
-        userId = null;
+  }) : friendPreviews = null,
+       userId = null;
 
   /// Static preview list (legacy).
   const FriendsListScreenParams.fromPreviews({
-    required List<FriendPreviewItem> friendPreviews,
+    required List<FriendPreviewItem> this.friendPreviews,
     this.title,
     this.viewOnly = true,
-  })  : friends = null,
-        friendPreviews = friendPreviews,
-        userId = null;
+  }) : friends = null,
+       userId = null;
 
   /// Another user's friends — loaded from profile list API with pagination.
   const FriendsListScreenParams.forUserProfile({
     required this.userId,
     this.title,
     this.viewOnly = true,
-  })  : friends = null,
-        friendPreviews = null;
+  }) : friends = null,
+       friendPreviews = null;
 
   final List<FriendUser>? friends;
   final List<FriendPreviewItem>? friendPreviews;
@@ -37,6 +35,5 @@ class FriendsListScreenParams {
 
   bool get usesPreviews => friendPreviews != null;
 
-  bool get isUserProfileFriendsList =>
-      userId != null && userId!.isNotEmpty;
+  bool get isUserProfileFriendsList => userId != null && userId!.isNotEmpty;
 }
