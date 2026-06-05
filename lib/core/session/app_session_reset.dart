@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/routes/app_router.dart';
+import 'package:redstreakapp/providers/curiosity_reading/curiosity_reading_provider.dart';
 import 'package:redstreakapp/providers/family/family_provider.dart';
 import 'package:redstreakapp/providers/friend/friend_provider.dart';
-import 'package:redstreakapp/providers/home/curiosity_reading_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/quiz_provider.dart';
 import 'package:redstreakapp/providers/home/saved_series_provider.dart';

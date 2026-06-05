@@ -3,6 +3,9 @@ import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/core/network/end_points.dart';
 
 class FamilyApiService {
+  static const bool enableApiLogging = false;
+  static final _api = BaseApiHelper(enableApiLogging: enableApiLogging);
+
   FamilyApiService._();
 
   static final FamilyApiService _instance = FamilyApiService._();
@@ -12,7 +15,7 @@ class FamilyApiService {
     int page = 1,
     int limit = 20,
   }) async {
-    return BaseApiHelper.instance.get(
+    return _api.get(
       EndPoints.getFamilyMembers(page: page, limit: limit),
     );
   }
@@ -21,7 +24,7 @@ class FamilyApiService {
     required String memberUserId,
     required String role,
   }) async {
-    return BaseApiHelper.instance.post(
+    return _api.post(
       EndPoints.addFamilyMember,
       data: {
         'memberUserId': memberUserId,
@@ -39,14 +42,14 @@ class FamilyApiService {
             excludeFamilyMemberId: excludeFamilyMemberId,
           )
         : EndPoints.getFamilyMembersRoles;
-    return BaseApiHelper.instance.get(path);
+    return _api.get(path);
   }
 
   Future<Either<ApiException, Map<String, dynamic>>> updateFamilyMemberRole({
     required String familyMemberId,
     required String role,
   }) async {
-    return BaseApiHelper.instance.patch(
+    return _api.patch(
       EndPoints.updateFamilyMember(familyMemberId: familyMemberId),
       data: {'role': role},
     );
@@ -55,7 +58,7 @@ class FamilyApiService {
   Future<Either<ApiException, Map<String, dynamic>>> removeFamilyMember({
     required String familyMemberId,
   }) async {
-    return BaseApiHelper.instance.delete(
+    return _api.delete(
       EndPoints.removeFamilyMember(familyMemberId: familyMemberId),
     );
   }

@@ -56,8 +56,7 @@ class EndPoints {
 
   static String getFamilyMembersRolesForEdit({
     required String excludeFamilyMemberId,
-  }) =>
-      '/mobile/family/roles?excludeFamilyMemberId=$excludeFamilyMemberId';
+  }) => '/mobile/family/roles?excludeFamilyMemberId=$excludeFamilyMemberId';
 
   static String getFamilyMembers({int page = 1, int limit = 20}) =>
       '/mobile/family?page=$page&limit=$limit';
@@ -171,4 +170,12 @@ class EndPoints {
     String groupType = 'all',
   }) =>
       '/mobile/friends/users/$userId/profile/list?section=$section&page=$page&limit=$limit&groupType=$groupType';
+
+  // Curiosity Reading endpoints
+  static getCuriosityReading({int page = 1, int limit = 10}) =>
+      "/mobile/curiosity/feed?includeBody=true&limit=$limit&page=$page";
+
+  static curiosityReadingInteract({required String readingId}) =>
+      '/mobile/curiosity/readings/$readingId/interact';
 }
+

@@ -9,6 +9,21 @@ import 'package:redstreakapp/core/utils/shared_pref.dart';
 import 'package:redstreakapp/core/utils/user_facing_message.dart';
 import '../helper/log_helper.dart';
 
+/// Request [extra] key used by [PrettyDioLogger] to decide whether to log.
+const String kEnableApiLoggingKey = 'enableApiLogging';
+
+Options mergeApiLoggingOptions({
+  required bool enableApiLogging,
+  Options? options,
+}) {
+  return (options ?? Options()).copyWith(
+    extra: {
+      ...?options?.extra,
+      kEnableApiLoggingKey: enableApiLogging,
+    },
+  );
+}
+
 class DioClient {
   DioClient._();
   static final _instance = DioClient._();
@@ -84,7 +99,13 @@ class DioClient {
       ),
     );
     _dio.interceptors.add(
-      PrettyDioLogger(request: true, requestBody: true, requestHeader: true),
+      PrettyDioLogger(
+        request: true,
+        requestBody: true,
+        requestHeader: true,
+        filter: (options, _) =>
+            options.extra[kEnableApiLoggingKey] != false,
+      ),
     );
   }
 
@@ -216,9 +237,11 @@ class DioClient {
 }
 
 class BaseApiHelper {
-  BaseApiHelper._();
-  static final BaseApiHelper _instance = BaseApiHelper._();
-  static BaseApiHelper get instance => _instance;
+  BaseApiHelper({this.enableApiLogging = true});
+
+  static final BaseApiHelper instance = BaseApiHelper();
+
+  final bool enableApiLogging;
   final Dio _dio = DioClient.instance.dio;
 
   static const int _nullDataMaxRetries = 1;
@@ -240,6 +263,11 @@ class BaseApiHelper {
     return optIn;
   }
 
+  Options _withLogging(Options? options) => mergeApiLoggingOptions(
+        enableApiLogging: enableApiLogging,
+        options: options,
+      );
+
   Future<Response<dynamic>> _requestWithNullDataRetry({
     required String method,
     required String path,
@@ -247,6 +275,7 @@ class BaseApiHelper {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
+    final requestOptions = _withLogging(options);
     DioException? lastDioError;
     for (var attempt = 0;; attempt++) {
       try {
@@ -256,7 +285,7 @@ class BaseApiHelper {
             response = await _dio.get(
               path,
               queryParameters: queryParameters,
-              options: options,
+              options: requestOptions,
             );
             break;
           case "POST":
@@ -264,7 +293,7 @@ class BaseApiHelper {
               path,
               data: data,
               queryParameters: queryParameters,
-              options: options,
+              options: requestOptions,
             );
             break;
           case "PATCH":
@@ -272,7 +301,7 @@ class BaseApiHelper {
               path,
               data: data,
               queryParameters: queryParameters,
-              options: options,
+              options: requestOptions,
             );
             break;
           case "DELETE":
@@ -280,7 +309,7 @@ class BaseApiHelper {
               path,
               data: data,
               queryParameters: queryParameters,
-              options: options,
+              options: requestOptions,
             );
             break;
           default:
@@ -288,13 +317,17 @@ class BaseApiHelper {
               path,
               data: data,
               queryParameters: queryParameters,
-              options: (options ?? Options()).copyWith(method: method),
+              options: requestOptions.copyWith(method: method),
             );
         }
 
         // Retry once when backend returns success but data is null.
         if (response.data == null &&
-            _shouldRetryNullData(method: method, attempt: attempt, options: options)) {
+            _shouldRetryNullData(
+              method: method,
+              attempt: attempt,
+              options: requestOptions,
+            )) {
           Logger.warning(
             "Null API response data for $method $path. Retrying (${attempt + 1}/$_nullDataMaxRetries)...",
           );
@@ -308,7 +341,11 @@ class BaseApiHelper {
         // We only auto-retry these for GET/DELETE unless opted in.
         final isNullLike = e.response == null && (e.message == null || e.message!.trim().isEmpty);
         if (isNullLike &&
-            _shouldRetryNullData(method: method, attempt: attempt, options: options)) {
+            _shouldRetryNullData(
+              method: method,
+              attempt: attempt,
+              options: requestOptions,
+            )) {
           Logger.warning(
             "Unknown Dio error for $method $path (null response). Retrying (${attempt + 1}/$_nullDataMaxRetries)...",
           );

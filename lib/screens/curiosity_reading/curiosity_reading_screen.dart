@@ -2,83 +2,135 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
-import 'package:redstreakapp/providers/home/curiosity_reading_provider.dart';
+import 'package:redstreakapp/providers/curiosity_reading/curiosity_reading_provider.dart';
+import 'package:redstreakapp/screens/curiosity_reading/widget/curiosity_reading_content.dart';
+import 'package:redstreakapp/screens/curiosity_reading/widget/curiosity_reading_screen_shimmer.dart';
 import 'package:shimmer/shimmer.dart';
 
-class CuriosityReadingScreen extends StatelessWidget {
+class CuriosityReadingScreen extends StatefulWidget {
   const CuriosityReadingScreen({super.key});
 
   @override
+  State<CuriosityReadingScreen> createState() => _CuriosityReadingScreenState();
+}
+
+class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
+  final ScrollController _scrollController = ScrollController();
+  String? _lastTrackedReadingId;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    if (maxScroll <= 0) {
+      context.read<CuriosityReadingProvider>().updateScrollDepth(100);
+      return;
+    }
+
+    final depth =
+        ((_scrollController.offset / maxScroll) * 100).round().clamp(0, 100);
+    context.read<CuriosityReadingProvider>().updateScrollDepth(depth);
+  }
+
+  void _trackReadingIfNeeded(CuriosityReadingProvider provider) {
+    final reading = provider.currentReading;
+    if (reading == null || reading.id == _lastTrackedReadingId) return;
+
+    _lastTrackedReadingId = reading.id;
+    _scrollController.jumpTo(0);
+    provider.onReadingDisplayed(reading.id);
+  }
+
+  Future<void> _exitToHome() async {
+    final provider = context.read<CuriosityReadingProvider>();
+    await provider.onLeaveReadingScreen();
+    if (mounted) context.pop();
+    provider.refreshFromHome();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      body: Consumer<CuriosityReadingProvider>(
-        builder: (context, provider, child) {
-          return GestureDetector(
-            onHorizontalDragEnd: (details) {
-              if (details.primaryVelocity! < 0) {
-                provider.nextReading();
-              }
-            },
-            child: Column(
-              key: ValueKey(provider.currentIndex),
-              children: [
-                _buildHeaderSection(
-                  context,
-                  title: provider
-                      .curiosityReadingList[provider.currentIndex]['title'],
-                  imageUrl: provider
-                      .curiosityReadingList[provider.currentIndex]['imageUrl'],
-                  onBackTap: () => context.pop(),
-                  onBookmarkTap: () {},
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.symmetric(horizontal: 25.w),
-                    child: Column(
-                      children: [
-                        AppText(
-                          text:
-                              provider.curiosityReadingList[provider
-                                  .currentIndex]['description'],
-                          style: AppTextStyles.regular(
-                            fontSize: 16,
-                            color: AppColors.black.setOpacity(0.8),
-                          ),
-                        ).animate().fadeInRight(
-                          delay: 200.ms,
-                          curve: Curves.decelerate,
-                        ),
-                        18.h.verticalSpace,
-                        Container(
-                          width: double.maxFinite,
-                          decoration: BoxDecoration(
-                            color: AppColors.teal.setOpacity(0.1),
-                            borderRadius: BorderRadius.circular(20.r),
-                          ),
-                          padding: .symmetric(vertical: 14.r, horizontal: 20.r),
-                          child: AppText(
-                            text:
-                                provider.curiosityReadingList[provider
-                                    .currentIndex]['fact'],
-                            style: AppTextStyles.medium(
-                              fontSize: 14,
-                              color: AppColors.teal,
-                            ),
-                          ),
-                        ).animate().fadeInRight(
-                          delay: 400.ms,
-                          curve: Curves.decelerate,
-                        ),
-                        25.w.verticalSpace,
-                      ],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          _exitToHome();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.white,
+        body: Consumer<CuriosityReadingProvider>(
+          builder: (context, provider, child) {
+            if (provider.curiosityReading == null) {
+              provider.getCuriosityReading();
+              return const CuriosityReadingScreenShimmer();
+            }
+
+            if (provider.curiosityReading!.data.readings.length <
+                    provider.currentIndex &&
+                provider.isLoadingMoreReading) {
+              return const CuriosityReadingScreenShimmer();
+            }
+
+            final readings = provider.curiosityReading!.data.readings;
+            if (readings.isEmpty) {
+              return const Center(child: Text('No readings available'));
+            }
+
+            final safeIndex =
+                provider.currentIndex.clamp(0, readings.length - 1);
+            final currentReading = readings[safeIndex];
+
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              _trackReadingIfNeeded(provider);
+            });
+
+            return GestureDetector(
+              onHorizontalDragEnd: (details) {
+                final velocity = details.primaryVelocity;
+                if (velocity == null) return;
+                if (velocity < 0) {
+                  provider.nextReading();
+                } else if (velocity > 0) {
+                  provider.previousReading();
+                }
+              },
+              child: Column(
+                key: ValueKey(safeIndex),
+                children: [
+                  _buildHeaderSection(
+                    context,
+                    title: currentReading.question,
+                    imageUrl: currentReading.imgUrl,
+                    onBackTap: _exitToHome,
+                    onBookmarkTap: () {},
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      padding: EdgeInsets.fromLTRB(25.w, 20.h, 25.w, 0),
+                      physics: const BouncingScrollPhysics(),
+                      child: CuriosityReadingContent(reading: currentReading),
                     ),
                   ),
-                ),
-              ],
-            ),
-          );
-        },
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

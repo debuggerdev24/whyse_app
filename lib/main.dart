@@ -5,9 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/core/utils/shared_pref.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
+import 'package:redstreakapp/providers/curiosity_reading/curiosity_reading_provider.dart';
 import 'package:redstreakapp/providers/profile/edit_profile_provider.dart';
 import 'package:redstreakapp/providers/profile/group_provider.dart';
-import 'package:redstreakapp/providers/home/curiosity_reading_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/saved_series_provider.dart';
 import 'package:redstreakapp/providers/home/quiz_provider.dart';
@@ -18,6 +18,7 @@ import 'package:redstreakapp/providers/profile/profile_provider.dart';
 import 'package:redstreakapp/providers/family/family_provider.dart';
 import 'package:redstreakapp/providers/friend/friend_provider.dart';
 import 'package:redstreakapp/providers/profile/your_books_provider.dart';
+import 'package:redstreakapp/services/curiosity_reading/curiosity_reading_service.dart';
 import 'package:redstreakapp/services/profile/group_api_service.dart';
 import 'package:redstreakapp/services/profile/profile_service.dart';
 import 'package:redstreakapp/whyse_app.dart';
@@ -45,20 +46,22 @@ void main() async {
         ChangeNotifierProvider(create: (_) => SavedSeriesProvider()),
         ChangeNotifierProvider(
           create: (_) => ProfileProvider(
-            ProfileService(BaseApiHelper.instance),
-            GroupApiService(BaseApiHelper.instance),
+            ProfileService(),
+            GroupApiService(),
           ),
         ),
         ChangeNotifierProvider(
-          create: (_) => GroupProvider(GroupApiService(BaseApiHelper.instance)),
+          create: (_) => GroupProvider(GroupApiService()),
         ),
-        ChangeNotifierProvider(create: (_) => CuriosityReadingProvider()),
         ChangeNotifierProvider(create: (_) => YourBooksProvider()),
         ChangeNotifierProvider(create: (_) => FriendProvider()),
         ChangeNotifierProvider(create: (_) => FamilyProvider()),
         ChangeNotifierProvider(
+          create: (_) => EditProfileProvider(ProfileService()),
+        ),
+        ChangeNotifierProvider(
           create: (_) =>
-              EditProfileProvider(ProfileService(BaseApiHelper.instance)),
+              CuriosityReadingProvider(CuriosityReadingService()),
         ),
       ],
       child: ToastificationWrapper(child: const WhyseApp()),

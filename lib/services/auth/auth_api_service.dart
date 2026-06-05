@@ -9,6 +9,9 @@ import 'package:redstreakapp/core/network/base_api_service.dart';
 import '../../models/home/story_models/generate_story_request.dart';
 
 class AuthApiServices {
+  static const bool enableApiLogging = true;
+
+  static final _apiHelper = BaseApiHelper(enableApiLogging: enableApiLogging);
   final _api = DioClient.instance.dio;
 
   AuthApiServices._();
@@ -17,13 +20,18 @@ class AuthApiServices {
 
   factory AuthApiServices() => _instance;
 
+  Options _logOptions([Options? options]) => mergeApiLoggingOptions(
+    enableApiLogging: enableApiLogging,
+    options: options,
+  );
+
   //todo 2nd
   //@override
   Future<Either<ApiException, Map<String, dynamic>>> startOnboarding({
     required String email,
   }) async {
     Map<String, String> data = {"email": email};
-    return await BaseApiHelper.instance.post(
+    return await _apiHelper.post(
       EndPoints.startOnBoarding, //ing,
       data: data,
     );
@@ -33,6 +41,7 @@ class AuthApiServices {
     final res = await _api.post(
       EndPoints.onBoardingProgress,
       data: {"identifier": onboardingId},
+      options: _logOptions(),
     );
     return res.data;
   }
@@ -42,7 +51,7 @@ class AuthApiServices {
     required String onboardingId,
     required String dateOfBirth,
   }) async {
-    return await BaseApiHelper.instance.post(
+    return await _apiHelper.post(
       EndPoints.saveAge,
       data: {"onboardingId": onboardingId, "dateOfBirth": dateOfBirth},
     );
@@ -67,6 +76,7 @@ class AuthApiServices {
         "password": password,
         "confirmPassword": confirmPassword,
       },
+      options: _logOptions(),
     );
     return res.data;
   }
@@ -79,6 +89,7 @@ class AuthApiServices {
     final res = await _api.post(
       EndPoints.verifyEmail,
       data: {"onboardingId": onboardingId, "email": email},
+      options: _logOptions(),
     );
     return res.data;
   }
@@ -96,6 +107,7 @@ class AuthApiServices {
         "country": country,
         "preferredLanguage": preferredLanguage,
       },
+      options: _logOptions(),
     );
     return res.data;
   }
@@ -111,13 +123,17 @@ class AuthApiServices {
         "onboardingId": onboardingId,
         "dailyReadingGoal": dailyReadingGoal,
       },
+      options: _logOptions(),
     );
     return res.data;
   }
 
   //@override
   Future<dynamic> getDefaultInterests() async {
-    final res = await _api.get(EndPoints.getDefaultInterest);
+    final res = await _api.get(
+      EndPoints.getDefaultInterest,
+      options: _logOptions(),
+    );
     return res.data;
   }
 
@@ -135,6 +151,7 @@ class AuthApiServices {
         "interestIds": interestIds,
         "customInterests": customInterests,
       },
+      options: _logOptions(),
     );
     return res.data;
   }
@@ -144,7 +161,7 @@ class AuthApiServices {
     final path = search != null && search.isNotEmpty
         ? EndPoints.getDefaultTopicsWithSearch(search)
         : EndPoints.getDefaultTopics;
-    final res = await _api.get(path);
+    final res = await _api.get(path, options: _logOptions());
     return res.data;
   }
 
@@ -161,13 +178,17 @@ class AuthApiServices {
         "topicIds": topicIds,
         "customTopics": customTopics,
       },
+      options: _logOptions(),
     );
     return res.data;
   }
 
   //@override
   Future<dynamic> getGoals() async {
-    final res = await _api.get(EndPoints.getDefaultGoals);
+    final res = await _api.get(
+      EndPoints.getDefaultGoals,
+      options: _logOptions(),
+    );
     return res.data;
   }
 
@@ -184,6 +205,7 @@ class AuthApiServices {
         "goalIds": goalIds,
         "customGoals": customGoals,
       },
+      options: _logOptions(),
     );
     return res.data;
   }
@@ -196,6 +218,7 @@ class AuthApiServices {
     final res = await _api.post(
       EndPoints.logIn,
       data: {"email": email, "password": password},
+      options: _logOptions(),
     );
     return res.data;
   }
@@ -203,7 +226,7 @@ class AuthApiServices {
   Future<Either<ApiException, Map<String, dynamic>>> googleSignUp({
     required Map<String, dynamic> data,
   }) async {
-    return await BaseApiHelper.instance.post(EndPoints.socialLogin, data: data);
+    return await _apiHelper.post(EndPoints.socialLogin, data: data);
   }
 
   //@override
@@ -211,7 +234,7 @@ class AuthApiServices {
     required String onboardingId,
     required String parentEmail,
   }) async {
-    return BaseApiHelper.instance.post(
+    return _apiHelper.post(
       EndPoints.saveParentEmail,
       data: {"onboardingId": onboardingId, "parentEmail": parentEmail},
     );
@@ -223,7 +246,9 @@ class AuthApiServices {
     final res = await _api.post(
       EndPoints.logOut,
       data: {"accessToken": accessToken},
-      options: Options(headers: {"Authorization": "Bearer $accessToken"}),
+      options: _logOptions(
+        Options(headers: {"Authorization": "Bearer $accessToken"}),
+      ),
     );
     return res.data;
   }
@@ -233,7 +258,7 @@ class AuthApiServices {
     final res = await _api.post(
       'http://167.172.45.71/api/v1/story/generateMobileStory',
       data: request.toJson(),
-      options: Options(receiveTimeout: const Duration(minutes: 5)),
+      options: _logOptions(Options(receiveTimeout: const Duration(minutes: 5))),
     );
     return res.data;
   }
@@ -243,7 +268,7 @@ class AuthApiServices {
     final res = await _api.post(
       'http://167.172.45.71/api/v1/story/generateMobileStoryImage',
       data: request.toJson(),
-      options: Options(receiveTimeout: const Duration(minutes: 5)),
+      options: _logOptions(Options(receiveTimeout: const Duration(minutes: 5))),
     );
     return res.data;
   }
@@ -256,6 +281,7 @@ class AuthApiServices {
     final res = await _api.post(
       'http://167.172.45.71/api/v1/story/mobile-story/$storyId/store-images',
       data: {"images": images},
+      options: _logOptions(),
     );
     return res.data;
   }
@@ -263,35 +289,29 @@ class AuthApiServices {
   Future<Either<ApiException, Map<String, dynamic>>> forgotPassword({
     required Map<String, dynamic> data,
   }) {
-    return BaseApiHelper.instance.post(EndPoints.forgotPassword, data: data);
+    return _apiHelper.post(EndPoints.forgotPassword, data: data);
   }
 
   Future<Either<ApiException, Map<String, dynamic>>> verifyForgotPasswordEmail({
     required Map<String, dynamic> data,
   }) {
-    return BaseApiHelper.instance.post(
-      EndPoints.verifyForgotPassMail,
-      data: data,
-    );
+    return _apiHelper.post(EndPoints.verifyForgotPassMail, data: data);
   }
 
   Future<Either<ApiException, Map<String, dynamic>>> verifyParentConsent({
     required Map<String, dynamic> data,
   }) {
-    return BaseApiHelper.instance.post(
-      EndPoints.verifyParentConsent,
-      data: data,
-    );
+    return _apiHelper.post(EndPoints.verifyParentConsent, data: data);
   }
 
   Future<Either<ApiException, Map<String, dynamic>>> resetPassword({
     required Map<String, dynamic> data,
   }) {
-    return BaseApiHelper.instance.post(EndPoints.resetPassword, data: data);
+    return _apiHelper.post(EndPoints.resetPassword, data: data);
   }
 
   Future<Either<ApiException, Map<String, dynamic>>> refreshToken() {
-    return BaseApiHelper.instance.post(
+    return _apiHelper.post(
       EndPoints.refreshToken,
       data: {"refreshToken": LocalStorageService.instance.getRefreshToken},
     );

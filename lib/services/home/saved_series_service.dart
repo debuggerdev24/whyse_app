@@ -3,6 +3,9 @@ import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/core/network/end_points.dart';
 
 class SavedSeriesService {
+  static const bool enableApiLogging = false;
+  static final _api = BaseApiHelper(enableApiLogging: enableApiLogging);
+
   SavedSeriesService._();
   static final SavedSeriesService instance = SavedSeriesService._();
 
@@ -11,7 +14,7 @@ class SavedSeriesService {
     int limit = 10,
     String search = '',
   }) async {
-    return BaseApiHelper.instance.get(
+    return _api.get(
       EndPoints.getMyList(page: page, limit: limit, search: search),
     );
   }
@@ -19,7 +22,7 @@ class SavedSeriesService {
   Future<Either<ApiException, Map<String, dynamic>>> toggleTopicList({
     required String topicId,
   }) async {
-    return BaseApiHelper.instance.post(
+    return _api.post(
       EndPoints.addOrRemoveToMyList(topicId: topicId),
     );
   }

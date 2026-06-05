@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
+import 'package:redstreakapp/providers/curiosity_reading/curiosity_reading_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/saved_series_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
@@ -26,12 +27,15 @@ class UserDashBoard extends StatefulWidget {
 class _UserDashBoardState extends State<UserDashBoard> {
   late StoryProvider storyProvider;
   late HomeProvider homeProvider;
+  late CuriosityReadingProvider curiosityReadingProvider;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       storyProvider = context.read<StoryProvider>();
       homeProvider = context.read<HomeProvider>();
+      curiosityReadingProvider = context.read<CuriosityReadingProvider>();
       callInitApis(context: context);
     });
   }
@@ -40,7 +44,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
     context.read<ProfileProvider>().getProfile();
     homeProvider.getMyTopics();
     context.read<SavedSeriesProvider>().getMySeriesList();
-    // storyProvider.getAllStories();
+    curiosityReadingProvider.refreshFromHome();
 
     storyProvider.getStoryGoals(
       onFailed: (error) {

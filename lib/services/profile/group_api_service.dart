@@ -3,10 +3,14 @@ import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/core/network/end_points.dart';
 
 class GroupApiService {
+  static const bool enableApiLogging = false;
+  static final _defaultApiHelper =
+      BaseApiHelper(enableApiLogging: enableApiLogging);
+
   final BaseApiHelper _apiHelper;
-  GroupApiService(
-    this._apiHelper,
-  );
+
+  GroupApiService([BaseApiHelper? apiHelper])
+      : _apiHelper = apiHelper ?? _defaultApiHelper;
 
   Future<Either<ApiException, Map<String, dynamic>>> getMyGroups() async {
     return await _apiHelper.get(EndPoints.getMyGroups);

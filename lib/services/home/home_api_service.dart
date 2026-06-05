@@ -3,6 +3,9 @@ import 'package:redstreakapp/core/network/end_points.dart';
 import 'package:redstreakapp/core/network/base_api_service.dart';
 
 class HomeApiService {
+  static const bool enableApiLogging = false;
+  static final _api = BaseApiHelper(enableApiLogging: enableApiLogging);
+
   HomeApiService._();
   static final HomeApiService _instance = HomeApiService._();
   static HomeApiService get instance => _instance;
@@ -10,7 +13,7 @@ class HomeApiService {
     int page = 1,
     int limit = 20,
   }) async {
-    return await BaseApiHelper.instance.get(
+    return await _api.get(
       EndPoints.getMyTopics(page: page, limit: limit),
     );
   }
@@ -20,7 +23,7 @@ class HomeApiService {
     int page = 1,
     int limit = 20,
   }) async {
-    return await BaseApiHelper.instance.get(
+    return await _api.get(
       EndPoints.getStoryIdeasByTopicId(topicId: topicId),
       queryParameters: {
         "page": page,
@@ -31,7 +34,7 @@ class HomeApiService {
   }
   
   Future<Either<ApiException, Map<String, dynamic>>> getStoryByStoryId({required String storyIdea}) async {
-    return await BaseApiHelper.instance.get(EndPoints.getStoryByStoryIdea(storyIdea: storyIdea));
+    return await _api.get(EndPoints.getStoryByStoryIdea(storyIdea: storyIdea));
   }
   
   //*browse
@@ -48,7 +51,7 @@ class HomeApiService {
       if (search.trim().isNotEmpty) "search": search.trim(),
     };
 
-    return await BaseApiHelper.instance.get(
+    return await _api.get(
       EndPoints.browseAllTopics,
       queryParameters: queryParameters,
     );
@@ -57,7 +60,7 @@ class HomeApiService {
   Future<Either<ApiException, Map<String, dynamic>>> toggleTopicList({
     required String topicId,
   }) async {
-    return await BaseApiHelper.instance.post(
+    return await _api.post(
       EndPoints.addOrRemoveToMyList(topicId: topicId),
     );
   }
@@ -65,7 +68,7 @@ class HomeApiService {
   Future<Either<ApiException, Map<String, dynamic>>> getTopicProgress({
     required String topicId,
   }) async {
-    return await BaseApiHelper.instance.get(
+    return await _api.get(
       EndPoints.topicProgress(topicId: topicId),
     );
   }
@@ -75,7 +78,7 @@ class HomeApiService {
     int limit = 10,
     String search = '',
   }) async {
-    return await BaseApiHelper.instance.get(
+    return await _api.get(
       EndPoints.getMyList(page: page, limit: limit, search: search),
     );
   }
@@ -83,7 +86,7 @@ class HomeApiService {
   Future<Either<ApiException, Map<String, dynamic>>> getMobileTopicStoryIdeas({
     required String topicId,
   }) async {
-    return await BaseApiHelper.instance.get(
+    return await _api.get(
       EndPoints.getMobileTopicStoryIdeas(topicId: topicId),
     );
   }
@@ -92,7 +95,7 @@ class HomeApiService {
     int page = 1,
     int limit = 10,
   }) async {
-    return await BaseApiHelper.instance.get(
+    return await _api.get(
       EndPoints.getContinueReading(page: page, limit: limit),
     );
   }

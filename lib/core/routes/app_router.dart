@@ -35,7 +35,7 @@ import 'package:redstreakapp/screens/profile/user_profile_topics_list_screen.dar
 import 'package:redstreakapp/screens/profile/user_profile_topics_list_screen_params.dart';
 import 'package:redstreakapp/screens/group/streak_ranking_screen.dart';
 import 'package:redstreakapp/screens/group/view_group_screen.dart';
-import 'package:redstreakapp/screens/home/curiosity_reading/curiosity_reading_screen.dart';
+import 'package:redstreakapp/screens/curiosity_reading/curiosity_reading_screen.dart';
 import 'package:redstreakapp/screens/notification/notification_screen.dart';
 import 'package:redstreakapp/screens/profile/profile_screen.dart';
 import 'package:redstreakapp/screens/profile/your_books_screen.dart';

@@ -28,9 +28,14 @@ String _normalizePhoneForApi(String raw) {
 }
 
 class ProfileService {
+  static const bool enableApiLogging = false;
+  static final _defaultApiHelper =
+      BaseApiHelper(enableApiLogging: enableApiLogging);
+
   final BaseApiHelper apiHelper;
 
-  ProfileService(this.apiHelper);
+  ProfileService([BaseApiHelper? apiHelper])
+      : apiHelper = apiHelper ?? _defaultApiHelper;
 
   Future<Either<ApiException, Map<String, dynamic>>> getProfile() async {
     return await apiHelper.get(EndPoints.profile);

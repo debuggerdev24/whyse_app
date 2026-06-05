@@ -4,6 +4,9 @@ import 'package:redstreakapp/core/network/end_points.dart';
 import 'package:redstreakapp/models/friend/friend_details_model.dart';
 
 class FriendApiService {
+  static const bool enableApiLogging = false;
+  static final _api = BaseApiHelper(enableApiLogging: enableApiLogging);
+
   FriendApiService._();
 
   static final FriendApiService _instance = FriendApiService._();
@@ -13,7 +16,7 @@ class FriendApiService {
     int page = 1,
     int limit = 20,
   }) async {
-    return await BaseApiHelper.instance.get(
+    return await _api.get(
       EndPoints.getFriends(page: page, limit: limit),
     );
   }
@@ -22,7 +25,7 @@ class FriendApiService {
     int page = 1,
     int limit = 20,
   }) async {
-    return await BaseApiHelper.instance.get(
+    return await _api.get(
       EndPoints.getFriendsExcludingFamily(page: page, limit: limit),
     );
   }
@@ -32,7 +35,7 @@ class FriendApiService {
     int limit = 20,
     String? q,
   }) async {
-    return await BaseApiHelper.instance.get(
+    return await _api.get(
       EndPoints.searchFriends(page: page, limit: limit, q: q),
     );
   }
@@ -40,7 +43,7 @@ class FriendApiService {
   Future<Either<ApiException, Map<String, dynamic>>> sendFriendRequest({
     required String email,
   }) async {
-    return await BaseApiHelper.instance.post(
+    return await _api.post(
       EndPoints.sendFriendRequest,
       data: {"email": email},
     );
@@ -50,7 +53,7 @@ class FriendApiService {
     int page = 1,
     int limit = 50,
   }) async {
-    return await BaseApiHelper.instance.get(
+    return await _api.get(
       EndPoints.getFriendRequests(page: page, limit: limit),
     );
   }
@@ -59,7 +62,7 @@ class FriendApiService {
     required String friendshipId,
     required String status,
   }) async {
-    return await BaseApiHelper.instance.patch(
+    return await _api.patch(
       EndPoints.updateFriendRequest(friendshipId: friendshipId),
       data: {"status": status},
     );
@@ -68,7 +71,7 @@ class FriendApiService {
   Future<Either<ApiException, Map<String, dynamic>>> removeFriend({
     required String friendshipId,
   }) async {
-    return await BaseApiHelper.instance.delete(
+    return await _api.delete(
       EndPoints.removeFriend(friendshipId: friendshipId),
     );
   }
@@ -76,7 +79,7 @@ class FriendApiService {
   Future<Either<ApiException, FriendDetailsResponse>> getFriendsDetails({
     required String friendId,
   }) async {
-    return BaseApiHelper.instance.get<FriendDetailsResponse>(
+    return _api.get<FriendDetailsResponse>(
       EndPoints.getFriendsDetails(friendId: friendId),
       parser: (result) =>
           FriendDetailsResponse.fromJson(result as Map<String, dynamic>),
@@ -89,7 +92,7 @@ class FriendApiService {
     int page = 1,
     int limit = 20,
   }) async {
-    return BaseApiHelper.instance.get<FriendProfileListResponse>(
+    return _api.get<FriendProfileListResponse>(
       EndPoints.getUserProfileSectionList(
         userId: userId,
         section: 'friends',
@@ -107,7 +110,7 @@ class FriendApiService {
     int page = 1,
     int limit = 20,
   }) async {
-    return BaseApiHelper.instance.get<UserProfileGroupsListResponse>(
+    return _api.get<UserProfileGroupsListResponse>(
       EndPoints.getUserProfileSectionList(
         userId: userId,
         section: 'groups',
@@ -126,7 +129,7 @@ class FriendApiService {
     int page = 1,
     int limit = 20,
   }) async {
-    return BaseApiHelper.instance.get<UserProfileTopicsListResponse>(
+    return _api.get<UserProfileTopicsListResponse>(
       EndPoints.getUserProfileSectionList(
         userId: userId,
         section: 'topics',
