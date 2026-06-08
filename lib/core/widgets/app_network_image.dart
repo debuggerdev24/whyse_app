@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
@@ -22,6 +24,7 @@ typedef AppNetworkImageErrorBuilder =
 /// - Centralises failure logging via [logNetworkImageError]; pass [tag] so
 ///   the console clearly shows where the image lives (e.g.
 ///   `ContinueReading.card`).
+/// - Automatically retries on HTTP 429 (rate limiting) until the image loads.
 ///
 /// All visual aspects can still be overridden when a screen needs something
 /// custom – override [placeholder] and/or [errorBuilder].
@@ -81,16 +84,18 @@ class AppNetworkImage extends StatelessWidget {
       // a failure.
       content = _buildError(context, '', const _EmptyImageUrlError());
     } else {
-      content = CachedNetworkImage(
+      content = _RateLimitRetryNetworkImage(
         imageUrl: resolved,
+        tag: tag,
         width: width,
         height: height,
         fit: fit,
-        placeholder: (ctx, _) => _buildPlaceholder(ctx),
-        errorWidget: (ctx, failedUrl, error) {
-          logNetworkImageError(tag: tag, url: failedUrl, error: error);
-          return _buildError(ctx, failedUrl, error);
-        },
+        placeholder: placeholder,
+        errorBuilder: errorBuilder,
+        errorTitle: errorTitle,
+        errorSubtitle: errorSubtitle,
+        errorCompact: errorCompact,
+        errorIconOnly: errorIconOnly,
       );
     }
 
@@ -105,8 +110,87 @@ class AppNetworkImage extends StatelessWidget {
     return content;
   }
 
+  Widget _buildError(BuildContext context, String url, Object error) {
+    if (errorBuilder != null) return errorBuilder!(context, url, error);
+    return NoImageFound(
+      title: errorTitle,
+      subtitle: errorSubtitle,
+      compact: errorCompact,
+      iconOnly: errorIconOnly,
+    );
+  }
+}
+
+class _RateLimitRetryNetworkImage extends StatefulWidget {
+  const _RateLimitRetryNetworkImage({
+    required this.imageUrl,
+    this.tag,
+    this.width,
+    this.height,
+    this.fit = BoxFit.cover,
+    this.placeholder,
+    this.errorBuilder,
+    this.errorTitle = 'No image found',
+    this.errorSubtitle,
+    this.errorCompact = false,
+    this.errorIconOnly = false,
+  });
+
+  final String imageUrl;
+  final String? tag;
+  final double? width;
+  final double? height;
+  final BoxFit fit;
+  final WidgetBuilder? placeholder;
+  final AppNetworkImageErrorBuilder? errorBuilder;
+  final String errorTitle;
+  final String? errorSubtitle;
+  final bool errorCompact;
+  final bool errorIconOnly;
+
+  @override
+  State<_RateLimitRetryNetworkImage> createState() =>
+      _RateLimitRetryNetworkImageState();
+}
+
+class _RateLimitRetryNetworkImageState extends State<_RateLimitRetryNetworkImage> {
+  int _retryAttempt = 0;
+  Timer? _retryTimer;
+
+  @override
+  void didUpdateWidget(covariant _RateLimitRetryNetworkImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.imageUrl != widget.imageUrl) {
+      _retryTimer?.cancel();
+      _retryAttempt = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _retryTimer?.cancel();
+    super.dispose();
+  }
+
+  void _scheduleRateLimitRetry(String url) {
+    if (_retryTimer?.isActive ?? false) return;
+
+    final delay = networkImageRateLimitRetryDelay(_retryAttempt);
+    logNetworkImageRateLimitRetry(
+      tag: widget.tag,
+      url: url,
+      attempt: _retryAttempt,
+      retryIn: delay,
+    );
+
+    _retryTimer = Timer(delay, () {
+      if (!mounted) return;
+      setState(() => _retryAttempt++);
+    });
+  }
+
   Widget _buildPlaceholder(BuildContext context) {
-    if (placeholder != null) return placeholder!(context);
+    if (widget.placeholder != null) return widget.placeholder!(context);
     return Shimmer.fromColors(
       baseColor: AppColors.shimmerBaseColor,
       highlightColor: AppColors.shimmerHighlightColor,
@@ -115,12 +199,38 @@ class AppNetworkImage extends StatelessWidget {
   }
 
   Widget _buildError(BuildContext context, String url, Object error) {
-    if (errorBuilder != null) return errorBuilder!(context, url, error);
+    if (widget.errorBuilder != null) {
+      return widget.errorBuilder!(context, url, error);
+    }
     return NoImageFound(
-      title: errorTitle,
-      subtitle: errorSubtitle,
-      compact: errorCompact,
-      iconOnly: errorIconOnly,
+      title: widget.errorTitle,
+      subtitle: widget.errorSubtitle,
+      compact: widget.errorCompact,
+      iconOnly: widget.errorIconOnly,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CachedNetworkImage(
+      key: ValueKey('${widget.imageUrl}#$_retryAttempt'),
+      cacheKey: '${widget.imageUrl}#$_retryAttempt',
+      imageUrl: widget.imageUrl,
+      width: widget.width,
+      height: widget.height,
+      fit: widget.fit,
+      placeholder: (ctx, _) => _buildPlaceholder(ctx),
+      errorWidget: (ctx, failedUrl, error) {
+        if (isNetworkImageRateLimited(error)) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _scheduleRateLimitRetry(failedUrl);
+          });
+          return _buildPlaceholder(ctx);
+        }
+
+        logNetworkImageError(tag: widget.tag, url: failedUrl, error: error);
+        return _buildError(ctx, failedUrl, error);
+      },
     );
   }
 }

@@ -1,6 +1,5 @@
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/network/base_api_service.dart';
-
 /// Turns API thumbnail paths into a full URL [CachedNetworkImage] can load.
 ///
 /// Supports two shapes returned by the backend:
@@ -52,6 +51,42 @@ void logNetworkImageError({
   final prefix = (tag == null || tag.isEmpty) ? '' : '[$tag] ';
   Logger.error(
     '${prefix}Image failed to load → url="$url" | error=$error',
+    tag: 'NetworkImage',
+  );
+}
+
+/// Returns true when the image request was rejected due to rate limiting.
+bool isNetworkImageRateLimited(Object error) {
+  final statusCode = _networkImageHttpStatusCode(error);
+  return statusCode == 429;
+}
+
+int? _networkImageHttpStatusCode(Object error) {
+  try {
+    final dynamic e = error;
+    final statusCode = e.statusCode;
+    if (statusCode is int) return statusCode;
+  } catch (_) {
+    // Not an HTTP status-bearing error.
+  }
+  return null;
+}
+/// Backoff delay for rate-limit retries: 2s → 4s → 8s → 16s → 30s (capped).
+Duration networkImageRateLimitRetryDelay(int attempt) {
+  final seconds = (2 * (1 << attempt.clamp(0, 4))).clamp(2, 30);
+  return Duration(seconds: seconds);
+}
+
+void logNetworkImageRateLimitRetry({
+  String? tag,
+  required String url,
+  required int attempt,
+  required Duration retryIn,
+}) {
+  final prefix = (tag == null || tag.isEmpty) ? '' : '[$tag] ';
+  Logger.info(
+    '${prefix}Image rate limited (429), retry #${attempt + 1} in '
+    '${retryIn.inSeconds}s → url="$url"',
     tag: 'NetworkImage',
   );
 }
