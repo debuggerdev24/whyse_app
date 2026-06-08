@@ -109,7 +109,7 @@ class AppNetworkImage extends StatelessWidget {
 
     return content;
   }
-
+ 
   Widget _buildError(BuildContext context, String url, Object error) {
     if (errorBuilder != null) return errorBuilder!(context, url, error);
     return NoImageFound(
