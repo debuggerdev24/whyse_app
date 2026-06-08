@@ -40,9 +40,6 @@ _Reading _$ReadingFromJson(Map<String, dynamic> json) => _Reading(
   ageBand: json['ageBand'] as String,
   language: json['language'] as String,
   previewCardType: json['previewCardType'] as String,
-  previewFacts: (json['previewFacts'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
   publishedAt: DateTime.parse(json['publishedAt'] as String),
   estimatedReadTimeMinutes: (json['estimatedReadTimeMinutes'] as num).toInt(),
   body: ReadingBody.fromJson(json['body'] as Map<String, dynamic>),
@@ -63,7 +60,6 @@ Map<String, dynamic> _$ReadingToJson(_Reading instance) => <String, dynamic>{
   'ageBand': instance.ageBand,
   'language': instance.language,
   'previewCardType': instance.previewCardType,
-  'previewFacts': instance.previewFacts,
   'publishedAt': instance.publishedAt.toIso8601String(),
   'estimatedReadTimeMinutes': instance.estimatedReadTimeMinutes,
   'body': instance.body,
@@ -107,7 +103,6 @@ _ReadingMeta _$ReadingMetaFromJson(Map<String, dynamic> json) => _ReadingMeta(
   translation: TranslationMeta.fromJson(
     json['translation'] as Map<String, dynamic>,
   ),
-  cache: CacheMeta.fromJson(json['cache'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$ReadingMetaToJson(_ReadingMeta instance) =>
@@ -123,7 +118,6 @@ Map<String, dynamic> _$ReadingMetaToJson(_ReadingMeta instance) =>
       'pool': instance.pool,
       'pagination': instance.pagination,
       'translation': instance.translation,
-      'cache': instance.cache,
     };
 
 _ReadingPool _$ReadingPoolFromJson(Map<String, dynamic> json) => _ReadingPool(

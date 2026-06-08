@@ -589,7 +589,8 @@ $ReadingMetaCopyWith<$Res> get meta {
 /// @nodoc
 mixin _$Reading {
 
- String get id; String get title; String get question; String get imgUrl; String get interestId; String get interestName; String get ageBand; String get language; String get previewCardType; List<String>? get previewFacts; DateTime get publishedAt; int get estimatedReadTimeMinutes; ReadingBody get body; bool get hasBody; bool get isTranslated; bool get isRecycled; String get recommendationReason; double get rankScore;
+ String get id; String get title; String get question; String get imgUrl; String get interestId; String get interestName; String get ageBand; String get language; String get previewCardType;// List<String>? previewFacts,
+ DateTime get publishedAt; int get estimatedReadTimeMinutes; ReadingBody get body; bool get hasBody; bool get isTranslated; bool get isRecycled; String get recommendationReason; double get rankScore;
 /// Create a copy of Reading
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -602,16 +603,16 @@ $ReadingCopyWith<Reading> get copyWith => _$ReadingCopyWithImpl<Reading>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Reading&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.question, question) || other.question == question)&&(identical(other.imgUrl, imgUrl) || other.imgUrl == imgUrl)&&(identical(other.interestId, interestId) || other.interestId == interestId)&&(identical(other.interestName, interestName) || other.interestName == interestName)&&(identical(other.ageBand, ageBand) || other.ageBand == ageBand)&&(identical(other.language, language) || other.language == language)&&(identical(other.previewCardType, previewCardType) || other.previewCardType == previewCardType)&&const DeepCollectionEquality().equals(other.previewFacts, previewFacts)&&(identical(other.publishedAt, publishedAt) || other.publishedAt == publishedAt)&&(identical(other.estimatedReadTimeMinutes, estimatedReadTimeMinutes) || other.estimatedReadTimeMinutes == estimatedReadTimeMinutes)&&(identical(other.body, body) || other.body == body)&&(identical(other.hasBody, hasBody) || other.hasBody == hasBody)&&(identical(other.isTranslated, isTranslated) || other.isTranslated == isTranslated)&&(identical(other.isRecycled, isRecycled) || other.isRecycled == isRecycled)&&(identical(other.recommendationReason, recommendationReason) || other.recommendationReason == recommendationReason)&&(identical(other.rankScore, rankScore) || other.rankScore == rankScore));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Reading&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.question, question) || other.question == question)&&(identical(other.imgUrl, imgUrl) || other.imgUrl == imgUrl)&&(identical(other.interestId, interestId) || other.interestId == interestId)&&(identical(other.interestName, interestName) || other.interestName == interestName)&&(identical(other.ageBand, ageBand) || other.ageBand == ageBand)&&(identical(other.language, language) || other.language == language)&&(identical(other.previewCardType, previewCardType) || other.previewCardType == previewCardType)&&(identical(other.publishedAt, publishedAt) || other.publishedAt == publishedAt)&&(identical(other.estimatedReadTimeMinutes, estimatedReadTimeMinutes) || other.estimatedReadTimeMinutes == estimatedReadTimeMinutes)&&(identical(other.body, body) || other.body == body)&&(identical(other.hasBody, hasBody) || other.hasBody == hasBody)&&(identical(other.isTranslated, isTranslated) || other.isTranslated == isTranslated)&&(identical(other.isRecycled, isRecycled) || other.isRecycled == isRecycled)&&(identical(other.recommendationReason, recommendationReason) || other.recommendationReason == recommendationReason)&&(identical(other.rankScore, rankScore) || other.rankScore == rankScore));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,question,imgUrl,interestId,interestName,ageBand,language,previewCardType,const DeepCollectionEquality().hash(previewFacts),publishedAt,estimatedReadTimeMinutes,body,hasBody,isTranslated,isRecycled,recommendationReason,rankScore);
+int get hashCode => Object.hash(runtimeType,id,title,question,imgUrl,interestId,interestName,ageBand,language,previewCardType,publishedAt,estimatedReadTimeMinutes,body,hasBody,isTranslated,isRecycled,recommendationReason,rankScore);
 
 @override
 String toString() {
-  return 'Reading(id: $id, title: $title, question: $question, imgUrl: $imgUrl, interestId: $interestId, interestName: $interestName, ageBand: $ageBand, language: $language, previewCardType: $previewCardType, previewFacts: $previewFacts, publishedAt: $publishedAt, estimatedReadTimeMinutes: $estimatedReadTimeMinutes, body: $body, hasBody: $hasBody, isTranslated: $isTranslated, isRecycled: $isRecycled, recommendationReason: $recommendationReason, rankScore: $rankScore)';
+  return 'Reading(id: $id, title: $title, question: $question, imgUrl: $imgUrl, interestId: $interestId, interestName: $interestName, ageBand: $ageBand, language: $language, previewCardType: $previewCardType, publishedAt: $publishedAt, estimatedReadTimeMinutes: $estimatedReadTimeMinutes, body: $body, hasBody: $hasBody, isTranslated: $isTranslated, isRecycled: $isRecycled, recommendationReason: $recommendationReason, rankScore: $rankScore)';
 }
 
 
@@ -622,7 +623,7 @@ abstract mixin class $ReadingCopyWith<$Res>  {
   factory $ReadingCopyWith(Reading value, $Res Function(Reading) _then) = _$ReadingCopyWithImpl;
 @useResult
 $Res call({
- String id, String title, String question, String imgUrl, String interestId, String interestName, String ageBand, String language, String previewCardType, List<String>? previewFacts, DateTime publishedAt, int estimatedReadTimeMinutes, ReadingBody body, bool hasBody, bool isTranslated, bool isRecycled, String recommendationReason, double rankScore
+ String id, String title, String question, String imgUrl, String interestId, String interestName, String ageBand, String language, String previewCardType, DateTime publishedAt, int estimatedReadTimeMinutes, ReadingBody body, bool hasBody, bool isTranslated, bool isRecycled, String recommendationReason, double rankScore
 });
 
 
@@ -639,7 +640,7 @@ class _$ReadingCopyWithImpl<$Res>
 
 /// Create a copy of Reading
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? question = null,Object? imgUrl = null,Object? interestId = null,Object? interestName = null,Object? ageBand = null,Object? language = null,Object? previewCardType = null,Object? previewFacts = freezed,Object? publishedAt = null,Object? estimatedReadTimeMinutes = null,Object? body = null,Object? hasBody = null,Object? isTranslated = null,Object? isRecycled = null,Object? recommendationReason = null,Object? rankScore = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? question = null,Object? imgUrl = null,Object? interestId = null,Object? interestName = null,Object? ageBand = null,Object? language = null,Object? previewCardType = null,Object? publishedAt = null,Object? estimatedReadTimeMinutes = null,Object? body = null,Object? hasBody = null,Object? isTranslated = null,Object? isRecycled = null,Object? recommendationReason = null,Object? rankScore = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -650,8 +651,7 @@ as String,interestName: null == interestName ? _self.interestName : interestName
 as String,ageBand: null == ageBand ? _self.ageBand : ageBand // ignore: cast_nullable_to_non_nullable
 as String,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
 as String,previewCardType: null == previewCardType ? _self.previewCardType : previewCardType // ignore: cast_nullable_to_non_nullable
-as String,previewFacts: freezed == previewFacts ? _self.previewFacts : previewFacts // ignore: cast_nullable_to_non_nullable
-as List<String>?,publishedAt: null == publishedAt ? _self.publishedAt : publishedAt // ignore: cast_nullable_to_non_nullable
+as String,publishedAt: null == publishedAt ? _self.publishedAt : publishedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,estimatedReadTimeMinutes: null == estimatedReadTimeMinutes ? _self.estimatedReadTimeMinutes : estimatedReadTimeMinutes // ignore: cast_nullable_to_non_nullable
 as int,body: null == body ? _self.body : body // ignore: cast_nullable_to_non_nullable
 as ReadingBody,hasBody: null == hasBody ? _self.hasBody : hasBody // ignore: cast_nullable_to_non_nullable
@@ -753,10 +753,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String question,  String imgUrl,  String interestId,  String interestName,  String ageBand,  String language,  String previewCardType,  List<String>? previewFacts,  DateTime publishedAt,  int estimatedReadTimeMinutes,  ReadingBody body,  bool hasBody,  bool isTranslated,  bool isRecycled,  String recommendationReason,  double rankScore)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String question,  String imgUrl,  String interestId,  String interestName,  String ageBand,  String language,  String previewCardType,  DateTime publishedAt,  int estimatedReadTimeMinutes,  ReadingBody body,  bool hasBody,  bool isTranslated,  bool isRecycled,  String recommendationReason,  double rankScore)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Reading() when $default != null:
-return $default(_that.id,_that.title,_that.question,_that.imgUrl,_that.interestId,_that.interestName,_that.ageBand,_that.language,_that.previewCardType,_that.previewFacts,_that.publishedAt,_that.estimatedReadTimeMinutes,_that.body,_that.hasBody,_that.isTranslated,_that.isRecycled,_that.recommendationReason,_that.rankScore);case _:
+return $default(_that.id,_that.title,_that.question,_that.imgUrl,_that.interestId,_that.interestName,_that.ageBand,_that.language,_that.previewCardType,_that.publishedAt,_that.estimatedReadTimeMinutes,_that.body,_that.hasBody,_that.isTranslated,_that.isRecycled,_that.recommendationReason,_that.rankScore);case _:
   return orElse();
 
 }
@@ -774,10 +774,10 @@ return $default(_that.id,_that.title,_that.question,_that.imgUrl,_that.interestI
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String question,  String imgUrl,  String interestId,  String interestName,  String ageBand,  String language,  String previewCardType,  List<String>? previewFacts,  DateTime publishedAt,  int estimatedReadTimeMinutes,  ReadingBody body,  bool hasBody,  bool isTranslated,  bool isRecycled,  String recommendationReason,  double rankScore)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String question,  String imgUrl,  String interestId,  String interestName,  String ageBand,  String language,  String previewCardType,  DateTime publishedAt,  int estimatedReadTimeMinutes,  ReadingBody body,  bool hasBody,  bool isTranslated,  bool isRecycled,  String recommendationReason,  double rankScore)  $default,) {final _that = this;
 switch (_that) {
 case _Reading():
-return $default(_that.id,_that.title,_that.question,_that.imgUrl,_that.interestId,_that.interestName,_that.ageBand,_that.language,_that.previewCardType,_that.previewFacts,_that.publishedAt,_that.estimatedReadTimeMinutes,_that.body,_that.hasBody,_that.isTranslated,_that.isRecycled,_that.recommendationReason,_that.rankScore);case _:
+return $default(_that.id,_that.title,_that.question,_that.imgUrl,_that.interestId,_that.interestName,_that.ageBand,_that.language,_that.previewCardType,_that.publishedAt,_that.estimatedReadTimeMinutes,_that.body,_that.hasBody,_that.isTranslated,_that.isRecycled,_that.recommendationReason,_that.rankScore);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -794,10 +794,10 @@ return $default(_that.id,_that.title,_that.question,_that.imgUrl,_that.interestI
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String question,  String imgUrl,  String interestId,  String interestName,  String ageBand,  String language,  String previewCardType,  List<String>? previewFacts,  DateTime publishedAt,  int estimatedReadTimeMinutes,  ReadingBody body,  bool hasBody,  bool isTranslated,  bool isRecycled,  String recommendationReason,  double rankScore)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String question,  String imgUrl,  String interestId,  String interestName,  String ageBand,  String language,  String previewCardType,  DateTime publishedAt,  int estimatedReadTimeMinutes,  ReadingBody body,  bool hasBody,  bool isTranslated,  bool isRecycled,  String recommendationReason,  double rankScore)?  $default,) {final _that = this;
 switch (_that) {
 case _Reading() when $default != null:
-return $default(_that.id,_that.title,_that.question,_that.imgUrl,_that.interestId,_that.interestName,_that.ageBand,_that.language,_that.previewCardType,_that.previewFacts,_that.publishedAt,_that.estimatedReadTimeMinutes,_that.body,_that.hasBody,_that.isTranslated,_that.isRecycled,_that.recommendationReason,_that.rankScore);case _:
+return $default(_that.id,_that.title,_that.question,_that.imgUrl,_that.interestId,_that.interestName,_that.ageBand,_that.language,_that.previewCardType,_that.publishedAt,_that.estimatedReadTimeMinutes,_that.body,_that.hasBody,_that.isTranslated,_that.isRecycled,_that.recommendationReason,_that.rankScore);case _:
   return null;
 
 }
@@ -809,7 +809,7 @@ return $default(_that.id,_that.title,_that.question,_that.imgUrl,_that.interestI
 @JsonSerializable()
 
 class _Reading implements Reading {
-  const _Reading({required this.id, required this.title, required this.question, required this.imgUrl, required this.interestId, required this.interestName, required this.ageBand, required this.language, required this.previewCardType, final  List<String>? previewFacts, required this.publishedAt, required this.estimatedReadTimeMinutes, required this.body, required this.hasBody, required this.isTranslated, required this.isRecycled, required this.recommendationReason, required this.rankScore}): _previewFacts = previewFacts;
+  const _Reading({required this.id, required this.title, required this.question, required this.imgUrl, required this.interestId, required this.interestName, required this.ageBand, required this.language, required this.previewCardType, required this.publishedAt, required this.estimatedReadTimeMinutes, required this.body, required this.hasBody, required this.isTranslated, required this.isRecycled, required this.recommendationReason, required this.rankScore});
   factory _Reading.fromJson(Map<String, dynamic> json) => _$ReadingFromJson(json);
 
 @override final  String id;
@@ -821,15 +821,7 @@ class _Reading implements Reading {
 @override final  String ageBand;
 @override final  String language;
 @override final  String previewCardType;
- final  List<String>? _previewFacts;
-@override List<String>? get previewFacts {
-  final value = _previewFacts;
-  if (value == null) return null;
-  if (_previewFacts is EqualUnmodifiableListView) return _previewFacts;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(value);
-}
-
+// List<String>? previewFacts,
 @override final  DateTime publishedAt;
 @override final  int estimatedReadTimeMinutes;
 @override final  ReadingBody body;
@@ -852,16 +844,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Reading&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.question, question) || other.question == question)&&(identical(other.imgUrl, imgUrl) || other.imgUrl == imgUrl)&&(identical(other.interestId, interestId) || other.interestId == interestId)&&(identical(other.interestName, interestName) || other.interestName == interestName)&&(identical(other.ageBand, ageBand) || other.ageBand == ageBand)&&(identical(other.language, language) || other.language == language)&&(identical(other.previewCardType, previewCardType) || other.previewCardType == previewCardType)&&const DeepCollectionEquality().equals(other._previewFacts, _previewFacts)&&(identical(other.publishedAt, publishedAt) || other.publishedAt == publishedAt)&&(identical(other.estimatedReadTimeMinutes, estimatedReadTimeMinutes) || other.estimatedReadTimeMinutes == estimatedReadTimeMinutes)&&(identical(other.body, body) || other.body == body)&&(identical(other.hasBody, hasBody) || other.hasBody == hasBody)&&(identical(other.isTranslated, isTranslated) || other.isTranslated == isTranslated)&&(identical(other.isRecycled, isRecycled) || other.isRecycled == isRecycled)&&(identical(other.recommendationReason, recommendationReason) || other.recommendationReason == recommendationReason)&&(identical(other.rankScore, rankScore) || other.rankScore == rankScore));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Reading&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.question, question) || other.question == question)&&(identical(other.imgUrl, imgUrl) || other.imgUrl == imgUrl)&&(identical(other.interestId, interestId) || other.interestId == interestId)&&(identical(other.interestName, interestName) || other.interestName == interestName)&&(identical(other.ageBand, ageBand) || other.ageBand == ageBand)&&(identical(other.language, language) || other.language == language)&&(identical(other.previewCardType, previewCardType) || other.previewCardType == previewCardType)&&(identical(other.publishedAt, publishedAt) || other.publishedAt == publishedAt)&&(identical(other.estimatedReadTimeMinutes, estimatedReadTimeMinutes) || other.estimatedReadTimeMinutes == estimatedReadTimeMinutes)&&(identical(other.body, body) || other.body == body)&&(identical(other.hasBody, hasBody) || other.hasBody == hasBody)&&(identical(other.isTranslated, isTranslated) || other.isTranslated == isTranslated)&&(identical(other.isRecycled, isRecycled) || other.isRecycled == isRecycled)&&(identical(other.recommendationReason, recommendationReason) || other.recommendationReason == recommendationReason)&&(identical(other.rankScore, rankScore) || other.rankScore == rankScore));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,question,imgUrl,interestId,interestName,ageBand,language,previewCardType,const DeepCollectionEquality().hash(_previewFacts),publishedAt,estimatedReadTimeMinutes,body,hasBody,isTranslated,isRecycled,recommendationReason,rankScore);
+int get hashCode => Object.hash(runtimeType,id,title,question,imgUrl,interestId,interestName,ageBand,language,previewCardType,publishedAt,estimatedReadTimeMinutes,body,hasBody,isTranslated,isRecycled,recommendationReason,rankScore);
 
 @override
 String toString() {
-  return 'Reading(id: $id, title: $title, question: $question, imgUrl: $imgUrl, interestId: $interestId, interestName: $interestName, ageBand: $ageBand, language: $language, previewCardType: $previewCardType, previewFacts: $previewFacts, publishedAt: $publishedAt, estimatedReadTimeMinutes: $estimatedReadTimeMinutes, body: $body, hasBody: $hasBody, isTranslated: $isTranslated, isRecycled: $isRecycled, recommendationReason: $recommendationReason, rankScore: $rankScore)';
+  return 'Reading(id: $id, title: $title, question: $question, imgUrl: $imgUrl, interestId: $interestId, interestName: $interestName, ageBand: $ageBand, language: $language, previewCardType: $previewCardType, publishedAt: $publishedAt, estimatedReadTimeMinutes: $estimatedReadTimeMinutes, body: $body, hasBody: $hasBody, isTranslated: $isTranslated, isRecycled: $isRecycled, recommendationReason: $recommendationReason, rankScore: $rankScore)';
 }
 
 
@@ -872,7 +864,7 @@ abstract mixin class _$ReadingCopyWith<$Res> implements $ReadingCopyWith<$Res> {
   factory _$ReadingCopyWith(_Reading value, $Res Function(_Reading) _then) = __$ReadingCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String title, String question, String imgUrl, String interestId, String interestName, String ageBand, String language, String previewCardType, List<String>? previewFacts, DateTime publishedAt, int estimatedReadTimeMinutes, ReadingBody body, bool hasBody, bool isTranslated, bool isRecycled, String recommendationReason, double rankScore
+ String id, String title, String question, String imgUrl, String interestId, String interestName, String ageBand, String language, String previewCardType, DateTime publishedAt, int estimatedReadTimeMinutes, ReadingBody body, bool hasBody, bool isTranslated, bool isRecycled, String recommendationReason, double rankScore
 });
 
 
@@ -889,7 +881,7 @@ class __$ReadingCopyWithImpl<$Res>
 
 /// Create a copy of Reading
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? question = null,Object? imgUrl = null,Object? interestId = null,Object? interestName = null,Object? ageBand = null,Object? language = null,Object? previewCardType = null,Object? previewFacts = freezed,Object? publishedAt = null,Object? estimatedReadTimeMinutes = null,Object? body = null,Object? hasBody = null,Object? isTranslated = null,Object? isRecycled = null,Object? recommendationReason = null,Object? rankScore = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? question = null,Object? imgUrl = null,Object? interestId = null,Object? interestName = null,Object? ageBand = null,Object? language = null,Object? previewCardType = null,Object? publishedAt = null,Object? estimatedReadTimeMinutes = null,Object? body = null,Object? hasBody = null,Object? isTranslated = null,Object? isRecycled = null,Object? recommendationReason = null,Object? rankScore = null,}) {
   return _then(_Reading(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -900,8 +892,7 @@ as String,interestName: null == interestName ? _self.interestName : interestName
 as String,ageBand: null == ageBand ? _self.ageBand : ageBand // ignore: cast_nullable_to_non_nullable
 as String,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
 as String,previewCardType: null == previewCardType ? _self.previewCardType : previewCardType // ignore: cast_nullable_to_non_nullable
-as String,previewFacts: freezed == previewFacts ? _self._previewFacts : previewFacts // ignore: cast_nullable_to_non_nullable
-as List<String>?,publishedAt: null == publishedAt ? _self.publishedAt : publishedAt // ignore: cast_nullable_to_non_nullable
+as String,publishedAt: null == publishedAt ? _self.publishedAt : publishedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,estimatedReadTimeMinutes: null == estimatedReadTimeMinutes ? _self.estimatedReadTimeMinutes : estimatedReadTimeMinutes // ignore: cast_nullable_to_non_nullable
 as int,body: null == body ? _self.body : body // ignore: cast_nullable_to_non_nullable
 as ReadingBody,hasBody: null == hasBody ? _self.hasBody : hasBody // ignore: cast_nullable_to_non_nullable
@@ -1207,7 +1198,7 @@ as String,
 /// @nodoc
 mixin _$ReadingMeta {
 
- String get userId; String get ageBand; String get language; String get languageCode; List<String> get interestsUsed; bool get isColdStart; int get totalCandidates; int get returnedCount; ReadingPool get pool; Pagination get pagination; TranslationMeta get translation; CacheMeta get cache;
+ String get userId; String get ageBand; String get language; String get languageCode; List<String> get interestsUsed; bool get isColdStart; int get totalCandidates; int get returnedCount; ReadingPool get pool; Pagination get pagination; TranslationMeta get translation;
 /// Create a copy of ReadingMeta
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1220,16 +1211,16 @@ $ReadingMetaCopyWith<ReadingMeta> get copyWith => _$ReadingMetaCopyWithImpl<Read
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReadingMeta&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.ageBand, ageBand) || other.ageBand == ageBand)&&(identical(other.language, language) || other.language == language)&&(identical(other.languageCode, languageCode) || other.languageCode == languageCode)&&const DeepCollectionEquality().equals(other.interestsUsed, interestsUsed)&&(identical(other.isColdStart, isColdStart) || other.isColdStart == isColdStart)&&(identical(other.totalCandidates, totalCandidates) || other.totalCandidates == totalCandidates)&&(identical(other.returnedCount, returnedCount) || other.returnedCount == returnedCount)&&(identical(other.pool, pool) || other.pool == pool)&&(identical(other.pagination, pagination) || other.pagination == pagination)&&(identical(other.translation, translation) || other.translation == translation)&&(identical(other.cache, cache) || other.cache == cache));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReadingMeta&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.ageBand, ageBand) || other.ageBand == ageBand)&&(identical(other.language, language) || other.language == language)&&(identical(other.languageCode, languageCode) || other.languageCode == languageCode)&&const DeepCollectionEquality().equals(other.interestsUsed, interestsUsed)&&(identical(other.isColdStart, isColdStart) || other.isColdStart == isColdStart)&&(identical(other.totalCandidates, totalCandidates) || other.totalCandidates == totalCandidates)&&(identical(other.returnedCount, returnedCount) || other.returnedCount == returnedCount)&&(identical(other.pool, pool) || other.pool == pool)&&(identical(other.pagination, pagination) || other.pagination == pagination)&&(identical(other.translation, translation) || other.translation == translation));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,userId,ageBand,language,languageCode,const DeepCollectionEquality().hash(interestsUsed),isColdStart,totalCandidates,returnedCount,pool,pagination,translation,cache);
+int get hashCode => Object.hash(runtimeType,userId,ageBand,language,languageCode,const DeepCollectionEquality().hash(interestsUsed),isColdStart,totalCandidates,returnedCount,pool,pagination,translation);
 
 @override
 String toString() {
-  return 'ReadingMeta(userId: $userId, ageBand: $ageBand, language: $language, languageCode: $languageCode, interestsUsed: $interestsUsed, isColdStart: $isColdStart, totalCandidates: $totalCandidates, returnedCount: $returnedCount, pool: $pool, pagination: $pagination, translation: $translation, cache: $cache)';
+  return 'ReadingMeta(userId: $userId, ageBand: $ageBand, language: $language, languageCode: $languageCode, interestsUsed: $interestsUsed, isColdStart: $isColdStart, totalCandidates: $totalCandidates, returnedCount: $returnedCount, pool: $pool, pagination: $pagination, translation: $translation)';
 }
 
 
@@ -1240,11 +1231,11 @@ abstract mixin class $ReadingMetaCopyWith<$Res>  {
   factory $ReadingMetaCopyWith(ReadingMeta value, $Res Function(ReadingMeta) _then) = _$ReadingMetaCopyWithImpl;
 @useResult
 $Res call({
- String userId, String ageBand, String language, String languageCode, List<String> interestsUsed, bool isColdStart, int totalCandidates, int returnedCount, ReadingPool pool, Pagination pagination, TranslationMeta translation, CacheMeta cache
+ String userId, String ageBand, String language, String languageCode, List<String> interestsUsed, bool isColdStart, int totalCandidates, int returnedCount, ReadingPool pool, Pagination pagination, TranslationMeta translation
 });
 
 
-$ReadingPoolCopyWith<$Res> get pool;$PaginationCopyWith<$Res> get pagination;$TranslationMetaCopyWith<$Res> get translation;$CacheMetaCopyWith<$Res> get cache;
+$ReadingPoolCopyWith<$Res> get pool;$PaginationCopyWith<$Res> get pagination;$TranslationMetaCopyWith<$Res> get translation;
 
 }
 /// @nodoc
@@ -1257,7 +1248,7 @@ class _$ReadingMetaCopyWithImpl<$Res>
 
 /// Create a copy of ReadingMeta
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? userId = null,Object? ageBand = null,Object? language = null,Object? languageCode = null,Object? interestsUsed = null,Object? isColdStart = null,Object? totalCandidates = null,Object? returnedCount = null,Object? pool = null,Object? pagination = null,Object? translation = null,Object? cache = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? userId = null,Object? ageBand = null,Object? language = null,Object? languageCode = null,Object? interestsUsed = null,Object? isColdStart = null,Object? totalCandidates = null,Object? returnedCount = null,Object? pool = null,Object? pagination = null,Object? translation = null,}) {
   return _then(_self.copyWith(
 userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,ageBand: null == ageBand ? _self.ageBand : ageBand // ignore: cast_nullable_to_non_nullable
@@ -1270,8 +1261,7 @@ as int,returnedCount: null == returnedCount ? _self.returnedCount : returnedCoun
 as int,pool: null == pool ? _self.pool : pool // ignore: cast_nullable_to_non_nullable
 as ReadingPool,pagination: null == pagination ? _self.pagination : pagination // ignore: cast_nullable_to_non_nullable
 as Pagination,translation: null == translation ? _self.translation : translation // ignore: cast_nullable_to_non_nullable
-as TranslationMeta,cache: null == cache ? _self.cache : cache // ignore: cast_nullable_to_non_nullable
-as CacheMeta,
+as TranslationMeta,
   ));
 }
 /// Create a copy of ReadingMeta
@@ -1300,15 +1290,6 @@ $TranslationMetaCopyWith<$Res> get translation {
   
   return $TranslationMetaCopyWith<$Res>(_self.translation, (value) {
     return _then(_self.copyWith(translation: value));
-  });
-}/// Create a copy of ReadingMeta
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$CacheMetaCopyWith<$Res> get cache {
-  
-  return $CacheMetaCopyWith<$Res>(_self.cache, (value) {
-    return _then(_self.copyWith(cache: value));
   });
 }
 }
@@ -1392,10 +1373,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String userId,  String ageBand,  String language,  String languageCode,  List<String> interestsUsed,  bool isColdStart,  int totalCandidates,  int returnedCount,  ReadingPool pool,  Pagination pagination,  TranslationMeta translation,  CacheMeta cache)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String userId,  String ageBand,  String language,  String languageCode,  List<String> interestsUsed,  bool isColdStart,  int totalCandidates,  int returnedCount,  ReadingPool pool,  Pagination pagination,  TranslationMeta translation)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ReadingMeta() when $default != null:
-return $default(_that.userId,_that.ageBand,_that.language,_that.languageCode,_that.interestsUsed,_that.isColdStart,_that.totalCandidates,_that.returnedCount,_that.pool,_that.pagination,_that.translation,_that.cache);case _:
+return $default(_that.userId,_that.ageBand,_that.language,_that.languageCode,_that.interestsUsed,_that.isColdStart,_that.totalCandidates,_that.returnedCount,_that.pool,_that.pagination,_that.translation);case _:
   return orElse();
 
 }
@@ -1413,10 +1394,10 @@ return $default(_that.userId,_that.ageBand,_that.language,_that.languageCode,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String userId,  String ageBand,  String language,  String languageCode,  List<String> interestsUsed,  bool isColdStart,  int totalCandidates,  int returnedCount,  ReadingPool pool,  Pagination pagination,  TranslationMeta translation,  CacheMeta cache)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String userId,  String ageBand,  String language,  String languageCode,  List<String> interestsUsed,  bool isColdStart,  int totalCandidates,  int returnedCount,  ReadingPool pool,  Pagination pagination,  TranslationMeta translation)  $default,) {final _that = this;
 switch (_that) {
 case _ReadingMeta():
-return $default(_that.userId,_that.ageBand,_that.language,_that.languageCode,_that.interestsUsed,_that.isColdStart,_that.totalCandidates,_that.returnedCount,_that.pool,_that.pagination,_that.translation,_that.cache);case _:
+return $default(_that.userId,_that.ageBand,_that.language,_that.languageCode,_that.interestsUsed,_that.isColdStart,_that.totalCandidates,_that.returnedCount,_that.pool,_that.pagination,_that.translation);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1433,10 +1414,10 @@ return $default(_that.userId,_that.ageBand,_that.language,_that.languageCode,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String userId,  String ageBand,  String language,  String languageCode,  List<String> interestsUsed,  bool isColdStart,  int totalCandidates,  int returnedCount,  ReadingPool pool,  Pagination pagination,  TranslationMeta translation,  CacheMeta cache)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String userId,  String ageBand,  String language,  String languageCode,  List<String> interestsUsed,  bool isColdStart,  int totalCandidates,  int returnedCount,  ReadingPool pool,  Pagination pagination,  TranslationMeta translation)?  $default,) {final _that = this;
 switch (_that) {
 case _ReadingMeta() when $default != null:
-return $default(_that.userId,_that.ageBand,_that.language,_that.languageCode,_that.interestsUsed,_that.isColdStart,_that.totalCandidates,_that.returnedCount,_that.pool,_that.pagination,_that.translation,_that.cache);case _:
+return $default(_that.userId,_that.ageBand,_that.language,_that.languageCode,_that.interestsUsed,_that.isColdStart,_that.totalCandidates,_that.returnedCount,_that.pool,_that.pagination,_that.translation);case _:
   return null;
 
 }
@@ -1448,7 +1429,7 @@ return $default(_that.userId,_that.ageBand,_that.language,_that.languageCode,_th
 @JsonSerializable()
 
 class _ReadingMeta implements ReadingMeta {
-  const _ReadingMeta({required this.userId, required this.ageBand, required this.language, required this.languageCode, required final  List<String> interestsUsed, required this.isColdStart, required this.totalCandidates, required this.returnedCount, required this.pool, required this.pagination, required this.translation, required this.cache}): _interestsUsed = interestsUsed;
+  const _ReadingMeta({required this.userId, required this.ageBand, required this.language, required this.languageCode, required final  List<String> interestsUsed, required this.isColdStart, required this.totalCandidates, required this.returnedCount, required this.pool, required this.pagination, required this.translation}): _interestsUsed = interestsUsed;
   factory _ReadingMeta.fromJson(Map<String, dynamic> json) => _$ReadingMetaFromJson(json);
 
 @override final  String userId;
@@ -1468,7 +1449,6 @@ class _ReadingMeta implements ReadingMeta {
 @override final  ReadingPool pool;
 @override final  Pagination pagination;
 @override final  TranslationMeta translation;
-@override final  CacheMeta cache;
 
 /// Create a copy of ReadingMeta
 /// with the given fields replaced by the non-null parameter values.
@@ -1483,16 +1463,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReadingMeta&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.ageBand, ageBand) || other.ageBand == ageBand)&&(identical(other.language, language) || other.language == language)&&(identical(other.languageCode, languageCode) || other.languageCode == languageCode)&&const DeepCollectionEquality().equals(other._interestsUsed, _interestsUsed)&&(identical(other.isColdStart, isColdStart) || other.isColdStart == isColdStart)&&(identical(other.totalCandidates, totalCandidates) || other.totalCandidates == totalCandidates)&&(identical(other.returnedCount, returnedCount) || other.returnedCount == returnedCount)&&(identical(other.pool, pool) || other.pool == pool)&&(identical(other.pagination, pagination) || other.pagination == pagination)&&(identical(other.translation, translation) || other.translation == translation)&&(identical(other.cache, cache) || other.cache == cache));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReadingMeta&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.ageBand, ageBand) || other.ageBand == ageBand)&&(identical(other.language, language) || other.language == language)&&(identical(other.languageCode, languageCode) || other.languageCode == languageCode)&&const DeepCollectionEquality().equals(other._interestsUsed, _interestsUsed)&&(identical(other.isColdStart, isColdStart) || other.isColdStart == isColdStart)&&(identical(other.totalCandidates, totalCandidates) || other.totalCandidates == totalCandidates)&&(identical(other.returnedCount, returnedCount) || other.returnedCount == returnedCount)&&(identical(other.pool, pool) || other.pool == pool)&&(identical(other.pagination, pagination) || other.pagination == pagination)&&(identical(other.translation, translation) || other.translation == translation));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,userId,ageBand,language,languageCode,const DeepCollectionEquality().hash(_interestsUsed),isColdStart,totalCandidates,returnedCount,pool,pagination,translation,cache);
+int get hashCode => Object.hash(runtimeType,userId,ageBand,language,languageCode,const DeepCollectionEquality().hash(_interestsUsed),isColdStart,totalCandidates,returnedCount,pool,pagination,translation);
 
 @override
 String toString() {
-  return 'ReadingMeta(userId: $userId, ageBand: $ageBand, language: $language, languageCode: $languageCode, interestsUsed: $interestsUsed, isColdStart: $isColdStart, totalCandidates: $totalCandidates, returnedCount: $returnedCount, pool: $pool, pagination: $pagination, translation: $translation, cache: $cache)';
+  return 'ReadingMeta(userId: $userId, ageBand: $ageBand, language: $language, languageCode: $languageCode, interestsUsed: $interestsUsed, isColdStart: $isColdStart, totalCandidates: $totalCandidates, returnedCount: $returnedCount, pool: $pool, pagination: $pagination, translation: $translation)';
 }
 
 
@@ -1503,11 +1483,11 @@ abstract mixin class _$ReadingMetaCopyWith<$Res> implements $ReadingMetaCopyWith
   factory _$ReadingMetaCopyWith(_ReadingMeta value, $Res Function(_ReadingMeta) _then) = __$ReadingMetaCopyWithImpl;
 @override @useResult
 $Res call({
- String userId, String ageBand, String language, String languageCode, List<String> interestsUsed, bool isColdStart, int totalCandidates, int returnedCount, ReadingPool pool, Pagination pagination, TranslationMeta translation, CacheMeta cache
+ String userId, String ageBand, String language, String languageCode, List<String> interestsUsed, bool isColdStart, int totalCandidates, int returnedCount, ReadingPool pool, Pagination pagination, TranslationMeta translation
 });
 
 
-@override $ReadingPoolCopyWith<$Res> get pool;@override $PaginationCopyWith<$Res> get pagination;@override $TranslationMetaCopyWith<$Res> get translation;@override $CacheMetaCopyWith<$Res> get cache;
+@override $ReadingPoolCopyWith<$Res> get pool;@override $PaginationCopyWith<$Res> get pagination;@override $TranslationMetaCopyWith<$Res> get translation;
 
 }
 /// @nodoc
@@ -1520,7 +1500,7 @@ class __$ReadingMetaCopyWithImpl<$Res>
 
 /// Create a copy of ReadingMeta
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? userId = null,Object? ageBand = null,Object? language = null,Object? languageCode = null,Object? interestsUsed = null,Object? isColdStart = null,Object? totalCandidates = null,Object? returnedCount = null,Object? pool = null,Object? pagination = null,Object? translation = null,Object? cache = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? userId = null,Object? ageBand = null,Object? language = null,Object? languageCode = null,Object? interestsUsed = null,Object? isColdStart = null,Object? totalCandidates = null,Object? returnedCount = null,Object? pool = null,Object? pagination = null,Object? translation = null,}) {
   return _then(_ReadingMeta(
 userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,ageBand: null == ageBand ? _self.ageBand : ageBand // ignore: cast_nullable_to_non_nullable
@@ -1533,8 +1513,7 @@ as int,returnedCount: null == returnedCount ? _self.returnedCount : returnedCoun
 as int,pool: null == pool ? _self.pool : pool // ignore: cast_nullable_to_non_nullable
 as ReadingPool,pagination: null == pagination ? _self.pagination : pagination // ignore: cast_nullable_to_non_nullable
 as Pagination,translation: null == translation ? _self.translation : translation // ignore: cast_nullable_to_non_nullable
-as TranslationMeta,cache: null == cache ? _self.cache : cache // ignore: cast_nullable_to_non_nullable
-as CacheMeta,
+as TranslationMeta,
   ));
 }
 
@@ -1564,15 +1543,6 @@ $TranslationMetaCopyWith<$Res> get translation {
   
   return $TranslationMetaCopyWith<$Res>(_self.translation, (value) {
     return _then(_self.copyWith(translation: value));
-  });
-}/// Create a copy of ReadingMeta
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$CacheMetaCopyWith<$Res> get cache {
-  
-  return $CacheMetaCopyWith<$Res>(_self.cache, (value) {
-    return _then(_self.copyWith(cache: value));
   });
 }
 }

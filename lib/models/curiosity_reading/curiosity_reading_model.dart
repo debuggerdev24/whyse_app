@@ -37,7 +37,7 @@ abstract class Reading with _$Reading {
     required String ageBand,
     required String language,
     required String previewCardType,
-    List<String>? previewFacts,
+    // List<String>? previewFacts,
     required DateTime publishedAt,
     required int estimatedReadTimeMinutes,
     required ReadingBody body,
@@ -79,7 +79,7 @@ abstract class ReadingMeta with _$ReadingMeta {
     required ReadingPool pool,
     required Pagination pagination,
     required TranslationMeta translation,
-    required CacheMeta cache,
+    // required CacheMeta cache,
   }) = _ReadingMeta;
 
   factory ReadingMeta.fromJson(Map<String, dynamic> json) =>

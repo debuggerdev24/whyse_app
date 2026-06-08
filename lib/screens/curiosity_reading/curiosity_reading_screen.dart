@@ -17,15 +17,22 @@ class CuriosityReadingScreen extends StatefulWidget {
 class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
   final ScrollController _scrollController = ScrollController();
   String? _lastTrackedReadingId;
+  CuriosityReadingProvider? _provider;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _provider = context.read<CuriosityReadingProvider>();
+      _provider!.markReadingScreenActive();
+    });
   }
 
   @override
   void dispose() {
+    _provider?.markReadingScreenInactive();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
@@ -56,6 +63,7 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
   Future<void> _exitToHome() async {
     final provider = context.read<CuriosityReadingProvider>();
     await provider.onLeaveReadingScreen();
+    provider.markReadingScreenInactive();
     if (mounted) context.pop();
     provider.refreshFromHome();
   }
@@ -74,13 +82,12 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
         body: Consumer<CuriosityReadingProvider>(
           builder: (context, provider, child) {
             if (provider.curiosityReading == null) {
-              provider.getCuriosityReading();
-              return const CuriosityReadingScreenShimmer();
-            }
-
-            if (provider.curiosityReading!.data.readings.length <
-                    provider.currentIndex &&
-                provider.isLoadingMoreReading) {
+              if (!provider.isGettingCuriosityReading) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted) return;
+                  provider.getCuriosityReading();
+                });
+              }
               return const CuriosityReadingScreenShimmer();
             }
 
@@ -89,9 +96,19 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
               return const Center(child: Text('No readings available'));
             }
 
-            final safeIndex =
-                provider.currentIndex.clamp(0, readings.length - 1);
-            final currentReading = readings[safeIndex];
+            final currentIndex = provider.currentIndex;
+            final isWaitingForMore =
+                currentIndex >= readings.length && provider.isLoadingMoreReading;
+
+            if (isWaitingForMore) {
+              return const CuriosityReadingScreenShimmer();
+            }
+
+            if (currentIndex < 0 || currentIndex >= readings.length) {
+              return const Center(child: Text('No readings available'));
+            }
+
+            final currentReading = readings[currentIndex];
 
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (!mounted) return;
@@ -109,7 +126,7 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
                 }
               },
               child: Column(
-                key: ValueKey(safeIndex),
+                key: ValueKey(currentReading.id),
                 children: [
                   _buildHeaderSection(
                     context,
@@ -143,7 +160,7 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
     required VoidCallback onBookmarkTap,
   }) {
     return SizedBox(
-      height: 400.h,
+      height: 340.h,
       width: double.maxFinite,
       child: Stack(
         children: [
@@ -236,13 +253,15 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: EdgeInsets.all(25.w),
+                    padding: EdgeInsets.fromLTRB(25.w, 0, 25.w, 16.h),
                     child: AppText(
                       text: title,
-                      style: AppTextStyles.bold(
-                        fontSize: 24,
+                      maxLines: 4,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.semiBold(
+                        fontSize: 18,
                         color: AppColors.white,
-                      ),
+                      ).copyWith(height: 1.35, letterSpacing: 0.1),
                       textAlign: TextAlign.start,
                     ).animate().fadeInRight(curve: Curves.decelerate),
                   ),

@@ -19,6 +19,9 @@ class CuriosityReadingProvider extends ChangeNotifier {
   int _currentIndex = 0;
   int get currentIndex => _currentIndex;
 
+  bool _isReadingScreenActive = false;
+  bool get isReadingScreenActive => _isReadingScreenActive;
+
   String? _sessionId;
   String? _activeReadingId;
   DateTime? _readingOpenedAt;
@@ -27,8 +30,16 @@ class CuriosityReadingProvider extends ChangeNotifier {
   Reading? get currentReading {
     final readings = curiosityReading?.data.readings;
     if (readings == null || readings.isEmpty) return null;
-    final safeIndex = _currentIndex.clamp(0, readings.length - 1);
-    return readings[safeIndex];
+    if (_currentIndex < 0 || _currentIndex >= readings.length) return null;
+    return readings[_currentIndex];
+  }
+
+  void markReadingScreenActive() {
+    _isReadingScreenActive = true;
+  }
+
+  void markReadingScreenInactive() {
+    _isReadingScreenActive = false;
   }
 
   void updateScrollDepth(int percent) {
@@ -74,11 +85,6 @@ class CuriosityReadingProvider extends ChangeNotifier {
   }
 
   Future<void> nextReading() async {
-    if (_shouldLoadMoreReading()) {
-      Logger.info('Loading more curiosity readings...');
-      loadMoreReading();
-    }
-
     await _finalizeActiveReading();
 
     final length = curiosityReading?.data.readings.length ?? 0;
@@ -86,10 +92,28 @@ class CuriosityReadingProvider extends ChangeNotifier {
 
     if (_currentIndex < length - 1) {
       _currentIndex++;
-    } else if (isLoadingMoreReading) {
-      _currentIndex++;
+      _activeReadingId = null;
+      notifyListeners();
+      if (_shouldLoadMoreReading()) {
+        Logger.info('Loading more curiosity readings...');
+        loadMoreReading();
+      }
+      return;
+    }
+
+    final hasMore = curiosityReading!.data.meta.pagination.hasMore;
+    if (!hasMore) return;
+
+    if (isLoadingMoreReading) {
+      _currentIndex = length;
     } else {
-      _currentIndex = 0;
+      Logger.info('Loading more curiosity readings...');
+      final previousLength = length;
+      await loadMoreReading();
+      final newLength = curiosityReading?.data.readings.length ?? 0;
+      if (newLength > previousLength) {
+        _currentIndex++;
+      }
     }
 
     _activeReadingId = null;
@@ -154,11 +178,14 @@ class CuriosityReadingProvider extends ChangeNotifier {
 
   void resetForNewSession() {
     _resetReadingState();
+    _isReadingScreenActive = false;
     isGettingCuriosityReading = false;
     notifyListeners();
   }
 
   Future<void> refreshFromHome() async {
+    if (_isReadingScreenActive) return;
+
     _resetReadingState();
     isGettingCuriosityReading = true;
     notifyListeners();
@@ -180,6 +207,7 @@ class CuriosityReadingProvider extends ChangeNotifier {
     result.fold(
       (exception) {
         Logger.error('Failed to load more curiosity readings: $exception');
+        _clampIndexToLoadedReadings();
       },
       (readings) {
         final current = curiosityReading!;
@@ -195,6 +223,17 @@ class CuriosityReadingProvider extends ChangeNotifier {
     );
     isLoadingMoreReading = false;
     notifyListeners();
+  }
+
+  void _clampIndexToLoadedReadings() {
+    final length = curiosityReading?.data.readings.length ?? 0;
+    if (length == 0) {
+      _currentIndex = 0;
+      return;
+    }
+    if (_currentIndex >= length) {
+      _currentIndex = length - 1;
+    }
   }
 
   bool _shouldLoadMoreReading() {
