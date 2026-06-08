@@ -73,7 +73,7 @@ int? _networkImageHttpStatusCode(Object error) {
 }
 /// Backoff delay for rate-limit retries: 2s → 4s → 8s → 16s → 30s (capped).
 Duration networkImageRateLimitRetryDelay(int attempt) {
-  final seconds = (2 * (1 << attempt.clamp(0, 4))).clamp(2, 30);
+  final seconds = (2 * (1 << attempt.clamp(0, 4))).clamp(2, 8);
   return Duration(seconds: seconds);
 }
 
