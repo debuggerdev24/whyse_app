@@ -1146,34 +1146,77 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  bool _isGoogleSignInInitialized = false;
+
+  Future<void> _ensureGoogleSignInInitialized() async {
+    if (_isGoogleSignInInitialized) return;
+
+    await GoogleSignIn.instance.initialize(
+      serverClientId: AppConstants.serverClientId,
+      clientId: Platform.isIOS ? AppConstants.clientIdIos : null,
+    );
+    _isGoogleSignInInitialized = true;
+  }
+
+  Future<GoogleSignInAccount?> _authenticateWithGoogle({
+    required List<String> scopes,
+  }) async {
+    await _ensureGoogleSignInInitialized();
+
+    try {
+      return await GoogleSignIn.instance.authenticate(scopeHint: scopes);
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        Logger.error("User cancelled sign-in");
+        return null;
+      }
+      Logger.error(
+        "Google Sign-In error: ${e.code.name} ${e.description ?? ''}",
+      );
+      rethrow;
+    }
+  }
+
+  Future<String?> _authorizeGoogleAccessToken(
+    GoogleSignInAccount account,
+    List<String> scopes,
+  ) async {
+    try {
+      final authorization =
+          await account.authorizationClient.authorizeScopes(scopes);
+      return authorization.accessToken;
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        Logger.error("User cancelled Google authorization");
+        return null;
+      }
+      Logger.error(
+        "Google authorization error: ${e.code.name} ${e.description ?? ''}",
+      );
+      return null;
+    }
+  }
+
   //todo google login functions
   //todo Google Sign-In Platform Exception: com.google.android.gms.common.api.ApiException: 16:
   Future<String?> getGoogleIDTokenForLogin() async {
     try {
       isSocialLoginLoading = true;
       notifyListeners();
-      final GoogleSignIn googleSignIn = GoogleSignIn(
-        serverClientId: AppConstants.serverClientId,
-        clientId: (Platform.isIOS) ? AppConstants.clientIdIos : null,
-        scopes: ["email", "profile"],
-      );
 
-      GoogleSignInAccount? account = await googleSignIn.signIn();
-      //
-      if (account == null) {
-        Logger.error("User cancelled sign-in");
-        return null;
-      }
+      const scopes = ['email', 'profile'];
+      final account = await _authenticateWithGoogle(scopes: scopes);
+      if (account == null) return null;
 
-      final auth = await account.authentication;
+      final auth = account.authentication;
+      final accessToken = await _authorizeGoogleAccessToken(account, scopes);
       googleLoginEmail = account.email;
       Logger.info(account.email);
       Logger.info("Account: /${account.toString()}");
-      Logger.info("access Token: ${auth.accessToken ?? 'NULL'}");
+      Logger.info("access Token: ${accessToken ?? 'NULL'}");
       Logger.info("idToken: /${auth.idToken ?? 'NULL'}");
       Logger.info("\nclose");
 
-      // Check if ID token is null
       if (auth.idToken == null) {
         Logger.error(
           "⚠️ ID Token is NULL - Check serverClientId configuration!",
@@ -1188,48 +1231,29 @@ class AuthProvider with ChangeNotifier {
     } catch (e) {
       Logger.error("Google Sign In catch error : ${e.toString()}");
       return null;
+    } finally {
+      isSocialLoginLoading = false;
+      notifyListeners();
     }
   }
 
   Future<String?> getGoogleIDToken() async {
-    GoogleSignIn? googleSignIn;
-
     try {
       isSocialLoginLoading = true;
       notifyListeners();
 
-      googleSignIn = GoogleSignIn(
-        serverClientId: AppConstants.serverClientId,
-        clientId: (Platform.isIOS) ? AppConstants.clientIdIos : null,
-        scopes: [
-          "email",
-          "profile",
-          "https://www.googleapis.com/auth/user.birthday.read",
-        ],
-      );
+      const scopes = [
+        'email',
+        'profile',
+        'https://www.googleapis.com/auth/user.birthday.read',
+      ];
 
       // Critical: Ensure UI thread is ready (prevents deadlock)
       await Future.delayed(const Duration(milliseconds: 100));
 
-      // Sign in with proper error handling
-      GoogleSignInAccount? account;
-      try {
-        account = await googleSignIn.signIn();
-      } on PlatformException catch (e) {
-        Logger.error("Google Sign-In Platform Exception: ${e.toString()}");
-        isSocialLoginLoading = false;
-        notifyListeners();
-        return null;
-      }
+      final account = await _authenticateWithGoogle(scopes: scopes);
+      if (account == null) return null;
 
-      if (account == null) {
-        Logger.error("User cancelled sign-in");
-        isSocialLoginLoading = false;
-        notifyListeners();
-        return null;
-      }
-
-      // Parse and set user information
       final displayName = account.displayName?.trim() ?? "";
       if (displayName.isNotEmpty) {
         final parts = displayName.split(RegExp(r'\s+'));
@@ -1246,13 +1270,12 @@ class AuthProvider with ChangeNotifier {
       Logger.info("Email: ${account.email}");
       Logger.info("Display Name: $displayName");
 
-      // Get authentication details
-      final auth = await account.authentication;
+      final auth = account.authentication;
+      final accessToken = await _authorizeGoogleAccessToken(account, scopes);
 
-      Logger.info("Access Token: ${auth.accessToken ?? 'NULL'}");
+      Logger.info("Access Token: ${accessToken ?? 'NULL'}");
       Logger.info("ID Token: ${auth.idToken ?? 'NULL'}");
 
-      // Validate ID token
       if (auth.idToken == null) {
         Logger.error(
           "⚠️ ID Token is NULL - Check serverClientId configuration!",
@@ -1260,34 +1283,30 @@ class AuthProvider with ChangeNotifier {
         Logger.error(
           "Make sure you're using the Web Client ID, not Android Client ID",
         );
-        isSocialLoginLoading = false;
-        notifyListeners();
         return null;
       }
 
-      // Fetch additional user data (birthday)
-      if (auth.accessToken != null) {
+      if (accessToken != null) {
         Logger.info("Birthdate API Calling");
-        await _fetchGoogleBirthday(auth.accessToken!);
+        await _fetchGoogleBirthday(accessToken);
       }
 
-      // Generate password for account creation
       generateStrongPassword();
 
       return auth.idToken;
     } catch (e) {
       Logger.error("Google Sign In error: ${e.toString()}");
 
-      // Attempt to sign out to clear any stuck state
       try {
-        await googleSignIn?.signOut();
+        await GoogleSignIn.instance.signOut();
       } catch (signOutError) {
         Logger.error("Sign out error: $signOutError");
       }
 
+      return null;
+    } finally {
       isSocialLoginLoading = false;
       notifyListeners();
-      return null;
     }
   }
 
