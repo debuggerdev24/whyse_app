@@ -7,7 +7,6 @@ import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/friend/friend_details_model.dart';
 import 'package:redstreakapp/screens/profile/user_profile_topics_list_screen_params.dart';
 import 'package:redstreakapp/services/profile/friend_api_service.dart';
-import 'package:shimmer/shimmer.dart';
 
 class UserProfileTopicsListScreen extends StatefulWidget {
   const UserProfileTopicsListScreen({super.key, required this.params});
@@ -281,10 +280,7 @@ class _ShimmerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: Container(
+    return AppSkeletonizer(child: Container(
         height: 100.h,
         decoration: BoxDecoration(
           color: Colors.white,

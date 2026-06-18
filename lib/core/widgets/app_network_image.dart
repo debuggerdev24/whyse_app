@@ -2,10 +2,9 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/utils/network_image_url.dart';
+import 'package:redstreakapp/core/widgets/app_skeletonizer.dart';
 import 'package:redstreakapp/core/widgets/global_widgets.dart';
-import 'package:shimmer/shimmer.dart';
 
 /// Signature for a custom error widget builder, mirroring
 /// [CachedNetworkImage]'s [LoadingErrorWidgetBuilder].
@@ -191,11 +190,7 @@ class _RateLimitRetryNetworkImageState extends State<_RateLimitRetryNetworkImage
 
   Widget _buildPlaceholder(BuildContext context) {
     if (widget.placeholder != null) return widget.placeholder!(context);
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: Container(color: AppColors.shimmerBaseColor),
-    );
+    return const AppSkeletonImagePlaceholder();
   }
 
   Widget _buildError(BuildContext context, String url, Object error) {

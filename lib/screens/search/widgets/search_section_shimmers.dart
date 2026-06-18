@@ -1,7 +1,7 @@
+import 'package:redstreakapp/core/widgets/app_skeletonizer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
-import 'package:shimmer/shimmer.dart';
 
 class SearchSectionShimmer {
   SearchSectionShimmer._();
@@ -25,10 +25,7 @@ class SearchResultRowShimmer extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Shimmer.fromColors(
-            baseColor: AppColors.shimmerBaseColor,
-            highlightColor: AppColors.shimmerHighlightColor,
-            child: Container(
+          AppSkeletonizer(child: Container(
               width: 112.w,
               height: 84.w,
               decoration: BoxDecoration(
@@ -39,10 +36,7 @@ class SearchResultRowShimmer extends StatelessWidget {
           ),
           14.w.horizontalSpace,
           Expanded(
-            child: Shimmer.fromColors(
-              baseColor: AppColors.shimmerBaseColor,
-              highlightColor: AppColors.shimmerHighlightColor,
-              child: Container(
+            child: AppSkeletonizer(child: Container(
                 height: 18.w,
                 decoration: BoxDecoration(
                   color: AppColors.shimmerBaseColor,
@@ -52,10 +46,7 @@ class SearchResultRowShimmer extends StatelessWidget {
             ),
           ),
           12.w.horizontalSpace,
-          Shimmer.fromColors(
-            baseColor: AppColors.shimmerBaseColor,
-            highlightColor: AppColors.shimmerHighlightColor,
-            child: Container(
+          AppSkeletonizer(child: Container(
               width: 44.r,
               height: 44.r,
               decoration: const BoxDecoration(

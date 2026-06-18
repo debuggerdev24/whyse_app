@@ -9,92 +9,99 @@ class HomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.w),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(22.r),
-            border: Border.all(color: AppColors.black.withValues(alpha: 0.12)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: 10.w,
-            children: [ 
-              SvgIcon(
-                AppAssets.thunder,
-                size: 17.w,
-                color: AppColors.orangeColor,
-              ),
-
-              AppText(
-                text: "2",
-                style: AppTextStyles.bold(
-                  fontSize: 20.sp,
-                  color: AppColors.black,
+    return SizedBox(
+      height: 40.w,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.w),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(22.r),
+                  border: Border.all(
+                    color: AppColors.black.withValues(alpha: 0.12),
+                  ),
                 ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 10.w,
+                  children: [
+                    SvgIcon(
+                      AppAssets.thunder,
+                      size: 17.w,
+                      color: AppColors.orangeColor,
+                    ),
+                    AppText(
+                      text: "2",
+                      style: AppTextStyles.bold(
+                        fontSize: 20.sp,
+                        color: AppColors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      context.pushNamed(AppRoutes.notificationScreen.name);
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.only(right: 12.w),
+                      child: SvgIcon(
+                        AppAssets.notification,
+                        size: 25.w,
+                        color: AppColors.black,
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      context.pushNamed(AppRoutes.profileScreen.name);
+                    },
+                    child: Container(
+                      width: 40.w,
+                      height: 40.w,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: const Color(0xFFE5D9B8),
+                          width: 3.w,
+                        ),
+                      ),
+                      child: ClipOval(
+                        child: Consumer<ProfileProvider>(
+                          builder: (context, profile, _) {
+                            return UserAvatarImage(
+                              avatarUrl: profile.profileData?.avatarUrl,
+                              size: 40.w,
+                              showPlaceholderShimmerWhenEmpty:
+                                  profile.getProfileState == DataState.loading,
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ),
-        Expanded(
-          child: Center(
+          IgnorePointer(
             child: AppText(
-              text: "Your Readings",
+              text: "Home",
               style: AppTextStyles.bold(fontSize: 21.sp),
             ),
           ),
-        ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            GestureDetector(
-              onTap: () {
-                context.pushNamed(AppRoutes.notificationScreen.name);
-              },
-              child: Padding(
-                padding: EdgeInsets.only(right: 12.w),
-                child: SvgIcon(
-                  AppAssets.notification,
-                  size: 25.w,
-                  color: AppColors.black,
-                ),
-              ),
-            ),
-            GestureDetector(
-              onTap: () {
-                context.pushNamed(AppRoutes.profileScreen.name);
-              },
-              // onTap: () => showLogOutConfirmationDialog(context: context),
-              child: Container(
-                width: 40.w,
-                height: 40.w,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: const Color(0xFFE5D9B8),
-                    width: 3.w,
-                  ),
-                ),
-                child: ClipOval(
-                  child: Consumer<ProfileProvider>(
-                    builder: (context, profile, _) {
-                      return UserAvatarImage(
-                        avatarUrl: profile.profileData?.avatarUrl,
-                        size: 40.w,
-                        showPlaceholderShimmerWhenEmpty:
-                            profile.getProfileState == DataState.loading,
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -262,14 +269,14 @@ class CalendarStrip extends StatelessWidget {
         //     color: AppColors.black.withValues(alpha: 0.4),
         //   ),
         // ),
-        13.w.verticalSpace,
+        0.w.verticalSpace,
         Container(
           decoration: BoxDecoration(
             border: Border.all(color: AppColors.black.withValues(alpha: 0.12)),
           ),
           padding: EdgeInsets.symmetric(vertical: 10.w),
           child: SizedBox(
-            height: 60.w,
+            height: 50.w,
             child: ListView.separated(
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               controller: scrollController,
@@ -292,14 +299,14 @@ class CalendarStrip extends StatelessWidget {
                       AppText(
                         text: _weekdayShort(date),
                         style: AppTextStyles.bold(
-                          fontSize: 13.sp,
+                          fontSize: 11.sp,
                           color: AppColors.black.withValues(alpha: 0.35),
                         ),
                       ),
                       4.w.verticalSpace,
                       Container(
-                        width: 34.w,
-                        height: 34.w,
+                        width: 30.w,
+                        height: 30.w,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,

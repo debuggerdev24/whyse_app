@@ -3,7 +3,6 @@ import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/home/continue_reading_item_model.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
-import 'package:shimmer/shimmer.dart';
 
 /// Card width (matches Series [StoryCard]) + trailing gap between slots.
 double _continueReadingSlotExtent() => 210.w + 10.w;
@@ -257,10 +256,7 @@ class _ContinueReadingCard extends StatelessWidget {
                         width: w,
                         height: h,
                         fit: BoxFit.cover,
-                        placeholder: (_) => Shimmer.fromColors(
-                          baseColor: AppColors.shimmerBaseColor,
-                          highlightColor: AppColors.shimmerHighlightColor,
-                          child: ColoredBox(
+                        placeholder: (_) => AppSkeletonizer(child: ColoredBox(
                             color: AppColors.shimmerBaseColor,
                             child: SizedBox(width: w, height: h),
                           ),
@@ -370,10 +366,7 @@ class _ContinueReadingCardShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: SizedBox(
+    return AppSkeletonizer(child: SizedBox(
         width: 210.w,
         height: 268.w,
         child: Container(

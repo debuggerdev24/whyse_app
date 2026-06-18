@@ -8,7 +8,6 @@ import 'package:redstreakapp/models/group/group_response_model.dart';
 import 'package:redstreakapp/providers/profile/group_provider.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
 import 'package:redstreakapp/screens/group/group_screen_params.dart';
-import 'package:shimmer/shimmer.dart';
 
 /// Current user first, then owners, then admins, then regular members
 /// (alphabetical by display name within each tier).
@@ -197,10 +196,7 @@ class _MembersCard extends StatelessWidget {
               children: List.generate(5, (index) {
                 return Column(
                   children: [
-                    Shimmer.fromColors(
-                      baseColor: AppColors.shimmerBaseColor,
-                      highlightColor: AppColors.shimmerHighlightColor,
-                      child: Container(
+                    AppSkeletonizer(child: Container(
                         height: 30,
                         width: double.maxFinite,
                         decoration: BoxDecoration(

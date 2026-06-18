@@ -16,6 +16,7 @@ export 'package:redstreakapp/core/constants/text_style.dart';
 export 'package:redstreakapp/core/enums/app_enums.dart';
 export 'package:redstreakapp/core/routes/app_router.dart';
 export 'package:redstreakapp/core/routes/user_routes.dart';
+export 'package:redstreakapp/core/widgets/app_skeletonizer.dart';
 export 'package:redstreakapp/core/widgets/app_button.dart';
 export 'package:redstreakapp/core/widgets/app_layout.dart';
 export 'package:redstreakapp/core/widgets/app_text.dart';

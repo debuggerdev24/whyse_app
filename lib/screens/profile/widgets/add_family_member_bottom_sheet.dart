@@ -5,7 +5,6 @@ import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/utils/user_facing_message.dart';
 import 'package:redstreakapp/models/family/family_role_model.dart';
 import 'package:redstreakapp/providers/family/family_provider.dart';
-import 'package:shimmer/shimmer.dart';
 
 void showAddFamilyMemberBottomSheet(
   BuildContext context, {
@@ -217,10 +216,7 @@ class _RoleShimmerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: Container(
+    return AppSkeletonizer(child: Container(
         height: 52.h,
         decoration: BoxDecoration(
           color: Colors.white,

@@ -3,7 +3,6 @@ import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/models/family/family_member_model.dart';
 import 'package:redstreakapp/screens/profile/widgets/profile_friend_avatar.dart';
-import 'package:shimmer/shimmer.dart';
 
 class ProfileFamilyMemberAvatar extends StatelessWidget {
   const ProfileFamilyMemberAvatar({
@@ -41,10 +40,7 @@ class ProfileFamilyMemberAvatar extends StatelessWidget {
                     width: 64.w,
                     height: 64.w,
                     fit: BoxFit.cover,
-                    placeholder: (context, url) => Shimmer.fromColors(
-                      baseColor: AppColors.shimmerBaseColor,
-                      highlightColor: AppColors.shimmerHighlightColor,
-                      child: Container(
+                    placeholder: (context, url) => AppSkeletonizer(child: Container(
                         width: 64.w,
                         height: 64.w,
                         color: color,

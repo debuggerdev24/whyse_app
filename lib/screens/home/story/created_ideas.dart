@@ -2,7 +2,6 @@ import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/screens/home/widgets/story_ui_components.dart';
-import 'package:shimmer/shimmer.dart';
 
 class CreatedIdeasList extends StatelessWidget {
   const CreatedIdeasList({super.key});
@@ -582,10 +581,7 @@ class _CreatedIdeasListShimmer extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Shimmer.fromColors(
-            baseColor: AppColors.shimmerBaseColor,
-            highlightColor: AppColors.shimmerHighlightColor,
-            child: Container(
+          AppSkeletonizer(child: Container(
               height: 310.w,
               width: double.infinity,
               color: AppColors.shimmerBaseColor,
@@ -597,10 +593,7 @@ class _CreatedIdeasListShimmer extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 18.w.verticalSpace,
-                Shimmer.fromColors(
-                  baseColor: AppColors.shimmerBaseColor,
-                  highlightColor: AppColors.shimmerHighlightColor,
-                  child: Container(
+                AppSkeletonizer(child: Container(
                     height: 36.w,
                     width: double.infinity,
                     decoration: BoxDecoration(
@@ -610,10 +603,7 @@ class _CreatedIdeasListShimmer extends StatelessWidget {
                   ),
                 ),
                 10.w.verticalSpace,
-                Shimmer.fromColors(
-                  baseColor: AppColors.shimmerBaseColor,
-                  highlightColor: AppColors.shimmerHighlightColor,
-                  child: Container(
+                AppSkeletonizer(child: Container(
                     height: 34.w,
                     width: double.infinity,
                     decoration: BoxDecoration(
@@ -623,10 +613,7 @@ class _CreatedIdeasListShimmer extends StatelessWidget {
                   ),
                 ),
                 18.w.verticalSpace,
-                Shimmer.fromColors(
-                  baseColor: AppColors.shimmerBaseColor,
-                  highlightColor: AppColors.shimmerHighlightColor,
-                  child: Container(
+                AppSkeletonizer(child: Container(
                     height: 18.w,
                     width: 150.w,
                     decoration: BoxDecoration(
@@ -657,10 +644,7 @@ class _ReadingItemTileShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: Row(
+    return AppSkeletonizer(child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(

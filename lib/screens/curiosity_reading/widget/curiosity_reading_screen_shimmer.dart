@@ -1,5 +1,4 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
-import 'package:shimmer/shimmer.dart';
 
 class CuriosityReadingScreenShimmer extends StatelessWidget {
   const CuriosityReadingScreenShimmer({super.key});
@@ -8,9 +7,7 @@ class CuriosityReadingScreenShimmer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      body: Shimmer.fromColors(
-        baseColor: Colors.grey.shade300,
-        highlightColor: Colors.grey.shade100,
+      body: AppSkeletonizer(
         child: Column(
           children: [
             SizedBox(

@@ -16,6 +16,7 @@ import 'package:redstreakapp/screens/auth/login_screen.dart';
 import 'package:redstreakapp/screens/auth/reset_password_screen.dart';
 import 'package:redstreakapp/screens/auth/signup_screen.dart';
 import 'package:redstreakapp/screens/auth/verify_mail_screen.dart';
+import 'package:redstreakapp/screens/explore/explore_screen.dart';
 import 'package:redstreakapp/screens/group/add_members_screen.dart';
 import 'package:redstreakapp/screens/group/create_group_screen.dart';
 import 'package:redstreakapp/screens/group/group_details_screen.dart';
@@ -113,10 +114,15 @@ class AppRouter {
           //* Search tab
           StatefulShellBranch(
             routes: [
+              // GoRoute(
+              //   path: AppRoutes.findYourBooksScreen.path,
+              //   name: AppRoutes.findYourBooksScreen.name,
+              //   builder: (context, state) => FindYourBooksScreen(),
+              // ),
               GoRoute(
-                path: AppRoutes.findYourBooksScreen.path,
-                name: AppRoutes.findYourBooksScreen.name,
-                builder: (context, state) => FindYourBooksScreen(),
+                path: AppRoutes.exploreScreen.path,
+                name: AppRoutes.exploreScreen.name,
+                builder: (context, state) => ExploreScreen(),
               ),
             ],
           ),
@@ -263,8 +269,9 @@ class AppRouter {
           storyImageUrl: extra["storyImageUrl"] as String?,
           storyIdeaId: extra["storyIdeaId"] as String?,
           fromContinueReading: extra["fromContinueReading"] == true,
-          continueReadingTopicId:
-              extra["continueReadingTopicId"]?.toString().trim(),
+          continueReadingTopicId: extra["continueReadingTopicId"]
+              ?.toString()
+              .trim(),
         );
       },
     ),
@@ -284,8 +291,9 @@ class AppRouter {
           storyIdeaId: extra?['storyIdeaId'] as String?,
           storyId: extra?['storyId'] as String?,
           fromContinueReading: extra?['fromContinueReading'] == true,
-          continueReadingTopicId:
-              extra?['continueReadingTopicId']?.toString().trim(),
+          continueReadingTopicId: extra?['continueReadingTopicId']
+              ?.toString()
+              .trim(),
         );
       },
     ),
@@ -306,8 +314,9 @@ class AppRouter {
           storyIdeaId: extra?['storyIdeaId'] as String?,
           storyId: extra?['storyId'] as String?,
           fromContinueReading: extra?['fromContinueReading'] == true,
-          continueReadingTopicId:
-              extra?['continueReadingTopicId']?.toString().trim(),
+          continueReadingTopicId: extra?['continueReadingTopicId']
+              ?.toString()
+              .trim(),
         );
       },
     ),
@@ -431,16 +440,19 @@ class AppRouter {
             initialConfirmedPageIndex = int.tryParse(rawConfirmed.toString());
           }
           fromContinueReading = extra["fromContinueReading"] == true;
-          continueReadingTopicId =
-              extra["continueReadingTopicId"]?.toString().trim();
-          if (continueReadingTopicId != null && continueReadingTopicId.isEmpty) {
+          continueReadingTopicId = extra["continueReadingTopicId"]
+              ?.toString()
+              .trim();
+          if (continueReadingTopicId != null &&
+              continueReadingTopicId.isEmpty) {
             continueReadingTopicId = null;
           }
           final rawGen = extra["resumeStoryIsGenerated"];
           if (rawGen is bool) {
             resumeStoryIsGenerated = rawGen;
           } else if (rawGen != null) {
-            resumeStoryIsGenerated = rawGen == true || rawGen.toString() == 'true';
+            resumeStoryIsGenerated =
+                rawGen == true || rawGen.toString() == 'true';
           }
         }
         return CreatedStoryReadingScreen(
@@ -600,9 +612,7 @@ class AppRouter {
           path: AppRoutes.addMembersScreen.name,
           name: AppRoutes.addMembersScreen.name,
           builder: (context, state) {
-            return AddMembersScreen(
-              groupId: state.extra as String,
-            );
+            return AddMembersScreen(groupId: state.extra as String);
           },
         ),
         GoRoute(

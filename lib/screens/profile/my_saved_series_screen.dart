@@ -5,7 +5,6 @@ import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/home/saved_series_model.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/saved_series_provider.dart';
-import 'package:shimmer/shimmer.dart';
 
 class MySavedSeriesScreen extends StatefulWidget {
   const MySavedSeriesScreen({super.key});
@@ -237,10 +236,7 @@ class _MySavedSeriesScreenState extends State<MySavedSeriesScreen> {
   }
 
   Widget _buildCardShimmer() {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: Column(
+    return AppSkeletonizer(child: Column(
         children: [
           Expanded(
             child: Container(

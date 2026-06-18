@@ -65,13 +65,11 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             ),
 
             24.w.verticalSpace,
-            const BooksBooksHomeSections(),
-            24.w.verticalSpace,
+            // const BooksBooksHomeSections(),
+            // 24.w.verticalSpace,
           ],
         ),
       ),
     );
   }
 }
-
-

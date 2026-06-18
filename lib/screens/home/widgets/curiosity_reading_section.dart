@@ -2,7 +2,6 @@ import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/providers/curiosity_reading/curiosity_reading_provider.dart';
-import 'package:shimmer/shimmer.dart';
 
 class CuriosityReadingSection extends StatelessWidget {
   const CuriosityReadingSection({super.key});
@@ -19,7 +18,7 @@ class CuriosityReadingSection extends StatelessWidget {
               SvgIcon(AppAssets.brain, size: 24.w),
               const SizedBox(width: 5),
               AppText(
-                text: "Curiosity Reading",
+                text: "Today's Sparks",
                 style: AppTextStyles.bold(
                   fontSize: 20.sp,
                   color: AppColors.teal,
@@ -48,49 +47,47 @@ class CuriosityReadingSection extends StatelessWidget {
             }
 
             return SizedBox(
-                  height: 280.w,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: EdgeInsets.only(
-                      left: 10.w,
-                      right: 18.w,
-                      top: 0,
-                      bottom: 0,
-                    ),
-                    physics: const BouncingScrollPhysics(),
-                    itemCount:
-                        (provider.curiosityReading?.data.readings.length ?? 0)
-                            .clamp(0, 5)
-                            .toInt(),
-                    itemBuilder: (context, index) {
-                      return ArticleCard(
-                        onReadTap: () {
-                          provider.setCurrentIndex(index);
-                          context.pushNamed(
-                            AppRoutes.curiosityReadingScreen.name,
-                          );
-                        },
-                        item: _CuriosityItem(
-                          title:
-                              provider
-                                  .curiosityReading
-                                  ?.data
-                                  .readings[index]
-                                  .question ??
-                              '',
-                          imageUrl:
-                              provider
-                                  .curiosityReading
-                                  ?.data
-                                  .readings[index]
-                                  .imgUrl ??
-                              '',
-                        ),
-                        cardWidth: 260.w,
-                        cardHeight: 280.w,
-                      );
+              height: 280.w,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.only(
+                  left: 10.w,
+                  right: 18.w,
+                  top: 0,
+                  bottom: 0,
+                ),
+                physics: const BouncingScrollPhysics(),
+                itemCount:
+                    (provider.curiosityReading?.data.readings.length ?? 0)
+                        .clamp(0, 5)
+                        .toInt(),
+                itemBuilder: (context, index) {
+                  return ArticleCard(
+                    onReadTap: () {
+                      provider.setCurrentIndex(index);
+                      context.pushNamed(AppRoutes.curiosityReadingScreen.name);
                     },
-                  ),
+                    item: _CuriosityItem(
+                      title:
+                          provider
+                              .curiosityReading
+                              ?.data
+                              .readings[index]
+                              .question ??
+                          '',
+                      imageUrl:
+                          provider
+                              .curiosityReading
+                              ?.data
+                              .readings[index]
+                              .imgUrl ??
+                          '',
+                    ),
+                    cardWidth: 260.w,
+                    cardHeight: 280.w,
+                  );
+                },
+              ),
             );
           },
         ),
@@ -228,9 +225,7 @@ class _ImageShimmerPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: const Color(0xFF2D3A4A),
-      highlightColor: const Color(0xFF405165),
+    return AppSkeletonizer(
       child: Container(
         decoration: BoxDecoration(
           color: const Color(0xFF2D3A4A),
@@ -314,10 +309,7 @@ class _CuriosityReadingErrorUI extends StatelessWidget {
             16.h.verticalSpace,
             AppText(
               text: 'Couldn\'t load readings',
-              style: AppTextStyles.bold(
-                fontSize: 17.sp,
-                color: AppColors.teal,
-              ),
+              style: AppTextStyles.bold(fontSize: 17.sp, color: AppColors.teal),
               textAlign: TextAlign.center,
             ),
             8.h.verticalSpace,
@@ -388,9 +380,7 @@ class _CuriosityReadingLoadingUI extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         itemCount: 5,
         itemBuilder: (context, index) {
-          return Shimmer.fromColors(
-            baseColor: const Color(0xFF2D3A4A),
-            highlightColor: const Color(0xFF405165),
+          return AppSkeletonizer(
             child: Container(
               width: 260.w,
               height: 280.w,
@@ -407,69 +397,60 @@ class _CuriosityReadingLoadingUI extends StatelessWidget {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
-                child: Shimmer.fromColors(
-                  baseColor: Colors.grey.shade300,
-                  highlightColor: Colors.grey.shade100,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      // Image Placeholder
-                      Container(color: Colors.white),
-
-                      // Brain Icon Placeholder
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: Container(
-                          width: 32,
-                          height: 32,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Container(color: Colors.white),
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: 14,
+                      right: 14,
+                      bottom: 14,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            height: 14,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
                           ),
-                        ),
+                          const SizedBox(height: 8),
+                          Container(
+                            height: 14,
+                            width: (260.w) * 0.75,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            height: 14,
+                            width: (260.w) * 0.5,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                          ),
+                        ],
                       ),
-
-                      // Bottom Content Placeholder
-                      Positioned(
-                        left: 14,
-                        right: 14,
-                        bottom: 14,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              height: 14,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Container(
-                              height: 14,
-                              width: (260.w) * 0.75,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Container(
-                              height: 14,
-                              width: (260.w) * 0.5,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),

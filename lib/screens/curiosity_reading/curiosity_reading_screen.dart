@@ -5,7 +5,6 @@ import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/providers/curiosity_reading/curiosity_reading_provider.dart';
 import 'package:redstreakapp/screens/curiosity_reading/widget/curiosity_reading_content.dart';
 import 'package:redstreakapp/screens/curiosity_reading/widget/curiosity_reading_screen_shimmer.dart';
-import 'package:shimmer/shimmer.dart';
 
 class CuriosityReadingScreen extends StatefulWidget {
   const CuriosityReadingScreen({super.key});
@@ -46,8 +45,10 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
       return;
     }
 
-    final depth =
-        ((_scrollController.offset / maxScroll) * 100).round().clamp(0, 100);
+    final depth = ((_scrollController.offset / maxScroll) * 100).round().clamp(
+      0,
+      100,
+    );
     context.read<CuriosityReadingProvider>().updateScrollDepth(depth);
   }
 
@@ -98,7 +99,8 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
 
             final currentIndex = provider.currentIndex;
             final isWaitingForMore =
-                currentIndex >= readings.length && provider.isLoadingMoreReading;
+                currentIndex >= readings.length &&
+                provider.isLoadingMoreReading;
 
             if (isWaitingForMore) {
               return const CuriosityReadingScreenShimmer();
@@ -168,11 +170,7 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
             child: AppNetworkImage(
               imageUrl: imageUrl,
               tag: 'CuriosityReading.hero',
-              placeholder: (_) => Shimmer.fromColors(
-                baseColor: Colors.grey[300]!,
-                highlightColor: Colors.grey[100]!,
-                child: Container(color: Colors.white),
-              ),
+              placeholder: (_) => const AppSkeletonImagePlaceholder(),
             ).animate().fadeIn(delay: 200.ms),
           ),
           Positioned.fill(
@@ -222,7 +220,7 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
                     Align(
                       alignment: Alignment.center,
                       child: AppText(
-                        text: 'Curiosity Reading',
+                        text: 'Sparks',
                         style: AppTextStyles.semiBold(
                           fontSize: 20,
                           color: AppColors.white,

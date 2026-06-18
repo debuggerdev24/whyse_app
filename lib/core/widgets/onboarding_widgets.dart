@@ -1,6 +1,6 @@
+import 'package:redstreakapp/core/widgets/app_skeletonizer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
@@ -168,10 +168,7 @@ class TopicCard extends StatelessWidget {
   }
 
   Widget _buildShimmerPlaceholder() {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: Container(
+    return AppSkeletonizer(child: Container(
         width: double.infinity,
         height: double.infinity,
         decoration: BoxDecoration(

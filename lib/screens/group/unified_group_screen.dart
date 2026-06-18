@@ -9,7 +9,6 @@ import 'package:redstreakapp/providers/profile/group_provider.dart';
 import 'package:redstreakapp/screens/group/group_details_tab.dart';
 import 'package:redstreakapp/screens/group/group_screen_params.dart';
 import 'package:redstreakapp/screens/group/widget/group_image_widget.dart';
-import 'package:shimmer/shimmer.dart';
 
 class UnifiedGroupScreen extends StatefulWidget {
   const UnifiedGroupScreen({super.key, required this.params});
@@ -255,10 +254,7 @@ class _GroupUpdatesTab extends StatelessWidget {
       itemBuilder: (_, __) => Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Shimmer.fromColors(
-            baseColor: AppColors.shimmerBaseColor,
-            highlightColor: AppColors.shimmerHighlightColor,
-            child: Container(
+          AppSkeletonizer(child: Container(
               width: 36.w,
               height: 36.w,
               decoration: const BoxDecoration(
@@ -269,10 +265,7 @@ class _GroupUpdatesTab extends StatelessWidget {
           ),
           10.w.horizontalSpace,
           Expanded(
-            child: Shimmer.fromColors(
-              baseColor: AppColors.shimmerBaseColor,
-              highlightColor: AppColors.shimmerHighlightColor,
-              child: Container(
+            child: AppSkeletonizer(child: Container(
                 height: 200.h,
                 decoration: BoxDecoration(
                   color: Colors.white,

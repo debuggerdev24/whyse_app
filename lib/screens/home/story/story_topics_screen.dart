@@ -1,3 +1,4 @@
+import 'package:redstreakapp/core/widgets/app_skeletonizer.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -16,7 +17,6 @@ import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
-import 'package:shimmer/shimmer.dart';
 
 class StoryTopicsScreen extends StatefulWidget {
   const StoryTopicsScreen({super.key});
@@ -265,10 +265,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
 
   /// Shown while `GET /story-flow/topics` (browse or search) is in flight.
   Widget _topicsBrowseShimmer() {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: GridView.builder(
+    return AppSkeletonizer(child: GridView.builder(
         physics: const NeverScrollableScrollPhysics(),
         padding: EdgeInsets.only(left: 10.w, right: 10.w, bottom: 20.w),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

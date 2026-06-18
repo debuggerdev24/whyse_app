@@ -1,3 +1,4 @@
+import 'package:redstreakapp/core/widgets/app_skeletonizer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
@@ -7,7 +8,6 @@ import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/models/home/browse_topic_model.dart';
-import 'package:shimmer/shimmer.dart';
 
 class SearchBooksField extends StatefulWidget {
   final TextEditingController controller;
@@ -936,10 +936,7 @@ class ImageShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: const ColoredBox(color: AppColors.lightwhiteColor),
+    return AppSkeletonizer(child: const ColoredBox(color: AppColors.lightwhiteColor),
     );
   }
 }
@@ -957,10 +954,7 @@ class _BrowseShimmerBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: Container(
+    return AppSkeletonizer(child: Container(
         width: width,
         height: height,
         decoration: BoxDecoration(

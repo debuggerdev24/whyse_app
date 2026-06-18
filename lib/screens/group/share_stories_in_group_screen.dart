@@ -4,7 +4,6 @@ import 'package:redstreakapp/core/utils/network_image_url.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/group/shareable_topic_model.dart';
 import 'package:redstreakapp/providers/profile/group_provider.dart';
-import 'package:shimmer/shimmer.dart';
 
 class ShareStoriesInGroupScreen extends StatefulWidget {
   const ShareStoriesInGroupScreen({super.key, required this.groupId});
@@ -208,10 +207,7 @@ class _ShareStoriesInGroupScreenState extends State<ShareStoriesInGroupScreen> {
   }
 
   Widget _buildShimmerTile() {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: Column(
+    return AppSkeletonizer(child: Column(
         children: [
           Expanded(
             child: Container(

@@ -27,7 +27,9 @@ class AppAssets {
   static const comics = "$_iconPath/comics.svg";
   static const fantancy = "$_iconPath/fantancy.svg";
   static const copy = "$_iconPath/copy.svg";
+  static const chat = "$_iconPath/chat.svg";
   static const histoy = "$_iconPath/histoy.svg";
+  static const streak = "$_iconPath/streak.svg";
   static const like = "$_iconPath/like.svg";
   static const mystery = "$_iconPath/mystery.svg";
   static const nature = "$_iconPath/nature.svg";
@@ -62,6 +64,7 @@ class AppAssets {
   static const font = "$_iconPath/font.svg";
   static const document = "$_iconPath/document.svg";
   static const dumbbell = "$_iconPath/dumbbell.svg";
+  static const explore = "$_iconPath/explore.svg";
 
   // images
   static const _imagePath = "assets/images";

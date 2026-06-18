@@ -6,7 +6,6 @@ import 'package:redstreakapp/models/friend/friend_model.dart';
 import 'package:redstreakapp/providers/family/family_provider.dart';
 import 'package:redstreakapp/screens/profile/widgets/add_family_member_bottom_sheet.dart';
 import 'package:redstreakapp/services/profile/friend_api_service.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class AddFamilyMemberScreen extends StatefulWidget {
@@ -287,10 +286,7 @@ class _FriendSelectTile extends StatelessWidget {
                     : CachedNetworkImage(
                         imageUrl: friend.avatarUrl!,
                         fit: BoxFit.cover,
-                        placeholder: (context, url) => Shimmer.fromColors(
-                          baseColor: AppColors.shimmerBaseColor,
-                          highlightColor: AppColors.shimmerHighlightColor,
-                          child: Container(
+                        placeholder: (context, url) => AppSkeletonizer(child: Container(
                             width: 48.w,
                             height: 48.w,
                             decoration: BoxDecoration(
@@ -385,10 +381,7 @@ class _ShimmerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: Row(
+    return AppSkeletonizer(child: Row(
         children: [
           Container(
             width: 48.w,

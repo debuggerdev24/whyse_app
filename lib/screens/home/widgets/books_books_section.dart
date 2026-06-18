@@ -1,7 +1,6 @@
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
-import 'package:shimmer/shimmer.dart';
 
 /// Must match title [TextStyle.height] and two lines in [_ShelfBookTile].
 const _kShelfTitleLineHeight = 1.2;
@@ -256,12 +255,10 @@ class _ShelfImageShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: const Color(0xFFE7E9EC),
-      highlightColor: const Color(0xFFF5F6F8),
+    return AppSkeletonizer(
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFE7E9EC),
+          color: AppColors.shimmerBaseColor,
           borderRadius: borderRadius,
         ),
       ),

@@ -9,7 +9,6 @@ import 'package:redstreakapp/models/friend/friend_model.dart';
 import 'package:redstreakapp/providers/family/family_provider.dart';
 import 'package:redstreakapp/screens/profile/friend_details_screen.dart';
 import 'package:redstreakapp/screens/profile/widgets/edit_family_member_bottom_sheet.dart';
-import 'package:shimmer/shimmer.dart';
 
 class FamilyMembersListScreen extends StatefulWidget {
   const FamilyMembersListScreen({super.key});
@@ -466,10 +465,7 @@ class _ShimmerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: Row(
+    return AppSkeletonizer(child: Row(
         children: [
           Container(
             width: 48.w,

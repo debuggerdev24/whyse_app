@@ -1,7 +1,6 @@
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
-import 'package:shimmer/shimmer.dart';
 
 class GroupImageWidget extends StatelessWidget {
   final String? imageUrl;
@@ -50,10 +49,7 @@ class _ImageShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: Container(
+    return AppSkeletonizer(child: Container(
         width: size,
         height: size,
         decoration: const BoxDecoration(

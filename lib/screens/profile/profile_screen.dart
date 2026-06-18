@@ -15,7 +15,6 @@ import 'package:redstreakapp/screens/profile/friend_details_screen.dart';
 import 'package:redstreakapp/screens/profile/widgets/group_block.dart';
 import 'package:redstreakapp/screens/profile/widgets/profile_friend_avatar.dart';
 import 'package:redstreakapp/screens/profile/widgets/profile_header_section.dart';
-import 'package:shimmer/shimmer.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -255,10 +254,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           for (var i = 0; i < 5; i++) ...[
             if (i > 0) 16.w.horizontalSpace,
-            Shimmer.fromColors(
-              baseColor: AppColors.shimmerBaseColor,
-              highlightColor: AppColors.shimmerHighlightColor,
-              child: SizedBox(
+            AppSkeletonizer(child: SizedBox(
                 width: 72.w,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -503,10 +499,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           for (var i = 0; i < 5; i++) ...[
             if (i > 0) 16.w.horizontalSpace,
-            Shimmer.fromColors(
-              baseColor: AppColors.shimmerBaseColor,
-              highlightColor: AppColors.shimmerHighlightColor,
-              child: SizedBox(
+            AppSkeletonizer(child: SizedBox(
                 width: 72.w,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -815,10 +808,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           final widths = [72.0, 88.0, 64.0, 80.0];
           return Padding(
             padding: EdgeInsets.only(right: i < 3 ? 12.w : 0),
-            child: Shimmer.fromColors(
-              baseColor: AppColors.shimmerBaseColor,
-              highlightColor: AppColors.shimmerHighlightColor,
-              child: Container(
+            child: AppSkeletonizer(child: Container(
                 width: widths[i].w,
                 height: 38.h,
                 decoration: BoxDecoration(
@@ -1233,10 +1223,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             3,
             (i) => Padding(
               padding: EdgeInsets.only(right: 12.w),
-              child: Shimmer.fromColors(
-                baseColor: AppColors.shimmerBaseColor,
-                highlightColor: AppColors.shimmerHighlightColor,
-                child: Container(
+              child: AppSkeletonizer(child: Container(
                   width: 210.w,
                   height: 240.w,
                   decoration: BoxDecoration(
@@ -1549,10 +1536,8 @@ class _SavedSeriesCard extends StatelessWidget {
   }
 }
 
-Shimmer _storyImageShimmer() {
-  return Shimmer.fromColors(
-    baseColor: AppColors.shimmerBaseColor,
-    highlightColor: AppColors.shimmerHighlightColor,
+Widget _storyImageShimmer() {
+  return AppSkeletonizer(
     child: Container(
       width: double.infinity,
       height: 132.w,
@@ -1568,9 +1553,7 @@ class _ProfileDetailsBlockShimmer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.fromLTRB(27, 20, 27, 20),
-      child: Shimmer.fromColors(
-        baseColor: Colors.grey.shade300,
-        highlightColor: Colors.grey.shade100,
+      child: AppSkeletonizer(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

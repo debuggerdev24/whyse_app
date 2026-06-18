@@ -80,22 +80,22 @@ class _UserDashBoardState extends State<UserDashBoard> {
           },
           items: [
             BottomNavItem(
-              icon: AppAssets.note,
+              icon: AppAssets.homeIcon,
               isSelected: value == 0,
               index: 0,
             ),
             BottomNavItem(
-              icon: AppAssets.searchIcon,
+              icon: AppAssets.explore,
               isSelected: value == 1,
               index: 1,
             ),
             BottomNavItem(
-              icon: AppAssets.dumble,
+              icon: AppAssets.streak,
               isSelected: value == 2,
               index: 2,
             ),
             BottomNavItem(
-              icon: AppAssets.star,
+              icon: AppAssets.chat,
               isSelected: value == 3,
               index: 3,
             ),
@@ -166,11 +166,11 @@ class BottomNavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color color = isSelected
         ? AppColors.black
-        : AppColors.darkGrey.withValues(alpha: 0.3);
+        : AppColors.darkGrey.withValues(alpha: 0.4);
 
     return Padding(
       padding: EdgeInsets.only(
-        left: index == 0 ? 30.w : 0,
+        left: index == 0 ? 30.w : 0, 
         right: index == 3 ? 30.w : 0,
       ),
       child: SvgPicture.asset(

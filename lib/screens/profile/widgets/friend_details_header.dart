@@ -3,7 +3,6 @@ import 'package:redstreakapp/core/utils/network_image_url.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/friend/friend_details_model.dart';
 import 'package:redstreakapp/screens/profile/widgets/profile_friend_avatar.dart';
-import 'package:shimmer/shimmer.dart';
 
 const Color friendDetailsHeaderBg = Color(0xFFE8D9C4);
 
@@ -89,10 +88,7 @@ class _ProfileAvatar extends StatelessWidget {
               width: 120.w,
               height: 120.w,
               fit: BoxFit.cover,
-              placeholder: (_) => Shimmer.fromColors(
-                baseColor: AppColors.shimmerBaseColor,
-                highlightColor: AppColors.shimmerHighlightColor,
-                child: Container(
+              placeholder: (_) => AppSkeletonizer(child: Container(
                   width: 120.w,
                   height: 120.w,
                   decoration: BoxDecoration(
@@ -149,10 +145,7 @@ class FriendDetailsHeaderShimmer extends StatelessWidget {
                   ),
                 ),
               ),
-              Shimmer.fromColors(
-                baseColor: AppColors.shimmerBaseColor,
-                highlightColor: AppColors.shimmerHighlightColor,
-                child: Container(
+              AppSkeletonizer(child: Container(
                   width: 120.w,
                   height: 120.w,
                   decoration: BoxDecoration(

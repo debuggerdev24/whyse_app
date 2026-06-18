@@ -5,7 +5,6 @@ import 'package:redstreakapp/models/group/group_response_model.dart';
 import 'package:redstreakapp/providers/profile/group_provider.dart';
 import 'package:redstreakapp/screens/group/group_details_screen.dart';
 import 'package:redstreakapp/screens/group/widget/group_image_widget.dart';
-import 'package:shimmer/shimmer.dart';
 
 class GroupListScreen extends StatefulWidget {
   const GroupListScreen({super.key});
@@ -149,10 +148,7 @@ class _ShimmerTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Shimmer.fromColors(
-          baseColor: AppColors.shimmerBaseColor,
-          highlightColor: AppColors.shimmerHighlightColor,
-          child: Container(
+        AppSkeletonizer(child: Container(
             width: 48,
             height: 48,
             decoration: const BoxDecoration(
@@ -177,10 +173,7 @@ class _ShimmerTile extends StatelessWidget {
   }
 
   Widget _shimmerBox({required double width, required double height}) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: Container(width: width, height: height, color: Colors.white),
+    return AppSkeletonizer(child: Container(width: width, height: height, color: Colors.white),
     );
   }
 }

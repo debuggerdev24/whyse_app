@@ -1,7 +1,7 @@
+import 'package:redstreakapp/core/widgets/app_skeletonizer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
-import 'package:shimmer/shimmer.dart';
 
 class HomeSectionShimmer {
   HomeSectionShimmer._();
@@ -32,10 +32,7 @@ class HomeSectionShimmer {
   }
 
   static Widget storyReadingScreenShimmer() {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: Column(
+    return AppSkeletonizer(child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _ShimmerBox(width: double.infinity, height: 280.w, radius: 0),
@@ -98,10 +95,7 @@ class _CreatedStoryReadingScreenShimmer extends StatelessWidget {
     double radius = 6,
     Color fill = AppColors.shimmerBaseColor,
   }) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: Container(
+    return AppSkeletonizer(child: Container(
         width: width,
         height: height,
         decoration: BoxDecoration(
@@ -124,10 +118,7 @@ class _CreatedStoryReadingScreenShimmer extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Shimmer.fromColors(
-                baseColor: AppColors.shimmerBaseColor,
-                highlightColor: AppColors.shimmerHighlightColor,
-                child: SizedBox.expand(
+              AppSkeletonizer(child: SizedBox.expand(
                   child: ColoredBox(color: AppColors.shimmerBaseColor),
                 ),
               ),
@@ -250,10 +241,7 @@ class _IdeasListScreenShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: SingleChildScrollView(
+    return AppSkeletonizer(child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -326,10 +314,7 @@ class _GenerateStoryIdeasScreenShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: SingleChildScrollView(
+    return AppSkeletonizer(child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -419,10 +404,7 @@ class _StoryIdeaCardShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: Container(
+    return AppSkeletonizer(child: Container(
         margin: EdgeInsets.symmetric(horizontal: 18.w),
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
@@ -663,10 +645,7 @@ class StoryIdeasImageShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: const ColoredBox(color: AppColors.lightwhiteColor),
+    return AppSkeletonizer(child: const ColoredBox(color: AppColors.lightwhiteColor),
     );
   }
 }
@@ -684,10 +663,7 @@ class _StoryIdeasShimmerBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: Container(
+    return AppSkeletonizer(child: Container(
         width: width,
         height: height,
         decoration: BoxDecoration(

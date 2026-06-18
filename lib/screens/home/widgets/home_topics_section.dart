@@ -1,3 +1,4 @@
+import 'package:redstreakapp/core/widgets/app_skeletonizer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -11,7 +12,6 @@ import 'package:redstreakapp/models/home/story_models/story_topics.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
-import 'package:shimmer/shimmer.dart';
 
 class HomeStoryTopics extends StatefulWidget {
   const HomeStoryTopics({super.key});
@@ -42,7 +42,7 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   AppText(
-                    text: "Series",
+                    text: "My Series",
                     style: AppTextStyles.bold(fontSize: 20),
                   ),
                   GestureDetector(
@@ -413,10 +413,7 @@ Widget _buildShimmerLoading() {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Shimmer.fromColors(
-              baseColor: AppColors.shimmerBaseColor,
-              highlightColor: AppColors.shimmerHighlightColor,
-              child: Container(
+            AppSkeletonizer(child: Container(
                 width: 88.w,
                 height: 20.w,
                 decoration: BoxDecoration(
@@ -425,10 +422,7 @@ Widget _buildShimmerLoading() {
                 ),
               ),
             ),
-            Shimmer.fromColors(
-              baseColor: AppColors.shimmerBaseColor,
-              highlightColor: AppColors.shimmerHighlightColor,
-              child: Container(
+            AppSkeletonizer(child: Container(
                 width: 52.w,
                 height: 16.w,
                 decoration: BoxDecoration(
@@ -456,10 +450,7 @@ Widget _buildShimmerLoading() {
         ),
       ),
       19.w.verticalSpace,
-      Shimmer.fromColors(
-        baseColor: AppColors.shimmerBaseColor,
-        highlightColor: AppColors.shimmerHighlightColor,
-        child: Container(
+      AppSkeletonizer(child: Container(
           width: double.infinity,
           padding: EdgeInsets.symmetric(vertical: 14.w),
           decoration: BoxDecoration(
@@ -478,10 +469,7 @@ class _StoryCardShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: Container(
+    return AppSkeletonizer(child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16.r),
@@ -632,10 +620,7 @@ class FeaturedTopicCard extends StatelessWidget {
 }
 
 Widget _featuredShimmer() {
-  return Shimmer.fromColors(
-    baseColor: AppColors.shimmerBaseColor,
-    highlightColor: AppColors.shimmerHighlightColor,
-    child: Container(
+  return AppSkeletonizer(child: Container(
       width: double.infinity,
       height: double.infinity,
       color: AppColors.shimmerBaseColor,
@@ -775,11 +760,9 @@ class NetflixStyleTopicCard extends StatelessWidget {
   }
 }
 
-Shimmer _netflixCardShimmer([double? w]) {
+Widget _netflixCardShimmer([double? w]) {
   final width = w ?? 120.w;
-  return Shimmer.fromColors(
-    baseColor: AppColors.shimmerBaseColor,
-    highlightColor: AppColors.shimmerHighlightColor,
+  return AppSkeletonizer(
     child: Container(width: width, height: 160.w, color: Colors.grey),
   );
 }
@@ -866,10 +849,8 @@ class StoryCard extends StatelessWidget {
   }
 }
 
-Shimmer _storyImageShimmer() {
-  return Shimmer.fromColors(
-    baseColor: AppColors.shimmerBaseColor,
-    highlightColor: AppColors.shimmerHighlightColor,
+Widget _storyImageShimmer() {
+  return AppSkeletonizer(
     child: Container(
       width: double.infinity,
       height: 132.w,

@@ -1,7 +1,6 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/models/friend/friend_model.dart';
 import 'package:redstreakapp/providers/friend/friend_provider.dart';
-import 'package:shimmer/shimmer.dart';
 
 class FriendRequestTile extends StatefulWidget {
   const FriendRequestTile({super.key, required this.request});
@@ -184,10 +183,7 @@ class NotificationShimmerList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Shimmer.fromColors(
-          baseColor: AppColors.shimmerBaseColor,
-          highlightColor: AppColors.shimmerHighlightColor,
-          child: Container(
+        AppSkeletonizer(child: Container(
             width: 80.w,
             height: 20.h,
             decoration: BoxDecoration(
@@ -209,10 +205,7 @@ class NotificationShimmerList extends StatelessWidget {
 class _ShimmerTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: Row(
+    return AppSkeletonizer(child: Row(
         children: [
           Container(
             width: 52.w,

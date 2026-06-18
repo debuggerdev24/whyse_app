@@ -1,9 +1,8 @@
+import 'package:redstreakapp/core/widgets/app_skeletonizer.dart';
 import 'package:flutter/material.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
-import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/services/profile/profile_service.dart';
-import 'package:shimmer/shimmer.dart';
 
 /// Shimmer block matching avatar dimensions (parent may clip to circle).
 class UserAvatarShimmerFill extends StatelessWidget {
@@ -13,10 +12,7 @@ class UserAvatarShimmerFill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      period: const Duration(milliseconds: 1200),
+    return AppSkeletonizer(
       child: Container(
         width: size,
         height: size,

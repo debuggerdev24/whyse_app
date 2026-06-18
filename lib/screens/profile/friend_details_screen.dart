@@ -16,7 +16,6 @@ import 'package:redstreakapp/screens/profile/user_profile_topics_list_screen_par
 import 'package:redstreakapp/screens/profile/widgets/add_family_member_bottom_sheet.dart';
 import 'package:redstreakapp/screens/profile/widgets/friend_details_header.dart';
 import 'package:redstreakapp/screens/profile/widgets/friend_preview_avatar.dart';
-import 'package:shimmer/shimmer.dart';
 
 class FriendDetailsScreenParams {
   const FriendDetailsScreenParams({required this.friendId});
@@ -289,10 +288,7 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     required double height,
     double radius = 8,
   }) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: Container(
+    return AppSkeletonizer(child: Container(
         width: width,
         height: height,
         decoration: BoxDecoration(
@@ -1272,10 +1268,8 @@ class _FamilyRoleBadge extends StatelessWidget {
   }
 }
 
-Shimmer _storyImageShimmer() {
-  return Shimmer.fromColors(
-    baseColor: AppColors.shimmerBaseColor,
-    highlightColor: AppColors.shimmerHighlightColor,
+Widget _storyImageShimmer() {
+  return AppSkeletonizer(
     child: Container(
       width: double.infinity,
       height: double.infinity,

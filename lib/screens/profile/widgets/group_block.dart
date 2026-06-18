@@ -5,7 +5,6 @@ import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/group/group_response_model.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
 import 'package:redstreakapp/screens/group/group_details_screen.dart';
-import 'package:shimmer/shimmer.dart';
 
 class GroupBlock extends StatefulWidget {
   const GroupBlock({super.key});
@@ -271,10 +270,7 @@ class _ImageShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: Container(
+    return AppSkeletonizer(child: Container(
         width: 64,
         height: 64,
         decoration: const BoxDecoration(
@@ -291,10 +287,7 @@ class _TextShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
-      child: Container(width: 30, height: 10, color: Colors.white),
+    return AppSkeletonizer(child: Container(width: 30, height: 10, color: Colors.white),
     );
   }
 }
