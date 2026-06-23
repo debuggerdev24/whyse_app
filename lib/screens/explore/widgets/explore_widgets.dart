@@ -1,12 +1,12 @@
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
+import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/models/curiosity_reading/curiosity_reading_model.dart';
+import 'package:redstreakapp/models/explore/explore_models.dart';
 import 'package:redstreakapp/models/home/browse_topic_model.dart';
-import 'package:redstreakapp/models/home/interest_model.dart';
-import 'package:redstreakapp/providers/home/story_provider.dart';
+import 'package:redstreakapp/providers/explore/explore_provider.dart';
 import 'package:redstreakapp/screens/explore/explore_constants.dart';
-import 'package:redstreakapp/screens/explore/explore_spark_dummy_data.dart';
 import 'package:redstreakapp/screens/search/widgets/search_widgets.dart';
 
 class ExploreSearchField extends StatefulWidget {
@@ -202,11 +202,11 @@ class _ExploreTabItem extends StatelessWidget {
 class ExploreDiscoverByInterest extends StatelessWidget {
   const ExploreDiscoverByInterest({
     super.key,
-    required this.selectedInterests,
+    required this.selectedInterestIds,
     required this.onInterestToggled,
   });
 
-  final Set<String> selectedInterests;
+  final Set<String> selectedInterestIds;
   final ValueChanged<String> onInterestToggled;
 
   @override
@@ -219,13 +219,23 @@ class ExploreDiscoverByInterest extends StatelessWidget {
           style: AppTextStyles.bold(fontSize: 20.sp),
         ),
         14.w.verticalSpace,
-        Consumer<StoryProvider>(
+        Consumer<ExploreProvider>(
           builder: (context, provider, _) {
-            if (provider.isGetInterestLoading && provider.interestsList.isEmpty) {
+            if (provider.interestsState == DataState.loading &&
+                provider.interests.isEmpty) {
               return const ExploreInterestTwoRowShimmer();
             }
 
-            final interests = provider.interestsList;
+            if (provider.interestsState == DataState.failed &&
+                provider.interests.isEmpty) {
+              return ExploreInlineError(
+                message: provider.interestsError ??
+                    'Could not load interests. Please try again.',
+                onRetry: () => provider.loadDiscoverInterests(force: true),
+              );
+            }
+
+            final interests = provider.interests;
             if (interests.isEmpty) {
               return AppText(
                 text: 'No interests available',
@@ -238,7 +248,7 @@ class ExploreDiscoverByInterest extends StatelessWidget {
 
             return ExploreInterestTwoRowScroller(
               interests: interests,
-              selectedInterests: selectedInterests,
+              selectedInterestIds: selectedInterestIds,
               onInterestToggled: onInterestToggled,
             );
           },
@@ -252,20 +262,20 @@ class ExploreInterestTwoRowScroller extends StatelessWidget {
   const ExploreInterestTwoRowScroller({
     super.key,
     required this.interests,
-    required this.selectedInterests,
+    required this.selectedInterestIds,
     required this.onInterestToggled,
   });
 
-  final List<InterestModel> interests;
-  final Set<String> selectedInterests;
+  final List<ExploreDiscoverInterest> interests;
+  final Set<String> selectedInterestIds;
   final ValueChanged<String> onInterestToggled;
 
   @override
   Widget build(BuildContext context) {
-    final topRow = <InterestModel>[
+    final topRow = <ExploreDiscoverInterest>[
       for (var i = 0; i < interests.length; i += 2) interests[i],
     ];
-    final bottomRow = <InterestModel>[
+    final bottomRow = <ExploreDiscoverInterest>[
       for (var i = 1; i < interests.length; i += 2) interests[i],
     ];
 
@@ -277,14 +287,14 @@ class ExploreInterestTwoRowScroller extends StatelessWidget {
         children: [
           _InterestRow(
             interests: topRow,
-            selectedInterests: selectedInterests,
+            selectedInterestIds: selectedInterestIds,
             onInterestToggled: onInterestToggled,
           ),
           if (bottomRow.isNotEmpty) ...[
             10.h.verticalSpace,
             _InterestRow(
               interests: bottomRow,
-              selectedInterests: selectedInterests,
+              selectedInterestIds: selectedInterestIds,
               onInterestToggled: onInterestToggled,
             ),
           ],
@@ -297,12 +307,12 @@ class ExploreInterestTwoRowScroller extends StatelessWidget {
 class _InterestRow extends StatelessWidget {
   const _InterestRow({
     required this.interests,
-    required this.selectedInterests,
+    required this.selectedInterestIds,
     required this.onInterestToggled,
   });
 
-  final List<InterestModel> interests;
-  final Set<String> selectedInterests;
+  final List<ExploreDiscoverInterest> interests;
+  final Set<String> selectedInterestIds;
   final ValueChanged<String> onInterestToggled;
 
   @override
@@ -315,8 +325,8 @@ class _InterestRow extends StatelessWidget {
           ExploreInterestTile(
             label: interests[i].name,
             iconPath: iconForInterestName(interests[i].name),
-            isSelected: selectedInterests.contains(interests[i].name),
-            onTap: () => onInterestToggled(interests[i].name),
+            isSelected: selectedInterestIds.contains(interests[i].id),
+            onTap: () => onInterestToggled(interests[i].id),
           ),
         ],
       ],
@@ -453,6 +463,174 @@ class ExploreFilteredEmptyState extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class ExploreInlineError extends StatelessWidget {
+  const ExploreInlineError({
+    super.key,
+    required this.message,
+    required this.onRetry,
+  });
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
+      decoration: BoxDecoration(
+        color: AppColors.searchBackgroundColor,
+        borderRadius: BorderRadius.circular(16.r),
+      ),
+      child: Column(
+        children: [
+          AppText(
+            text: message,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.medium(
+              fontSize: 14.sp,
+              color: AppColors.black.withValues(alpha: 0.65),
+            ),
+          ),
+          12.w.verticalSpace,
+          GestureDetector(
+            onTap: onRetry,
+            child: AppText(
+              text: 'Retry',
+              style: AppTextStyles.semibold(
+                fontSize: 15.sp,
+                color: AppColors.teal,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ExploreSectionEmpty extends StatelessWidget {
+  const ExploreSectionEmpty({super.key, required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+      decoration: BoxDecoration(
+        color: AppColors.searchBackgroundColor,
+        borderRadius: BorderRadius.circular(16.r),
+      ),
+      child: AppText(
+        text: 'No $title items yet',
+        textAlign: TextAlign.center,
+        style: AppTextStyles.medium(
+          fontSize: 14.sp,
+          color: AppColors.black.withValues(alpha: 0.5),
+        ),
+      ),
+    );
+  }
+}
+
+class ExploreSeriesSectionView extends StatelessWidget {
+  const ExploreSeriesSectionView({
+    super.key,
+    required this.section,
+    required this.onTopicTap,
+    required this.onRetry,
+    required this.onLoadMore,
+  });
+
+  final ExplorePagedSection<BrowseTopicModel> section;
+  final ValueChanged<BrowseTopicModel> onTopicTap;
+  final VoidCallback onRetry;
+  final VoidCallback onLoadMore;
+
+  @override
+  Widget build(BuildContext context) {
+    return ExploreHorizontalSection(
+      title: section.title,
+      child: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (section.state == DataState.loading && section.items.isEmpty) {
+      return const ExploreSeriesRowShimmer();
+    }
+
+    if (section.state == DataState.failed && section.items.isEmpty) {
+      return ExploreInlineError(
+        message: section.error ?? 'Something went wrong. Please try again.',
+        onRetry: onRetry,
+      );
+    }
+
+    if (section.items.isEmpty) {
+      return ExploreSectionEmpty(title: section.title);
+    }
+
+    return ExploreSeriesRow(
+      topics: section.items,
+      onTopicTap: onTopicTap,
+      isLoadingMore: section.isLoadingMore,
+      hasMore: section.hasMore,
+      onLoadMore: onLoadMore,
+    );
+  }
+}
+
+class ExploreSparkSectionView extends StatelessWidget {
+  const ExploreSparkSectionView({
+    super.key,
+    required this.section,
+    required this.onItemTap,
+    required this.onRetry,
+    required this.onLoadMore,
+  });
+
+  final ExplorePagedSection<ExploreSparkItem> section;
+  final void Function(ExploreSparkItem item, int index) onItemTap;
+  final VoidCallback onRetry;
+  final VoidCallback onLoadMore;
+
+  @override
+  Widget build(BuildContext context) {
+    return ExploreHorizontalSection(
+      title: section.title,
+      child: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (section.state == DataState.loading && section.items.isEmpty) {
+      return const ExploreSparkRowShimmer();
+    }
+
+    if (section.state == DataState.failed && section.items.isEmpty) {
+      return ExploreInlineError(
+        message: section.error ?? 'Something went wrong. Please try again.',
+        onRetry: onRetry,
+      );
+    }
+
+    if (section.items.isEmpty) {
+      return ExploreSectionEmpty(title: section.title);
+    }
+
+    return ExploreSparkItemsRow(
+      items: section.items,
+      onItemTap: onItemTap,
+      isLoadingMore: section.isLoadingMore,
+      hasMore: section.hasMore,
+      onLoadMore: onLoadMore,
     );
   }
 }
@@ -728,31 +906,88 @@ class ExploreSparkCard extends StatelessWidget {
   }
 }
 
-class ExploreSeriesRow extends StatelessWidget {
+class ExploreSeriesRow extends StatefulWidget {
   const ExploreSeriesRow({
     super.key,
     required this.topics,
     required this.onTopicTap,
+    this.isLoadingMore = false,
+    this.hasMore = false,
+    this.onLoadMore,
   });
 
   final List<BrowseTopicModel> topics;
   final ValueChanged<BrowseTopicModel> onTopicTap;
+  final bool isLoadingMore;
+  final bool hasMore;
+  final VoidCallback? onLoadMore;
+
+  @override
+  State<ExploreSeriesRow> createState() => _ExploreSeriesRowState();
+}
+
+class _ExploreSeriesRowState extends State<ExploreSeriesRow> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_handleScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_handleScroll)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _handleScroll() {
+    if (!widget.hasMore || widget.isLoadingMore || widget.onLoadMore == null) {
+      return;
+    }
+    final position = _scrollController.position;
+    if (position.pixels >= position.maxScrollExtent - 120) {
+      widget.onLoadMore!();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (topics.isEmpty) return const SizedBox.shrink();
+    if (widget.topics.isEmpty) return const SizedBox.shrink();
+
+    final itemCount =
+        widget.topics.length + (widget.isLoadingMore ? 1 : 0);
 
     return SizedBox(
       height: 232.w,
       child: ListView.builder(
+        controller: _scrollController,
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
-        itemCount: topics.length,
+        itemCount: itemCount,
         itemBuilder: (context, index) {
-          final topic = topics[index];
+          if (index >= widget.topics.length) {
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Center(
+                child: SizedBox(
+                  width: 24.w,
+                  height: 24.w,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.teal,
+                  ),
+                ),
+              ),
+            );
+          }
+
+          final topic = widget.topics[index];
           return ExploreSeriesCard(
             topic: topic,
-            onTap: () => onTopicTap(topic),
+            onTap: () => widget.onTopicTap(topic),
           );
         },
       ),
@@ -760,31 +995,87 @@ class ExploreSeriesRow extends StatelessWidget {
   }
 }
 
-class ExploreSparkItemsRow extends StatelessWidget {
+class ExploreSparkItemsRow extends StatefulWidget {
   const ExploreSparkItemsRow({
     super.key,
     required this.items,
     required this.onItemTap,
+    this.isLoadingMore = false,
+    this.hasMore = false,
+    this.onLoadMore,
   });
 
   final List<ExploreSparkItem> items;
-  final ValueChanged<ExploreSparkItem> onItemTap;
+  final void Function(ExploreSparkItem item, int index) onItemTap;
+  final bool isLoadingMore;
+  final bool hasMore;
+  final VoidCallback? onLoadMore;
+
+  @override
+  State<ExploreSparkItemsRow> createState() => _ExploreSparkItemsRowState();
+}
+
+class _ExploreSparkItemsRowState extends State<ExploreSparkItemsRow> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_handleScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_handleScroll)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _handleScroll() {
+    if (!widget.hasMore || widget.isLoadingMore || widget.onLoadMore == null) {
+      return;
+    }
+    final position = _scrollController.position;
+    if (position.pixels >= position.maxScrollExtent - 120) {
+      widget.onLoadMore!();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (items.isEmpty) return const SizedBox.shrink();
+    if (widget.items.isEmpty) return const SizedBox.shrink();
+
+    final itemCount = widget.items.length + (widget.isLoadingMore ? 1 : 0);
 
     return SizedBox(
       height: 280.w,
       child: ListView.builder(
+        controller: _scrollController,
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
-        itemCount: items.length,
+        itemCount: itemCount,
         itemBuilder: (context, index) {
-          final item = items[index];
+          if (index >= widget.items.length) {
+            return Padding(
+              padding: EdgeInsets.only(right: 14.w),
+              child: Center(
+                child: SizedBox(
+                  width: 24.w,
+                  height: 24.w,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.teal,
+                  ),
+                ),
+              ),
+            );
+          }
+
+          final item = widget.items[index];
           return ExploreSparkArticleCard(
             item: item,
-            onTap: () => onItemTap(item),
+            onTap: () => widget.onItemTap(item, index),
           );
         },
       ),
@@ -824,28 +1115,41 @@ class ExploreSparkRow extends StatelessWidget {
   }
 }
 
-class ExploreSparkContentShimmer extends StatelessWidget {
-  const ExploreSparkContentShimmer({super.key});
+class ExploreSparkRowShimmer extends StatelessWidget {
+  const ExploreSparkRowShimmer({super.key});
 
   @override
   Widget build(BuildContext context) {
     return AppSkeletonizer(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const AppSkeletonBox(width: 90, height: 20),
-          14.w.verticalSpace,
-          SizedBox(
-            height: 280.w,
-            child: Row(
-              children: [
-                AppSkeletonBox(width: 260, height: 280, borderRadius: 24),
-                14.w.horizontalSpace,
-                AppSkeletonBox(width: 260, height: 280, borderRadius: 24),
-              ],
-            ),
-          ),
-        ],
+      child: SizedBox(
+        height: 280.w,
+        child: Row(
+          children: [
+            AppSkeletonBox(width: 260, height: 280, borderRadius: 24),
+            14.w.horizontalSpace,
+            AppSkeletonBox(width: 260, height: 280, borderRadius: 24),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ExploreSeriesRowShimmer extends StatelessWidget {
+  const ExploreSeriesRowShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AppSkeletonizer(
+      child: SizedBox(
+        height: 232.w,
+        child: Row(
+          children: [
+            AppSkeletonBox(width: 220, height: 232, borderRadius: 24),
+            16.w.horizontalSpace,
+            AppSkeletonBox(width: 220, height: 232, borderRadius: 24),
+          ],
+        ),
       ),
     );
   }
@@ -862,32 +1166,29 @@ class ExploreContentShimmer extends StatelessWidget {
         children: [
           const AppSkeletonBox(width: 180, height: 20),
           14.w.verticalSpace,
-          const ExploreInterestTwoRowShimmer(),
+          const ExploreSeriesRowShimmer(),
           28.w.verticalSpace,
           const AppSkeletonBox(width: 90, height: 20),
           14.w.verticalSpace,
-          SizedBox(
-            height: 232.w,
-            child: Row(
-              children: [
-                Expanded(
-                  child: AppSkeletonBox(
-                    width: double.infinity,
-                    height: 232,
-                    borderRadius: 24,
-                  ),
-                ),
-                16.w.horizontalSpace,
-                Expanded(
-                  child: AppSkeletonBox(
-                    width: double.infinity,
-                    height: 232,
-                    borderRadius: 24,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          const ExploreSeriesRowShimmer(),
+        ],
+      ),
+    );
+  }
+}
+
+class ExploreSparkContentShimmer extends StatelessWidget {
+  const ExploreSparkContentShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AppSkeletonizer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const AppSkeletonBox(width: 90, height: 20),
+          14.w.verticalSpace,
+          const ExploreSparkRowShimmer(),
         ],
       ),
     );

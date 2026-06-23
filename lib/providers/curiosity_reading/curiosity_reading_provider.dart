@@ -2,7 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/models/curiosity_reading/curiosity_reading_model.dart';
+import 'package:redstreakapp/models/explore/explore_models.dart';
+import 'package:redstreakapp/models/explore/spark_reading_mapper.dart';
 import 'package:redstreakapp/services/curiosity_reading/curiosity_reading_service.dart';
+
+typedef ExploreSparkLoadMore =
+    Future<({List<ExploreSparkItem> items, ExplorePagination pagination})>
+    Function();
+
+class _ExploreSparkSession {
+  _ExploreSparkSession({
+    required this.loadMoreItems,
+    required ExplorePagination pagination,
+  }) : pagination = pagination;
+
+  final ExploreSparkLoadMore loadMoreItems;
+  ExplorePagination pagination;
+}
 
 class CuriosityReadingProvider extends ChangeNotifier {
   CuriosityReadingProvider(this._service);
@@ -13,8 +29,14 @@ class CuriosityReadingProvider extends ChangeNotifier {
 
   bool isGettingCuriosityReading = false;
   bool isLoadingMoreReading = false;
+  bool isLoadingReadingBody = false;
   String? currentReadingError;
   CuriosityReadingModel? curiosityReading;
+
+  bool _openedFromExplore = false;
+  bool get openedFromExplore => _openedFromExplore;
+
+  _ExploreSparkSession? _exploreSession;
 
   int _currentIndex = 0;
   int get currentIndex => _currentIndex;
@@ -93,6 +115,7 @@ class CuriosityReadingProvider extends ChangeNotifier {
     if (_currentIndex < length - 1) {
       _currentIndex++;
       _activeReadingId = null;
+      await _ensureCurrentReadingBody();
       notifyListeners();
       if (_shouldLoadMoreReading()) {
         Logger.info('Loading more curiosity readings...');
@@ -113,6 +136,7 @@ class CuriosityReadingProvider extends ChangeNotifier {
       final newLength = curiosityReading?.data.readings.length ?? 0;
       if (newLength > previousLength) {
         _currentIndex++;
+        await _ensureCurrentReadingBody();
       }
     }
 
@@ -126,6 +150,109 @@ class CuriosityReadingProvider extends ChangeNotifier {
     await _finalizeActiveReading();
     _currentIndex--;
     _activeReadingId = null;
+    await _ensureCurrentReadingBody();
+    notifyListeners();
+  }
+
+  Future<void> openFromExploreSection({
+    required List<ExploreSparkItem> items,
+    required int startIndex,
+    required ExplorePagination pagination,
+    required ExploreSparkLoadMore loadMoreItems,
+  }) async {
+    if (items.isEmpty) return;
+
+    _openedFromExplore = true;
+    _exploreSession = _ExploreSparkSession(
+      loadMoreItems: loadMoreItems,
+      pagination: pagination,
+    );
+
+    isGettingCuriosityReading = true;
+    currentReadingError = null;
+    notifyListeners();
+
+    final readings = items.map((item) => readingFromSparkJson(item.rawJson)).toList();
+    curiosityReading = CuriosityReadingModel(
+      success: true,
+      data: CuriosityReadingData(
+        readings: readings,
+        meta: readingMetaFromExplorePagination(pagination),
+      ),
+    );
+    _currentIndex = startIndex.clamp(0, readings.length - 1);
+    _sessionId = 'explore-spark-${DateTime.now().millisecondsSinceEpoch}';
+
+    await _ensureCurrentReadingBody();
+
+    isGettingCuriosityReading = false;
+    notifyListeners();
+  }
+
+  Future<void> _ensureCurrentReadingBody() async {
+    final reading = currentReading;
+    if (reading == null) return;
+    if (reading.hasBody && reading.body.article.trim().isNotEmpty) return;
+
+    isLoadingReadingBody = true;
+    notifyListeners();
+
+    final enriched = await _loadReadingBody(reading);
+    _replaceReadingAt(_currentIndex, enriched);
+
+    isLoadingReadingBody = false;
+    notifyListeners();
+  }
+
+  Future<Reading> _loadReadingBody(Reading reading) async {
+    final result = await _service.getReadingById(readingId: reading.id);
+    return result.fold(
+      (error) {
+        Logger.error('Failed to load spark body for ${reading.id}: ${error.errorMsg}');
+        if (reading.body.article.trim().isNotEmpty) return reading;
+        return reading.copyWith(
+          body: ReadingBody(
+            article: reading.question,
+            keyFacts: const [],
+            quote: '',
+            readingLevel: '',
+          ),
+          hasBody: true,
+        );
+      },
+      (enriched) => enriched,
+    );
+  }
+
+  void _replaceReadingAt(int index, Reading reading) {
+    final current = curiosityReading;
+    if (current == null) return;
+
+    final readings = [...current.data.readings];
+    if (index < 0 || index >= readings.length) return;
+    readings[index] = reading;
+    curiosityReading = current.copyWith(
+      data: current.data.copyWith(readings: readings),
+    );
+  }
+
+  void completeExploreSession() {
+    _openedFromExplore = false;
+    _exploreSession = null;
+    _currentIndex = 0;
+    _activeReadingId = null;
+    _readingOpenedAt = null;
+    _scrollDepthPercent = 0;
+    isLoadingReadingBody = false;
+    isLoadingMoreReading = false;
+  }
+
+  Future<void> exitExploreSessionAndRestoreHome() async {
+    completeExploreSession();
+    isGettingCuriosityReading = true;
+    notifyListeners();
+    await _fetchCuriosityReading();
+    isGettingCuriosityReading = false;
     notifyListeners();
   }
 
@@ -168,12 +295,15 @@ class CuriosityReadingProvider extends ChangeNotifier {
   void _resetReadingState() {
     _currentIndex = 0;
     isLoadingMoreReading = false;
+    isLoadingReadingBody = false;
     currentReadingError = null;
     curiosityReading = null;
     _sessionId = null;
     _activeReadingId = null;
     _readingOpenedAt = null;
     _scrollDepthPercent = 0;
+    _exploreSession = null;
+    _openedFromExplore = false;
   }
 
   void resetForNewSession() {
@@ -197,6 +327,11 @@ class CuriosityReadingProvider extends ChangeNotifier {
   }
 
   Future<void> loadMoreReading() async {
+    if (_exploreSession != null) {
+      await _loadMoreExploreReading();
+      return;
+    }
+
     isLoadingMoreReading = true;
     notifyListeners();
 
@@ -223,6 +358,52 @@ class CuriosityReadingProvider extends ChangeNotifier {
     );
     isLoadingMoreReading = false;
     notifyListeners();
+  }
+
+  Future<void> _loadMoreExploreReading() async {
+    final session = _exploreSession;
+    if (session == null || !session.pagination.hasMore) return;
+
+    isLoadingMoreReading = true;
+    notifyListeners();
+
+    try {
+      final result = await session.loadMoreItems();
+      if (result.items.isEmpty) {
+        session.pagination = result.pagination;
+        _syncExplorePagination(result.pagination);
+        return;
+      }
+
+      final newReadings = result.items
+          .map((item) => readingFromSparkJson(item.rawJson))
+          .toList();
+      final current = curiosityReading!;
+      curiosityReading = current.copyWith(
+        data: current.data.copyWith(
+          readings: [...current.data.readings, ...newReadings],
+        ),
+      );
+
+      session.pagination = result.pagination;
+      _syncExplorePagination(result.pagination);
+    } catch (error, stackTrace) {
+      Logger.error('Failed to load more explore sparks: $error\n$stackTrace');
+      _clampIndexToLoadedReadings();
+    } finally {
+      isLoadingMoreReading = false;
+      notifyListeners();
+    }
+  }
+
+  void _syncExplorePagination(ExplorePagination pagination) {
+    final current = curiosityReading;
+    if (current == null) return;
+    curiosityReading = current.copyWith(
+      data: current.data.copyWith(
+        meta: readingMetaFromExplorePagination(pagination),
+      ),
+    );
   }
 
   void _clampIndexToLoadedReadings() {

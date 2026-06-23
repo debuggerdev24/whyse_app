@@ -7,6 +7,7 @@ import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/providers/curiosity_reading/curiosity_reading_provider.dart';
+import 'package:redstreakapp/providers/explore/explore_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/saved_series_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
@@ -45,6 +46,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
     homeProvider.getMyTopics();
     context.read<SavedSeriesProvider>().getMySeriesList();
     curiosityReadingProvider.refreshFromHome();
+    context.read<ExploreProvider>().prefetchExploreCache();
 
     storyProvider.getStoryGoals(
       onFailed: (error) {

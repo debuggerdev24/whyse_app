@@ -61,12 +61,22 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
     provider.onReadingDisplayed(reading.id);
   }
 
-  Future<void> _exitToHome() async {
+  Future<void> _exitReading() async {
     final provider = context.read<CuriosityReadingProvider>();
     await provider.onLeaveReadingScreen();
     provider.markReadingScreenInactive();
-    if (mounted) context.pop();
-    provider.refreshFromHome();
+    if (!mounted) return;
+
+    final fromExplore = provider.openedFromExplore;
+    if (fromExplore) {
+      await provider.exitExploreSessionAndRestoreHome();
+    }
+
+    context.pop();
+
+    if (!fromExplore) {
+      provider.refreshFromHome();
+    }
   }
 
   @override
@@ -75,7 +85,7 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) {
-          _exitToHome();
+          _exitReading();
         }
       },
       child: Scaffold(
@@ -134,16 +144,27 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
                     context,
                     title: currentReading.question,
                     imageUrl: currentReading.imgUrl,
-                    onBackTap: _exitToHome,
+                    onBackTap: _exitReading,
                     onBookmarkTap: () {},
                   ),
                   Expanded(
-                    child: SingleChildScrollView(
-                      controller: _scrollController,
-                      padding: EdgeInsets.fromLTRB(25.w, 20.h, 25.w, 0),
-                      physics: const BouncingScrollPhysics(),
-                      child: CuriosityReadingContent(reading: currentReading),
-                    ),
+                    child: provider.isLoadingReadingBody
+                        ? Center(
+                            child: SizedBox(
+                              width: 28.w,
+                              height: 28.w,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.teal,
+                              ),
+                            ),
+                          )
+                        : SingleChildScrollView(
+                            controller: _scrollController,
+                            padding: EdgeInsets.fromLTRB(25.w, 20.h, 25.w, 0),
+                            physics: const BouncingScrollPhysics(),
+                            child: CuriosityReadingContent(reading: currentReading),
+                          ),
                   ),
                 ],
               ),

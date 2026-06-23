@@ -13,6 +13,7 @@ import 'package:redstreakapp/providers/profile/edit_profile_provider.dart';
 import 'package:redstreakapp/providers/profile/group_provider.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
 import 'package:redstreakapp/providers/profile/your_books_provider.dart';
+import 'package:redstreakapp/providers/explore/explore_provider.dart';
 
 /// Clears in-memory user data from all [ChangeNotifier] providers so the next
 /// login starts with a clean slate. Uses [context] if provided, otherwise
@@ -33,4 +34,5 @@ void resetAppProvidersForNewUser([BuildContext? context]) {
   ctx.read<YourBooksProvider>().clearSessionData();
   ctx.read<OnBoardingProvider>().clearSelections();
   ctx.read<CuriosityReadingProvider>().resetForNewSession();
+  ctx.read<ExploreProvider>().clearSessionData();
 }

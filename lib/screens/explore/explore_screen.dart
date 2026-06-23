@@ -1,14 +1,14 @@
+import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
-import 'package:redstreakapp/core/utils/custom_loader.dart';
+import 'package:redstreakapp/models/explore/explore_models.dart';
 import 'package:redstreakapp/models/home/browse_topic_model.dart';
-import 'package:redstreakapp/providers/home/story_provider.dart';
+import 'package:redstreakapp/providers/curiosity_reading/curiosity_reading_provider.dart';
+import 'package:redstreakapp/providers/explore/explore_provider.dart';
+import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/screens/dashboard.dart';
-import 'package:redstreakapp/screens/explore/explore_dummy_data.dart';
-import 'package:redstreakapp/screens/explore/explore_spark_dummy_data.dart';
 import 'package:redstreakapp/screens/explore/explore_constants.dart';
 import 'package:redstreakapp/screens/explore/widgets/explore_widgets.dart';
 import 'package:redstreakapp/screens/search/widgets/search_widgets.dart';
-import 'package:redstreakapp/services/home/home_api_service.dart';
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -22,19 +22,20 @@ class _ExploreScreenState extends State<ExploreScreen> {
   final ScrollController _contentScrollController = ScrollController();
 
   ExploreMainTab _selectedTab = ExploreMainTab.series;
-  final Set<String> _selectedInterestFilters = {};
-  bool _isLoadingProgress = false;
+  final Set<String> _selectedInterestIds = {};
 
   @override
   void initState() {
     super.initState();
     tabIndex.addListener(_handleTabChange);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final storyProvider = context.read<StoryProvider>();
-      if (storyProvider.interestsList.isEmpty) {
-        storyProvider.getStoryInterest(onFailed: (_) {});
-      }
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _bootstrap());
+  }
+
+  Future<void> _bootstrap() async {
+    final provider = context.read<ExploreProvider>();
+    await provider.ensureExploreReady();
+    if (!mounted) return;
+    await _loadCurrentTabContent();
   }
 
   @override
@@ -48,51 +49,160 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   void _handleTabChange() {
     if (!mounted || tabIndex.value != 1) return;
-    if (_searchController.text.isNotEmpty || _selectedInterestFilters.isNotEmpty) {
+    if (_searchController.text.isNotEmpty || _selectedInterestIds.isNotEmpty) {
       setState(() {
         _searchController.clear();
-        _selectedInterestFilters.clear();
+        _selectedInterestIds.clear();
       });
+      _loadCurrentTabContent();
     }
   }
 
   bool get _isSearching => _searchController.text.trim().isNotEmpty;
 
-  void _clearInterestFilters() {
-    setState(() => _selectedInterestFilters.clear());
+  Future<void> _loadCurrentTabContent({bool refresh = false}) async {
+    final provider = context.read<ExploreProvider>();
+    final search = _searchController.text.trim();
+    final filters = Set<String>.from(_selectedInterestIds);
+
+    if (_selectedTab == ExploreMainTab.series) {
+      await provider.loadSeriesContent(
+        search: search,
+        selectedInterestIds: filters,
+        refresh: refresh,
+      );
+    } else {
+      await provider.loadSparkContent(
+        search: search,
+        selectedInterestIds: filters,
+        refresh: refresh,
+      );
+    }
   }
 
-  void _toggleInterestFilter(String interest) {
+  void _clearInterestFilters() {
+    setState(() => _selectedInterestIds.clear());
+    _syncInterestSelection();
+  }
+
+  void _toggleInterestFilter(String interestId) {
     setState(() {
-      if (_selectedInterestFilters.contains(interest)) {
-        _selectedInterestFilters.remove(interest);
+      if (_selectedInterestIds.contains(interestId)) {
+        _selectedInterestIds.remove(interestId);
       } else {
-        _selectedInterestFilters.add(interest);
+        _selectedInterestIds.add(interestId);
       }
     });
+    _syncInterestSelection();
+  }
+
+  void _syncInterestSelection() {
+    final provider = context.read<ExploreProvider>();
+    final filters = Set<String>.from(_selectedInterestIds);
+    if (_selectedTab == ExploreMainTab.series) {
+      provider.syncSeriesInterestSelection(filters);
+    } else {
+      provider.syncSparkInterestSelection(filters);
+    }
+  }
+
+  void _onTabChanged(ExploreMainTab tab) {
+    if (_selectedTab == tab) return;
+    setState(() => _selectedTab = tab);
+    final provider = context.read<ExploreProvider>();
+    final needsLoad = tab == ExploreMainTab.series
+        ? provider.seriesState.forYou == null
+        : provider.sparkState.forYou == null;
+    if (needsLoad) {
+      _loadCurrentTabContent(refresh: true);
+    }
   }
 
   Widget _buildInterestBlock() {
     return ExploreDiscoverByInterest(
-      selectedInterests: _selectedInterestFilters,
+      selectedInterestIds: _selectedInterestIds,
       onInterestToggled: _toggleInterestFilter,
     );
   }
 
-  List<Widget> _buildDummySeriesScrollContent() {
+  void _openTopicSeries(BrowseTopicModel topic) {
+    context.read<HomeProvider>().getTopicStoryDetails(topicId: topic.id);
+    context.pushNamed(
+      AppRoutes.createdStorySummaryScreen.name,
+      extra: topic.id,
+    );
+  }
+
+  void _onSparkItemTap(
+    ExploreSparkItem item,
+    int index,
+    ExplorePagedSection<ExploreSparkItem> section,
+  ) async {
+    final curiosityProvider = context.read<CuriosityReadingProvider>();
+    final exploreProvider = context.read<ExploreProvider>();
+
+    await curiosityProvider.openFromExploreSection(
+      items: section.items,
+      startIndex: index,
+      pagination: section.pagination,
+      loadMoreItems: () =>
+          exploreProvider.loadMoreSparkSectionPage(section.key),
+    );
+
+    if (!mounted) return;
+    if (curiosityProvider.currentReading == null) {
+      AppToast.error(
+        context,
+        curiosityProvider.currentReadingError ??
+            'Could not open this Spark. Please try again.',
+      );
+      return;
+    }
+
+    context.pushNamed(AppRoutes.curiosityReadingScreen.name);
+  }
+
+  List<Widget> _buildSeriesScrollContent(ExploreProvider provider) {
     if (_isSearching) {
+      final section = provider.seriesState.forYou;
+      if (section == null || (section.state == DataState.loading && section.items.isEmpty)) {
+        return const [ExploreContentShimmer()];
+      }
+      if (section.state == DataState.failed && section.items.isEmpty) {
+        return [
+          ExploreInlineError(
+            message: section.error ?? 'Could not load search results.',
+            onRetry: () => provider.retrySeriesSection(ExploreProvider.forYouKey),
+          ),
+        ];
+      }
+      if (section.items.isEmpty) {
+        return [BrowseEmptyState(query: _searchController.text.trim())];
+      }
       return [
-        BrowseEmptyState(query: _searchController.text.trim()),
+        ExploreSeriesSectionView(
+          section: section,
+          onTopicTap: _openTopicSeries,
+          onRetry: () => provider.retrySeriesSection(section.key),
+          onLoadMore: () => provider.loadMoreSeriesSection(section.key),
+        ),
       ];
     }
 
-    final sections =
-        exploreDummySeriesSectionsForFilter(_selectedInterestFilters);
+    final sections = provider.seriesState.visibleSeriesSections;
+    if (sections.isEmpty) {
+      if (provider.isLoadingSeriesContent) {
+        return const [ExploreContentShimmer()];
+      }
+      return const [ExploreSectionEmpty(title: 'series')];
+    }
 
-    if (_selectedInterestFilters.isNotEmpty && sections.isEmpty) {
+    if (_selectedInterestIds.isNotEmpty &&
+        sections.every((section) => section.items.isEmpty) &&
+        sections.every((section) => section.state == DataState.success)) {
       return [
         ExploreFilteredEmptyState(
-          interestLabels: _selectedInterestFilters.toList(),
+          interestLabels: provider.interestLabelsForIds(_selectedInterestIds),
           onClearFilter: _clearInterestFilters,
         ),
       ];
@@ -101,61 +211,57 @@ class _ExploreScreenState extends State<ExploreScreen> {
     return [
       for (var i = 0; i < sections.length; i++) ...[
         if (i > 0) 28.w.verticalSpace,
-        ExploreHorizontalSection(
-          title: sections[i].title,
-          child: ExploreSeriesRow(
-            topics: sections[i].topics,
-            onTopicTap: _openTopicProgress,
-          ),
+        ExploreSeriesSectionView(
+          section: sections[i],
+          onTopicTap: _openTopicSeries,
+          onRetry: () => provider.retrySeriesSection(sections[i].key),
+          onLoadMore: () => provider.loadMoreSeriesSection(sections[i].key),
         ),
       ],
     ];
   }
 
-  Future<void> _openTopicProgress(BrowseTopicModel topic) async {
-    if (_isLoadingProgress) return;
-    setState(() => _isLoadingProgress = true);
-
-    final response = await HomeApiService.instance.getTopicProgress(
-      topicId: topic.id,
-    );
-
-    if (!mounted) return;
-    setState(() => _isLoadingProgress = false);
-
-    response.fold(
-      (error) => AppToast.error(context, error.errorMsg),
-      (result) {
-        final data = result['data'] ?? result;
-        final readings = data['readings'];
-        final list = readings is List ? readings : <dynamic>[];
-        if (list.isEmpty) {
-          AppToast.info(context: context, message: 'No readings found');
-          return;
-        }
-        context.pushNamed(
-          AppRoutes.randomStorySeriesScreen.name,
-          extra: {'progress': result, 'searchTopic': topic.toJson()},
-        );
-      },
-    );
-  }
-
-  void _onSparkItemTap(ExploreSparkItem item) {
-    AppToast.info(context: context, message: item.question);
-  }
-
-  List<Widget> _buildSparkScrollContent() {
+  List<Widget> _buildSparkScrollContent(ExploreProvider provider) {
     if (_isSearching) {
-      return [BrowseEmptyState(query: _searchController.text.trim())];
+      final section = provider.sparkState.forYou;
+      if (section == null || (section.state == DataState.loading && section.items.isEmpty)) {
+        return const [ExploreSparkContentShimmer()];
+      }
+      if (section.state == DataState.failed && section.items.isEmpty) {
+        return [
+          ExploreInlineError(
+            message: section.error ?? 'Could not load search results.',
+            onRetry: () => provider.retrySparkSection(ExploreProvider.forYouKey),
+          ),
+        ];
+      }
+      if (section.items.isEmpty) {
+        return [BrowseEmptyState(query: _searchController.text.trim())];
+      }
+      return [
+        ExploreSparkSectionView(
+          section: section,
+          onItemTap: (item, index) => _onSparkItemTap(item, index, section),
+          onRetry: () => provider.retrySparkSection(section.key),
+          onLoadMore: () => provider.loadMoreSparkSection(section.key),
+        ),
+      ];
     }
 
-    final sections = exploreDummySparkSectionsForFilter(_selectedInterestFilters);
+    final sections = provider.sparkState.visibleSparkSections;
+    if (sections.isEmpty) {
+      if (provider.isLoadingSparkContent) {
+        return const [ExploreSparkContentShimmer()];
+      }
+      return const [ExploreSectionEmpty(title: 'spark')];
+    }
 
-    if (_selectedInterestFilters.isNotEmpty && sections.isEmpty) {
+    if (_selectedInterestIds.isNotEmpty &&
+        sections.every((section) => section.items.isEmpty) &&
+        sections.every((section) => section.state == DataState.success)) {
       return [
         ExploreFilteredEmptyState(
-          interestLabels: _selectedInterestFilters.toList(),
+          interestLabels: provider.interestLabelsForIds(_selectedInterestIds),
           onClearFilter: _clearInterestFilters,
         ),
       ];
@@ -164,12 +270,12 @@ class _ExploreScreenState extends State<ExploreScreen> {
     return [
       for (var i = 0; i < sections.length; i++) ...[
         if (i > 0) 28.w.verticalSpace,
-        ExploreHorizontalSection(
-          title: sections[i].title,
-          child: ExploreSparkItemsRow(
-            items: sections[i].items,
-            onItemTap: _onSparkItemTap,
-          ),
+        ExploreSparkSectionView(
+          section: sections[i],
+          onItemTap: (item, index) =>
+              _onSparkItemTap(item, index, sections[i]),
+          onRetry: () => provider.retrySparkSection(sections[i].key),
+          onLoadMore: () => provider.loadMoreSparkSection(sections[i].key),
         ),
       ],
     ];
@@ -178,75 +284,66 @@ class _ExploreScreenState extends State<ExploreScreen> {
   void _onSearchChanged(String value) {
     setState(() {});
     deBouncer.run(() {
-      if (mounted) setState(() {});
+      if (!mounted) return;
+      _loadCurrentTabContent();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final storyProvider = context.watch<StoryProvider>();
+    final exploreProvider = context.watch<ExploreProvider>();
 
-    return Stack(
-      children: [
-        AppLayout(
-          body: ColoredBox(
-            color: AppColors.white,
-            child: SafeArea(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        ExploreSearchField(
-                          controller: _searchController,
-                          onChanged: _onSearchChanged,
-                        ),
-                        20.w.verticalSpace,
-                        ExploreTabBar(
-                          selectedTab: _selectedTab,
-                          onTabChanged: (tab) {
-                            setState(() => _selectedTab = tab);
-                          },
-                        ),
-                        24.w.verticalSpace,
-                        _buildInterestBlock(),
-                      ],
+    return AppLayout(
+      body: ColoredBox(
+        color: AppColors.white,
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ExploreSearchField(
+                      controller: _searchController,
+                      onChanged: _onSearchChanged,
                     ),
-                  ),
-                  Expanded(
-                    child: RefreshIndicator(
-                      color: AppColors.teal,
-                      backgroundColor: AppColors.white,
-                      onRefresh: () async {
-                        if (storyProvider.interestsList.isEmpty) {
-                          await storyProvider.getStoryInterest(
-                            onFailed: (_) {},
-                          );
-                        }
-                        setState(() {});
-                      },
-                      child: ListView(
-                        controller: _contentScrollController,
-                        physics: const AlwaysScrollableScrollPhysics(
-                          parent: BouncingScrollPhysics(),
-                        ),
-                        padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
-                        children: _selectedTab == ExploreMainTab.series
-                            ? _buildDummySeriesScrollContent()
-                            : _buildSparkScrollContent(),
-                      ),
+                    20.w.verticalSpace,
+                    ExploreTabBar(
+                      selectedTab: _selectedTab,
+                      onTabChanged: _onTabChanged,
                     ),
-                  ),
-                ],
+                    24.w.verticalSpace,
+                    _buildInterestBlock(),
+                  ],
+                ),
               ),
-            ),
+              Expanded(
+                child: RefreshIndicator(
+                  color: AppColors.teal,
+                  backgroundColor: AppColors.white,
+                  onRefresh: () => exploreProvider.refreshCurrentTab(
+                    tab: _selectedTab,
+                    search: _searchController.text.trim(),
+                    selectedInterestIds: _selectedInterestIds,
+                  ),
+                  child: ListView(
+                    controller: _contentScrollController,
+                    physics: const AlwaysScrollableScrollPhysics(
+                      parent: BouncingScrollPhysics(),
+                    ),
+                    padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
+                    children: _selectedTab == ExploreMainTab.series
+                        ? _buildSeriesScrollContent(exploreProvider)
+                        : _buildSparkScrollContent(exploreProvider),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        if (_isLoadingProgress) const FullPageIndicator(),
-      ],
+      ),
     );
   }
 }

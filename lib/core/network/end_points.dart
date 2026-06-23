@@ -171,9 +171,21 @@ class EndPoints {
   }) =>
       '/mobile/friends/users/$userId/profile/list?section=$section&page=$page&limit=$limit&groupType=$groupType';
 
+  // Mobile Explorer endpoints
+  static const explorerDiscoverInterests = '/mobile/explorer/discover-interests';
+  static const explorerSeriesForYou = '/mobile/explorer/series/for-you';
+  static const explorerSeriesPopular = '/mobile/explorer/series/popular';
+  static const explorerSeriesInterest = '/mobile/explorer/series/interest';
+  static const explorerSparkForYou = '/mobile/explorer/spark/for-you';
+  static const explorerSparkPopular = '/mobile/explorer/spark/popular';
+  static const explorerSparkInterest = '/mobile/explorer/spark/interest';
+
   // Curiosity Reading endpoints
   static getCuriosityReading({int page = 1, int limit = 10}) =>
       "/mobile/curiosity/feed?includeBody=true&limit=$limit&page=$page";
+
+  static String getCuriosityReadingById({required String readingId}) =>
+      '/mobile/curiosity/readings/$readingId?includeBody=true';
 
   static curiosityReadingInteract({required String readingId}) =>
       '/mobile/curiosity/readings/$readingId/interact';
