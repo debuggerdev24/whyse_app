@@ -26,6 +26,9 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
       if (!mounted) return;
       _provider = context.read<CuriosityReadingProvider>();
       _provider!.markReadingScreenActive();
+      if (_provider!.openedFromExplore && _provider!.isLoadingReadingBody) {
+        _provider!.loadExploreSessionBody();
+      }
     });
   }
 
@@ -92,6 +95,11 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
         backgroundColor: AppColors.white,
         body: Consumer<CuriosityReadingProvider>(
           builder: (context, provider, child) {
+            if (provider.isGettingCuriosityReading ||
+                provider.isLoadingReadingBody) {
+              return const CuriosityReadingScreenShimmer();
+            }
+
             if (provider.curiosityReading == null) {
               if (!provider.isGettingCuriosityReading) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -148,23 +156,12 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
                     onBookmarkTap: () {},
                   ),
                   Expanded(
-                    child: provider.isLoadingReadingBody
-                        ? Center(
-                            child: SizedBox(
-                              width: 28.w,
-                              height: 28.w,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: AppColors.teal,
-                              ),
-                            ),
-                          )
-                        : SingleChildScrollView(
-                            controller: _scrollController,
-                            padding: EdgeInsets.fromLTRB(25.w, 20.h, 25.w, 0),
-                            physics: const BouncingScrollPhysics(),
-                            child: CuriosityReadingContent(reading: currentReading),
-                          ),
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      padding: EdgeInsets.fromLTRB(25.w, 20.h, 25.w, 0),
+                      physics: const BouncingScrollPhysics(),
+                      child: CuriosityReadingContent(reading: currentReading),
+                    ),
                   ),
                 ],
               ),

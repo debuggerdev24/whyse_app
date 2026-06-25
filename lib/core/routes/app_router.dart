@@ -398,7 +398,9 @@ class AppRouter {
       path: AppRoutes.createdStorySummaryScreen.path,
       name: AppRoutes.createdStorySummaryScreen.name,
       builder: (context, state) {
-        return MyStoryIdeasScreen();
+        final extra = state.extra;
+        final topicId = extra is String ? extra : null;
+        return MyStoryIdeasScreen(initialTopicId: topicId);
       },
     ),
     GoRoute(

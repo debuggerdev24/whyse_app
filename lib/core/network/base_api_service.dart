@@ -100,11 +100,11 @@ class DioClient {
     );
     _dio.interceptors.add(
       PrettyDioLogger(
-        request: true,
-        requestBody: true,
-        requestHeader: true,
-        filter: (options, _) =>
-            options.extra[kEnableApiLoggingKey] != false,
+        // request: true,
+        // requestBody: true,
+        // requestHeader: true,
+        // filter: (options, _) =>
+        //     options.extra[kEnableApiLoggingKey] != false,
       ),
     );
   }

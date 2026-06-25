@@ -24,9 +24,14 @@ import 'package:redstreakapp/screens/home/widgets/story_ui_components.dart';
 import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
 
 class MyStoryIdeasScreen extends StatefulWidget {
-  const MyStoryIdeasScreen({super.key, this.preferGeneratedData = false});
+  const MyStoryIdeasScreen({
+    super.key,
+    this.preferGeneratedData = false,
+    this.initialTopicId,
+  });
 
   final bool preferGeneratedData;
+  final String? initialTopicId;
 
   @override
   State<MyStoryIdeasScreen> createState() => _MyStoryIdeasScreenState();
@@ -35,6 +40,7 @@ class MyStoryIdeasScreen extends StatefulWidget {
 class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _waitingForGeneratedFirstResponse = true;
+  bool _showTopicDetailsShimmer = false;
   String? _topicIdForScreen;
 
   // Local progress overlay used in the generation flow before the API summary
@@ -179,7 +185,41 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
   void initState() {
     super.initState();
     _waitingForGeneratedFirstResponse = widget.preferGeneratedData;
+    _showTopicDetailsShimmer = !widget.preferGeneratedData;
+    _topicIdForScreen = widget.initialTopicId;
     _scrollController.addListener(_onScroll);
+
+    final initialTopicId = widget.initialTopicId;
+    if (!widget.preferGeneratedData && initialTopicId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final homeProvider = context.read<HomeProvider>();
+        if (homeProvider.isRefreshingStoryIdeas) return;
+        if (homeProvider.storySummary?.topicId == initialTopicId) return;
+        homeProvider.getTopicStoryDetails(topicId: initialTopicId);
+      });
+    }
+  }
+
+  bool _isTopicDetailsReady(HomeProvider homeProvider) {
+    final expectedTopicId =
+        widget.initialTopicId ??
+        _topicIdForScreen ??
+        homeProvider.activeStoryIdeasTopicId;
+    if (expectedTopicId == null || expectedTopicId.isEmpty) return false;
+    return homeProvider.storySummary?.topicId == expectedTopicId &&
+        !homeProvider.isRefreshingStoryIdeas &&
+        !homeProvider.isStoryIdeasLoading;
+  }
+
+  void _clearTopicDetailsShimmerIfReady(HomeProvider homeProvider) {
+    if (!_showTopicDetailsShimmer || !_isTopicDetailsReady(homeProvider)) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() => _showTopicDetailsShimmer = false);
+    });
   }
 
   @override
@@ -335,9 +375,14 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
             // Track the topic this screen should operate on (especially important
             // for generation flow where HomeProvider may still hold an old topic id).
             _topicIdForScreen ??=
-                generatedSummary?.topicId ?? homeProvider.storySummary?.topicId;
+                widget.initialTopicId ??
+                generatedSummary?.topicId ??
+                homeProvider.storySummary?.topicId;
+
             if (generatedSummary != null) {
-              _topicIdForScreen = generatedSummary.topicId;
+              if (widget.preferGeneratedData) {
+                _topicIdForScreen = generatedSummary.topicId;
+              }
               if (widget.preferGeneratedData &&
                   homeProvider.activeStoryIdeasTopicId !=
                       generatedSummary.topicId) {
@@ -361,15 +406,21 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
               return HomeSectionShimmer.createdStoryIdeasLoadingShimmer();
             }
 
-            // For the new-generation flow (preferGeneratedData == true):
-            //   Before any reading: show ONLY the freshly generated data.
-            //   Falling back to homeProvider.storySummary would show stale data
-            //   from a previous topic if generation failed or is still loading.
-            //   After returning from a reading session: prefer the refreshed API
-            //   data (which includes read-progress) then fall back to generated.
-            // For existing topics (preferGeneratedData == false):
-            //   Use homeProvider.storySummary only — ignore any leftover
-            //   generatedSummary from a previous generation flow.
+            _clearTopicDetailsShimmerIfReady(homeProvider);
+
+            final shouldShowTopicDetailsShimmer =
+                !widget.preferGeneratedData &&
+                (_showTopicDetailsShimmer ||
+                    homeProvider.isRefreshingStoryIdeas ||
+                    homeProvider.isStoryIdeasLoading ||
+                    homeProvider.isGenerateSeriesLoading ||
+                    storyProvider.isGenerateStoryIdeasLoading ||
+                    !_isTopicDetailsReady(homeProvider));
+
+            if (shouldShowTopicDetailsShimmer) {
+              return HomeSectionShimmer.createdStoryIdeasLoadingShimmer();
+            }
+
             final apiSummaryMatchesGenerated =
                 homeProvider.storySummary != null &&
                 generatedSummary != null &&
@@ -390,14 +441,6 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                 (selectedSummary != null && selectedSummary == generatedSummary)
                 ? _applyLocalReadingOverlay(selectedSummary)
                 : selectedSummary;
-
-            if (homeProvider.isStoryIdeasLoading ||
-                homeProvider.isGenerateSeriesLoading ||
-                homeProvider.isRefreshingStoryIdeas ||
-                (displaySummary == null &&
-                    storyProvider.isGenerateStoryIdeasLoading)) {
-              return HomeSectionShimmer.createdStoryIdeasLoadingShimmer();
-            }
 
             if (displaySummary == null) {
               final errorMsg =

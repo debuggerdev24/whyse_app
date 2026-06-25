@@ -154,12 +154,12 @@ class CuriosityReadingProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> openFromExploreSection({
+  void beginExploreSession({
     required List<ExploreSparkItem> items,
     required int startIndex,
     required ExplorePagination pagination,
     required ExploreSparkLoadMore loadMoreItems,
-  }) async {
+  }) {
     if (items.isEmpty) return;
 
     _openedFromExplore = true;
@@ -168,11 +168,11 @@ class CuriosityReadingProvider extends ChangeNotifier {
       pagination: pagination,
     );
 
-    isGettingCuriosityReading = true;
     currentReadingError = null;
-    notifyListeners();
+    isGettingCuriosityReading = false;
 
-    final readings = items.map((item) => readingFromSparkJson(item.rawJson)).toList();
+    final readings =
+        items.map((item) => readingFromSparkJson(item.rawJson)).toList();
     curiosityReading = CuriosityReadingModel(
       success: true,
       data: CuriosityReadingData(
@@ -183,10 +183,17 @@ class CuriosityReadingProvider extends ChangeNotifier {
     _currentIndex = startIndex.clamp(0, readings.length - 1);
     _sessionId = 'explore-spark-${DateTime.now().millisecondsSinceEpoch}';
 
-    await _ensureCurrentReadingBody();
-
-    isGettingCuriosityReading = false;
+    final reading = currentReading;
+    final needsBody =
+        reading != null &&
+        (!reading.hasBody || reading.body.article.trim().isEmpty);
+    isLoadingReadingBody = needsBody;
     notifyListeners();
+  }
+
+  Future<void> loadExploreSessionBody() async {
+    if (!_openedFromExplore || !isLoadingReadingBody) return;
+    await _ensureCurrentReadingBody();
   }
 
   Future<void> _ensureCurrentReadingBody() async {

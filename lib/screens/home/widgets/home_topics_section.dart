@@ -93,13 +93,15 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
                             (index) => StoryCard(
                               story: list[index],
                               onTap: () {
-                                provider.getTopicStoryDetails(
-                                  topicId: list[index].id,
+                                final topicId = list[index].id;
+                                provider.beginTopicStoryDetailsLoad(
+                                  topicId: topicId,
                                 );
+                                provider.getTopicStoryDetails(topicId: topicId);
                                 context
                                     .pushNamed(
                                       AppRoutes.createdStorySummaryScreen.name,
-                                      extra: list[index].id,
+                                      extra: topicId,
                                     )
                                     .then((_) {
                                       if (!context.mounted) return;

@@ -9,6 +9,13 @@ import 'package:redstreakapp/providers/explore/explore_provider.dart';
 import 'package:redstreakapp/screens/explore/explore_constants.dart';
 import 'package:redstreakapp/screens/search/widgets/search_widgets.dart';
 
+double exploreSeriesCardHeight(BuildContext context) {
+  final textScaler = MediaQuery.textScalerOf(context);
+  final titleLine = textScaler.scale(17.sp) * 1.2;
+  final subtitleLine = textScaler.scale(13.sp) * 1.2;
+  return 150.w + 12.h + 4.h + titleLine + 14.h + subtitleLine + 6.h;
+}
+
 class ExploreSearchField extends StatefulWidget {
   const ExploreSearchField({
     super.key,
@@ -679,7 +686,7 @@ class ExploreSeriesCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: 220.w,
-        margin: EdgeInsets.all( 5.w),
+        margin: EdgeInsets.only(right: 14.w),
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(24.r),
@@ -693,6 +700,7 @@ class ExploreSeriesCard extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SizedBox(
@@ -710,7 +718,7 @@ class ExploreSeriesCard extends StatelessWidget {
                     ),
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 14.w, 16.w, 4.w),
+              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 4.h),
               child: AppText(
                 text: topic.topic,
                 style: AppTextStyles.bold(fontSize: 17.sp),
@@ -719,7 +727,7 @@ class ExploreSeriesCard extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.w),
+              padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 14.h),
               child: AppText(
                 text: seriesReadingsLabel(topic),
                 style: AppTextStyles.medium(
@@ -959,9 +967,10 @@ class _ExploreSeriesRowState extends State<ExploreSeriesRow> {
 
     final itemCount =
         widget.topics.length + (widget.isLoadingMore ? 1 : 0);
+    final rowHeight = exploreSeriesCardHeight(context);
 
     return SizedBox(
-      height: 232.w,
+      height: rowHeight,
       child: ListView.builder(
         controller: _scrollController,
         scrollDirection: Axis.horizontal,
@@ -1140,14 +1149,16 @@ class ExploreSeriesRowShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rowHeight = exploreSeriesCardHeight(context);
+
     return AppSkeletonizer(
       child: SizedBox(
-        height: 232.w,
+        height: rowHeight,
         child: Row(
           children: [
-            AppSkeletonBox(width: 220, height: 232, borderRadius: 24),
+            AppSkeletonBox(width: 220, height: rowHeight, borderRadius: 24),
             16.w.horizontalSpace,
-            AppSkeletonBox(width: 220, height: 232, borderRadius: 24),
+            AppSkeletonBox(width: 220, height: rowHeight, borderRadius: 24),
           ],
         ),
       ),

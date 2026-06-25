@@ -126,7 +126,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
   void _openTopicSeries(BrowseTopicModel topic) {
-    context.read<HomeProvider>().getTopicStoryDetails(topicId: topic.id);
+    final homeProvider = context.read<HomeProvider>();
+    homeProvider.beginTopicStoryDetailsLoad(topicId: topic.id);
+    homeProvider.getTopicStoryDetails(topicId: topic.id);
     context.pushNamed(
       AppRoutes.createdStorySummaryScreen.name,
       extra: topic.id,
@@ -137,11 +139,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
     ExploreSparkItem item,
     int index,
     ExplorePagedSection<ExploreSparkItem> section,
-  ) async {
+  ) {
     final curiosityProvider = context.read<CuriosityReadingProvider>();
     final exploreProvider = context.read<ExploreProvider>();
 
-    await curiosityProvider.openFromExploreSection(
+    curiosityProvider.beginExploreSession(
       items: section.items,
       startIndex: index,
       pagination: section.pagination,
@@ -149,7 +151,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
           exploreProvider.loadMoreSparkSectionPage(section.key),
     );
 
-    if (!mounted) return;
     if (curiosityProvider.currentReading == null) {
       AppToast.error(
         context,
@@ -160,6 +161,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
     }
 
     context.pushNamed(AppRoutes.curiosityReadingScreen.name);
+    curiosityProvider.loadExploreSessionBody();
   }
 
   List<Widget> _buildSeriesScrollContent(ExploreProvider provider) {

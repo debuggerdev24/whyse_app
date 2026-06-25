@@ -509,80 +509,103 @@ class StoryIdeasLoadingShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      physics: const NeverScrollableScrollPhysics(),
+    return AppSkeletonizer(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _StoryIdeasShimmerBox(
+          Container(
             width: double.infinity,
-            height: 310.w,
-            borderRadius: 0,
+            height: 310.h,
+            color: AppColors.shimmerBaseColor,
           ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                18.w.verticalSpace,
-                const _StoryIdeasShimmerBox(
-                  width: double.infinity,
-                  height: 38,
-                  borderRadius: 8,
-                ),
-                10.w.verticalSpace,
-                Row(
-                  children: const [
-                    _StoryIdeasShimmerBox(
-                      width: 84,
-                      height: 28,
-                      borderRadius: 999,
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  18.h.verticalSpace,
+                  Container(
+                    width: double.infinity,
+                    height: 38.h,
+                    decoration: BoxDecoration(
+                      color: AppColors.shimmerBaseColor,
+                      borderRadius: BorderRadius.circular(8.r),
                     ),
-                    SizedBox(width: 8),
-                    _StoryIdeasShimmerBox(
-                      width: 78,
-                      height: 28,
-                      borderRadius: 999,
+                  ),
+                  10.h.verticalSpace,
+                  Row(
+                    children: [
+                      Container(
+                        width: 84.w,
+                        height: 28.h,
+                        decoration: BoxDecoration(
+                          color: AppColors.shimmerBaseColor,
+                          borderRadius: BorderRadius.circular(999.r),
+                        ),
+                      ),
+                      8.w.horizontalSpace,
+                      Container(
+                        width: 78.w,
+                        height: 28.h,
+                        decoration: BoxDecoration(
+                          color: AppColors.shimmerBaseColor,
+                          borderRadius: BorderRadius.circular(999.r),
+                        ),
+                      ),
+                    ],
+                  ),
+                  20.h.verticalSpace,
+                  Container(
+                    width: double.infinity,
+                    height: 48.h,
+                    decoration: BoxDecoration(
+                      color: AppColors.shimmerBaseColor,
+                      borderRadius: BorderRadius.circular(999.r),
                     ),
-                  ],
-                ),
-                20.w.verticalSpace,
-                const _StoryIdeasShimmerBox(
-                  width: double.infinity,
-                  height: 48,
-                  borderRadius: 999,
-                ),
-                18.w.verticalSpace,
-                Row(
-                  children: const [
-                    _StoryIdeasShimmerBox(
-                      width: 80,
-                      height: 44,
-                      borderRadius: 8,
+                  ),
+                  18.h.verticalSpace,
+                  Row(
+                    children: [
+                      Container(
+                        width: 80.w,
+                        height: 44.h,
+                        decoration: BoxDecoration(
+                          color: AppColors.shimmerBaseColor,
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                      ),
+                      25.w.horizontalSpace,
+                      Container(
+                        width: 72.w,
+                        height: 44.h,
+                        decoration: BoxDecoration(
+                          color: AppColors.shimmerBaseColor,
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                      ),
+                    ],
+                  ),
+                  16.h.verticalSpace,
+                  Container(
+                    width: double.infinity,
+                    height: 1.h,
+                    color: AppColors.shimmerBaseColor,
+                  ),
+                  18.h.verticalSpace,
+                  Container(
+                    width: 180.w,
+                    height: 18.h,
+                    decoration: BoxDecoration(
+                      color: AppColors.shimmerBaseColor,
+                      borderRadius: BorderRadius.circular(6.r),
                     ),
-                    SizedBox(width: 25),
-                    _StoryIdeasShimmerBox(
-                      width: 72,
-                      height: 44,
-                      borderRadius: 8,
-                    ),
-                  ],
-                ),
-                16.w.verticalSpace,
-                const _StoryIdeasShimmerBox(
-                  width: double.infinity,
-                  height: 1,
-                  borderRadius: 1,
-                ),
-                18.w.verticalSpace,
-                const _StoryIdeasShimmerBox(
-                  width: 180,
-                  height: 18,
-                  borderRadius: 6,
-                ),
-                18.w.verticalSpace,
-                ...List.generate(4, (_) => const StoryIdeaEpisodeShimmer()),
-              ],
+                  ),
+                  18.h.verticalSpace,
+                  ...List.generate(4, (_) => const StoryIdeaEpisodeShimmer()),
+                ],
+              ),
             ),
           ),
         ],
@@ -596,8 +619,13 @@ class StoryIdeasLoadMoreShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [StoryIdeaEpisodeShimmer(), StoryIdeaEpisodeShimmer()],
+    return AppSkeletonizer(
+      child: Column(
+        children: const [
+          StoryIdeaEpisodeShimmer(),
+          StoryIdeaEpisodeShimmer(),
+        ],
+      ),
     );
   }
 }
@@ -663,13 +691,12 @@ class _StoryIdeasShimmerBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppSkeletonizer(child: Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(borderRadius),
-        ),
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: AppColors.shimmerBaseColor,
+        borderRadius: BorderRadius.circular(borderRadius),
       ),
     );
   }

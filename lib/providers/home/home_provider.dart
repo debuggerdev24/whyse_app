@@ -379,6 +379,16 @@ class HomeProvider extends ChangeNotifier {
 
   // True while [getTopicStoryDetails] is in progress.
   bool isRefreshingStoryIdeas = false;
+  int _topicDetailsRequestId = 0;
+
+  /// Sets loading UI synchronously before navigating to [MyStoryIdeasScreen].
+  void beginTopicStoryDetailsLoad({required String topicId}) {
+    activeStoryIdeasTopicId = topicId;
+    storySummary = null;
+    storyIdeasError = null;
+    isRefreshingStoryIdeas = true;
+    notifyListeners();
+  }
 
   // Fetches already-generated story ideas for a topic using the mobile GET
   // endpoint (/story/mobile/topics/{id}/story-ideas).
@@ -395,11 +405,10 @@ class HomeProvider extends ChangeNotifier {
     required String topicId,
     bool showLoadingUi = true,
   }) async {
-    if (showLoadingUi && isRefreshingStoryIdeas) return;
-
+    final requestId = ++_topicDetailsRequestId;
     final isSameTopic = activeStoryIdeasTopicId == topicId;
+
     if (showLoadingUi && !isSameTopic) {
-      // Different topic — clear stale data so the ideas screen shows a shimmer.
       storySummary = null;
       storyIdeasError = null;
       activeStoryIdeasTopicId = topicId;
@@ -414,10 +423,12 @@ class HomeProvider extends ChangeNotifier {
       topicId: topicId,
     );
 
+    if (requestId != _topicDetailsRequestId) return;
+
     response.fold(
       (l) {
         Logger.error(l.errorMsg);
-        if (showLoadingUi && !isSameTopic) {
+        if (showLoadingUi) {
           storyIdeasError = l.errorMsg;
         }
       },
@@ -431,7 +442,7 @@ class HomeProvider extends ChangeNotifier {
           }
         } catch (e, stack) {
           Logger.error("Error parsing mobile story-ideas: $e\n$stack");
-          if (showLoadingUi && !isSameTopic) {
+          if (showLoadingUi) {
             storyIdeasError = "Something went wrong. Please try again.";
           }
         }

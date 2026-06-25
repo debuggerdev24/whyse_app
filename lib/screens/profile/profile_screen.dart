@@ -1330,12 +1330,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           return _SavedSeriesCard(
             item: item,
             onTap: () {
-              context.read<HomeProvider>().getTopicStoryDetails(
-                topicId: item.topic.id,
-              );
+              final topicId = item.topic.id;
+              final homeProvider = context.read<HomeProvider>();
+              homeProvider.beginTopicStoryDetailsLoad(topicId: topicId);
+              homeProvider.getTopicStoryDetails(topicId: topicId);
               context.pushNamed(
                 AppRoutes.createdStorySummaryScreen.name,
-                extra: item.topic.id,
+                extra: topicId,
               );
             },
           );

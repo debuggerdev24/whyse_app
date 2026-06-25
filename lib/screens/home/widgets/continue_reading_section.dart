@@ -80,6 +80,7 @@ class _ContinueReadingSectionState extends State<ContinueReadingSection>
     final topicId = item.topic.id;
     if (topicId.isEmpty) return;
     final hp = context.read<HomeProvider>();
+    hp.beginTopicStoryDetailsLoad(topicId: topicId);
     hp.getTopicStoryDetails(topicId: topicId);
     if (!context.mounted) return;
     context
