@@ -1,91 +1,132 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
-
-class LeaderboardEntry {
-  const LeaderboardEntry({
-    required this.rank,
-    required this.name,
-    required this.points,
-    this.isCurrentUser = false,
-  });
-
-  final int rank;
-  final String name;
-  final int points;
-  final bool isCurrentUser;
-}
-
-const _leaderboardEntries = [
-  LeaderboardEntry(rank: 1, name: 'Emma Rodriguez', points: 43),
-  LeaderboardEntry(rank: 2, name: 'Liam Kumar', points: 40),
-  LeaderboardEntry(rank: 3, name: 'Sofia Mendes', points: 38),
-  LeaderboardEntry(rank: 4, name: 'Noah Patel', points: 35),
-  LeaderboardEntry(rank: 5, name: 'You', points: 32, isCurrentUser: true),
-  LeaderboardEntry(rank: 6, name: 'Ava Chen', points: 28),
-  LeaderboardEntry(rank: 7, name: 'Lucas Brown', points: 24),
-  LeaderboardEntry(rank: 8, name: 'Mia Johnson', points: 20),
-  LeaderboardEntry(rank: 9, name: 'Ethan Davis', points: 16),
-  LeaderboardEntry(rank: 10, name: 'Isla Wilson', points: 12),
-];
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
+import 'package:redstreakapp/models/gamification/leaderboard_model.dart';
+import 'package:redstreakapp/providers/gamification/gamification_provider.dart';
 
 class AchivementsFriendsTab extends StatelessWidget {
   const AchivementsFriendsTab({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final podium = _leaderboardEntries.take(3).toList();
-    final listEntries = _leaderboardEntries.skip(3).toList();
-    final subtitleColor = AppColors.black.withValues(alpha: 0.45);
+    return Consumer<GamificationProvider>(
+      builder: (context, gp, _) {
+        if (gp.isLoadingLeaderboard && gp.friendsLeaderboard == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-    return ListView(
-      padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 24.h),
-      children: [
-        AppText(
-          text: 'Leaderboard',
-          style: AppTextStyles.semiBold(
-            fontSize: 18.sp,
-            color: AppColors.black,
-          ),
-        ),
-        20.h.verticalSpace,
-        _LeaderboardPodium(
-          second: podium[1],
-          first: podium[0],
-          third: podium[2],
-        ),
-        24.h.verticalSpace,
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(20.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 14,
-                offset: const Offset(0, 4),
+        final board = gp.friendsLeaderboard;
+        if (board == null || board.entries.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: EdgeInsets.all(24.w),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AppText(
+                    text: gp.leaderboardError ??
+                        'No leaderboard data yet. Complete Sparks or Episodes to earn points.',
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.medium(
+                      fontSize: 14.sp,
+                      color: AppColors.black.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  16.h.verticalSpace,
+                  AppFilledButton(
+                    text: 'Retry',
+                    backgroundColor: AppColors.teal,
+                    onTap: () => gp.fetchLeaderboard(scope: 'friends'),
+                  ),
+                ],
               ),
+            ),
+          );
+        }
+
+        final entries = board.entries;
+        final podium = entries.take(3).toList();
+        final listEntries = entries.length > 3 ? entries.skip(3).toList() : <LeaderboardEntryModel>[];
+        final subtitleColor = AppColors.black.withValues(alpha: 0.45);
+
+        return RefreshIndicator(
+          onRefresh: () => gp.fetchLeaderboard(scope: 'friends'),
+          child: ListView(
+            padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 24.h),
+            children: [
+              AppText(
+                text: 'Leaderboard',
+                style: AppTextStyles.semiBold(
+                  fontSize: 18.sp,
+                  color: AppColors.black,
+                ),
+              ),
+              if (board.yourRank != null) ...[
+                8.h.verticalSpace,
+                AppText(
+                  text:
+                      'Your rank: #${board.yourRank!.rank} · ${board.yourRank!.totalScore} pts',
+                  style: AppTextStyles.medium(
+                    fontSize: 13.sp,
+                    color: subtitleColor,
+                  ),
+                ),
+              ],
+              20.h.verticalSpace,
+              if (podium.length >= 3)
+                _LeaderboardPodium(
+                  second: podium[1],
+                  first: podium[0],
+                  third: podium[2],
+                )
+              else if (podium.isNotEmpty)
+                ...podium.map(
+                  (e) => Padding(
+                    padding: EdgeInsets.only(bottom: 12.h),
+                    child: _LeaderboardListTile(
+                      entry: e,
+                      subtitleColor: subtitleColor,
+                    ),
+                  ),
+                ),
+              if (listEntries.isNotEmpty) ...[
+                24.h.verticalSpace,
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(20.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.06),
+                        blurRadius: 14,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  padding: EdgeInsets.symmetric(vertical: 8.h),
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: listEntries.length,
+                    separatorBuilder: (_, _) => Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: AppColors.black.withValues(alpha: 0.06),
+                      indent: 16.w,
+                      endIndent: 16.w,
+                    ),
+                    itemBuilder: (context, index) {
+                      return _LeaderboardListTile(
+                        entry: listEntries[index],
+                        subtitleColor: subtitleColor,
+                      );
+                    },
+                  ),
+                ),
+              ],
             ],
           ),
-          padding: EdgeInsets.symmetric(vertical: 8.h),
-          child: ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: listEntries.length,
-            separatorBuilder: (_, _) => Divider(
-              height: 1,
-              thickness: 1,
-              color: AppColors.black.withValues(alpha: 0.06),
-              indent: 16.w,
-              endIndent: 16.w,
-            ),
-            itemBuilder: (context, index) {
-              return _LeaderboardListTile(
-                entry: listEntries[index],
-                subtitleColor: subtitleColor,
-              );
-            },
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
@@ -97,24 +138,20 @@ class _LeaderboardPodium extends StatelessWidget {
     required this.third,
   });
 
-  final LeaderboardEntry first;
-  final LeaderboardEntry second;
-  final LeaderboardEntry third;
+  final LeaderboardEntryModel first;
+  final LeaderboardEntryModel second;
+  final LeaderboardEntryModel third;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Expanded(
-          child: _PodiumPlayer(entry: second, avatarSize: 72.w),
-        ),
+        Expanded(child: _PodiumPlayer(entry: second, avatarSize: 72.w)),
         Expanded(
           child: _PodiumPlayer(entry: first, avatarSize: 96.w, showCrown: true),
         ),
-        Expanded(
-          child: _PodiumPlayer(entry: third, avatarSize: 64.w),
-        ),
+        Expanded(child: _PodiumPlayer(entry: third, avatarSize: 64.w)),
       ],
     );
   }
@@ -127,7 +164,7 @@ class _PodiumPlayer extends StatelessWidget {
     this.showCrown = false,
   });
 
-  final LeaderboardEntry entry;
+  final LeaderboardEntryModel entry;
   final double avatarSize;
   final bool showCrown;
 
@@ -158,11 +195,8 @@ class _PodiumPlayer extends StatelessWidget {
                 color: AppColors.lighttealcolor,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.person_rounded,
-                color: AppColors.teal,
-                size: avatarSize * 0.42,
-              ),
+              clipBehavior: Clip.antiAlias,
+              child: _LeaderboardAvatar(entry: entry, size: avatarSize),
             ),
             Positioned(
               bottom: -8.h,
@@ -185,7 +219,7 @@ class _PodiumPlayer extends StatelessWidget {
         ),
         18.h.verticalSpace,
         AppText(
-          text: entry.name,
+          text: entry.displayName,
           textAlign: TextAlign.center,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -195,7 +229,7 @@ class _PodiumPlayer extends StatelessWidget {
           ),
         ),
         4.h.verticalSpace,
-        _PointsLabel(points: entry.points, color: subtitleColor),
+        _PointsLabel(points: entry.totalScore, color: subtitleColor),
       ],
     );
   }
@@ -207,7 +241,7 @@ class _LeaderboardListTile extends StatelessWidget {
     required this.subtitleColor,
   });
 
-  final LeaderboardEntry entry;
+  final LeaderboardEntryModel entry;
   final Color subtitleColor;
 
   @override
@@ -252,16 +286,13 @@ class _LeaderboardListTile extends StatelessWidget {
               color: AppColors.lighttealcolor,
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              Icons.person_rounded,
-              color: AppColors.teal,
-              size: 18.w,
-            ),
+            clipBehavior: Clip.antiAlias,
+            child: _LeaderboardAvatar(entry: entry, size: 36.w),
           ),
           12.w.horizontalSpace,
           Expanded(
             child: AppText(
-              text: entry.name,
+              text: entry.displayName,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: AppTextStyles.semiBold(
@@ -270,8 +301,70 @@ class _LeaderboardListTile extends StatelessWidget {
               ),
             ),
           ),
-          _PointsLabel(points: entry.points, color: subtitleColor),
+          _PointsLabel(points: entry.totalScore, color: subtitleColor),
         ],
+      ),
+    );
+  }
+}
+
+class _LeaderboardAvatar extends StatelessWidget {
+  const _LeaderboardAvatar({required this.entry, required this.size});
+
+  final LeaderboardEntryModel entry;
+  final double size;
+
+  static const _avatarColors = [
+    AppColors.teal,
+    Color(0xFFE8D9C4),
+    Color(0xFFFFB37A),
+    Color(0xFFFFA8C5),
+    Color(0xFF6B8E9B),
+  ];
+
+  Color get _fallbackColor {
+    final hash = entry.userId.codeUnits.fold<int>(0, (prev, c) => prev + c);
+    return _avatarColors[hash % _avatarColors.length];
+  }
+
+  String get _initials {
+    final name = entry.displayName.trim();
+    if (name.isEmpty) return '?';
+    final parts = name.split(RegExp(r'[\s\-_]+')).where((p) => p.isNotEmpty);
+    final letters = parts.map((p) => p[0].toUpperCase()).take(2);
+    final result = letters.join();
+    return result.isEmpty ? name[0].toUpperCase() : result;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final url = entry.avatarUrl;
+    if (url != null && url.isNotEmpty) {
+      return AppNetworkImage(
+        imageUrl: url,
+        tag: 'Leaderboard.avatar.${entry.userId}',
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorIconOnly: true,
+        errorBuilder: (_, _, _) => _fallback(),
+      );
+    }
+    return _fallback();
+  }
+
+  Widget _fallback() {
+    return Container(
+      width: size,
+      height: size,
+      color: _fallbackColor,
+      alignment: Alignment.center,
+      child: AppText(
+        text: _initials,
+        style: AppTextStyles.bold(
+          fontSize: (size * 0.34).sp,
+          color: AppColors.white,
+        ),
       ),
     );
   }

@@ -189,5 +189,16 @@ class EndPoints {
 
   static curiosityReadingInteract({required String readingId}) =>
       '/mobile/curiosity/readings/$readingId/interact';
+
+  // Gamification & streaks
+  static const streakScore = '/user/streak-score';
+  static String streakScoreForMonth({required int month, required int year}) =>
+      '/user/streak-score?month=$month&year=$year';
+  static const buyStreakFreeze = '/streak/freeze/buy';
+  static String leaderboard({
+    String scope = 'global',
+    int page = 1,
+    int limit = 20,
+  }) => '/leaderboard?scope=$scope&page=$page&limit=$limit';
 }
 

@@ -8,6 +8,10 @@ class StartQuizScreen extends StatefulWidget {
   final String? storyIdeaId;
   final bool fromContinueReading;
   final String? continueReadingTopicId;
+  final int episodeNumber;
+  final String? seriesTitle;
+  final int totalEpisodes;
+  final String? topicId;
 
   const StartQuizScreen({
     super.key,
@@ -17,6 +21,10 @@ class StartQuizScreen extends StatefulWidget {
     this.storyIdeaId,
     this.fromContinueReading = false,
     this.continueReadingTopicId,
+    this.episodeNumber = 1,
+    this.seriesTitle,
+    this.totalEpisodes = 0,
+    this.topicId,
   });
 
   @override
@@ -48,6 +56,11 @@ class _StartQuizScreenState extends State<StartQuizScreen> {
         'fromContinueReading': widget.fromContinueReading,
         if ((widget.continueReadingTopicId ?? '').isNotEmpty)
           'continueReadingTopicId': widget.continueReadingTopicId,
+        'episodeNumber': widget.episodeNumber,
+        if ((widget.seriesTitle ?? '').isNotEmpty)
+          'seriesTitle': widget.seriesTitle,
+        'totalEpisodes': widget.totalEpisodes,
+        if ((widget.topicId ?? '').isNotEmpty) 'topicId': widget.topicId,
       },
     );
   }

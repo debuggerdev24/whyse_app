@@ -13,13 +13,17 @@ import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
+import 'package:redstreakapp/models/gamification/activity_rewards.dart';
+import 'package:redstreakapp/models/gamification/score_award_result.dart';
+import 'package:redstreakapp/models/gamification/score_event_config.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
+import 'package:redstreakapp/providers/gamification/gamification_provider.dart';
+import 'package:redstreakapp/screens/achivements/widgets/achievement_goal_card.dart';
 import 'package:redstreakapp/screens/home/quiz/quiz_question_screen.dart';
 
-import 'package:redstreakapp/models/home/story_models/quiz_exit_snapshot.dart';
 import '../../../providers/home/story_provider.dart';
 
-class QuizCompletedScreen extends StatelessWidget {
+class QuizCompletedScreen extends StatefulWidget {
   final int score;
   final int total;
   final String storyTitle;
@@ -28,6 +32,10 @@ class QuizCompletedScreen extends StatelessWidget {
   final String? storyId;
   final bool fromContinueReading;
   final String? continueReadingTopicId;
+  final int episodeNumber;
+  final String? seriesTitle;
+  final int totalEpisodes;
+  final String? topicId;
 
   const QuizCompletedScreen({
     super.key,
@@ -39,31 +47,198 @@ class QuizCompletedScreen extends StatelessWidget {
     this.storyId,
     this.fromContinueReading = false,
     this.continueReadingTopicId,
+    this.episodeNumber = 1,
+    this.seriesTitle,
+    this.totalEpisodes = 0,
+    this.topicId,
   });
+
+  @override
+  State<QuizCompletedScreen> createState() => _QuizCompletedScreenState();
+}
+
+class _QuizCompletedScreenState extends State<QuizCompletedScreen> {
+  bool _isSubmitting = true;
+  bool _submitFailed = false;
+  ScoreAwardResult? _awards;
+  ActivityRewards? _rewards;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _submitQuiz());
+  }
+
+  Future<void> _submitQuiz() async {
+    if (!mounted) return;
+    setState(() {
+      _isSubmitting = true;
+      _submitFailed = false;
+    });
+
+    final provider = context.read<StoryProvider>();
+    final sId =
+        widget.storyId ??
+        (provider.stories.isNotEmpty ? provider.stories.first.id : null);
+    final ideaId = widget.storyIdeaId;
+    final safeTotal = widget.total <= 0 ? 0 : widget.total;
+    final safeScore = widget.score.clamp(0, safeTotal == 0 ? widget.score : safeTotal);
+
+    if (sId == null || sId.isEmpty || ideaId == null || ideaId.isEmpty) {
+      if (!mounted) return;
+      setState(() {
+        _isSubmitting = false;
+        _submitFailed = true;
+      });
+      return;
+    }
+
+    final data = await provider.submitQuizResult(
+      storyId: sId,
+      correctAnswers: safeScore,
+      totalQuestions: safeTotal,
+    );
+    if (!mounted) return;
+
+    if (data == null) {
+      setState(() {
+        _isSubmitting = false;
+        _submitFailed = true;
+      });
+      AppToast.error(context, provider.quizError ?? "Unable to submit quiz.");
+      return;
+    }
+
+    final gamification = context.read<GamificationProvider>();
+    final awards = await gamification.handleActivityResponse({'data': data});
+    final qp = data["quizProgress"] is Map
+        ? Map<String, dynamic>.from(data["quizProgress"])
+        : const <String, dynamic>{};
+
+    final hp = context.read<HomeProvider>();
+    hp.applyLocalQuizProgress(
+      storyIdeaId: (data["storyIdeaId"]?.toString() ?? ideaId),
+      totalQuestions: qp["totalQuestions"] is int
+          ? qp["totalQuestions"] as int
+          : int.tryParse(qp["totalQuestions"]?.toString() ?? "") ?? safeTotal,
+      correctAnswers: qp["correctAnswers"] is int
+          ? qp["correctAnswers"] as int
+          : int.tryParse(qp["correctAnswers"]?.toString() ?? "") ?? safeScore,
+      isCompleted: qp["isCompleted"] == true,
+      completedAt: qp["completedAt"]?.toString(),
+    );
+
+    final topicId = hp.activeStoryIdeasTopicId;
+    if (!widget.fromContinueReading && topicId != null) {
+      // ignore: unawaited_futures
+      hp.getTopicStoryDetails(topicId: topicId, showLoadingUi: false);
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _isSubmitting = false;
+      _awards = awards;
+      _rewards = awards?.rewards;
+    });
+  }
+
+  Future<void> _onContinue() async {
+    final hp = context.read<HomeProvider>();
+    final gamification = context.read<GamificationProvider>();
+    final resolvedTopicId =
+        widget.topicId ??
+        widget.continueReadingTopicId ??
+        hp.activeStoryIdeasTopicId;
+
+    await hp.refreshHomeReadingData(topicId: resolvedTopicId);
+    if (!mounted) return;
+
+    final totalEpisodes = widget.totalEpisodes > 0
+        ? widget.totalEpisodes
+        : (hp.storySummary?.storyIdeas.length ?? 0);
+    final completedEpisodes = hp.countFullyCompletedEpisodes();
+    final seriesComplete = hp.isSeriesFullyComplete(
+          totalEpisodes: totalEpisodes,
+        ) ||
+        _awards?.hasSeriesCompleted == true;
+
+    context.read<StoryProvider>().clareStoryData();
+
+    if (seriesComplete) {
+      if (_rewards != null) {
+        gamification.stashPendingEpisodeRewards(_rewards);
+      }
+      final sparksPoints = gamification.resolveQuizCompletionPoints(_awards);
+      context.pushReplacementNamed(
+        AppRoutes.seriesCompletedScreen.name,
+        extra: {
+          'seriesTitle': (widget.seriesTitle?.trim().isNotEmpty == true)
+              ? widget.seriesTitle!.trim()
+              : (widget.storyTitle.isNotEmpty ? widget.storyTitle : 'Series'),
+          'storyImageUrl': widget.storyImageUrl,
+          'totalEpisodes': totalEpisodes > 0 ? totalEpisodes : completedEpisodes,
+          'completedEpisodes':
+              completedEpisodes > 0 ? completedEpisodes : widget.episodeNumber,
+          'sparksPoints': sparksPoints > 0
+              ? sparksPoints
+              : (_awards?.pointsFor(ScoreEventConfig.seriesCompleted) ?? 0),
+          'topicId': resolvedTopicId,
+        },
+      );
+      return;
+    }
+
+    if (widget.fromContinueReading) {
+      final tid = widget.continueReadingTopicId ?? widget.topicId;
+      if (tid != null && tid.isNotEmpty) {
+        context.goNamed(AppRoutes.createdStorySummaryScreen.name, extra: tid);
+        return;
+      }
+      context.goNamed(AppRoutes.homeScreen.name);
+      return;
+    }
+
+    if (resolvedTopicId != null && resolvedTopicId.isNotEmpty) {
+      context.goNamed(
+        AppRoutes.createdStorySummaryScreen.name,
+        extra: resolvedTopicId,
+      );
+    } else {
+      context.goNamed(AppRoutes.homeScreen.name);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final provider = context.read<StoryProvider>();
     Logger.info("Story length: ${provider.stories.length}");
-    Logger.info("Current story index: ${provider.currentStoryIndex}");
-    final safeTotal = total <= 0 ? 0 : total;
-    final safeScore = score.clamp(0, safeTotal == 0 ? score : safeTotal);
+    final safeTotal = widget.total <= 0 ? 0 : widget.total;
+    final safeScore = widget.score.clamp(0, safeTotal == 0 ? widget.score : safeTotal);
     final percent = safeTotal == 0 ? 0 : (safeScore / safeTotal);
-    final shouldCelebrate = safeTotal > 0 && percent >= 0.6;
-    final headline = percent >= 0.8
-        ? "Amazing job!"
+    final shouldCelebrate = !_isSubmitting && safeTotal > 0 && percent >= 0.6;
+    final gamification = context.read<GamificationProvider>();
+    final sparksReward = gamification.resolveQuizCompletionPoints(_awards);
+    final showPoints = sparksReward > 0;
+
+    final headline = _isSubmitting
+        ? 'Submitting quiz...'
+        : percent >= 0.8
+        ? 'Amazing job!'
         : percent >= 0.5
-        ? "Nice work!"
+        ? 'Nice work!'
         : percent > 0
-        ? "Good try!"
-        : "Let’s try again!";
-    final subText = percent >= 0.8
-        ? "You really understood the story."
+        ? 'Good try!'
+        : 'Let’s try again!';
+    final subText = _isSubmitting
+        ? 'Saving your results and rewards.'
+        : percent >= 0.8
+        ? 'You really understood the story.'
         : percent >= 0.5
-        ? "You’re getting the hang of it."
+        ? 'You’re getting the hang of it.'
         : percent > 0
-        ? "Read once more and you’ll score higher."
-        : "Read the story once more, then retake the quiz.";
+        ? 'Read once more and you’ll score higher.'
+        : 'Read the story once more, then retake the quiz.';
+
     return AppLayout(
       body: Stack(
         children: [
@@ -74,8 +249,6 @@ class QuizCompletedScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Spacer(flex: 2),
-
-                  // Story thumbnail card
                   Container(
                     padding: EdgeInsets.all(12.w),
                     decoration: BoxDecoration(
@@ -94,14 +267,14 @@ class QuizCompletedScreen extends StatelessWidget {
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(10.r),
-                          child:
-                              storyImageUrl != null && storyImageUrl!.isNotEmpty
+                          child: widget.storyImageUrl != null &&
+                                  widget.storyImageUrl!.isNotEmpty
                               ? Image.network(
-                                  storyImageUrl!,
+                                  widget.storyImageUrl!,
                                   width: 72.w,
                                   height: 72.w,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => Image.asset(
+                                  errorBuilder: (_, _, _) => Image.asset(
                                     AppAssets.quizcomplete,
                                     width: 72.w,
                                     height: 72.w,
@@ -117,15 +290,9 @@ class QuizCompletedScreen extends StatelessWidget {
                         ),
                         8.w.verticalSpace,
                         AppText(
-                          text: "AI Generated Text",
-                          style: AppTextStyles.regular(
-                            fontSize: 10.sp,
-                            color: AppColors.black.withValues(alpha: 0.5),
-                          ),
-                        ),
-                        4.w.verticalSpace,
-                        AppText(
-                          text: storyTitle.isNotEmpty ? storyTitle : "Story",
+                          text: widget.storyTitle.isNotEmpty
+                              ? widget.storyTitle
+                              : 'Story',
                           style: AppTextStyles.semibold(
                             fontSize: 14.sp,
                             color: AppColors.black,
@@ -136,10 +303,8 @@ class QuizCompletedScreen extends StatelessWidget {
                     ),
                   ),
                   16.w.verticalSpace,
-
                   SvgIcon(AppAssets.correctoption, size: 28.w),
                   20.w.verticalSpace,
-
                   AppText(
                     text: headline,
                     style: AppTextStyles.semibold(
@@ -157,100 +322,104 @@ class QuizCompletedScreen extends StatelessWidget {
                     ).copyWith(height: 1.35),
                     textAlign: TextAlign.center,
                   ),
-                  20.w.verticalSpace,
-                  AppText(
-                    text: "Your Score:",
-                    style: AppTextStyles.bold(
-                      fontSize: 14.sp,
-                      color: AppColors.black.withValues(alpha: 0.6),
+                  if (!_isSubmitting) ...[
+                    20.w.verticalSpace,
+                    AppText(
+                      text: 'Your Score:',
+                      style: AppTextStyles.bold(
+                        fontSize: 14.sp,
+                        color: AppColors.black.withValues(alpha: 0.6),
+                      ),
                     ),
-                  ),
-                  8.w.verticalSpace,
-                  AppText(
-                    text: "$safeScore/$safeTotal",
-                    style: AppTextStyles.bold(
-                      fontSize: 24.sp,
-                      color: AppColors.black,
+                    8.w.verticalSpace,
+                    AppText(
+                      text: '$safeScore/$safeTotal',
+                      style: AppTextStyles.bold(
+                        fontSize: 24.sp,
+                        color: AppColors.black,
+                      ),
                     ),
-                  ),
-                  24.w.verticalSpace,
-                  AppText(
-                    text: "Reward:",
-                    style: AppTextStyles.bold(
-                      fontSize: 14.sp,
-                      color: AppColors.black.withValues(alpha: 0.6),
+                    24.w.verticalSpace,
+                    AppText(
+                      text: 'Reward:',
+                      style: AppTextStyles.bold(
+                        fontSize: 14.sp,
+                        color: AppColors.black.withValues(alpha: 0.6),
+                      ),
                     ),
-                  ),
-                  12.w.verticalSpace,
-                  safeScore == 0
-                      ? AppText(
-                          text:
-                              "No reward this time. You’ll earn rewards when you score points.",
-                          style: AppTextStyles.semiBold(
-                            fontSize: 12.sp,
-                            color: AppColors.black.withValues(alpha: 0.6),
-                          ).copyWith(height: 1.35),
-                          textAlign: TextAlign.center,
-                        )
-                      : Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 14.w,
-                            vertical: 6.h,
-                          ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(40.r),
-                            border: Border.all(
-                              color: AppColors.orangeColor,
-                              width: 1.2,
-                            ),
-                            color: AppColors.orangeColor.withValues(alpha: 0.1),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SvgIcon(
-                                AppAssets.thunder,
-                                size: 18.w,
-                                color: AppColors.orangeColor,
-                              ),
-                              8.w.horizontalSpace,
-                              AppText(
-                                text: safeScore.toString(),
-                                style: AppTextStyles.semibold(
-                                  fontSize: 16.sp,
-                                  color: AppColors.black,
-                                ),
-                              ),
-                            ],
-                          ),
+                    12.w.verticalSpace,
+                    if (!showPoints)
+                      AppText(
+                        text: 'Quiz completed!',
+                        style: AppTextStyles.semiBold(
+                          fontSize: 12.sp,
+                          color: AppColors.black.withValues(alpha: 0.6),
                         ),
+                        textAlign: TextAlign.center,
+                      )
+                    else
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 14.w,
+                          vertical: 6.h,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(40.r),
+                          border: Border.all(
+                            color: AppColors.orangeColor,
+                            width: 1.2,
+                          ),
+                          color: AppColors.orangeColor.withValues(alpha: 0.1),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SvgIcon(
+                              AppAssets.thunder,
+                              size: 18.w,
+                              color: AppColors.orangeColor,
+                            ),
+                            8.w.horizontalSpace,
+                            AppText(
+                              text: '+$sparksReward',
+                              style: AppTextStyles.semibold(
+                                fontSize: 16.sp,
+                                color: AppColors.black,
+                              ),
+                            ),
+                            4.w.horizontalSpace,
+                            AppText(
+                              text: 'Sparks Points',
+                              style: AppTextStyles.medium(
+                                fontSize: 12.sp,
+                                color: AppColors.bluecolor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    if (_rewards?.interestAchievementProgress != null) ...[
+                      16.h.verticalSpace,
+                      AchievementGoalCard(
+                        achievement: _rewards!.interestAchievementProgress!,
+                      ),
+                    ],
+                  ],
                   Spacer(flex: 2),
-
-                  Consumer<StoryProvider>(
-                    builder: (context, sp, _) {
-                      final isSubmitting = sp.isSubmitQuizLoading;
-                      final hasNext =
-                          (sp.storyIdeas?.storyIdeas.length ?? sp.stories.length) -
-                                  1 >
-                              sp.currentStoryIndex;
-                      return AppFilledButton(
-                        text: hasNext ? "See Next Story" : "Continue",
-                        onTap: isSubmitting
-                            ? null
-                            : () async {
-                                if (!context.mounted) return;
-                                await _submitAndPop(
-                                  context,
-                                  sp,
-                                  safeScore,
-                                  safeTotal,
-                                );
-                              },
-                        backgroundColor: AppColors.teal,
-                        fixedSize: Size(348, 42.w),
-                        isLoading: isSubmitting,
-                      );
-                    },
+                  AppFilledButton(
+                    text: _submitFailed ? 'Retry' : 'Continue',
+                    onTap: _isSubmitting
+                        ? null
+                        : () {
+                            if (_submitFailed) {
+                              _submitQuiz();
+                              return;
+                            }
+                            _onContinue();
+                          },
+                    backgroundColor: AppColors.teal,
+                    fixedSize: Size(348, 42.w),
+                    isLoading: _isSubmitting,
                   ),
                   40.w.verticalSpace,
                 ],
@@ -262,102 +431,11 @@ class QuizCompletedScreen extends StatelessWidget {
               bottom: 150.h,
               left: 0,
               right: 0,
-              child: Lottie.asset(
-                'assets/lottie/Congratulations.json',
-                // repeat: false,
-              ),
+              child: Lottie.asset('assets/lottie/Congratulations.json'),
             ),
         ],
       ),
     );
-  }
-
-  Future<void> _submitAndPop(
-    BuildContext context,
-    StoryProvider provider,
-    int correctAnswers,
-    int totalQuestions,
-  ) async {
-    if (provider.isSubmitQuizLoading) return;
-    final sId = storyId ?? (provider.stories.isNotEmpty ? provider.stories.first.id : null);
-    final ideaId = storyIdeaId;
-    if (sId == null || sId.isEmpty || ideaId == null || ideaId.isEmpty) {
-      if (!context.mounted) return;
-      context.pop(
-        QuizExitSnapshot(
-          storyIdeaId: ideaId ?? '',
-          totalQuestions: totalQuestions,
-          correctAnswers: correctAnswers,
-          isCompleted: true,
-          completedAt: DateTime.now().toUtc().toIso8601String(),
-        ),
-      );
-      return;
-    }
-
-    final data = await provider.submitQuizResult(
-      storyId: sId,
-      correctAnswers: correctAnswers,
-      totalQuestions: totalQuestions,
-    );
-    if (!context.mounted) return;
-    if (data == null) {
-      AppToast.error(context, provider.quizError ?? "Unable to submit quiz.");
-      return;
-    }
-    final qp = data["quizProgress"] is Map ? Map<String, dynamic>.from(data["quizProgress"]) : const <String, dynamic>{};
-    final snap = QuizExitSnapshot(
-      storyIdeaId: (data["storyIdeaId"]?.toString() ?? ideaId),
-      totalQuestions: qp["totalQuestions"] is int
-          ? qp["totalQuestions"] as int
-          : int.tryParse(qp["totalQuestions"]?.toString() ?? "") ??
-              totalQuestions,
-      correctAnswers: qp["correctAnswers"] is int
-          ? qp["correctAnswers"] as int
-          : int.tryParse(qp["correctAnswers"]?.toString() ?? "") ??
-              correctAnswers,
-      isCompleted: qp["isCompleted"] == true,
-      completedAt: qp["completedAt"]?.toString(),
-    );
-
-    // Apply immediately so MyStoryIdeas reflects completion without waiting.
-    final hp = context.read<HomeProvider>();
-    hp.applyLocalQuizProgress(
-      storyIdeaId: snap.storyIdeaId,
-      totalQuestions: snap.totalQuestions,
-      correctAnswers: snap.correctAnswers,
-      isCompleted: snap.isCompleted,
-      completedAt: snap.completedAt,
-    );
-
-    final topicId = hp.activeStoryIdeasTopicId;
-    if (!fromContinueReading && topicId != null) {
-      // Silent refresh for any derived fields.
-      // ignore: unawaited_futures
-      hp.getTopicStoryDetails(topicId: topicId, showLoadingUi: false);
-    }
-
-    if (!context.mounted) return;
-    if (fromContinueReading) {
-      context.read<StoryProvider>().clareStoryData();
-      // Refresh home shelf in background; do not block navigation.
-      // ignore: unawaited_futures
-      hp.getContinueReading(force: true);
-      if (!context.mounted) return;
-      final tid = continueReadingTopicId;
-      if (tid != null && tid.isNotEmpty) {
-        // Summary screen shows its own shimmer while this request completes.
-        // ignore: unawaited_futures
-        hp.getTopicStoryDetails(topicId: tid);
-        if (!context.mounted) return;
-        context.goNamed(AppRoutes.createdStorySummaryScreen.name, extra: tid);
-      } else {
-        context.goNamed(AppRoutes.homeScreen.name);
-      }
-    } else {
-      // Navigate back to the story ideas screen (instead of the reader).
-      context.goNamed(AppRoutes.createdStorySummaryScreen.name);
-    }
   }
 }
 

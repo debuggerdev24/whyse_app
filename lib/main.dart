@@ -19,7 +19,9 @@ import 'package:redstreakapp/providers/family/family_provider.dart';
 import 'package:redstreakapp/providers/friend/friend_provider.dart';
 import 'package:redstreakapp/providers/explore/explore_provider.dart';
 import 'package:redstreakapp/providers/profile/your_books_provider.dart';
+import 'package:redstreakapp/providers/gamification/gamification_provider.dart';
 import 'package:redstreakapp/services/curiosity_reading/curiosity_reading_service.dart';
+import 'package:redstreakapp/services/gamification/gamification_api_service.dart';
 import 'package:redstreakapp/services/profile/group_api_service.dart';
 import 'package:redstreakapp/services/profile/profile_service.dart';
 import 'package:redstreakapp/whyse_app.dart';
@@ -64,6 +66,9 @@ void main() async {
         ChangeNotifierProvider(
           create: (_) =>
               CuriosityReadingProvider(CuriosityReadingService()),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => GamificationProvider(GamificationApiService.instance),
         ),
       ],
       child: ToastificationWrapper(child: const WhyseApp()),

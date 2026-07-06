@@ -56,6 +56,7 @@ import 'package:redstreakapp/screens/home/quiz/quiz_question_screen.dart';
 import 'package:redstreakapp/screens/home/quiz/enter_quiz_number.dart';
 import 'package:redstreakapp/screens/home/quiz/start_quiz_screen.dart';
 import 'package:redstreakapp/screens/home/story/episode_completed_screen.dart';
+import 'package:redstreakapp/screens/home/story/series_completed_screen.dart';
 import 'package:redstreakapp/models/home/browse_topic_model.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/screens/practice/practice_zone.dart';
@@ -277,6 +278,14 @@ class AppRouter {
           continueReadingTopicId: extra["continueReadingTopicId"]
               ?.toString()
               .trim(),
+          episodeNumber: extra['episodeNumber'] is int
+              ? extra['episodeNumber'] as int
+              : int.tryParse(extra['episodeNumber']?.toString() ?? '') ?? 1,
+          seriesTitle: extra['seriesTitle']?.toString(),
+          totalEpisodes: extra['totalEpisodes'] is int
+              ? extra['totalEpisodes'] as int
+              : int.tryParse(extra['totalEpisodes']?.toString() ?? '') ?? 0,
+          topicId: extra['topicId']?.toString().trim(),
         );
       },
     ),
@@ -299,6 +308,14 @@ class AppRouter {
           continueReadingTopicId: extra?['continueReadingTopicId']
               ?.toString()
               .trim(),
+          episodeNumber: extra?['episodeNumber'] is int
+              ? extra!['episodeNumber'] as int
+              : int.tryParse(extra?['episodeNumber']?.toString() ?? '') ?? 1,
+          seriesTitle: extra?['seriesTitle']?.toString(),
+          totalEpisodes: extra?['totalEpisodes'] is int
+              ? extra!['totalEpisodes'] as int
+              : int.tryParse(extra?['totalEpisodes']?.toString() ?? '') ?? 0,
+          topicId: extra?['topicId']?.toString().trim(),
         );
       },
     ),
@@ -322,6 +339,14 @@ class AppRouter {
           continueReadingTopicId: extra?['continueReadingTopicId']
               ?.toString()
               .trim(),
+          episodeNumber: extra?['episodeNumber'] is int
+              ? extra!['episodeNumber'] as int
+              : int.tryParse(extra?['episodeNumber']?.toString() ?? '') ?? 1,
+          seriesTitle: extra?['seriesTitle']?.toString(),
+          totalEpisodes: extra?['totalEpisodes'] is int
+              ? extra!['totalEpisodes'] as int
+              : int.tryParse(extra?['totalEpisodes']?.toString() ?? '') ?? 0,
+          topicId: extra?['topicId']?.toString().trim(),
         );
       },
     ),
@@ -339,9 +364,15 @@ class AppRouter {
           episodeNumber: extra['episodeNumber'] is int
               ? extra['episodeNumber'] as int
               : int.tryParse(extra['episodeNumber']?.toString() ?? '') ?? 1,
+          completedEpisodes: extra['completedEpisodes'] is int
+              ? extra['completedEpisodes'] as int
+              : int.tryParse(extra['completedEpisodes']?.toString() ?? '') ?? 1,
+          totalEpisodes: extra['totalEpisodes'] is int
+              ? extra['totalEpisodes'] as int
+              : int.tryParse(extra['totalEpisodes']?.toString() ?? '') ?? 0,
           progressPercent: extra['progressPercent'] is int
               ? extra['progressPercent'] as int
-              : int.tryParse(extra['progressPercent']?.toString() ?? '') ?? 37,
+              : int.tryParse(extra['progressPercent']?.toString() ?? '') ?? 0,
           sparksPoints: extra['sparksPoints'] is int
               ? extra['sparksPoints'] as int
               : int.tryParse(extra['sparksPoints']?.toString() ?? '') ?? 20,
@@ -349,6 +380,28 @@ class AppRouter {
           continueReadingTopicId: extra['continueReadingTopicId']
               ?.toString()
               .trim(),
+          topicId: extra['topicId']?.toString().trim(),
+        );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.seriesCompletedScreen.path,
+      name: AppRoutes.seriesCompletedScreen.name,
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>? ?? const {};
+        return SeriesCompletedScreen(
+          seriesTitle: extra['seriesTitle']?.toString() ?? 'Series',
+          storyImageUrl: extra['storyImageUrl']?.toString(),
+          totalEpisodes: extra['totalEpisodes'] is int
+              ? extra['totalEpisodes'] as int
+              : int.tryParse(extra['totalEpisodes']?.toString() ?? '') ?? 0,
+          completedEpisodes: extra['completedEpisodes'] is int
+              ? extra['completedEpisodes'] as int
+              : int.tryParse(extra['completedEpisodes']?.toString() ?? '') ?? 0,
+          sparksPoints: extra['sparksPoints'] is int
+              ? extra['sparksPoints'] as int
+              : int.tryParse(extra['sparksPoints']?.toString() ?? '') ?? 100,
+          topicId: extra['topicId']?.toString(),
         );
       },
     ),

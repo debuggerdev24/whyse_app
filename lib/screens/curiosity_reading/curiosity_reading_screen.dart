@@ -1,10 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
+import 'package:redstreakapp/core/routes/app_router.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/providers/curiosity_reading/curiosity_reading_provider.dart';
+import 'package:redstreakapp/providers/gamification/gamification_provider.dart';
 import 'package:redstreakapp/screens/curiosity_reading/widget/curiosity_reading_content.dart';
 import 'package:redstreakapp/screens/curiosity_reading/widget/curiosity_reading_screen_shimmer.dart';
+import 'package:redstreakapp/screens/curiosity_reading/widgets/spark_session_summary_sheet.dart';
 
 class CuriosityReadingScreen extends StatefulWidget {
   const CuriosityReadingScreen({super.key});
@@ -26,6 +31,15 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
       if (!mounted) return;
       _provider = context.read<CuriosityReadingProvider>();
       _provider!.markReadingScreenActive();
+      context.read<GamificationProvider>().startSparkSession();
+      _provider!.onSparkAwarded = (award) {
+        if (!mounted) return;
+        context.read<GamificationProvider>().recordSparkCompletion(award);
+      };
+      _provider!.onSparkRewardsFromApi = (award) {
+        if (!mounted) return;
+        context.read<GamificationProvider>().applySparkInteractionRewards(award);
+      };
       if (_provider!.openedFromExplore && _provider!.isLoadingReadingBody) {
         _provider!.loadExploreSessionBody();
       }
@@ -64,22 +78,38 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
     provider.onReadingDisplayed(reading.id);
   }
 
-  Future<void> _exitReading() async {
+  void _exitReading() {
     final provider = context.read<CuriosityReadingProvider>();
-    await provider.onLeaveReadingScreen();
+    final gamification = context.read<GamificationProvider>();
+
+    provider.onLeaveReadingScreen();
     provider.markReadingScreenInactive();
-    if (!mounted) return;
 
     final fromExplore = provider.openedFromExplore;
-    if (fromExplore) {
-      await provider.exitExploreSessionAndRestoreHome();
-    }
 
+    if (!mounted) return;
     context.pop();
 
-    if (!fromExplore) {
-      provider.refreshFromHome();
-    }
+    unawaited(() async {
+      await provider.awaitPendingInteractions();
+      provider.onSparkAwarded = null;
+      provider.onSparkRewardsFromApi = null;
+
+      final summary = gamification.consumeSparkSessionSummary();
+      if (summary != null && !summary.isEmpty) {
+        final rootContext = AppRouter.rootNavigatorKey.currentContext;
+        if (rootContext != null && rootContext.mounted) {
+          await showSparkSessionSummarySheet(rootContext, summary);
+        }
+        await gamification.fetchStreakScore(force: true);
+      }
+
+      if (fromExplore) {
+        await provider.exitExploreSessionAndRestoreHome();
+      } else {
+        await provider.refreshFromHome();
+      }
+    }());
   }
 
   @override

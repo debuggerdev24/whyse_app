@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/models/curiosity_reading/curiosity_reading_model.dart';
 import 'package:redstreakapp/models/explore/explore_models.dart';
 import 'package:redstreakapp/models/explore/spark_reading_mapper.dart';
+import 'package:redstreakapp/models/gamification/score_award_result.dart';
 import 'package:redstreakapp/services/curiosity_reading/curiosity_reading_service.dart';
 
 typedef ExploreSparkLoadMore =
@@ -49,6 +52,14 @@ class CuriosityReadingProvider extends ChangeNotifier {
   DateTime? _readingOpenedAt;
   int _scrollDepthPercent = 0;
 
+  /// Called when a spark is marked COMPLETED (swipe away or exit).
+  void Function(ScoreAwardResult award)? onSparkAwarded;
+
+  /// Called when the interact API returns rewards for a completed spark.
+  void Function(ScoreAwardResult award)? onSparkRewardsFromApi;
+
+  final List<Future<ScoreAwardResult?>> _pendingInteractions = [];
+
   Reading? get currentReading {
     final readings = curiosityReading?.data.readings;
     if (readings == null || readings.isEmpty) return null;
@@ -76,50 +87,60 @@ class CuriosityReadingProvider extends ChangeNotifier {
     _readingOpenedAt = DateTime.now();
     _scrollDepthPercent = 0;
 
-    _sendInteraction(
-      readingId: readingId,
-      eventType: 'OPENED',
-      readDurationMs: 0,
-      scrollDepthPercent: 0,
+    unawaited(
+      _sendInteraction(
+        readingId: readingId,
+        eventType: 'OPENED',
+        readDurationMs: 0,
+        scrollDepthPercent: 0,
+      ),
     );
   }
 
-  Future<void> onLeaveReadingScreen() async {
-    await _finalizeActiveReading();
-    _activeReadingId = null;
-    _readingOpenedAt = null;
-    _scrollDepthPercent = 0;
+  void onLeaveReadingScreen() {
+    _finalizeActiveReadingLocally();
   }
 
-  Future<void> setCurrentIndex(int value) async {
+  Future<void> awaitPendingInteractions({
+    Duration timeout = const Duration(milliseconds: 800),
+  }) async {
+    if (_pendingInteractions.isEmpty) return;
+    final pending = List<Future<ScoreAwardResult?>>.from(_pendingInteractions);
+    try {
+      await Future.wait(pending).timeout(timeout);
+    } catch (_) {
+      // Show summary with whatever rewards arrived before timeout.
+    }
+  }
+
+  void setCurrentIndex(int value) {
     if (value == _currentIndex) return;
 
     if (_activeReadingId != null) {
-      await _finalizeActiveReading();
+      _finalizeActiveReadingLocally();
     }
 
     _currentIndex = value;
     if (_shouldLoadMoreReading()) {
       Logger.info('Loading more curiosity readings...');
-      loadMoreReading();
+      unawaited(loadMoreReading());
     }
     notifyListeners();
   }
 
-  Future<void> nextReading() async {
-    await _finalizeActiveReading();
+  void nextReading() {
+    _finalizeActiveReadingLocally();
 
     final length = curiosityReading?.data.readings.length ?? 0;
     if (length == 0) return;
 
     if (_currentIndex < length - 1) {
       _currentIndex++;
-      _activeReadingId = null;
-      await _ensureCurrentReadingBody();
       notifyListeners();
+      unawaited(_ensureCurrentReadingBody());
       if (_shouldLoadMoreReading()) {
         Logger.info('Loading more curiosity readings...');
-        loadMoreReading();
+        unawaited(loadMoreReading());
       }
       return;
     }
@@ -129,29 +150,36 @@ class CuriosityReadingProvider extends ChangeNotifier {
 
     if (isLoadingMoreReading) {
       _currentIndex = length;
-    } else {
-      Logger.info('Loading more curiosity readings...');
-      final previousLength = length;
-      await loadMoreReading();
-      final newLength = curiosityReading?.data.readings.length ?? 0;
-      if (newLength > previousLength) {
-        _currentIndex++;
-        await _ensureCurrentReadingBody();
-      }
+      notifyListeners();
+      return;
     }
 
-    _activeReadingId = null;
+    Logger.info('Loading more curiosity readings...');
+    final previousLength = length;
+    _currentIndex = length;
     notifyListeners();
+
+    unawaited(() async {
+      await loadMoreReading();
+      final newLength = curiosityReading?.data.readings.length ?? 0;
+      if (newLength > previousLength && _currentIndex == previousLength) {
+        _currentIndex++;
+        notifyListeners();
+        unawaited(_ensureCurrentReadingBody());
+      } else {
+        _clampIndexToLoadedReadings();
+        notifyListeners();
+      }
+    }());
   }
 
-  Future<void> previousReading() async {
+  void previousReading() {
     if (_currentIndex <= 0) return;
 
-    await _finalizeActiveReading();
+    _finalizeActiveReadingLocally();
     _currentIndex--;
-    _activeReadingId = null;
-    await _ensureCurrentReadingBody();
     notifyListeners();
+    unawaited(_ensureCurrentReadingBody());
   }
 
   void beginExploreSession({
@@ -435,35 +463,51 @@ class CuriosityReadingProvider extends ChangeNotifier {
     _sessionId ??= 'curiosity-${DateTime.now().millisecondsSinceEpoch}';
   }
 
-  Future<void> _finalizeActiveReading() async {
+  void _finalizeActiveReadingLocally() {
     final readingId = _activeReadingId;
     final openedAt = _readingOpenedAt;
     if (readingId == null || openedAt == null) return;
 
     final durationMs = DateTime.now().difference(openedAt).inMilliseconds;
     final isRead = durationMs >= readThresholdMs;
-
-    _sendInteraction(
-      readingId: readingId,
-      eventType: isRead ? 'COMPLETED' : 'SKIPPED',
-      readDurationMs: isRead ? durationMs : null,
-      scrollDepthPercent: isRead ? _scrollDepthPercent : null,
-    );
+    final depth = _scrollDepthPercent;
 
     _activeReadingId = null;
     _readingOpenedAt = null;
     _scrollDepthPercent = 0;
+
+    if (isRead) {
+      onSparkAwarded?.call(ScoreAwardResult.empty());
+    }
+
+    unawaited(
+      _sendInteraction(
+        readingId: readingId,
+        eventType: isRead ? 'COMPLETED' : 'SKIPPED',
+        readDurationMs: isRead ? durationMs : null,
+        scrollDepthPercent: isRead ? depth : null,
+      ).then((award) {
+        if (award != null && isRead) {
+          onSparkRewardsFromApi?.call(award);
+          if (award.totalPointsEarned > 0) {
+            Logger.info(
+              'Spark $readingId API awarded ${award.totalPointsEarned} pts',
+            );
+          }
+        }
+      }),
+    );
   }
 
-  void _sendInteraction({
+  Future<ScoreAwardResult?> _sendInteraction({
     required String readingId,
     required String eventType,
     int? readDurationMs,
     int? scrollDepthPercent,
-  }) {
+  }) async {
     _ensureSessionId();
 
-    _service
+    final future = _service
         .recordReadingInteraction(
           readingId: readingId,
           eventType: eventType,
@@ -471,15 +515,23 @@ class CuriosityReadingProvider extends ChangeNotifier {
           readDurationMs: readDurationMs,
           scrollDepthPercent: scrollDepthPercent,
         )
-        .then((result) {
-          result.fold(
-            (exception) => Logger.error(
-              'Curiosity reading $eventType failed for $readingId: $exception',
-            ),
-            (_) => Logger.info(
-              'Curiosity reading $eventType recorded for $readingId',
-            ),
-          );
-        });
+        .then(
+          (result) => result.fold(
+            (exception) {
+              Logger.error(
+                'Curiosity reading $eventType failed for $readingId: $exception',
+              );
+              return null;
+            },
+            (raw) {
+              Logger.info('Curiosity reading $eventType recorded for $readingId');
+              return ScoreAwardResult.parse(raw);
+            },
+          ),
+        );
+
+    _pendingInteractions.add(future);
+    future.whenComplete(() => _pendingInteractions.remove(future));
+    return future;
   }
 }

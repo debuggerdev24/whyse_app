@@ -17,46 +17,29 @@ import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/models/gamification/activity_rewards.dart';
 import 'package:redstreakapp/screens/achivements/widgets/achievement_goal_card.dart';
 
-/// Celebration UI shown after the user finishes reading a chapter/episode.
-/// Points and progress are display-only (no API).
-class EpisodeCompletedScreen extends StatefulWidget {
-  const EpisodeCompletedScreen({
+class SeriesCompletedScreen extends StatefulWidget {
+  const SeriesCompletedScreen({
     super.key,
-    required this.storyId,
-    required this.storyTitle,
+    required this.seriesTitle,
     this.storyImageUrl,
-    this.storyIdeaId,
-    this.seriesTitle,
-    this.episodeNumber = 1,
-    this.completedEpisodes = 1,
     this.totalEpisodes = 0,
-    this.progressPercent = 0,
-    this.sparksPoints = 20,
-    this.fromContinueReading = false,
-    this.continueReadingTopicId,
+    this.completedEpisodes = 0,
+    this.sparksPoints = 100,
     this.topicId,
   });
 
-  final String storyId;
-  final String storyTitle;
+  final String seriesTitle;
   final String? storyImageUrl;
-  final String? storyIdeaId;
-  final String? seriesTitle;
-  final int episodeNumber;
-  final int completedEpisodes;
   final int totalEpisodes;
-  final int progressPercent;
+  final int completedEpisodes;
   final int sparksPoints;
-  final bool fromContinueReading;
-  final String? continueReadingTopicId;
   final String? topicId;
 
   @override
-  State<EpisodeCompletedScreen> createState() =>
-      _EpisodeCompletedScreenState();
+  State<SeriesCompletedScreen> createState() => _SeriesCompletedScreenState();
 }
 
-class _EpisodeCompletedScreenState extends State<EpisodeCompletedScreen>
+class _SeriesCompletedScreenState extends State<SeriesCompletedScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _poppersController;
   bool _showPoppers = true;
@@ -82,23 +65,18 @@ class _EpisodeCompletedScreenState extends State<EpisodeCompletedScreen>
 
   @override
   Widget build(BuildContext context) {
-    final displaySeries =
-        (widget.seriesTitle != null && widget.seriesTitle!.trim().isNotEmpty)
-        ? widget.seriesTitle!.trim()
-        : (widget.storyTitle.isNotEmpty ? widget.storyTitle : 'Story');
-    final totalEpisodes = widget.totalEpisodes > 0 ? widget.totalEpisodes : 0;
-    var completedEpisodes = widget.completedEpisodes;
-    if (totalEpisodes > 0) {
-      if (completedEpisodes > totalEpisodes) completedEpisodes = totalEpisodes;
-      if (completedEpisodes < 0) completedEpisodes = 0;
-    }
-    final safePercent = totalEpisodes > 0
-        ? ((completedEpisodes / totalEpisodes) * 100).round().clamp(0, 100)
-        : widget.progressPercent.clamp(0, 100);
-    final progress = safePercent / 100.0;
-    final episodeProgressText = totalEpisodes > 0
-        ? 'Episode $completedEpisodes of $totalEpisodes Completed'
-        : 'Episode ${widget.episodeNumber} Completed';
+    final total = widget.totalEpisodes > 0
+        ? widget.totalEpisodes
+        : widget.completedEpisodes;
+    var completed = widget.completedEpisodes > 0
+        ? widget.completedEpisodes
+        : total;
+    if (total > 0 && completed > total) completed = total;
+    if (completed < 0) completed = 0;
+    final percent = total > 0 ? 100 : 0;
+    final progressText = total > 0
+        ? '$completed/$total Episodes Completed!'
+        : 'Series Completed!';
     final showPoints = widget.sparksPoints > 0;
 
     return AppLayout(
@@ -114,14 +92,14 @@ class _EpisodeCompletedScreenState extends State<EpisodeCompletedScreen>
                       padding: EdgeInsets.only(top: 28.h, bottom: 16.h),
                       child: Column(
                         children: [
-                          _StoryCard(
+                          _SeriesCard(
                             imageUrl: widget.storyImageUrl,
-                            seriesTitle: displaySeries,
-                            episodeNumber: widget.episodeNumber,
+                            seriesTitle: widget.seriesTitle,
+                            episodeCount: total,
                           ),
                           28.h.verticalSpace,
                           AppText(
-                            text: 'Reading Complete!',
+                            text: 'Series Completed!',
                             style: AppTextStyles.bold(
                               fontSize: 26.sp,
                               color: AppColors.black,
@@ -131,7 +109,7 @@ class _EpisodeCompletedScreenState extends State<EpisodeCompletedScreen>
                           8.h.verticalSpace,
                           AppText(
                             text:
-                                'Great job! You finished reading. Take the quiz to complete this episode.',
+                                'Amazing! You’ve completed the entire series.',
                             style: AppTextStyles.medium(
                               fontSize: 14.sp,
                               color: AppColors.black.withValues(alpha: 0.55),
@@ -140,15 +118,15 @@ class _EpisodeCompletedScreenState extends State<EpisodeCompletedScreen>
                           ),
                           24.h.verticalSpace,
                           if (showPoints) ...[
-                            _SparksRewardCard(points: widget.sparksPoints),
+                            _PointsCard(points: widget.sparksPoints),
                             16.h.verticalSpace,
                           ],
-                          _SeriesProgressCard(
-                            episodeProgressText: episodeProgressText,
-                            completedEpisodes: completedEpisodes,
-                            totalEpisodes: totalEpisodes,
-                            progress: progress,
-                            percentLabel: safePercent,
+                          _ProgressCard(
+                            seriesTitle: widget.seriesTitle,
+                            progressText: progressText,
+                            completed: completed,
+                            total: total,
+                            percent: percent,
                           ),
                           if (_rewards?.seriesAchievementProgress != null) ...[
                             16.h.verticalSpace,
@@ -167,15 +145,15 @@ class _EpisodeCompletedScreenState extends State<EpisodeCompletedScreen>
                     ),
                   ),
                   AppFilledButton(
-                    text: 'Take Quiz',
-                    backgroundColor: AppColors.orangeColor,
+                    text: 'Explore more series',
+                    backgroundColor: AppColors.teal,
                     fixedSize: Size(double.infinity, 50.h),
-                    onTap: _onTakeQuiz,
+                    onTap: () => context.goNamed(AppRoutes.exploreScreen.name),
                   ),
                   12.h.verticalSpace,
                   AppOutlinedButton(
                     text: 'Back to home',
-                    borderColor: AppColors.orangeColor.withValues(alpha: 0.45),
+                    borderColor: AppColors.teal.withValues(alpha: 0.45),
                     fixedSize: Size(double.infinity, 50.h),
                     textStyle: AppTextStyles.semibold(
                       fontSize: 16.sp,
@@ -212,46 +190,24 @@ class _EpisodeCompletedScreenState extends State<EpisodeCompletedScreen>
     );
   }
 
-  void _onTakeQuiz() {
-    context.pushNamed(
-      AppRoutes.startQuizScreen.name,
-      extra: {
-        'storyId': widget.storyId,
-        'storyTitle': widget.storyTitle,
-        'storyImageUrl': widget.storyImageUrl,
-        'storyIdeaId': widget.storyIdeaId,
-        'episodeNumber': widget.episodeNumber,
-        'seriesTitle': widget.seriesTitle,
-        'totalEpisodes': widget.totalEpisodes,
-        'fromContinueReading': widget.fromContinueReading,
-        if ((widget.continueReadingTopicId ?? '').isNotEmpty)
-          'continueReadingTopicId': widget.continueReadingTopicId,
-        if ((widget.topicId ?? '').isNotEmpty) 'topicId': widget.topicId,
-      },
-    );
-  }
-
   void _onBackToHome() {
     context.read<StoryProvider>().clareStoryData();
-
-    final topicId = widget.topicId ?? widget.continueReadingTopicId;
     // ignore: unawaited_futures
-    context.read<HomeProvider>().refreshHomeReadingData(topicId: topicId);
-
+    context.read<HomeProvider>().refreshHomeReadingData(topicId: widget.topicId);
     context.goNamed(AppRoutes.homeScreen.name);
   }
 }
 
-class _StoryCard extends StatelessWidget {
-  const _StoryCard({
+class _SeriesCard extends StatelessWidget {
+  const _SeriesCard({
     required this.imageUrl,
     required this.seriesTitle,
-    required this.episodeNumber,
+    required this.episodeCount,
   });
 
   final String? imageUrl;
   final String seriesTitle;
-  final int episodeNumber;
+  final int episodeCount;
 
   @override
   Widget build(BuildContext context) {
@@ -274,22 +230,15 @@ class _StoryCard extends StatelessWidget {
             ],
           ),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12.r),
                 child: AppNetworkImage(
                   imageUrl: imageUrl,
-                  tag: 'EpisodeCompleted.thumbnail',
+                  tag: 'SeriesCompleted.thumbnail',
                   width: double.infinity,
                   height: 110.h,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => Image.asset(
-                    AppAssets.quizcomplete,
-                    width: double.infinity,
-                    height: 110.h,
-                    fit: BoxFit.cover,
-                  ),
                 ),
               ),
               12.h.verticalSpace,
@@ -312,7 +261,7 @@ class _StoryCard extends StatelessWidget {
               ),
               4.h.verticalSpace,
               AppText(
-                text: 'Episode $episodeNumber',
+                text: '$episodeCount Episodes',
                 style: AppTextStyles.medium(
                   fontSize: 13.sp,
                   color: AppColors.black.withValues(alpha: 0.5),
@@ -339,9 +288,8 @@ class _StoryCard extends StatelessWidget {
   }
 }
 
-class _SparksRewardCard extends StatelessWidget {
-  const _SparksRewardCard({required this.points});
-
+class _PointsCard extends StatelessWidget {
+  const _PointsCard({required this.points});
   final int points;
 
   @override
@@ -350,7 +298,7 @@ class _SparksRewardCard extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFFDEBDD),
+        color: const Color(0xFFFFF4D6),
         borderRadius: BorderRadius.circular(16.r),
       ),
       child: Row(
@@ -395,26 +343,26 @@ class _SparksRewardCard extends StatelessWidget {
   }
 }
 
-class _SeriesProgressCard extends StatelessWidget {
-  const _SeriesProgressCard({
-    required this.episodeProgressText,
-    required this.completedEpisodes,
-    required this.totalEpisodes,
-    required this.progress,
-    required this.percentLabel,
+class _ProgressCard extends StatelessWidget {
+  const _ProgressCard({
+    required this.seriesTitle,
+    required this.progressText,
+    required this.completed,
+    required this.total,
+    required this.percent,
   });
 
-  final String episodeProgressText;
-  final int completedEpisodes;
-  final int totalEpisodes;
-  final double progress;
-  final int percentLabel;
+  final String seriesTitle;
+  final String progressText;
+  final int completed;
+  final int total;
+  final int percent;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+      padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16.r),
@@ -422,50 +370,36 @@ class _SeriesProgressCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 40.w,
-            height: 40.w,
-            decoration: BoxDecoration(
-              color: const Color(0xFFFDEBDD),
-              borderRadius: BorderRadius.circular(20.r),
-            ),
-            alignment: Alignment.center,
-            child: SvgIcon(
-              AppAssets.bookOpen,
-              size: 20.w,
-              color: AppColors.orangeColor,
-            ),
-          ),
+          Icon(Icons.emoji_events_rounded,
+              color: AppColors.orangeColor, size: 28.w),
           12.w.horizontalSpace,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 AppText(
-                  text: episodeProgressText,
+                  text: seriesTitle,
                   style: AppTextStyles.bold(
                     fontSize: 14.sp,
                     color: AppColors.black,
                   ),
                 ),
-                2.h.verticalSpace,
+                4.h.verticalSpace,
                 AppText(
-                  text: totalEpisodes > 0
-                      ? '$completedEpisodes/$totalEpisodes Episodes · Keep Going!'
-                      : 'Keep Going!',
+                  text: progressText,
                   style: AppTextStyles.medium(
                     fontSize: 12.sp,
-                    color: AppColors.black.withValues(alpha: 0.5),
+                    color: AppColors.teal,
                   ),
                 ),
                 8.h.verticalSpace,
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4.r),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    minHeight: 6.h,
-                    backgroundColor: AppColors.black.withValues(alpha: 0.08),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
+                  child: const LinearProgressIndicator(
+                    value: 1,
+                    minHeight: 6,
+                    backgroundColor: Color(0x14000000),
+                    valueColor: AlwaysStoppedAnimation<Color>(
                       AppColors.orangeColor,
                     ),
                   ),
@@ -474,32 +408,11 @@ class _SeriesProgressCard extends StatelessWidget {
             ),
           ),
           12.w.horizontalSpace,
-          SizedBox(
-            width: 48.w,
-            height: 48.w,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox(
-                  width: 48.w,
-                  height: 48.w,
-                  child: CircularProgressIndicator(
-                    value: progress,
-                    strokeWidth: 4.w,
-                    backgroundColor: AppColors.black.withValues(alpha: 0.08),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      AppColors.orangeColor,
-                    ),
-                  ),
-                ),
-                AppText(
-                  text: '$percentLabel%',
-                  style: AppTextStyles.bold(
-                    fontSize: 11.sp,
-                    color: AppColors.orangeColor,
-                  ),
-                ),
-              ],
+          AppText(
+            text: '$percent%',
+            style: AppTextStyles.bold(
+              fontSize: 14.sp,
+              color: AppColors.orangeColor,
             ),
           ),
         ],

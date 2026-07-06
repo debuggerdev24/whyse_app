@@ -6,6 +6,8 @@ import 'package:redstreakapp/models/home/story_models/reading_exit_snapshot.dart
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/reading_appearance_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
+import 'package:redstreakapp/providers/gamification/gamification_provider.dart';
+import 'package:redstreakapp/models/gamification/score_award_result.dart';
 import 'package:redstreakapp/services/home/story_api_service.dart';
 import 'package:redstreakapp/screens/home/story/widget/font_theme_bottom_sheet.dart';
 import 'package:redstreakapp/screens/home/widgets/home_section_shimmers.dart';
@@ -59,6 +61,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
   bool _hasStartedReading = false;
   bool _isTimerRunning = false;
   bool _timeUpDialogShown = false;
+  bool _isFinishingEpisode = false;
 
   @override
   void initState() {
@@ -297,7 +300,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
     _schedulePageProgressReport(completedPageIndex);
   }
 
-  void _onChapterCompleted({
+  Future<void> _onChapterCompleted({
     required BuildContext context,
     required StoryProvider storyProvider,
     required String storyId,
@@ -307,20 +310,63 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
     required String? seriesTitle,
     required int pageIndex,
     required int pageCount,
-  }) {
-    _reportPageProgressNow(pageIndex);
+  }) async {
+    if (_isFinishingEpisode) return;
+    setState(() => _isFinishingEpisode = true);
 
     final storyIdeaId = widget.storyIdeaId;
+    final homeProvider = context.read<HomeProvider>();
+    final prevReading = storyIdeaId != null && storyIdeaId.isNotEmpty
+        ? homeProvider.continueReadingForIdea(storyIdeaId)
+        : null;
+    final hadReadingLeft = prevReading == null
+        ? true
+        : !prevReading.isReadingComplete;
+    final quizAlreadyDone = prevReading?.quizProgress?.isCompleted == true &&
+        (prevReading?.quizProgress?.totalQuestions ?? 0) > 0;
+    final shouldGrantReadingReward = hadReadingLeft && !quizAlreadyDone;
+
     if (storyIdeaId != null && storyIdeaId.isNotEmpty && pageCount > 0) {
-      context.read<HomeProvider>().applyLocalReadingProgressFromReadingSession(
+      homeProvider.applyLocalReadingProgressFromReadingSession(
         storyIdeaId: storyIdeaId,
         lastPageIndex: pageIndex,
         pageCount: pageCount,
       );
     }
 
-    final homeProvider = context.read<HomeProvider>();
-    final summary = homeProvider.storySummary;
+    final gamification = context.read<GamificationProvider>();
+    ScoreAwardResult? readingAwards;
+    if (storyIdeaId != null && storyIdeaId.isNotEmpty) {
+      await gamification.finishReadingSession(
+        storyIdeaId: storyIdeaId,
+        lastPageIndex: pageIndex,
+      );
+      if (shouldGrantReadingReward) {
+        readingAwards = await gamification.completeEpisodeAfterReading(
+          storyIdeaId: storyIdeaId,
+        );
+      }
+    }
+
+    if (!mounted) return;
+    setState(() => _isFinishingEpisode = false);
+
+    var summary = homeProvider.storySummary;
+    var resolvedTopicId = summary?.topicId ??
+        homeProvider.activeStoryIdeasTopicId ??
+        widget.continueReadingTopicId;
+
+    if (resolvedTopicId != null &&
+        resolvedTopicId.isNotEmpty &&
+        summary == null) {
+      await homeProvider.getTopicStoryDetails(
+        topicId: resolvedTopicId,
+        showLoadingUi: false,
+      );
+      summary = homeProvider.storySummary;
+      resolvedTopicId = summary?.topicId ?? resolvedTopicId;
+    }
+
     final totalEpisodes = summary?.storyIdeas.length ??
         storyProvider.storyIdeas?.storyIdeas.length ??
         summary?.overallProgress?.totalStories ??
@@ -334,27 +380,46 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
               : (topicFromIdeas != null && topicFromIdeas.isNotEmpty
                     ? topicFromIdeas
                     : null));
-    final progressPercent = totalEpisodes > 0
-        ? ((episodeNumber.clamp(1, totalEpisodes) / totalEpisodes) * 100)
-              .round()
-              .clamp(1, 100)
-        : 37;
+    final quizExtra = {
+      'storyId': storyId,
+      'storyTitle': storyTitle,
+      'storyImageUrl': storyImageUrl,
+      'storyIdeaId': widget.storyIdeaId,
+      'episodeNumber': episodeNumber,
+      'seriesTitle': resolvedSeries,
+      'totalEpisodes': totalEpisodes,
+      'fromContinueReading': widget.fromContinueReading,
+      if ((widget.continueReadingTopicId ?? '').isNotEmpty)
+        'continueReadingTopicId': widget.continueReadingTopicId,
+      'topicId': resolvedTopicId,
+    };
 
-    context.pushNamed(
-      AppRoutes.episodeCompletedScreen.name,
-      extra: {
-        'storyId': storyId,
-        'storyTitle': storyTitle,
-        'storyImageUrl': storyImageUrl,
-        'storyIdeaId': widget.storyIdeaId,
-        'seriesTitle': resolvedSeries,
-        'episodeNumber': episodeNumber,
-        'progressPercent': progressPercent,
-        'sparksPoints': 20,
-        'fromContinueReading': widget.fromContinueReading,
-        if ((widget.continueReadingTopicId ?? '').isNotEmpty)
-          'continueReadingTopicId': widget.continueReadingTopicId,
-      },
+    if (shouldGrantReadingReward) {
+      final readingCompleted = homeProvider.countReadingCompletedEpisodes();
+      final resolvedCompleted = readingCompleted > 0
+          ? readingCompleted
+          : episodeNumber;
+      final progressPercent = totalEpisodes > 0
+          ? ((resolvedCompleted / totalEpisodes) * 100).round().clamp(0, 100)
+          : 0;
+      final sparksPoints = gamification.resolveEpisodePoints(readingAwards);
+
+      context.pushReplacementNamed(
+        AppRoutes.episodeCompletedScreen.name,
+        extra: {
+          ...quizExtra,
+          'completedEpisodes': resolvedCompleted,
+          'totalEpisodes': totalEpisodes,
+          'progressPercent': progressPercent,
+          'sparksPoints': sparksPoints,
+        },
+      );
+      return;
+    }
+
+    context.pushReplacementNamed(
+      AppRoutes.startQuizScreen.name,
+      extra: quizExtra,
     );
   }
 
@@ -373,19 +438,6 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
     }
     _progressDebounceTimer?.cancel();
     _progressDebounceTimer = Timer(_progressDebounce, _flushQueuedPageProgress);
-  }
-
-  /// Saves page progress immediately (used when finishing the last page).
-  void _reportPageProgressNow(int pageIndex) {
-    final storyIdeaId = widget.storyIdeaId;
-    if (storyIdeaId == null || storyIdeaId.isEmpty) return;
-    if (pageIndex < 0) return;
-    _progressDebounceTimer?.cancel();
-    _queuedProgressPageIndex = pageIndex;
-    if (pageIndex > _maxConfirmedPageIndex) {
-      _maxConfirmedPageIndex = pageIndex;
-    }
-    _flushQueuedPageProgress();
   }
 
   void _flushQueuedPageProgress() {
@@ -712,18 +764,22 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                         else ...[
                           if (isLastPage)
                             _BottomPrimaryButton(
-                              text: "Finish Reading",
-                              onTap: () => _onChapterCompleted(
-                                context: context,
-                                storyProvider: provider,
-                                storyId: stories.id,
-                                storyTitle: stories.title,
-                                storyImageUrl: stories.thumbnailUrl,
-                                episodeNumber: stories.sequenceIndex ?? 1,
-                                seriesTitle: stories.readingTopic,
-                                pageIndex: safePageIndex,
-                                pageCount: pages.length,
-                              ),
+                              text: _isFinishingEpisode
+                                  ? 'Saving...'
+                                  : 'Take Quiz',
+                              onTap: _isFinishingEpisode
+                                  ? null
+                                  : () => _onChapterCompleted(
+                                      context: context,
+                                      storyProvider: provider,
+                                      storyId: stories.id,
+                                      storyTitle: stories.title,
+                                      storyImageUrl: stories.thumbnailUrl,
+                                      episodeNumber: stories.sequenceIndex ?? 1,
+                                      seriesTitle: stories.readingTopic,
+                                      pageIndex: safePageIndex,
+                                      pageCount: pages.length,
+                                    ),
                             )
                           else
                             _BottomPrimaryButton(
@@ -761,10 +817,10 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
 }
 
 class _BottomPrimaryButton extends StatelessWidget {
-  const _BottomPrimaryButton({required this.text, required this.onTap});
+  const _BottomPrimaryButton({required this.text, this.onTap});
 
   final String text;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {

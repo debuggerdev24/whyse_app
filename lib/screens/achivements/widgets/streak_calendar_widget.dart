@@ -1,12 +1,15 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/models/gamification/streak_score_model.dart';
 
 class StreakCalendarWidget extends StatefulWidget {
   const StreakCalendarWidget({
     super.key,
-    required this.streakDays,
+    required this.calendarDays,
+    this.onMonthChanged,
   });
 
-  final Set<int> streakDays;
+  final List<StreakCalendarDay> calendarDays;
+  final void Function(int year, int month)? onMonthChanged;
 
   @override
   State<StreakCalendarWidget> createState() => _StreakCalendarWidgetState();
@@ -42,6 +45,35 @@ class _StreakCalendarWidgetState extends State<StreakCalendarWidget> {
     setState(() {
       _visibleMonth = DateTime(_visibleMonth.year, _visibleMonth.month + delta);
     });
+    widget.onMonthChanged?.call(_visibleMonth.year, _visibleMonth.month);
+  }
+
+  Set<int> _completedDaysForVisibleMonth() {
+    final days = <int>{};
+    for (final day in widget.calendarDays) {
+      if (!day.isCompleted) continue;
+      final parsed = DateTime.tryParse(day.date);
+      if (parsed == null) continue;
+      if (parsed.year == _visibleMonth.year &&
+          parsed.month == _visibleMonth.month) {
+        days.add(parsed.day);
+      }
+    }
+    return days;
+  }
+
+  Set<int> _frozenDaysForVisibleMonth() {
+    final days = <int>{};
+    for (final day in widget.calendarDays) {
+      if (!day.isFrozen) continue;
+      final parsed = DateTime.tryParse(day.date);
+      if (parsed == null) continue;
+      if (parsed.year == _visibleMonth.year &&
+          parsed.month == _visibleMonth.month) {
+        days.add(parsed.day);
+      }
+    }
+    return days;
   }
 
   List<DateTime?> _buildMonthGrid() {
@@ -63,9 +95,12 @@ class _StreakCalendarWidgetState extends State<StreakCalendarWidget> {
   @override
   Widget build(BuildContext context) {
     final cells = _buildMonthGrid();
+    final completedDays = _completedDaysForVisibleMonth();
+    final frozenDays = _frozenDaysForVisibleMonth();
     final monthTitle =
         '${_monthNames[_visibleMonth.month - 1]} ${_visibleMonth.year}';
     final inactiveColor = AppColors.black.withValues(alpha: 0.35);
+    final now = DateTime.now();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,7 +181,13 @@ class _StreakCalendarWidgetState extends State<StreakCalendarWidget> {
                   final date = cells[index];
                   if (date == null) return const SizedBox.shrink();
 
-                  final isStreakDay = widget.streakDays.contains(date.day);
+                  final isCompleted = completedDays.contains(date.day);
+                  final isFrozen =
+                      frozenDays.contains(date.day) && !isCompleted;
+                  final isToday = date.year == now.year &&
+                      date.month == now.month &&
+                      date.day == now.day;
+
                   return Center(
                     child: Container(
                       width: 34.w,
@@ -154,19 +195,30 @@ class _StreakCalendarWidgetState extends State<StreakCalendarWidget> {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: isStreakDay
+                        color: isCompleted
                             ? AppColors.orangeColor
+                            : isFrozen
+                            ? const Color(0xFF2B9FD9)
                             : Colors.transparent,
+                        border: isToday && !isCompleted && !isFrozen
+                            ? Border.all(color: AppColors.orangeColor, width: 2)
+                            : null,
                       ),
-                      child: AppText(
-                        text: '${date.day}',
-                        style: AppTextStyles.semiBold(
-                          fontSize: 14.sp,
-                          color: isStreakDay
-                              ? AppColors.white
-                              : inactiveColor,
-                        ),
-                      ),
+                      child: isFrozen
+                          ? Icon(
+                              Icons.ac_unit_rounded,
+                              size: 16.w,
+                              color: AppColors.white,
+                            )
+                          : AppText(
+                              text: '${date.day}',
+                              style: AppTextStyles.semiBold(
+                                fontSize: 14.sp,
+                                color: isCompleted
+                                    ? AppColors.white
+                                    : inactiveColor,
+                              ),
+                            ),
                     ),
                   );
                 },

@@ -2,6 +2,7 @@ import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/user_avatar_image.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
+import 'package:redstreakapp/providers/gamification/gamification_provider.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
 
 class HomeHeader extends StatelessWidget {
@@ -18,33 +19,43 @@ class HomeHeader extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.w),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(22.r),
-                  border: Border.all(
-                    color: AppColors.black.withValues(alpha: 0.12),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: 10.w,
-                  children: [
-                    SvgIcon(
-                      AppAssets.thunder,
-                      size: 17.w,
-                      color: AppColors.orangeColor,
-                    ),
-                    AppText(
-                      text: "2",
-                      style: AppTextStyles.bold(
-                        fontSize: 20.sp,
-                        color: AppColors.black,
+              Consumer<GamificationProvider>(
+                builder: (context, gp, _) {
+                  final streakCount = gp.streakScore?.streak.currentStreak ?? 0;
+                  return GestureDetector(
+                    onTap: () =>
+                        context.pushNamed(AppRoutes.achivementsScreen.name),
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.w),
+                      decoration: BoxDecoration(
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(22.r),
+                        border: Border.all(
+                          color: AppColors.black.withValues(alpha: 0.12),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: 10.w,
+                        children: [
+                          SvgIcon(
+                            AppAssets.thunder,
+                            size: 17.w,
+                            color: AppColors.orangeColor,
+                          ),
+                          AppText(
+                            text: '$streakCount',
+                            style: AppTextStyles.bold(
+                              fontSize: 20.sp,
+                              color: AppColors.black,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
@@ -294,6 +305,11 @@ class CalendarStrip extends StatelessWidget {
                     date.year == now.year &&
                     date.month == now.month &&
                     date.day == now.day;
+                final isCompleted = context
+                    .watch<GamificationProvider>()
+                    .streakScore
+                    ?.isDateCompleted(date) ??
+                    false;
                 return SizedBox(
                   width: 52.w,
                   child: Column(
@@ -317,15 +333,25 @@ class CalendarStrip extends StatelessWidget {
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: isToday
+                          color: isCompleted
                               ? AppColors.orangeColor
+                              : isToday
+                              ? AppColors.orangeColor.withValues(alpha: 0.25)
                               : Colors.transparent,
+                          border: isToday && !isCompleted
+                              ? Border.all(
+                                  color: AppColors.orangeColor,
+                                  width: 2,
+                                )
+                              : null,
                         ),
                         child: AppText(
                           text: date.day.toString(),
                           style: AppTextStyles.bold(
                             fontSize: 13.sp,
-                            color: isToday
+                            color: isCompleted
+                                ? AppColors.white
+                                : isToday
                                 ? AppColors.black
                                 : AppColors.black.withValues(alpha: 0.55),
                           ),

@@ -1,5 +1,6 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/home_widgets.dart';
+import 'package:redstreakapp/providers/gamification/gamification_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/screens/home/widgets/continue_reading_section.dart';
 import 'package:redstreakapp/screens/home/widgets/curiosity_reading_section.dart';
@@ -14,6 +15,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with RouteAware {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<GamificationProvider>().fetchStreakScore();
+    });
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -34,6 +44,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     // Returned to Home from another screen (story ideas / reader etc).
     if (!mounted) return;
     context.read<HomeProvider>().getContinueReading(force: true);
+    context.read<GamificationProvider>().fetchStreakScore(force: true);
   }
 
   @override

@@ -114,6 +114,14 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Refreshes Continue Reading shelf and My Series topics after finishing a story.
+  Future<void> refreshHomeReadingData({String? topicId}) async {
+    await getContinueReading(force: true);
+    if (topicId != null && topicId.isNotEmpty) {
+      await getTopicStoryDetails(topicId: topicId, showLoadingUi: false);
+    }
+  }
+
   Future<void> getContinueReadingLoadMore() async {
     if (!hasMoreContinueReading ||
         isContinueReadingLoading ||
@@ -495,14 +503,41 @@ class HomeProvider extends ChangeNotifier {
           : ((readPagesFromFarthest / pageCount) * 100).round().clamp(0, 100),
       lastReadAt: prev?.lastReadAt ?? DateTime.now().toUtc().toIso8601String(),
       completedAt: prev?.completedAt,
-      // Completion now depends on quiz completion (when quizProgress exists).
-      isCompleted:
-          (readPagesFromFarthest >= pageCount) &&
-              ((prev?.quizProgress == null) ||
-                  (prev?.quizProgress?.isCompleted == true)) ||
-          (prev?.isCompleted ?? false),
+      isCompleted: prev?.isCompleted ?? false,
+      quizProgress: prev?.quizProgress,
     );
     notifyListeners();
+  }
+
+  int countFullyCompletedEpisodes() {
+    final ideas = storySummary?.storyIdeas ?? const [];
+    return ideas
+        .where((idea) => idea.continueReading?.isFullyCompleted == true)
+        .length;
+  }
+
+  int countReadingCompletedEpisodes() {
+    final ideas = storySummary?.storyIdeas ?? const [];
+    return ideas
+        .where((idea) => idea.continueReading?.isReadingComplete == true)
+        .length;
+  }
+
+  bool isSeriesFullyComplete({int? totalEpisodes}) {
+    final ideas = storySummary?.storyIdeas;
+    if (ideas == null || ideas.isEmpty) return false;
+    final total = (totalEpisodes ?? 0) > 0 ? totalEpisodes! : ideas.length;
+    if (total <= 0) return false;
+    return countFullyCompletedEpisodes() >= total;
+  }
+
+  ContinueReading? continueReadingForIdea(String storyIdeaId) {
+    final ideas = storySummary?.storyIdeas;
+    if (ideas == null) return null;
+    for (final idea in ideas) {
+      if (idea.id == storyIdeaId) return idea.continueReading;
+    }
+    return null;
   }
 
   void applyLocalQuizProgress({

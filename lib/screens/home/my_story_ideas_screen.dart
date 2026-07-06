@@ -683,6 +683,11 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                                             storyImageUrl ??
                                             resumeIdea.thumbnailUrl,
                                         'storyIdeaId': resumeIdea.id,
+                                        'episodeNumber': resumeIndex + 1,
+                                        'seriesTitle': summary.topicTitle,
+                                        'totalEpisodes': summary.storyIdeas.length,
+                                        if (hp.activeStoryIdeasTopicId != null)
+                                          'topicId': hp.activeStoryIdeasTopicId,
                                       },
                                     )
                                     .then((result) {

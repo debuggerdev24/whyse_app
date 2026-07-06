@@ -29,6 +29,7 @@ enum AppRoutes {
   quizQuestionScreen,
   quizCompletedScreen,
   episodeCompletedScreen,
+  seriesCompletedScreen,
   whatInterestScreen,
   forgotPasswordScreen,
   verifyOtpScreen,
