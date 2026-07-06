@@ -67,6 +67,7 @@ class AppAssets {
   static const explore = "$_iconPath/explore.svg";
 
   // images
+  static const streakFire = "$_imagePath/streak_fire.png";
   static const _imagePath = "assets/images";
   static const dargon = "$_imagePath/dinosaur.png";
   static const detativeclue = "$_imagePath/detativeclue.png";

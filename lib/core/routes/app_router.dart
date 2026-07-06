@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/extensions/routes_extensions.dart';
+import 'package:redstreakapp/screens/achivements/achivements_screen.dart';
 import 'package:redstreakapp/screens/auth/above_16/create_account_screen.dart';
 import 'package:redstreakapp/screens/auth/above_16/goals_screen.dart';
 import 'package:redstreakapp/screens/auth/above_16/interests_screen.dart';
@@ -54,6 +55,7 @@ import 'package:redstreakapp/screens/home/quiz/quiz_completed_screen.dart';
 import 'package:redstreakapp/screens/home/quiz/quiz_question_screen.dart';
 import 'package:redstreakapp/screens/home/quiz/enter_quiz_number.dart';
 import 'package:redstreakapp/screens/home/quiz/start_quiz_screen.dart';
+import 'package:redstreakapp/screens/home/story/episode_completed_screen.dart';
 import 'package:redstreakapp/models/home/browse_topic_model.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/screens/practice/practice_zone.dart';
@@ -111,7 +113,6 @@ class AppRouter {
               ),
             ],
           ),
-          //* Search tab
           StatefulShellBranch(
             routes: [
               // GoRoute(
@@ -126,13 +127,17 @@ class AppRouter {
               ),
             ],
           ),
-          //* Practice Zone tab
           StatefulShellBranch(
             routes: [
+              // GoRoute(
+              //   path: AppRoutes.practiceZoneScreen.path,
+              //   name: AppRoutes.practiceZoneScreen.name,
+              //   builder: (context, state) => PracticeZoneSection(),
+              // ),
               GoRoute(
-                path: AppRoutes.practiceZoneScreen.path,
-                name: AppRoutes.practiceZoneScreen.name,
-                builder: (context, state) => PracticeZoneSection(),
+                path: AppRoutes.achivementsScreen.path,
+                name: AppRoutes.achivementsScreen.name,
+                builder: (context, state) => AchivementsScreen(),
               ),
             ],
           ),
@@ -315,6 +320,33 @@ class AppRouter {
           storyId: extra?['storyId'] as String?,
           fromContinueReading: extra?['fromContinueReading'] == true,
           continueReadingTopicId: extra?['continueReadingTopicId']
+              ?.toString()
+              .trim(),
+        );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.episodeCompletedScreen.path,
+      name: AppRoutes.episodeCompletedScreen.name,
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>? ?? const {};
+        return EpisodeCompletedScreen(
+          storyId: extra['storyId']?.toString() ?? '',
+          storyTitle: extra['storyTitle']?.toString() ?? '',
+          storyImageUrl: extra['storyImageUrl']?.toString(),
+          storyIdeaId: extra['storyIdeaId']?.toString(),
+          seriesTitle: extra['seriesTitle']?.toString(),
+          episodeNumber: extra['episodeNumber'] is int
+              ? extra['episodeNumber'] as int
+              : int.tryParse(extra['episodeNumber']?.toString() ?? '') ?? 1,
+          progressPercent: extra['progressPercent'] is int
+              ? extra['progressPercent'] as int
+              : int.tryParse(extra['progressPercent']?.toString() ?? '') ?? 37,
+          sparksPoints: extra['sparksPoints'] is int
+              ? extra['sparksPoints'] as int
+              : int.tryParse(extra['sparksPoints']?.toString() ?? '') ?? 20,
+          fromContinueReading: extra['fromContinueReading'] == true,
+          continueReadingTopicId: extra['continueReadingTopicId']
               ?.toString()
               .trim(),
         );

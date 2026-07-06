@@ -1,5 +1,5 @@
-import 'package:redstreakapp/core/constants/app_constants.dart';
 import 'package:redstreakapp/core/enums/user_gender.dart';
+import 'package:redstreakapp/core/utils/network_image_url.dart';
 
 class FriendResponse {
   final String friendshipId;
@@ -48,9 +48,7 @@ class FriendUser {
       username: json['username'] as String?,
       phone: json['phone'] as String?,
       gender: UserGender.fromApi(json['gender']),
-      avatarUrl: json['avatarUrl'] != null
-          ? '${AppConstants.imageBaseUrl}${json['avatarUrl']}'
-          : null,
+      avatarUrl: resolveNullableNetworkImageUrl(json['avatarUrl']?.toString()),
     );
   }
 

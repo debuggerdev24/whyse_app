@@ -3,6 +3,7 @@ import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/utils/share_helper.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/home/story_models/reading_exit_snapshot.dart';
+import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/reading_appearance_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/services/home/story_api_service.dart';
@@ -296,6 +297,67 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
     _schedulePageProgressReport(completedPageIndex);
   }
 
+  void _onChapterCompleted({
+    required BuildContext context,
+    required StoryProvider storyProvider,
+    required String storyId,
+    required String storyTitle,
+    required String? storyImageUrl,
+    required int episodeNumber,
+    required String? seriesTitle,
+    required int pageIndex,
+    required int pageCount,
+  }) {
+    _reportPageProgressNow(pageIndex);
+
+    final storyIdeaId = widget.storyIdeaId;
+    if (storyIdeaId != null && storyIdeaId.isNotEmpty && pageCount > 0) {
+      context.read<HomeProvider>().applyLocalReadingProgressFromReadingSession(
+        storyIdeaId: storyIdeaId,
+        lastPageIndex: pageIndex,
+        pageCount: pageCount,
+      );
+    }
+
+    final homeProvider = context.read<HomeProvider>();
+    final summary = homeProvider.storySummary;
+    final totalEpisodes = summary?.storyIdeas.length ??
+        storyProvider.storyIdeas?.storyIdeas.length ??
+        summary?.overallProgress?.totalStories ??
+        0;
+    final topicFromIdeas = storyProvider.storyIdeas?.topic.title.trim();
+    final resolvedSeries =
+        (seriesTitle != null && seriesTitle.trim().isNotEmpty)
+        ? seriesTitle.trim()
+        : (summary?.topicTitle.trim().isNotEmpty == true
+              ? summary!.topicTitle.trim()
+              : (topicFromIdeas != null && topicFromIdeas.isNotEmpty
+                    ? topicFromIdeas
+                    : null));
+    final progressPercent = totalEpisodes > 0
+        ? ((episodeNumber.clamp(1, totalEpisodes) / totalEpisodes) * 100)
+              .round()
+              .clamp(1, 100)
+        : 37;
+
+    context.pushNamed(
+      AppRoutes.episodeCompletedScreen.name,
+      extra: {
+        'storyId': storyId,
+        'storyTitle': storyTitle,
+        'storyImageUrl': storyImageUrl,
+        'storyIdeaId': widget.storyIdeaId,
+        'seriesTitle': resolvedSeries,
+        'episodeNumber': episodeNumber,
+        'progressPercent': progressPercent,
+        'sparksPoints': 20,
+        'fromContinueReading': widget.fromContinueReading,
+        if ((widget.continueReadingTopicId ?? '').isNotEmpty)
+          'continueReadingTopicId': widget.continueReadingTopicId,
+      },
+    );
+  }
+
   void _goToPreviousPage() {
     if (_currentPageIndex <= 0) return;
     setState(() => _currentPageIndex--);
@@ -311,6 +373,19 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
     }
     _progressDebounceTimer?.cancel();
     _progressDebounceTimer = Timer(_progressDebounce, _flushQueuedPageProgress);
+  }
+
+  /// Saves page progress immediately (used when finishing the last page).
+  void _reportPageProgressNow(int pageIndex) {
+    final storyIdeaId = widget.storyIdeaId;
+    if (storyIdeaId == null || storyIdeaId.isEmpty) return;
+    if (pageIndex < 0) return;
+    _progressDebounceTimer?.cancel();
+    _queuedProgressPageIndex = pageIndex;
+    if (pageIndex > _maxConfirmedPageIndex) {
+      _maxConfirmedPageIndex = pageIndex;
+    }
+    _flushQueuedPageProgress();
   }
 
   void _flushQueuedPageProgress() {
@@ -637,27 +712,18 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                         else ...[
                           if (isLastPage)
                             _BottomPrimaryButton(
-                              text: "Take Quiz",
-                              onTap: () {
-                                // Do NOT mark the last page as read just by opening the quiz.
-                                // The server will finalize completion when quiz is submitted.
-                                _schedulePageProgressReport(safePageIndex);
-                                context.pushNamed(
-                                  AppRoutes.startQuizScreen.name,
-                                  extra: {
-                                    'storyId': stories.id,
-                                    'storyTitle': stories.title,
-                                    'storyImageUrl': stories.thumbnailUrl,
-                                    'storyIdeaId': widget.storyIdeaId,
-                                    'fromContinueReading':
-                                        widget.fromContinueReading,
-                                    if ((widget.continueReadingTopicId ?? '')
-                                        .isNotEmpty)
-                                      'continueReadingTopicId':
-                                          widget.continueReadingTopicId,
-                                  },
-                                );
-                              },
+                              text: "Finish Reading",
+                              onTap: () => _onChapterCompleted(
+                                context: context,
+                                storyProvider: provider,
+                                storyId: stories.id,
+                                storyTitle: stories.title,
+                                storyImageUrl: stories.thumbnailUrl,
+                                episodeNumber: stories.sequenceIndex ?? 1,
+                                seriesTitle: stories.readingTopic,
+                                pageIndex: safePageIndex,
+                                pageCount: pages.length,
+                              ),
                             )
                           else
                             _BottomPrimaryButton(

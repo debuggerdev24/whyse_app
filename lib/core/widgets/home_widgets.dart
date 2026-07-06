@@ -198,6 +198,10 @@ class CalendarStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final now = DateTime.now();
     final monthDates = _getCurrentMonthDates();
+    final textScaler = MediaQuery.textScalerOf(context);
+    final weekdayLineHeight = textScaler.scale(11.sp) * 1.25;
+    final dayCircleSize = 30.w;
+    final stripItemHeight = weekdayLineHeight + 4.w + dayCircleSize;
     // final monthTitle = "${_monthName(now.month)} ${now.year}";
     final todayIndex = monthDates.indexWhere(
       (date) =>
@@ -276,14 +280,14 @@ class CalendarStrip extends StatelessWidget {
           ),
           padding: EdgeInsets.symmetric(vertical: 10.w),
           child: SizedBox(
-            height: 50.w,
+            height: stripItemHeight,
             child: ListView.separated(
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               controller: scrollController,
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
               itemCount: monthDates.length,
-              separatorBuilder: (_, __) => 5.w.horizontalSpace,
+              separatorBuilder: (_, _) => 5.w.horizontalSpace,
               itemBuilder: (context, index) {
                 final date = monthDates[index];
                 final isToday =
@@ -300,13 +304,16 @@ class CalendarStrip extends StatelessWidget {
                         text: _weekdayShort(date),
                         style: AppTextStyles.bold(
                           fontSize: 11.sp,
+                          height: 1.25,
                           color: AppColors.black.withValues(alpha: 0.35),
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      4.w.verticalSpace,
+                      SizedBox(height: 4.w),
                       Container(
-                        width: 30.w,
-                        height: 30.w,
+                        width: dayCircleSize,
+                        height: dayCircleSize,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,

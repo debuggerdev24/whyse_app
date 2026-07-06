@@ -1,23 +1,76 @@
+import 'package:redstreakapp/core/constants/app_constants.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/network/base_api_service.dart';
+
 /// Turns API thumbnail paths into a full URL [CachedNetworkImage] can load.
 ///
 /// Supports two shapes returned by the backend:
-///   * Absolute `http(s)://` URLs (e.g. `https://upload.wikimedia.org/...`)
-///     — returned as-is.
-///   * Site-relative paths (e.g. `uploads/stories/thumbnails/.../foo.png`
-///     or `/storage/...`) — base URL is prepended.
+///   * Absolute `http(s)://` URLs on the app/media host — content paths are
+///     rewritten to [AppConstants.imageBaseUrl] (S3). Avatar paths stay on
+///     [DioClient.baseUrl]. External hosts are returned as-is.
+///   * Site-relative paths (e.g. `topics/.../foo.jpg` or `/curiosity/...`)
+///     — [AppConstants.imageBaseUrl] is prepended. `/uploads/avatars/...`
+///     uses [DioClient.baseUrl] instead.
 String resolveNetworkImageUrl(String url) {
   final trimmed = url.trim();
   if (trimmed.isEmpty) return '';
+
+  final imageBase = AppConstants.imageBaseUrl.replaceAll(RegExp(r'/+$'), '');
+  final appBase = _appBaseUrl();
+
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    final uri = Uri.tryParse(trimmed);
+    if (uri != null) {
+      if (_isAvatarMediaPath(uri.path)) {
+        return _resolveAvatarAbsoluteUrl(uri, appBase);
+      }
+      if (_shouldRewriteToImageBase(uri)) {
+        return _joinImageBase(imageBase, uri.path, query: uri.query);
+      }
+    }
     return trimmed;
   }
-  final base = DioClient.baseUrl.replaceAll(RegExp(r'/+$'), '');
+
+  final base = _isAvatarMediaPath(trimmed) ? appBase : imageBase;
   if (trimmed.startsWith('/')) {
     return '$base$trimmed';
   }
   return '$base/$trimmed';
+}
+
+String _appBaseUrl() => DioClient.baseUrl.replaceAll(RegExp(r'/+$'), '');
+
+bool _isAvatarMediaPath(String path) {
+  final normalized = path.toLowerCase();
+  return normalized.contains('/uploads/avatars/') ||
+      normalized.contains('/avatars/');
+}
+
+/// Avatars are served from the app host (whyse.com), not the S3 media CDN.
+String _resolveAvatarAbsoluteUrl(Uri uri, String appBase) {
+  final imageHost = Uri.tryParse(AppConstants.imageBaseUrl)?.host;
+  if (imageHost != null && uri.host == imageHost) {
+    return _joinImageBase(appBase, uri.path, query: uri.query);
+  }
+  return uri.toString();
+}
+
+bool _shouldRewriteToImageBase(Uri uri) {
+  if (_isAvatarMediaPath(uri.path)) return false;
+
+  final imageHost = Uri.tryParse(AppConstants.imageBaseUrl)?.host;
+  if (imageHost != null && uri.host == imageHost) return false;
+
+  if (uri.host == 'whyse.com' || uri.host == 'www.whyse.com') return true;
+
+  final apiHost = Uri.tryParse(DioClient.baseUrl)?.host;
+  return apiHost != null && uri.host == apiHost;
+}
+
+String _joinImageBase(String imageBase, String path, {String query = ''}) {
+  final normalizedPath = path.startsWith('/') ? path : '/$path';
+  if (query.isEmpty) return '$imageBase$normalizedPath';
+  return '$imageBase$normalizedPath?$query';
 }
 
 /// Same as [resolveNetworkImageUrl] but preserves `null` / empty inputs by

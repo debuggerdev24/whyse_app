@@ -210,7 +210,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
       ];
     }
 
-    return [
+    return [ 
       for (var i = 0; i < sections.length; i++) ...[
         if (i > 0) 28.w.verticalSpace,
         ExploreSeriesSectionView(

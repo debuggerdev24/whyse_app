@@ -11,9 +11,21 @@ import 'package:redstreakapp/screens/search/widgets/search_widgets.dart';
 
 double exploreSeriesCardHeight(BuildContext context) {
   final textScaler = MediaQuery.textScalerOf(context);
-  final titleLine = textScaler.scale(17.sp) * 1.2;
-  final subtitleLine = textScaler.scale(13.sp) * 1.2;
-  return 150.w + 12.h + 4.h + titleLine + 14.h + subtitleLine + 6.h;
+  const titleLineHeight = 1.3;
+  const subtitleLineHeight = 1.3;
+  final titleLine = textScaler.scale(17.sp) * titleLineHeight;
+  final subtitleLine = textScaler.scale(13.sp) * subtitleLineHeight;
+  // Image + title block + subtitle block + safety buffer for font metrics.
+  return 150.w + 12.h + titleLine + 4.h + subtitleLine + 14.h + 8.h;
+}
+
+double exploreSparkCardHeight(BuildContext context) {
+  final textScaler = MediaQuery.textScalerOf(context);
+  const titleLineHeight = 1.3;
+  const subtitleLineHeight = 1.3;
+  final titleBlock = textScaler.scale(17.sp) * titleLineHeight * 2;
+  final subtitleLine = textScaler.scale(13.sp) * subtitleLineHeight;
+  return 150.w + 14.w + 4.w + titleBlock + 16.w + subtitleLine + 8.h;
 }
 
 class ExploreSearchField extends StatefulWidget {
@@ -673,10 +685,12 @@ class ExploreSeriesCard extends StatelessWidget {
     super.key,
     required this.topic,
     required this.onTap,
+    this.height,
   });
 
   final BrowseTopicModel topic;
   final VoidCallback onTap;
+  final double? height;
 
   @override
   Widget build(BuildContext context) {
@@ -686,6 +700,7 @@ class ExploreSeriesCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: 220.w,
+        height: height,
         margin: EdgeInsets.only(right: 14.w),
         decoration: BoxDecoration(
           color: AppColors.white,
@@ -700,7 +715,6 @@ class ExploreSeriesCard extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SizedBox(
@@ -717,25 +731,35 @@ class ExploreSeriesCard extends StatelessWidget {
                       colors: const [AppColors.teal, AppColors.bluecolor],
                     ),
             ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 4.h),
-              child: AppText(
-                text: topic.topic,
-                style: AppTextStyles.bold(fontSize: 17.sp),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 14.h),
-              child: AppText(
-                text: seriesReadingsLabel(topic),
-                style: AppTextStyles.medium(
-                  fontSize: 13.sp,
-                  color: subtitleColor,
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 14.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    AppText(
+                      text: topic.topic,
+                      style: AppTextStyles.bold(
+                        fontSize: 17.sp,
+                        height: 1.3,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 4.h),
+                    AppText(
+                      text: seriesReadingsLabel(topic),
+                      style: AppTextStyles.medium(
+                        fontSize: 13.sp,
+                        height: 1.3,
+                        color: subtitleColor,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -850,10 +874,12 @@ class ExploreSparkCard extends StatelessWidget {
     super.key,
     required this.reading,
     required this.onTap,
+    this.height,
   });
 
   final Reading reading;
   final VoidCallback onTap;
+  final double? height;
 
   @override
   Widget build(BuildContext context) {
@@ -861,6 +887,7 @@ class ExploreSparkCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: 220.w,
+        height: height,
         margin: EdgeInsets.only(right: 16.w),
         decoration: BoxDecoration(
           color: AppColors.white,
@@ -886,25 +913,35 @@ class ExploreSparkCard extends StatelessWidget {
                 errorCompact: true,
               ),
             ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 14.w, 16.w, 4.w),
-              child: AppText(
-                text: reading.title,
-                style: AppTextStyles.bold(fontSize: 17.sp),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.w),
-              child: AppText(
-                text: reading.interestName,
-                style: AppTextStyles.medium(
-                  fontSize: 13.sp,
-                  color: AppColors.black.withValues(alpha: 0.45),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(16.w, 14.w, 16.w, 16.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    AppText(
+                      text: reading.title,
+                      style: AppTextStyles.bold(
+                        fontSize: 17.sp,
+                        height: 1.3,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 4.h),
+                    AppText(
+                      text: reading.interestName,
+                      style: AppTextStyles.medium(
+                        fontSize: 13.sp,
+                        height: 1.3,
+                        color: AppColors.black.withValues(alpha: 0.45),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -996,6 +1033,7 @@ class _ExploreSeriesRowState extends State<ExploreSeriesRow> {
           final topic = widget.topics[index];
           return ExploreSeriesCard(
             topic: topic,
+            height: rowHeight,
             onTap: () => widget.onTopicTap(topic),
           );
         },
@@ -1106,8 +1144,10 @@ class ExploreSparkRow extends StatelessWidget {
   Widget build(BuildContext context) {
     if (readings.isEmpty) return const SizedBox.shrink();
 
+    final rowHeight = exploreSparkCardHeight(context);
+
     return SizedBox(
-      height: 232.w,
+      height: rowHeight,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
@@ -1116,6 +1156,7 @@ class ExploreSparkRow extends StatelessWidget {
           final reading = readings[index];
           return ExploreSparkCard(
             reading: reading,
+            height: rowHeight,
             onTap: () => onReadingTap(reading, index),
           );
         },

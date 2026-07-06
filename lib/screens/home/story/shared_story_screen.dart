@@ -896,12 +896,18 @@ class _StoryViewerState extends State<_StoryViewer> {
   }
 
   void _openQuiz() {
+    final episodeNumber = widget.story.sequenceIndex ?? 1;
     context.pushNamed(
-      AppRoutes.startQuizScreen.name,
+      AppRoutes.episodeCompletedScreen.name,
       extra: {
         'storyId': widget.story.id,
         'storyTitle': widget.story.title,
         'storyImageUrl': widget.story.thumbnailUrl,
+        'storyIdeaId': widget.storyIdeaId,
+        'seriesTitle': widget.topicTitle,
+        'episodeNumber': episodeNumber,
+        'progressPercent': 37,
+        'sparksPoints': 20,
       },
     );
   }
