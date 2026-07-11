@@ -169,8 +169,15 @@ class HomeHeader extends StatelessWidget {
   }
 }
 
-class CalendarStrip extends StatelessWidget {
+class CalendarStrip extends StatefulWidget {
   const CalendarStrip({super.key});
+
+  @override
+  State<CalendarStrip> createState() => _CalendarStripState();
+}
+
+class _CalendarStripState extends State<CalendarStrip> {
+  late final ScrollController _scrollController;
 
   List<DateTime> _getCurrentMonthDates() {
     final now = DateTime.now();
@@ -187,184 +194,129 @@ class CalendarStrip extends StatelessWidget {
     return labels[date.weekday - 1];
   }
 
-  // String _monthName(int month) {
-  //   const months = [
-  //     'January',
-  //     'February',
-  //     'March',
-  //     'April',
-  //     'May',
-  //     'June',
-  //     'July',
-  //     'August',
-  //     'September',
-  //     'October',
-  //     'November',
-  //     'December',
-  //   ];
-  //   return months[month - 1];
-  // }
-
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToToday());
+  }
+
+  void _scrollToToday() {
+    if (!mounted || !_scrollController.hasClients) return;
     final now = DateTime.now();
     final monthDates = _getCurrentMonthDates();
-    final textScaler = MediaQuery.textScalerOf(context);
-    final weekdayLineHeight = textScaler.scale(11.sp) * 1.25;
-    final dayCircleSize = 30.w;
-    final stripItemHeight = weekdayLineHeight + 4.w + dayCircleSize;
-    // final monthTitle = "${_monthName(now.month)} ${now.year}";
     final todayIndex = monthDates.indexWhere(
       (date) =>
           date.year == now.year &&
           date.month == now.month &&
           date.day == now.day,
     );
-    final scrollController = ScrollController(
-      initialScrollOffset: todayIndex > 0 ? (todayIndex - 1) * 57.w : 0,
-    );
+    if (todayIndex <= 0) return;
+    _scrollController.jumpTo((todayIndex - 1) * 57.w);
+  }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // AppText(
-        //   text: monthTitle,
-        //   style: AppTextStyles.bold(
-        //     fontSize: 12.sp,
-        //     color: AppColors.black.withValues(alpha: 0.6),
-        //   ),
-        // ),
-        // AppText(
-        //   text: "Weekly goal",
-        //   style: AppTextStyles.bold(fontSize: 12.sp),
-        // ),
-        // 5.w.verticalSpace,
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
-        // SizedBox(
-        //   width: double.infinity,
-        //   child: Row(
-        //     children: [
-        //       Expanded(
-        //         child: Container(
-        //           height: 4.h,
-        //           decoration: BoxDecoration(
-        //             color: AppColors.orangeColor,
-        //             borderRadius: BorderRadius.circular(2.r),
-        //           ),
-        //         ),
-        //       ),
-        //       4.w.horizontalSpace,
-        //       Expanded(
-        //         child: Container(
-        //           height: 4.h,
-        //           decoration: BoxDecoration(
-        //             color: Colors.grey.shade200,
-        //             borderRadius: BorderRadius.circular(2.r),
-        //           ),
-        //         ),
-        //       ),
-        //       4.w.horizontalSpace,
-        //       Expanded(
-        //         child: Container(
-        //           height: 4.h,
-        //           decoration: BoxDecoration(
-        //             color: Colors.grey.shade200,
-        //             borderRadius: BorderRadius.circular(2.r),
-        //           ),
-        //         ),
-        //       ),
-        //     ],
-        //   ),
-        // ),
-        // 6.w.verticalSpace,
-        // AppText(
-        //   text: "1/3 Exercises",
-        //   style: AppTextStyles.bold(
-        //     fontSize: 12.sp,
-        //     color: AppColors.black.withValues(alpha: 0.4),
-        //   ),
-        // ),
-        0.w.verticalSpace,
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: AppColors.black.withValues(alpha: 0.12)),
+  Widget _buildDayItem({
+    required DateTime date,
+    required DateTime now,
+    required bool isCompleted,
+    required double dayCircleSize,
+  }) {
+    final isToday =
+        date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day;
+
+    return SizedBox(
+      width: 52.w,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AppText(
+            text: _weekdayShort(date),
+            style: AppTextStyles.bold(
+              fontSize: 11.sp,
+              height: 1.1,
+              color: AppColors.black.withValues(alpha: 0.35),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
           ),
-          padding: EdgeInsets.symmetric(vertical: 10.w),
-          child: SizedBox(
-            height: stripItemHeight,
-            child: ListView.separated(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              controller: scrollController,
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              itemCount: monthDates.length,
-              separatorBuilder: (_, _) => 5.w.horizontalSpace,
-              itemBuilder: (context, index) {
-                final date = monthDates[index];
-                final isToday =
-                    date.year == now.year &&
-                    date.month == now.month &&
-                    date.day == now.day;
-                final isCompleted = context
-                    .watch<GamificationProvider>()
-                    .streakScore
-                    ?.isDateCompleted(date) ??
-                    false;
-                return SizedBox(
-                  width: 52.w,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      AppText(
-                        text: _weekdayShort(date),
-                        style: AppTextStyles.bold(
-                          fontSize: 11.sp,
-                          height: 1.25,
-                          color: AppColors.black.withValues(alpha: 0.35),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      SizedBox(height: 4.w),
-                      Container(
-                        width: dayCircleSize,
-                        height: dayCircleSize,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: isCompleted
-                              ? AppColors.orangeColor
-                              : isToday
-                              ? AppColors.orangeColor.withValues(alpha: 0.25)
-                              : Colors.transparent,
-                          border: isToday && !isCompleted
-                              ? Border.all(
-                                  color: AppColors.orangeColor,
-                                  width: 2,
-                                )
-                              : null,
-                        ),
-                        child: AppText(
-                          text: date.day.toString(),
-                          style: AppTextStyles.bold(
-                            fontSize: 13.sp,
-                            color: isCompleted
-                                ? AppColors.white
-                                : isToday
-                                ? AppColors.black
-                                : AppColors.black.withValues(alpha: 0.55),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
+          SizedBox(height: 4.w),
+          Container(
+            width: dayCircleSize,
+            height: dayCircleSize,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isCompleted
+                  ? AppColors.orangeColor
+                  : isToday
+                  ? AppColors.orangeColor.withValues(alpha: 0.25)
+                  : Colors.transparent,
+              border: isToday && !isCompleted
+                  ? Border.all(
+                      color: AppColors.orangeColor,
+                      width: 2,
+                    )
+                  : null,
+            ),
+            child: AppText(
+              text: date.day.toString(),
+              style: AppTextStyles.bold(
+                fontSize: 13.sp,
+                height: 1,
+                color: isCompleted
+                    ? AppColors.white
+                    : isToday
+                    ? AppColors.black
+                    : AppColors.black.withValues(alpha: 0.55),
+              ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final monthDates = _getCurrentMonthDates();
+    final dayCircleSize = 30.w;
+    final streakScore = context.watch<GamificationProvider>().streakScore;
+
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.black.withValues(alpha: 0.12)),
+      ),
+      padding: EdgeInsets.symmetric(vertical: 10.w),
+      child: SingleChildScrollView(
+        controller: _scrollController,
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        physics: const BouncingScrollPhysics(),
+        child: Row(
+          children: [
+            for (var index = 0; index < monthDates.length; index++) ...[
+              if (index > 0) 5.w.horizontalSpace,
+              _buildDayItem(
+                date: monthDates[index],
+                now: now,
+                isCompleted:
+                    streakScore?.isDateCompleted(monthDates[index]) ?? false,
+                dayCircleSize: dayCircleSize,
+              ),
+            ],
+          ],
         ),
-      ],
+      ),
     );
   }
 }

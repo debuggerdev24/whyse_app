@@ -41,6 +41,7 @@ import 'package:redstreakapp/screens/curiosity_reading/curiosity_reading_screen.
 import 'package:redstreakapp/screens/notification/notification_screen.dart';
 import 'package:redstreakapp/screens/profile/profile_screen.dart';
 import 'package:redstreakapp/screens/profile/your_books_screen.dart';
+import 'package:redstreakapp/screens/chat/chat_screen.dart';
 import 'package:redstreakapp/screens/search/search_screen.dart';
 import 'package:redstreakapp/screens/home/story/custom_story_topic_screen.dart';
 
@@ -143,9 +144,9 @@ class AppRouter {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppRoutes.searchScreen.path,
-                name: AppRoutes.searchScreen.name,
-                builder: (context, state) => SearchScreen(),
+                path: AppRoutes.chatScreen.path,
+                name: AppRoutes.chatScreen.name,
+                builder: (context, state) => const ChatScreen(),
               ),
             ],
           ),
@@ -609,6 +610,11 @@ class AppRouter {
       builder: (context, state) {
         return const BookDetailsScreen();
       },
+    ),
+    GoRoute(
+      path: AppRoutes.searchScreen.path,
+      name: AppRoutes.searchScreen.name,
+      builder: (context, state) => const SearchScreen(),
     ),
     GoRoute(
       path: AppRoutes.notificationScreen.path,
