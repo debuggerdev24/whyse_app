@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:redstreakapp/core/extensions/color.extensions.dart';
-import 'package:redstreakapp/core/routes/app_router.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/providers/curiosity_reading/curiosity_reading_provider.dart';

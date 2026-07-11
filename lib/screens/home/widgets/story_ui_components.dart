@@ -54,7 +54,7 @@ class StoryHeroHeader extends StatelessWidget {
                     children: [
                       topLeft,
                       const Spacer(),
-                      if (topRight != null) topRight!,
+                      ?topRight,
                     ],
                   ),
                 ),
@@ -71,7 +71,7 @@ class StoryHeroHeader extends StatelessWidget {
                           Text(title, style: titleStyle),
                           if (titleBottomSpacing != null)
                             SizedBox(height: titleBottomSpacing),
-                          if (bottomWidget != null) bottomWidget!,
+                          ?bottomWidget,
                         ],
                       ),
                     ),

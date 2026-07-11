@@ -1,6 +1,6 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
 
-showLoadingDialog(BuildContext context) {
+void showLoadingDialog(BuildContext context) {
   showDialog(
     context: context,
     barrierDismissible: false,

@@ -27,7 +27,7 @@ class GroupImageWidget extends StatelessWidget {
                 width: dimension,
                 height: dimension,
                 placeholder: (_) => _ImageShimmer(dimension),
-                errorBuilder: (_, __, ___) => Container(
+                errorBuilder: (_, _, _) => Container(
                   width: dimension,
                   height: dimension,
                   decoration: BoxDecoration(

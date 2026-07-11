@@ -250,8 +250,8 @@ class _GroupUpdatesTab extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 20.h),
       itemCount: 3,
-      separatorBuilder: (_, __) => 20.h.verticalSpace,
-      itemBuilder: (_, __) => Row(
+      separatorBuilder: (_, _) => 20.h.verticalSpace,
+      itemBuilder: (_, _) => Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AppSkeletonizer(child: Container(
@@ -304,7 +304,7 @@ class _GroupUpdatesTab extends StatelessWidget {
           physics: const BouncingScrollPhysics(),
           padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 20.h),
           itemCount: list.length,
-          separatorBuilder: (_, __) => 20.h.verticalSpace,
+          separatorBuilder: (_, _) => 20.h.verticalSpace,
           itemBuilder: (_, index) {
             final item = list[index];
             final member = groupProvider.groupMembersList.firstWhere(
@@ -587,7 +587,7 @@ class _GroupStreaksTab extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               padding: EdgeInsets.fromLTRB(18.w, 4.h, 18.w, 16.h),
               itemCount: _kStreakRankingEntries.length,
-              separatorBuilder: (_, __) => Divider(
+              separatorBuilder: (_, _) => Divider(
                 height: 1,
                 thickness: 1,
                 color: AppColors.black.withValues(alpha: 0.08),
@@ -697,7 +697,7 @@ class _StreakRankingRow extends StatelessWidget {
                   color: AppColors.teal,
                 ),
               ),
-              errorBuilder: (_, __, ___) => Container(
+              errorBuilder: (_, _, _) => Container(
                 color: AppColors.lighttealcolor,
                 alignment: Alignment.center,
                 child: Icon(

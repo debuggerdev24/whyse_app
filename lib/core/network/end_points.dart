@@ -181,13 +181,13 @@ class EndPoints {
   static const explorerSparkInterest = '/mobile/explorer/spark/interest';
 
   // Curiosity Reading endpoints
-  static getCuriosityReading({int page = 1, int limit = 10}) =>
+  static String getCuriosityReading({int page = 1, int limit = 10}) =>
       "/mobile/curiosity/feed?includeBody=true&limit=$limit&page=$page";
 
   static String getCuriosityReadingById({required String readingId}) =>
       '/mobile/curiosity/readings/$readingId?includeBody=true';
 
-  static curiosityReadingInteract({required String readingId}) =>
+  static String curiosityReadingInteract({required String readingId}) =>
       '/mobile/curiosity/readings/$readingId/interact';
 
   // Gamification & streaks

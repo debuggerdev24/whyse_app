@@ -16,8 +16,8 @@ typedef ExploreSparkLoadMore =
 class _ExploreSparkSession {
   _ExploreSparkSession({
     required this.loadMoreItems,
-    required ExplorePagination pagination,
-  }) : pagination = pagination;
+    required this.pagination,
+  });
 
   final ExploreSparkLoadMore loadMoreItems;
   ExplorePagination pagination;

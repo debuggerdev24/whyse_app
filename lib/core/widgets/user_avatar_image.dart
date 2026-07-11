@@ -60,7 +60,7 @@ class UserAvatarImage extends StatelessWidget {
       width: size,
       height: size,
       placeholder: (_) => UserAvatarShimmerFill(size: size),
-      errorBuilder: (_, __, ___) => Image.asset(
+      errorBuilder: (_, _, _) => Image.asset(
         AppAssets.profile,
         fit: BoxFit.cover,
         width: size,

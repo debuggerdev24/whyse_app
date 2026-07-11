@@ -545,7 +545,7 @@ class _TagsSection extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.only(right: 24.w),
         itemCount: interests.length,
-        separatorBuilder: (_, __) => SizedBox(width: 10.w),
+        separatorBuilder: (_, _) => SizedBox(width: 10.w),
         itemBuilder: (context, index) {
           final interest = interests[index];
           final name = interest.name.trim();
@@ -1418,7 +1418,7 @@ class _StoryImage extends StatelessWidget {
               fit: BoxFit.cover,
               height: height,
               width: double.infinity,
-              progressIndicatorBuilder: (_, __, progress) =>
+              progressIndicatorBuilder: (_, _, progress) =>
                   _loadingProgress(height, progress.progress),
               errorWidget: (_, url, error) {
                 logNetworkImageError(

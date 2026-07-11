@@ -149,7 +149,7 @@ class _BookShelfRow extends StatelessWidget {
             physics: const BouncingScrollPhysics(),
             padding: EdgeInsets.only(left: 20.w, right: 20.w),
             itemCount: items.length,
-            separatorBuilder: (_, __) => 14.w.horizontalSpace,
+            separatorBuilder: (_, _) => 14.w.horizontalSpace,
             itemBuilder: (_, index) {
               return _ShelfBookTile(
                 book: items[index],
@@ -217,7 +217,7 @@ class _ShelfBookTile extends StatelessWidget {
               placeholder: (_) => _ShelfImageShimmer(
                 borderRadius: BorderRadius.circular(14.r),
               ),
-              errorBuilder: (_, __, ___) =>
+              errorBuilder: (_, _, _) =>
                   _ShelfImageError(borderRadius: BorderRadius.circular(14.r)),
             ),
           ),

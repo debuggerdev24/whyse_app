@@ -39,7 +39,7 @@ List<GroupMember> _sortedMembersForDisplay(
     return a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase());
   });
 
-  return [if (self != null) self, ...others];
+  return [?self, ...others];
 }
 
 class _GroupDetailsTabVM {

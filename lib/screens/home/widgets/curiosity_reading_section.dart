@@ -140,7 +140,7 @@ class ArticleCard extends StatelessWidget {
                 placeholder: (_) => _ImageShimmerPlaceholder(
                   borderRadius: BorderRadius.circular(20),
                 ),
-                errorBuilder: (_, __, ___) => _ImageErrorPlaceholder(
+                errorBuilder: (_, _, _) => _ImageErrorPlaceholder(
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),

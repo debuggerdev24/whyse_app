@@ -4,7 +4,6 @@ import 'package:redstreakapp/providers/gamification/gamification_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/screens/home/widgets/continue_reading_section.dart';
 import 'package:redstreakapp/screens/home/widgets/curiosity_reading_section.dart';
-import 'package:redstreakapp/screens/home/widgets/books_books_section.dart';
 import 'package:redstreakapp/screens/home/widgets/home_topics_section.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -22,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       if (!mounted) return;
       context.read<GamificationProvider>().fetchStreakScore();
     });
-  }
+  } 
 
   @override
   void didChangeDependencies() {

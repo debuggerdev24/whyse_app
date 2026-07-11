@@ -202,7 +202,7 @@ class _ShareStoriesInGroupScreenState extends State<ShareStoriesInGroupScreen> {
         childAspectRatio: 0.62,
       ),
       itemCount: 6,
-      itemBuilder: (_, __) => _buildShimmerTile(),
+      itemBuilder: (_, _) => _buildShimmerTile(),
     );
   }
 

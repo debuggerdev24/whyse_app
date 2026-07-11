@@ -66,7 +66,6 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
   @override
   void initState() {
     super.initState();
-    print(" --- story reading screen");
     _currentPageIndex = widget.initialPageIndex;
     final initialConfirmed =
         widget.initialConfirmedPageIndex ?? (widget.initialPageIndex - 1);

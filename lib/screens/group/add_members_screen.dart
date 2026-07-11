@@ -191,7 +191,7 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
     return ListView.separated(
       physics: const NeverScrollableScrollPhysics(),
       itemCount: 8,
-      separatorBuilder: (_, __) => Divider(
+      separatorBuilder: (_, _) => Divider(
         height: 24.w,
         thickness: 1,
         color: AppColors.black.withValues(alpha: 0.08),
@@ -294,7 +294,7 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
     return ListView.separated(
       controller: _scrollController,
       itemCount: itemCount,
-      separatorBuilder: (_, __) => Divider(
+      separatorBuilder: (_, _) => Divider(
         height: 24.w,
         thickness: 1,
         color: AppColors.black.withValues(alpha: 0.08),

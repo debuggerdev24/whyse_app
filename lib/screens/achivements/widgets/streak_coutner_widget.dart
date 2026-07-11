@@ -38,6 +38,6 @@ class StreakCoutnerWidget extends StatelessWidget {
           Image.asset(AppAssets.streakFire, height: 110.h, fit: BoxFit.contain),
         ],
       ),
-    );
+    );  
   }
 }

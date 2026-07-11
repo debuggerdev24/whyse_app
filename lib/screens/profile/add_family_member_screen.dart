@@ -191,7 +191,7 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
               parent: BouncingScrollPhysics(),
             ),
             itemCount: _friends.length + (_hasNextPage ? 1 : 0),
-            separatorBuilder: (_, __) => Divider(
+            separatorBuilder: (_, _) => Divider(
               height: 24.w,
               thickness: 1,
               color: AppColors.black.setOpacity(0.08),
@@ -295,7 +295,7 @@ class _FriendSelectTile extends StatelessWidget {
                             ),
                           ),
                         ),
-                        errorWidget: (_, __, ___) => Container(
+                        errorWidget: (_, _, _) => Container(
                           width: 48.w,
                           height: 48.w,
                           decoration: BoxDecoration(
@@ -370,8 +370,8 @@ class _LoadingList extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.separated(
       itemCount: 6,
-      separatorBuilder: (_, __) => SizedBox(height: 16.w),
-      itemBuilder: (_, __) => const _ShimmerTile(),
+      separatorBuilder: (_, _) => SizedBox(height: 16.w),
+      itemBuilder: (_, _) => const _ShimmerTile(),
     );
   }
 }

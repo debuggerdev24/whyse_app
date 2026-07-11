@@ -10,8 +10,8 @@ class HomeSectionShimmer {
     return ListView.separated(
       padding: EdgeInsets.only(bottom: 10.h),
       itemCount: itemCount,
-      separatorBuilder: (_, __) => 18.w.verticalSpace,
-      itemBuilder: (_, __) => const _StoryIdeaCardShimmer(),
+      separatorBuilder: (_, _) => 18.w.verticalSpace,
+      itemBuilder: (_, _) => const _StoryIdeaCardShimmer(),
     );
   }
 

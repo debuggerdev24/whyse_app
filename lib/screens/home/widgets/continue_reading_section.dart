@@ -351,7 +351,7 @@ class _ContinueReadingShimmer extends StatelessWidget {
           padding: EdgeInsets.zero,
           itemExtent: _continueReadingSlotExtent(),
           itemCount: 3,
-          itemBuilder: (_, __) => Padding(
+          itemBuilder: (_, _) => Padding(
             padding: EdgeInsets.only(right: 10.w),
             child: SizedBox(width: 210.w, child: _ContinueReadingCardShimmer()),
           ),

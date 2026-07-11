@@ -225,7 +225,7 @@ class CreatedIdeasList extends StatelessWidget {
     );
   }
 
-  showMoreOptionsBottomSheet(
+  void showMoreOptionsBottomSheet(
     BuildContext context, {
     required VoidCallback onRegenerateTopic,
   }) {
@@ -345,7 +345,7 @@ class _ReadingItemTile extends StatelessWidget {
                 width: 122.w,
                 height: 84.w,
                 borderRadius: BorderRadius.circular(16.r),
-                errorBuilder: (_, __, ___) => AppNetworkImage(
+                errorBuilder: (_, _, _) => AppNetworkImage(
                   imageUrl: topicThumbnailUrl,
                   tag: 'CreatedIdeas.thumbnail (fallback)',
                   width: 122.w,

@@ -216,7 +216,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
                             scrollDirection: Axis.horizontal,
                             padding: EdgeInsets.only(right: 24.w),
                             itemCount: customTopics.length,
-                            separatorBuilder: (_, __) => SizedBox(width: 10.w),
+                            separatorBuilder: (_, _) => SizedBox(width: 10.w),
                             itemBuilder: (context, index) {
                               final title = customTopics[index];
                               return _CustomTopicChip(

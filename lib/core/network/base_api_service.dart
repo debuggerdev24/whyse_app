@@ -35,7 +35,7 @@ class DioClient {
   Completer<String?>? _refreshCompleter;
   bool _isHandlingSessionExpiry = false;
 
-  initialize() {
+  void initialize() {
     _dio = Dio(
       BaseOptions(
         baseUrl: apiBaseUrl,
@@ -55,6 +55,7 @@ class DioClient {
     Logger.info(
       "onBoarding ID : ${LocalStorageService.instance.onboardingId.toString()}",
     );
+
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
@@ -111,7 +112,7 @@ class DioClient {
 
   Dio get dio => _dio;
 
-  addToken(String token) {
+  void addToken(String token) {
     _isHandlingSessionExpiry = false;
     _dio.options.headers["Authorization"] = "Bearer $token";
   }

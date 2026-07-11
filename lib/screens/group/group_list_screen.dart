@@ -56,7 +56,7 @@ class _GroupListScreenState extends State<GroupListScreen> {
 
                   return ListView.separated(
                     itemCount: vm.groups.length,
-                    separatorBuilder: (_, __) => Divider(
+                    separatorBuilder: (_, _) => Divider(
                       height: 24.w,
                       thickness: 1,
                       color: AppColors.black.setOpacity(0.08),
@@ -135,8 +135,8 @@ class _LoadingList extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.separated(
       itemCount: 6,
-      separatorBuilder: (_, __) => const SizedBox(height: 16),
-      itemBuilder: (_, __) => const _ShimmerTile(),
+      separatorBuilder: (_, _) => const SizedBox(height: 16),
+      itemBuilder: (_, _) => const _ShimmerTile(),
     );
   }
 }
