@@ -8,6 +8,7 @@ import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/providers/curiosity_reading/curiosity_reading_provider.dart';
 import 'package:redstreakapp/providers/explore/explore_provider.dart';
+import 'package:redstreakapp/providers/gamification/gamification_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/saved_series_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
@@ -41,30 +42,33 @@ class _UserDashBoardState extends State<UserDashBoard> {
     });
   }
 
-  void callInitApis({required BuildContext context}) {
-    context.read<ProfileProvider>().getProfile();
-    homeProvider.getMyTopics();
-    context.read<SavedSeriesProvider>().getMySeriesList();
-    curiosityReadingProvider.refreshFromHome();
-    context.read<ExploreProvider>().prefetchExploreCache();
+  void callInitApis({required BuildContext context}) async {
+    await Future.wait([
+      homeProvider.getMyTopics(),
+      curiosityReadingProvider.refreshFromHome(),
+      context.read<GamificationProvider>().fetchStreakScore(),
+      context.read<ProfileProvider>().getProfile(),
+      context.read<SavedSeriesProvider>().getMySeriesList(),
+      context.read<ExploreProvider>().prefetchExploreCache(),
 
-    storyProvider.getStoryGoals(
-      onFailed: (error) {
-        AppToast.error(context, "Goal $error");
-      },
-    );
+      storyProvider.getStoryGoals(
+        onFailed: (error) {
+          AppToast.error(context, "Goal $error");
+        },
+      ),
 
-    storyProvider.getStoryInterest(
-      onFailed: (error) {
-        AppToast.error(context, "Interest $error");
-      },
-    );
+      storyProvider.getStoryInterest(
+        onFailed: (error) {
+          AppToast.error(context, "Interest $error");
+        },
+      ),
 
-    storyProvider.getStoryTopics(
-      onFailed: (error) {
-        AppToast.error(context, "Topic $error");
-      },
-    );
+      storyProvider.getStoryTopics(
+        onFailed: (error) {
+          AppToast.error(context, "Topic $error");
+        },
+      ),
+    ]);
   }
 
   @override
@@ -172,7 +176,7 @@ class BottomNavItem extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.only(
-        left: index == 0 ? 30.w : 0, 
+        left: index == 0 ? 30.w : 0,
         right: index == 3 ? 30.w : 0,
       ),
       child: SvgPicture.asset(

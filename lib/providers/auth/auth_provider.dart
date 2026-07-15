@@ -868,7 +868,9 @@ class AuthProvider with ChangeNotifier {
         //   response['message'] ?? "Goals saved successfully",
         // );
         selectedGoalIds.clear();
-        customGoals.clear();
+        isCustomGoalSelected = false;
+        customGoalTitleCtr.clear();
+        customGoalDesCtr.clear();
         return true;
       } else {
         AppToast.error(context, response['message'] ?? "Failed to save goals");
@@ -1755,16 +1757,15 @@ class AuthProvider with ChangeNotifier {
       context.goNamed(AppRoutes.consentStatusScreen.name);
     } else if (step == AppConstants.createAccount) {
       context.goNamed(AppRoutes.createAccountScreen.name);
-    } else if (step == AppConstants.profileInfo) {
-      context.goNamed(AppRoutes.profileInfoScreen.name);
-    } else if (step == AppConstants.readingGoal) {
-      context.goNamed(AppRoutes.readingGoalScreen.name);
-    } else if (step == AppConstants.interest) {
-      context.goNamed(AppRoutes.interestsScreen.name);
-    } else if (step == AppConstants.topics) {
-      context.goNamed(AppRoutes.topicsScreen.name);
-    } else if (step == AppConstants.goals) {
-      context.goNamed(AppRoutes.goalsScreen.name);
+    } else if (step == AppConstants.profileInfo ||
+        step == AppConstants.readingGoal ||
+        step == AppConstants.interest ||
+        step == AppConstants.topics ||
+        step == AppConstants.goals) {
+      context.goNamed(
+        AppRoutes.accountSetupScreen.name,
+        extra: step,
+      );
     } else if (step == AppConstants.completed) {
       if (LocalStorageService.instance.getAuthToken!.isEmpty) {
         context.goNamed(AppRoutes.loginScreen.name);

@@ -8,6 +8,16 @@ import 'package:redstreakapp/providers/profile/profile_provider.dart';
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
 
+  static String _formatSparkPoints(int points) {
+    if (points >= 1000000) {
+      return '${(points / 1000000).toStringAsFixed(1)}M';
+    }
+    if (points >= 10000) {
+      return '${(points / 1000).toStringAsFixed(1)}K';
+    }
+    return '$points';
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -21,7 +31,8 @@ class HomeHeader extends StatelessWidget {
             children: [
               Consumer<GamificationProvider>(
                 builder: (context, gp, _) {
-                  final streakCount = gp.streakScore?.streak.currentStreak ?? 0;
+                  final sparkPoints =
+                      gp.streakScore?.scores.totalScore ?? 0;
                   return GestureDetector(
                     onTap: () =>
                         context.pushNamed(AppRoutes.achivementsScreen.name),
@@ -45,7 +56,7 @@ class HomeHeader extends StatelessWidget {
                             color: AppColors.orangeColor,
                           ),
                           AppText(
-                            text: '$streakCount',
+                            text: _formatSparkPoints(sparkPoints),
                             style: AppTextStyles.bold(
                               fontSize: 20.sp,
                               color: AppColors.black,

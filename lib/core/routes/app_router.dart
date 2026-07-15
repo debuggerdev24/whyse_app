@@ -3,13 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/extensions/routes_extensions.dart';
 import 'package:redstreakapp/screens/achivements/achivements_screen.dart';
 import 'package:redstreakapp/screens/auth/above_16/create_account_screen.dart';
-import 'package:redstreakapp/screens/auth/above_16/goals_screen.dart';
-import 'package:redstreakapp/screens/auth/above_16/interests_screen.dart';
-import 'package:redstreakapp/screens/auth/above_16/profile_info_screen.dart';
-import 'package:redstreakapp/screens/auth/above_16/reading_goal_screen.dart';
+import 'package:redstreakapp/screens/auth/above_16/account_setup/account_setup_screen.dart';
+import 'package:redstreakapp/core/constants/app_constants.dart';
 import 'package:redstreakapp/screens/auth/above_16/subscription_screen.dart';
 import 'package:redstreakapp/screens/auth/above_16/success_screen.dart';
-import 'package:redstreakapp/screens/auth/above_16/topics_screen.dart';
 import 'package:redstreakapp/screens/auth/above_16/what_intrest_screen.dart';
 import 'package:redstreakapp/screens/auth/enter_age_screen.dart';
 import 'package:redstreakapp/screens/auth/forgot_password_screen.dart';
@@ -214,30 +211,36 @@ class AppRouter {
     GoRoute(
       path: AppRoutes.profileInfoScreen.path,
       name: AppRoutes.profileInfoScreen.name,
+      builder: (context, state) => const AccountSetupScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.accountSetupScreen.path,
+      name: AppRoutes.accountSetupScreen.name,
       builder: (context, state) {
-        return ProfileInfoScreen();
+        final step = state.extra as String?;
+        return AccountSetupScreen(initialStep: step);
       },
     ),
     GoRoute(
       path: AppRoutes.readingGoalScreen.path,
       name: AppRoutes.readingGoalScreen.name,
-      builder: (context, state) {
-        return ReadingGoalScreen();
-      },
+      builder: (context, state) => const AccountSetupScreen(
+        initialStep: AppConstants.readingGoal,
+      ),
     ),
     GoRoute(
       path: AppRoutes.interestsScreen.path,
       name: AppRoutes.interestsScreen.name,
-      builder: (context, state) {
-        return InterestsScreen();
-      },
+      builder: (context, state) => const AccountSetupScreen(
+        initialStep: AppConstants.interest,
+      ),
     ),
     GoRoute(
       path: AppRoutes.topicsScreen.path,
       name: AppRoutes.topicsScreen.name,
-      builder: (context, state) {
-        return TopicsScreen();
-      },
+      builder: (context, state) => const AccountSetupScreen(
+        initialStep: AppConstants.topics,
+      ),
     ),
     GoRoute(
       path: AppRoutes.successScreen.path,
@@ -474,9 +477,9 @@ class AppRouter {
     GoRoute(
       path: AppRoutes.goalsScreen.path,
       name: AppRoutes.goalsScreen.name,
-      builder: (context, state) {
-        return GoalScreen();
-      },
+      builder: (context, state) => const AccountSetupScreen(
+        initialStep: AppConstants.goals,
+      ),
     ),
     GoRoute(
       path: AppRoutes.createdStorySummaryScreen.path,

@@ -1,10 +1,13 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/models/chat/chat_history_model.dart';
+import 'package:redstreakapp/models/explore/explore_models.dart';
 import 'package:redstreakapp/models/home/browse_topic_model.dart';
+import 'package:redstreakapp/providers/chat/chat_provider.dart';
 import 'package:redstreakapp/providers/curiosity_reading/curiosity_reading_provider.dart';
 import 'package:redstreakapp/providers/explore/explore_provider.dart';
-import 'package:redstreakapp/screens/chat/models/chat_message.dart';
 import 'package:redstreakapp/screens/chat/widgets/chat_widgets.dart';
-import 'package:redstreakapp/screens/dashboard.dart';
+import 'package:redstreakapp/services/home/home_api_service.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -14,36 +17,27 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  static const _initialBotMessage =
-      'What do you want to learn next?';
-
   static const _suggestions = [
     'Suggest me a book to read',
-    'I want to read a spark post about nature',
+    'I want to read a Spark about nature',
     'Suggest me a story to read',
+    'What should I learn today?',
+    'Show me series about animals',
   ];
 
   final TextEditingController _messageController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
 
-  final List<ChatMessage> _messages = [];
   bool _showSuggestions = true;
-  bool _isBotTyping = false;
-  int _messageCounter = 0;
+  bool _isOpeningCard = false;
 
   @override
   void initState() {
     super.initState();
-    _messages.add(
-      ChatMessage(
-        id: _nextMessageId(),
-        type: ChatMessageType.botText,
-        text: _initialBotMessage,
-      ),
-    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ExploreProvider>().ensureExploreReady();
+      context.read<ChatProvider>().loadChatHistory();
     });
   }
 
@@ -55,218 +49,133 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
-  String _nextMessageId() => 'chat_${++_messageCounter}';
-
-  void _closeChat() {
-    tabIndex.value = 0;
-    AppRouter.indexedStackNavigationShell?.goBranch(0);
-  }
-
   Future<void> _handleSend([String? presetText]) async {
-    final text = (presetText ?? _messageController.text).trim();
-    if (text.isEmpty || _isBotTyping) return;
+    final chatProvider = context.read<ChatProvider>();
+    if (chatProvider.isStreaming) return;
 
-    setState(() {
-      _showSuggestions = false;
-      _messages.add(
-        ChatMessage(
-          id: _nextMessageId(),
-          type: ChatMessageType.userText,
-          text: text,
-        ),
-      );
-      _isBotTyping = true;
-    });
+    final text = (presetText ?? _messageController.text).trim();
+    if (text.isEmpty) return;
+
     _messageController.clear();
+    setState(() => _showSuggestions = false);
     _focusNode.unfocus();
     _scrollToBottom();
 
-    await Future<void>.delayed(const Duration(milliseconds: 650));
-    if (!mounted) return;
-
-    final response = _buildBotResponse(text);
-    setState(() {
-      _messages.addAll(response);
-      _isBotTyping = false;
-    });
+    await chatProvider.sendMessage(text);
     _scrollToBottom();
-  }
-
-  List<ChatMessage> _buildBotResponse(String userText) {
-    final normalized = userText.toLowerCase();
-    final kind = _resolveResponseKind(normalized);
-
-    switch (kind) {
-      case ChatResponseKind.sparkPosts:
-        return [
-          ChatMessage(
-            id: _nextMessageId(),
-            type: ChatMessageType.sparkCards,
-            sparkItems: _sparkItems(),
-          ),
-        ];
-      case ChatResponseKind.storyTopics:
-        return [
-          ChatMessage(
-            id: _nextMessageId(),
-            type: ChatMessageType.botText,
-            text:
-                'Sure. Here are some topics you can choose to read stories from.',
-          ),
-          ChatMessage(
-            id: _nextMessageId(),
-            type: ChatMessageType.topicCards,
-            topicItems: _topicItems(),
-          ),
-        ];
-      case ChatResponseKind.bookSuggestion:
-        return [
-          ChatMessage(
-            id: _nextMessageId(),
-            type: ChatMessageType.botText,
-            text:
-                'Great choice! Head to Explore to browse books and series tailored for you.',
-          ),
-        ];
-      case ChatResponseKind.generic:
-      case ChatResponseKind.none:
-        return [
-          ChatMessage(
-            id: _nextMessageId(),
-            type: ChatMessageType.botText,
-            text:
-                'I can help you find spark posts, stories, or books. Try one of the suggestions below.',
-          ),
-        ];
-    }
-  }
-
-  ChatResponseKind _resolveResponseKind(String normalized) {
-    if (normalized.contains('spark')) {
-      return ChatResponseKind.sparkPosts;
-    }
-    if (normalized.contains('story') || normalized.contains('topic')) {
-      return ChatResponseKind.storyTopics;
-    }
-    if (normalized.contains('book')) {
-      return ChatResponseKind.bookSuggestion;
-    }
-    return ChatResponseKind.generic;
-  }
-
-  List<ChatSparkItem> _sparkItems() {
-    final readings =
-        context.read<CuriosityReadingProvider>().curiosityReading?.data.readings ??
-            const [];
-
-    if (readings.isNotEmpty) {
-      return readings
-          .take(5)
-          .map(
-            (reading) => ChatSparkItem(
-              id: reading.id,
-              title: reading.question,
-              imageUrl: reading.imgUrl,
-            ),
-          )
-          .toList();
-    }
-
-    return const [
-      ChatSparkItem(
-        id: 'spark_1',
-        title: 'Why are there clouds in the sky?',
-        imageUrl: 'assets/images/story1.png',
-      ),
-      ChatSparkItem(
-        id: 'spark_2',
-        title: 'How do trees grow in the rain?',
-        imageUrl: 'assets/images/story2.png',
-      ),
-      ChatSparkItem(
-        id: 'spark_3',
-        title: 'What makes the ocean blue?',
-        imageUrl: 'assets/images/story3.png',
-      ),
-    ];
-  }
-
-  List<ChatTopicItem> _topicItems() {
-    final explore = context.read<ExploreProvider>();
-    final topics = <BrowseTopicModel>[
-      ...?explore.seriesState.forYou?.items,
-      ...?explore.seriesState.popular?.items,
-    ];
-
-    final unique = <String, BrowseTopicModel>{};
-    for (final topic in topics) {
-      if (topic.id.isEmpty) continue;
-      unique.putIfAbsent(topic.id, () => topic);
-    }
-
-    if (unique.isNotEmpty) {
-      return unique.values
-          .take(5)
-          .map(
-            (topic) => ChatTopicItem(
-              id: topic.id,
-              title: topic.topic,
-              storyCount: topic.noOfStories,
-              imageUrl: topic.thumbnailUrl,
-              isInMyList: topic.isInMyList,
-            ),
-          )
-          .toList();
-    }
-
-    return const [
-      ChatTopicItem(
-        id: 'topic_nature',
-        title: 'Nature',
-        storyCount: 50,
-        imageUrl: 'assets/images/story1.png',
-        isInMyList: false,
-      ),
-      ChatTopicItem(
-        id: 'topic_space',
-        title: 'Space',
-        storyCount: 50,
-        imageUrl: 'assets/images/space.png',
-        isInMyList: false,
-      ),
-      ChatTopicItem(
-        id: 'topic_adventure',
-        title: 'Adventure',
-        storyCount: 42,
-        imageUrl: 'assets/images/story2.png',
-        isInMyList: false,
-      ),
-    ];
   }
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scrollController.hasClients) return;
       _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
+        0,
         duration: const Duration(milliseconds: 280),
         curve: Curves.easeOut,
       );
     });
   }
 
-  void _openSparkReading(int index) {
-    final provider = context.read<CuriosityReadingProvider>();
-    provider.setCurrentIndex(index);
+  Future<void> _onCardTap(CardItem item) async {
+    if (_isOpeningCard || item.id.isEmpty) return;
+    setState(() => _isOpeningCard = true);
+
+    try {
+      if (item.kind == CardItemType.spark) {
+        await _openSpark(item);
+      } else {
+        await _openSeries(item);
+      }
+    } finally {
+      if (mounted) setState(() => _isOpeningCard = false);
+    }
+  }
+
+  Future<void> _openSpark(CardItem item) async {
+    final curiosity = context.read<CuriosityReadingProvider>();
+    curiosity.beginExploreSession(
+      items: [
+        ExploreSparkItem(
+          id: item.id,
+          title: item.title,
+          question: item.question,
+          imageUrl: item.imageUrl,
+          interestName: '',
+          rawJson: {
+            'id': item.id,
+            'title': item.title,
+            'question': item.question,
+            'imgUrl': item.imageUrl,
+          },
+        ),
+      ],
+      startIndex: 0,
+      pagination: const ExplorePagination(
+        page: 1,
+        limit: 1,
+        total: 1,
+        totalPages: 1,
+        hasMore: false,
+      ),
+      loadMoreItems: () async => (
+        items: <ExploreSparkItem>[],
+        pagination: const ExplorePagination(
+          page: 1,
+          limit: 1,
+          total: 1,
+          totalPages: 1,
+          hasMore: false,
+        ),
+      ),
+    );
+
+    if (!mounted) return;
     context.pushNamed(AppRoutes.curiosityReadingScreen.name);
   }
 
-  void _openTopic(BrowseTopicModel topic) {
-    context.pushNamed(
-      AppRoutes.randomStorySeriesScreen.name,
-      extra: {
-        'progress': <String, dynamic>{},
-        'searchTopic': topic.toJson(),
+  Future<void> _openSeries(CardItem item) async {
+    final response = await HomeApiService.instance.getTopicProgress(
+      topicId: item.id,
+    );
+    if (!mounted) return;
+
+    await response.fold(
+      (error) async {
+        AppToast.error(context, error.errorMsg);
+      },
+      (result) async {
+        final data = result['data'] ?? result;
+        final readings = data['readings'];
+        final list = readings is List ? readings : <dynamic>[];
+        if (list.isEmpty) {
+          AppToast.info(context: context, message: 'No readings found');
+          return;
+        }
+
+        final topic = BrowseTopicModel(
+          id: item.id,
+          topic: item.title,
+          learningGoal: item.question,
+          type: 'story',
+          interests: const [],
+          noOfStories: list.length,
+          noOfStoriesGenerated: list.length,
+          createdBy: '',
+          isOwnTopic: false,
+          isInMyList: false,
+          createdOn: null,
+          updatedAt: null,
+          thumbnailUrl: item.imageUrl,
+          thumbnailSource: '',
+          thumbnailLicense: '',
+          thumbnailAttribution: '',
+          thumbnailSearchEntity: '',
+        );
+
+        context.pushNamed(
+          AppRoutes.randomStorySeriesScreen.name,
+          extra: {'progress': result, 'searchTopic': topic.toJson()},
+        );
       },
     );
   }
@@ -275,88 +184,103 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: chatBackgroundColor,
-      appBar: ChatAppBar(onClose: _closeChat),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 16.h),
-              physics: const BouncingScrollPhysics(),
-              itemCount: _messages.length + (_isBotTyping ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (_isBotTyping && index == _messages.length) {
-                  return Padding(
-                    padding: EdgeInsets.only(top: 8.h, bottom: 16.h),
-                    child: const _TypingIndicator(),
-                  );
-                }
+      appBar: const ChatAppBar(),
+      body: Consumer<ChatProvider>(
+        builder: (context, chatProvider, child) {
+          final messages = chatProvider.messages
+              .where(
+                (m) =>
+                    m.isUserMessage ||
+                    m.segments.isNotEmpty ||
+                    m.content.trim().isNotEmpty,
+              )
+              .toList();
+          final isTyping = chatProvider.isBotTyping;
 
-                final message = _messages[index];
-                return Padding(
-                  padding: EdgeInsets.only(bottom: 16.h),
-                  child: _ChatMessageTile(
-                    message: message,
-                    onSparkRead: (item) {
-                      final sparks = _sparkItems();
-                      final sparkIndex = sparks.indexWhere((e) => e.id == item.id);
-                      if (sparkIndex >= 0 &&
-                          context
-                                  .read<CuriosityReadingProvider>()
-                                  .curiosityReading
-                                  ?.data
-                                  .readings
-                                  .isNotEmpty ==
-                              true) {
-                        _openSparkReading(sparkIndex);
-                        return;
-                      }
-                      AppToast.info(
-                        context: context,
-                        message: 'Opening spark post…',
-                      );
-                    },
-                    onTopicTap: (item) {
-                      final explore = context.read<ExploreProvider>();
-                      final topics = <BrowseTopicModel>[
-                        ...?explore.seriesState.forYou?.items,
-                        ...?explore.seriesState.popular?.items,
-                      ];
-                      BrowseTopicModel? match;
-                      for (final topic in topics) {
-                        if (topic.id == item.id) {
-                          match = topic;
-                          break;
-                        }
-                      }
-                      if (match != null) {
-                        _openTopic(match);
-                      } else {
-                        AppToast.info(
-                          context: context,
-                          message: 'Opening ${item.title}…',
-                        );
-                      }
-                    },
-                    onAddToList: (_) {
-                      AppToast.success(context, 'Added to your list');
-                    },
+          // While history is loading (or truly empty), show the welcome
+          // landing — not the mid-chat suggestion strip on a blank list.
+          if (messages.isEmpty && !chatProvider.isStreaming) {
+            return Column(
+              children: [
+                Expanded(
+                  child: Skeletonizer(
+                    enabled: chatProvider.isChatHistoryLoading,
+                    child: ChatEmptyState(
+                      suggestions: _suggestions,
+                      onSuggestionTap: _handleSend,
+                    ),
                   ),
-                );
-              },
-            ),
-          ),
-          if (_showSuggestions && !_isBotTyping)
-            ChatSuggestionSection(
-              suggestions: _suggestions,
-              onSuggestionTap: _handleSend,
-            ),
-          ChatInputBar(
-            controller: _messageController,
-            focusNode: _focusNode,
-            onSend: () => _handleSend(),
-          ),
-        ],
+                ),
+                ChatInputBar(
+                  controller: _messageController,
+                  focusNode: _focusNode,
+                  onSend: () => _handleSend(),
+                ),
+              ],
+            );
+          }
+
+          final itemCount = messages.length + (isTyping ? 1 : 0);
+
+          return Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  controller: _scrollController,
+                  reverse: true,
+                  padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 16.h),
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: itemCount,
+                  itemBuilder: (context, index) {
+                    if (isTyping && index == 0) {
+                      return Padding(
+                        padding: EdgeInsets.only(top: 16.h),
+                        child: const _TypingIndicator(),
+                      );
+                    }
+
+                    final messageIndex = isTyping ? index - 1 : index;
+                    final message =
+                        messages[messages.length - 1 - messageIndex];
+                    final latestBotId = chatProvider.messages
+                        .lastWhere(
+                          (m) => !m.isUserMessage,
+                          orElse: () => message,
+                        )
+                        .id;
+                    final isStreamingTarget =
+                        !message.isUserMessage && message.id == latestBotId;
+                    // Animate while the stream is active; typewriter keeps
+                    // catching up after the stream ends via its own state.
+                    final shouldAnimate =
+                        chatProvider.isStreaming && isStreamingTarget;
+                    return Padding(
+                      padding: EdgeInsets.only(top: 16.h),
+                      child: _ChatMessageTile(
+                        message: message,
+                        onCardTap: _onCardTap,
+                        animateText: shouldAnimate,
+                        isStreaming: shouldAnimate,
+                      ),
+                    );
+                  },
+                ),
+              ),
+              if (_showSuggestions &&
+                  !chatProvider.isStreaming &&
+                  messages.isNotEmpty)
+                ChatSuggestionSection(
+                  suggestions: _suggestions,
+                  onSuggestionTap: _handleSend,
+                ),
+              ChatInputBar(
+                controller: _messageController,
+                focusNode: _focusNode,
+                onSend: () => _handleSend(),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -365,40 +289,136 @@ class _ChatScreenState extends State<ChatScreen> {
 class _ChatMessageTile extends StatelessWidget {
   const _ChatMessageTile({
     required this.message,
-    this.onSparkRead,
-    this.onTopicTap,
-    this.onAddToList,
+    required this.onCardTap,
+    this.animateText = false,
+    this.isStreaming = false,
   });
 
   final ChatMessage message;
-  final ValueChanged<ChatSparkItem>? onSparkRead;
-  final ValueChanged<ChatTopicItem>? onTopicTap;
-  final ValueChanged<ChatTopicItem>? onAddToList;
+  final ValueChanged<CardItem> onCardTap;
+  final bool animateText;
+  final bool isStreaming;
 
   @override
   Widget build(BuildContext context) {
-    switch (message.type) {
-      case ChatMessageType.botText:
-        return ChatBotTextBubble(text: message.text ?? '');
-      case ChatMessageType.userText:
-        return ChatUserTextBubble(text: message.text ?? '');
-      case ChatMessageType.sparkCards:
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ChatSparkCardsRow(
-              items: message.sparkItems,
-              onReadTap: onSparkRead,
-            ),
-          ],
-        );
-      case ChatMessageType.topicCards:
-        return ChatTopicCardsRow(
-          items: message.topicItems,
-          onCardTap: onTopicTap,
-          onAddToListTap: onAddToList,
-        );
+    if (message.isUserMessage) {
+      final text = _primaryText(message);
+      if (text.isEmpty) return const SizedBox.shrink();
+      return ChatUserTextBubble(text: text);
     }
+
+    final segments = message.segments;
+    if (segments.isEmpty) {
+      final fallback = message.content.trim();
+      // Placeholder assistant row while SSE is still connecting / typing.
+      if (fallback.isEmpty) return const SizedBox.shrink();
+      return ChatBotTextBubble(
+        text: fallback,
+        animate: animateText,
+        showCursor: isStreaming,
+      );
+    }
+
+    final children = <Widget>[];
+    var avatarShown = false;
+    final textSegmentIndexes = <int>[];
+    for (var i = 0; i < segments.length; i++) {
+      if (segments[i].type == ChatMessageSegmentType.text &&
+          segments[i].content.trim().isNotEmpty) {
+        textSegmentIndexes.add(i);
+      }
+    }
+    final lastTextSegmentIndex =
+        textSegmentIndexes.isEmpty ? -1 : textSegmentIndexes.last;
+
+    for (var i = 0; i < segments.length; i++) {
+      final segment = segments[i];
+      switch (segment.type) {
+        case ChatMessageSegmentType.text:
+          final text = segment.content.trim();
+          if (text.isEmpty) continue;
+          final isLastText = i == lastTextSegmentIndex;
+          children.add(
+            ChatBotTextBubble(
+              key: ValueKey('${message.id}-text-$i'),
+              text: text,
+              showAvatar: !avatarShown,
+              animate: animateText,
+              showCursor: isStreaming && isLastText,
+            ),
+          );
+          avatarShown = true;
+        case ChatMessageSegmentType.cards:
+          if (segment.items.isEmpty) continue;
+          if (!avatarShown) {
+            children.add(const ChatBotAvatar());
+            children.add(SizedBox(height: 8.h));
+            avatarShown = true;
+          }
+          children.add(
+            _ChatCardsSegment(items: segment.items, onCardTap: onCardTap),
+          );
+      }
+    }
+
+    if (children.isEmpty) {
+      final fallback = message.content.trim();
+      if (fallback.isEmpty) return const SizedBox.shrink();
+      return ChatBotTextBubble(
+        text: fallback,
+        animate: animateText,
+        showCursor: isStreaming,
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var i = 0; i < children.length; i++) ...[
+          if (i > 0) SizedBox(height: 10.h),
+          children[i],
+        ],
+      ],
+    );
+  }
+
+  String _primaryText(ChatMessage message) {
+    for (final segment in message.segments) {
+      if (segment.type == ChatMessageSegmentType.text &&
+          segment.content.trim().isNotEmpty) {
+        return segment.content.trim();
+      }
+    }
+    return message.content.trim();
+  }
+}
+
+class _ChatCardsSegment extends StatelessWidget {
+  const _ChatCardsSegment({
+    required this.items,
+    required this.onCardTap,
+  });
+
+  final List<CardItem> items;
+  final ValueChanged<CardItem> onCardTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final sparks =
+        items.where((item) => item.kind == CardItemType.spark).toList();
+    final stories =
+        items.where((item) => item.kind != CardItemType.spark).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (sparks.isNotEmpty)
+          ChatSparkCardsRow(items: sparks, onCardTap: onCardTap),
+        if (sparks.isNotEmpty && stories.isNotEmpty) SizedBox(height: 10.h),
+        if (stories.isNotEmpty)
+          ChatTopicCardsRow(items: stories, onCardTap: onCardTap),
+      ],
+    );
   }
 }
 

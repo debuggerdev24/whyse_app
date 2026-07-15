@@ -17,10 +17,6 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      context.read<GamificationProvider>().fetchStreakScore();
-    });
   } 
 
   @override

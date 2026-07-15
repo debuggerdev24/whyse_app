@@ -117,7 +117,7 @@ class _SubScriptionScreenState extends State<SubScriptionScreen> {
                           price: "\$12.99/mo",
                           features: [
                             "Ad Free",
-                            "Full AI Features",
+                            "Full AI",
                             "Progress Reports",
                           ],
                           isSelected: selectedPlan == "Premium",
@@ -131,8 +131,8 @@ class _SubScriptionScreenState extends State<SubScriptionScreen> {
                           title: "Family Plan",
                           price: "\$24.99/mo",
                           features: [
-                            "Everything in Premium",
-                            "Up to 5 Profiles",
+                            "Everything in the Premium Plan",
+                            "Upto 5 Profiles",
                             "One Subscription",
                           ],
                           isSelected: selectedPlan == "Family",

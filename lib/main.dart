@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/core/utils/shared_pref.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
+import 'package:redstreakapp/providers/chat/chat_provider.dart';
 import 'package:redstreakapp/providers/curiosity_reading/curiosity_reading_provider.dart';
 import 'package:redstreakapp/providers/profile/edit_profile_provider.dart';
 import 'package:redstreakapp/providers/profile/group_provider.dart';
@@ -47,6 +48,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => OnBoardingProvider()),
         ChangeNotifierProvider(create: (_) => HomeProvider()),
         ChangeNotifierProvider(create: (_) => SavedSeriesProvider()),
+        ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(
           create: (_) => ProfileProvider(
             ProfileService(),

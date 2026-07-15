@@ -50,7 +50,8 @@ class SuccessScreen extends StatelessWidget {
               ),
               // ---------- BUTTON AT BOTTOM ----------
               AppFilledButton(
-                text: "Continue",
+                text: "Choose a Plan",
+                backgroundColor: AppColors.black,
                 onTap: () async {
                   // if ( context.mounted) {
                   //           final googleIdToken =

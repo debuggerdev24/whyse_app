@@ -5,7 +5,7 @@ import 'package:redstreakapp/models/curiosity_reading/curiosity_reading_model.da
 import 'package:redstreakapp/models/explore/spark_reading_mapper.dart';
 
 class CuriosityReadingService {
-  static const bool enableApiLogging = true;
+  static const bool enableApiLogging = false;
   static final _defaultApi =
       BaseApiHelper(enableApiLogging: enableApiLogging);
 

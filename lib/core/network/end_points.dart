@@ -172,7 +172,8 @@ class EndPoints {
       '/mobile/friends/users/$userId/profile/list?section=$section&page=$page&limit=$limit&groupType=$groupType';
 
   // Mobile Explorer endpoints
-  static const explorerDiscoverInterests = '/mobile/explorer/discover-interests';
+  static const explorerDiscoverInterests =
+      '/mobile/explorer/discover-interests';
   static const explorerSeriesForYou = '/mobile/explorer/series/for-you';
   static const explorerSeriesPopular = '/mobile/explorer/series/popular';
   static const explorerSeriesInterest = '/mobile/explorer/series/interest';
@@ -200,5 +201,9 @@ class EndPoints {
     int page = 1,
     int limit = 20,
   }) => '/leaderboard?scope=$scope&page=$page&limit=$limit';
-}
 
+  // Chat endpoints
+  static String chatHistory({int limit = 50, int page = 1}) =>
+      '/mobile/chat?limit=$limit&page=$page';
+  static const chatStream = '/mobile/chat/stream';
+}

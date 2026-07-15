@@ -13,6 +13,7 @@ enum AppRoutes {
 
   /////Onboarding////
   profileInfoScreen,
+  accountSetupScreen,
   readingGoalScreen,
   interestsScreen,
   topicsScreen,

@@ -126,7 +126,10 @@ class _PersonalAchievementsTab extends StatelessWidget {
           child: ListView(
             padding: EdgeInsets.fromLTRB(24.w, 28.h, 24.w, 32.h),
             children: [
-              StreakCoutnerWidget(streakCount: data.streak.currentStreak),
+              StreakCoutnerWidget(
+                streakCount: data.streak.currentStreak,
+                longestStreak: data.streak.longestStreak,
+              ),
               20.h.verticalSpace,
               UserPointsWidget(totalPoints: data.scores.totalScore),
               28.h.verticalSpace,
