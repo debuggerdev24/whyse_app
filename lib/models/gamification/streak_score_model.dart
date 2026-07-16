@@ -107,7 +107,7 @@ class StreakCalendarDay {
   final bool qualified;
   final String status;
 
-  bool get isCompleted => status == 'completed' || qualified;
+  bool get isCompleted => status == 'completed';
 
   bool get isFrozen => status == 'frozen';
 
@@ -194,6 +194,12 @@ class StreakScoreModel {
     final key =
         '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
     return calendarDays.any((d) => d.date == key && d.isCompleted);
+  }
+
+  bool isDateFrozen(DateTime date) {
+    final key =
+        '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    return calendarDays.any((d) => d.date == key && d.isFrozen);
   }
 
   StreakScoreModel copyWith({

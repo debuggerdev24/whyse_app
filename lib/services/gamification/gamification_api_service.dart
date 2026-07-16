@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/core/network/end_points.dart';
+import 'package:redstreakapp/models/gamification/achievement_claim_result.dart';
 import 'package:redstreakapp/models/gamification/leaderboard_model.dart';
 import 'package:redstreakapp/models/gamification/score_award_result.dart';
 import 'package:redstreakapp/models/gamification/streak_score_model.dart';
@@ -73,6 +74,15 @@ class GamificationApiService {
       parser: (raw) => raw is Map
           ? Map<String, dynamic>.from(raw)
           : <String, dynamic>{},
+    );
+  }
+
+  Future<Either<ApiException, AchievementClaimResult>> claimAchievement({
+    required String achievementId,
+  }) async {
+    return _api.post<AchievementClaimResult>(
+      EndPoints.claimAchievement(achievementId: achievementId),
+      parser: AchievementClaimResult.fromJson,
     );
   }
 }

@@ -1,15 +1,20 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/models/gamification/achievement_progress_model.dart';
+import 'package:redstreakapp/providers/gamification/gamification_provider.dart';
 
 class AchievementGoalCard extends StatelessWidget {
   const AchievementGoalCard({
     super.key,
     required this.achievement,
     this.icon,
+    this.onClaim,
+    this.isClaiming = false,
   });
 
   final AchievementProgress achievement;
   final Widget? icon;
+  final VoidCallback? onClaim;
+  final bool isClaiming;
 
   @override
   Widget build(BuildContext context) {
@@ -68,9 +73,12 @@ class AchievementGoalCard extends StatelessWidget {
                         color: AppColors.teal,
                       )
                     else if (achievement.claimable)
-                      _StatusChip(
-                        label: 'Claim',
-                        color: AppColors.orangeColor,
+                      GestureDetector(
+                        onTap: isClaiming ? null : onClaim,
+                        child: _StatusChip(
+                          label: isClaiming ? 'Claiming...' : 'Claim',
+                          color: AppColors.orangeColor,
+                        ),
                       )
                     else if (achievement.completed)
                       _StatusChip(
@@ -181,15 +189,56 @@ class AchievementsSectionWidget extends StatelessWidget {
           style: AppTextStyles.semiBold(fontSize: 18.sp, color: AppColors.black),
         ),
         14.h.verticalSpace,
-        ...achievements.map(
-          (achievement) => Padding(
-            padding: EdgeInsets.only(bottom: 12.h),
-            child: AchievementGoalCard(achievement: achievement),
-          ),
+        Consumer<GamificationProvider>(
+          builder: (context, gp, _) {
+            return Column(
+              children: achievements
+                  .map(
+                    (achievement) => Padding(
+                      padding: EdgeInsets.only(bottom: 12.h),
+                      child: AchievementGoalCard(
+                        achievement: achievement,
+                        isClaiming: gp.claimingAchievementId == achievement.id,
+                        onClaim: achievement.claimable && !achievement.claimed
+                            ? () => claimAchievementReward(
+                                  context,
+                                  gp,
+                                  achievement,
+                                )
+                            : null,
+                      ),
+                    ),
+                  )
+                  .toList(),
+            );
+          },
         ),
       ],
     );
   }
+}
+
+Future<void> claimAchievementReward(
+  BuildContext context,
+  GamificationProvider gp,
+  AchievementProgress achievement,
+) async {
+  final points = achievement.rewardPoints ?? 0;
+  final success = await gp.claimAchievement(achievement.id);
+  if (!context.mounted) return;
+
+  if (success) {
+    final message = points > 0
+        ? '${achievement.label} claimed! +$points pts'
+        : '${achievement.label} claimed!';
+    AppToast.success(context, message);
+    return;
+  }
+
+  AppToast.error(
+    context,
+    gp.claimAchievementError ?? 'Unable to claim achievement.',
+  );
 }
 
 class _StatusChip extends StatelessWidget {

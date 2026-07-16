@@ -53,6 +53,7 @@ class ProfileDataModel {
   final String preferredLanguage;
   final int dailyReadingGoal;
   final Counts counts;
+  final ProfileOverview? overview;
   // final List<Group> groups;
   // final List<Friend> friends;
   // final List<Topic> topics;
@@ -75,6 +76,7 @@ class ProfileDataModel {
     required this.preferredLanguage,
     required this.dailyReadingGoal,
     required this.counts,
+    this.overview,
     // required this.groups,
     // required this.friends,
     // required this.topics,
@@ -105,6 +107,11 @@ class ProfileDataModel {
       preferredLanguage: json['preferredLanguage']?.toString() ?? '',
       dailyReadingGoal: _readInt(json['dailyReadingGoal']) ?? 0,
       counts: Counts.fromJson(json['counts'] ?? {}),
+      overview: json['overview'] is Map
+          ? ProfileOverview.fromJson(
+              Map<String, dynamic>.from(json['overview'] as Map),
+            )
+          : null,
       // groups: (json['groups'] as List? ?? [])
       //     .map((e) => Group.fromJson(e))
       //     .toList(),
@@ -161,6 +168,11 @@ class ProfileDataModel {
       counts: data['counts'] is Map
           ? Counts.fromJson(Map<String, dynamic>.from(data['counts'] as Map))
           : base.counts,
+      overview: data['overview'] is Map
+          ? ProfileOverview.fromJson(
+              Map<String, dynamic>.from(data['overview'] as Map),
+            )
+          : base.overview,
     );
   }
 }
@@ -211,6 +223,128 @@ class Counts {
       memberGroupsCount: n('memberGroupsCount'),
       friendCount: n('friendCount'),
     );
+  }
+}
+
+class ProfileOverview {
+  const ProfileOverview({
+    required this.streak,
+    required this.score,
+    required this.reading,
+    required this.achievementsUnlocked,
+  });
+
+  final ProfileOverviewStreak streak;
+  final int score;
+  final ProfileOverviewReading reading;
+  final int achievementsUnlocked;
+
+  static const empty = ProfileOverview(
+    streak: ProfileOverviewStreak.empty,
+    score: 0,
+    reading: ProfileOverviewReading.empty,
+    achievementsUnlocked: 0,
+  );
+
+  factory ProfileOverview.fromJson(Map<String, dynamic> json) {
+    return ProfileOverview(
+      streak: json['streak'] is Map
+          ? ProfileOverviewStreak.fromJson(
+              Map<String, dynamic>.from(json['streak'] as Map),
+            )
+          : ProfileOverviewStreak.empty,
+      score: ProfileDataModel._readInt(json['score']) ?? 0,
+      reading: json['reading'] is Map
+          ? ProfileOverviewReading.fromJson(
+              Map<String, dynamic>.from(json['reading'] as Map),
+            )
+          : ProfileOverviewReading.empty,
+      achievementsUnlocked:
+          ProfileDataModel._readInt(json['achievementsUnlocked']) ?? 0,
+    );
+  }
+}
+
+class ProfileOverviewStreak {
+  const ProfileOverviewStreak({
+    required this.current,
+    required this.longest,
+    this.lastActiveDate,
+  });
+
+  final int current;
+  final int longest;
+  final String? lastActiveDate;
+
+  static const empty = ProfileOverviewStreak(
+    current: 0,
+    longest: 0,
+  );
+
+  factory ProfileOverviewStreak.fromJson(Map<String, dynamic> json) {
+    return ProfileOverviewStreak(
+      current: ProfileDataModel._readInt(json['current']) ?? 0,
+      longest: ProfileDataModel._readInt(json['longest']) ?? 0,
+      lastActiveDate: json['lastActiveDate']?.toString(),
+    );
+  }
+}
+
+class ProfileOverviewReading {
+  const ProfileOverviewReading({
+    required this.totalDuration,
+    required this.completedCount,
+  });
+
+  final ProfileReadingDuration totalDuration;
+  final int completedCount;
+
+  static const empty = ProfileOverviewReading(
+    totalDuration: ProfileReadingDuration.empty,
+    completedCount: 0,
+  );
+
+  factory ProfileOverviewReading.fromJson(Map<String, dynamic> json) {
+    return ProfileOverviewReading(
+      totalDuration: json['totalDuration'] is Map
+          ? ProfileReadingDuration.fromJson(
+              Map<String, dynamic>.from(json['totalDuration'] as Map),
+            )
+          : ProfileReadingDuration.empty,
+      completedCount: ProfileDataModel._readInt(json['completedCount']) ?? 0,
+    );
+  }
+}
+
+class ProfileReadingDuration {
+  const ProfileReadingDuration({
+    required this.value,
+    required this.unit,
+  });
+
+  final int value;
+  final String unit;
+
+  static const empty = ProfileReadingDuration(value: 0, unit: 'minutes');
+
+  factory ProfileReadingDuration.fromJson(Map<String, dynamic> json) {
+    return ProfileReadingDuration(
+      value: ProfileDataModel._readInt(json['value']) ?? 0,
+      unit: json['unit']?.toString() ?? 'minutes',
+    );
+  }
+
+  String get displayLabel {
+    switch (unit.toLowerCase()) {
+      case 'hour':
+      case 'hours':
+        return value == 1 ? 'Hour' : 'Hours';
+      case 'minute':
+      case 'minutes':
+        return value == 1 ? 'Minute' : 'Minutes';
+      default:
+        return unit;
+    }
   }
 }
 

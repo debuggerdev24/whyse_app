@@ -1,7 +1,13 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:redstreakapp/models/profile/profile_data_model.dart';
 
 part 'friend_details_model.freezed.dart';
 part 'friend_details_model.g.dart';
+
+ProfileOverview? _overviewFromJson(dynamic json) {
+  if (json == null || json is! Map) return null;
+  return ProfileOverview.fromJson(Map<String, dynamic>.from(json));
+}
 
 @freezed
 abstract class FriendDetailsResponse with _$FriendDetailsResponse {
@@ -19,6 +25,8 @@ abstract class FriendDetailsResponse with _$FriendDetailsResponse {
 abstract class FriendDetailsData with _$FriendDetailsData {
   const factory FriendDetailsData({
     required FriendProfile profile,
+    @JsonKey(fromJson: _overviewFromJson, includeToJson: false)
+    ProfileOverview? overview,
     required FriendsPreview friendsPreview,
     required GroupsPreview groupsPreview,
     required TopicsPreview topicsPreview,

@@ -7,6 +7,7 @@ import 'package:redstreakapp/models/home/saved_series_model.dart';
 import 'package:redstreakapp/providers/family/family_provider.dart';
 import 'package:redstreakapp/providers/friend/friend_provider.dart';
 import 'package:redstreakapp/models/family/family_member_model.dart';
+import 'package:redstreakapp/models/profile/profile_data_model.dart';
 import 'package:redstreakapp/screens/profile/widgets/profile_family_member_avatar.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/saved_series_provider.dart';
@@ -54,8 +55,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _overviewBlock(),
                     _interestsBlock(),
                     _subscriptionBlock(),
-                    _yourBooksBlock(context),
-                    _yourEBooksBlock(context),
+                    // _yourBooksBlock(context),
+                    // _yourEBooksBlock(context),
                     _mySeriesListBlock(),
                     SizedBox(height: 24.w),
                   ],
@@ -136,7 +137,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           fontSize: 14,
                           color: AppColors.black.withValues(alpha: 0.6),
                         ),
-                      ),
+                      ),    
                     ],
                   );
                 },
@@ -173,9 +174,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const Spacer(),
                 GestureDetector(
-                  onTap: () => context.pushNamed(
-                    AppRoutes.familyMembersListScreen.name,
-                  ),
+                  onTap: () =>
+                      context.pushNamed(AppRoutes.familyMembersListScreen.name),
                   child: AppText(
                     text: 'View all',
                     style: AppTextStyles.semibold(
@@ -225,7 +225,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
-      child: Row(
+      child: Row( 
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           for (var i = 0; i < members.length; i++) ...[
@@ -254,7 +254,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           for (var i = 0; i < 5; i++) ...[
             if (i > 0) 16.w.horizontalSpace,
-            AppSkeletonizer(child: SizedBox(
+            AppSkeletonizer(
+              child: SizedBox(
                 width: 72.w,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -305,7 +306,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         children: [
           AppText(
-            text: provider.familyMembersError ?? 'Failed to load family members',
+            text:
+                provider.familyMembersError ?? 'Failed to load family members',
             textAlign: TextAlign.center,
             style: AppTextStyles.medium(
               fontSize: 13,
@@ -317,7 +319,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onTap: () => provider.getFamilyMembersPreview(forceRefresh: true),
             child: AppText(
               text: 'Retry',
-              style: AppTextStyles.semibold(fontSize: 14, color: AppColors.teal),
+              style: AppTextStyles.semibold(
+                fontSize: 14,
+                color: AppColors.teal,
+              ),
             ),
           ),
         ],
@@ -499,7 +504,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           for (var i = 0; i < 5; i++) ...[
             if (i > 0) 16.w.horizontalSpace,
-            AppSkeletonizer(child: SizedBox(
+            AppSkeletonizer(
+              child: SizedBox(
                 width: 72.w,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -641,84 +647,107 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _overviewBlock() {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border(
-          top: BorderSide(color: AppColors.black.setOpacity(0.08), width: 1),
-        ),
-      ),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AppText(
-              text: 'Overview',
-              style: AppTextStyles.bold(fontSize: 20, color: AppColors.black),
+    return Consumer<ProfileProvider>(
+      builder: (context, provider, _) {
+        final overview =
+            provider.profileData?.overview ?? ProfileOverview.empty;
+        final isLoading =
+            provider.getProfileState == DataState.loading &&
+            provider.profileData == null;
+
+        return Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            border: Border(
+              top: BorderSide(color: AppColors.black.setOpacity(0.08), width: 1),
             ),
-            16.w.verticalSpace,
-            IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: _profileStatCard(
-                      leading: SvgIcon(
-                        AppAssets.thunder,
-                        size: 28.w,
-                        color: AppColors.orangeColor,
-                      ),
-                      value: '263',
-                      label: 'Streaks',
-                    ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppText(
+                  text: 'Overview',
+                  style: AppTextStyles.bold(
+                    fontSize: 20,
+                    color: AppColors.black,
                   ),
-                  16.w.horizontalSpace,
-                  Expanded(
-                    child: _profileStatCard(
-                      leading: Icon(
-                        Icons.description_outlined,
-                        size: 28.sp,
-                        color: AppColors.black.setOpacity(0.55),
+                ),
+                16.w.verticalSpace,
+                IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        child: _profileStatCard(
+                          leading: SvgIcon(
+                            AppAssets.thunder,
+                            size: 28.w,
+                            color: AppColors.orangeColor,
+                          ),
+                          value: isLoading
+                              ? '--'
+                              : '${overview.streak.current}',
+                          label: 'Streak',
+                        ),
                       ),
-                      value: '450',
-                      label: 'Pages Read',
-                    ),
+                      16.w.horizontalSpace,
+                      Expanded(
+                        child: _profileStatCard(
+                          leading: SvgIcon(
+                            AppAssets.star,
+                            size: 28.w,
+                            color: AppColors.orangeColor,
+                          ),
+                          value: isLoading ? '--' : '${overview.score}',
+                          label: 'Points',
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                16.w.verticalSpace,
+                IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        child: _profileStatCard(
+                          leading: SvgIcon(
+                            AppAssets.document,
+                            size: 28.w,
+                            color: AppColors.black.setOpacity(0.55),
+                          ),
+                          value: isLoading
+                              ? '--'
+                              : '${overview.reading.completedCount}',
+                          label: 'Readings',
+                        ),
+                      ),
+                      16.w.horizontalSpace,
+                      Expanded(
+                        child: _profileStatCard(
+                          leading: Icon(
+                            Icons.emoji_events_outlined,
+                            size: 28.sp,
+                            color: AppColors.teal,
+                          ),
+                          value: isLoading
+                              ? '--'
+                              : '${overview.achievementsUnlocked}',
+                          label: 'Achievements',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            16.w.verticalSpace,
-            IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: _profileStatCard(
-                      leading: Icon(
-                        Icons.schedule_outlined,
-                        size: 28.sp,
-                        color: AppColors.black.setOpacity(0.55),
-                      ),
-                      value: '60',
-                      label: 'Hours',
-                    ),
-                  ),
-                  16.w.horizontalSpace,
-                  Expanded(
-                    child: _profileStatCard(
-                      leading: Text('🇺🇸', style: TextStyle(fontSize: 26.sp)),
-                      value: 'A1',
-                      label: 'Level',
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -808,7 +837,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           final widths = [72.0, 88.0, 64.0, 80.0];
           return Padding(
             padding: EdgeInsets.only(right: i < 3 ? 12.w : 0),
-            child: AppSkeletonizer(child: Container(
+            child: AppSkeletonizer(
+              child: Container(
                 width: widths[i].w,
                 height: 38.h,
                 decoration: BoxDecoration(
@@ -981,166 +1011,166 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _yourBooksBlock(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border(
-          top: BorderSide(
-            color: AppColors.black.withValues(alpha: 0.08),
-            width: 1,
-          ),
-        ),
-      ),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                AppText(
-                  text: 'Your Books',
-                  style: AppTextStyles.bold(
-                    fontSize: 20,
-                    color: AppColors.black,
-                  ),
-                ),
-                const Spacer(),
-                GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () =>
-                      context.pushNamed(AppRoutes.yourBooksScreen.name),
-                  child: AppText(
-                    text: 'See all',
-                    style: AppTextStyles.semibold(
-                      fontSize: 15,
-                      color: AppColors.teal,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            12.verticalSpace,
-            SizedBox(
-              height: 125,
-              width: double.maxFinite,
-              child: ListView.separated(
-                separatorBuilder: (context, index) => const SizedBox(width: 8),
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                itemCount: 10,
-                itemBuilder: (context, index) {
-                  return Container(
-                    height: 120,
-                    margin: EdgeInsets.only(bottom: 5, left: 1),
-                    width: 80,
-                    decoration: BoxDecoration(
-                      color: AppColors.lightwhiteColor,
-                      borderRadius: BorderRadius.circular(12.r),
-                      image: DecorationImage(
-                        image: AssetImage(AppAssets.demoBookImage),
-                        fit: BoxFit.cover,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.black.withValues(alpha: 0.15),
-                          spreadRadius: 2,
-                          blurRadius: 2,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget _yourBooksBlock(BuildContext context) {
+  //   return Container(
+  //     width: double.infinity,
+  //     decoration: BoxDecoration(
+  //       color: AppColors.white,
+  //       border: Border(
+  //         top: BorderSide(
+  //           color: AppColors.black.withValues(alpha: 0.08),
+  //           width: 1,
+  //         ),
+  //       ),
+  //     ),
+  //     child: Padding(
+  //       padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           Row(
+  //             children: [
+  //               AppText(
+  //                 text: 'Your Books',
+  //                 style: AppTextStyles.bold(
+  //                   fontSize: 20,
+  //                   color: AppColors.black,
+  //                 ),
+  //               ),
+  //               const Spacer(),
+  //               GestureDetector(
+  //                 behavior: HitTestBehavior.opaque,
+  //                 onTap: () =>
+  //                     context.pushNamed(AppRoutes.yourBooksScreen.name),
+  //                 child: AppText(
+  //                   text: 'See all',
+  //                   style: AppTextStyles.semibold(
+  //                     fontSize: 15,
+  //                     color: AppColors.teal,
+  //                   ),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //           12.verticalSpace,
+  //           SizedBox(
+  //             height: 125,
+  //             width: double.maxFinite,
+  //             child: ListView.separated(
+  //               separatorBuilder: (context, index) => const SizedBox(width: 8),
+  //               scrollDirection: Axis.horizontal,
+  //               physics: const BouncingScrollPhysics(),
+  //               itemCount: 10,
+  //               itemBuilder: (context, index) {
+  //                 return Container(
+  //                   height: 120,
+  //                   margin: EdgeInsets.only(bottom: 5, left: 1),
+  //                   width: 80,
+  //                   decoration: BoxDecoration(
+  //                     color: AppColors.lightwhiteColor,
+  //                     borderRadius: BorderRadius.circular(12.r),
+  //                     image: DecorationImage(
+  //                       image: AssetImage(AppAssets.demoBookImage),
+  //                       fit: BoxFit.cover,
+  //                     ),
+  //                     boxShadow: [
+  //                       BoxShadow(
+  //                         color: AppColors.black.withValues(alpha: 0.15),
+  //                         spreadRadius: 2,
+  //                         blurRadius: 2,
+  //                         offset: const Offset(0, 2),
+  //                       ),
+  //                     ],
+  //                   ),
+  //                 );
+  //               },
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
-  Widget _yourEBooksBlock(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border(
-          top: BorderSide(
-            color: AppColors.black.withValues(alpha: 0.08),
-            width: 1,
-          ),
-        ),
-      ),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                AppText(
-                  text: 'Your eBooks',
-                  style: AppTextStyles.bold(
-                    fontSize: 20,
-                    color: AppColors.black,
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () =>
-                      context.pushNamed(AppRoutes.yourBooksScreen.name),
-                  child: AppText(
-                    text: 'View all',
-                    style: AppTextStyles.semibold(
-                      fontSize: 15,
-                      color: AppColors.teal,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            12.verticalSpace,
-            SizedBox(
-              height: 125,
-              width: double.maxFinite,
-              child: ListView.separated(
-                separatorBuilder: (context, index) => const SizedBox(width: 8),
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                itemCount: 10,
-                itemBuilder: (context, index) {
-                  return Container(
-                    height: 120,
-                    margin: EdgeInsets.only(bottom: 5, left: 1),
-                    width: 80,
-                    decoration: BoxDecoration(
-                      color: AppColors.lightwhiteColor,
-                      borderRadius: BorderRadius.circular(12.r),
-                      image: DecorationImage(
-                        image: AssetImage(AppAssets.demoBookImage),
-                        fit: BoxFit.cover,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.black.withValues(alpha: 0.15),
-                          spreadRadius: 2,
-                          blurRadius: 2,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget _yourEBooksBlock(BuildContext context) {
+  //   return Container(
+  //     width: double.infinity,
+  //     decoration: BoxDecoration(
+  //       color: AppColors.white,
+  //       border: Border(
+  //         top: BorderSide(
+  //           color: AppColors.black.withValues(alpha: 0.08),
+  //           width: 1,
+  //         ),
+  //       ),
+  //     ),
+  //     child: Padding(
+  //       padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           Row(
+  //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //             children: [
+  //               AppText(
+  //                 text: 'Your eBooks',
+  //                 style: AppTextStyles.bold(
+  //                   fontSize: 20,
+  //                   color: AppColors.black,
+  //                 ),
+  //               ),
+  //               GestureDetector(
+  //                 onTap: () =>
+  //                     context.pushNamed(AppRoutes.yourBooksScreen.name),
+  //                 child: AppText(
+  //                   text: 'View all',
+  //                   style: AppTextStyles.semibold(
+  //                     fontSize: 15,
+  //                     color: AppColors.teal,
+  //                   ),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //           12.verticalSpace,
+  //           SizedBox(
+  //             height: 125,
+  //             width: double.maxFinite,
+  //             child: ListView.separated(
+  //               separatorBuilder: (context, index) => const SizedBox(width: 8),
+  //               scrollDirection: Axis.horizontal,
+  //               physics: const BouncingScrollPhysics(),
+  //               itemCount: 10,
+  //               itemBuilder: (context, index) {
+  //                 return Container(
+  //                   height: 120,
+  //                   margin: EdgeInsets.only(bottom: 5, left: 1),
+  //                   width: 80,
+  //                   decoration: BoxDecoration(
+  //                     color: AppColors.lightwhiteColor,
+  //                     borderRadius: BorderRadius.circular(12.r),
+  //                     image: DecorationImage(
+  //                       image: AssetImage(AppAssets.demoBookImage),
+  //                       fit: BoxFit.cover,
+  //                     ),
+  //                     boxShadow: [
+  //                       BoxShadow(
+  //                         color: AppColors.black.withValues(alpha: 0.15),
+  //                         spreadRadius: 2,
+  //                         blurRadius: 2,
+  //                         offset: const Offset(0, 2),
+  //                       ),
+  //                     ],
+  //                   ),
+  //                 );
+  //               },
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _mySeriesListBlock() {
     return Consumer<SavedSeriesProvider>(
@@ -1223,7 +1253,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             3,
             (i) => Padding(
               padding: EdgeInsets.only(right: 12.w),
-              child: AppSkeletonizer(child: Container(
+              child: AppSkeletonizer(
+                child: Container(
                   width: 210.w,
                   height: 240.w,
                   decoration: BoxDecoration(
@@ -1374,7 +1405,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   AppText(
                     text: value,
                     style: AppTextStyles.bold(
-                      fontSize: 20,
+                      fontSize: 18,
                       color: AppColors.black,
                     ),
                   ),
@@ -1382,9 +1413,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   AppText(
                     text: label,
                     style: AppTextStyles.medium(
-                      fontSize: 12,
+                      fontSize: 11,
                       color: AppColors.black.setOpacity(0.48),
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),

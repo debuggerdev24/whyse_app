@@ -2,6 +2,7 @@ import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/utils/shared_pref.dart';
 import 'package:redstreakapp/core/utils/user_facing_message.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/core/widgets/loading_dialog.dart';
 import 'package:redstreakapp/models/group/group_members_model.dart';
 import 'package:redstreakapp/models/group/group_response_model.dart';
@@ -390,14 +391,25 @@ class GroupMemberRow extends StatelessWidget {
     final tag = _tagType;
     return Row(
       children: [
-        Container(
-          width: 32.w,
-          height: 32.w,
-          decoration: const BoxDecoration(
-            color: AppColors.extealighttealcolor,
-            shape: BoxShape.circle,
+        ClipOval(
+          child: AppNetworkImage(
+            imageUrl: item.avatarUrl,
+            tag: 'GroupDetails.memberAvatar',
+            width: 32.w,
+            height: 32.w,
+            placeholder: (_) => Container(
+              width: 32.w,
+              height: 32.w,
+              color: AppColors.extealighttealcolor,
+              child: Icon(Icons.person, size: 15.sp, color: AppColors.teal),
+            ),
+            errorBuilder: (_, _, _) => Container(
+              width: 32.w,
+              height: 32.w,
+              color: AppColors.extealighttealcolor,
+              child: Icon(Icons.person, size: 15.sp, color: AppColors.teal),
+            ),
           ),
-          child: Icon(Icons.person, size: 15.sp, color: AppColors.teal),
         ),
         12.w.horizontalSpace,
         Expanded(
@@ -422,6 +434,8 @@ class GroupMemberRow extends StatelessWidget {
             ],
           ),
         ),
+        _MemberStreakBadge(streak: item.currentStreak),
+        8.w.horizontalSpace,
         _MemberTag(
           type: tag,
           onTap: switch (tag) {
@@ -432,6 +446,42 @@ class GroupMemberRow extends StatelessWidget {
           },
         ),
       ],
+    );
+  }
+}
+
+class _MemberStreakBadge extends StatelessWidget {
+  const _MemberStreakBadge({required this.streak});
+
+  final int streak;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: AppColors.black.withValues(alpha: 0.1)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SvgIcon(
+            AppAssets.thunder,
+            size: 12.sp,
+            color: AppColors.orangeColor,
+          ),
+          4.w.horizontalSpace,
+          AppText(
+            text: '$streak',
+            style: AppTextStyles.semibold(
+              fontSize: 12.sp,
+              color: AppColors.black,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -25,6 +25,7 @@ Map<String, dynamic> _$FriendDetailsResponseToJson(
 _FriendDetailsData _$FriendDetailsDataFromJson(Map<String, dynamic> json) =>
     _FriendDetailsData(
       profile: FriendProfile.fromJson(json['profile'] as Map<String, dynamic>),
+      overview: _overviewFromJson(json['overview']),
       friendsPreview: FriendsPreview.fromJson(
         json['friendsPreview'] as Map<String, dynamic>,
       ),

@@ -5,6 +5,7 @@ import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/core/utils/network_image_url.dart';
 import 'package:redstreakapp/core/utils/user_facing_message.dart';
 import 'package:redstreakapp/models/friend/friend_details_model.dart';
+import 'package:redstreakapp/models/profile/profile_data_model.dart';
 import 'package:redstreakapp/providers/family/family_provider.dart';
 import 'package:redstreakapp/providers/friend/friend_provider.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
@@ -51,7 +52,7 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
       friendId: friendId,
     );
     return result.fold((failure) => throw failure, (response) => response.data);
-  }
+  }             
 
   void _reloadDetails() {
     setState(() {
@@ -121,9 +122,9 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
                         _relationshipActionsBlock(details, profile),
                         _friendsBlock(context, details),
                         _groupsBlock(context, details),
-                        _overviewBlock(),
+                        _overviewBlock(details),
                         _interestsBlock(details),
-                        _yourBooksBlock(),
+                        // _yourBooksBlock(),
                         _mySeriesListBlock(details),
                         SizedBox(height: 24.w),
                       ],
@@ -288,7 +289,8 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     required double height,
     double radius = 8,
   }) {
-    return AppSkeletonizer(child: Container(
+    return AppSkeletonizer(
+      child: Container(
         width: width,
         height: height,
         decoration: BoxDecoration(
@@ -517,11 +519,9 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
       context,
       memberName: memberName,
       onConfirm: (role) async {
-        final error =
-            await context.read<FamilyProvider>().addFamilyMemberFromProfile(
-          profile: profile,
-          role: role,
-        );
+        final error = await context
+            .read<FamilyProvider>()
+            .addFamilyMemberFromProfile(profile: profile, role: role);
         if (!mounted) return error;
         if (error == null) {
           AppToast.success(
@@ -694,7 +694,9 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     );
   }
 
-  Widget _overviewBlock() {
+  Widget _overviewBlock(FriendDetailsData details) {
+    final overview = details.overview ?? ProfileOverview.empty;
+
     return _sectionContainer(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -715,20 +717,20 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
                       size: 24.w,
                       color: AppColors.orangeColor,
                     ),
-                    value: '263',
-                    label: 'Streaks',
+                    value: '${overview.streak.current}',
+                    label: 'Streak',
                   ),
                 ),
                 16.w.horizontalSpace,
                 Expanded(
                   child: _profileStatCard(
                     leading: SvgIcon(
-                      AppAssets.document,
+                      AppAssets.star,
                       size: 24.w,
-                      color: AppColors.black,
+                      color: AppColors.orangeColor,
                     ),
-                    value: '450',
-                    label: 'Pages Read',
+                    value: '${overview.score}',
+                    label: 'Points',
                   ),
                 ),
               ],
@@ -742,24 +744,24 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
                 Expanded(
                   child: _profileStatCard(
                     leading: SvgIcon(
-                      AppAssets.dumbbell,
+                      AppAssets.document,
                       size: 24.w,
                       color: AppColors.black,
                     ),
-                    value: '30',
-                    label: 'Exercises',
+                    value: '${overview.reading.completedCount}',
+                    label: 'Readings',
                   ),
                 ),
                 16.w.horizontalSpace,
                 Expanded(
                   child: _profileStatCard(
-                    leading: SvgIcon(
-                      AppAssets.clock,
-                      size: 24.w,
-                      color: AppColors.black,
+                    leading: Icon(
+                      Icons.emoji_events_outlined,
+                      size: 24.sp,
+                      color: AppColors.teal,
                     ),
-                    value: '60',
-                    label: 'Hours',
+                    value: '${overview.achievementsUnlocked}',
+                    label: 'Achievements',
                   ),
                 ),
               ],
@@ -814,65 +816,65 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     );
   }
 
-  Widget _yourBooksBlock() {
-    return _sectionContainer(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              AppText(
-                text: 'Books Read',
-                style: AppTextStyles.bold(fontSize: 18, color: AppColors.black),
-              ),
-              AppText(
-                text: 'View all',
-                style: AppTextStyles.semiBold(
-                  fontSize: 14,
-                  color: AppColors.teal,
-                ),
-              ),
-            ],
-          ),
-          12.verticalSpace,
-          SizedBox(
-            height: 125,
-            width: double.maxFinite,
-            child: ListView.separated(
-              separatorBuilder: (context, index) => const SizedBox(width: 8),
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              itemCount: 10,
-              itemBuilder: (context, index) {
-                return Container(
-                  height: 120,
-                  margin: const EdgeInsets.only(bottom: 5, left: 1),
-                  width: 80,
-                  decoration: BoxDecoration(
-                    color: AppColors.lightwhiteColor,
-                    borderRadius: BorderRadius.circular(12.r),
-                    image: DecorationImage(
-                      image: AssetImage(AppAssets.demoBookImage),
-                      fit: BoxFit.cover,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.black.withValues(alpha: 0.15),
-                        spreadRadius: 2,
-                        blurRadius: 2,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _yourBooksBlock() {
+  //   return _sectionContainer(
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Row(
+  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //           children: [
+  //             AppText(
+  //               text: 'Books Read',
+  //               style: AppTextStyles.bold(fontSize: 18, color: AppColors.black),
+  //             ),
+  //             AppText(
+  //               text: 'View all',
+  //               style: AppTextStyles.semiBold(
+  //                 fontSize: 14,
+  //                 color: AppColors.teal,
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //         12.verticalSpace,
+  //         SizedBox(
+  //           height: 125,
+  //           width: double.maxFinite,
+  //           child: ListView.separated(
+  //             separatorBuilder: (context, index) => const SizedBox(width: 8),
+  //             scrollDirection: Axis.horizontal,
+  //             physics: const BouncingScrollPhysics(),
+  //             itemCount: 10,
+  //             itemBuilder: (context, index) {
+  //               return Container(
+  //                 height: 120,
+  //                 margin: const EdgeInsets.only(bottom: 5, left: 1),
+  //                 width: 80,
+  //                 decoration: BoxDecoration(
+  //                   color: AppColors.lightwhiteColor,
+  //                   borderRadius: BorderRadius.circular(12.r),
+  //                   image: DecorationImage(
+  //                     image: AssetImage(AppAssets.demoBookImage),
+  //                     fit: BoxFit.cover,
+  //                   ),
+  //                   boxShadow: [
+  //                     BoxShadow(
+  //                       color: AppColors.black.withValues(alpha: 0.15),
+  //                       spreadRadius: 2,
+  //                       blurRadius: 2,
+  //                       offset: const Offset(0, 2),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               );
+  //             },
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _mySeriesListBlock(FriendDetailsData details) {
     final topics = details.topicsPreview.items;
@@ -1020,7 +1022,7 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
                   AppText(
                     text: value,
                     style: AppTextStyles.semiBold(
-                      fontSize: 18,
+                      fontSize: 16,
                       color: AppColors.black,
                     ).copyWith(height: 1.2),
                   ),
@@ -1028,9 +1030,11 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
                   AppText(
                     text: label,
                     style: AppTextStyles.semiBold(
-                      fontSize: 14,
+                      fontSize: 11,
                       color: AppColors.black.setOpacity(0.48),
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),

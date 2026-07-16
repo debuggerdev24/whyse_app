@@ -196,6 +196,8 @@ class EndPoints {
   static String streakScoreForMonth({required int month, required int year}) =>
       '/user/streak-score?month=$month&year=$year';
   static const buyStreakFreeze = '/streak/freeze/buy';
+  static String claimAchievement({required String achievementId}) =>
+      '/achievements/$achievementId/claim';
   static String leaderboard({
     String scope = 'global',
     int page = 1,

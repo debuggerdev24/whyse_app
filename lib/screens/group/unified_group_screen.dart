@@ -1,5 +1,6 @@
 import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/utils/shared_pref.dart';
 import 'package:redstreakapp/core/utils/user_facing_message.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/group/group_members_model.dart';
@@ -69,15 +70,6 @@ class _UnifiedGroupScreenState extends State<UnifiedGroupScreen>
           text: p.groupName,
           style: AppTextStyles.semibold(fontSize: 20, color: AppColors.black),
         ),
-        actions: [
-          TextButton(
-            onPressed: () {},
-            child: AppText(
-              text: 'Edit',
-              style: AppTextStyles.bold(fontSize: 14, color: AppColors.teal),
-            ),
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -534,126 +526,171 @@ class _GroupStreaksTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 24.h),
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(20.r),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.black.withValues(alpha: 0.06),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 0),
-              child: Row(
-                children: [
-                  SvgIcon(
-                    AppAssets.thunder,
-                    size: 22.sp,
-                    color: AppColors.orangeColor,
-                  ),
-                  10.w.horizontalSpace,
-                  AppText(
-                    text: 'Streaks Ranking',
-                    style: AppTextStyles.bold(
-                      fontSize: 18.sp,
-                      color: AppColors.black,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            14.h.verticalSpace,
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 18.w),
-              child: Divider(
-                height: 1,
-                thickness: 1,
-                color: AppColors.black.withValues(alpha: 0.08),
-              ),
-            ),
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: EdgeInsets.fromLTRB(18.w, 4.h, 18.w, 16.h),
-              itemCount: _kStreakRankingEntries.length,
-              separatorBuilder: (_, _) => Divider(
-                height: 1,
-                thickness: 1,
-                color: AppColors.black.withValues(alpha: 0.08),
-              ),
-              itemBuilder: (_, index) {
-                return _StreakRankingRow(entry: _kStreakRankingEntries[index]);
-              },
-            ),
-          ],
-        ),
+    return Selector<GroupProvider, _GroupStreaksTabVM>(
+      selector: (_, p) => _GroupStreaksTabVM(
+        state: p.getGroupMembersState,
+        members: p.groupMembersList,
+        error: p.getGroupMembersError,
       ),
+      builder: (context, vm, _) {
+        final myUserId = LocalStorageService.instance.getLoggedInUserId;
+        final rankedMembers = vm.members.sortedByStreakDesc();
+
+        return SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 24.h),
+          child: Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(20.r),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.black.withValues(alpha: 0.06),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 0),
+                  child: Row(
+                    children: [
+                      SvgIcon(
+                        AppAssets.thunder,
+                        size: 22.sp,
+                        color: AppColors.orangeColor,
+                      ),
+                      10.w.horizontalSpace,
+                      AppText(
+                        text: 'Streaks Ranking',
+                        style: AppTextStyles.bold(
+                          fontSize: 18.sp,
+                          color: AppColors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                14.h.verticalSpace,
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 18.w),
+                  child: Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: AppColors.black.withValues(alpha: 0.08),
+                  ),
+                ),
+                if (vm.isLoading)
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 24.h),
+                    child: Column(
+                      children: List.generate(
+                        4,
+                        (index) => Padding(
+                          padding: EdgeInsets.only(bottom: 14.h),
+                          child: AppSkeletonizer(
+                            child: Container(
+                              height: 52.h,
+                              decoration: BoxDecoration(
+                                color: AppColors.white,
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                else if (vm.isError)
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(18.w, 24.h, 18.w, 24.h),
+                    child: AppText(
+                      text: userFacingMessage(
+                        vm.error,
+                        fallback: 'Unable to load streak ranking.',
+                      ),
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.medium(
+                        fontSize: 14.sp,
+                        color: AppColors.black.withValues(alpha: 0.55),
+                      ),
+                    ),
+                  )
+                else if (rankedMembers.isEmpty)
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(18.w, 24.h, 18.w, 24.h),
+                    child: AppText(
+                      text: 'No members yet.',
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.medium(
+                        fontSize: 14.sp,
+                        color: AppColors.black.withValues(alpha: 0.55),
+                      ),
+                    ),
+                  )
+                else
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: EdgeInsets.fromLTRB(18.w, 4.h, 18.w, 16.h),
+                    itemCount: rankedMembers.length,
+                    separatorBuilder: (_, _) => Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: AppColors.black.withValues(alpha: 0.08),
+                    ),
+                    itemBuilder: (_, index) {
+                      final member = rankedMembers[index];
+                      final isMe =
+                          myUserId.isNotEmpty && member.userId == myUserId;
+                      return _StreakRankingRow(
+                        rank: index + 1,
+                        name: isMe ? 'You' : member.displayName,
+                        streak: member.currentStreak,
+                        avatarUrl: member.avatarUrl,
+                      );
+                    },
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
 
-class _StreakRankingEntry {
-  const _StreakRankingEntry({
+class _GroupStreaksTabVM {
+  const _GroupStreaksTabVM({
+    required this.state,
+    required this.members,
+    required this.error,
+  });
+
+  final DataState state;
+  final List<GroupMember> members;
+  final String? error;
+
+  bool get isLoading => state == DataState.loading;
+  bool get isError => state == DataState.failed;
+}
+
+class _StreakRankingRow extends StatelessWidget {
+  const _StreakRankingRow({
     required this.rank,
     required this.name,
-    required this.score,
-    required this.avatarUrl,
+    required this.streak,
+    this.avatarUrl,
   });
 
   final int rank;
   final String name;
-  final int score;
-  final String avatarUrl;
-}
-
-const List<_StreakRankingEntry> _kStreakRankingEntries = [
-  _StreakRankingEntry(
-    rank: 1,
-    name: 'Emma Rodriguez',
-    score: 10,
-    avatarUrl: 'https://picsum.photos/seed/streak-avatar-1/128/128',
-  ),
-  _StreakRankingEntry(
-    rank: 2,
-    name: 'Liam Kumar',
-    score: 6,
-    avatarUrl: 'https://picsum.photos/seed/streak-avatar-2/128/128',
-  ),
-  _StreakRankingEntry(
-    rank: 3,
-    name: 'Sofia Mendes',
-    score: 4,
-    avatarUrl: 'https://picsum.photos/seed/streak-avatar-3/128/128',
-  ),
-  _StreakRankingEntry(
-    rank: 4,
-    name: 'Noah Patel',
-    score: 1,
-    avatarUrl: 'https://picsum.photos/seed/streak-avatar-4/128/128',
-  ),
-  _StreakRankingEntry(
-    rank: 5,
-    name: 'You',
-    score: 1,
-    avatarUrl: 'https://picsum.photos/seed/streak-avatar-5/128/128',
-  ),
-];
-
-class _StreakRankingRow extends StatelessWidget {
-  const _StreakRankingRow({required this.entry});
-
-  final _StreakRankingEntry entry;
+  final int streak;
+  final String? avatarUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -674,7 +711,7 @@ class _StreakRankingRow extends StatelessWidget {
               color: AppColors.extealighttealcolor,
             ),
             child: AppText(
-              text: '${entry.rank}',
+              text: '$rank',
               style: AppTextStyles.semibold(
                 fontSize: 13.sp,
                 color: AppColors.teal,
@@ -684,7 +721,7 @@ class _StreakRankingRow extends StatelessWidget {
           14.w.horizontalSpace,
           ClipOval(
             child: AppNetworkImage(
-              imageUrl: entry.avatarUrl,
+              imageUrl: avatarUrl,
               tag: 'UnifiedGroup.memberAvatar',
               width: avatarSize,
               height: avatarSize,
@@ -711,7 +748,7 @@ class _StreakRankingRow extends StatelessWidget {
           12.w.horizontalSpace,
           Expanded(
             child: AppText(
-              text: entry.name,
+              text: name,
               style: AppTextStyles.medium(
                 fontSize: 16.sp,
                 color: AppColors.black,
@@ -737,7 +774,7 @@ class _StreakRankingRow extends StatelessWidget {
                 ),
                 6.w.horizontalSpace,
                 AppText(
-                  text: '${entry.score}',
+                  text: '$streak',
                   style: AppTextStyles.bold(
                     fontSize: 16.sp,
                     color: AppColors.black,

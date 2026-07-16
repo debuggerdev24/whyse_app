@@ -50,7 +50,7 @@ class ProfileHeaderSection extends StatelessWidget {
                         children: [
                           _CircleOutlineIconButton(
                             onTap: () {
-                             context.pushNamed(
+                              context.pushNamed(
                                 AppRoutes.notificationScreen.name,
                               );
                             },
@@ -85,30 +85,30 @@ class ProfileHeaderSection extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  SizedBox(
-                    width: 72.w,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        AppText(
-                          text: '#12',
-                          style: AppTextStyles.bold(
-                            fontSize: 28,
-                            color: AppColors.black,
-                          ),
-                        ),
-                        // 4.w.verticalSpace,
-                        AppText(
-                          text: 'Your Rank',
-                          style: AppTextStyles.medium(
-                            fontSize: 13,
-                            color: AppColors.black.withValues(alpha: 0.65),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  // SizedBox(
+                  //   width: 72.w,
+                  //   child: Column(
+                  //     crossAxisAlignment: CrossAxisAlignment.start,
+                  //     mainAxisAlignment: MainAxisAlignment.end,
+                  //     children: [
+                  //       AppText(
+                  //         text: '#12',
+                  //         style: AppTextStyles.bold(
+                  //           fontSize: 28,
+                  //           color: AppColors.black,
+                  //         ),
+                  //       ),
+                  //       // 4.w.verticalSpace,
+                  //       AppText(
+                  //         text: 'Your Rank',
+                  //         style: AppTextStyles.medium(
+                  //           fontSize: 13,
+                  //           color: AppColors.black.withValues(alpha: 0.65),
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
                   Expanded(
                     child: Align(
                       alignment: Alignment.bottomCenter,
@@ -140,23 +140,23 @@ class ProfileHeaderSection extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(
-                    width: 72.w,
-                    child: Align(
-                      alignment: Alignment.bottomRight,
-                      child: Padding(
-                        padding: EdgeInsets.only(bottom: 4.h),
-                        child: _CircleOutlineIconButton(
-                          onTap: () {},
-                          child: SvgIcon(
-                            AppAssets.shareIcon,
-                            size: 18.w,
-                            color: AppColors.black,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  // SizedBox(
+                  //   width: 72.w,
+                  //   child: Align(
+                  //     alignment: Alignment.bottomRight,
+                  //     child: Padding(
+                  //       padding: EdgeInsets.only(bottom: 4.h),
+                  //       child: _CircleOutlineIconButton(
+                  //         onTap: () {},
+                  //         child: SvgIcon(
+                  //           AppAssets.shareIcon,
+                  //           size: 18.w,
+                  //           color: AppColors.black,
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ),

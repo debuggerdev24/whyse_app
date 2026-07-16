@@ -38,9 +38,11 @@ class GamificationProvider extends ChangeNotifier {
   bool isLoadingStreakScore = false;
   bool isLoadingLeaderboard = false;
   bool isBuyingFreeze = false;
+  String? claimingAchievementId;
   String? streakScoreError;
   String? leaderboardError;
   String? freezeBuyError;
+  String? claimAchievementError;
 
   int _sessionSparkPoints = 0;
   int _sessionApiPointsAwarded = 0;
@@ -248,6 +250,30 @@ class GamificationProvider extends ChangeNotifier {
     );
 
     isBuyingFreeze = false;
+    notifyListeners();
+    return success;
+  }
+
+  Future<bool> claimAchievement(String achievementId) async {
+    if (claimingAchievementId != null) return false;
+    claimingAchievementId = achievementId;
+    claimAchievementError = null;
+    notifyListeners();
+
+    final result = await _api.claimAchievement(achievementId: achievementId);
+    var success = false;
+    await result.fold(
+      (error) async {
+        claimAchievementError = error.errorMsg;
+        Logger.error('claimAchievement failed: ${error.errorMsg}');
+      },
+      (_) async {
+        success = true;
+        await fetchStreakScore(force: true);
+      },
+    );
+
+    claimingAchievementId = null;
     notifyListeners();
     return success;
   }

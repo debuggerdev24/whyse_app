@@ -236,12 +236,14 @@ class _CalendarStripState extends State<CalendarStrip> {
     required DateTime date,
     required DateTime now,
     required bool isCompleted,
+    required bool isFrozen,
     required double dayCircleSize,
   }) {
     final isToday =
         date.year == now.year &&
         date.month == now.month &&
         date.day == now.day;
+    final hasStreakHighlight = isCompleted || isFrozen;
 
     return SizedBox(
       width: 52.w,
@@ -268,28 +270,36 @@ class _CalendarStripState extends State<CalendarStrip> {
               shape: BoxShape.circle,
               color: isCompleted
                   ? AppColors.orangeColor
+                  : isFrozen
+                  ? AppColors.streakFreezeBlue
                   : isToday
                   ? AppColors.orangeColor.withValues(alpha: 0.25)
                   : Colors.transparent,
-              border: isToday && !isCompleted
+              border: isToday && !hasStreakHighlight
                   ? Border.all(
                       color: AppColors.orangeColor,
                       width: 2,
                     )
                   : null,
             ),
-            child: AppText(
-              text: date.day.toString(),
-              style: AppTextStyles.bold(
-                fontSize: 13.sp,
-                height: 1,
-                color: isCompleted
-                    ? AppColors.white
-                    : isToday
-                    ? AppColors.black
-                    : AppColors.black.withValues(alpha: 0.55),
-              ),
-            ),
+            child: isFrozen
+                ? Icon(
+                    Icons.ac_unit_rounded,
+                    size: 14.w,
+                    color: AppColors.white,
+                  )
+                : AppText(
+                    text: date.day.toString(),
+                    style: AppTextStyles.bold(
+                      fontSize: 13.sp,
+                      height: 1,
+                      color: isCompleted
+                          ? AppColors.white
+                          : isToday
+                          ? AppColors.black
+                          : AppColors.black.withValues(alpha: 0.55),
+                    ),
+                  ),
           ),
         ],
       ),
@@ -322,6 +332,8 @@ class _CalendarStripState extends State<CalendarStrip> {
                 now: now,
                 isCompleted:
                     streakScore?.isDateCompleted(monthDates[index]) ?? false,
+                isFrozen:
+                    streakScore?.isDateFrozen(monthDates[index]) ?? false,
                 dayCircleSize: dayCircleSize,
               ),
             ],

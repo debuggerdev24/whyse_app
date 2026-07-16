@@ -302,7 +302,7 @@ $FriendDetailsDataCopyWith<$Res> get data {
 /// @nodoc
 mixin _$FriendDetailsData {
 
- FriendProfile get profile; FriendsPreview get friendsPreview; GroupsPreview get groupsPreview; TopicsPreview get topicsPreview; FriendDetailsFilters get filters;
+ FriendProfile get profile;@JsonKey(fromJson: _overviewFromJson, includeToJson: false) ProfileOverview? get overview; FriendsPreview get friendsPreview; GroupsPreview get groupsPreview; TopicsPreview get topicsPreview; FriendDetailsFilters get filters;
 /// Create a copy of FriendDetailsData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -315,16 +315,16 @@ $FriendDetailsDataCopyWith<FriendDetailsData> get copyWith => _$FriendDetailsDat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FriendDetailsData&&(identical(other.profile, profile) || other.profile == profile)&&(identical(other.friendsPreview, friendsPreview) || other.friendsPreview == friendsPreview)&&(identical(other.groupsPreview, groupsPreview) || other.groupsPreview == groupsPreview)&&(identical(other.topicsPreview, topicsPreview) || other.topicsPreview == topicsPreview)&&(identical(other.filters, filters) || other.filters == filters));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FriendDetailsData&&(identical(other.profile, profile) || other.profile == profile)&&(identical(other.overview, overview) || other.overview == overview)&&(identical(other.friendsPreview, friendsPreview) || other.friendsPreview == friendsPreview)&&(identical(other.groupsPreview, groupsPreview) || other.groupsPreview == groupsPreview)&&(identical(other.topicsPreview, topicsPreview) || other.topicsPreview == topicsPreview)&&(identical(other.filters, filters) || other.filters == filters));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,profile,friendsPreview,groupsPreview,topicsPreview,filters);
+int get hashCode => Object.hash(runtimeType,profile,overview,friendsPreview,groupsPreview,topicsPreview,filters);
 
 @override
 String toString() {
-  return 'FriendDetailsData(profile: $profile, friendsPreview: $friendsPreview, groupsPreview: $groupsPreview, topicsPreview: $topicsPreview, filters: $filters)';
+  return 'FriendDetailsData(profile: $profile, overview: $overview, friendsPreview: $friendsPreview, groupsPreview: $groupsPreview, topicsPreview: $topicsPreview, filters: $filters)';
 }
 
 
@@ -335,7 +335,7 @@ abstract mixin class $FriendDetailsDataCopyWith<$Res>  {
   factory $FriendDetailsDataCopyWith(FriendDetailsData value, $Res Function(FriendDetailsData) _then) = _$FriendDetailsDataCopyWithImpl;
 @useResult
 $Res call({
- FriendProfile profile, FriendsPreview friendsPreview, GroupsPreview groupsPreview, TopicsPreview topicsPreview, FriendDetailsFilters filters
+ FriendProfile profile,@JsonKey(fromJson: _overviewFromJson, includeToJson: false) ProfileOverview? overview, FriendsPreview friendsPreview, GroupsPreview groupsPreview, TopicsPreview topicsPreview, FriendDetailsFilters filters
 });
 
 
@@ -352,10 +352,11 @@ class _$FriendDetailsDataCopyWithImpl<$Res>
 
 /// Create a copy of FriendDetailsData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? profile = null,Object? friendsPreview = null,Object? groupsPreview = null,Object? topicsPreview = null,Object? filters = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? profile = null,Object? overview = freezed,Object? friendsPreview = null,Object? groupsPreview = null,Object? topicsPreview = null,Object? filters = null,}) {
   return _then(_self.copyWith(
 profile: null == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
-as FriendProfile,friendsPreview: null == friendsPreview ? _self.friendsPreview : friendsPreview // ignore: cast_nullable_to_non_nullable
+as FriendProfile,overview: freezed == overview ? _self.overview : overview // ignore: cast_nullable_to_non_nullable
+as ProfileOverview?,friendsPreview: null == friendsPreview ? _self.friendsPreview : friendsPreview // ignore: cast_nullable_to_non_nullable
 as FriendsPreview,groupsPreview: null == groupsPreview ? _self.groupsPreview : groupsPreview // ignore: cast_nullable_to_non_nullable
 as GroupsPreview,topicsPreview: null == topicsPreview ? _self.topicsPreview : topicsPreview // ignore: cast_nullable_to_non_nullable
 as TopicsPreview,filters: null == filters ? _self.filters : filters // ignore: cast_nullable_to_non_nullable
@@ -489,10 +490,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( FriendProfile profile,  FriendsPreview friendsPreview,  GroupsPreview groupsPreview,  TopicsPreview topicsPreview,  FriendDetailsFilters filters)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( FriendProfile profile, @JsonKey(fromJson: _overviewFromJson, includeToJson: false)  ProfileOverview? overview,  FriendsPreview friendsPreview,  GroupsPreview groupsPreview,  TopicsPreview topicsPreview,  FriendDetailsFilters filters)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FriendDetailsData() when $default != null:
-return $default(_that.profile,_that.friendsPreview,_that.groupsPreview,_that.topicsPreview,_that.filters);case _:
+return $default(_that.profile,_that.overview,_that.friendsPreview,_that.groupsPreview,_that.topicsPreview,_that.filters);case _:
   return orElse();
 
 }
@@ -510,10 +511,10 @@ return $default(_that.profile,_that.friendsPreview,_that.groupsPreview,_that.top
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( FriendProfile profile,  FriendsPreview friendsPreview,  GroupsPreview groupsPreview,  TopicsPreview topicsPreview,  FriendDetailsFilters filters)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( FriendProfile profile, @JsonKey(fromJson: _overviewFromJson, includeToJson: false)  ProfileOverview? overview,  FriendsPreview friendsPreview,  GroupsPreview groupsPreview,  TopicsPreview topicsPreview,  FriendDetailsFilters filters)  $default,) {final _that = this;
 switch (_that) {
 case _FriendDetailsData():
-return $default(_that.profile,_that.friendsPreview,_that.groupsPreview,_that.topicsPreview,_that.filters);case _:
+return $default(_that.profile,_that.overview,_that.friendsPreview,_that.groupsPreview,_that.topicsPreview,_that.filters);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -530,10 +531,10 @@ return $default(_that.profile,_that.friendsPreview,_that.groupsPreview,_that.top
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( FriendProfile profile,  FriendsPreview friendsPreview,  GroupsPreview groupsPreview,  TopicsPreview topicsPreview,  FriendDetailsFilters filters)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( FriendProfile profile, @JsonKey(fromJson: _overviewFromJson, includeToJson: false)  ProfileOverview? overview,  FriendsPreview friendsPreview,  GroupsPreview groupsPreview,  TopicsPreview topicsPreview,  FriendDetailsFilters filters)?  $default,) {final _that = this;
 switch (_that) {
 case _FriendDetailsData() when $default != null:
-return $default(_that.profile,_that.friendsPreview,_that.groupsPreview,_that.topicsPreview,_that.filters);case _:
+return $default(_that.profile,_that.overview,_that.friendsPreview,_that.groupsPreview,_that.topicsPreview,_that.filters);case _:
   return null;
 
 }
@@ -545,10 +546,11 @@ return $default(_that.profile,_that.friendsPreview,_that.groupsPreview,_that.top
 @JsonSerializable()
 
 class _FriendDetailsData implements FriendDetailsData {
-  const _FriendDetailsData({required this.profile, required this.friendsPreview, required this.groupsPreview, required this.topicsPreview, required this.filters});
+  const _FriendDetailsData({required this.profile, @JsonKey(fromJson: _overviewFromJson, includeToJson: false) this.overview, required this.friendsPreview, required this.groupsPreview, required this.topicsPreview, required this.filters});
   factory _FriendDetailsData.fromJson(Map<String, dynamic> json) => _$FriendDetailsDataFromJson(json);
 
 @override final  FriendProfile profile;
+@override@JsonKey(fromJson: _overviewFromJson, includeToJson: false) final  ProfileOverview? overview;
 @override final  FriendsPreview friendsPreview;
 @override final  GroupsPreview groupsPreview;
 @override final  TopicsPreview topicsPreview;
@@ -567,16 +569,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FriendDetailsData&&(identical(other.profile, profile) || other.profile == profile)&&(identical(other.friendsPreview, friendsPreview) || other.friendsPreview == friendsPreview)&&(identical(other.groupsPreview, groupsPreview) || other.groupsPreview == groupsPreview)&&(identical(other.topicsPreview, topicsPreview) || other.topicsPreview == topicsPreview)&&(identical(other.filters, filters) || other.filters == filters));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FriendDetailsData&&(identical(other.profile, profile) || other.profile == profile)&&(identical(other.overview, overview) || other.overview == overview)&&(identical(other.friendsPreview, friendsPreview) || other.friendsPreview == friendsPreview)&&(identical(other.groupsPreview, groupsPreview) || other.groupsPreview == groupsPreview)&&(identical(other.topicsPreview, topicsPreview) || other.topicsPreview == topicsPreview)&&(identical(other.filters, filters) || other.filters == filters));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,profile,friendsPreview,groupsPreview,topicsPreview,filters);
+int get hashCode => Object.hash(runtimeType,profile,overview,friendsPreview,groupsPreview,topicsPreview,filters);
 
 @override
 String toString() {
-  return 'FriendDetailsData(profile: $profile, friendsPreview: $friendsPreview, groupsPreview: $groupsPreview, topicsPreview: $topicsPreview, filters: $filters)';
+  return 'FriendDetailsData(profile: $profile, overview: $overview, friendsPreview: $friendsPreview, groupsPreview: $groupsPreview, topicsPreview: $topicsPreview, filters: $filters)';
 }
 
 
@@ -587,7 +589,7 @@ abstract mixin class _$FriendDetailsDataCopyWith<$Res> implements $FriendDetails
   factory _$FriendDetailsDataCopyWith(_FriendDetailsData value, $Res Function(_FriendDetailsData) _then) = __$FriendDetailsDataCopyWithImpl;
 @override @useResult
 $Res call({
- FriendProfile profile, FriendsPreview friendsPreview, GroupsPreview groupsPreview, TopicsPreview topicsPreview, FriendDetailsFilters filters
+ FriendProfile profile,@JsonKey(fromJson: _overviewFromJson, includeToJson: false) ProfileOverview? overview, FriendsPreview friendsPreview, GroupsPreview groupsPreview, TopicsPreview topicsPreview, FriendDetailsFilters filters
 });
 
 
@@ -604,10 +606,11 @@ class __$FriendDetailsDataCopyWithImpl<$Res>
 
 /// Create a copy of FriendDetailsData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? profile = null,Object? friendsPreview = null,Object? groupsPreview = null,Object? topicsPreview = null,Object? filters = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? profile = null,Object? overview = freezed,Object? friendsPreview = null,Object? groupsPreview = null,Object? topicsPreview = null,Object? filters = null,}) {
   return _then(_FriendDetailsData(
 profile: null == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
-as FriendProfile,friendsPreview: null == friendsPreview ? _self.friendsPreview : friendsPreview // ignore: cast_nullable_to_non_nullable
+as FriendProfile,overview: freezed == overview ? _self.overview : overview // ignore: cast_nullable_to_non_nullable
+as ProfileOverview?,friendsPreview: null == friendsPreview ? _self.friendsPreview : friendsPreview // ignore: cast_nullable_to_non_nullable
 as FriendsPreview,groupsPreview: null == groupsPreview ? _self.groupsPreview : groupsPreview // ignore: cast_nullable_to_non_nullable
 as GroupsPreview,topicsPreview: null == topicsPreview ? _self.topicsPreview : topicsPreview // ignore: cast_nullable_to_non_nullable
 as TopicsPreview,filters: null == filters ? _self.filters : filters // ignore: cast_nullable_to_non_nullable

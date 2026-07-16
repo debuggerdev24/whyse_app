@@ -14,6 +14,8 @@ class AppColors {
   static const Color searchBackgroundColor = Color(0xFFF1F1F1);
 
   static const Color orangeColor = Color(0xFFF28518);
+  static const Color streakFreezeBlue = Color(0xFF2B9FD9);
+  static const Color streakFreezeBlueLight = Color(0xFFE3F4FF);
   static const Color lightyellowcolor = Color(0xFFF2ECE6);
   static const Color bluecolor = Color(0xFF011E41);
 

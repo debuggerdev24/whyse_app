@@ -49,14 +49,14 @@ class StreakFreezeWidget extends StatelessWidget {
                     width: 52.w,
                     height: 52.w,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE3F4FF),
+                      color: AppColors.streakFreezeBlueLight,
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
                     child: Icon(
                       Icons.ac_unit_rounded,
                       size: 26.w,
-                      color: const Color(0xFF2B9FD9),
+                      color: AppColors.streakFreezeBlue,
                     ),
                   ),
                   14.w.horizontalSpace,

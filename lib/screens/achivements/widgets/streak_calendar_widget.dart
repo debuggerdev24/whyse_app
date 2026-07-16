@@ -182,8 +182,7 @@ class _StreakCalendarWidgetState extends State<StreakCalendarWidget> {
                   if (date == null) return const SizedBox.shrink();
 
                   final isCompleted = completedDays.contains(date.day);
-                  final isFrozen =
-                      frozenDays.contains(date.day) && !isCompleted;
+                  final isFrozen = frozenDays.contains(date.day);
                   final isToday = date.year == now.year &&
                       date.month == now.month &&
                       date.day == now.day;
@@ -198,7 +197,7 @@ class _StreakCalendarWidgetState extends State<StreakCalendarWidget> {
                         color: isCompleted
                             ? AppColors.orangeColor
                             : isFrozen
-                            ? const Color(0xFF2B9FD9)
+                            ? AppColors.streakFreezeBlue
                             : Colors.transparent,
                         border: isToday && !isCompleted && !isFrozen
                             ? Border.all(color: AppColors.orangeColor, width: 2)
