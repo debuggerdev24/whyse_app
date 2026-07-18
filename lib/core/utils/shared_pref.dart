@@ -10,6 +10,7 @@ class LocalStorageService {
       _createAccMailKey = "create_acc_mail",
       _createAccPassKey = "create_acc_pass",
       _googleIdTokenKey = "google_id_token",
+      _dateOfBirthKey = "saved_date_of_birth",
       _loggedInUsersId = "logged_in_user_is";
 
   late SharedPreferences prefs;
@@ -25,6 +26,7 @@ class LocalStorageService {
   bool get getConsentRequestStatus =>
       prefs.getBool(_consentReqStatusKey) ?? false;
   String get getGoogleIdToken => prefs.getString(_googleIdTokenKey) ?? "";
+  String get getSavedDateOfBirth => prefs.getString(_dateOfBirthKey) ?? "";
   String get getRegisteredUserMail => prefs.getString(_createAccMailKey) ?? "";
   String get getRegisteredUserPassword =>
       prefs.getString(_createAccPassKey) ?? "";
@@ -41,6 +43,10 @@ class LocalStorageService {
 
   Future<void> removeGoogleIdToken() async {
     await prefs.remove(_googleIdTokenKey);
+  }
+
+  Future<void> removeDateOfBirth() async {
+    await prefs.remove(_dateOfBirthKey);
   }
 
   Future<void> removeRegisteredUserMail() async {
@@ -66,6 +72,10 @@ class LocalStorageService {
 
   Future<void> saveGoogleIdToken({required String idToken}) async {
     await prefs.setString(_googleIdTokenKey, idToken);
+  }
+
+  Future<void> saveDateOfBirth(String dateOfBirth) async {
+    await prefs.setString(_dateOfBirthKey, dateOfBirth);
   }
 
   Future<void> saveUserMail({required String mail}) async {

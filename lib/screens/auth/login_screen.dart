@@ -191,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         icon: AppAssets.google,
                         onTap: () async {
                           //todo getting id token
-                          final idToken = await provider.getGoogleIDToken();
+                          final idToken = await provider.getGoogleIDTokenForLogin();
                           if (idToken == null) {
                             if (context.mounted) {
                               AppToast.info(
@@ -201,100 +201,37 @@ class _LoginScreenState extends State<LoginScreen> {
                             }
                             return;
                           }
-                          provider.loginWithGoogle(
+                          await provider.beginGoogleSocialLogin(
+                            context: context,
                             idToken: idToken,
                             onAccountFound: () {
-                              AppToast.success(context, "Login Successfully.");
-                              context.goNamed(AppRoutes.homeScreen.name);
-                            },
-                            onNoAccountFound: (error) async {
                               if (!context.mounted) return;
-
-                              await provider.saveAge(
+                              AppToast.success(context, "Login Successfully.");
+                              provider.navigateToHomeScreen(context);
+                            },
+                            onNoAccountFound: () async {
+                              if (!context.mounted) return;
+                              await provider.finalizeGoogleSignup(
                                 context: context,
-                                onSuccess: () async {
-                                  if (!context.mounted) return;
-                                  if (provider.isUnder16) {
-                                    provider.setIsUnder16FromGoogle(
-                                      value: true,
-                                    );
-                                    context.pushNamed(
-                                      AppRoutes.parentEmailScreen.name,
-                                    );
-                                    return;
-                                  }
-                                  provider.setIsUnder16FromGoogle(value: false);
-
-                                  provider.toggleAcceptedTerms(value: true);
-                                  await provider.createAccount(
-                                    isTermsAccepted: provider.acceptedTerms,
-                                    context: context,
-                                    onSuccess: () {
-                                      context.pushNamed(
-                                        AppRoutes.profileInfoScreen.name,
-                                      );
-                                      // Future.delayed(Duration(seconds: 2), () {
-                                      AppToast.success(
-                                        context,
-                                        "Please complete your on-boarding session",
-                                      );
-                                      // });
-                                    },
+                                onProfileInfo: () {
+                                  context.pushNamed(
+                                    AppRoutes.profileInfoScreen.name,
+                                  );
+                                  AppToast.success(
+                                    context,
+                                    "Please complete your on-boarding session",
+                                  );
+                                },
+                                onParentEmail: () {
+                                  context.pushNamed(
+                                    AppRoutes.parentEmailScreen.name,
                                   );
                                 },
                                 onFailed: (error) {
                                   if (!context.mounted) return;
-                                  AppToast.error(
-                                    context,
-                                    "Save Age API Error: $error",
-                                  );
+                                  AppToast.error(context, error);
                                 },
                               );
-                              // await provider.startOnboarding(
-                              //   context: context,
-                              //   onSuccess: () async {
-                              //     if (!context.mounted) return;
-                              //    await provider.saveAge(
-                              //                                         context: context,
-                              //                                         onSuccess: () async {
-                              //                                           if (!context.mounted) return;
-                              //                                           if (provider.isUnder16) {
-                              //                                             context.pushNamed(
-                              //                                               AppRoutes.parentEmailScreen.name,
-                              //                                             );
-                              //                                             return;
-                              //                                           }
-                              //
-                              //                                           provider.toggleAcceptedTerms(
-                              //                                             value: true,
-                              //                                           );
-                              //                                           final success = await provider
-                              //                                               .createAccount(
-                              //                                                 isTermsAccepted:
-                              //                                                     provider.acceptedTerms,
-                              //                                                 context: context,
-                              //                                               );
-                              //                                           if (success && context.mounted) {
-                              //                                             context.pushNamed(
-                              //                                               AppRoutes.profileInfoScreen.name,
-                              //                                             );
-                              //                                           }
-                              //                                         },
-                              //                                         onFailed: (error) {
-                              //                                           if (!context.mounted) return;
-                              //                                           AppToast.error(context, error);
-                              //                                         },
-                              //                                       );
-                              //
-                              //   },
-                              //   onFailed: (error) {
-                              //     if (!context.mounted) return;
-                              //     AppToast.error(
-                              //       context,
-                              //       "Start onboarding error: $error",
-                              //     );
-                              //   },
-                              // );
                             },
                             onFailed: (error) {
                               AppToast.error(

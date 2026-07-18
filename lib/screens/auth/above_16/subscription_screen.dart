@@ -12,7 +12,6 @@ import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/core/widgets/plan_card.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
-import 'package:redstreakapp/core/routes/user_routes.dart';
 
 class SubScriptionScreen extends StatefulWidget {
   const SubScriptionScreen({super.key});
@@ -153,15 +152,15 @@ class _SubScriptionScreenState extends State<SubScriptionScreen> {
                       final resgisteredUserMail =
                           LocalStorageService.instance.getRegisteredUserMail;
                       if (googleIdToken.isNotEmpty) {
-                        await provider.loginWithGoogle(
-                          idToken: LocalStorageService.instance.getGoogleIdToken,
+                        await provider.loginWithStoredGoogleToken(
+                          context: context,
                           onFailed: (error) {
                             AppToast.error(context, error);
                           },
                           onAccountFound: () {
-                            context.goNamed(AppRoutes.homeScreen.name);
+                            if (!context.mounted) return;
                             AppToast.success(context, "Login Successfully.");
-                            LocalStorageService.instance.removeGoogleIdToken();
+                            provider.navigateToHomeScreen(context);
                           },
                         );
                         return;
