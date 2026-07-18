@@ -31,14 +31,20 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
   final Set<String> _selectedInterestIds = {};
   final Set<String> _selectedTopicIds = {};
   final Set<String> _selectedGoalIds = {};
+  final List<String> _customInterests = [];
+  final List<String> _customTopics = [];
+  final List<String> _customGoalTitles = [];
 
   @override
   void initState() {
     super.initState();
     _currentStep = _resolveInitialStep(widget.initialStep);
     _bootstrapFlow();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _prefetchStepData();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _prefetchStepData();
+      if (mounted) {
+        _restoreFromCachedOnboardingProgress();
+      }
     });
   }
 
@@ -302,9 +308,115 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
     _scrollToBottom();
   }
 
+  String? _consumeInputText() {
+    final text = _inputController.text.trim();
+    if (text.isEmpty) return null;
+    _inputController.clear();
+    return text;
+  }
+
+  void _appendCustomInterest(String name) {
+    if (!_customInterests.contains(name)) {
+      _customInterests.add(name);
+    }
+  }
+
+  void _appendCustomTopic(String title) {
+    if (!_customTopics.contains(title)) {
+      _customTopics.add(title);
+    }
+  }
+
+  void _appendCustomGoal(String title) {
+    if (!_customGoalTitles.contains(title)) {
+      _customGoalTitles.add(title);
+    }
+  }
+
+  void _restoreFromCachedOnboardingProgress() {
+    final progress = context.read<AuthProvider>().cachedOnboardingProgress;
+    if (progress == null) return;
+
+    final onboardingProvider = context.read<OnBoardingProvider>();
+    final auth = context.read<AuthProvider>();
+    var changed = false;
+
+    final profile = progress.userProfile;
+    if (profile?.country != null && profile!.country!.isNotEmpty) {
+      _selectedCountry = profile.country;
+      onboardingProvider.setCountry(profile.country!);
+      changed = true;
+    }
+    if (profile?.preferredLanguage != null &&
+        profile!.preferredLanguage!.isNotEmpty) {
+      _selectedLanguage = profile.preferredLanguage;
+      onboardingProvider.setLanguage(profile.preferredLanguage!);
+      changed = true;
+    }
+
+    if (progress.userInterests != null) {
+      for (final item in progress.userInterests!) {
+        final interestId = item.interestId?.toString();
+        if (interestId != null && interestId.isNotEmpty) {
+          _selectedInterestIds.add(interestId);
+          changed = true;
+        }
+        final customName = item.customName?.toString().trim();
+        if (customName != null && customName.isNotEmpty) {
+          _appendCustomInterest(customName);
+          changed = true;
+        }
+      }
+    }
+
+    if (progress.userTopics != null) {
+      for (final item in progress.userTopics!) {
+        final topicId = item.topicId?.toString();
+        if (topicId != null && topicId.isNotEmpty) {
+          _selectedTopicIds.add(topicId);
+          changed = true;
+        }
+        final customName = item.customName?.toString().trim();
+        if (customName != null && customName.isNotEmpty) {
+          _appendCustomTopic(customName);
+          changed = true;
+        }
+      }
+    }
+
+    if (progress.userGoals != null) {
+      for (final item in progress.userGoals!) {
+        if (item.isCustom == true) {
+          final title = item.title?.trim();
+          if (title != null && title.isNotEmpty) {
+            _appendCustomGoal(title);
+            changed = true;
+          }
+        } else {
+          final goalId = item.goalId?.toString();
+          if (goalId != null && goalId.isNotEmpty) {
+            _selectedGoalIds.add(goalId);
+            auth.selectedGoalIds.add(goalId);
+            changed = true;
+          }
+        }
+      }
+    }
+
+    if (changed) {
+      setState(() {});
+    }
+  }
+
   Future<void> _submitInterests() async {
     if (_isBusy || _currentStep != AccountSetupStep.interests) return;
-    if (_selectedInterestIds.isEmpty) {
+
+    final pendingCustom = _consumeInputText();
+    if (pendingCustom != null) {
+      _appendCustomInterest(pendingCustom);
+    }
+
+    if (_selectedInterestIds.isEmpty && _customInterests.isEmpty) {
       AppToast.error(context, 'Please select at least one interest');
       return;
     }
@@ -314,7 +426,8 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
         .where((item) => _selectedInterestIds.contains(item['id']))
         .map((item) => item['name']?.toString() ?? '')
         .where((name) => name.isNotEmpty)
-        .toList();
+        .toList()
+      ..addAll(_customInterests);
 
     setState(() => _isBusy = true);
     _deactivatePickers();
@@ -323,7 +436,7 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
     final success = await auth.saveInterests(
       context,
       interestIds: _selectedInterestIds.toList(),
-      customInterests: <String>[],
+      customInterests: List<String>.from(_customInterests),
     );
 
     if (!mounted) return;
@@ -339,6 +452,7 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
       _isBusy = false;
       _currentStep = AccountSetupStep.topics;
       _selectedTopicIds.clear();
+      _customInterests.clear();
       _appendBotAndPicker(
         '**Great!** Now tell me what topics you would like to read about.',
         OnboardingChatItemType.topicPicker,
@@ -349,7 +463,13 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
 
   Future<void> _submitTopics() async {
     if (_isBusy || _currentStep != AccountSetupStep.topics) return;
-    if (_selectedTopicIds.isEmpty) {
+
+    final pendingCustom = _consumeInputText();
+    if (pendingCustom != null) {
+      _appendCustomTopic(pendingCustom);
+    }
+
+    if (_selectedTopicIds.isEmpty && _customTopics.isEmpty) {
       AppToast.error(context, 'Please select at least one topic');
       return;
     }
@@ -359,7 +479,8 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
         .where((item) => _selectedTopicIds.contains(item['id']))
         .map((item) => item['title']?.toString() ?? '')
         .where((title) => title.isNotEmpty)
-        .toList();
+        .toList()
+      ..addAll(_customTopics);
 
     setState(() => _isBusy = true);
     _deactivatePickers();
@@ -371,7 +492,7 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
     final success = await auth.saveTopics(
       context,
       topicIds: _selectedTopicIds.toList(),
-      customTopics: <String>[],
+      customTopics: List<String>.from(_customTopics),
     );
 
     if (!mounted) return;
@@ -387,6 +508,7 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
       _isBusy = false;
       _currentStep = AccountSetupStep.goals;
       _selectedGoalIds.clear();
+      _customTopics.clear();
       auth.selectedGoalIds.clear();
       _appendBotAndPicker(
         '**Great!** Now tell me what motivates you the most.',
@@ -398,7 +520,13 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
 
   Future<void> _submitGoals() async {
     if (_isBusy || _currentStep != AccountSetupStep.goals) return;
-    if (_selectedGoalIds.isEmpty) {
+
+    final pendingCustom = _consumeInputText();
+    if (pendingCustom != null) {
+      _appendCustomGoal(pendingCustom);
+    }
+
+    if (_selectedGoalIds.isEmpty && _customGoalTitles.isEmpty) {
       AppToast.error(context, 'Please select at least one goal');
       return;
     }
@@ -408,7 +536,8 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
         .where((item) => _selectedGoalIds.contains(item['id']))
         .map((item) => item['title']?.toString() ?? '')
         .where((title) => title.isNotEmpty)
-        .toList();
+        .toList()
+      ..addAll(_customGoalTitles);
 
     setState(() => _isBusy = true);
     _deactivatePickers();
@@ -417,7 +546,14 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
     final success = await auth.saveGoals(
       context,
       goalIds: _selectedGoalIds.toList(),
-      customGoals: <Map<String, String>>[],
+      customGoals: _customGoalTitles
+          .map(
+            (title) => {
+              'title': title,
+              'description': title,
+            },
+          )
+          .toList(),
     );
 
     if (!mounted) return;
@@ -429,6 +565,7 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
     setState(() {
       _isBusy = false;
       _currentStep = AccountSetupStep.finished;
+      _customGoalTitles.clear();
     });
 
     context.pushNamed(AppRoutes.successScreen.name);
@@ -462,6 +599,19 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
     return _currentStep == AccountSetupStep.interests ||
         _currentStep == AccountSetupStep.topics ||
         _currentStep == AccountSetupStep.goals;
+  }
+
+  String get _inputHintText {
+    switch (_currentStep) {
+      case AccountSetupStep.interests:
+        return 'Add custom interest...';
+      case AccountSetupStep.topics:
+        return 'Add custom topic...';
+      case AccountSetupStep.goals:
+        return 'Add custom goal...';
+      default:
+        return 'Type here';
+    }
   }
 
   @override
@@ -498,7 +648,7 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
                 AccountSetupInputBar(
                   controller: _inputController,
                   enabled: _canUseInputBar && !_isBusy,
-                  hintText: _canUseInputBar ? 'Tap send to continue' : 'Type here',
+                  hintText: _canUseInputBar ? _inputHintText : 'Type here',
                   onSend: _handleSend,
                 ),
               ],
@@ -559,24 +709,36 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
           );
         }
         return Column(
-          children: auth.interestsList.map((interest) {
-            final id = interest['id']?.toString() ?? '';
-            final name = interest['name']?.toString() ?? '';
-            return AccountSetupInterestChip(
-              label: name,
-              iconPath: iconForInterestName(name),
-              isSelected: _selectedInterestIds.contains(id),
-              onTap: () {
-                setState(() {
-                  if (_selectedInterestIds.contains(id)) {
-                    _selectedInterestIds.remove(id);
-                  } else {
-                    _selectedInterestIds.add(id);
-                  }
-                });
-              },
-            );
-          }).toList(),
+          children: [
+            ...auth.interestsList.map((interest) {
+              final id = interest['id']?.toString() ?? '';
+              final name = interest['name']?.toString() ?? '';
+              return AccountSetupInterestChip(
+                label: name,
+                iconPath: iconForInterestName(name),
+                isSelected: _selectedInterestIds.contains(id),
+                onTap: () {
+                  setState(() {
+                    if (_selectedInterestIds.contains(id)) {
+                      _selectedInterestIds.remove(id);
+                    } else {
+                      _selectedInterestIds.add(id);
+                    }
+                  });
+                },
+              );
+            }),
+            ..._customInterests.map(
+              (name) => AccountSetupInterestChip(
+                label: name,
+                iconPath: iconForInterestName(name),
+                isSelected: true,
+                onTap: () {
+                  setState(() => _customInterests.remove(name));
+                },
+              ),
+            ),
+          ],
         );
       case OnboardingChatItemType.topicPicker:
         if (!item.isActive) return const SizedBox.shrink();
@@ -589,27 +751,39 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
           );
         }
         return Column(
-          children: auth.topicsList.map((topic) {
-            final id = topic['id']?.toString() ?? '';
-            final title = topic['title']?.toString() ?? '';
-            final thumb = topic['thumbnailUrl']?.toString() ?? '';
-            return AccountSetupTopicChip(
-              label: title,
-              imagePath: thumb.isNotEmpty
-                  ? thumb
-                  : imageForTopicTitle(title),
-              isSelected: _selectedTopicIds.contains(id),
-              onTap: () {
-                setState(() {
-                  if (_selectedTopicIds.contains(id)) {
-                    _selectedTopicIds.remove(id);
-                  } else {
-                    _selectedTopicIds.add(id);
-                  }
-                });
-              },
-            );
-          }).toList(),
+          children: [
+            ...auth.topicsList.map((topic) {
+              final id = topic['id']?.toString() ?? '';
+              final title = topic['title']?.toString() ?? '';
+              final thumb = topic['thumbnailUrl']?.toString() ?? '';
+              return AccountSetupTopicChip(
+                label: title,
+                imagePath: thumb.isNotEmpty
+                    ? thumb
+                    : imageForTopicTitle(title),
+                isSelected: _selectedTopicIds.contains(id),
+                onTap: () {
+                  setState(() {
+                    if (_selectedTopicIds.contains(id)) {
+                      _selectedTopicIds.remove(id);
+                    } else {
+                      _selectedTopicIds.add(id);
+                    }
+                  });
+                },
+              );
+            }),
+            ..._customTopics.map(
+              (title) => AccountSetupTopicChip(
+                label: title,
+                imagePath: imageForTopicTitle(title),
+                isSelected: true,
+                onTap: () {
+                  setState(() => _customTopics.remove(title));
+                },
+              ),
+            ),
+          ],
         );
       case OnboardingChatItemType.goalPicker:
         if (!item.isActive) return const SizedBox.shrink();
@@ -622,24 +796,36 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
           );
         }
         return Column(
-          children: auth.goalsList.map((goal) {
-            final id = goal['id']?.toString() ?? '';
-            final title = goal['title']?.toString() ?? '';
-            final description = goal['description']?.toString() ?? '';
-            return AccountSetupGoalCard(
-              title: title,
-              description: description,
-              isSelected: _selectedGoalIds.contains(id),
-              onTap: () {
-                setState(() {
-                  auth.toggleGoal(id);
-                  _selectedGoalIds
-                    ..clear()
-                    ..addAll(auth.selectedGoalIds);
-                });
-              },
-            );
-          }).toList(),
+          children: [
+            ...auth.goalsList.map((goal) {
+              final id = goal['id']?.toString() ?? '';
+              final title = goal['title']?.toString() ?? '';
+              final description = goal['description']?.toString() ?? '';
+              return AccountSetupGoalCard(
+                title: title,
+                description: description,
+                isSelected: _selectedGoalIds.contains(id),
+                onTap: () {
+                  setState(() {
+                    auth.toggleGoal(id);
+                    _selectedGoalIds
+                      ..clear()
+                      ..addAll(auth.selectedGoalIds);
+                  });
+                },
+              );
+            }),
+            ..._customGoalTitles.map(
+              (title) => AccountSetupGoalCard(
+                title: title,
+                description: title,
+                isSelected: true,
+                onTap: () {
+                  setState(() => _customGoalTitles.remove(title));
+                },
+              ),
+            ),
+          ],
         );
     }
   }
