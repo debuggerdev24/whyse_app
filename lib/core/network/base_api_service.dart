@@ -65,6 +65,11 @@ class DioClient {
           } else {
             options.headers.remove("Content-Type");
           }
+          final existingAuth = options.headers["Authorization"];
+          if (existingAuth != null && existingAuth.toString().isNotEmpty) {
+            handler.next(options);
+            return;
+          }
           if (token != null && token.isNotEmpty) {
             options.headers["Authorization"] = "Bearer $token";
           } else {

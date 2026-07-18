@@ -11,12 +11,15 @@ import 'package:redstreakapp/core/utils/shared_pref.dart';
 import 'package:redstreakapp/core/utils/field_validator.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
+import 'package:redstreakapp/core/routes/app_router.dart';
 import 'package:redstreakapp/services/auth/auth_api_service.dart';
 import 'package:redstreakapp/core/network/base_api_service.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/helper/log_helper.dart';
 import '../../models/auth/on_boarding_progress_model.dart' hide User;
+
+enum _GoogleSocialLoginOutcome { existingAccount, newAccount, failed }
 
 class AuthProvider with ChangeNotifier {
   TextEditingController customGoalTitleCtr = TextEditingController(),
@@ -44,13 +47,339 @@ class AuthProvider with ChangeNotifier {
       isEmailSent = false,
       isPasswordObscure = true,
       isConfirmPasswordObscure = true,
-      _isUnder16FromGoogle = false;
+      _isUnder16FromGoogle = false,
+      _pendingGoogleSignup = false,
+      _pendingGoogleLogin = false,
+      _openDatePickerOnAgeScreen = false;
+
+  GoogleSignInAccount? _lastGoogleSignInAccount;
+  String? _pendingGoogleIdToken;
+  VoidCallback? _onGoogleAccountFound;
+  VoidCallback? _onGoogleNoAccountFound;
+  Function(String)? _onGoogleLoginFailed;
+
+  static const _googleBirthdayScope =
+      'https://www.googleapis.com/auth/user.birthday.read';
 
   // -------- TOGGLE FUNCTIONS -------- //
 
   void setIsUnder16FromGoogle({required bool value}) {
     _isUnder16FromGoogle = value;
     notifyListeners();
+  }
+
+  void setPendingGoogleSignup(bool value) {
+    _pendingGoogleSignup = value;
+    notifyListeners();
+  }
+
+  bool get pendingGoogleSignup => _pendingGoogleSignup;
+  bool get pendingGoogleLogin => _pendingGoogleLogin;
+  bool get hasGoogleBirthDate => googleBirthDate.isNotEmpty;
+  bool get openDatePickerOnAgeScreen => _openDatePickerOnAgeScreen;
+
+  void setPendingGoogleLogin(bool value) {
+    _pendingGoogleLogin = value;
+    notifyListeners();
+  }
+
+  void setOpenDatePickerOnAgeScreen(bool value) {
+    _openDatePickerOnAgeScreen = value;
+    notifyListeners();
+  }
+
+  void clearGoogleBirthDate() {
+    googleBirthDate = "";
+    notifyListeners();
+  }
+
+  void _clearGoogleLoginPendingState() {
+    _pendingGoogleIdToken = null;
+    _pendingGoogleLogin = false;
+    _onGoogleAccountFound = null;
+    _onGoogleNoAccountFound = null;
+    _onGoogleLoginFailed = null;
+    notifyListeners();
+  }
+
+  void _finishGoogleLoginWithExistingAccount() {
+    final onFound = _onGoogleAccountFound;
+    _clearGoogleLoginPendingState();
+    onFound?.call();
+  }
+
+  Future<bool> ensureOnboardingAndSaveAgeForGoogle({
+    required BuildContext context,
+    required Function(String error) onFailed,
+  }) async {
+    final email = googleLoginEmail.trim().isNotEmpty
+        ? googleLoginEmail.trim()
+        : createAccEmailCtr.text.trim();
+    if (email.isEmpty) {
+      onFailed("Could not get email from Google account");
+      return false;
+    }
+
+    final dateToSend = calculateDateToSend();
+    Logger.info("dateToSend $dateToSend");
+    if (dateToSend == null || dateToSend.isEmpty) {
+      onFailed("Please select your date of birth");
+      return false;
+    }
+
+    var onboardingId = LocalStorageService.instance.onboardingId;
+    if (onboardingId == null) {
+      final onboardingResult = await AuthApiServices().startOnboarding(
+        email: email,
+      );
+      final started = await onboardingResult.fold<Future<bool>>(
+        (l) async {
+          onFailed(l.errorMsg);
+          return false;
+        },
+        (r) async {
+          final data = r['data'];
+          await LocalStorageService.instance.setOnboardingEmail(data['email']);
+          await LocalStorageService.instance.saveOnboardingId(
+            data['onboardingId'],
+          );
+          return true;
+        },
+      );
+      if (!started) return false;
+      onboardingId = LocalStorageService.instance.onboardingId;
+    }
+
+    isSaveUserAgeLoading = true;
+    notifyListeners();
+
+    final response = await AuthApiServices().saveBirthDate(
+      onboardingId: onboardingId!,
+      dateOfBirth: dateToSend,
+    );
+
+    isSaveUserAgeLoading = false;
+    notifyListeners();
+
+    return response.fold(
+      (l) {
+        onFailed(l.errorMsg);
+        return false;
+      },
+      (r) async {
+        await LocalStorageService.instance.setAgeCompleted(true);
+        await LocalStorageService.instance.saveDateOfBirth(dateToSend);
+        return true;
+      },
+    );
+  }
+
+  Future<void> beginGoogleSocialLogin({
+    required BuildContext context,
+    required String idToken,
+    required VoidCallback onAccountFound,
+    required VoidCallback onNoAccountFound,
+    required Function(String error) onFailed,
+  }) async {
+    _pendingGoogleIdToken = idToken;
+    _onGoogleAccountFound = onAccountFound;
+    _onGoogleNoAccountFound = onNoAccountFound;
+    _onGoogleLoginFailed = onFailed;
+
+    if (!hasGoogleBirthDate && selectedDate == null) {
+      final hasBirthday = await tryFetchGoogleBirthdayFromSignedInAccount();
+      if (!hasBirthday) {
+        setPendingGoogleLogin(true);
+        setOpenDatePickerOnAgeScreen(true);
+        if (context.mounted) {
+          context.pushNamed(AppRoutes.enterAgeScreen.name);
+        }
+        return;
+      }
+    }
+
+    final dateOfBirth = calculateDateToSend();
+    if (dateOfBirth == null || dateOfBirth.isEmpty) {
+      onFailed("Please select your date of birth");
+      return;
+    }
+
+    var outcome = await _performGoogleSocialLogin(
+      idToken: idToken,
+      dateOfBirth: dateOfBirth,
+    );
+
+    if (outcome == _GoogleSocialLoginOutcome.existingAccount) {
+      _finishGoogleLoginWithExistingAccount();
+      return;
+    }
+    if (outcome == _GoogleSocialLoginOutcome.failed || !context.mounted) {
+      return;
+    }
+
+    await LocalStorageService.instance.clearOnboardingSession();
+    final ageSaved = await ensureOnboardingAndSaveAgeForGoogle(
+      context: context,
+      onFailed: (error) => _onGoogleLoginFailed?.call(error),
+    );
+    if (!ageSaved || !context.mounted) return;
+
+    outcome = await _performGoogleSocialLogin(
+      idToken: idToken,
+      dateOfBirth: dateOfBirth,
+      onboardingId: LocalStorageService.instance.onboardingId,
+    );
+
+    if (outcome == _GoogleSocialLoginOutcome.existingAccount) {
+      _finishGoogleLoginWithExistingAccount();
+      return;
+    }
+    if (outcome == _GoogleSocialLoginOutcome.newAccount) {
+      _onGoogleNoAccountFound?.call();
+    }
+  }
+
+  Future<void> completeGoogleSocialLogin(BuildContext context) async {
+    final idToken = _pendingGoogleIdToken;
+    if (idToken == null) {
+      _onGoogleLoginFailed?.call(
+        "Google sign-in session expired. Please try again.",
+      );
+      return;
+    }
+
+    final dateOfBirth = calculateDateToSend();
+    if (dateOfBirth == null || dateOfBirth.isEmpty) {
+      _onGoogleLoginFailed?.call("Please select your date of birth");
+      return;
+    }
+
+    if (LocalStorageService.instance.onboardingId == null) {
+      await LocalStorageService.instance.clearOnboardingSession();
+      final ageSaved = await ensureOnboardingAndSaveAgeForGoogle(
+        context: context,
+        onFailed: (error) => _onGoogleLoginFailed?.call(error),
+      );
+      if (!ageSaved || !context.mounted) return;
+    }
+
+    final outcome = await _performGoogleSocialLogin(
+      idToken: idToken,
+      dateOfBirth: dateOfBirth,
+      onboardingId: LocalStorageService.instance.onboardingId,
+    );
+
+    if (outcome == _GoogleSocialLoginOutcome.existingAccount) {
+      _finishGoogleLoginWithExistingAccount();
+      return;
+    }
+    if (outcome == _GoogleSocialLoginOutcome.newAccount) {
+      _onGoogleNoAccountFound?.call();
+    }
+  }
+
+  void navigateToHomeScreen([BuildContext? context]) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppRouter.goRouter.goNamed(AppRoutes.homeScreen.name);
+    });
+  }
+
+  Future<_GoogleSocialLoginOutcome> _performGoogleSocialLogin({
+    required String idToken,
+    required String dateOfBirth,
+    String? onboardingId,
+  }) async {
+    isSocialLoginLoading = true;
+    notifyListeners();
+
+    try {
+      final payload = {
+        "provider": "google",
+        "idToken": idToken,
+        "dateOfBirth": dateOfBirth,
+        if (onboardingId != null && onboardingId.isNotEmpty)
+          "onboardingId": onboardingId,
+      };
+
+      final response = await AuthApiServices().googleSignUp(data: payload);
+      return await response.fold<Future<_GoogleSocialLoginOutcome>>(
+        (l) async {
+          _onGoogleLoginFailed?.call(l.errorMsg);
+          return _GoogleSocialLoginOutcome.failed;
+        },
+        (r) async {
+          final responseData = r['data'];
+          if (responseData is! Map) {
+            _onGoogleLoginFailed?.call("Invalid login response");
+            return _GoogleSocialLoginOutcome.failed;
+          }
+
+          final data = Map<String, dynamic>.from(responseData);
+          Logger.info("Google Login Response Data: $data");
+          await _persistSocialLoginSession(
+            data,
+            idToken: idToken,
+            dateOfBirth: dateOfBirth,
+          );
+
+          if (data["session"] == null) {
+            return _GoogleSocialLoginOutcome.newAccount;
+          }
+          return _GoogleSocialLoginOutcome.existingAccount;
+        },
+      );
+    } catch (e) {
+      _onGoogleLoginFailed?.call("Failed google login, please try again");
+      return _GoogleSocialLoginOutcome.failed;
+    } finally {
+      isSocialLoginLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _persistSocialLoginSession(
+    Map<String, dynamic> data, {
+    required String idToken,
+    required String dateOfBirth,
+  }) async {
+    final onboarding = data["onboarding"];
+    if (onboarding is Map && onboarding['onboardingId'] != null) {
+      if (onboarding['isCompleted'] == true) {
+        await LocalStorageService.instance.clearOnboardingSession();
+      } else {
+        await LocalStorageService.instance.saveOnboardingId(
+          onboarding['onboardingId'].toString(),
+        );
+      }
+    }
+
+    final user = data["user"];
+    if (user is Map && user["id"] != null) {
+      await LocalStorageService.instance.saveUserId(id: user["id"].toString());
+    }
+
+    final session = data["session"];
+    if (session is! Map) {
+      await LocalStorageService.instance.saveGoogleIdToken(idToken: idToken);
+      await LocalStorageService.instance.saveDateOfBirth(dateOfBirth);
+      return;
+    }
+
+    final accessToken = session["accessToken"]?.toString();
+    if (accessToken != null && accessToken.isNotEmpty) {
+      await LocalStorageService.instance.saveAuthToken(accessToken);
+      DioClient.instance.addToken(accessToken);
+      Logger.info("Token saved successfully from login: $accessToken");
+    }
+
+    if (session["refreshToken"] != null) {
+      await LocalStorageService.instance.saveRefreshToken(
+        session["refreshToken"].toString(),
+      );
+    }
+
+    await LocalStorageService.instance.removeGoogleIdToken();
+    await LocalStorageService.instance.removeDateOfBirth();
   }
 
   void toggleAcceptedTerms({bool? value}) {
@@ -243,15 +572,8 @@ class AuthProvider with ChangeNotifier {
 
   Future<String?> getOnBoardingProgress() async {
     try {
-      final onboardingId = LocalStorageService.instance.onboardingId;
-      if (onboardingId == null) return null;
-
-      final response = await AuthApiServices().getOnboardingProgress(
-        onboardingId: onboardingId,
-      );
-
-      if (response != null && response['success'] == true) {
-        final data = OnBoardingProgressModel.fromJson(response["data"]);
+      final data = await loadOnboardingProgress();
+      if (data == null) return null;
 
         // if (data['nextStep'] != null &&
         //     data['nextStep'].toString().isNotEmpty) {
@@ -308,12 +630,101 @@ class AuthProvider with ChangeNotifier {
         }
 
         return data.currentStep;
-      }
-      return null;
     } catch (e) {
       debugPrint("Onboarding progress error: $e");
       return null;
     }
+  }
+
+  OnBoardingProgressModel? _cachedOnboardingProgress;
+
+  OnBoardingProgressModel? get cachedOnboardingProgress =>
+      _cachedOnboardingProgress;
+
+  Future<OnBoardingProgressModel?> loadOnboardingProgress() async {
+    final onboardingId = LocalStorageService.instance.onboardingId;
+    if (onboardingId == null) return null;
+
+    final response = await AuthApiServices().getOnboardingProgress(
+      onboardingId: onboardingId,
+    );
+
+    if (response != null && response['success'] == true) {
+      _cachedOnboardingProgress = OnBoardingProgressModel.fromJson(
+        response['data'],
+      );
+      notifyListeners();
+      return _cachedOnboardingProgress;
+    }
+    return null;
+  }
+
+  Future<bool> handleIncompleteOnboardingLogin(
+    BuildContext context,
+    Map<String, dynamic> response,
+  ) async {
+    final data = response['data'];
+    if (data is! Map || data['requiresOnboarding'] != true) return false;
+
+    final onboarding = data['onboarding'];
+    if (onboarding is! Map) return false;
+
+    await _persistOnboardingSessionFromLogin(
+      Map<String, dynamic>.from(onboarding),
+    );
+
+    final progress = await loadOnboardingProgress();
+    if (!context.mounted) return true;
+
+    final step =
+        progress?.currentStep?.toString() ??
+        onboarding['currentStep']?.toString();
+    if (step == null || step.isEmpty) return false;
+
+    decideFirstScreen(context: context, step: step, showResumeMessage: true);
+    return true;
+  }
+
+  Future<void> _persistOnboardingSessionFromLogin(
+    Map<String, dynamic> onboarding,
+  ) async {
+    final onboardingId = onboarding['onboardingId']?.toString();
+    if (onboardingId != null && onboardingId.isNotEmpty) {
+      await LocalStorageService.instance.saveOnboardingId(onboardingId);
+    }
+
+    final email = onboarding['email']?.toString();
+    if (email != null && email.isNotEmpty) {
+      await LocalStorageService.instance.setOnboardingEmail(email);
+      createAccEmailCtr.text = email;
+      signUpEmailCtr.text = email;
+      googleLoginEmail = email;
+    }
+
+    final dobRaw = onboarding['dateOfBirth']?.toString();
+    if (dobRaw != null && dobRaw.isNotEmpty) {
+      final parsed = DateTime.tryParse(dobRaw);
+      if (parsed != null) {
+        selectedDate = parsed;
+        googleBirthDate =
+            '${parsed.year}-${parsed.month.toString().padLeft(2, '0')}-${parsed.day.toString().padLeft(2, '0')}';
+        calculatedAge =
+            onboarding['age'] as int? ?? _calculateAgeFromBirthDate(parsed);
+        await LocalStorageService.instance.saveDateOfBirth(googleBirthDate);
+        await LocalStorageService.instance.setAgeCompleted(true);
+      }
+    }
+    notifyListeners();
+  }
+
+  int _calculateAgeFromBirthDate(DateTime birthDate) {
+    final today = DateTime.now();
+    var age = today.year - birthDate.year;
+    if (today.month < birthDate.month ||
+        (today.month == birthDate.month && today.day < birthDate.day)) {
+      age--;
+    }
+    return age;
   }
 
   //todo
@@ -334,16 +745,19 @@ class AuthProvider with ChangeNotifier {
       return;
     }
 
-    //todo Calculate age to check if we need to spoof for backend compliance
-    String? dateToSend = calculateDateToSend();
+    final dateToSend = calculateDateToSend();
     Logger.info("dateToSend $dateToSend");
+    if (dateToSend == null || dateToSend.isEmpty) {
+      AppToast.error(context, "Please select your date of birth");
+      return;
+    }
 
     isSaveUserAgeLoading = true;
     notifyListeners();
 
     final response = await AuthApiServices().saveBirthDate(
       onboardingId: onboardingId,
-      dateOfBirth: dateToSend!,
+      dateOfBirth: dateToSend,
     );
     response.fold(
       (l) {
@@ -351,6 +765,7 @@ class AuthProvider with ChangeNotifier {
       },
       (r) async {
         await LocalStorageService.instance.setAgeCompleted(true);
+        await LocalStorageService.instance.saveDateOfBirth(dateToSend);
         // clearCreateAccountFields();
         onSuccess.call();
       },
@@ -369,11 +784,45 @@ class AuthProvider with ChangeNotifier {
               today.day < selectedDate!.day)) {
         calculatedAge--;
       }
-      String dateToSend =
-          "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
-      return dateToSend;
+      return "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
     }
-    return googleBirthDate;
+    if (googleBirthDate.isNotEmpty) {
+      return googleBirthDate;
+    }
+    return null;
+  }
+
+  Future<void> finalizeGoogleSignup({
+    required BuildContext context,
+    required VoidCallback onProfileInfo,
+    required VoidCallback onParentEmail,
+    required Function(String error) onFailed,
+  }) async {
+    if (isUnder16) {
+      setIsUnder16FromGoogle(value: true);
+      setPendingGoogleSignup(false);
+      onParentEmail();
+      return;
+    }
+
+    setIsUnder16FromGoogle(value: false);
+    toggleAcceptedTerms(value: true);
+
+    if (createAccPasswordCtr.text.trim().isEmpty) {
+      generateStrongPassword();
+    }
+
+    final success = await createAccount(
+      isTermsAccepted: acceptedTerms,
+      context: context,
+      onSuccess: onProfileInfo,
+    );
+
+    setPendingGoogleSignup(false);
+
+    if (!success && context.mounted) {
+      onFailed("Failed to create account. Please try again.");
+    }
   }
 
   //todo create account
@@ -967,6 +1416,17 @@ class AuthProvider with ChangeNotifier {
         loginPasswordCtr.clear();
         return true;
       } else {
+        final responseData = response['data'];
+        if (responseData is Map &&
+            responseData['requiresOnboarding'] == true &&
+            context.mounted) {
+          final handled = await handleIncompleteOnboardingLogin(
+            context,
+            Map<String, dynamic>.from(response),
+          );
+          if (handled) return false;
+        }
+
         // Parse errors array if present
         if (response['errors'] != null &&
             (response['errors'] as List).isNotEmpty) {
@@ -1079,6 +1539,8 @@ class AuthProvider with ChangeNotifier {
   Future<void> loginWithGoogle({
     VoidCallback? onAccountFound,
     required String? idToken,
+    required String dateOfBirth,
+    String? onboardingId,
     Function(String error)? onNoAccountFound,
     required Function(String error) onFailed,
   }) async {
@@ -1088,63 +1550,53 @@ class AuthProvider with ChangeNotifier {
       return;
     }
 
-    final data = {
-      "provider": "google",
-      "idToken": idToken,
-      // "onboardingId": SharedPrefs.instance.onboardingId,
-    };
-    final response = await AuthApiServices().googleSignUp(data: data);
-    response.fold(
-      (l) {
-        onFailed.call(l.errorMsg);
-      },
-      (r) async {
-        final data = r['data'];
-        Logger.info("Google Login Response Data: $data");
-
-        //todo saving onBoarding id.
-        if (data["onboarding"]['onboardingId'] != null) {
-          await LocalStorageService.instance.saveOnboardingId(
-            data["onboarding"]['onboardingId'],
-          );
-        }
-
-        // if (data != null) {
-        String? accessToken;
-        if (data["session"] == null) {
-          onNoAccountFound!.call(data["user"]["email"]);
-          LocalStorageService.instance.saveGoogleIdToken(idToken: idToken);
-          return;
-        }
-
-        //todo Check for nested session object first (if account founds)
-        final session = data['session'];
-
-        if (session["accessToken"] != null) {
-          accessToken = session["accessToken"];
-          await LocalStorageService.instance.saveAuthToken(accessToken!);
-        }
-
-        if (session["refreshToken"] != null) {
-          await LocalStorageService.instance.saveRefreshToken(
-            session["refreshToken"],
-          );
-        }
-
-        if (accessToken != null) {
-          //todo Update the current API instance with the new token immediately
-          DioClient.instance.addToken(accessToken);
-          Logger.error("Token saved successfully from login: $accessToken");
-        }
-
-        //signUpEmailCtr.text = data["user"]["email"];
-
-        onAccountFound?.call();
-      },
+    _onGoogleLoginFailed = onFailed;
+    final outcome = await _performGoogleSocialLogin(
+      idToken: idToken,
+      dateOfBirth: dateOfBirth,
+      onboardingId: onboardingId,
     );
 
-    isSocialLoginLoading = false;
-    notifyListeners();
+    if (outcome == _GoogleSocialLoginOutcome.existingAccount) {
+      onAccountFound?.call();
+      return;
+    }
+    if (outcome == _GoogleSocialLoginOutcome.newAccount) {
+      onNoAccountFound?.call("");
+    }
+  }
+
+  Future<void> loginWithStoredGoogleToken({
+    required BuildContext context,
+    required VoidCallback onAccountFound,
+    required Function(String error) onFailed,
+  }) async {
+    final idToken = LocalStorageService.instance.getGoogleIdToken;
+    if (idToken.isEmpty) {
+      onFailed("Google sign-in session expired. Please login again.");
+      return;
+    }
+
+    final storedDob = LocalStorageService.instance.getSavedDateOfBirth;
+    final dateOfBirth = storedDob.isNotEmpty ? storedDob : calculateDateToSend();
+    if (dateOfBirth == null || dateOfBirth.isEmpty) {
+      onFailed("Date of birth not found. Please login again.");
+      return;
+    }
+
+    _onGoogleLoginFailed = onFailed;
+    final outcome = await _performGoogleSocialLogin(
+      idToken: idToken,
+      dateOfBirth: dateOfBirth,
+      onboardingId: LocalStorageService.instance.onboardingId,
+    );
+
+    if (outcome == _GoogleSocialLoginOutcome.existingAccount) {
+      onAccountFound();
+      return;
+    }
+
+    onFailed("Could not complete Google login. Please try again.");
   }
 
   bool _isGoogleSignInInitialized = false;
@@ -1165,7 +1617,9 @@ class AuthProvider with ChangeNotifier {
     await _ensureGoogleSignInInitialized();
 
     try {
-      return await GoogleSignIn.instance.authenticate(scopeHint: scopes);
+      final account = await GoogleSignIn.instance.authenticate(scopeHint: scopes);
+      _lastGoogleSignInAccount = account;
+      return account;
     } on GoogleSignInException catch (e) {
       if (e.code == GoogleSignInExceptionCode.canceled) {
         Logger.error("User cancelled sign-in");
@@ -1176,6 +1630,20 @@ class AuthProvider with ChangeNotifier {
       );
       rethrow;
     }
+  }
+
+  void _populateFieldsFromGoogleAccount(GoogleSignInAccount account) {
+    final displayName = account.displayName?.trim() ?? "";
+    if (displayName.isNotEmpty) {
+      final parts = displayName.split(RegExp(r'\s+'));
+      firstNameCtr.text = parts.first;
+      lastNameCtr.text = (parts.length > 1) ? parts.sublist(1).join(" ") : "";
+    } else {
+      firstNameCtr.text = "";
+      lastNameCtr.text = "";
+    }
+    createAccEmailCtr.text = account.email;
+    googleLoginEmail = account.email;
   }
 
   Future<String?> _authorizeGoogleAccessToken(
@@ -1209,9 +1677,10 @@ class AuthProvider with ChangeNotifier {
       final account = await _authenticateWithGoogle(scopes: scopes);
       if (account == null) return null;
 
+      _populateFieldsFromGoogleAccount(account);
+
       final auth = account.authentication;
       final accessToken = await _authorizeGoogleAccessToken(account, scopes);
-      googleLoginEmail = account.email;
       Logger.info(account.email);
       Logger.info("Account: /${account.toString()}");
       Logger.info("access Token: ${accessToken ?? 'NULL'}");
@@ -1246,7 +1715,7 @@ class AuthProvider with ChangeNotifier {
       const scopes = [
         'email',
         'profile',
-        'https://www.googleapis.com/auth/user.birthday.read',
+        _googleBirthdayScope,
       ];
 
       // Critical: Ensure UI thread is ready (prevents deadlock)
@@ -1255,21 +1724,10 @@ class AuthProvider with ChangeNotifier {
       final account = await _authenticateWithGoogle(scopes: scopes);
       if (account == null) return null;
 
-      final displayName = account.displayName?.trim() ?? "";
-      if (displayName.isNotEmpty) {
-        final parts = displayName.split(RegExp(r'\s+'));
-        firstNameCtr.text = parts.first;
-        lastNameCtr.text = (parts.length > 1) ? parts.sublist(1).join(" ") : "";
-      } else {
-        firstNameCtr.text = "";
-        lastNameCtr.text = "";
-      }
-
-      createAccEmailCtr.text = account.email;
-      googleLoginEmail = account.email;
+      _populateFieldsFromGoogleAccount(account);
 
       Logger.info("Email: ${account.email}");
-      Logger.info("Display Name: $displayName");
+      Logger.info("Display Name: ${account.displayName?.trim() ?? ''}");
 
       final auth = account.authentication;
       final accessToken = await _authorizeGoogleAccessToken(account, scopes);
@@ -1290,6 +1748,9 @@ class AuthProvider with ChangeNotifier {
       if (accessToken != null) {
         Logger.info("Birthdate API Calling");
         await _fetchGoogleBirthday(accessToken);
+      } else {
+        googleBirthDate = "";
+        Logger.info("Birthday scope not granted; manual DOB entry required");
       }
 
       generateStrongPassword();
@@ -1311,47 +1772,82 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  Future<bool> tryFetchGoogleBirthdayFromSignedInAccount() async {
+    final account = _lastGoogleSignInAccount;
+    if (account == null) {
+      Logger.info("No signed-in Google account available for birthday fetch");
+      return false;
+    }
+
+    final accessToken = await _authorizeGoogleAccessToken(
+      account,
+      const [_googleBirthdayScope],
+    );
+    if (accessToken == null) {
+      Logger.info("Birthday scope not granted; manual DOB entry required");
+      return false;
+    }
+
+    return _fetchGoogleBirthday(accessToken);
+  }
+
   //todo fetch google birth date
-  Future<void> _fetchGoogleBirthday(String accessToken) async {
+  Future<bool> _fetchGoogleBirthday(String accessToken) async {
+    googleBirthDate = "";
     try {
-      final response = await BaseApiHelper.instance.get(
+      final dio = Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
+        ),
+      );
+      final response = await dio.get<Map<String, dynamic>>(
         "https://people.googleapis.com/v1/people/me",
         queryParameters: {"personFields": "birthdays"},
         options: Options(headers: {"Authorization": "Bearer $accessToken"}),
       );
 
-      response.fold(
-        (l) {
-          Logger.error("Error while getting birthdate: $e");
-          return;
-        },
-        (r) {
-          Logger.info("Birthdate response: $r");
-          final birthdays = r["birthdays"];
-          if (birthdays == null || birthdays.isEmpty) return;
+      final data = response.data;
+      if (data == null) return false;
 
-          final date = birthdays.first["date"];
-          if (date == null) return;
+      Logger.info("Birthdate response: $data");
+      final birthdays = data["birthdays"];
+      if (birthdays == null || birthdays is! List || birthdays.isEmpty) {
+        Logger.info("No birthday set on Google account");
+        return false;
+      }
 
-          final int day = date["day"];
-          final int month = date["month"];
-          final int year = date["year"];
-          final today = DateTime.now();
+      final date = birthdays.first["date"];
+      if (date == null || date is! Map) return false;
 
-          calculatedAge = today.year - year;
-          if (today.month < month ||
-              (today.month == month && today.day < day)) {
-            calculatedAge--;
-          }
+      final year = date["year"];
+      final month = date["month"];
+      final day = date["day"];
+      if (year == null || month == null || day == null) {
+        Logger.info("Google birthday is missing year, month, or day");
+        return false;
+      }
 
-          googleBirthDate =
-              "$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}";
-          Logger.info("Google Birthdate: $googleBirthDate");
-        },
+      final today = DateTime.now();
+      calculatedAge = today.year - (year as int);
+      if (today.month < (month as int) ||
+          (today.month == month && today.day < (day as int))) {
+        calculatedAge--;
+      }
+
+      googleBirthDate =
+          "$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}";
+      Logger.info("Google Birthdate: $googleBirthDate");
+      notifyListeners();
+      return true;
+    } on DioException catch (e) {
+      Logger.error(
+        "Failed to fetch birthday: ${e.response?.data ?? e.message}",
       );
+      return false;
     } catch (e) {
       Logger.error("Failed to fetch birthday: $e");
-      return;
+      return false;
     }
   }
 
@@ -1536,6 +2032,15 @@ class AuthProvider with ChangeNotifier {
     confirmPasswordCtr.clear();
     age = null;
     selectedDate = null;
+    googleBirthDate = "";
+    _pendingGoogleSignup = false;
+    _pendingGoogleLogin = false;
+    _openDatePickerOnAgeScreen = false;
+    _pendingGoogleIdToken = null;
+    _onGoogleAccountFound = null;
+    _onGoogleNoAccountFound = null;
+    _onGoogleLoginFailed = null;
+    _lastGoogleSignInAccount = null;
     notifyListeners();
   }
 
@@ -1745,6 +2250,7 @@ class AuthProvider with ChangeNotifier {
   void decideFirstScreen({
     required BuildContext context,
     required String step,
+    bool showResumeMessage = true,
   }) {
     Logger.info("Current Step: $step");
     if (step == AppConstants.age) {
@@ -1774,11 +2280,11 @@ class AuthProvider with ChangeNotifier {
       }
     }
 
-    if (step != AppConstants.completed) {
+    if (showResumeMessage && step != AppConstants.completed) {
       AppToast.info(
         context: context,
         durationSecond: 5,
-        message: "Please complete your on boarding session.",
+        message: "Please complete your onboarding to access your account.",
       );
     }
   }
