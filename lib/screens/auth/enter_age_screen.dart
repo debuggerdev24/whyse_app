@@ -28,8 +28,16 @@ class _AgeEntryScreenState extends State<AgeEntryScreen> {
 
   @override
   void initState() {
-    _dateController.clear();
     super.initState();
+    _dateController.clear();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final provider = context.read<AuthProvider>();
+      if (provider.openDatePickerOnAgeScreen) {
+        provider.setOpenDatePickerOnAgeScreen(false);
+        _showCupertinoPicker(context);
+      }
+    });
   }
 
   // Show Cupertino Bottom Sheet Picker
@@ -184,6 +192,27 @@ class _AgeEntryScreenState extends State<AgeEntryScreen> {
                                 return;
                               }
 
+                              if (provider.pendingGoogleLogin) {
+                                final saved =
+                                    await provider
+                                        .ensureOnboardingAndSaveAgeForGoogle(
+                                  context: context,
+                                  onFailed: (error) {
+                                    AppToast.error(context, error);
+                                  },
+                                );
+                                if (!saved || !context.mounted) return;
+
+                                AppToast.success(
+                                  context,
+                                  "Age saved successfully",
+                                );
+                                _dateController.clear();
+                                provider.setPendingGoogleLogin(false);
+                                await provider.completeGoogleSocialLogin(context);
+                                return;
+                              }
+
                               await provider.saveAge(
                                 context: context,
                                 onSuccess: () {
@@ -192,6 +221,30 @@ class _AgeEntryScreenState extends State<AgeEntryScreen> {
                                     "Age saved successfully",
                                   );
                                   _dateController.clear();
+
+                                  if (provider.pendingGoogleSignup) {
+                                    provider.finalizeGoogleSignup(
+                                      context: context,
+                                      onProfileInfo: () {
+                                        context.pushNamed(
+                                          AppRoutes.profileInfoScreen.name,
+                                        );
+                                        AppToast.success(
+                                          context,
+                                          "Please complete your on-boarding session",
+                                        );
+                                      },
+                                      onParentEmail: () {
+                                        context.pushNamed(
+                                          AppRoutes.parentEmailScreen.name,
+                                        );
+                                      },
+                                      onFailed: (error) {
+                                        AppToast.error(context, error);
+                                      },
+                                    );
+                                    return;
+                                  }
 
                                   if (provider.isUnder16) {
                                     context.pushNamed(
@@ -202,11 +255,10 @@ class _AgeEntryScreenState extends State<AgeEntryScreen> {
                                   provider.clearCreateAccountFields();
                                   context.pushNamed(
                                     AppRoutes.createAccountScreen.name,
-                                    // extra: false,
                                   );
                                 },
                                 onFailed: (error) {
-                                  AppToast.success(context, error);
+                                  AppToast.error(context, error);
                                 },
                               );
 
