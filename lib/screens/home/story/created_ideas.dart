@@ -65,7 +65,7 @@ class CreatedIdeasList extends StatelessWidget {
                   ),
                   titleStyle: AppTextStyles.bold(
                     fontSize: 24.sp,
-                    color: AppColors.white,
+                    color: AppColors.onImage,
                   ),
                 ),
                 Padding(
@@ -363,12 +363,12 @@ class _ReadingItemTile extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: AppColors.teal,
                       shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.white, width: 2.w),
+                      border: Border.all(color: AppColors.onImage, width: 2.w),
                     ),
                     child: Icon(
                       Icons.check,
                       size: 14.w,
-                      color: AppColors.white,
+                      color: AppColors.onPrimary,
                     ),
                   ),
                 ),

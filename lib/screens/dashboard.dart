@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
+import 'package:redstreakapp/core/constants/text_style.dart';
+import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/providers/curiosity_reading/curiosity_reading_provider.dart';
 import 'package:redstreakapp/providers/explore/explore_provider.dart';
@@ -128,14 +130,15 @@ class BottomNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(
-        top: 18.r,
-        bottom: MediaQuery.of(context).padding.bottom + 10.r,
+        top: 10.r,
+        bottom: MediaQuery.of(context).padding.bottom + 8.r,
       ),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.navBar,
+        border: Border(top: BorderSide(color: AppColors.border)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
+            color: Colors.black.withValues(alpha: 0.12),
             blurRadius: 18,
             spreadRadius: -3,
             offset: const Offset(0, 8),
@@ -170,20 +173,39 @@ class BottomNavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = isSelected
-        ? AppColors.black
-        : AppColors.darkGrey.withValues(alpha: 0.4);
+    final Color color = isSelected ? AppColors.teal : AppColors.darkGrey;
+    const labels = ['Home', 'Explore', 'Activity', 'Community'];
 
     return Padding(
       padding: EdgeInsets.only(
-        left: index == 0 ? 30.w : 0,
-        right: index == 3 ? 30.w : 0,
+        left: index == 0 ? 18.w : 0,
+        right: index == 3 ? 18.w : 0,
       ),
-      child: SvgPicture.asset(
-        icon,
-        width: (index == 1) ? 40.w : 32.w,
-        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-        theme: SvgTheme(currentColor: color),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SvgPicture.asset(
+            icon,
+            width: (index == 1) ? 28.w : 24.w,
+            colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+            theme: SvgTheme(currentColor: color),
+          ),
+          4.h.verticalSpace,
+          AppText(
+            text: labels[index],
+            style: AppTextStyles.semibold(fontSize: 11.sp, color: color),
+          ),
+          4.h.verticalSpace,
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            height: 3.h,
+            width: isSelected ? 22.w : 0,
+            decoration: BoxDecoration(
+              color: AppColors.teal,
+              borderRadius: BorderRadius.circular(2.r),
+            ),
+          ),
+        ],
       ),
     );
   }

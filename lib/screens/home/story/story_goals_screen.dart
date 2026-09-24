@@ -171,7 +171,7 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                                 vertical: 13.h,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: AppColors.white,
                                 borderRadius: BorderRadius.circular(12.r),
                                 border: Border.all(
                                   color: isSelected

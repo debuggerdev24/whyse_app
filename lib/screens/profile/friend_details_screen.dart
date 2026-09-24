@@ -113,7 +113,7 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
               FriendDetailsHeader(profile: profile),
               Expanded(
                 child: ColoredBox(
-                  color: AppColors.white,
+                  color: AppColors.onPrimary,
                   child: SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -542,8 +542,8 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
         onPressed: () => _showAddToFamilySheet(profile),
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          backgroundColor: AppColors.black,
-          foregroundColor: AppColors.white,
+          backgroundColor: AppColors.teal,
+          foregroundColor: AppColors.onPrimary,
           padding: EdgeInsets.symmetric(vertical: 14.h),
           shape: const StadiumBorder(),
         ),
@@ -554,14 +554,14 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
             Icon(
               Icons.family_restroom_rounded,
               size: 22.sp,
-              color: AppColors.white,
+              color: AppColors.onPrimary,
             ),
             16.w.horizontalSpace,
             AppText(
               text: 'Add to Family',
               style: AppTextStyles.semibold(
                 fontSize: 16,
-                color: AppColors.white,
+                color: AppColors.onPrimary,
               ),
             ),
           ],

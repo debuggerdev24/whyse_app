@@ -133,7 +133,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
 
                       // Loading State
                       if (provider.isLoadingInterests)
-                        const Expanded(
+                        Expanded(
                           child: Center(
                             child: CircularProgressIndicator(
                               color: AppColors.teal,

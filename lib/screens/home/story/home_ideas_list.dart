@@ -338,7 +338,7 @@ class _IdeaCard extends StatelessWidget {
                         vertical: 4.h,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.white.withValues(alpha: 0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         borderRadius: BorderRadius.circular(6.r),
                       ),
                       child: AppText(
@@ -401,7 +401,7 @@ class _IdeaCard extends StatelessWidget {
                             text: "Read Story",
                             style: AppTextStyles.bold(
                               fontSize: 14.sp,
-                              color: AppColors.white,
+                              color: AppColors.onPrimary,
                             ),
                           ),
                         ),

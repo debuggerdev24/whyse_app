@@ -31,9 +31,9 @@ class BookDetailsScreen extends StatelessWidget {
     );
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F8F8),
+      backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF8F8F8),
+        backgroundColor: AppColors.backgroundColor,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
@@ -432,7 +432,7 @@ class _BottomContinueButton extends StatelessWidget {
             onPressed: () {},
             child: AppText(
               text: 'Start Reading',
-              style: AppTextStyles.semiBold(fontSize: 14, color: Colors.white),
+              style: AppTextStyles.semiBold(fontSize: 14, color: AppColors.onImage),
             ),
           ),
         ),
@@ -479,7 +479,7 @@ class _ImageError extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFECEFF3),
+        color: AppColors.lightwhiteColor,
         borderRadius: radius,
       ),
       alignment: Alignment.center,

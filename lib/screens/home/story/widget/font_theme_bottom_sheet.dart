@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/providers/home/reading_appearance_provider.dart';
 
 // ─── Bottom Sheet Function ───────────────────────────────────────────────────
@@ -43,9 +44,9 @@ class _FontThemeBottomSheetState extends State<_FontThemeBottomSheet>
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
       ),
       child: SafeArea(
         top: false,
@@ -58,14 +59,14 @@ class _FontThemeBottomSheetState extends State<_FontThemeBottomSheet>
                 width: 38,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD1D1D6),
+                  color: AppColors.border,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ),
             const SizedBox(height: 14),
             _buildTabBar(),
-            const Divider(height: 1, color: Color(0xFFE5E5EA)),
+            Divider(height: 1, color: AppColors.border),
             SizedBox(
               height: 300,
               child: TabBarView(
@@ -84,9 +85,9 @@ class _FontThemeBottomSheetState extends State<_FontThemeBottomSheet>
     return TabBar(
       controller: _tabController,
       isScrollable: true,
-      labelColor: const Color(0xFF0E9E96),
-      unselectedLabelColor: const Color(0xFF707070),
-      indicatorColor: const Color(0xFF0E9E96),
+      labelColor: AppColors.teal,
+      unselectedLabelColor: AppColors.darkGrey,
+      indicatorColor: AppColors.teal,
       indicatorWeight: 3,
       indicatorSize: TabBarIndicatorSize.label,
       labelStyle: const TextStyle(
@@ -138,44 +139,44 @@ class _FontThemeBottomSheetState extends State<_FontThemeBottomSheet>
                 ),
               ),
               const SizedBox(height: 18),
-              const Divider(height: 1, color: Color(0xFFE5E5EA)),
+              Divider(height: 1, color: AppColors.border),
               const SizedBox(height: 14),
-              const Text(
+              Text(
                 'Size',
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF1C1C1E),
+                  color: AppColors.black,
                 ),
               ),
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Text(
+                  Text(
                     'A',
                     style: TextStyle(
                       fontSize: 28,
                       height: 1,
-                      color: Color(0xFF1C1C1E),
+                      color: AppColors.black,
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: SliderTheme(
                       data: SliderTheme.of(context).copyWith(
-                        activeTrackColor: const Color(0xFF0E9E96),
-                        inactiveTrackColor: const Color(0xFFD1D1D6),
+                        activeTrackColor: AppColors.teal,
+                        inactiveTrackColor: AppColors.border,
                         trackHeight: 4,
-                        thumbColor: Colors.white,
+                        thumbColor: AppColors.white,
                         overlayColor: Colors.transparent,
-                        activeTickMarkColor: const Color(0xFF0E9E96),
-                        inactiveTickMarkColor: const Color(0xFFB9B9C2),
+                        activeTickMarkColor: AppColors.teal,
+                        inactiveTickMarkColor: AppColors.darkGrey,
                         tickMarkShape: const RoundSliderTickMarkShape(
                           tickMarkRadius: 1.2,
                         ),
-                        thumbShape: const _RingThumbShape(
+                        thumbShape: _RingThumbShape(
                           radius: 12,
-                          ringColor: Color(0xFF1C1C1E),
+                          ringColor: AppColors.black,
                           ringWidth: 5,
                         ),
                       ),
@@ -187,12 +188,12 @@ class _FontThemeBottomSheetState extends State<_FontThemeBottomSheet>
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
+                  Text(
                     'A',
                     style: TextStyle(
                       fontSize: 42,
                       height: 1,
-                      color: Color(0xFF1C1C1E),
+                      color: AppColors.black,
                     ),
                   ),
                 ],
@@ -249,11 +250,9 @@ class _FontCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           border: Border.all(
-            color: isSelected
-                ? const Color(0xFF1C1C1E)
-                : const Color(0xFFD1D1D6),
+            color: isSelected ? AppColors.black : AppColors.border,
             width: isSelected ? 1.2 : 1,
           ),
           borderRadius: BorderRadius.circular(14),
@@ -267,24 +266,24 @@ class _FontCard extends StatelessWidget {
                   ? GoogleFonts.libreBaskerville(
                       fontSize: 45,
                       height: 1,
-                      color: const Color(0xFF1C1C1E),
+                      color: AppColors.black,
                       fontWeight: FontWeight.w400,
                     )
                   : TextStyle(
                       fontSize: 45,
                       height: 1,
                       fontFamily: font.fontFamily,
-                      color: const Color(0xFF1C1C1E),
+                      color: AppColors.black,
                       fontWeight: FontWeight.w400,
                     ),
             ),
             const SizedBox(height: 2),
             Text(
               font.name,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 height: 1,
-                color: Color(0xFF1C1C1E),
+                color: AppColors.black,
               ),
             ),
           ],
@@ -326,7 +325,7 @@ class _RingThumbShape extends SliderComponentShape {
     required Size sizeWithOverflow,
   }) {
     final canvas = context.canvas;
-    final fillPaint = Paint()..color = Colors.white;
+    final fillPaint = Paint()..color = AppColors.white;
     final ringPaint = Paint()
       ..color = ringColor
       ..style = PaintingStyle.stroke
@@ -361,9 +360,7 @@ class _ThemeCard extends StatelessWidget {
               color: theme.background,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: isSelected
-                    ? const Color(0xFF00B37D)
-                    : const Color(0xFFD1D1D6),
+                color: isSelected ? AppColors.teal : AppColors.border,
                 width: isSelected ? 2.5 : 1,
               ),
               boxShadow: [
@@ -388,7 +385,7 @@ class _ThemeCard extends StatelessWidget {
           const SizedBox(height: 5),
           Text(
             theme.name,
-            style: const TextStyle(fontSize: 11, color: Color(0xFF8E8E93)),
+            style: TextStyle(fontSize: 11, color: AppColors.darkGrey),
           ),
         ],
       ),

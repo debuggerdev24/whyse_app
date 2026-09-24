@@ -129,7 +129,7 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                             showLeaveQuizConfirmation(context: context),
                         child: SvgIcon(
                           AppAssets.disable,
-                          color: Colors.black,
+                          color: AppColors.black,
                           size: 30.sp,
                         ),
                       ),
@@ -146,7 +146,7 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                               } else if (index == quiz.currentQuestionIndex) {
                                 color = AppColors.orangeColor;
                               } else {
-                                color = Colors.grey.withValues(alpha: 0.2);
+                                color = AppColors.border;
                               }
 
                               return Expanded(
@@ -210,7 +210,7 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                           "${quiz.currentQuestionIndex + 1} / ${quiz.questions.length}",
                       style: AppTextStyles.regular(
                         fontSize: 14.sp,
-                        color: Colors.grey,
+                        color: AppColors.darkGrey,
                       ),
                     ),
                   ),
@@ -250,7 +250,7 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                               );
                             }
                           },
-                          backgroundColor: Color(0xFF00796B),
+                          backgroundColor: AppColors.teal,
                           fixedSize: Size(348.w, 42.h),
                         )
                       : AppFilledButton(
@@ -259,8 +259,8 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                               ? quiz.checkAnswer
                               : () {},
                           backgroundColor: quiz.selectedOptionIndex != null
-                              ? AppColors.black
-                              : Colors.grey,
+                              ? AppColors.teal
+                              : AppColors.teal.withValues(alpha: 0.35),
                           fixedSize: Size(348.w, 42.h),
                         ),
 

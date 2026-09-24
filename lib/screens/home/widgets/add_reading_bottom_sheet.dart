@@ -13,7 +13,7 @@ Widget addReadingBottomSheet({required BuildContext context}) {
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 27.w, vertical: 16.h),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: AppColors.white,
       borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
     ),
     child: Column(
@@ -23,7 +23,7 @@ Widget addReadingBottomSheet({required BuildContext context}) {
           width: 40.w,
           height: 4.h,
           decoration: BoxDecoration(
-            color: const Color(0xFFD1D1D1),
+            color: AppColors.border,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -112,10 +112,10 @@ class _OptionCard extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: Colors.grey.shade200, //isSelected ? AppColors.black :
+            color: AppColors.border,
             width: 1,
           ),
           boxShadow: [
@@ -174,7 +174,7 @@ class ReadingLevelCard extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(color: AppColors.black.withValues(alpha: 0.1)),
         ),
@@ -225,7 +225,7 @@ class ReadingLevelCard extends StatelessWidget {
                 value: progress,
                 minHeight: 8.h,
                 backgroundColor: AppColors.black.withValues(alpha: 0.08),
-                valueColor: const AlwaysStoppedAnimation(Color(0xFF0E8C8A)),
+                valueColor: AlwaysStoppedAnimation(AppColors.teal),
               ),
             ),
 

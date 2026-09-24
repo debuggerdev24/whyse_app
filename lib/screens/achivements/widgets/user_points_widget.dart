@@ -11,7 +11,7 @@ class UserPointsWidget extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFFDEBDD),
+        color: AppColors.lightyellowcolor,
         borderRadius: BorderRadius.circular(16.r),
       ),
       child: Row(
@@ -19,7 +19,7 @@ class UserPointsWidget extends StatelessWidget {
           Container(
             width: 44.w,
             height: 44.w,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.white,
               shape: BoxShape.circle,
             ),

@@ -181,7 +181,7 @@ class _VerifyProfileContactScreenState extends State<VerifyProfileContactScreen>
       textStyle: textStyle,
       decoration: BoxDecoration(
         border: Border.all(
-          color: borderColor ?? Colors.grey,
+          color: borderColor ?? AppColors.border,
           width: borderWidth,
         ),
         borderRadius: BorderRadius.circular(borderRadius),
@@ -243,7 +243,7 @@ class _VerifyProfileContactScreenState extends State<VerifyProfileContactScreen>
                 ),
                 submittedPinTheme: _pinTheme(
                   textStyle: AppTextStyles.textStyle22Medium,
-                  borderColor: Colors.grey.shade400,
+                  borderColor: AppColors.border,
                 ),
                 keyboardType: TextInputType.number,
               ),

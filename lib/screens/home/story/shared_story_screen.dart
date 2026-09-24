@@ -214,7 +214,7 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
                                 },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.teal,
-                            foregroundColor: AppColors.white,
+                            foregroundColor: AppColors.onPrimary,
                             padding: EdgeInsets.symmetric(vertical: 14.h),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12.r),
@@ -225,7 +225,7 @@ class _SharedStoryScreenState extends State<SharedStoryScreen> {
                             "Try again",
                             style: AppTextStyles.semibold(
                               fontSize: 16.sp,
-                              color: AppColors.white,
+                              color: AppColors.onPrimary,
                             ),
                           ),
                         ),
@@ -672,7 +672,7 @@ class _StoryIdeaTile extends StatelessWidget {
                         child: Icon(
                           Icons.lock_outline_rounded,
                           size: 28.sp,
-                          color: AppColors.white,
+                          color: AppColors.onImage,
                         ),
                       ),
                     ),
@@ -1448,7 +1448,7 @@ class _StoryImage extends StatelessWidget {
                           child: Icon(
                             Icons.home_rounded,
                             size: 18.sp,
-                            color: AppColors.white,
+                            color: AppColors.onImage,
                           ),
                         ),
                         GlassIconButton(
@@ -1456,7 +1456,7 @@ class _StoryImage extends StatelessWidget {
                           child: Icon(
                             Icons.close_rounded,
                             size: 18.sp,
-                            color: AppColors.white,
+                            color: AppColors.onImage,
                           ),
                         ),
                       ],

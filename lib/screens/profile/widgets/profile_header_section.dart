@@ -3,16 +3,13 @@ import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/user_avatar_image.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
 
-/// Tan header for profile.
-const Color _profileHeaderBg = Color(0xFFE8D9C4);
-
 class ProfileHeaderSection extends StatelessWidget {
   const ProfileHeaderSection({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: _profileHeaderBg,
+      color: AppColors.backgroundColor,
       child: Padding(
         padding: EdgeInsets.fromLTRB(14.w, 2.w, 14.w, 12.w),
         child: Column(
@@ -119,8 +116,8 @@ class ProfileHeaderSection extends StatelessWidget {
                           shape: BoxShape.circle,
                           color: AppColors.white.withValues(alpha: 0.85),
                           border: Border.all(
-                            color: AppColors.black.withValues(alpha: 0.35),
-                            width: 1.2,
+                            color: AppColors.border,
+                            width: 2,
                           ),
                         ),
                         alignment: Alignment.center,
@@ -185,8 +182,9 @@ class _CircleOutlineIconButton extends StatelessWidget {
           height: 36.w,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
+            color: AppColors.white,
             border: Border.all(
-              color: AppColors.black.withValues(alpha: 0.35),
+              color: AppColors.border,
               width: 1.2,
             ),
           ),

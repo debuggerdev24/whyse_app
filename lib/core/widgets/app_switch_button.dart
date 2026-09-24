@@ -17,11 +17,11 @@ class AppSwitchButton extends StatefulWidget {
   // Thumb diameter — larger than track height to create the overflow look
   final double thumbDiameter;
 
-  // Colors
-  final Color activeTrackColor;
-  final Color inactiveTrackColor;
-  final Color activeThumbColor;
-  final Color inactiveThumbColor;
+  // Colors. Null uses the active app palette.
+  final Color? activeTrackColor;
+  final Color? inactiveTrackColor;
+  final Color? activeThumbColor;
+  final Color? inactiveThumbColor;
 
   // Animation
   final Duration animationDuration;
@@ -34,13 +34,18 @@ class AppSwitchButton extends StatefulWidget {
     this.trackWidth = 110,
     this.trackHeight = 54,
     this.thumbDiameter = 80,
-    this.activeTrackColor = const Color(0xFFE8891A), // orange
-    this.inactiveTrackColor = const Color(0xFFE0E0E0), // light gray
-    this.activeThumbColor = const Color(0xFF1C1C1C), // near-black
-    this.inactiveThumbColor = const Color(0xFFBDBDBD), // medium gray
+    this.activeTrackColor,
+    this.inactiveTrackColor,
+    this.activeThumbColor,
+    this.inactiveThumbColor,
     this.animationDuration = const Duration(milliseconds: 280),
     this.animationCurve = Curves.easeInOut,
   });
+
+  Color get _activeTrackColor => activeTrackColor ?? AppColors.orangeColor;
+  Color get _inactiveTrackColor => inactiveTrackColor ?? AppColors.border;
+  Color get _activeThumbColor => activeThumbColor ?? AppColors.onImage;
+  Color get _inactiveThumbColor => inactiveThumbColor ?? AppColors.darkGrey;
 
   @override
   State<AppSwitchButton> createState() => _CustomSwitchState();
@@ -50,8 +55,6 @@ class _CustomSwitchState extends State<AppSwitchButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _thumbPositionAnim;
-  late Animation<Color?> _trackColorAnim;
-  late Animation<Color?> _thumbColorAnim;
 
   @override
   void initState() {
@@ -61,30 +64,10 @@ class _CustomSwitchState extends State<AppSwitchButton>
       duration: widget.animationDuration,
       value: widget.value ? 1.0 : 0.0,
     );
-    _buildAnimations();
-  }
-
-  void _buildAnimations() {
     _thumbPositionAnim = CurvedAnimation(
       parent: _controller,
       curve: widget.animationCurve,
     );
-
-    _trackColorAnim =
-        ColorTween(
-          begin: widget.inactiveTrackColor,
-          end: widget.activeTrackColor,
-        ).animate(
-          CurvedAnimation(parent: _controller, curve: widget.animationCurve),
-        );
-
-    _thumbColorAnim =
-        ColorTween(
-          begin: widget.inactiveThumbColor,
-          end: widget.activeThumbColor,
-        ).animate(
-          CurvedAnimation(parent: _controller, curve: widget.animationCurve),
-        );
   }
 
   @override
@@ -120,8 +103,16 @@ class _CustomSwitchState extends State<AppSwitchButton>
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, _) {
-          final Color trackColor = _trackColorAnim.value!;
-          final Color thumbColor = _thumbColorAnim.value!;
+          final Color trackColor = Color.lerp(
+            widget._inactiveTrackColor,
+            widget._activeTrackColor,
+            _controller.value,
+          )!;
+          final Color thumbColor = Color.lerp(
+            widget._inactiveThumbColor,
+            widget._activeThumbColor,
+            _controller.value,
+          )!;
 
           // Thumb X centre:
           //   OFF → left side: thumbDiameter/2

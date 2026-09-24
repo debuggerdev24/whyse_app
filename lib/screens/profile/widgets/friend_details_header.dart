@@ -4,8 +4,6 @@ import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/friend/friend_details_model.dart';
 import 'package:redstreakapp/screens/profile/widgets/profile_friend_avatar.dart';
 
-const Color friendDetailsHeaderBg = Color(0xFFE8D9C4);
-
 class FriendDetailsHeader extends StatelessWidget {
   const FriendDetailsHeader({super.key, required this.profile});
 
@@ -14,7 +12,7 @@ class FriendDetailsHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: friendDetailsHeaderBg,
+      color: AppColors.backgroundColor,
       child: Padding(
         padding: EdgeInsets.fromLTRB(14.w, 15.w, 14.w, 20.w),
         child: Column(
@@ -75,8 +73,8 @@ class _ProfileAvatar extends StatelessWidget {
         shape: BoxShape.circle,
         color: _fallbackColor,
         border: Border.all(
-          color: AppColors.black.withValues(alpha: 0.35),
-          width: 1.2,
+          color: AppColors.border,
+          width: 2,
         ),
       ),
       clipBehavior: Clip.antiAlias,
@@ -124,7 +122,7 @@ class FriendDetailsHeaderShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: friendDetailsHeaderBg,
+      color: AppColors.backgroundColor,
       child: Padding(
         padding: EdgeInsets.fromLTRB(14.w, 10.w, 14.w, 0.w),
         child: SafeArea(

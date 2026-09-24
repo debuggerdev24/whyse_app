@@ -331,7 +331,7 @@ class _StoryCard extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
-            child: Icon(Icons.check_rounded, size: 18.w, color: AppColors.white),
+            child: Icon(Icons.check_rounded, size: 18.w, color: AppColors.onImage),
           ),
         ),
       ],
@@ -350,7 +350,7 @@ class _SparksRewardCard extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFFDEBDD),
+        color: AppColors.lightyellowcolor,
         borderRadius: BorderRadius.circular(16.r),
       ),
       child: Row(
@@ -358,7 +358,7 @@ class _SparksRewardCard extends StatelessWidget {
           Container(
             width: 44.w,
             height: 44.w,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.white,
               shape: BoxShape.circle,
             ),
@@ -426,7 +426,7 @@ class _SeriesProgressCard extends StatelessWidget {
             width: 40.w,
             height: 40.w,
             decoration: BoxDecoration(
-              color: const Color(0xFFFDEBDD),
+              color: AppColors.lightyellowcolor,
               borderRadius: BorderRadius.circular(20.r),
             ),
             alignment: Alignment.center,
@@ -465,7 +465,7 @@ class _SeriesProgressCard extends StatelessWidget {
                     value: progress,
                     minHeight: 6.h,
                     backgroundColor: AppColors.black.withValues(alpha: 0.08),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
+                    valueColor: AlwaysStoppedAnimation<Color>(
                       AppColors.orangeColor,
                     ),
                   ),
@@ -487,7 +487,7 @@ class _SeriesProgressCard extends StatelessWidget {
                     value: progress,
                     strokeWidth: 4.w,
                     backgroundColor: AppColors.black.withValues(alpha: 0.08),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
+                    valueColor: AlwaysStoppedAnimation<Color>(
                       AppColors.orangeColor,
                     ),
                   ),

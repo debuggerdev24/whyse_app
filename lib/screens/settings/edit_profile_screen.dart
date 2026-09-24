@@ -1077,8 +1077,8 @@ class _EditSocialLinkDialogState extends State<_EditSocialLinkDialog> {
                         onPressed: _submit,
                         style: ElevatedButton.styleFrom(
                           elevation: 0,
-                          backgroundColor: AppColors.black,
-                          foregroundColor: AppColors.white,
+                          backgroundColor: AppColors.teal,
+                          foregroundColor: AppColors.onPrimary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(40.r),
                           ),
@@ -1088,7 +1088,7 @@ class _EditSocialLinkDialogState extends State<_EditSocialLinkDialog> {
                           text: 'Save',
                           style: AppTextStyles.semibold(
                             fontSize: 16.sp,
-                            color: AppColors.white,
+                            color: AppColors.onPrimary,
                           ),
                         ),
                       ),

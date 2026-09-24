@@ -187,7 +187,7 @@ class NotificationShimmerList extends StatelessWidget {
             width: 80.w,
             height: 20.h,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.shimmerBaseColor,
               borderRadius: BorderRadius.circular(4.r),
             ),
           ),
@@ -210,9 +210,9 @@ class _ShimmerTile extends StatelessWidget {
           Container(
             width: 52.w,
             height: 52.w,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white,
+              color: AppColors.shimmerBaseColor,
             ),
           ),
           12.w.horizontalSpace,
@@ -224,7 +224,7 @@ class _ShimmerTile extends StatelessWidget {
                   width: 120.w,
                   height: 14.h,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.shimmerBaseColor,
                     borderRadius: BorderRadius.circular(4.r),
                   ),
                 ),
@@ -233,7 +233,7 @@ class _ShimmerTile extends StatelessWidget {
                   width: 170.w,
                   height: 11.h,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.shimmerBaseColor,
                     borderRadius: BorderRadius.circular(4.r),
                   ),
                 ),
@@ -245,7 +245,7 @@ class _ShimmerTile extends StatelessWidget {
             width: 70.w,
             height: 34.h,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.shimmerBaseColor,
               borderRadius: BorderRadius.circular(22.r),
             ),
           ),
@@ -254,7 +254,7 @@ class _ShimmerTile extends StatelessWidget {
             width: 70.w,
             height: 34.h,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.shimmerBaseColor,
               borderRadius: BorderRadius.circular(22.r),
             ),
           ),

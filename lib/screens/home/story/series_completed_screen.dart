@@ -280,7 +280,7 @@ class _SeriesCard extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
-            child: Icon(Icons.check_rounded, size: 18.w, color: AppColors.white),
+            child: Icon(Icons.check_rounded, size: 18.w, color: AppColors.onImage),
           ),
         ),
       ],
@@ -298,7 +298,7 @@ class _PointsCard extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF4D6),
+        color: AppColors.lightyellowcolor,
         borderRadius: BorderRadius.circular(16.r),
       ),
       child: Row(
@@ -306,7 +306,7 @@ class _PointsCard extends StatelessWidget {
           Container(
             width: 44.w,
             height: 44.w,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.white,
               shape: BoxShape.circle,
             ),
@@ -395,10 +395,10 @@ class _ProgressCard extends StatelessWidget {
                 8.h.verticalSpace,
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4.r),
-                  child: const LinearProgressIndicator(
+                  child: LinearProgressIndicator(
                     value: 1,
                     minHeight: 6,
-                    backgroundColor: Color(0x14000000),
+                    backgroundColor: const Color(0x14000000),
                     valueColor: AlwaysStoppedAnimation<Color>(
                       AppColors.orangeColor,
                     ),

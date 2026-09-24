@@ -56,14 +56,14 @@ class StoryIdeasHeaderCard extends StatelessWidget {
                     vertical: 7.h,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.white.withValues(alpha: 0.14),
+                    color: AppColors.onImage.withValues(alpha: 0.14),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: AppText(
                     text: "Story Collection",
                     style: AppTextStyles.semibold(
                       fontSize: 12.sp,
-                      color: AppColors.white,
+                      color: AppColors.onImage,
                     ),
                   ),
                 ),
@@ -75,7 +75,7 @@ class StoryIdeasHeaderCard extends StatelessWidget {
                   style: AppTextStyles.bold(
                     fontSize: 28.sp,
                     height: 1.1,
-                    color: AppColors.white,
+                    color: AppColors.onImage,
                   ),
                 ),
                 10.w.verticalSpace,
@@ -87,7 +87,7 @@ class StoryIdeasHeaderCard extends StatelessWidget {
                     style: AppTextStyles.medium(
                       fontSize: 14.sp,
                       height: 1.4,
-                      color: AppColors.white.withValues(alpha: 0.84),
+                      color: AppColors.onImage.withValues(alpha: 0.84),
                     ),
                   ),
                 14.w.verticalSpace,
@@ -264,7 +264,7 @@ class StoryIdeaEpisodeCard extends StatelessWidget {
                       text: "Read Story",
                       style: AppTextStyles.bold(
                         fontSize: 14.sp,
-                        color: AppColors.white,
+                        color: AppColors.onPrimary,
                       ),
                     ),
                   ),
@@ -330,19 +330,19 @@ class _HeaderMetaChip extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.12),
+        color: AppColors.onImage.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 15.sp, color: AppColors.white),
+          Icon(icon, size: 15.sp, color: AppColors.onImage),
           6.w.horizontalSpace,
           AppText(
             text: label,
             style: AppTextStyles.semibold(
               fontSize: 12.sp,
-              color: AppColors.white,
+              color: AppColors.onImage,
             ),
           ),
         ],

@@ -14,7 +14,7 @@ class AppSkeletonizer extends StatelessWidget {
   final Widget child;
   final bool enabled;
 
-  static ShimmerEffect effect = ShimmerEffect(
+  static ShimmerEffect get effect => ShimmerEffect(
     baseColor: AppColors.shimmerBaseColor,
     highlightColor: AppColors.shimmerHighlightColor,
   );
@@ -61,10 +61,10 @@ class AppSkeletonImagePlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const AppSkeletonizer(
+    return AppSkeletonizer(
       child: ColoredBox(
         color: AppColors.lightwhiteColor,
-        child: SizedBox.expand(),
+        child: const SizedBox.expand(),
       ),
     );
   }
