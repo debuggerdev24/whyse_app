@@ -96,20 +96,46 @@ class SvgIcon extends StatelessWidget {
   const SvgIcon(this.iconPath, {super.key, double size = 100, this.color})
     : width = size,
       height = size;
+
   final String iconPath;
   final double width;
   final double height;
   final Color? color;
 
+  /// Brand marks and multi-color art keep their own fills.
+  /// Every other icon is tinted so it stays visible on each theme.
+  static const Set<String> _keepOriginalColors = {
+    AppAssets.google,
+    AppAssets.correctoption,
+    AppAssets.canceloption,
+    AppAssets.check,
+    AppAssets.check1,
+    AppAssets.thunder,
+    AppAssets.welcome,
+    AppAssets.splascreen,
+    AppAssets.adventure,
+    AppAssets.comics,
+    AppAssets.fantancy,
+    AppAssets.mystery,
+    AppAssets.nature,
+    AppAssets.science,
+    AppAssets.readingskill,
+    AppAssets.vocabulary,
+    AppAssets.pronunciation,
+    AppAssets.comprehension,
+  };
+
   @override
   Widget build(BuildContext context) {
+    final Color? tint = color ??
+        (_keepOriginalColors.contains(iconPath) ? null : AppColors.black);
     return SvgPicture.asset(
       iconPath,
       width: width,
       height: height,
-      colorFilter: color == null
+      colorFilter: tint == null
           ? null
-          : ColorFilter.mode(color!, BlendMode.srcIn),
+          : ColorFilter.mode(tint, BlendMode.srcIn),
     );
   }
 }

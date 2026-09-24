@@ -1,34 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:redstreakapp/core/theme/app_palette.dart';
+import 'package:redstreakapp/core/theme/app_theme_controller.dart';
 
+/// Colors used across the app.
+///
+/// Do not put new hex values here. Edit the palettes in
+/// `lib/core/theme/app_palette.dart`. These names stay so existing screens
+/// pick up the active theme without a rewrite.
+///
+/// [white] is the card surface (white in light mode, deep teal in dark mode).
+/// [black] is body text. Text that must stay light on a photo uses [onImage].
+/// Text on a teal button uses [onPrimary].
 class AppColors {
   AppColors._();
 
-  // Login screen colors
-  static const Color teal = Color(0xFF167C80);
-  static const Color darkGrey = Color(0xFF4A4A4A);
-  static const Color black = Color(0xFF1A1A1A);
-  static const Color lightblackColor = Color(0xFF1E1E1E);
+  static AppPalette get palette => AppThemeController.instance.palette;
 
-  static const Color white = Color(0xFFFFFFFF);
-  static const Color backgroundColor = Color(0xFFFAFAFA);
-  static const Color searchBackgroundColor = Color(0xFFF1F1F1);
+  static Color get teal => palette.primary;
+  static Color get darkGrey => palette.textSecondary;
+  static Color get black => palette.textPrimary;
+  static Color get lightblackColor => palette.textPrimary;
 
-  static const Color orangeColor = Color(0xFFF28518);
+  static Color get white => palette.cardSurface;
+  static Color get backgroundColor => palette.background;
+  static Color get searchBackgroundColor => palette.subSurface;
+
+  static Color get orangeColor => palette.reward;
   static const Color streakFreezeBlue = Color(0xFF2B9FD9);
   static const Color streakFreezeBlueLight = Color(0xFFE3F4FF);
-  static const Color lightyellowcolor = Color(0xFFF2ECE6);
+  static Color get lightyellowcolor => palette.warmSurface;
   static const Color bluecolor = Color(0xFF011E41);
 
-  static const Color lightwhiteColor = Color(0xFFF0F0F0);
+  static Color get lightwhiteColor => palette.mutedSurface;
   static const Color greenColor = Color(0xFF1EA437);
   static const Color darkgreenColor = Color(0xFF0CBA65);
 
-  static const Color lighttealcolor = Color(0xFFCFE5E5);
-  static const Color extealighttealcolor = Color(0xFFE4EFF0);
+  static Color get lighttealcolor => palette.secondary;
+  static Color get extealighttealcolor => palette.subSurface;
   static const Color redColor = Color(0xFFE52222);
-  static const Color indicatorColor = Color(0xff030C09);
+  static Color get indicatorColor => palette.textPrimary;
 
+  static Color get shimmerBaseColor => palette.shimmerBase;
+  static Color get shimmerHighlightColor => palette.shimmerHighlight;
 
-  static const Color shimmerBaseColor = Color.fromARGB(255, 207, 209, 213);
-  static const Color shimmerHighlightColor = Color(0xFFFBFCFF);
+  static Color get onPrimary => palette.onPrimary;
+  static Color get onImage => palette.onImage;
+  static Color get navBar => palette.navBar;
+  static Color get border => palette.border;
 }

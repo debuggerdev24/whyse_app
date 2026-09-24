@@ -56,7 +56,7 @@ class AppFilledButton extends StatelessWidget {
           ),
 
           elevation: 0,
-          backgroundColor: backgroundColor ?? AppColors.black,
+          backgroundColor: backgroundColor ?? AppColors.teal,
 
           fixedSize: fixedSize ?? Size(354.w, 50.h),
           splashFactory: NoSplash.splashFactory,
@@ -79,7 +79,7 @@ class AppFilledButton extends StatelessWidget {
                     textStyle ??
                     AppTextStyles.semibold(
                       fontSize: 16.5.sp,
-                      color: AppColors.white,
+                      color: AppColors.onPrimary,
                     ),
               ),
       ),
@@ -191,7 +191,9 @@ class ActionButton extends StatelessWidget {
       alignment: Alignment.center,
       child: AppText(
         text: text,
-        style: AppTextStyles.textStyle14Semibold.copyWith(color: Colors.white),
+        style: AppTextStyles.textStyle14Semibold.copyWith(
+          color: AppColors.onPrimary,
+        ),
       ),
     );
   }
@@ -219,7 +221,7 @@ class ReadingSkillButton extends StatelessWidget {
         height: 52.h,
         width: 170.w,
         decoration: BoxDecoration(
-          color: isSelected ? Colors.black : Colors.white,
+          color: isSelected ? AppColors.teal : AppColors.white,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: isSelected
@@ -235,7 +237,7 @@ class ReadingSkillButton extends StatelessWidget {
                 icon,
                 size: 18.sp,
                 color: isSelected
-                    ? Colors.white
+                    ? AppColors.onPrimary
                     : AppColors.black.withValues(alpha: 0.4),
               ),
               8.w.horizontalSpace,
@@ -244,7 +246,7 @@ class ReadingSkillButton extends StatelessWidget {
                 style: AppTextStyles.bold(
                   fontSize: 14.sp,
                   color: isSelected
-                      ? Colors.white
+                      ? AppColors.onPrimary
                       : AppColors.black.withValues(alpha: 0.4),
                 ),
               ),
@@ -264,21 +266,27 @@ class AppButton extends StatelessWidget {
     this.padding,
     this.fontSize,
     this.margin,
+    this.fullWidth = true,
   });
   final VoidCallback onTap;
   final String text;
   final EdgeInsetsGeometry? padding, margin;
   final double? fontSize;
+  final bool fullWidth;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: double.infinity,
+        child: Container(
+        width: fullWidth ? double.infinity : null,
         margin: margin ?? EdgeInsets.zero,
-        padding: padding ?? EdgeInsets.symmetric(vertical: 10.w),
+        padding: padding ??
+            EdgeInsets.symmetric(
+              vertical: 10.w,
+              horizontal: fullWidth ? 0 : 16.w,
+            ),
         decoration: BoxDecoration(
           color: AppColors.teal,
           borderRadius: BorderRadius.circular(40.r),
@@ -288,7 +296,7 @@ class AppButton extends StatelessWidget {
           text: text,
           style: AppTextStyles.bold(
             fontSize: fontSize ?? 13.sp,
-            color: AppColors.white,
+            color: AppColors.onPrimary,
           ),
         ),
       ),

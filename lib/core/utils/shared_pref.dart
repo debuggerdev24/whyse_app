@@ -105,6 +105,12 @@ class LocalStorageService {
     await prefs.setString(_onboardingIdKey, id);
   }
 
+  static const _themeModeKey = 'app_theme_mode';
+  String? get themeModeName => prefs.getString(_themeModeKey);
+  Future<void> saveThemeMode(String mode) async {
+    await prefs.setString(_themeModeKey, mode);
+  }
+
   static const _ageCompletedKey = 'age_completed';
   bool get isAgeCompleted => prefs.getBool(_ageCompletedKey) ?? false;
   Future<void> setAgeCompleted(bool val) async {
@@ -118,6 +124,10 @@ class LocalStorageService {
   }
 
   Future<void> clear() async {
+    final themeMode = themeModeName;
     await prefs.clear();
+    if (themeMode != null) {
+      await saveThemeMode(themeMode);
+    }
   }
 }

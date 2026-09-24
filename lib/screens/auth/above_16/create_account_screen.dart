@@ -168,7 +168,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                   ? Icon(
                                       Icons.check,
                                       size: 18.w,
-                                      color: Colors.white,
+                                      color: AppColors.onPrimary,
                                     )
                                   : null,
                             ),

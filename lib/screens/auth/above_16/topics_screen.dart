@@ -171,7 +171,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
                       20.w.verticalSpace,
                       // Loading State
                       if (provider.isLoadingTopics)
-                        const Expanded(
+                        Expanded(
                           child: Center(
                             child: CircularProgressIndicator(
                               color: AppColors.teal,

@@ -576,7 +576,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                     titleStyle: AppTextStyles.bold(
                       fontSize: 20,
                       height: 1.2,
-                      color: AppColors.white,
+                      color: AppColors.onImage,
                     ),
                     titleBottomSpacing: 10.w,
                     bottomWidget: !_hasStartedReading
@@ -585,28 +585,28 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                               SvgIcon(
                                 AppAssets.page,
                                 size: 16.sp,
-                                color: AppColors.white,
+                                color: AppColors.onImage,
                               ),
                               6.w.horizontalSpace,
                               AppText(
                                 text: '${pages.length} Pages',
                                 style: AppTextStyles.semiBold(
                                   fontSize: 12,
-                                  color: AppColors.white,
+                                  color: AppColors.onImage,
                                 ),
                               ),
                               14.w.horizontalSpace,
                               SvgIcon(
                                 AppAssets.clock,
                                 size: 16.sp,
-                                color: AppColors.white,
+                                color: AppColors.onImage,
                               ),
                               6.w.horizontalSpace,
                               AppText(
                                 text: '${stories.lessonDuration ?? 0} min',
                                 style: AppTextStyles.semiBold(
                                   fontSize: 12,
-                                  color: AppColors.white,
+                                  color: AppColors.onImage,
                                 ),
                               ),
                             ],
@@ -618,7 +618,7 @@ class _CreatedStoryReadingScreenState extends State<CreatedStoryReadingScreen> {
                                     'Page ${safePageIndex + 1} of ${pages.length}',
                                 style: AppTextStyles.bold(
                                   fontSize: 13.sp,
-                                  color: AppColors.white,
+                                  color: AppColors.onImage,
                                 ),
                               ),
                             ],
@@ -835,7 +835,7 @@ class _BottomPrimaryButton extends StatelessWidget {
         alignment: Alignment.center,
         child: AppText(
           text: text,
-          style: AppTextStyles.bold(fontSize: 18.sp, color: AppColors.white),
+          style: AppTextStyles.bold(fontSize: 18.sp, color: AppColors.onPrimary),
         ),
       ),
     );

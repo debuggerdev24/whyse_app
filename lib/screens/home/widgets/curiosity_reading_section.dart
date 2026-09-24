@@ -13,19 +13,58 @@ class CuriosityReadingSection extends StatelessWidget {
       children: [
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.w),
-          child: Row(
-            children: [
-              SvgIcon(AppAssets.brain, size: 24.w),
-              const SizedBox(width: 5),
-              AppText(
-                text: "Today's Sparks",
-                style: AppTextStyles.bold(
-                  fontSize: 20.sp,
-                  color: AppColors.teal,
-                ),
-              ),
-              SvgIcon(AppAssets.rightArrow, size: 24.w),
-            ],
+          child: Consumer<CuriosityReadingProvider>(
+            builder: (context, provider, _) {
+              final hasReadings =
+                  (provider.curiosityReading?.data.readings.length ?? 0) > 0;
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AppText(
+                          text: "Today's Sparks",
+                          style: AppTextStyles.bold(
+                            fontSize: 20.sp,
+                            color: AppColors.black,
+                          ),
+                        ),
+                        2.h.verticalSpace,
+                        AppText(
+                          text: 'Little moments, Big discoveries!',
+                          style: AppTextStyles.medium(
+                            fontSize: 13.sp,
+                            color: AppColors.darkGrey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (hasReadings)
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        provider.setCurrentIndex(0);
+                        context.pushNamed(
+                          AppRoutes.curiosityReadingScreen.name,
+                        );
+                      },
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 4.h, left: 8.w),
+                        child: AppText(
+                          text: 'See All  →',
+                          style: AppTextStyles.semibold(
+                            fontSize: 14.sp,
+                            color: AppColors.teal,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
         ),
         // 6.w.verticalSpace,
@@ -172,7 +211,7 @@ class ArticleCard extends StatelessWidget {
                   child: SvgIcon(
                     AppAssets.brain,
                     size: 24.w,
-                    color: AppColors.white,
+                    color: AppColors.onImage,
                   ),
                 ),
               ),
@@ -344,7 +383,7 @@ class _CuriosityReadingErrorUI extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.refresh_rounded,
-                      color: AppColors.white,
+                      color: AppColors.onPrimary,
                       size: 18.r,
                     ),
                     8.w.horizontalSpace,
@@ -352,7 +391,7 @@ class _CuriosityReadingErrorUI extends StatelessWidget {
                       text: 'Try again',
                       style: AppTextStyles.bold(
                         fontSize: 14.sp,
-                        color: AppColors.white,
+                        color: AppColors.onPrimary,
                       ),
                     ),
                   ],
@@ -400,15 +439,15 @@ class _CuriosityReadingLoadingUI extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Container(color: Colors.white),
+                    Container(color: AppColors.shimmerBaseColor),
                     Positioned(
                       top: 8,
                       right: 8,
                       child: Container(
                         width: 32,
                         height: 32,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
+                        decoration: BoxDecoration(
+                          color: AppColors.shimmerBaseColor,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -425,7 +464,7 @@ class _CuriosityReadingLoadingUI extends StatelessWidget {
                             height: 14,
                             width: double.infinity,
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: AppColors.shimmerBaseColor,
                               borderRadius: BorderRadius.circular(6),
                             ),
                           ),
@@ -434,7 +473,7 @@ class _CuriosityReadingLoadingUI extends StatelessWidget {
                             height: 14,
                             width: (260.w) * 0.75,
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: AppColors.shimmerBaseColor,
                               borderRadius: BorderRadius.circular(6),
                             ),
                           ),
@@ -443,7 +482,7 @@ class _CuriosityReadingLoadingUI extends StatelessWidget {
                             height: 14,
                             width: (260.w) * 0.5,
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: AppColors.shimmerBaseColor,
                               borderRadius: BorderRadius.circular(6),
                             ),
                           ),

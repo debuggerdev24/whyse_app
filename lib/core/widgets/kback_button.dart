@@ -10,18 +10,19 @@ import '../routes/user_routes.dart';
 
 class CustomBackButton extends StatelessWidget {
   final VoidCallback? onTap;
-  final Color color;
+  final Color? color;
   final EdgeInsetsGeometry? margin;
 
   const CustomBackButton({
     super.key,
     this.onTap,
-    this.color = Colors.black,
+    this.color,
     this.margin,
   });
 
   @override
   Widget build(BuildContext context) {
+    final iconColor = color ?? AppColors.black;
     return Padding(
       padding: margin ?? EdgeInsetsGeometry.zero,
       child: GestureDetector(
@@ -38,12 +39,12 @@ class CustomBackButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SvgIcon(AppAssets.backButton, size: 13.sp, color: color),
+            SvgIcon(AppAssets.backButton, size: 13.sp, color: iconColor),
             12.w.horizontalSpace,
             AppText(
               text: "Back",
               style: AppTextStyles.semibold(
-                color: color,
+                color: iconColor,
                 fontSize: 15.sp,
               ),
             ),
@@ -56,19 +57,19 @@ class CustomBackButton extends StatelessWidget {
 
 /// ---------- READY-TO-USE APP BAR WITH BACK BUTTON ----------
 class CustomBackAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final Color backgroundColor;
+  final Color? backgroundColor;
   final VoidCallback? onBack;
 
   const CustomBackAppBar({
     super.key,
-    this.backgroundColor = AppColors.backgroundColor,
+    this.backgroundColor,
     this.onBack,
   });
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: backgroundColor,
+      backgroundColor: backgroundColor ?? AppColors.backgroundColor,
       elevation: 0,
       automaticallyImplyLeading: false,
       flexibleSpace: Align(

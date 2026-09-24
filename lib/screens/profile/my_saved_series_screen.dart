@@ -244,7 +244,7 @@ class _MySavedSeriesScreenState extends State<MySavedSeriesScreen> {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.shimmerBaseColor,
                 borderRadius: BorderRadius.circular(16.r),
               ),
             ),
@@ -253,8 +253,8 @@ class _MySavedSeriesScreenState extends State<MySavedSeriesScreen> {
           Container(
             width: 32.w,
             height: 32.w,
-            decoration: const BoxDecoration(
-              color: Colors.white,
+            decoration: BoxDecoration(
+              color: AppColors.shimmerBaseColor,
               shape: BoxShape.circle,
             ),
           ),
@@ -343,7 +343,7 @@ class _SavedSeriesCard extends StatelessWidget {
                             width: 32.h,
                             height: 32.h,
                             margin: EdgeInsets.only(top: 10.w, right: 10.w),
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               color: AppColors.white,
                               shape: BoxShape.circle,
                             ),

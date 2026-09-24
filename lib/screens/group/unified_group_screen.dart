@@ -184,12 +184,12 @@ class _UnifiedGroupScreenState extends State<UnifiedGroupScreen>
             Padding(
               padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 14.h),
               child: AppFilledButton(
-                backgroundColor: AppColors.black,
+                backgroundColor: AppColors.teal,
                 text: ' Share Series',
                 icon: SvgIcon(
                   AppAssets.shareIcon,
                   size: 20.sp,
-                  color: AppColors.white,
+                  color: AppColors.onPrimary,
                 ),
                 onTap: () {
                   context.pushNamed(
@@ -249,9 +249,9 @@ class _GroupUpdatesTab extends StatelessWidget {
           AppSkeletonizer(child: Container(
               width: 36.w,
               height: 36.w,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white,
+                color: AppColors.shimmerBaseColor,
               ),
             ),
           ),
@@ -260,7 +260,7 @@ class _GroupUpdatesTab extends StatelessWidget {
             child: AppSkeletonizer(child: Container(
                 height: 200.h,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.shimmerBaseColor,
                   borderRadius: BorderRadius.circular(16.r),
                 ),
               ),
@@ -346,7 +346,7 @@ class _GroupFeedCard extends StatelessWidget {
         Container(
           width: 36.w,
           height: 36.w,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: AppColors.lighttealcolor,
           ),
@@ -706,7 +706,7 @@ class _StreakRankingRow extends StatelessWidget {
             width: rankSize,
             height: rankSize,
             alignment: Alignment.center,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: AppColors.extealighttealcolor,
             ),

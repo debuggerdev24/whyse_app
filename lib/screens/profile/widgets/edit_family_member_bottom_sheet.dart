@@ -131,10 +131,10 @@ class _EditFamilyMemberBottomSheetState extends State<EditFamilyMemberBottomShee
                   onPressed: _selectedRole == null || _isSaving ? null : _saveRole,
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
-                    backgroundColor: AppColors.black,
-                    disabledBackgroundColor: AppColors.black.setOpacity(0.25),
-                    foregroundColor: AppColors.white,
-                    disabledForegroundColor: AppColors.white.setOpacity(0.7),
+                    backgroundColor: AppColors.teal,
+                    disabledBackgroundColor: AppColors.teal.withValues(alpha: 0.35),
+                    foregroundColor: AppColors.onPrimary,
+                    disabledForegroundColor: AppColors.onPrimary.withValues(alpha: 0.7),
                     padding: EdgeInsets.symmetric(vertical: 14.h),
                     shape: const StadiumBorder(),
                   ),
@@ -142,16 +142,16 @@ class _EditFamilyMemberBottomSheetState extends State<EditFamilyMemberBottomShee
                       ? SizedBox(
                           width: 22.sp,
                           height: 22.sp,
-                          child: const CircularProgressIndicator(
+                          child: CircularProgressIndicator(
                             strokeWidth: 2.5,
-                            color: AppColors.white,
+                            color: AppColors.onPrimary,
                           ),
                         )
                       : AppText(
                           text: 'Save',
                           style: AppTextStyles.semibold(
                             fontSize: 16,
-                            color: AppColors.white,
+                            color: AppColors.onPrimary,
                           ),
                         ),
                 ),
@@ -226,7 +226,7 @@ class _EditRoleShimmerTile extends StatelessWidget {
     return AppSkeletonizer(child: Container(
         height: 52.h,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.shimmerBaseColor,
           borderRadius: BorderRadius.circular(12.r),
         ),
       ),

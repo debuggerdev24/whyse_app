@@ -283,7 +283,7 @@ class _ShimmerTile extends StatelessWidget {
     return AppSkeletonizer(child: Container(
         height: 100.h,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.shimmerBaseColor,
           borderRadius: BorderRadius.circular(16.r),
         ),
       ),

@@ -123,7 +123,7 @@ class _ExploreSearchFieldState extends State<ExploreSearchField> {
         contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(999),
-          borderSide: const BorderSide(color: AppColors.searchBackgroundColor),
+          borderSide: BorderSide(color: AppColors.searchBackgroundColor),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(999),
@@ -728,7 +728,7 @@ class ExploreSeriesCard extends StatelessWidget {
                     )
                   : FallbackTopicArt(
                       topic: topic,
-                      colors: const [AppColors.teal, AppColors.bluecolor],
+                      colors: [AppColors.teal, AppColors.bluecolor],
                     ),
             ),
             Expanded(

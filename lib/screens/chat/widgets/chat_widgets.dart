@@ -4,7 +4,7 @@ import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/chat/chat_history_model.dart';
 
-const Color _chatBackground = Color(0xFFF9F6F3);
+Color get chatBackgroundColor => AppColors.backgroundColor;
 
 class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
   const ChatAppBar({super.key});
@@ -739,7 +739,7 @@ class ChatInputBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: _chatBackground,
+      color: chatBackgroundColor,
       padding: EdgeInsets.fromLTRB(
         20.w,
         8.h,
@@ -784,13 +784,13 @@ class ChatInputBar extends StatelessWidget {
             child: Container(
               width: 48.w,
               height: 48.w,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppColors.teal,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.arrow_upward_rounded,
-                color: AppColors.white,
+                color: AppColors.onPrimary,
                 size: 22.w,
               ),
             ),
@@ -800,5 +800,3 @@ class ChatInputBar extends StatelessWidget {
     );
   }
 }
-
-Color get chatBackgroundColor => _chatBackground;

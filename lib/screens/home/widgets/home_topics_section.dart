@@ -41,9 +41,26 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  AppText(
-                    text: "My Series",
-                    style: AppTextStyles.bold(fontSize: 20),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AppText(
+                          text: "My Series",
+                          style: AppTextStyles.bold(
+                            fontSize: 20,
+                            color: AppColors.black,
+                          ),
+                        ),
+                        AppText(
+                          text: "Your reading collection",
+                          style: AppTextStyles.medium(
+                            fontSize: 13.sp,
+                            color: AppColors.darkGrey,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
@@ -231,7 +248,7 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
       child: Container(
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -317,7 +334,7 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
                             child: AppText(
                               text: "Re-generate",
                               style: AppTextStyles.textStyle14Semibold.copyWith(
-                                color: Colors.white,
+                                color: AppColors.white,
                               ),
                             ),
                           ),
@@ -473,7 +490,7 @@ class _StoryCardShimmer extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppSkeletonizer(child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.shimmerBaseColor,
           borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
@@ -765,7 +782,11 @@ class NetflixStyleTopicCard extends StatelessWidget {
 Widget _netflixCardShimmer([double? w]) {
   final width = w ?? 120.w;
   return AppSkeletonizer(
-    child: Container(width: width, height: 160.w, color: Colors.grey),
+    child: Container(
+      width: width,
+      height: 160.w,
+      color: AppColors.shimmerBaseColor,
+    ),
   );
 }
 
