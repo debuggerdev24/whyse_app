@@ -93,7 +93,7 @@ class _GoalScreenState extends State<GoalScreen> {
                       18.w.verticalSpace,
 
                       if (provider.isLoadingGoals)
-                        const Expanded(
+                        Expanded(
                           child: Center(
                             child: CircularProgressIndicator(
                               color: AppColors.teal,
@@ -160,7 +160,7 @@ class _GoalScreenState extends State<GoalScreen> {
                                     vertical: 13.h,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: AppColors.white,
                                     borderRadius: BorderRadius.circular(12.r),
                                     border: Border.all(
                                       color: isSelected

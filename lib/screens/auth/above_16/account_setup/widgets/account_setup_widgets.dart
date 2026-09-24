@@ -1,8 +1,8 @@
 import 'package:redstreakapp/core/constants/app_constants.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 
-const Color accountSetupBackground = Color(0xFFF5F5F5);
-const Color accountSetupInputBg = Color(0xFFEFEFEF);
+Color get accountSetupBackground => AppColors.backgroundColor;
+Color get accountSetupInputBg => AppColors.lightwhiteColor;
 
 class AccountSetupHeader extends StatelessWidget {
   const AccountSetupHeader({super.key});
@@ -30,7 +30,7 @@ class AccountSetupHeader extends StatelessWidget {
               text: 'Account Setup',
               style: AppTextStyles.bold(
                 fontSize: 20.sp,
-                color: AppColors.white,
+                color: AppColors.onImage,
               ),
             ),
           ),
@@ -53,7 +53,7 @@ class AccountSetupBotBubble extends StatelessWidget {
         Container(
           width: 34.w,
           height: 34.w,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: AppColors.white,
             shape: BoxShape.circle,
           ),
@@ -584,7 +584,7 @@ class AccountSetupInputBar extends StatelessWidget {
               child: Container(
                 width: 48.w,
                 height: 48.w,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: AppColors.teal,
                   shape: BoxShape.circle,
                 ),

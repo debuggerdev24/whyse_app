@@ -80,7 +80,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                         scrollDirection: Axis.horizontal,
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.white,
                             border: Border.all(
                               color: AppColors.black.withValues(alpha: 0.1),
                             ),
@@ -109,9 +109,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                                       Container(
                                         width: 1.w,
                                         height: 22.h,
-                                        color: Colors.grey.withValues(
-                                          alpha: 0.3,
-                                        ),
+                                        color: AppColors.border,
                                       ),
                                   ],
                                 );
@@ -256,9 +254,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
           text: text,
           style: AppTextStyles.semibold(
             fontSize: isSelected ? 15.sp : 13.sp,
-            color: isSelected
-                ? Colors.white
-                : AppColors.black.withValues(alpha: 0.3),
+            color: isSelected ? AppColors.onPrimary : AppColors.darkGrey,
           ),
         ),
       ),

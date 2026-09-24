@@ -155,7 +155,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       decoration: BoxDecoration(
         color: AppColors.white,
         border: Border(
-          top: BorderSide(color: AppColors.black.setOpacity(0.08), width: 1),
+          top: BorderSide(color: AppColors.border, width: 1),
         ),
       ),
       child: Padding(
@@ -264,9 +264,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Container(
                       width: 64.w,
                       height: 64.w,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white,
+                        color: AppColors.shimmerBaseColor,
                       ),
                     ),
                     8.h.verticalSpace,
@@ -274,7 +274,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       width: 52.w,
                       height: 12.h,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.shimmerBaseColor,
                         borderRadius: BorderRadius.circular(4.r),
                       ),
                     ),
@@ -283,7 +283,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       width: 40.w,
                       height: 10.h,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.shimmerBaseColor,
                         borderRadius: BorderRadius.circular(4.r),
                       ),
                     ),
@@ -338,7 +338,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Icon(
             Icons.family_restroom_outlined,
             size: 36.w,
-            color: AppColors.black.setOpacity(0.2),
+            color: AppColors.black.withValues(alpha: 0.4),
           ),
           8.h.verticalSpace,
           AppText(
@@ -354,7 +354,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             textAlign: TextAlign.center,
             style: AppTextStyles.medium(
               fontSize: 12,
-              color: AppColors.black.setOpacity(0.35),
+              color: AppColors.black.setOpacity(0.55),
             ),
           ),
         ],
@@ -371,7 +371,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.black,
           backgroundColor: AppColors.white,
-          side: BorderSide(color: AppColors.black.setOpacity(0.15)),
+          side: BorderSide(color: AppColors.black.withValues(alpha: 0.28)),
           padding: EdgeInsets.symmetric(vertical: 14.h),
           shape: const StadiumBorder(),
         ),
@@ -404,7 +404,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       decoration: BoxDecoration(
         color: AppColors.white,
         border: Border(
-          top: BorderSide(color: AppColors.black.setOpacity(0.08), width: 1),
+          top: BorderSide(color: AppColors.border, width: 1),
         ),
       ),
       child: Padding(
@@ -514,9 +514,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Container(
                       width: 64.w,
                       height: 64.w,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white,
+                        color: AppColors.shimmerBaseColor,
                       ),
                     ),
                     8.h.verticalSpace,
@@ -524,7 +524,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       width: 52.w,
                       height: 12.h,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.shimmerBaseColor,
                         borderRadius: BorderRadius.circular(4.r),
                       ),
                     ),
@@ -588,7 +588,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Icon(
             Icons.people_outline_rounded,
             size: 36.w,
-            color: AppColors.black.setOpacity(0.2),
+            color: AppColors.black.withValues(alpha: 0.4),
           ),
           8.h.verticalSpace,
           AppText(
@@ -603,7 +603,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             text: 'Add friends to start reading together',
             style: AppTextStyles.medium(
               fontSize: 12,
-              color: AppColors.black.setOpacity(0.35),
+              color: AppColors.black.setOpacity(0.55),
             ),
           ),
         ],
@@ -619,7 +619,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.black,
           backgroundColor: AppColors.white,
-          side: BorderSide(color: AppColors.black.setOpacity(0.15)),
+          side: BorderSide(color: AppColors.black.withValues(alpha: 0.28)),
           padding: EdgeInsets.symmetric(vertical: 14.h),
           shape: const StadiumBorder(),
         ),
@@ -660,7 +660,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           decoration: BoxDecoration(
             color: AppColors.white,
             border: Border(
-              top: BorderSide(color: AppColors.black.setOpacity(0.08), width: 1),
+              top: BorderSide(color: AppColors.border, width: 1),
             ),
           ),
           child: Padding(
@@ -760,7 +760,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             color: AppColors.white,
             border: Border(
               top: BorderSide(
-                color: AppColors.black.setOpacity(0.08),
+                color: AppColors.border,
                 width: 1,
               ),
             ),
@@ -842,7 +842,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 width: widths[i].w,
                 height: 38.h,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.shimmerBaseColor,
                   borderRadius: BorderRadius.circular(24.r),
                 ),
               ),
@@ -903,7 +903,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Icon(
             Icons.interests_outlined,
             size: 34.w,
-            color: AppColors.black.setOpacity(0.2),
+            color: AppColors.black.withValues(alpha: 0.4),
           ),
           8.h.verticalSpace,
           AppText(
@@ -919,7 +919,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             textAlign: TextAlign.center,
             style: AppTextStyles.medium(
               fontSize: 12,
-              color: AppColors.black.setOpacity(0.35),
+              color: AppColors.black.setOpacity(0.55),
             ),
           ),
         ],
@@ -991,8 +991,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
-                  backgroundColor: AppColors.black,
-                  foregroundColor: AppColors.white,
+                  backgroundColor: AppColors.teal,
+                  foregroundColor: AppColors.onPrimary,
                   padding: EdgeInsets.symmetric(vertical: 14.h),
                   shape: const StadiumBorder(),
                 ),
@@ -1000,7 +1000,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   text: 'Upgrade',
                   style: AppTextStyles.semibold(
                     fontSize: 15,
-                    color: AppColors.white,
+                    color: AppColors.onPrimary,
                   ),
                 ),
               ),
@@ -1327,7 +1327,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Icon(
                 Icons.bookmark_border_rounded,
                 size: 36.w,
-                color: AppColors.black.setOpacity(0.2),
+                color: AppColors.black.withValues(alpha: 0.4),
               ),
               8.h.verticalSpace,
               AppText(
@@ -1342,7 +1342,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 text: 'Series you save will appear here',
                 style: AppTextStyles.medium(
                   fontSize: 12,
-                  color: AppColors.black.setOpacity(0.35),
+                  color: AppColors.black.setOpacity(0.55),
                 ),
               ),
             ],
@@ -1385,7 +1385,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       decoration: BoxDecoration(
         color: AppColors.lightwhiteColor,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.black.setOpacity(0.08)),
+        border: Border.all(color: AppColors.border),
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
@@ -1450,7 +1450,7 @@ class _SavedSeriesCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
-              color: AppColors.black.setOpacity(0.08),
+              color: AppColors.border,
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -1511,7 +1511,7 @@ class _SavedSeriesCard extends StatelessWidget {
                           width: 32.h,
                           height: 32.h,
                           margin: EdgeInsets.only(top: 10.w, right: 10.w),
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             color: AppColors.white,
                             shape: BoxShape.circle,
                           ),
@@ -1627,7 +1627,7 @@ class _ProfileDetailsBlockShimmer extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.shimmerBaseColor,
         borderRadius: BorderRadius.circular(6),
       ),
     );

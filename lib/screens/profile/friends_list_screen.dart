@@ -796,9 +796,9 @@ class _ShimmerTile extends StatelessWidget {
           Container(
             width: 48.w,
             height: 48.w,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white,
+              color: AppColors.shimmerBaseColor,
             ),
           ),
           16.w.horizontalSpace,
@@ -810,7 +810,7 @@ class _ShimmerTile extends StatelessWidget {
                   width: 120.w,
                   height: 14.h,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.shimmerBaseColor,
                     borderRadius: BorderRadius.circular(4.r),
                   ),
                 ),
@@ -819,7 +819,7 @@ class _ShimmerTile extends StatelessWidget {
                   width: 80.w,
                   height: 11.h,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.shimmerBaseColor,
                     borderRadius: BorderRadius.circular(4.r),
                   ),
                 ),

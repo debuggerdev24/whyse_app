@@ -49,7 +49,7 @@ class SearchResultRowShimmer extends StatelessWidget {
           AppSkeletonizer(child: Container(
               width: 44.r,
               height: 44.r,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppColors.shimmerBaseColor,
               ),

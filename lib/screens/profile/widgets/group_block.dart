@@ -273,9 +273,9 @@ class _ImageShimmer extends StatelessWidget {
     return AppSkeletonizer(child: Container(
         width: 64,
         height: 64,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white,
+          color: AppColors.shimmerBaseColor,
         ),
       ),
     );
@@ -287,7 +287,7 @@ class _TextShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppSkeletonizer(child: Container(width: 30, height: 10, color: Colors.white),
+    return AppSkeletonizer(child: Container(width: 30, height: 10, color: AppColors.shimmerBaseColor),
     );
   }
 }
@@ -328,8 +328,8 @@ class _ActionButtons extends StatelessWidget {
             },
             style: ElevatedButton.styleFrom(
               elevation: 0,
-              backgroundColor: AppColors.black,
-              foregroundColor: AppColors.white,
+              backgroundColor: AppColors.teal,
+              foregroundColor: AppColors.onPrimary,
               padding: EdgeInsets.symmetric(vertical: 14.h),
               shape: const StadiumBorder(),
             ),
@@ -337,7 +337,7 @@ class _ActionButtons extends StatelessWidget {
               text: 'Join Group',
               style: AppTextStyles.semibold(
                 fontSize: 15,
-                color: AppColors.white,
+                color: AppColors.onPrimary,
               ),
             ),
           ),

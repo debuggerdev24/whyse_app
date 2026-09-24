@@ -289,7 +289,7 @@ class _SeriesTile extends StatelessWidget {
                             child: Container(
                               width: 30.w,
                               height: 30.w,
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 color: AppColors.white,
                                 shape: BoxShape.circle,
                               ),
@@ -345,7 +345,7 @@ class _SeriesTile extends StatelessWidget {
               ),
             ),
             child: selected
-                ? Icon(Icons.check, size: 18.sp, color: AppColors.white)
+                ? Icon(Icons.check, size: 18.sp, color: AppColors.onPrimary)
                 : null,
           ),
         ],

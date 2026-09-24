@@ -360,8 +360,8 @@ class YourEBooksScreen extends StatelessWidget {
                   onPressed: () => Navigator.of(context).pop(),
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
-                    backgroundColor: AppColors.black,
-                    foregroundColor: AppColors.white,
+                    backgroundColor: AppColors.teal,
+                    foregroundColor: AppColors.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(26.r),
                     ),
@@ -371,7 +371,7 @@ class YourEBooksScreen extends StatelessWidget {
                     text: 'Send',
                     style: AppTextStyles.semibold(
                       fontSize: 16,
-                      color: AppColors.white,
+                      color: AppColors.onPrimary,
                     ),
                   ),
                 ),
@@ -648,7 +648,7 @@ class _RecipientTile extends StatelessWidget {
             CircleAvatar(
               radius: 25.r,
               backgroundColor: data.avatarBg,
-              child: Icon(data.avatarIcon, color: AppColors.white, size: 18.sp),
+              child: Icon(data.avatarIcon, color: AppColors.onImage, size: 18.sp),
             ),
             10.horizontalSpace,
             Expanded(
@@ -709,7 +709,7 @@ class _RecipientTile extends StatelessWidget {
                 ),
               ),
               child: selected
-                  ? Icon(Icons.check, color: AppColors.white, size: 16.sp)
+                  ? Icon(Icons.check, color: AppColors.onPrimary, size: 16.sp)
                   : null,
             ),
           ],

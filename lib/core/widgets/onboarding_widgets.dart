@@ -45,7 +45,9 @@ class OnboardingHeader extends StatelessWidget {
                     child: SvgIcon(
                       backIcon,
                       size: backIconSize.sp,
-                      color: currentStep == 0 ? Colors.grey : AppColors.black,
+                      color: currentStep == 0
+                          ? AppColors.darkGrey
+                          : AppColors.black,
                     ),
                   ),
                 ),
@@ -117,12 +119,10 @@ class SelectionOption extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         margin: EdgeInsets.only(bottom: 12.h),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
-            color: isSelected
-                ? AppColors.teal
-                : AppColors.black.withValues(alpha: 0.15),
+            color: isSelected ? AppColors.teal : AppColors.border,
             width: 1.w,
           ),
         ),
@@ -206,7 +206,7 @@ class TopicCard extends StatelessWidget {
               width: double.infinity,
               height: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.shimmerBaseColor,
                 borderRadius: BorderRadius.circular(20.r),
               ),
             ),
@@ -236,7 +236,7 @@ class TopicCard extends StatelessWidget {
                 text: label,
                 style: AppTextStyles.bold(
                   fontSize: 14.sp,
-                  color: Colors.white,
+                  color: AppColors.onImage,
                   letterSpacing: 0.2,
                 ),
               ),
@@ -266,33 +266,31 @@ class OptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color borderColor = Colors.black.withValues(alpha: 0.1);
-    Color backgroundColor = Colors.white;
+    Color borderColor = AppColors.border;
+    Color backgroundColor = AppColors.white;
     Color textColor = AppColors.black;
     Widget? trailingIcon;
 
     if (isChecked) {
       if (isCorrect) {
-        borderColor = Color(0xFF4CAF50);
-        backgroundColor = Color(0xFFE8F5E9);
-        textColor = Color(0xFF2E7D32);
+        borderColor = AppColors.greenColor;
+        backgroundColor = AppColors.greenColor.withValues(alpha: 0.16);
+        textColor = AppColors.greenColor;
         trailingIcon = SvgIcon(AppAssets.correctoption, size: 24.w);
       } else if (isSelected && !isCorrect) {
         borderColor = AppColors.redColor;
-        backgroundColor = Color(0xFFFFEBEE);
+        backgroundColor = AppColors.redColor.withValues(alpha: 0.16);
         textColor = AppColors.redColor;
         trailingIcon = SvgIcon(AppAssets.canceloption, size: 24.w);
       } else {
-        borderColor = Colors.black.withValues(alpha: 0.1);
-        backgroundColor = Colors.white;
-        textColor = AppColors.black;
+        borderColor = AppColors.border;
+        backgroundColor = AppColors.white;
+        textColor = AppColors.darkGrey;
       }
-    } else {
-      if (isSelected) {
-        borderColor = AppColors.teal;
-        backgroundColor = AppColors.teal.withValues(alpha: 0.1);
-        textColor = AppColors.teal;
-      }
+    } else if (isSelected) {
+      borderColor = AppColors.teal;
+      backgroundColor = AppColors.teal.withValues(alpha: 0.16);
+      textColor = AppColors.teal;
     }
 
     return GestureDetector(

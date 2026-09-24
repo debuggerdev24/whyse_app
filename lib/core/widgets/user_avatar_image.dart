@@ -1,3 +1,4 @@
+import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/widgets/app_skeletonizer.dart';
 import 'package:flutter/material.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
@@ -16,7 +17,7 @@ class UserAvatarShimmerFill extends StatelessWidget {
       child: Container(
         width: size,
         height: size,
-        color: Colors.white,
+        color: AppColors.shimmerBaseColor,
       ),
     );
   }

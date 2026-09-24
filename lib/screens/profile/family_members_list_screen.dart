@@ -104,7 +104,7 @@ class _FamilyMembersListScreenState extends State<FamilyMembersListScreen> {
                                 child: SizedBox(
                                   width: 24.sp,
                                   height: 24.sp,
-                                  child: const CircularProgressIndicator(
+                                  child: CircularProgressIndicator(
                                     strokeWidth: 2.5,
                                     color: AppColors.teal,
                                   ),
@@ -386,7 +386,7 @@ class _FamilyMemberTileState extends State<_FamilyMemberTile> {
   Widget _initials(FriendUser user) {
     return Center(child: AppText(
         text: user.initials,
-        style: AppTextStyles.bold(fontSize: 14.sp, color: AppColors.white),
+        style: AppTextStyles.bold(fontSize: 14.sp, color: AppColors.onImage),
       ),
     );
   }
@@ -470,9 +470,9 @@ class _ShimmerTile extends StatelessWidget {
           Container(
             width: 48.w,
             height: 48.w,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white,
+              color: AppColors.shimmerBaseColor,
             ),
           ),
           16.w.horizontalSpace,
@@ -484,7 +484,7 @@ class _ShimmerTile extends StatelessWidget {
                   width: 140.w,
                   height: 14.h,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.shimmerBaseColor,
                     borderRadius: BorderRadius.circular(4.r),
                   ),
                 ),
@@ -493,7 +493,7 @@ class _ShimmerTile extends StatelessWidget {
                   width: 72.w,
                   height: 22.h,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.shimmerBaseColor,
                     borderRadius: BorderRadius.circular(20.r),
                   ),
                 ),

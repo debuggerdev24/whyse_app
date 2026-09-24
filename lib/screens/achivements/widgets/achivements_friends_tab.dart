@@ -191,7 +191,7 @@ class _PodiumPlayer extends StatelessWidget {
             Container(
               width: avatarSize,
               height: avatarSize,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppColors.lighttealcolor,
                 shape: BoxShape.circle,
               ),
@@ -265,7 +265,7 @@ class _LeaderboardListTile extends StatelessWidget {
           Container(
             width: 32.w,
             height: 32.w,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: AppColors.extealighttealcolor,
             ),
@@ -282,7 +282,7 @@ class _LeaderboardListTile extends StatelessWidget {
           Container(
             width: 36.w,
             height: 36.w,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.lighttealcolor,
               shape: BoxShape.circle,
             ),
@@ -314,12 +314,12 @@ class _LeaderboardAvatar extends StatelessWidget {
   final LeaderboardEntryModel entry;
   final double size;
 
-  static const _avatarColors = [
+  static List<Color> get _avatarColors => [
     AppColors.teal,
-    Color(0xFFE8D9C4),
-    Color(0xFFFFB37A),
-    Color(0xFFFFA8C5),
-    Color(0xFF6B8E9B),
+    const Color(0xFFE8D9C4),
+    const Color(0xFFFFB37A),
+    const Color(0xFFFFA8C5),
+    const Color(0xFF6B8E9B),
   ];
 
   Color get _fallbackColor {

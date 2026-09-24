@@ -497,13 +497,13 @@ class _MemberTag extends StatelessWidget {
     final (label, bgColor, textColor, borderColor) = switch (type) {
       _MemberTagType.leave => (
         'Leave',
-        const Color(0xFFFFF5F5),
+        AppColors.redColor.withValues(alpha: 0.12),
         AppColors.redColor,
         AppColors.redColor.withValues(alpha: 0.6),
       ),
       _MemberTagType.remove => (
         'Remove',
-        const Color(0xFFFFF5F5),
+        AppColors.redColor.withValues(alpha: 0.12),
         AppColors.redColor,
         AppColors.redColor.withValues(alpha: 0.4),
       ),
@@ -515,7 +515,7 @@ class _MemberTag extends StatelessWidget {
       ),
       _MemberTagType.member => (
         'Member',
-        const Color(0xFFF3F3F3),
+        AppColors.lightwhiteColor,
         AppColors.black.withValues(alpha: 0.6),
         Colors.transparent,
       ),

@@ -41,7 +41,7 @@ class PlanCard extends StatelessWidget {
                   offset: const Offset(0, 2),
                 ),
               ],
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isSelected ? AppColors.teal : Colors.transparent,

@@ -131,11 +131,11 @@ class AchievementGoalCard extends StatelessWidget {
   Color get _iconBackgroundColor {
     switch (achievement.type) {
       case 'spark':
-        return const Color(0xFFFDEBDD);
+        return AppColors.lightyellowcolor;
       case 'series':
-        return const Color(0xFFE8F4FF);
+        return AppColors.lightwhiteColor;
       case 'interest':
-        return const Color(0xFFEAF8F0);
+        return AppColors.extealighttealcolor;
       default:
         return AppColors.teal;
     }
@@ -162,7 +162,7 @@ class AchievementGoalCard extends StatelessWidget {
           color: AppColors.teal,
         );
       default:
-        return SvgIcon(AppAssets.page, size: 22.w, color: AppColors.white);
+        return SvgIcon(AppAssets.page, size: 22.w, color: AppColors.onPrimary);
     }
   }
 }

@@ -93,13 +93,13 @@ class _CreatedStoryReadingScreenShimmer extends StatelessWidget {
     required double width,
     required double height,
     double radius = 6,
-    Color fill = AppColors.shimmerBaseColor,
+    Color? fill,
   }) {
     return AppSkeletonizer(child: Container(
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: fill,
+          color: fill ?? AppColors.shimmerBaseColor,
           borderRadius: BorderRadius.circular(radius),
         ),
       ),
@@ -408,7 +408,7 @@ class _StoryIdeaCardShimmer extends StatelessWidget {
         margin: EdgeInsets.symmetric(horizontal: 18.w),
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.shimmerBaseColor,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -497,7 +497,7 @@ class _ShimmerBox extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.shimmerBaseColor,
         borderRadius: BorderRadius.circular(radius),
       ),
     );
@@ -673,7 +673,7 @@ class StoryIdeasImageShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppSkeletonizer(child: const ColoredBox(color: AppColors.lightwhiteColor),
+    return AppSkeletonizer(child: ColoredBox(color: AppColors.lightwhiteColor),
     );
   }
 }

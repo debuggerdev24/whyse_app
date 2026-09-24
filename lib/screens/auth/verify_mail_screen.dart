@@ -60,7 +60,7 @@ class VerifyOtpScreen extends StatelessWidget {
                         submittedPinTheme: buildPinTheme(
                           textStyle: AppTextStyles.textStyle22Medium,
 
-                          borderColor: Colors.grey.shade400,
+                          borderColor: AppColors.border,
                         ),
 
                         keyboardType: TextInputType.number,
@@ -124,7 +124,7 @@ class VerifyOtpScreen extends StatelessWidget {
       textStyle: textStyle,
       decoration: BoxDecoration(
         border: Border.all(
-          color: borderColor ?? Colors.grey,
+          color: borderColor ?? AppColors.border,
           width: borderWidth,
         ),
         borderRadius: BorderRadius.circular(borderRadius),

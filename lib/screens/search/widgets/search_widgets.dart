@@ -175,7 +175,7 @@ class FeaturedTopicCard extends StatelessWidget {
                         text: topic.storiesCountLabel,
                         style: AppTextStyles.semibold(
                           fontSize: 12.sp,
-                          color: AppColors.white,
+                          color: AppColors.onPrimary,
                         ),
                       ),
                     ),
@@ -205,7 +205,7 @@ class FeaturedTopicCard extends StatelessWidget {
                       style: AppTextStyles.bold(
                         fontSize: 28.sp,
                         height: 1.1,
-                        color: AppColors.white,
+                        color: AppColors.onImage,
                       ),
                     ),
                     10.w.verticalSpace,
@@ -216,7 +216,7 @@ class FeaturedTopicCard extends StatelessWidget {
                       style: AppTextStyles.medium(
                         fontSize: 14.sp,
                         height: 1.4,
-                        color: AppColors.white.withValues(alpha: 0.84),
+                        color: AppColors.onImage.withValues(alpha: 0.84),
                       ),
                     ),
                     14.w.verticalSpace,
@@ -228,7 +228,7 @@ class FeaturedTopicCard extends StatelessWidget {
                           .map(
                             (interest) => GlassChip(
                               label: interest,
-                              textColor: AppColors.white,
+                              textColor: AppColors.onImage,
                             ),
                           )
                           .toList(),
@@ -309,7 +309,7 @@ class PosterTopicCard extends StatelessWidget {
                     style: AppTextStyles.bold(
                       fontSize: 18.sp,
                       height: 1.15,
-                      color: AppColors.white,
+                      color: AppColors.onImage,
                     ),
                   ),
                   10.w.verticalSpace,
@@ -319,12 +319,12 @@ class PosterTopicCard extends StatelessWidget {
                     children: [
                       GlassChip(
                         label: topic.storiesCountLabel,
-                        textColor: AppColors.white,
+                        textColor: AppColors.onImage,
                       ),
                       if (topic.interests.isNotEmpty)
                         GlassChip(
                           label: topic.interests.first,
-                          textColor: AppColors.white,
+                          textColor: AppColors.onImage,
                         ),
                     ],
                   ),
@@ -434,9 +434,9 @@ class BrowseTopicDetailsSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 28.h),
       child: SafeArea(
@@ -555,7 +555,7 @@ class FallbackTopicArt extends StatelessWidget {
       child: Center(
         child: Icon(
           Icons.auto_stories_rounded,
-          color: AppColors.white.withValues(alpha: 0.85),
+          color: AppColors.onImage.withValues(alpha: 0.85),
           size: 42.sp,
         ),
       ),
@@ -573,15 +573,15 @@ class TopBadge extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.14),
+        color: Colors.white.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppColors.white.withValues(alpha: 0.15)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
       ),
       child: AppText(
         text: label,
         style: AppTextStyles.semibold(
           fontSize: 12.sp,
-          color: AppColors.white,
+          color: AppColors.onImage,
         ),
       ),
     );
@@ -609,17 +609,17 @@ class TopicListToggleButton extends StatelessWidget {
     final Color backgroundColor = isInMyList
         ? AppColors.teal
         : darkMode
-        ? AppColors.white.withValues(alpha: 0.16)
+        ? Colors.white.withValues(alpha: 0.16)
         : AppColors.white;
     final Color borderColor = isInMyList
         ? AppColors.teal
         : darkMode
-        ? AppColors.white.withValues(alpha: 0.20)
+        ? Colors.white.withValues(alpha: 0.20)
         : AppColors.black.withValues(alpha: 0.12);
     final Color foregroundColor = isInMyList
-        ? AppColors.white
+        ? AppColors.onPrimary
         : darkMode
-        ? AppColors.white
+        ? AppColors.onImage
         : AppColors.black;
 
     return GestureDetector(
@@ -687,9 +687,9 @@ class GlassChip extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.w),
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.12),
+        color: Colors.white.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppColors.white.withValues(alpha: 0.12)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
       ),
       child: AppText(
         text: '${label.split(' ')[0]} Stories',
@@ -842,7 +842,7 @@ class BrowseErrorState extends StatelessWidget {
                 text: "Try Again",
                 style: AppTextStyles.semibold(
                   fontSize: 14.sp,
-                  color: AppColors.white,
+                  color: AppColors.onPrimary,
                 ),
               ),
             ),
@@ -952,7 +952,7 @@ class ImageShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppSkeletonizer(child: const ColoredBox(color: AppColors.lightwhiteColor),
+    return AppSkeletonizer(child: ColoredBox(color: AppColors.lightwhiteColor),
     );
   }
 }
@@ -974,7 +974,7 @@ class _BrowseShimmerBox extends StatelessWidget {
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.shimmerBaseColor,
           borderRadius: BorderRadius.circular(borderRadius),
         ),
       ),

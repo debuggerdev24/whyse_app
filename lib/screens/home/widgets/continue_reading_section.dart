@@ -98,9 +98,25 @@ class _ContinueReadingSectionState extends State<ContinueReadingSection>
       children: [
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.w),
-          child: AppText(
-            text: "Continue Reading...",
-            style: AppTextStyles.bold(fontSize: 20.sp),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppText(
+                text: 'Continue reading...',
+                style: AppTextStyles.bold(
+                  fontSize: 20.sp,
+                  color: AppColors.black,
+                ),
+              ),
+              2.h.verticalSpace,
+              AppText(
+                text: 'Pick up where you left off',
+                style: AppTextStyles.medium(
+                  fontSize: 13.sp,
+                  color: AppColors.darkGrey,
+                ),
+              ),
+            ],
           ),
         ),
         6.w.verticalSpace,
@@ -321,10 +337,14 @@ class _ContinueReadingCard extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 10.w),
-                  AppButton(
-                    margin: EdgeInsets.zero,
-                    onTap: onContinueReading,
-                    text: "Continue Reading",
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: AppButton(
+                      fullWidth: false,
+                      margin: EdgeInsets.zero,
+                      onTap: onContinueReading,
+                      text: 'Continue',
+                    ),
                   ),
                 ],
               ),
@@ -372,7 +392,7 @@ class _ContinueReadingCardShimmer extends StatelessWidget {
         height: 268.w,
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.shimmerBaseColor,
             borderRadius: BorderRadius.circular(16.r),
             boxShadow: [
               BoxShadow(
@@ -445,7 +465,7 @@ class _ContinueReadingEmptyState extends StatelessWidget {
         width: double.infinity,
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: const Color(0xFFF7F8FA),
+          color: AppColors.lightwhiteColor,
           borderRadius: BorderRadius.circular(16.r),
         ),
         child: Row(
@@ -508,9 +528,9 @@ class _ContinueReadingErrorState extends StatelessWidget {
         width: double.infinity,
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: const Color(0xFFFFF6F6),
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: const Color(0xFFFFD6D6)),
+          border: Border.all(color: AppColors.redColor.withValues(alpha: 0.35)),
         ),
         child: Row(
           children: [
@@ -544,7 +564,7 @@ class _ContinueReadingErrorState extends StatelessWidget {
                   text: "Retry",
                   style: AppTextStyles.bold(
                     fontSize: 12.sp,
-                    color: AppColors.white,
+                    color: AppColors.onPrimary,
                   ),
                 ),
               ),

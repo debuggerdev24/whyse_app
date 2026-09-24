@@ -26,13 +26,13 @@ class CustomDropDown extends StatelessWidget {
         highlightColor: Colors.transparent,
         hoverColor: Colors.transparent,
         focusColor: AppColors.darkGrey.withValues(alpha: 0.1),
-        canvasColor: Colors.white,
+        canvasColor: AppColors.white,
       ),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 20.w),
         height: 50.h,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: AppColors.black.withValues(alpha: 0.1),
@@ -48,7 +48,7 @@ class CustomDropDown extends StatelessWidget {
               size: 22.sp,
             ),
 
-            dropdownColor: Colors.white,
+            dropdownColor: AppColors.white,
             elevation: 3,
 
             style: AppTextStyles.regular(
@@ -144,7 +144,7 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 20.w),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.white,
             borderRadius: BorderRadius.circular(14.r),
             border: Border.all(color: AppColors.black.withValues(alpha: 0.1)),
           ),
@@ -159,7 +159,7 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
                   color: AppColors.black.withValues(alpha: 0.3),
                 ),
               ),
-              icon: const Icon(
+              icon: Icon(
                 Icons.keyboard_arrow_down_rounded,
                 color: AppColors.black,
               ),

@@ -8,122 +8,120 @@ import 'package:redstreakapp/providers/profile/profile_provider.dart';
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
 
-  static String _formatSparkPoints(int points) {
-    if (points >= 1000000) {
-      return '${(points / 1000000).toStringAsFixed(1)}M';
+  static String _streakLabel(int days) {
+    if (days <= 0) return '0 days';
+    if (days == 1) return '1 day';
+    if (days % 7 == 0) {
+      final weeks = days ~/ 7;
+      return weeks == 1 ? '1 week' : '$weeks weeks';
     }
-    if (points >= 10000) {
-      return '${(points / 1000).toStringAsFixed(1)}K';
-    }
-    return '$points';
+    return '$days days';
   }
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 40.w,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Consumer<GamificationProvider>(
-                builder: (context, gp, _) {
-                  final sparkPoints =
-                      gp.streakScore?.scores.totalScore ?? 0;
-                  return GestureDetector(
-                    onTap: () =>
-                        context.pushNamed(AppRoutes.achivementsScreen.name),
-                    child: Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.w),
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.circular(22.r),
-                        border: Border.all(
-                          color: AppColors.black.withValues(alpha: 0.12),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        spacing: 10.w,
-                        children: [
-                          SvgIcon(
-                            AppAssets.thunder,
-                            size: 17.w,
-                            color: AppColors.orangeColor,
-                          ),
-                          AppText(
-                            text: _formatSparkPoints(sparkPoints),
-                            style: AppTextStyles.bold(
-                              fontSize: 20.sp,
-                              color: AppColors.black,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+    return Consumer2<ProfileProvider, GamificationProvider>(
+      builder: (context, profile, gp, _) {
+        final firstName = profile.profileData?.firstName.trim() ?? '';
+        final name = firstName.isNotEmpty ? firstName : 'there';
+        final streakDays = gp.streakScore?.streak.currentStreak ?? 0;
+        return Row(
+          children: [
+            GestureDetector(
+              onTap: () => context.pushNamed(AppRoutes.profileScreen.name),
+              child: Container(
+                width: 44.w,
+                height: 44.w,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.border, width: 2.w),
+                ),
+                child: ClipOval(
+                  child: UserAvatarImage(
+                    avatarUrl: profile.profileData?.avatarUrl,
+                    size: 44.w,
+                    showPlaceholderShimmerWhenEmpty:
+                        profile.getProfileState == DataState.loading,
+                  ),
+                ),
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
+            ),
+            10.w.horizontalSpace,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      context.pushNamed(AppRoutes.notificationScreen.name);
-                    },
-                    child: Padding(
-                      padding: EdgeInsets.only(right: 12.w),
-                      child: SvgIcon(
-                        AppAssets.notification,
-                        size: 25.w,
-                        color: AppColors.black,
-                      ),
+                  AppText(
+                    text: 'Hey, $name!',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.bold(
+                      fontSize: 20.sp,
+                      color: AppColors.black,
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      context.pushNamed(AppRoutes.profileScreen.name);
-                    },
-                    child: Container(
-                      width: 40.w,
-                      height: 40.w,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: const Color(0xFFE5D9B8),
-                          width: 3.w,
-                        ),
-                      ),
-                      child: ClipOval(
-                        child: Consumer<ProfileProvider>(
-                          builder: (context, profile, _) {
-                            return UserAvatarImage(
-                              avatarUrl: profile.profileData?.avatarUrl,
-                              size: 40.w,
-                              showPlaceholderShimmerWhenEmpty:
-                                  profile.getProfileState == DataState.loading,
-                            );
-                          },
-                        ),
-                      ),
+                  AppText(
+                    text: 'Ready for a new adventure?',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.medium(
+                      fontSize: 12.sp,
+                      color: AppColors.darkGrey,
                     ),
                   ),
                 ],
               ),
-            ],
-          ),
-          IgnorePointer(
-            child: AppText(
-              text: "Home",
-              style: AppTextStyles.bold(fontSize: 21.sp),
             ),
-          ),
-        ],
-      ),
+            GestureDetector(
+              onTap: () => context.pushNamed(AppRoutes.achivementsScreen.name),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SvgIcon(
+                      AppAssets.thunder,
+                      size: 14.w,
+                      color: AppColors.orangeColor,
+                    ),
+                    4.w.horizontalSpace,
+                    AppText(
+                      text: _streakLabel(streakDays),
+                      style: AppTextStyles.semibold(
+                        fontSize: 12.sp,
+                        color: AppColors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            8.w.horizontalSpace,
+            GestureDetector(
+              onTap: () => context.pushNamed(AppRoutes.notificationScreen.name),
+              child: SvgIcon(
+                AppAssets.notification,
+                size: 22.w,
+                color: AppColors.black,
+              ),
+            ),
+            8.w.horizontalSpace,
+            GestureDetector(
+              onTap: () => context.pushNamed(AppRoutes.settingsScreen.name),
+              child: Icon(
+                Icons.settings_outlined,
+                size: 22.sp,
+                color: AppColors.black,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -286,7 +284,7 @@ class _CalendarStripState extends State<CalendarStrip> {
                 ? Icon(
                     Icons.ac_unit_rounded,
                     size: 14.w,
-                    color: AppColors.white,
+                    color: AppColors.onImage,
                   )
                 : AppText(
                     text: date.day.toString(),
@@ -294,7 +292,7 @@ class _CalendarStripState extends State<CalendarStrip> {
                       fontSize: 13.sp,
                       height: 1,
                       color: isCompleted
-                          ? AppColors.white
+                          ? AppColors.onImage
                           : isToday
                           ? AppColors.black
                           : AppColors.black.withValues(alpha: 0.55),
@@ -365,14 +363,14 @@ class BottomStatsCard extends StatelessWidget {
                 text: "Oxford Vocabulary",
                 style: AppTextStyles.bold(
                   fontSize: 16.sp,
-                  color: AppColors.white,
+                  color: AppColors.onImage,
                   letterSpacing: 1,
                 ),
               ),
               AppText(
                 text: "OXFORD",
                 style: AppTextStyles.textStyle16Regular.copyWith(
-                  color: AppColors.white.withValues(alpha: 0.5),
+                  color: AppColors.onImage.withValues(alpha: 0.5),
                   fontSize: 14.sp,
                   letterSpacing: 2,
                 ),
@@ -387,7 +385,7 @@ class BottomStatsCard extends StatelessWidget {
                 text: "3,500/5,000",
                 style: AppTextStyles.medium(
                   fontSize: 12.sp,
-                  color: AppColors.white,
+                  color: AppColors.onImage,
                 ),
               ),
               AppText(

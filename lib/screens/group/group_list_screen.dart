@@ -151,9 +151,9 @@ class _ShimmerTile extends StatelessWidget {
         AppSkeletonizer(child: Container(
             width: 48,
             height: 48,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white,
+              color: AppColors.shimmerBaseColor,
             ),
           ),
         ),
@@ -173,7 +173,7 @@ class _ShimmerTile extends StatelessWidget {
   }
 
   Widget _shimmerBox({required double width, required double height}) {
-    return AppSkeletonizer(child: Container(width: width, height: height, color: Colors.white),
+    return AppSkeletonizer(child: Container(width: width, height: height, color: AppColors.shimmerBaseColor),
     );
   }
 }

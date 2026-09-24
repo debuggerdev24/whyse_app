@@ -426,7 +426,7 @@ class _MemberTile extends StatelessWidget {
               ),
             ),
             child: isSelected
-                ? Icon(Icons.check, size: 14.sp, color: AppColors.white)
+                ? Icon(Icons.check, size: 14.sp, color: AppColors.onPrimary)
                 : null,
           ),
         ],
