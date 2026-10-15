@@ -30,6 +30,7 @@ class AppAssets {
   static const chat = "$_iconPath/chat.svg";
   static const histoy = "$_iconPath/histoy.svg";
   static const streak = "$_iconPath/streak.svg";
+  static const streakFireIcon = "$_iconPath/streak_fire.svg";
   static const like = "$_iconPath/like.svg";
   static const mystery = "$_iconPath/mystery.svg";
   static const nature = "$_iconPath/nature.svg";
@@ -59,6 +60,9 @@ class AppAssets {
   static const correctoption = "$_iconPath/correct.svg";
   static const searchIcon = "$_iconPath/searchIcons.svg";
   static const homeIcon = "$_iconPath/home.svg";
+  static const rewards = "$_iconPath/rewards.svg";
+  static const community = "$_iconPath/community.svg";
+  static const profileIcon = "$_iconPath/profile.svg";
   static const shareIcon = "$_iconPath/share.svg";
   static const addMembers = "$_iconPath/addMember.svg";
   static const font = "$_iconPath/font.svg";

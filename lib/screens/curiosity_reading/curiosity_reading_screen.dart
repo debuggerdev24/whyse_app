@@ -1,7 +1,7 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/providers/curiosity_reading/curiosity_reading_provider.dart';
@@ -120,9 +120,13 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
           _exitReading();
         }
       },
-      child: Scaffold(
-        backgroundColor: AppColors.white,
-        body: Consumer<CuriosityReadingProvider>(
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark.copyWith(
+          statusBarColor: Colors.transparent,
+        ),
+        child: Scaffold(
+          backgroundColor: const Color(0xFFF2F2F7),
+          body: Consumer<CuriosityReadingProvider>(
           builder: (context, provider, child) {
             if (provider.isGettingCuriosityReading ||
                 provider.isLoadingReadingBody) {
@@ -174,28 +178,34 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
                   provider.previousReading();
                 }
               },
-              child: Column(
+              child: SingleChildScrollView(
                 key: ValueKey(currentReading.id),
-                children: [
-                  _buildHeaderSection(
-                    context,
-                    title: currentReading.question,
-                    imageUrl: currentReading.imgUrl,
-                    onBackTap: _exitReading,
-                    onBookmarkTap: () {},
-                  ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      controller: _scrollController,
-                      padding: EdgeInsets.fromLTRB(25.w, 20.h, 25.w, 0),
-                      physics: const BouncingScrollPhysics(),
+                controller: _scrollController,
+                physics: const BouncingScrollPhysics(),
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.paddingOf(context).bottom + 24.h,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildHeaderSection(
+                      context,
+                      title: currentReading.question,
+                      category: currentReading.interestName,
+                      imageUrl: currentReading.imgUrl,
+                      onBackTap: _exitReading,
+                      onBookmarkTap: () {},
+                    ),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 0),
                       child: CuriosityReadingContent(reading: currentReading),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           },
+          ),
         ),
       ),
     );
@@ -204,128 +214,165 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
   Widget _buildHeaderSection(
     BuildContext context, {
     required String title,
+    required String category,
     required String imageUrl,
     required VoidCallback onBackTap,
     required VoidCallback onBookmarkTap,
   }) {
-    return SizedBox(
-      height: 340.h,
-      width: double.maxFinite,
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: AppNetworkImage(
-              imageUrl: imageUrl,
-              tag: 'CuriosityReading.hero',
-              placeholder: (_) => const AppSkeletonImagePlaceholder(),
-            ).animate().fadeIn(delay: 200.ms),
-          ),
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.setOpacity(0.1),
-                    Colors.black.setOpacity(0.6),
-                  ],
+    final topInset = MediaQuery.paddingOf(context).top;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
+      child: SizedBox(
+        height: topInset + 348.h,
+        width: double.infinity,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              AppNetworkImage(
+                imageUrl: imageUrl,
+                tag: 'CuriosityReading.hero',
+                placeholder: (_) => const AppSkeletonImagePlaceholder(),
+              ).animate().fadeIn(delay: 200.ms),
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0x00000000),
+                      Color(0x00000000),
+                      Color(0xB3000000),
+                    ],
+                    stops: [0, 0.52, 1],
+                  ),
                 ),
               ),
-            ),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                margin: EdgeInsets.only(
-                  top: MediaQuery.of(context).padding.top + 12.r,
-                  left: 25.w,
-                  right: 25.w,
-                ),
-                height: 40.h,
-                width: double.maxFinite,
-                child: Stack(
+              Padding(
+                padding: EdgeInsets.fromLTRB(14.w, topInset + 10, 14.w, 22.h),
+                child: Column(
                   children: [
+                    SizedBox(
+                      height: 48,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: _GlassCircleButton(
+                              onTap: onBackTap,
+                              child: const Icon(
+                                Icons.chevron_left_rounded,
+                                color: Color(0xFF1C1C1E),
+                                size: 28,
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 56),
+                            child: AppText(
+                              text: 'Curiosity Reading',
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.bold(
+                                fontSize: 17,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: _GlassCircleButton(
+                              onTap: onBookmarkTap,
+                              child: SvgIcon(
+                                AppAssets.bookmark,
+                                size: 20,
+                                color: const Color(0xFF1C1C1E),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: GestureDetector(
-                        onTap: onBackTap,
-                        child: Container(
-                          height: 40.h,
-                          width: 40.h,
-                          decoration: BoxDecoration(
-                            color: AppColors.white,
-                            shape: BoxShape.circle,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (category.trim().isNotEmpty)
+                            AppText(
+                              text: category.trim().toUpperCase(),
+                              style: AppTextStyles.semibold(
+                                fontSize: 12,
+                                color: Colors.white.withValues(alpha: 0.92),
+                              ).copyWith(letterSpacing: 1.1),
+                            ),
+                          8.h.verticalSpace,
+                          AppText(
+                            text: title,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.bold(
+                              fontSize: 26,
+                              color: Colors.white,
+                              height: 1.15,
+                            ),
                           ),
-                          padding: .all(13.r),
-                          child: SvgIcon(AppAssets.backButton),
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.center,
-                      child: AppText(
-                        text: 'Sparks',
-                        style: AppTextStyles.semiBold(
-                          fontSize: 20,
-                          color: AppColors.white,
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: GestureDetector(
-                        onTap: onBookmarkTap,
-                        child: Container(
-                          height: 40.h,
-                          width: 40.h,
-                          decoration: BoxDecoration(
-                            color: AppColors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          padding: .all(10.r),
-                          child: SvgIcon(AppAssets.bookmark),
-                        ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(25.w, 0, 25.w, 16.h),
-                    child: AppText(
-                      text: title,
-                      maxLines: 4,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.semiBold(
-                        fontSize: 18,
-                        color: AppColors.white,
-                      ).copyWith(height: 1.35, letterSpacing: 0.1),
-                      textAlign: TextAlign.start,
-                    ).animate().fadeInRight(curve: Curves.decelerate),
-                  ),
-                  Container(
-                    height: 30.h,
-                    width: double.maxFinite,
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(12.r),
-                        topRight: Radius.circular(12.r),
-                      ),
-                    ),
-                  ),
-                ],
               ),
             ],
           ),
-        ],
+        ),
+    );
+  }
+}
+
+class _GlassCircleButton extends StatelessWidget {
+  const _GlassCircleButton({required this.onTap, required this.child});
+
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: SizedBox(
+        width: 48,
+        height: 48,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            ClipOval(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                child: const DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0x8CFFFFFF),
+                  ),
+                  child: SizedBox.expand(),
+                ),
+              ),
+            ),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.7),
+                ),
+              ),
+              child: const SizedBox.expand(),
+            ),
+            child,
+          ],
+        ),
       ),
     );
   }

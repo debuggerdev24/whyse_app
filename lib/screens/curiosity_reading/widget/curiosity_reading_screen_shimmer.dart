@@ -6,7 +6,7 @@ class CuriosityReadingScreenShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: const Color(0xFFF2F2F7),
       body: AppSkeletonizer(
         child: Column(
           children: [

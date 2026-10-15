@@ -10,7 +10,15 @@ class NotificationScreen extends StatefulWidget {
   State<NotificationScreen> createState() => _NotificationScreenState();
 }
 
+enum _NotificationFilter { all, unread, mentions, followers }
+
 class _NotificationScreenState extends State<NotificationScreen> {
+  static const _pageColor = Color(0xFFF2F2F7);
+  static const _accent = Color(0xFF1A9B86);
+
+  _NotificationFilter _filter = _NotificationFilter.all;
+  bool _markedAllRead = false;
+
   @override
   void initState() {
     super.initState();
@@ -26,41 +34,120 @@ class _NotificationScreenState extends State<NotificationScreen> {
   @override
   Widget build(BuildContext context) {
     return AppLayout(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.w),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => context.pop(),
-                    child: SvgIcon(AppAssets.backButton, size: 12.w),
-                  ),
-                  Expanded(
-                    child: Center(
-                      child: AppText(
+      body: ColoredBox(
+        color: _pageColor,
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
+                child: SizedBox(
+                  height: 44,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: GestureDetector(
+                          onTap: () => context.pop(),
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.06),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.chevron_left_rounded,
+                              color: Color(0xFF1C1C1E),
+                            ),
+                          ),
+                        ),
+                      ),
+                      AppText(
                         text: 'Notifications',
                         style: AppTextStyles.bold(fontSize: 20.sp),
                       ),
+                    ],
+                  ),
+                ),
+              ),
+              16.h.verticalSpace,
+              SizedBox(
+                height: 36,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  children: [
+                    for (final filter in _NotificationFilter.values) ...[
+                      _FilterChip(
+                        label: switch (filter) {
+                          _NotificationFilter.all => 'All',
+                          _NotificationFilter.unread => 'Unread',
+                          _NotificationFilter.mentions => 'Mentions',
+                          _NotificationFilter.followers => 'Followers',
+                        },
+                        selected: _filter == filter,
+                        accent: _accent,
+                        onTap: () => setState(() => _filter = filter),
+                      ),
+                      if (filter != _NotificationFilter.followers)
+                        const SizedBox(width: 8),
+                    ],
+                  ],
+                ),
+              ),
+              8.h.verticalSpace,
+              Expanded(
+                child: Consumer<FriendProvider>(
+                  builder: (context, provider, _) {
+                    return _buildBody(provider);
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 12.h),
+                child: GestureDetector(
+                  onTap: () => setState(() => _markedAllRead = true),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 22,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _accent,
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.check_rounded,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        AppText(
+                          text: 'Mark all as read',
+                          style: AppTextStyles.semibold(
+                            fontSize: 15.sp,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  20.w.horizontalSpace,
-                ],
+                ),
               ),
-            ),
-            Divider(
-              height: 1.w,
-              color: AppColors.black.withValues(alpha: 0.08),
-            ),
-            Expanded(
-              child: Consumer<FriendProvider>(
-                builder: (context, provider, _) {
-                  return _buildBody(provider);
-                },
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -76,7 +163,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
       case DataState.failed:
         return _buildErrorState(provider);
       case DataState.success:
-        if (provider.requestsList.isEmpty) {
+        final showRequests =
+            _filter == _NotificationFilter.all ||
+            _filter == _NotificationFilter.unread;
+        if (!showRequests || provider.requestsList.isEmpty) {
           return _buildEmptyState();
         }
         return _buildRequestsList(provider);
@@ -91,26 +181,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
         ),
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 18.w),
-        itemCount: provider.requestsList.length + 1,
-        separatorBuilder: (_, index) {
-          if (index == 0) return SizedBox.shrink();
-          return SizedBox(height: 16.w);
-        },
+        padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 12.h),
+        itemCount: provider.requestsList.length,
+        separatorBuilder: (_, _) => SizedBox(height: 18.h),
         itemBuilder: (context, index) {
-          if (index == 0) {
-            return Padding(
-              padding: EdgeInsets.only(bottom: 13.w),
-              child: AppText(
-                text: 'Friend Requests',
-                style: AppTextStyles.bold(fontSize: 20.sp),
-              ),
-            );
-          }
-          final request = provider.requestsList[index - 1];
+          final request = provider.requestsList[index];
           return FriendRequestTile(
             key: ValueKey(request.friendshipId),
             request: request,
+            showUnreadDot: !_markedAllRead,
           );
         },
       ),
@@ -233,6 +312,44 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 ),
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  const _FilterChip({
+    required this.label,
+    required this.selected,
+    required this.accent,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final Color accent;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? accent : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: selected ? accent : const Color(0xFFE4E4E8),
+          ),
+        ),
+        child: AppText(
+          text: label,
+          style: AppTextStyles.medium(
+            fontSize: 14.sp,
+            color: selected ? Colors.white : const Color(0xFF8E8E93),
           ),
         ),
       ),

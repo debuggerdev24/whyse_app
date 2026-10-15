@@ -36,100 +36,74 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: EdgeInsets.only(left: 4.w, bottom: 10.w),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  AppText(
-                    text: "My Series",
-                    style: AppTextStyles.bold(fontSize: 20),
-                  ),
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      context.read<StoryProvider>().clearStoryFields();
-                      context.pushNamed(AppRoutes.storyGoalsScreen.name);
-                    },
-                    child: AppText(
-                      text: "+ Add",
-                      style: AppTextStyles.sfProTextBold(
-                        fontSize: 14.sp,
-                        color: AppColors.teal,
-                      ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                AppText(
+                  text: "Series",
+                  style: AppTextStyles.bold(fontSize: 22.sp),
+                ),
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    context.pushNamed(AppRoutes.mySavedSeriesScreen.name);
+                  },
+                  child: AppText(
+                    text: "See all",
+                    style: AppTextStyles.semibold(
+                      fontSize: 14.sp,
+                      color: AppColors.orangeColor,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+            12.h.verticalSpace,
             if (list.isNotEmpty)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  NotificationListener<ScrollNotification>(
-                    onNotification: (ScrollNotification notification) {
-                      if (!provider.hasMoreTopics ||
-                          provider.isTopicsLoadingMore ||
-                          provider.isTopicsLoading) {
-                        return false;
-                      }
-                      final m = notification.metrics;
-                      if (m.axis != Axis.horizontal || m.maxScrollExtent <= 0) {
-                        return false;
-                      }
-                      if (m.pixels >= m.maxScrollExtent - 160.w) {
-                        provider.getMyTopicsLoadMore();
-                      }
-                      return false;
-                    },
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ...List.generate(
-                            list.length,
-                            (index) => StoryCard(
-                              story: list[index],
-                              onTap: () {
-                                final topicId = list[index].id;
-                                provider.beginTopicStoryDetailsLoad(
-                                  topicId: topicId,
-                                );
-                                provider.getTopicStoryDetails(topicId: topicId);
-                                context
-                                    .pushNamed(
-                                      AppRoutes.createdStorySummaryScreen.name,
-                                      extra: topicId,
-                                    )
-                                    .then((_) {
-                                      if (!context.mounted) return;
-                                      context
-                                          .read<HomeProvider>()
-                                          .getContinueReading(force: true);
-                                    });
-                              },
-                            ),
-                          ),
-                          if (provider.isTopicsLoadingMore)
-                            ...List.generate(
-                              2,
-                              (i) => Padding(
-                                padding: EdgeInsets.only(right: 18.w),
-                                child: SizedBox(
-                                  width: 210.w,
-                                  child: const _StoryCardShimmer(),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final gap = 12.w;
+                  final itemWidth = (constraints.maxWidth - gap) / 2;
+                  final itemCount =
+                      list.length + (provider.isTopicsLoadingMore ? 2 : 0);
+                  return Wrap(
+                    spacing: gap,
+                    runSpacing: gap,
+                    children: [
+                      for (var index = 0; index < itemCount; index++)
+                        SizedBox(
+                          width: itemWidth,
+                          height: 188.h,
+                          child: index >= list.length
+                              ? const _StoryCardShimmer()
+                              : StoryCard(
+                                  story: list[index],
+                                  colorIndex: index,
+                                  onTap: () {
+                                    final topicId = list[index].id;
+                                    provider.beginTopicStoryDetailsLoad(
+                                      topicId: topicId,
+                                    );
+                                    provider.getTopicStoryDetails(
+                                      topicId: topicId,
+                                    );
+                                    context
+                                        .pushNamed(
+                                          AppRoutes.createdStorySummaryScreen.name,
+                                          extra: topicId,
+                                        )
+                                        .then((_) {
+                                          if (!context.mounted) return;
+                                          context
+                                              .read<HomeProvider>()
+                                              .getContinueReading(force: true);
+                                        });
+                                  },
                                 ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  _addNewReadingButton(context),
-                ],
+                        ),
+                    ],
+                  );
+                },
               ),
             // OLD: Wrap grid with NetflixStyleTopicCard (commented for now)
             // if (list.length > 1)
@@ -436,92 +410,39 @@ Widget _buildShimmerLoading() {
           ],
         ),
       ),
-      19.w.verticalSpace,
-      SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        physics: const NeverScrollableScrollPhysics(),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (var i = 0; i < 3; i++)
-              Padding(
-                padding: EdgeInsets.only(right: i < 2 ? 10.w : 0),
-                child: SizedBox(width: 210.w, child: const _StoryCardShimmer()),
-              ),
-          ],
-        ),
-      ),
-      19.w.verticalSpace,
-      AppSkeletonizer(child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(vertical: 14.w),
-          decoration: BoxDecoration(
-            color: AppColors.shimmerBaseColor,
-            borderRadius: BorderRadius.circular(30.r),
-          ),
-        ),
+      12.h.verticalSpace,
+      LayoutBuilder(
+        builder: (context, constraints) {
+          final gap = 12.w;
+          final itemWidth = (constraints.maxWidth - gap) / 2;
+          return Wrap(
+            spacing: gap,
+            runSpacing: gap,
+            children: [
+              for (var i = 0; i < 4; i++)
+                SizedBox(
+                  width: itemWidth,
+                  height: 188.h,
+                  child: const _StoryCardShimmer(),
+                ),
+            ],
+          );
+        },
       ),
     ],
   );
 }
 
-/// Shimmer placeholder matching [StoryCard] (image 132.w, title, readings line, Start Reading).
 class _StoryCardShimmer extends StatelessWidget {
   const _StoryCardShimmer();
 
   @override
   Widget build(BuildContext context) {
-    return AppSkeletonizer(child: Container(
+    return AppSkeletonizer(
+      child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(height: 132.w, color: AppColors.shimmerBaseColor),
-            Padding(
-              padding: EdgeInsets.fromLTRB(14.w, 12.w, 14.w, 4.w),
-              child: Container(
-                height: 16.sp,
-                width: 140.w,
-                decoration: BoxDecoration(
-                  color: AppColors.shimmerBaseColor,
-                  borderRadius: BorderRadius.circular(4.r),
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 14.w),
-              child: Container(
-                height: 12.sp,
-                width: 120.w,
-                decoration: BoxDecoration(
-                  color: AppColors.shimmerBaseColor,
-                  borderRadius: BorderRadius.circular(4.r),
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(12.w, 14.w, 12.w, 14.w),
-              child: Container(
-                height: 44.w,
-                decoration: BoxDecoration(
-                  color: AppColors.shimmerBaseColor,
-                  borderRadius: BorderRadius.circular(30.r),
-                ),
-              ),
-            ),
-          ],
+          color: AppColors.shimmerBaseColor,
+          borderRadius: BorderRadius.circular(22.r),
         ),
       ),
     );
@@ -769,83 +690,144 @@ Widget _netflixCardShimmer([double? w]) {
   );
 }
 
-/// Home topic card: cover (fixed height), title, readings line, Start Reading — spacing via padding only.
+/// Home series tile: photo card when a cover exists, solid color card otherwise.
 class StoryCard extends StatelessWidget {
-  const StoryCard({super.key, required this.story, this.onTap});
+  const StoryCard({
+    super.key,
+    required this.story,
+    this.onTap,
+    this.colorIndex = 0,
+  });
 
   final CreatedStoryTopicsModel story;
   final VoidCallback? onTap;
+  final int colorIndex;
+
+  static const _fallbackFills = <Color>[
+    Color(0xFFF6E7B2),
+    Color(0xFFF8CDB4),
+    Color(0xFFD9EFE4),
+    Color(0xFFE7DDF8),
+  ];
+
+  static const _fallbackAccents = <Color>[
+    Color(0xFFC4A15A),
+    Color(0xFFC47A52),
+    Color(0xFF3E9A78),
+    Color(0xFF7A5EA8),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final subtitleColor = AppColors.black.withValues(alpha: 0.45);
     final readCount = story.noOfStories;
     final totalCount = story.noOfStoriesGenerated > 0
         ? story.noOfStoriesGenerated
         : readCount;
+    final hasImage = story.thumbnailUrl.trim().isNotEmpty;
+    final fill = _fallbackFills[colorIndex % _fallbackFills.length];
+    final accent = _fallbackAccents[colorIndex % _fallbackAccents.length];
+    final titleColor = hasImage ? Colors.white : AppColors.black;
+    final metaColor = hasImage
+        ? Colors.white.withValues(alpha: 0.82)
+        : AppColors.black.withValues(alpha: 0.45);
 
-    return Container(
-      width: 210.w,
-      alignment: Alignment.center,
-      margin: EdgeInsets.only(right: 18.w),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
-            child: SizedBox(
-              height: 132.w,
-              width: double.infinity,
-              child: _buildTopicCover(
+    return GestureDetector(
+      onTap: onTap,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22.r),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (hasImage)
+              _buildTopicCover(
                 story.thumbnailUrl,
                 shimmer: _storyImageShimmer(),
                 compact: true,
                 iconOnly: true,
+              )
+            else
+              ColoredBox(color: fill),
+            if (hasImage)
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0x22000000),
+                      Color(0x00000000),
+                      Color(0xD1000000),
+                    ],
+                    stops: [0, 0.4, 1],
+                  ),
+                ),
+              ),
+            if (!hasImage)
+              Positioned(
+                top: 16.h,
+                left: 0,
+                right: 0,
+                child: Icon(
+                  colorIndex.isEven
+                      ? Icons.bubble_chart_rounded
+                      : Icons.confirmation_number_rounded,
+                  size: 54.w,
+                  color: accent.withValues(alpha: 0.9),
+                ),
+              ),
+            Positioned(
+              left: 12.w,
+              right: 12.w,
+              bottom: 12.h,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AppText(
+                    text: story.topic,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.bold(
+                      fontSize: 16.sp,
+                      color: titleColor,
+                    ),
+                  ),
+                  4.h.verticalSpace,
+                  AppText(
+                    text: '$totalCount out of $readCount Reading',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.medium(
+                      fontSize: 11.sp,
+                      color: metaColor,
+                    ),
+                  ),
+                  10.h.verticalSpace,
+                  Container(
+                    width: 32.w,
+                    height: 32.w,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: hasImage
+                          ? Colors.white.withValues(alpha: 0.2)
+                          : accent,
+                      border: hasImage
+                          ? Border.all(
+                              color: Colors.white.withValues(alpha: 0.85),
+                            )
+                          : null,
+                    ),
+                    child: Icon(
+                      Icons.arrow_forward_rounded,
+                      color: Colors.white,
+                      size: 16.w,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(14.w, 13.w, 14.w, 2.w),
-            child: AppText(
-              text: story.topic,
-              style: AppTextStyles.bold(fontSize: 16.sp),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 14.w),
-            child: AppText(
-              text: '$totalCount out of $readCount Readings',
-              style: AppTextStyles.medium(
-                fontSize: 12.sp,
-                color: subtitleColor,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          AppButton(
-            margin: EdgeInsets.fromLTRB(14.w, 12.w, 14.w, 16.w),
-            onTap: () {
-              onTap?.call();
-            },
-            text: "Start Reading",
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
