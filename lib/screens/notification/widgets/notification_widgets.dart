@@ -1,11 +1,17 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/widgets/user_avatar_image.dart';
 import 'package:redstreakapp/models/friend/friend_model.dart';
 import 'package:redstreakapp/providers/friend/friend_provider.dart';
 
 class FriendRequestTile extends StatefulWidget {
-  const FriendRequestTile({super.key, required this.request});
+  const FriendRequestTile({
+    super.key,
+    required this.request,
+    this.showUnreadDot = true,
+  });
 
   final FriendRequestResponse request;
+  final bool showUnreadDot;
 
   @override
   State<FriendRequestTile> createState() => _FriendRequestTileState();
@@ -54,123 +60,126 @@ class _FriendRequestTileState extends State<FriendRequestTile> {
     );
   }
 
-  static const List<Color> _avatarColors = [
-    Color(0xFF53C3BF),
-    Color(0xFFD7B086),
-    Color(0xFF66C99D),
-    Color(0xFF7B9FD4),
-    Color(0xFFD48B8B),
-    Color(0xFFA68BD4),
-    Color(0xFFD4C36A),
-    Color(0xFF6AC8D4),
-  ];
-
-  Color get _avatarColor {
-    final hash = widget.request.requester.id.codeUnits
-        .fold<int>(0, (prev, c) => prev + c);
-    return _avatarColors[hash % _avatarColors.length];
-  }
-
   @override
   Widget build(BuildContext context) {
     final user = widget.request.requester;
+    final handle = (user.username ?? user.displayName ?? 'someone').trim();
+    final name = handle.startsWith('@') ? handle : '@$handle';
+
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CircleAvatar(
-          radius: 26.r,
-          backgroundColor: _avatarColor,
-          child: AppText(
-            text: user.initials,
-            style: AppTextStyles.bold(
-              fontSize: 16.sp,
-              color: AppColors.white,
-            ),
-          ),
+        ClipOval(
+          child: UserAvatarImage(avatarUrl: user.avatarUrl, size: 44),
         ),
         12.w.horizontalSpace,
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              AppText(
-                text: user.displayName ?? user.username ?? '',
-                style: AppTextStyles.bold(fontSize: 16.sp),
-                maxLines: 1,
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: name,
+                      style: AppTextStyles.bold(fontSize: 15.sp),
+                    ),
+                    TextSpan(
+                      text: ' sent you a friend request',
+                      style: AppTextStyles.regular(fontSize: 15.sp),
+                    ),
+                  ],
+                ),
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              2.w.verticalSpace,
+              4.h.verticalSpace,
               AppText(
-                text: 'sent you a friend request',
-                style: AppTextStyles.regular(
+                text: 'Friend request',
+                style: AppTextStyles.medium(
                   fontSize: 12.sp,
-                  color: AppColors.black.withValues(alpha: 0.6),
+                  color: const Color(0xFF8E8E93),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              ),
+              10.h.verticalSpace,
+              Row(
+                children: [
+                  _ActionButton(
+                    label: 'Decline',
+                    filled: false,
+                    busy: _isDeclining,
+                    onTap: _decline,
+                  ),
+                  const SizedBox(width: 10),
+                  _ActionButton(
+                    label: 'Accept',
+                    filled: true,
+                    busy: _isAccepting,
+                    onTap: _accept,
+                  ),
+                ],
               ),
             ],
           ),
         ),
-        8.w.horizontalSpace,
-        GestureDetector(
-          onTap: _accept,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.w),
-            decoration: BoxDecoration(
-              color: AppColors.black,
-              borderRadius: BorderRadius.circular(22.r),
+        if (widget.showUnreadDot) ...[
+          const SizedBox(width: 8),
+          Container(
+            width: 8,
+            height: 8,
+            margin: const EdgeInsets.only(top: 6),
+            decoration: const BoxDecoration(
+              color: Color(0xFF1A9B86),
+              shape: BoxShape.circle,
             ),
-            child: _isAccepting
-                ? SizedBox(
-                    width: 16.sp,
-                    height: 16.sp,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppColors.white,
-                    ),
-                  )
-                : AppText(
-                    text: 'Accept',
-                    style: AppTextStyles.bold(
-                      fontSize: 14.sp,
-                      color: AppColors.white,
-                    ),
-                  ),
           ),
-        ),
-        8.w.horizontalSpace,
-        GestureDetector(
-          onTap: _decline,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.w),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(22.r),
-              border: Border.all(
-                color: AppColors.black.withValues(alpha: 0.15),
-                width: 1,
-              ),
-            ),
-            child: _isDeclining
-                ? SizedBox(
-                    width: 16.sp,
-                    height: 16.sp,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppColors.black,
-                    ),
-                  )
-                : AppText(
-                    text: 'Decline',
-                    style: AppTextStyles.bold(
-                      fontSize: 14.sp,
-                      color: AppColors.black,
-                    ),
-                  ),
-          ),
-        ),
+        ],
       ],
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.label,
+    required this.filled,
+    required this.busy,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool filled;
+  final bool busy;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = filled ? Colors.white : const Color(0xFF1C1C1E);
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+        decoration: BoxDecoration(
+          color: filled ? const Color(0xFF1C1C1E) : Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: filled
+              ? null
+              : Border.all(color: const Color(0xFFE4E4E8)),
+        ),
+        child: busy
+            ? SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: color,
+                ),
+              )
+            : AppText(
+                text: label,
+                style: AppTextStyles.semibold(fontSize: 14.sp, color: color),
+              ),
+      ),
     );
   }
 }

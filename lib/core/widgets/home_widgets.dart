@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/user_avatar_image.dart';
@@ -8,122 +10,93 @@ import 'package:redstreakapp/providers/profile/profile_provider.dart';
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
 
-  static String _formatSparkPoints(int points) {
-    if (points >= 1000000) {
-      return '${(points / 1000000).toStringAsFixed(1)}M';
-    }
-    if (points >= 10000) {
-      return '${(points / 1000).toStringAsFixed(1)}K';
-    }
-    return '$points';
+  String _greetingName(ProfileProvider profile) {
+    final first = profile.profileData?.firstName.trim() ?? '';
+    if (first.isNotEmpty) return first;
+    final display = profile.profileData?.displayName.trim() ?? '';
+    if (display.isNotEmpty) return display.split(' ').first;
+    return 'there';
   }
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 40.w,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Consumer<GamificationProvider>(
-                builder: (context, gp, _) {
-                  final sparkPoints =
-                      gp.streakScore?.scores.totalScore ?? 0;
-                  return GestureDetector(
-                    onTap: () =>
-                        context.pushNamed(AppRoutes.achivementsScreen.name),
-                    child: Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.w),
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.circular(22.r),
-                        border: Border.all(
-                          color: AppColors.black.withValues(alpha: 0.12),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        spacing: 10.w,
-                        children: [
-                          SvgIcon(
-                            AppAssets.thunder,
-                            size: 17.w,
-                            color: AppColors.orangeColor,
-                          ),
-                          AppText(
-                            text: _formatSparkPoints(sparkPoints),
-                            style: AppTextStyles.bold(
-                              fontSize: 20.sp,
-                              color: AppColors.black,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+    return Row(
+      children: [
+        GestureDetector(
+          onTap: () => context.pushNamed(AppRoutes.profileScreen.name),
+          child: Container(
+            width: 46.w,
+            height: 46.w,
+            decoration: const BoxDecoration(shape: BoxShape.circle),
+            child: ClipOval(
+              child: Consumer<ProfileProvider>(
+                builder: (context, profile, _) {
+                  return UserAvatarImage(
+                    avatarUrl: profile.profileData?.avatarUrl,
+                    size: 46.w,
+                    showPlaceholderShimmerWhenEmpty:
+                        profile.getProfileState == DataState.loading,
                   );
                 },
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
+            ),
+          ),
+        ),
+        12.w.horizontalSpace,
+        Expanded(
+          child: Consumer<ProfileProvider>(
+            builder: (context, profile, _) {
+              final name = _greetingName(profile);
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      context.pushNamed(AppRoutes.notificationScreen.name);
-                    },
-                    child: Padding(
-                      padding: EdgeInsets.only(right: 12.w),
-                      child: SvgIcon(
-                        AppAssets.notification,
-                        size: 25.w,
-                        color: AppColors.black,
-                      ),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'Hey, ',
+                          style: AppTextStyles.bold(
+                            fontSize: 20.sp,
+                            color: AppColors.black,
+                          ),
+                        ),
+                        TextSpan(
+                          text: '$name!',
+                          style: AppTextStyles.bold(
+                            fontSize: 20.sp,
+                            color: const Color(0xFF22B56E),
+                          ),
+                        ),
+                      ],
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      context.pushNamed(AppRoutes.profileScreen.name);
-                    },
-                    child: Container(
-                      width: 40.w,
-                      height: 40.w,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: const Color(0xFFE5D9B8),
-                          width: 3.w,
-                        ),
-                      ),
-                      child: ClipOval(
-                        child: Consumer<ProfileProvider>(
-                          builder: (context, profile, _) {
-                            return UserAvatarImage(
-                              avatarUrl: profile.profileData?.avatarUrl,
-                              size: 40.w,
-                              showPlaceholderShimmerWhenEmpty:
-                                  profile.getProfileState == DataState.loading,
-                            );
-                          },
-                        ),
-                      ),
+                  2.h.verticalSpace,
+                  AppText(
+                    text: 'Ready for a new adventure?',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.medium(
+                      fontSize: 13.sp,
+                      color: AppColors.darkGrey,
                     ),
                   ),
                 ],
-              ),
-            ],
+              );
+            },
           ),
-          IgnorePointer(
-            child: AppText(
-              text: "Home",
-              style: AppTextStyles.bold(fontSize: 21.sp),
-            ),
-          ),
-        ],
-      ),
+        ),
+        _GlassCircleButton(
+          onTap: () => context.pushNamed(AppRoutes.achivementsScreen.name),
+          child: const SvgIcon(AppAssets.streakFireIcon, size: 24),
+        ),
+        const SizedBox(width: 10),
+        _GlassCircleButton(
+          onTap: () => context.pushNamed(AppRoutes.notificationScreen.name),
+          child: const SvgIcon(AppAssets.notification, size: 24),
+        ),
+      ],
     );
   }
 
@@ -174,6 +147,61 @@ class HomeHeader extends StatelessWidget {
         style: AppTextStyles.regular(
           color: (title == "Yes") ? AppColors.redColor : AppColors.black,
           fontSize: 17.sp,
+        ),
+      ),
+    );
+  }
+}
+
+class _GlassCircleButton extends StatelessWidget {
+  const _GlassCircleButton({required this.onTap, required this.child});
+
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF8D8D93).withValues(alpha: 0.18),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            ClipOval(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                child: const DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0x9EFFFFFF),
+                  ),
+                  child: SizedBox.expand(),
+                ),
+              ),
+            ),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.85),
+                ),
+              ),
+              child: const SizedBox.expand(),
+            ),
+            child,
+          ],
         ),
       ),
     );

@@ -4,8 +4,10 @@ import 'package:redstreakapp/models/home/continue_reading_item_model.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 
-/// Card width (matches Series [StoryCard]) + trailing gap between slots.
-double _continueReadingSlotExtent() => 210.w + 10.w;
+double _continueReadingCardWidth(BuildContext context) {
+  final screen = MediaQuery.sizeOf(context).width;
+  return (screen - 20.w * 2 - 12.w) / 2;
+}
 
 class ContinueReadingSection extends StatefulWidget {
   const ContinueReadingSection({super.key});
@@ -76,21 +78,6 @@ class _ContinueReadingSectionState extends State<ContinueReadingSection>
         });
   }
 
-  void _openTopicDetails(BuildContext context, ContinueReadingItemModel item) {
-    final topicId = item.topic.id;
-    if (topicId.isEmpty) return;
-    final hp = context.read<HomeProvider>();
-    hp.beginTopicStoryDetailsLoad(topicId: topicId);
-    hp.getTopicStoryDetails(topicId: topicId);
-    if (!context.mounted) return;
-    context
-        .pushNamed(AppRoutes.createdStorySummaryScreen.name, extra: topicId)
-        .then((_) {
-          if (!context.mounted) return;
-          hp.getContinueReading(force: true);
-        });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -100,10 +87,10 @@ class _ContinueReadingSectionState extends State<ContinueReadingSection>
           padding: EdgeInsets.symmetric(horizontal: 20.w),
           child: AppText(
             text: "Continue Reading...",
-            style: AppTextStyles.bold(fontSize: 20.sp),
+            style: AppTextStyles.bold(fontSize: 22.sp),
           ),
         ),
-        6.w.verticalSpace,
+        12.h.verticalSpace,
         Consumer<HomeProvider>(
           builder: (context, provider, _) {
             final isLoading =
@@ -133,52 +120,45 @@ class _ContinueReadingSectionState extends State<ContinueReadingSection>
                 ? 2
                 : 0;
 
-            return Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: SizedBox(
-                height: 280.w,
-                child: NotificationListener<ScrollNotification>(
-                  onNotification: (ScrollNotification notification) {
-                    if (!provider.hasMoreContinueReading ||
-                        provider.isContinueReadingLoadingMore ||
-                        provider.isContinueReadingLoading) {
-                      return false;
-                    }
-                    final m = notification.metrics;
-                    if (m.axis != Axis.horizontal || m.maxScrollExtent <= 0) {
-                      return false;
-                    }
-                    if (m.pixels >= m.maxScrollExtent - 160.w) {
-                      provider.getContinueReadingLoadMore();
-                    }
+            final cardWidth = _continueReadingCardWidth(context);
+            return SizedBox(
+              height: 176.h,
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (ScrollNotification notification) {
+                  if (!provider.hasMoreContinueReading ||
+                      provider.isContinueReadingLoadingMore ||
+                      provider.isContinueReadingLoading) {
                     return false;
+                  }
+                  final m = notification.metrics;
+                  if (m.axis != Axis.horizontal || m.maxScrollExtent <= 0) {
+                    return false;
+                  }
+                  if (m.pixels >= m.maxScrollExtent - 160.w) {
+                    provider.getContinueReadingLoadMore();
+                  }
+                  return false;
+                },
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  itemCount: items.length + tailShimmer,
+                  separatorBuilder: (_, _) => SizedBox(width: 12.w),
+                  itemBuilder: (_, index) {
+                    return SizedBox(
+                      width: cardWidth,
+                      child: index >= items.length
+                          ? const _ContinueReadingCardShimmer()
+                          : _ContinueReadingCard(
+                              item: items[index],
+                              onOpen: () => _openContinueReading(
+                                context,
+                                items[index],
+                              ),
+                            ),
+                    );
                   },
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    padding: EdgeInsets.zero,
-                    itemExtent: _continueReadingSlotExtent(),
-                    itemCount: items.length + tailShimmer,
-                    itemBuilder: (_, index) {
-                      return Padding(
-                        padding: EdgeInsets.only(right: 18.w),
-                        child: SizedBox(
-                          width: 210.w,
-                          child: index >= items.length
-                              ? const _ContinueReadingCardShimmer()
-                              : _ContinueReadingCard(
-                                  item: items[index],
-                                  onOpenDetails: () =>
-                                      _openTopicDetails(context, items[index]),
-                                  onContinueReading: () => _openContinueReading(
-                                    context,
-                                    items[index],
-                                  ),
-                                ),
-                        ),
-                      );
-                    },
-                  ),
                 ),
               ),
             );
@@ -190,141 +170,120 @@ class _ContinueReadingSectionState extends State<ContinueReadingSection>
 }
 
 class _ContinueReadingCard extends StatelessWidget {
-  const _ContinueReadingCard({
-    required this.item,
-    required this.onOpenDetails,
-    required this.onContinueReading,
-  });
+  const _ContinueReadingCard({required this.item, required this.onOpen});
 
   final ContinueReadingItemModel item;
-  final VoidCallback onOpenDetails;
-  final VoidCallback onContinueReading;
+  final VoidCallback onOpen;
 
   @override
   Widget build(BuildContext context) {
-    final subtitleColor = AppColors.black.withValues(alpha: 0.45);
-    final useTopicShelfCounts = item.displayReadingsDen != null &&
-        item.displayReadingsDen! > 0;
+    final useTopicShelfCounts =
+        item.displayReadingsDen != null && item.displayReadingsDen! > 0;
     final pageCount = useTopicShelfCounts
         ? item.displayReadingsDen!
         : (item.pageCount <= 0 ? 0 : item.pageCount);
     final readPages = useTopicShelfCounts
         ? (item.displayReadingsNum ?? 0)
         : item.readPages;
+    final progress = pageCount <= 0
+        ? 0.0
+        : (readPages / pageCount).clamp(0.0, 1.0);
     final displayTitle = item.topic.title.isEmpty
         ? item.storyIdeaTitle.isEmpty
             ? item.storyTitle
             : item.storyIdeaTitle
         : item.topic.title;
+    final imageUrl = item.topic.thumbnailUrl.isEmpty
+        ? item.thumbnailUrl
+        : item.topic.thumbnailUrl;
 
-    return SizedBox(
-      width: 210.w, 
-      height: 268.w,
-      child: Container(
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    return GestureDetector(
+      onTap: onOpen,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22.r),
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-            Expanded(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: onOpenDetails,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(16.r),
-                  ),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final w = constraints.maxWidth;
-                      final h = constraints.maxHeight;
-                      return AppNetworkImage(
-                        imageUrl: item.topic.thumbnailUrl.isEmpty
-                            ? item.thumbnailUrl
-                            : item.topic.thumbnailUrl,
-                        tag: 'ContinueReading.card',
-                        width: w,
-                        height: h,
-                        fit: BoxFit.cover,
-                        placeholder: (_) => AppSkeletonizer(child: ColoredBox(
-                            color: AppColors.shimmerBaseColor,
-                            child: SizedBox(width: w, height: h),
-                          ),
-                        ),
-                        errorCompact: true,
-                        errorIconOnly: true,
-                      );
-                    },
+            AppNetworkImage(
+              imageUrl: imageUrl,
+              tag: 'ContinueReading.card',
+              fit: BoxFit.cover,
+              placeholder: (_) => AppSkeletonizer(
+                child: const ColoredBox(color: Color(0xFFE6E8EC)),
+              ),
+              errorCompact: true,
+              errorIconOnly: true,
+            ),
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0x33000000),
+                    Color(0x00000000),
+                    Color(0xCC000000),
+                  ],
+                  stops: [0, 0.45, 1],
+                ),
+              ),
+            ),
+            Positioned(
+              top: 10.h,
+              left: 10.w,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.38),
+                  borderRadius: BorderRadius.circular(20.r),
+                ),
+                child: AppText(
+                  text: 'Story',
+                  style: AppTextStyles.medium(
+                    fontSize: 11.sp,
+                    color: Colors.white,
                   ),
                 ),
               ),
             ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(14.w, 10.w, 14.w, 12.w),
+            Positioned(
+              left: 12.w,
+              right: 12.w,
+              bottom: 10.h,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: onOpenDetails,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: AppText(
-                            text: displayTitle.isNotEmpty
-                                ? displayTitle
-                                : 'Story',
-                            style: AppTextStyles.bold(
-                              fontSize: 16.sp,
-                              height: 1.22,
-                            ),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        SizedBox(height: 6.w),
-                        SizedBox(
-                          height: 16.sp,
-                          width: double.infinity,
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: AppText(
-                              text: pageCount > 0
-                                  ? '$readPages out of $pageCount Readings'
-                                  : '0 out of 0 Readings',
-                              style: AppTextStyles.medium(
-                                fontSize: 12.sp,
-                                height: 1.2,
-                                color: subtitleColor,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ),
-                      ],
+                  AppText(
+                    text: displayTitle.isNotEmpty ? displayTitle : 'Story',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.bold(
+                      fontSize: 14.sp,
+                      color: Colors.white,
                     ),
                   ),
-                  SizedBox(height: 10.w),
-                  AppButton(
-                    margin: EdgeInsets.zero,
-                    onTap: onContinueReading,
-                    text: "Continue Reading",
+                  4.h.verticalSpace,
+                  AppText(
+                    text: pageCount > 0
+                        ? '$readPages/$pageCount Readings'
+                        : '0/0 Readings',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.medium(
+                      fontSize: 11.sp,
+                      color: Colors.white.withValues(alpha: 0.85),
+                    ),
+                  ),
+                  8.h.verticalSpace,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8.r),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      minHeight: 4.h,
+                      backgroundColor: Colors.white.withValues(alpha: 0.35),
+                      color: AppColors.orangeColor,
+                    ),
                   ),
                 ],
               ),
@@ -341,20 +300,18 @@ class _ContinueReadingShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
-      child: SizedBox(
-        height: 280.w,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.zero,
-          itemExtent: _continueReadingSlotExtent(),
-          itemCount: 3,
-          itemBuilder: (_, _) => Padding(
-            padding: EdgeInsets.only(right: 10.w),
-            child: SizedBox(width: 210.w, child: _ContinueReadingCardShimmer()),
-          ),
+    final cardWidth = _continueReadingCardWidth(context);
+    return SizedBox(
+      height: 176.h,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        itemCount: 2,
+        separatorBuilder: (_, _) => SizedBox(width: 12.w),
+        itemBuilder: (_, _) => SizedBox(
+          width: cardWidth,
+          child: const _ContinueReadingCardShimmer(),
         ),
       ),
     );
@@ -367,67 +324,11 @@ class _ContinueReadingCardShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppSkeletonizer(child: SizedBox(
-        width: 210.w,
-        height: 268.w,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: ColoredBox(
-                  color: AppColors.shimmerBaseColor,
-                  child: const SizedBox.expand(),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(14.w, 10.w, 14.w, 12.w),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Container(
-                      height: 54.w,
-                      width: 140.w,
-                      decoration: BoxDecoration(
-                        color: AppColors.shimmerBaseColor,
-                        borderRadius: BorderRadius.circular(4.r),
-                      ),
-                    ),
-                    SizedBox(height: 6.w),
-                    Container(
-                      height: 16.sp,
-                      width: 120.w,
-                      decoration: BoxDecoration(
-                        color: AppColors.shimmerBaseColor,
-                        borderRadius: BorderRadius.circular(4.r),
-                      ),
-                    ),
-                    SizedBox(height: 10.w),
-                    Container(
-                      height: 44.w,
-                      decoration: BoxDecoration(
-                        color: AppColors.shimmerBaseColor,
-                        borderRadius: BorderRadius.circular(30.r),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+    return AppSkeletonizer(
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.shimmerBaseColor,
+          borderRadius: BorderRadius.circular(22.r),
         ),
       ),
     );

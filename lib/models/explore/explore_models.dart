@@ -7,17 +7,31 @@ class ExploreDiscoverInterest {
     required this.id,
     required this.name,
     required this.color,
+    this.description = '',
+    this.imageUrl = '',
   });
 
   final String id;
   final String name;
   final String color;
+  final String description;
+  final String imageUrl;
 
   factory ExploreDiscoverInterest.fromJson(Map<String, dynamic> json) {
     return ExploreDiscoverInterest(
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
       color: json['color']?.toString() ?? '',
+      description: json['description']?.toString() ??
+          json['subtitle']?.toString() ??
+          json['tagline']?.toString() ??
+          '',
+      imageUrl: resolveNetworkImageUrl(
+        json['imgUrl']?.toString() ??
+            json['imageUrl']?.toString() ??
+            json['thumbnailUrl']?.toString() ??
+            '',
+      ),
     );
   }
 }

@@ -9,7 +9,7 @@ import 'package:redstreakapp/core/network/end_points.dart';
 import 'package:redstreakapp/models/chat/chat_history_model.dart';
 import 'package:redstreakapp/models/chat/chat_stream_event.dart';
 
-class ChatService {
+class ChatService {    
   static final _apiHelper = BaseApiHelper(enableApiLogging: true);
 
   Future<Either<ApiException, Map<String, dynamic>>> fetchChatHistory({

@@ -44,35 +44,51 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
     return AppLayout(
       body: SafeArea(
-        child: ListView(
-          padding: EdgeInsets.symmetric(vertical: 15.w),
+        bottom: false,
+        child: Column(
           children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: const HomeHeader(),
+            ColoredBox(
+              color: AppColors.backgroundColor,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 12.h),
+                child: const HomeHeader(),
+              ),
             ),
-            20.w.verticalSpace,
-
-            const CalendarStrip(),
-            24.w.verticalSpace,
-
-            CuriosityReadingSection(),
-
-            24.w.verticalSpace,
-
-            ContinueReadingSection(),
-            24.w.verticalSpace,
-
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: const HomeStoryTopics(),
+            Expanded(
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (notification) {
+                  if (notification.metrics.axis != Axis.vertical) return false;
+                  if (notification.metrics.maxScrollExtent <= 0) return false;
+                  if (notification.metrics.pixels <
+                      notification.metrics.maxScrollExtent - 280) {
+                    return false;
+                  }
+                  final home = context.read<HomeProvider>();
+                  if (home.hasMoreTopics &&
+                      !home.isTopicsLoadingMore &&
+                      !home.isTopicsLoading) {
+                    home.getMyTopicsLoadMore();
+                  }
+                  return false;
+                },
+                child: ListView(
+                  padding: EdgeInsets.only(bottom: bottomInset + 108.h),
+                  children: [
+                    const CuriosityReadingSection(),
+                    26.h.verticalSpace,
+                    const ContinueReadingSection(),
+                    26.h.verticalSpace,
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      child: const HomeStoryTopics(),
+                    ),
+                  ],
+                ),
+              ),
             ),
-
-            24.w.verticalSpace,
-            // const BooksBooksHomeSections(),
-            // 24.w.verticalSpace,
           ],
         ),
       ),
