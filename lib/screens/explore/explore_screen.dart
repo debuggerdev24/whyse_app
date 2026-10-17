@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
@@ -32,7 +30,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
     super.initState();
     tabIndex.addListener(_handleTabChange);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+    if (!mounted) return;
       context.read<ExploreProvider>().ensureExploreReady();
     });
   }
@@ -46,7 +44,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   void _handleTabChange() {
     if (!mounted || tabIndex.value == 1) return;
     if (_openInterest == null && _seeAll == null) return;
-    setState(() {
+      setState(() {
       _openInterest = null;
       _seeAll = null;
     });
@@ -127,7 +125,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
     if (description.isNotEmpty) return description;
 
     for (final topic in _seriesPool(provider)) {
-      if (_topicMatches(topic, interest) && topic.learningGoal.trim().isNotEmpty) {
+      if (_topicMatches(topic, interest) &&
+          topic.learningGoal.trim().isNotEmpty) {
         return topic.learningGoal.trim();
       }
     }
@@ -151,7 +150,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
   List<BrowseTopicModel> _seriesPool(ExploreProvider provider) {
-    return [
+      return [
       ...?provider.seriesState.forYou?.items,
       ...?provider.seriesState.popular?.items,
       for (final section in provider.seriesState.interestSections)
@@ -160,7 +159,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
   List<ExploreSparkItem> _sparkPool(ExploreProvider provider) {
-    return [
+    return [ 
       ...?provider.sparkState.forYou?.items,
       ...?provider.sparkState.popular?.items,
       for (final section in provider.sparkState.interestSections)
@@ -248,17 +247,12 @@ class _CategoryGrid extends StatelessWidget {
     final failed =
         provider.interestsState == DataState.failed && interests.isEmpty;
 
-    return RefreshIndicator(
-      color: exploreTeal,
-      backgroundColor: Colors.white,
-      onRefresh: () => provider.loadDiscoverInterests(force: true),
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(
-          parent: BouncingScrollPhysics(),
-        ),
-        padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 24.h),
-        children: [
-          Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
@@ -270,39 +264,50 @@ class _CategoryGrid extends StatelessWidget {
                   ),
                 ),
               ),
-              GestureDetector(
+              GlassIconButton(
+                size: 44,
                 onTap: onSearch,
-                child: Container(
-                  width: 44,
-                  height: 44,
-                  alignment: Alignment.center,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: SvgIcon(
-                    AppAssets.searchIcon,
-                    size: 22,
-                    color: const Color(0xFF1C1C1E),
-                  ),
+                child: const SvgIcon(
+                  AppAssets.searchIcon,
+                  size: 22,
+                  color: Color(0xFF1C1C1E),
                 ),
               ),
             ],
           ),
-          6.h.verticalSpace,
-          AppText(
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(16.w, 6.h, 16.w, 18.h),
+          child: AppText(
             text: 'Choose an interest to discover amazing series and Sparks.',
             style: AppTextStyles.regular(
               fontSize: 15,
               color: const Color(0xFF8E8E93),
             ).copyWith(height: 1.35),
           ),
-          18.h.verticalSpace,
+        ),
+        Expanded(
+          child: RefreshIndicator(
+            color: exploreTeal,
+            backgroundColor: Colors.white,
+            onRefresh: () => provider.loadDiscoverInterests(force: true),
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              padding: EdgeInsets.fromLTRB(
+                16.w,
+                0,
+                16.w,
+                24.h + MediaQuery.paddingOf(context).bottom,
+              ),
+              children: [
           if (loading)
             const _GridShimmer()
           else if (failed)
             ExploreInlineError(
-              message: provider.interestsError ??
+              message:
+                  provider.interestsError ??
                   'Could not load interests. Please try again.',
               onRetry: () => provider.loadDiscoverInterests(force: true),
             )
@@ -336,8 +341,11 @@ class _CategoryGrid extends StatelessWidget {
                 );
               },
             ),
-        ],
-      ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -380,7 +388,9 @@ class _CategoryDetailView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       physics: const BouncingScrollPhysics(),
-      padding: EdgeInsets.only(bottom: 24.h),
+      padding: EdgeInsets.only(
+        bottom: 24.h + MediaQuery.paddingOf(context).bottom,
+      ),
       children: [
         _Hero(
           title: interest.name,
@@ -473,12 +483,20 @@ class _Hero extends StatelessWidget {
                 ),
               ),
             ),
-            Padding(
+              Padding(
               padding: EdgeInsets.fromLTRB(16.w, topInset + 8, 16.w, 22.h),
-              child: Column(
+                child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _FrostedBackButton(onTap: onBack),
+                  children: [
+                  GlassIconButton(
+                    onTap: onBack,
+                    size: 44,
+                    child: const Icon(
+                      Icons.chevron_left_rounded,
+                      color: Color(0xFF1C1C1E),
+                      size: 28,
+                    ),
+                  ),
                   const Spacer(),
                   AppText(
                     text: title,
@@ -512,45 +530,6 @@ class _Hero extends StatelessWidget {
   }
 }
 
-class _FrostedBackButton extends StatelessWidget {
-  const _FrostedBackButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: SizedBox(
-        width: 44,
-        height: 44,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            ClipOval(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-                child: const DecoratedBox(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Color(0x99FFFFFF),
-                  ),
-                  child: SizedBox.expand(),
-                ),
-              ),
-            ),
-            const Icon(
-              Icons.chevron_left_rounded,
-              color: Color(0xFF1C1C1E),
-              size: 28,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _SeriesSections extends StatelessWidget {
   const _SeriesSections({
     required this.interest,
@@ -575,8 +554,9 @@ class _SeriesSections extends StatelessWidget {
       interest.id,
     );
 
-    final forYouMatched =
-        (forYou?.items ?? []).where((topic) => topicMatches(topic, interest)).toList();
+    final forYouMatched = (forYou?.items ?? [])
+        .where((topic) => topicMatches(topic, interest))
+        .toList();
     final popularMatched = (popular?.items ?? [])
         .where((topic) => topicMatches(topic, interest))
         .toList();
@@ -586,7 +566,8 @@ class _SeriesSections extends StatelessWidget {
         : forYouMatched;
     final forYouLoading = useInterestList
         ? interestSection == null ||
-              (interestSection.state == DataState.loading && forYouItems.isEmpty)
+              (interestSection.state == DataState.loading &&
+                  forYouItems.isEmpty)
         : forYou?.state == DataState.loading && forYouItems.isEmpty;
 
     return Column(
@@ -603,12 +584,15 @@ class _SeriesSections extends StatelessWidget {
                 onTap: () => onTopicTap(topic),
               ),
           ],
-          onSeeAll: forYouItems.length > 2 ? () => onSeeAll(_SeeAllKind.seriesForYou) : null,
+          onSeeAll: forYouItems.length > 2
+              ? () => onSeeAll(_SeeAllKind.seriesForYou)
+              : null,
         ),
         22.h.verticalSpace,
         _PreviewRow(
           title: 'Popular',
-          loading: popular?.state == DataState.loading && popularMatched.isEmpty,
+          loading:
+              popular?.state == DataState.loading && popularMatched.isEmpty,
           items: [
             for (final topic in popularMatched)
               ExploreMediaCard(
@@ -656,10 +640,12 @@ class _SparkSections extends StatelessWidget {
       interest.id,
     );
 
-    final forYouMatched =
-        (forYou?.items ?? []).where((item) => sparkMatches(item, interest)).toList();
-    final popularMatched =
-        (popular?.items ?? []).where((item) => sparkMatches(item, interest)).toList();
+    final forYouMatched = (forYou?.items ?? [])
+        .where((item) => sparkMatches(item, interest))
+        .toList();
+    final popularMatched = (popular?.items ?? [])
+        .where((item) => sparkMatches(item, interest))
+        .toList();
     final useInterestList = forYouMatched.isEmpty;
     final source = useInterestList ? interestSection : forYou;
     final forYouItems = useInterestList
@@ -667,7 +653,8 @@ class _SparkSections extends StatelessWidget {
         : forYouMatched;
     final forYouLoading = useInterestList
         ? interestSection == null ||
-              (interestSection.state == DataState.loading && forYouItems.isEmpty)
+              (interestSection.state == DataState.loading &&
+                  forYouItems.isEmpty)
         : forYou?.state == DataState.loading && forYouItems.isEmpty;
 
     return Column(
@@ -687,12 +674,15 @@ class _SparkSections extends StatelessWidget {
                 },
               ),
           ],
-          onSeeAll: forYouItems.length > 2 ? () => onSeeAll(_SeeAllKind.sparkForYou) : null,
+          onSeeAll: forYouItems.length > 2
+              ? () => onSeeAll(_SeeAllKind.sparkForYou)
+              : null,
         ),
         22.h.verticalSpace,
         _PreviewRow(
           title: 'Popular',
-          loading: popular?.state == DataState.loading && popularMatched.isEmpty,
+          loading:
+              popular?.state == DataState.loading && popularMatched.isEmpty,
           items: [
             for (var i = 0; i < popularMatched.length; i++)
               ExploreMediaCard(
@@ -762,7 +752,9 @@ class _PreviewRow extends StatelessWidget {
               Expanded(child: preview[0]),
               12.w.horizontalSpace,
               Expanded(
-                child: preview.length > 1 ? preview[1] : const SizedBox.shrink(),
+                child: preview.length > 1
+                    ? preview[1]
+                    : const SizedBox.shrink(),
               ),
             ],
           ),
@@ -839,7 +831,12 @@ class _SeeAllView extends StatelessWidget {
                   ),
                 )
               : GridView.builder(
-                  padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 24.h),
+                  padding: EdgeInsets.fromLTRB(
+                    16.w,
+                    8.h,
+                    16.w,
+                    24.h + MediaQuery.paddingOf(context).bottom,
+                  ),
                   physics: const BouncingScrollPhysics(),
                   itemCount: cards.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

@@ -131,7 +131,7 @@ class StoryPages {
           : (pageIndexRaw is num ? pageIndexRaw.toInt() : int.tryParse(pageIndexRaw?.toString() ?? '0') ?? 0);
       return StoryPages(
         pageIndex: pageIndex,
-        text: stripHtml(json["text"]?.toString() ?? ''),
+        text: json["text"]?.toString() ?? '',
         primaryEntity: json["primaryEntity"]?.toString() ?? '',
         imageUrl: resolveNetworkImageUrl(json["imageUrl"]?.toString() ?? ''),
         imageSource: json["imageSource"]?.toString() ?? '',

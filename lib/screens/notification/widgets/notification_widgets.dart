@@ -66,75 +66,88 @@ class _FriendRequestTileState extends State<FriendRequestTile> {
     final handle = (user.username ?? user.displayName ?? 'someone').trim();
     final name = handle.startsWith('@') ? handle : '@$handle';
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ClipOval(
-          child: UserAvatarImage(avatarUrl: user.avatarUrl, size: 44),
-        ),
-        12.w.horizontalSpace,
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text.rich(
-                TextSpan(
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipOval(
+            child: UserAvatarImage(avatarUrl: user.avatarUrl, size: 44),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: name,
+                        style: AppTextStyles.bold(
+                          fontSize: 15,
+                          color: const Color(0xFF1C1C1E),
+                        ),
+                      ),
+                      TextSpan(
+                        text: ' sent you a friend request',
+                        style: AppTextStyles.regular(
+                          fontSize: 15,
+                          color: const Color(0xFF1C1C1E),
+                        ),
+                      ),
+                    ],
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                AppText(
+                  text: 'Friend request',
+                  style: AppTextStyles.medium(
+                    fontSize: 12,
+                    color: const Color(0xFF8E8E93),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Row(
                   children: [
-                    TextSpan(
-                      text: name,
-                      style: AppTextStyles.bold(fontSize: 15.sp),
+                    _ActionButton(
+                      label: 'Decline',
+                      filled: false,
+                      busy: _isDeclining,
+                      onTap: _decline,
                     ),
-                    TextSpan(
-                      text: ' sent you a friend request',
-                      style: AppTextStyles.regular(fontSize: 15.sp),
+                    const SizedBox(width: 10),
+                    _ActionButton(
+                      label: 'Accept',
+                      filled: true,
+                      busy: _isAccepting,
+                      onTap: _accept,
                     ),
                   ],
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              4.h.verticalSpace,
-              AppText(
-                text: 'Friend request',
-                style: AppTextStyles.medium(
-                  fontSize: 12.sp,
-                  color: const Color(0xFF8E8E93),
-                ),
-              ),
-              10.h.verticalSpace,
-              Row(
-                children: [
-                  _ActionButton(
-                    label: 'Decline',
-                    filled: false,
-                    busy: _isDeclining,
-                    onTap: _decline,
-                  ),
-                  const SizedBox(width: 10),
-                  _ActionButton(
-                    label: 'Accept',
-                    filled: true,
-                    busy: _isAccepting,
-                    onTap: _accept,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        if (widget.showUnreadDot) ...[
-          const SizedBox(width: 8),
-          Container(
-            width: 8,
-            height: 8,
-            margin: const EdgeInsets.only(top: 6),
-            decoration: const BoxDecoration(
-              color: Color(0xFF1A9B86),
-              shape: BoxShape.circle,
+              ],
             ),
           ),
+          if (widget.showUnreadDot) ...[
+            const SizedBox(width: 8),
+            Container(
+              width: 8,
+              height: 8,
+              margin: const EdgeInsets.only(top: 6),
+              decoration: const BoxDecoration(
+                color: AppColors.teal,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
@@ -177,7 +190,7 @@ class _ActionButton extends StatelessWidget {
               )
             : AppText(
                 text: label,
-                style: AppTextStyles.semibold(fontSize: 14.sp, color: color),
+                style: AppTextStyles.semibold(fontSize: 14, color: color),
               ),
       ),
     );

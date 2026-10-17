@@ -706,7 +706,14 @@ class AppRouter {
           path: AppRoutes.addMembersScreen.name,
           name: AppRoutes.addMembersScreen.name,
           builder: (context, state) {
-            return AddMembersScreen(groupId: state.extra as String);
+            final extra = state.extra;
+            if (extra is AddMembersScreenArgs) {
+              return AddMembersScreen(
+                groupId: extra.groupId,
+                title: extra.title,
+              );
+            }
+            return AddMembersScreen(groupId: extra as String);
           },
         ),
         GoRoute(

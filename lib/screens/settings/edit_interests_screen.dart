@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
-import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/providers/profile/edit_profile_provider.dart';
+import 'package:redstreakapp/screens/settings/widget/settings_chrome.dart';
 
 class EditInterestsScreen extends StatefulWidget {
   const EditInterestsScreen({super.key});
@@ -90,17 +89,6 @@ class _EditInterestsScreenState extends State<EditInterestsScreen> {
     super.dispose();
   }
 
-  String _getIconForInterest(String name) {
-    if (name.toLowerCase().contains("adventure")) return AppAssets.adventure;
-    if (name.toLowerCase().contains("mystery")) return AppAssets.mystery;
-    if (name.toLowerCase().contains("science")) return AppAssets.science;
-    if (name.toLowerCase().contains("fantasy")) return AppAssets.fantancy;
-    if (name.toLowerCase().contains("history")) return AppAssets.histoy;
-    if (name.toLowerCase().contains("nature")) return AppAssets.nature;
-    if (name.toLowerCase().contains("comics")) return AppAssets.comics;
-    return AppAssets.adventure;
-  }
-
   void _toggleApiInterest(String id) {
     setState(() {
       if (_selectedInterestIds.contains(id)) {
@@ -163,134 +151,126 @@ class _EditInterestsScreenState extends State<EditInterestsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundColor,
-        surfaceTintColor: Colors.transparent,
-        leading: Align(
-          alignment: Alignment.centerLeft,
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () => context.pop(),
-            child: Container(
-              padding: const EdgeInsets.only(left: 18),
-              child: SvgIcon(AppAssets.backButton, size: 13.sp),
+    final bottom = MediaQuery.paddingOf(context).bottom;
+
+    return SettingsScaffold(
+      title: 'Edit Interests',
+      bottom: Padding(
+        padding: EdgeInsets.fromLTRB(20, 8, 20, bottom + 12),
+        child: GestureDetector(
+          onTap: _saveInterests,
+          child: Container(
+            height: 56,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: settingsInk,
+              borderRadius: BorderRadius.circular(28),
+            ),
+            child: AppText(
+              text: 'Save',
+              style: AppTextStyles.semibold(fontSize: 17, color: Colors.white),
             ),
           ),
         ),
-        centerTitle: true,
-        title: AppText(
-          text: 'Edit Interests',
-          style: AppTextStyles.semibold(fontSize: 20),
-        ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(1.h),
-          child: Container(
-            color: AppColors.black.withValues(alpha: 0.1),
-            height: 1,
-          ),
-        ),
       ),
-      body: SafeArea(
-        child: Consumer<AuthProvider>(
-          builder: (context, provider, child) {
-            if (provider.isLoadingInterests) {
-              return const Center(
-                child: CircularProgressIndicator(color: AppColors.teal),
-              );
-            }
-
-            if (provider.interestsList.isNotEmpty && !_hasMatchedInterests) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                _matchInterestsAfterLoad();
-              });
-            }
-
-            return Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AppText(
-                        text: "Pick Your Interests",
-                        style: AppTextStyles.bold(fontSize: 28.sp),
-                      ),
-                      10.h.verticalSpace,
-                      AppText(
-                        text:
-                            "Choose topics you love to personalize your reading journey.",
-                        style: AppTextStyles.medium(
-                          fontSize: 15.sp,
-                          color: AppColors.black.withValues(alpha: 0.8),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                20.h.verticalSpace,
-                Expanded(
-                  child: ListView(
-                    padding: EdgeInsets.symmetric(horizontal: 24.w),
-                    physics: const BouncingScrollPhysics(),
-                    children: [
-                      ...provider.interestsList.map((interest) {
-                        final id = interest['id'];
-                        final name = interest['name'];
-                        return SelectionOption(
-                          label: name,
-                          isSelected: _selectedInterestIds.contains(id),
-                          onTap: () => _toggleApiInterest(id),
-                          iconPath: _getIconForInterest(name),
-                        );
-                      }),
-                      ..._customInterests.map((name) {
-                        return SelectionOption(
-                          label: name,
-                          isSelected: _selectedCustomInterests.contains(name),
-                          onTap: () => _toggleCustomInterest(name),
-                          iconPath: AppAssets.adventure,
-                        );
-                      }),
-                      Padding(
-                        padding: EdgeInsets.only(top: 10.h, bottom: 20.h),
-                        child: AppTextField(
-                          controller: _customInterestController,
-                          hintText: "Add Custom Interest...",
-                          onSubmit: (val) => _addCustomInterest(val),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 12.h),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _saveInterests,
-                      style: ElevatedButton.styleFrom(
-                        elevation: 0,
-                        backgroundColor: AppColors.orangeColor,
-                        foregroundColor: AppColors.white,
-                        padding: EdgeInsets.symmetric(vertical: 14.h),
-                        shape: const StadiumBorder(),
-                      ),
-                      child: AppText(
-                        text: 'Save',
-                        style: AppTextStyles.semibold(
-                          fontSize: 16,
-                          color: AppColors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+      body: Consumer<AuthProvider>(
+        builder: (context, provider, child) {
+          if (provider.isLoadingInterests) {
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.teal),
             );
-          },
+          }
+
+          if (provider.interestsList.isNotEmpty && !_hasMatchedInterests) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _matchInterestsAfterLoad();
+            });
+          }
+
+          return ListView(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 20.h),
+            children: [
+              AppText(
+                text: 'Pick Your Interests',
+                style: AppTextStyles.bold(fontSize: 28, color: settingsInk),
+              ),
+              SizedBox(height: 8.h),
+              AppText(
+                text:
+                    'Choose topics you love to personalize your reading journey.',
+                style: AppTextStyles.regular(fontSize: 15, color: settingsMuted),
+              ),
+              SizedBox(height: 18.h),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final interest in provider.interestsList)
+                    _InterestChip(
+                      label: interest['name'] as String,
+                      selected: _selectedInterestIds.contains(interest['id']),
+                      onTap: () => _toggleApiInterest(interest['id'] as String),
+                    ),
+                  for (final name in _customInterests)
+                    _InterestChip(
+                      label: name,
+                      selected: _selectedCustomInterests.contains(name),
+                      onTap: () => _toggleCustomInterest(name),
+                    ),
+                ],
+              ),
+              SizedBox(height: 18.h),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: AppTextField(
+                  controller: _customInterestController,
+                  hintText: 'Add a custom interest',
+                  onSubmit: _addCustomInterest,
+                  border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(14)),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _InterestChip extends StatelessWidget {
+  const _InterestChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.teal : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: AppText(
+          text: label,
+          style: AppTextStyles.medium(
+            fontSize: 14,
+            color: selected ? Colors.white : settingsInk,
+          ),
         ),
       ),
     );

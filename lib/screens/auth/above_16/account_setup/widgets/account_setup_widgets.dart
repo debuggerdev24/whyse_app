@@ -1,5 +1,6 @@
 import 'package:redstreakapp/core/constants/app_constants.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/widgets/app_dropdown.dart';
 
 const Color accountSetupBackground = Color(0xFFF5F5F5);
 const Color accountSetupInputBg = Color(0xFFEFEFEF);
@@ -184,46 +185,11 @@ class AccountSetupDropdownField extends StatelessWidget {
       alignment: Alignment.centerRight,
       child: SizedBox(
         width: 0.82.sw,
-        child: Container(
-          height: 52.h,
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: AppColors.black.withValues(alpha: 0.85)),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: value,
-              isExpanded: true,
-              icon: Icon(
-                Icons.keyboard_arrow_down_rounded,
-                color: AppColors.black,
-                size: 22.sp,
-              ),
-              hint: AppText(
-                text: hint,
-                style: AppTextStyles.medium(
-                  fontSize: 15.sp,
-                  color: AppColors.black.withValues(alpha: 0.35),
-                ),
-              ),
-              items: items
-                  .map(
-                    (item) => DropdownMenuItem<String>(
-                      value: item,
-                      child: AppText(
-                        text: item,
-                        style: AppTextStyles.medium(fontSize: 15.sp),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  )
-                  .toList(),
-              onChanged: onChanged,
-            ),
-          ),
+        child: AppDropdown(
+          hint: hint,
+          items: items,
+          value: value,
+          onChanged: onChanged,
         ),
       ),
     );

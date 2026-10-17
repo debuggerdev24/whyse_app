@@ -1,5 +1,4 @@
 import 'package:redstreakapp/core/enums/data_status.dart';
-import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/utils/network_image_url.dart';
 import 'package:redstreakapp/core/utils/user_facing_message.dart';
@@ -9,6 +8,7 @@ import 'package:redstreakapp/models/friend/friend_model.dart';
 import 'package:redstreakapp/providers/family/family_provider.dart';
 import 'package:redstreakapp/screens/profile/friend_details_screen.dart';
 import 'package:redstreakapp/screens/profile/widgets/edit_family_member_bottom_sheet.dart';
+import 'package:redstreakapp/screens/settings/widget/settings_chrome.dart';
 
 class FamilyMembersListScreen extends StatefulWidget {
   const FamilyMembersListScreen({super.key});
@@ -47,83 +47,67 @@ class _FamilyMembersListScreenState extends State<FamilyMembersListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AppLayout(
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundColor,
-        surfaceTintColor: Colors.transparent,
-        title: const AppText(text: 'Family Members'),
-        leading: IconButton(
-          onPressed: () => context.pop(),
-          icon: const Icon(Icons.chevron_left_rounded),
-        ),
-      ),
-      body: Column(
-        children: [
-          Divider(color: AppColors.black.setOpacity(0.1), height: 1),
-          Expanded(
-            child: Consumer<FamilyProvider>(
-              builder: (context, provider, _) {
-                switch (provider.familyMembersState) {
-                  case DataState.loading:
-                    return const _LoadingList();
-                  case DataState.failed:
-                    return _ErrorState(
-                      message: userFacingMessage(provider.familyMembersError),
-                      onRetry: () =>
-                          provider.getFamilyMembers(forceRefresh: true),
-                    );
-                  case DataState.success:
-                    if (provider.familyMembers.isEmpty) {
-                      return const _EmptyState();
-                    }
-                    final itemCount =
-                        provider.familyMembers.length +
-                        (provider.hasMoreFamilyMembers ? 1 : 0);
-
-                    return RefreshIndicator(
-                      color: AppColors.teal,
-                      onRefresh: () =>
-                          provider.getFamilyMembers(forceRefresh: true),
-                      child: ListView.separated(
-                        controller: _scrollController,
-                        physics: const AlwaysScrollableScrollPhysics(
-                          parent: BouncingScrollPhysics(),
-                        ),
-                        padding: EdgeInsets.fromLTRB(24.w, 14.h, 24.w, 20.h),
-                        itemCount: itemCount,
-                        separatorBuilder: (_, __) => Divider(
-                          height: 24.w,
-                          thickness: 1,
-                          color: AppColors.black.setOpacity(0.08),
-                        ),
-                        itemBuilder: (context, index) {
-                          if (index == provider.familyMembers.length) {
-                            return Padding(
-                              padding: EdgeInsets.symmetric(vertical: 12.h),
-                              child: Center(
-                                child: SizedBox(
-                                  width: 24.sp,
-                                  height: 24.sp,
-                                  child: const CircularProgressIndicator(
-                                    strokeWidth: 2.5,
-                                    color: AppColors.teal,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }
-                          return _FamilyMemberTile(
-                            key: ValueKey(provider.familyMembers[index].id),
-                            member: provider.familyMembers[index],
-                          );
-                        },
-                      ),
-                    );
+    return SettingsScaffold(
+      title: 'Family',
+      body: Padding(
+        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+        child: Consumer<FamilyProvider>(
+          builder: (context, provider, _) {
+            switch (provider.familyMembersState) {
+              case DataState.loading:
+                return const _LoadingList();
+              case DataState.failed:
+                return _ErrorState(
+                  message: userFacingMessage(provider.familyMembersError),
+                  onRetry: () => provider.getFamilyMembers(forceRefresh: true),
+                );
+              case DataState.success:
+                if (provider.familyMembers.isEmpty) {
+                  return const _EmptyState();
                 }
-              },
-            ),
-          ),
-        ],
+                final itemCount = provider.familyMembers.length +
+                    (provider.hasMoreFamilyMembers ? 1 : 0);
+
+                return RefreshIndicator(
+                  color: AppColors.teal,
+                  onRefresh: () =>
+                      provider.getFamilyMembers(forceRefresh: true),
+                  child: ListView.separated(
+                    controller: _scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(
+                      parent: BouncingScrollPhysics(),
+                    ),
+                    padding: EdgeInsets.only(
+                      bottom: MediaQuery.paddingOf(context).bottom + 16,
+                    ),
+                    itemCount: itemCount,
+                    separatorBuilder: (_, _) => SizedBox(height: 10.h),
+                    itemBuilder: (context, index) {
+                      if (index == provider.familyMembers.length) {
+                        return Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
+                          child: Center(
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: const CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: AppColors.teal,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      return _FamilyMemberTile(
+                        key: ValueKey(provider.familyMembers[index].id),
+                        member: provider.familyMembers[index],
+                      );
+                    },
+                  ),
+                );
+            }
+          },
+        ),
       ),
     );
   }
@@ -184,32 +168,29 @@ class _FamilyMemberTileState extends State<_FamilyMemberTile> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 56.w,
-                height: 56.w,
-                decoration: BoxDecoration(
-                  color: Colors.red.setOpacity(0.1),
+                width: 56,
+                height: 56,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFFE8E6),
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
-                child: Icon(
+                child: const Icon(
                   Icons.family_restroom_outlined,
-                  size: 28.sp,
-                  color: Colors.red,
+                  size: 28,
+                  color: Color(0xFFFF5C4D),
                 ),
               ),
               16.h.verticalSpace,
               AppText(
                 text: 'Remove Family Member',
-                style: AppTextStyles.bold(fontSize: 18.sp),
+                style: AppTextStyles.bold(fontSize: 18, color: settingsInk),
               ),
               8.h.verticalSpace,
               AppText(
                 text: 'Are you sure you want to remove $name from your family?',
                 textAlign: TextAlign.center,
-                style: AppTextStyles.medium(
-                  fontSize: 14.sp,
-                  color: AppColors.black.setOpacity(0.6),
-                ),
+                style: AppTextStyles.regular(fontSize: 14, color: settingsMuted),
               ),
               24.h.verticalSpace,
               Row(
@@ -220,17 +201,15 @@ class _FamilyMemberTileState extends State<_FamilyMemberTile> {
                       child: Container(
                         padding: EdgeInsets.symmetric(vertical: 12.w),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(30.r),
-                          border: Border.all(
-                            color: AppColors.black.setOpacity(0.15),
-                          ),
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(color: const Color(0xFFE4E4E4)),
                         ),
                         alignment: Alignment.center,
                         child: AppText(
                           text: 'Cancel',
                           style: AppTextStyles.semibold(
-                            fontSize: 15.sp,
-                            color: AppColors.black,
+                            fontSize: 15,
+                            color: settingsInk,
                           ),
                         ),
                       ),
@@ -246,15 +225,15 @@ class _FamilyMemberTileState extends State<_FamilyMemberTile> {
                       child: Container(
                         padding: EdgeInsets.symmetric(vertical: 12.w),
                         decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(30.r),
+                          color: const Color(0xFFFF5C4D),
+                          borderRadius: BorderRadius.circular(30),
                         ),
                         alignment: Alignment.center,
                         child: AppText(
                           text: 'Remove',
                           style: AppTextStyles.semibold(
-                            fontSize: 15.sp,
-                            color: AppColors.white,
+                            fontSize: 15,
+                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -294,99 +273,108 @@ class _FamilyMemberTileState extends State<_FamilyMemberTile> {
     final user = member.member;
     final avatarUrl = resolveNullableNetworkImageUrl(user.avatarUrl);
 
-    return Row(
-      children: [
-        Expanded(
-          child: GestureDetector(
-            onTap: _openProfile,
-            behavior: HitTestBehavior.opaque,
-            child: Row(
-              children: [
-                Container(
-                  width: 48.w,
-                  height: 48.w,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _avatarColor,
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  alignment: Alignment.center,
+    return Opacity(
+      opacity: _isRemoving ? 0.5 : 1,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            GestureDetector(
+              onTap: _isRemoving ? null : _openProfile,
+              behavior: HitTestBehavior.opaque,
+              child: ClipOval(
+                child: SizedBox(
+                  width: 44,
+                  height: 44,
                   child: avatarUrl != null
                       ? AppNetworkImage(
                           imageUrl: avatarUrl,
                           tag: 'FamilyMembersList.avatar',
-                          width: 48.w,
-                          height: 48.w,
+                          width: 44,
+                          height: 44,
                           fit: BoxFit.cover,
                           errorCompact: true,
                           errorIconOnly: true,
-                          errorBuilder: (_, __, ___) =>
-                              Center(child: _initials(user)),
+                          errorBuilder: (_, _, _) => _initials(user),
                         )
                       : _initials(user),
                 ),
-                16.w.horizontalSpace,
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AppText(
-                        text: user.displayName ?? user.username ?? '',
-                        style: AppTextStyles.semibold(
-                          fontSize: 16.sp,
-                          color: AppColors.black,
-                        ),
-                      ),
-                      6.h.verticalSpace,
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 10.w,
-                          vertical: 4.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.extealighttealcolor,
-                          borderRadius: BorderRadius.circular(20.r),
-                        ),
-                        child: AppText(
-                          text: member.relationship,
-                          style: AppTextStyles.semibold(
-                            fontSize: 12.sp,
-                            color: AppColors.teal,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: GestureDetector(
+                onTap: _isRemoving ? null : _openProfile,
+                behavior: HitTestBehavior.opaque,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AppText(
+                      text: user.displayName ?? user.username ?? '',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.semibold(
+                        fontSize: 16,
+                        color: settingsInk,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 8.w,
+                        vertical: 2.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFDDF4F1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: AppText(
+                        text: member.relationship,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.semibold(
+                          fontSize: 12,
+                          color: AppColors.teal,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(width: 8.w),
+            _ActionChip(
+              label: 'Edit',
+              foregroundColor: AppColors.teal,
+              backgroundColor: const Color(0xFFDDF4F1),
+              onTap: _showEditSheet,
+            ),
+            SizedBox(width: 8.w),
+            _ActionChip(
+              label: 'Remove',
+              foregroundColor: const Color(0xFFFF5C4D),
+              backgroundColor: const Color(0xFFFFE8E6),
+              isLoading: _isRemoving,
+              onTap: _isRemoving ? null : _showRemoveDialog,
+            ),
+          ],
         ),
-        8.w.horizontalSpace,
-        _ActionChip(
-          label: 'Edit',
-          foregroundColor: AppColors.teal,
-          backgroundColor: AppColors.extealighttealcolor,
-          borderColor: AppColors.teal.setOpacity(0.25),
-          onTap: _showEditSheet,
-        ),
-        8.w.horizontalSpace,
-        _ActionChip(
-          label: 'Remove',
-          foregroundColor: Colors.red,
-          backgroundColor: Colors.red.setOpacity(0.08),
-          borderColor: Colors.red.setOpacity(0.2),
-          isLoading: _isRemoving,
-          onTap: _isRemoving ? null : _showRemoveDialog,
-        ),
-      ],
+      ),
     );
   }
 
   Widget _initials(FriendUser user) {
-    return Center(child: AppText(
-        text: user.initials,
-        style: AppTextStyles.bold(fontSize: 14.sp, color: AppColors.white),
+    return ColoredBox(
+      color: _avatarColor,
+      child: Center(
+        child: AppText(
+          text: user.initials,
+          style: AppTextStyles.bold(fontSize: 14, color: Colors.white),
+        ),
       ),
     );
   }
@@ -397,7 +385,6 @@ class _ActionChip extends StatelessWidget {
     required this.label,
     required this.foregroundColor,
     required this.backgroundColor,
-    required this.borderColor,
     this.onTap,
     this.isLoading = false,
   });
@@ -405,7 +392,6 @@ class _ActionChip extends StatelessWidget {
   final String label;
   final Color foregroundColor;
   final Color backgroundColor;
-  final Color borderColor;
   final VoidCallback? onTap;
   final bool isLoading;
 
@@ -414,16 +400,17 @@ class _ActionChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+        height: 32,
+        padding: EdgeInsets.symmetric(horizontal: 10.w),
+        alignment: Alignment.center,
         decoration: BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: borderColor),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: isLoading
             ? SizedBox(
-                width: 14.sp,
-                height: 14.sp,
+                width: 14,
+                height: 14,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   color: foregroundColor,
@@ -432,7 +419,7 @@ class _ActionChip extends StatelessWidget {
             : AppText(
                 text: label,
                 style: AppTextStyles.semibold(
-                  fontSize: 12.sp,
+                  fontSize: 12,
                   color: foregroundColor,
                 ),
               ),
@@ -447,15 +434,10 @@ class _LoadingList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      padding: EdgeInsets.fromLTRB(24.w, 14.h, 24.w, 20.h),
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: 8,
-      separatorBuilder: (_, __) => Divider(
-        height: 24.w,
-        thickness: 1,
-        color: AppColors.black.setOpacity(0.08),
-      ),
-      itemBuilder: (_, __) => const _ShimmerTile(),
+      itemCount: 6,
+      separatorBuilder: (_, _) => SizedBox(height: 10.h),
+      itemBuilder: (_, _) => const _ShimmerTile(),
     );
   }
 }
@@ -465,42 +447,13 @@ class _ShimmerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppSkeletonizer(child: Row(
-        children: [
-          Container(
-            width: 48.w,
-            height: 48.w,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white,
-            ),
-          ),
-          16.w.horizontalSpace,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 140.w,
-                  height: 14.h,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4.r),
-                  ),
-                ),
-                8.h.verticalSpace,
-                Container(
-                  width: 72.w,
-                  height: 22.h,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20.r),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+    return AppSkeletonizer(
+      child: Container(
+        height: 64,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
       ),
     );
   }
@@ -512,20 +465,9 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.family_restroom_outlined,
-            size: 48.w,
-            color: AppColors.black.setOpacity(0.3),
-          ),
-          12.verticalSpace,
-          AppText(
-            text: 'No family members yet',
-            style: AppTextStyles.medium(fontSize: 16.sp),
-          ),
-        ],
+      child: AppText(
+        text: 'No family members yet',
+        style: AppTextStyles.regular(fontSize: 14, color: settingsMuted),
       ),
     );
   }
@@ -545,35 +487,25 @@ class _ErrorState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline_rounded,
-              size: 48.sp,
-              color: AppColors.black.setOpacity(0.3),
-            ),
-            12.h.verticalSpace,
             AppText(
               text: message ?? 'Failed to load family members',
               textAlign: TextAlign.center,
-              style: AppTextStyles.medium(
-                fontSize: 14.sp,
-                color: AppColors.black.setOpacity(0.55),
-              ),
+              style: AppTextStyles.regular(fontSize: 14, color: settingsMuted),
             ),
-            16.h.verticalSpace,
+            SizedBox(height: 16.h),
             GestureDetector(
               onTap: onRetry,
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.h),
+                height: 44,
+                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(color: AppColors.teal.setOpacity(0.4)),
+                  color: settingsInk,
+                  borderRadius: BorderRadius.circular(22),
                 ),
                 child: AppText(
                   text: 'Retry',
-                  style: AppTextStyles.semibold(
-                    fontSize: 14.sp,
-                    color: AppColors.teal,
-                  ),
+                  style: AppTextStyles.semibold(fontSize: 15, color: Colors.white),
                 ),
               ),
             ),

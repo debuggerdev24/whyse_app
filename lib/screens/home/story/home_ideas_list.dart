@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +7,7 @@ import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/utils/date_formatter.dart';
 import 'package:redstreakapp/core/utils/network_image_url.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
+import 'package:redstreakapp/core/widgets/glass_icon_button.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/models/home/story_models/story_idea_model.dart';
@@ -418,40 +418,3 @@ class _IdeaCard extends StatelessWidget {
   }
 }
 
-class GlassIconButton extends StatelessWidget {
-  final Widget child;
-  final VoidCallback onTap;
-  final double size;
-  final BorderRadius borderRadius;
-
-  const GlassIconButton({
-    super.key,
-    required this.child,
-    required this.onTap,
-    this.size = 36,
-    this.borderRadius = const BorderRadius.all(Radius.circular(18)),
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: borderRadius,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: InkWell(
-          onTap: onTap,
-          child: Container(
-            height: size,
-            width: size,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.5),
-              borderRadius: borderRadius,
-            ),
-            child: child,
-          ),
-        ),
-      ),
-    );
-  }
-}

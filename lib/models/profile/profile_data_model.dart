@@ -29,6 +29,11 @@ class ProfileDataModel {
     return t;
   }
 
+  static DateTime? _readDate(dynamic v) {
+    if (v == null) return null;
+    return DateTime.tryParse(v.toString());
+  }
+
   static int? _readInt(dynamic v) {
     if (v == null) return null;
     if (v is int) return v;
@@ -54,6 +59,7 @@ class ProfileDataModel {
   final int dailyReadingGoal;
   final Counts counts;
   final ProfileOverview? overview;
+  final DateTime? createdAt;
   // final List<Group> groups;
   // final List<Friend> friends;
   // final List<Topic> topics;
@@ -77,6 +83,7 @@ class ProfileDataModel {
     required this.dailyReadingGoal,
     required this.counts,
     this.overview,
+    this.createdAt,
     // required this.groups,
     // required this.friends,
     // required this.topics,
@@ -112,6 +119,7 @@ class ProfileDataModel {
               Map<String, dynamic>.from(json['overview'] as Map),
             )
           : null,
+      createdAt: _readDate(json['createdAt'] ?? json['joinedAt']),
       // groups: (json['groups'] as List? ?? [])
       //     .map((e) => Group.fromJson(e))
       //     .toList(),
@@ -173,6 +181,9 @@ class ProfileDataModel {
               Map<String, dynamic>.from(data['overview'] as Map),
             )
           : base.overview,
+      createdAt: data.containsKey('createdAt') || data.containsKey('joinedAt')
+          ? _readDate(data['createdAt'] ?? data['joinedAt'])
+          : base.createdAt,
     );
   }
 }
@@ -336,7 +347,7 @@ class ProfileReadingDuration {
 
   String get displayLabel {
     switch (unit.toLowerCase()) {
-      case 'hour':
+      case 'hour':  
       case 'hours':
         return value == 1 ? 'Hour' : 'Hours';
       case 'minute':

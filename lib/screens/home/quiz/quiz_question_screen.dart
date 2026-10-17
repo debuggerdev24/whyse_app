@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_layout.dart';
+import 'package:redstreakapp/core/widgets/glass_icon_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
@@ -111,161 +111,153 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
         final options = currentQuestion['options'] as List<String>;
         final correctIndex = currentQuestion['correctIndex'] as int;
 
-        return AppLayout(
-          body: SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 27.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  16.w.verticalSpace,
+        final canCheck = quiz.selectedOptionIndex != null;
+        final buttonWidth = MediaQuery.sizeOf(context).width - 32;
 
-                  /// Top Bar
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GestureDetector(
-                        onTap: () =>
-                            showLeaveQuizConfirmation(context: context),
-                        child: SvgIcon(
-                          AppAssets.disable,
-                          color: Colors.black,
-                          size: 30.sp,
+        return AppLayout(
+          body: ColoredBox(
+            color: const Color(0xFFF2F2F7),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        GlassIconButton(
+                          onTap: () =>
+                              showLeaveQuizConfirmation(context: context),
+                          child: const Icon(
+                            Icons.close_rounded,
+                            color: Color(0xFF1A1A1A),
+                            size: 22,
+                          ),
                         ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 4.w),
+                        const SizedBox(width: 14),
+                        Expanded(
                           child: Row(
                             children: List.generate(quiz.questions.length, (
                               index,
                             ) {
-                              Color color;
-                              if (index < quiz.currentQuestionIndex) {
-                                color = AppColors.orangeColor;
-                              } else if (index == quiz.currentQuestionIndex) {
-                                color = AppColors.orangeColor;
-                              } else {
-                                color = Colors.grey.withValues(alpha: 0.2);
-                              }
-
+                              final filled = index <= quiz.currentQuestionIndex;
                               return Expanded(
                                 child: Container(
-                                  margin: EdgeInsets.symmetric(horizontal: 4.w),
-                                  height: 4.h,
+                                  margin: EdgeInsets.only(
+                                    left: index == 0 ? 0 : 4,
+                                  ),
+                                  height: 8,
                                   decoration: BoxDecoration(
-                                    color: color,
-                                    borderRadius: BorderRadius.circular(2),
+                                    color: filled
+                                        ? AppColors.orangeColor
+                                        : const Color(0x1A1A1A1A),
+                                    borderRadius: BorderRadius.circular(16),
                                   ),
                                 ),
                               );
                             }),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-
-                  19.w.verticalSpace,
-
-                  /// Scrollable content (question + options)
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: EdgeInsets.only(bottom: 12.h),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          /// Question
-                          AppText(
-                            text: currentQuestion['question'],
-                            style: AppTextStyles.bold(
-                              fontSize: 32.sp,
-                              color: AppColors.black,
-                            ).copyWith(height: 1.2),
-                          ),
-
-                          31.w.verticalSpace,
-
-                          /// Options
-                          ...List.generate(
-                            options.length,
-                            (index) => OptionCard(
-                              text: options[index],
-                              isSelected: quiz.selectedOptionIndex == index,
-                              isCorrect: index == correctIndex,
-                              isChecked: quiz.isChecked,
-                              onTap: !quiz.isChecked
-                                  ? () => quiz.selectOption(index)
-                                  : null,
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            AppText(
+                              text: currentQuestion['question'],
+                              style: AppTextStyles.semibold(
+                                fontSize: 22,
+                                color: const Color(0xFF1A1A1A),
+                              ).copyWith(height: 1.25, letterSpacing: -0.3),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  Center(
-                    child: AppText(
-                      text:
-                          "${quiz.currentQuestionIndex + 1} / ${quiz.questions.length}",
-                      style: AppTextStyles.regular(
-                        fontSize: 14.sp,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ),
-
-                  16.w.verticalSpace,
-
-                  /// Button
-                  quiz.isChecked
-                      ? AppFilledButton(
-                          text: "Continue",
-                          onTap: () {
-                            if (quiz.currentQuestionIndex <
-                                quiz.questions.length - 1) {
-                              quiz.continueQuiz();
-                            } else {
-                              context.pushReplacementNamed(
-                                AppRoutes.quizCompletedScreen.name,
-                                extra: {
-                                  'score': quiz.score,
-                                  'total': quiz.questions.length,
-                                  'storyTitle': widget.storyTitle,
-                                  'storyImageUrl': widget.storyImageUrl,
-                                  'storyIdeaId': widget.storyIdeaId,
-                                  'storyId': widget.storyId,
-                                  'fromContinueReading': widget.fromContinueReading,
-                                  if ((widget.continueReadingTopicId ?? '')
-                                      .isNotEmpty)
-                                    'continueReadingTopicId':
-                                        widget.continueReadingTopicId,
-                                  'episodeNumber': widget.episodeNumber,
-                                  if ((widget.seriesTitle ?? '').isNotEmpty)
-                                    'seriesTitle': widget.seriesTitle,
-                                  'totalEpisodes': widget.totalEpisodes,
-                                  if ((widget.topicId ?? '').isNotEmpty)
-                                    'topicId': widget.topicId,
-                                },
-                              );
-                            }
-                          },
-                          backgroundColor: Color(0xFF00796B),
-                          fixedSize: Size(348.w, 42.h),
-                        )
-                      : AppFilledButton(
-                          text: "Check",
-                          onTap: quiz.selectedOptionIndex != null
-                              ? quiz.checkAnswer
-                              : () {},
-                          backgroundColor: quiz.selectedOptionIndex != null
-                              ? AppColors.black
-                              : Colors.grey,
-                          fixedSize: Size(348.w, 42.h),
+                            const SizedBox(height: 20),
+                            ...List.generate(
+                              options.length,
+                              (index) => OptionCard(
+                                text: options[index],
+                                isSelected: quiz.selectedOptionIndex == index,
+                                isCorrect: index == correctIndex,
+                                isChecked: quiz.isChecked,
+                                onTap: !quiz.isChecked
+                                    ? () => quiz.selectOption(index)
+                                    : null,
+                              ),
+                            ),
+                          ],
                         ),
-
-                  24.w.verticalSpace,
-                ],
+                      ),
+                    ),
+                    Center(
+                      child: AppText(
+                        text:
+                            "${quiz.currentQuestionIndex + 1} / ${quiz.questions.length}",
+                        style: AppTextStyles.medium(
+                          fontSize: 12,
+                          color: const Color(0x991A1A1A),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    quiz.isChecked
+                        ? AppFilledButton(
+                            text: "Continue",
+                            onTap: () {
+                              if (quiz.currentQuestionIndex <
+                                  quiz.questions.length - 1) {
+                                quiz.continueQuiz();
+                              } else {
+                                context.pushReplacementNamed(
+                                  AppRoutes.quizCompletedScreen.name,
+                                  extra: {
+                                    'score': quiz.score,
+                                    'total': quiz.questions.length,
+                                    'storyTitle': widget.storyTitle,
+                                    'storyImageUrl': widget.storyImageUrl,
+                                    'storyIdeaId': widget.storyIdeaId,
+                                    'storyId': widget.storyId,
+                                    'fromContinueReading':
+                                        widget.fromContinueReading,
+                                    if ((widget.continueReadingTopicId ?? '')
+                                        .isNotEmpty)
+                                      'continueReadingTopicId':
+                                          widget.continueReadingTopicId,
+                                    'episodeNumber': widget.episodeNumber,
+                                    if ((widget.seriesTitle ?? '').isNotEmpty)
+                                      'seriesTitle': widget.seriesTitle,
+                                    'totalEpisodes': widget.totalEpisodes,
+                                    if ((widget.topicId ?? '').isNotEmpty)
+                                      'topicId': widget.topicId,
+                                  },
+                                );
+                              }
+                            },
+                            backgroundColor: AppColors.teal,
+                            textStyle: AppTextStyles.semibold(
+                              fontSize: 14,
+                              color: Colors.white,
+                            ).copyWith(height: 17 / 14),
+                            fixedSize: Size(buttonWidth, 50),
+                          )
+                        : AppFilledButton(
+                            text: "Check",
+                            onTap: canCheck ? quiz.checkAnswer : () {},
+                            backgroundColor: canCheck
+                                ? AppColors.teal
+                                : const Color(0xFFE5E5EA),
+                            textStyle: AppTextStyles.semibold(
+                              fontSize: 14,
+                              color: canCheck
+                                  ? Colors.white
+                                  : const Color(0xFF8E8E93),
+                            ).copyWith(height: 17 / 14),
+                            fixedSize: Size(buttonWidth, 50),
+                          ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -281,10 +273,16 @@ void showLeaveQuizConfirmation({required BuildContext context}) {
     builder: (dialogContext) {
       return ZoomIn(
         child: AlertDialog(
-          backgroundColor: AppColors.backgroundColor,
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
           title: Text(
-            "Are you sure you want to quit this quizzes?",
-            style: AppTextStyles.textStyle20Regular,
+            "Are you sure you want to quit this quiz?",
+            style: AppTextStyles.semibold(
+              fontSize: 18,
+              color: const Color(0xFF1A1A1A),
+            ).copyWith(height: 1.3),
           ),
           actions: [
             myActionButtonTheme(

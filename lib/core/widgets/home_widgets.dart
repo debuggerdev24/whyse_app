@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/user_avatar_image.dart';
@@ -49,6 +47,7 @@ class HomeHeader extends StatelessWidget {
               final name = _greetingName(profile);
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text.rich(
                     TextSpan(
@@ -87,12 +86,13 @@ class HomeHeader extends StatelessWidget {
             },
           ),
         ),
-        _GlassCircleButton(
+        const SizedBox(width: 8),
+        GlassIconButton(
           onTap: () => context.pushNamed(AppRoutes.achivementsScreen.name),
           child: const SvgIcon(AppAssets.streakFireIcon, size: 24),
         ),
         const SizedBox(width: 10),
-        _GlassCircleButton(
+        GlassIconButton(
           onTap: () => context.pushNamed(AppRoutes.notificationScreen.name),
           child: const SvgIcon(AppAssets.notification, size: 24),
         ),
@@ -147,61 +147,6 @@ class HomeHeader extends StatelessWidget {
         style: AppTextStyles.regular(
           color: (title == "Yes") ? AppColors.redColor : AppColors.black,
           fontSize: 17.sp,
-        ),
-      ),
-    );
-  }
-}
-
-class _GlassCircleButton extends StatelessWidget {
-  const _GlassCircleButton({required this.onTap, required this.child});
-
-  final VoidCallback onTap;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF8D8D93).withValues(alpha: 0.18),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            ClipOval(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                child: const DecoratedBox(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Color(0x9EFFFFFF),
-                  ),
-                  child: SizedBox.expand(),
-                ),
-              ),
-            ),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.85),
-                ),
-              ),
-              child: const SizedBox.expand(),
-            ),
-            child,
-          ],
         ),
       ),
     );
@@ -268,9 +213,7 @@ class _CalendarStripState extends State<CalendarStrip> {
     required double dayCircleSize,
   }) {
     final isToday =
-        date.year == now.year &&
-        date.month == now.month &&
-        date.day == now.day;
+        date.year == now.year && date.month == now.month && date.day == now.day;
     final hasStreakHighlight = isCompleted || isFrozen;
 
     return SizedBox(
@@ -299,15 +242,10 @@ class _CalendarStripState extends State<CalendarStrip> {
               color: isCompleted
                   ? AppColors.orangeColor
                   : isFrozen
-                  ? AppColors.streakFreezeBlue
-                  : isToday
                   ? AppColors.orangeColor.withValues(alpha: 0.25)
                   : Colors.transparent,
               border: isToday && !hasStreakHighlight
-                  ? Border.all(
-                      color: AppColors.orangeColor,
-                      width: 2,
-                    )
+                  ? Border.all(color: AppColors.orangeColor, width: 2)
                   : null,
             ),
             child: isFrozen
@@ -360,8 +298,7 @@ class _CalendarStripState extends State<CalendarStrip> {
                 now: now,
                 isCompleted:
                     streakScore?.isDateCompleted(monthDates[index]) ?? false,
-                isFrozen:
-                    streakScore?.isDateFrozen(monthDates[index]) ?? false,
+                isFrozen: streakScore?.isDateFrozen(monthDates[index]) ?? false,
                 dayCircleSize: dayCircleSize,
               ),
             ],

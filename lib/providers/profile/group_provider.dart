@@ -64,14 +64,18 @@ class GroupProvider extends ChangeNotifier {
     required String groupId,
     required VoidCallback onSuccess,
     required Function(String error) onError,
+    String role = 'MEMBER',
+    List<String>? userIds,
   }) async {
-    if (_selectedUserIds.isEmpty) return;
+    final ids = userIds ?? _selectedUserIds.toList();
+    if (ids.isEmpty) return;
     try {
       _addMembersLoading = true;
       notifyListeners();
       final result = await _groupApiService.addGroupMembers(
         groupId: groupId,
-        userIds: _selectedUserIds.toList(),
+        userIds: ids,
+        role: role,
       );
       result.fold(
         (l) {

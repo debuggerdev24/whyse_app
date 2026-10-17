@@ -99,133 +99,144 @@ class _StreakCalendarWidgetState extends State<StreakCalendarWidget> {
     final frozenDays = _frozenDaysForVisibleMonth();
     final monthTitle =
         '${_monthNames[_visibleMonth.month - 1]} ${_visibleMonth.year}';
-    final inactiveColor = AppColors.black.withValues(alpha: 0.35);
     final now = DateTime.now();
+
+    final weeks = <List<DateTime?>>[];
+    for (var i = 0; i < cells.length; i += 7) {
+      final week = cells.skip(i).take(7).toList();
+      while (week.length < 7) {
+        week.add(null);
+      }
+      weeks.add(week);
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AppText(
           text: 'Streak Calendar',
-          style: AppTextStyles.semiBold(fontSize: 18.sp, color: AppColors.black),
-        ),
-        14.h.verticalSpace,
-        Container(
-          width: double.infinity,
-          padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 20.h),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(18.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 14,
-                offset: const Offset(0, 4),
-              ),
-            ],
+          style: AppTextStyles.semibold(
+            fontSize: 18,
+            color: const Color(0xFF1A1A1A),
           ),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  _MonthNavButton(
-                    icon: Icons.chevron_left_rounded,
-                    onTap: () => _shiftMonth(-1),
-                  ),
-                  Expanded(
-                    child: Center(
-                      child: AppText(
-                        text: monthTitle,
-                        style: AppTextStyles.semiBold(
-                          fontSize: 16.sp,
-                          color: AppColors.black,
-                        ),
-                      ),
-                    ),
-                  ),
-                  _MonthNavButton(
-                    icon: Icons.chevron_right_rounded,
-                    onTap: () => _shiftMonth(1),
-                  ),
-                ],
-              ),
-              18.h.verticalSpace,
-              Row(
-                children: _weekdayLabels
-                    .map(
-                      (label) => Expanded(
-                        child: Center(
-                          child: AppText(
-                            text: label,
-                            style: AppTextStyles.medium(
-                              fontSize: 13.sp,
-                              color: inactiveColor,
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-              12.h.verticalSpace,
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: cells.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 7,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 0,
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            _MonthNavButton(
+              icon: Icons.chevron_left_rounded,
+              onTap: () => _shiftMonth(-1),
+            ),
+            Expanded(
+              child: AppText(
+                text: monthTitle,
+                textAlign: TextAlign.center,
+                style: AppTextStyles.semibold(
+                  fontSize: 16,
+                  color: const Color(0xFF1A1A1A),
                 ),
-                itemBuilder: (context, index) {
-                  final date = cells[index];
-                  if (date == null) return const SizedBox.shrink();
-
-                  final isCompleted = completedDays.contains(date.day);
-                  final isFrozen = frozenDays.contains(date.day);
-                  final isToday = date.year == now.year &&
-                      date.month == now.month &&
-                      date.day == now.day;
-
-                  return Center(
-                    child: Container(
-                      width: 34.w,
-                      height: 34.w,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isCompleted
-                            ? AppColors.orangeColor
-                            : isFrozen
-                            ? AppColors.streakFreezeBlue
-                            : Colors.transparent,
-                        border: isToday && !isCompleted && !isFrozen
-                            ? Border.all(color: AppColors.orangeColor, width: 2)
-                            : null,
-                      ),
-                      child: isFrozen
-                          ? Icon(
-                              Icons.ac_unit_rounded,
-                              size: 16.w,
-                              color: AppColors.white,
-                            )
-                          : AppText(
-                              text: '${date.day}',
-                              style: AppTextStyles.semiBold(
-                                fontSize: 14.sp,
-                                color: isCompleted
-                                    ? AppColors.white
-                                    : inactiveColor,
-                              ),
-                            ),
-                    ),
-                  );
-                },
               ),
-            ],
-          ),
+            ),
+            _MonthNavButton(
+              icon: Icons.chevron_right_rounded,
+              onTap: () => _shiftMonth(1),
+            ),
+          ],
         ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            for (final label in _weekdayLabels)
+              Expanded(
+                child: AppText(
+                  text: label,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.medium(
+                    fontSize: 12,
+                    color: const Color(0xFF8E8E93),
+                  ),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        for (final week in weeks)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Row(
+              children: [
+                for (final date in week)
+                  Expanded(
+                    child: _DayCell(
+                      date: date,
+                      now: now,
+                      isCompleted: date != null && completedDays.contains(date.day),
+                      isFrozen: date != null && frozenDays.contains(date.day),
+                    ),
+                  ),
+              ],
+            ),
+          ),
       ],
+    );
+  }
+}
+
+class _DayCell extends StatelessWidget {
+  const _DayCell({
+    required this.date,
+    required this.now,
+    required this.isCompleted,
+    required this.isFrozen,
+  });
+
+  final DateTime? date;
+  final DateTime now;
+  final bool isCompleted;
+  final bool isFrozen;
+
+  @override
+  Widget build(BuildContext context) {
+    if (date == null) return const SizedBox(height: 40);
+
+    final isToday =
+        date!.year == now.year && date!.month == now.month && date!.day == now.day;
+    final isFuture = date!.isAfter(DateTime(now.year, now.month, now.day));
+    final Color textColor = isCompleted
+        ? Colors.white
+        : isFuture
+        ? const Color(0xFFC7C7CC)
+        : const Color(0xFF1A1A1A);
+
+    return SizedBox(
+      height: 40,
+      child: Center(
+        child: Container(
+          width: 36,
+          height: 36,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: isCompleted
+                ? AppColors.orangeColor
+                : isFrozen
+                ? const Color(0xFFE7F6F6)
+                : Colors.transparent,
+            border: isToday && !isCompleted
+                ? Border.all(color: AppColors.orangeColor, width: 1.5)
+                : null,
+          ),
+          child: isFrozen
+              ? const SvgIcon(AppAssets.snow, size: 16)
+              : AppText(
+                  text: '${date!.day}',
+                  style: AppTextStyles.semibold(
+                    fontSize: 14,
+                    color: textColor,
+                  ),
+                ),
+        ),
+      ),
     );
   }
 }
@@ -240,7 +251,16 @@ class _MonthNavButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Icon(icon, size: 22.sp, color: AppColors.black),
+      child: Container(
+        width: 32,
+        height: 32,
+        alignment: Alignment.center,
+        decoration: const BoxDecoration(
+          color: Color(0xFFF2F2F7),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, size: 20, color: const Color(0xFF1A1A1A)),
+      ),
     );
   }
 }

@@ -273,50 +273,51 @@ class OptionCard extends StatelessWidget {
 
     if (isChecked) {
       if (isCorrect) {
-        borderColor = Color(0xFF4CAF50);
-        backgroundColor = Color(0xFFE8F5E9);
-        textColor = Color(0xFF2E7D32);
-        trailingIcon = SvgIcon(AppAssets.correctoption, size: 24.w);
+        borderColor = AppColors.teal;
+        backgroundColor = const Color(0xFFE0F2F1);
+        textColor = AppColors.teal;
+        trailingIcon = SvgIcon(AppAssets.correctoption, size: 22);
       } else if (isSelected && !isCorrect) {
         borderColor = AppColors.redColor;
-        backgroundColor = Color(0xFFFFEBEE);
+        backgroundColor = const Color(0xFFFFEBEE);
         textColor = AppColors.redColor;
-        trailingIcon = SvgIcon(AppAssets.canceloption, size: 24.w);
+        trailingIcon = SvgIcon(AppAssets.canceloption, size: 22);
       } else {
-        borderColor = Colors.black.withValues(alpha: 0.1);
+        borderColor = const Color(0xFFE8E8E8);
         backgroundColor = Colors.white;
-        textColor = AppColors.black;
+        textColor = const Color(0xFF1A1A1A);
       }
-    } else {
-      if (isSelected) {
-        borderColor = AppColors.teal;
-        backgroundColor = AppColors.teal.withValues(alpha: 0.1);
-        textColor = AppColors.teal;
-      }
+    } else if (isSelected) {
+      borderColor = AppColors.teal;
+      backgroundColor = const Color(0xFFE0F2F1);
+      textColor = AppColors.teal;
     }
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.only(bottom: 12.h),
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 15.h),
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: borderColor, width: 1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: borderColor),
         ),
         child: Row(
           children: [
             Expanded(
               child: AppText(
                 text: text,
-                style: AppTextStyles.sfProTextBold(
-                  fontSize: 14.sp,
+                style: AppTextStyles.regular(
+                  fontSize: 14,
                   color: textColor,
-                ),
+                ).copyWith(height: 1.3),
               ),
             ),
-            if (trailingIcon != null) ...[12.w.horizontalSpace, trailingIcon],
+            if (trailingIcon != null) ...[
+              const SizedBox(width: 12),
+              trailingIcon,
+            ],
           ],
         ),
       ),

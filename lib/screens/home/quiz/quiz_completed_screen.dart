@@ -242,23 +242,27 @@ class _QuizCompletedScreenState extends State<QuizCompletedScreen> {
     return AppLayout(
       body: Stack(
         children: [
+          const ColoredBox(
+            color: Color(0xFFF2F2F7),
+            child: SizedBox.expand(),
+          ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Spacer(flex: 2),
                   Container(
-                    padding: EdgeInsets.all(12.w),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16.r),
-                      boxShadow: [
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: const [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
-                          blurRadius: 12,
-                          offset: Offset(0, 4),
+                          color: Color(0x14000000),
+                          blurRadius: 16,
+                          offset: Offset(0, 6),
                         ),
                       ],
                     ),
@@ -308,18 +312,18 @@ class _QuizCompletedScreenState extends State<QuizCompletedScreen> {
                   AppText(
                     text: headline,
                     style: AppTextStyles.semibold(
-                      fontSize: 32.sp,
-                      color: AppColors.black,
-                    ),
+                      fontSize: 28,
+                      color: const Color(0xFF1A1A1A),
+                    ).copyWith(height: 1.2),
                     textAlign: TextAlign.center,
                   ),
                   8.w.verticalSpace,
                   AppText(
                     text: subText,
-                    style: AppTextStyles.medium(
-                      fontSize: 14.sp,
-                      color: AppColors.black.withValues(alpha: 0.6),
-                    ).copyWith(height: 1.35),
+                    style: AppTextStyles.regular(
+                      fontSize: 14,
+                      color: const Color(0x991A1A1A),
+                    ).copyWith(height: 1.4),
                     textAlign: TextAlign.center,
                   ),
                   if (!_isSubmitting) ...[
@@ -418,8 +422,13 @@ class _QuizCompletedScreenState extends State<QuizCompletedScreen> {
                             _onContinue();
                           },
                     backgroundColor: AppColors.teal,
-                    fixedSize: Size(348, 42.w),
+                    textStyle: AppTextStyles.semibold(
+                      fontSize: 14,
+                      color: Colors.white,
+                    ).copyWith(height: 17 / 14),
+                    fixedSize: Size(MediaQuery.sizeOf(context).width - 48, 50),
                     isLoading: _isSubmitting,
+                    loadingColor: Colors.white,
                   ),
                   40.w.verticalSpace,
                 ],

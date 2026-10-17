@@ -1,11 +1,11 @@
 import 'package:redstreakapp/core/enums/data_status.dart';
-import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/utils/network_image_url.dart';
 import 'package:redstreakapp/core/utils/user_facing_message.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/friend/friend_details_model.dart';
 import 'package:redstreakapp/screens/profile/user_profile_topics_list_screen_params.dart';
+import 'package:redstreakapp/screens/settings/widget/settings_chrome.dart';
 import 'package:redstreakapp/services/profile/friend_api_service.dart';
 
 class UserProfileTopicsListScreen extends StatefulWidget {
@@ -104,27 +104,9 @@ class _UserProfileTopicsListScreenState extends State<UserProfileTopicsListScree
 
   @override
   Widget build(BuildContext context) {
-    return AppLayout(
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundColor,
-        surfaceTintColor: Colors.transparent,
-        title: AppText(text: widget.params.title ?? 'Series Followed'),
-        leading: IconButton(
-          onPressed: () => context.pop(),
-          icon: const Icon(Icons.chevron_left_rounded),
-        ),
-      ),
-      body: Column(
-        children: [
-          Divider(color: AppColors.black.setOpacity(0.1), height: 1),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(24.w, 14.w, 24.w, 0),
-              child: _buildBody(),
-            ),
-          ),
-        ],
-      ),
+    return SettingsScaffold(
+      title: widget.params.title ?? 'Series Followed',
+      body: _buildBody(),
     );
   }
 
@@ -144,25 +126,33 @@ class _UserProfileTopicsListScreenState extends State<UserProfileTopicsListScree
     return RefreshIndicator(
       color: AppColors.teal,
       onRefresh: () => _loadTopics(page: 1),
-      child: ListView.separated(
+      child: GridView.builder(
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
         ),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          8,
+          16,
+          MediaQuery.paddingOf(context).bottom + 16,
+        ),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 14,
+          crossAxisSpacing: 12,
+          childAspectRatio: 0.78,
+        ),
         itemCount: itemCount,
-        separatorBuilder: (_, __) => SizedBox(height: 16.h),
         itemBuilder: (context, index) {
           if (index == _topics.length) {
-            return Padding(
-              padding: EdgeInsets.symmetric(vertical: 12.h),
-              child: Center(
-                child: SizedBox(
-                  width: 24.sp,
-                  height: 24.sp,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: AppColors.teal,
-                  ),
+            return const Center(
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: AppColors.teal,
                 ),
               ),
             );
@@ -187,76 +177,60 @@ class _TopicListTile extends StatelessWidget {
         ? subtitle
         : '${topic.noOfReadings} Readings';
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.black.setOpacity(0.08)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.setOpacity(0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(22),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          ColoredBox(
+            color: const Color(0xFF1C1C1E),
+            child: imageUrl == null
+                ? const Icon(Icons.auto_stories_outlined, color: Colors.white54)
+                : AppNetworkImage(
+                    imageUrl: imageUrl,
+                    tag: 'UserProfileTopicsList.cover',
+                    fit: BoxFit.cover,
+                    errorCompact: true,
+                    errorIconOnly: true,
+                  ),
           ),
-        ],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              width: 100.w,
-              child: imageUrl != null
-                  ? AppNetworkImage(
-                      imageUrl: imageUrl,
-                      tag: 'UserProfileTopicsList.cover',
-                      width: 100.w,
-                      height: 100.w,
-                      fit: BoxFit.cover,
-                      errorCompact: true,
-                      errorIconOnly: true,
-                    )
-                  : ColoredBox(
-                      color: AppColors.lightwhiteColor,
-                      child: Icon(
-                        Icons.auto_stories_outlined,
-                        color: AppColors.black.setOpacity(0.25),
-                      ),
-                    ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 12.h),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    AppText(
-                      text: topic.title ?? 'Untitled',
-                      style: AppTextStyles.semibold(
-                        fontSize: 15.sp,
-                        color: AppColors.black,
-                      ),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    8.h.verticalSpace,
-                    AppText(
-                      text: subtitleText,
-                      style: AppTextStyles.medium(
-                        fontSize: 13.sp,
-                        color: AppColors.black.setOpacity(0.5),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0x00000000), Color(0xCC000000)],
+                stops: [0.45, 1],
               ),
             ),
-          ],
-        ),
+          ),
+          Positioned(
+            left: 10,
+            right: 10,
+            bottom: 12,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppText(
+                  text: topic.title ?? 'Untitled',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.bold(fontSize: 16, color: Colors.white),
+                ),
+                const SizedBox(height: 2),
+                AppText(
+                  text: subtitleText,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.regular(
+                    fontSize: 12,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -267,10 +241,17 @@ class _LoadingList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
+    return GridView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 14,
+        crossAxisSpacing: 12,
+        childAspectRatio: 0.78,
+      ),
       itemCount: 6,
-      separatorBuilder: (_, __) => SizedBox(height: 16.h),
-      itemBuilder: (_, __) => const _ShimmerTile(),
+      itemBuilder: (_, _) => const _ShimmerTile(),
     );
   }
 }
@@ -280,11 +261,11 @@ class _ShimmerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppSkeletonizer(child: Container(
-        height: 100.h,
+    return AppSkeletonizer(
+      child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(22),
         ),
       ),
     );
@@ -303,32 +284,25 @@ class _ErrorState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
-            size: 40.w,
-            color: AppColors.orangeColor,
-          ),
-          12.verticalSpace,
           AppText(
             text: message ?? 'Something went wrong',
             textAlign: TextAlign.center,
-            style: AppTextStyles.medium(fontSize: 14.sp),
+            style: AppTextStyles.regular(fontSize: 14, color: settingsMuted),
           ),
-          16.verticalSpace,
+          const SizedBox(height: 16),
           GestureDetector(
             onTap: onRetry,
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.h),
+              height: 44,
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              alignment: Alignment.center,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(color: AppColors.teal.setOpacity(0.4)),
+                color: settingsInk,
+                borderRadius: BorderRadius.circular(22),
               ),
               child: AppText(
                 text: 'Retry',
-                style: AppTextStyles.semibold(
-                  fontSize: 14.sp,
-                  color: AppColors.teal,
-                ),
+                style: AppTextStyles.semibold(fontSize: 15, color: Colors.white),
               ),
             ),
           ),
@@ -347,15 +321,9 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.auto_stories_outlined,
-            size: 48.w,
-            color: AppColors.black.setOpacity(0.3),
-          ),
-          12.verticalSpace,
           AppText(
             text: 'No series yet',
-            style: AppTextStyles.medium(fontSize: 16.sp),
+            style: AppTextStyles.regular(fontSize: 14, color: settingsMuted),
           ),
         ],
       ),

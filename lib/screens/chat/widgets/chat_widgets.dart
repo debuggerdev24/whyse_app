@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/chat/chat_history_model.dart';
 
-const Color _chatBackground = Color(0xFFF9F6F3);
+const Color _chatBackground = Color(0xFFF2F2F7);
+const Color _chatInk = Color(0xFF1A1A1A);
 
 class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
   const ChatAppBar({super.key});
@@ -69,50 +71,42 @@ class ChatBotTextBubble extends StatelessWidget {
   const ChatBotTextBubble({
     super.key,
     required this.text,
-    this.showAvatar = true,
     this.animate = false,
     this.showCursor = false,
   });
 
   final String text;
-  final bool showAvatar;
   final bool animate;
   final bool showCursor;
 
   @override
   Widget build(BuildContext context) {
     final regularStyle = AppTextStyles.regular(
-      fontSize: 16.sp,
-      color: AppColors.black,
+      fontSize: 15,
+      color: _chatInk,
     ).copyWith(height: 1.35);
     final boldStyle = AppTextStyles.bold(
-      fontSize: 16.sp,
-      color: AppColors.black,
+      fontSize: 15,
+      color: _chatInk,
     ).copyWith(height: 1.35);
 
     return Align(
       alignment: Alignment.centerLeft,
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 0.82.sw),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (showAvatar) ...[const ChatBotAvatar(), SizedBox(height: 8.h)],
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(16.r),
-              ),
-              child: ChatTypewriterText(
-                text: text,
-                style: regularStyle,
-                boldStyle: boldStyle,
-                animate: animate,
-                showCursor: showCursor,
-              ),
-            ),
-          ],
+        constraints: BoxConstraints(maxWidth: 0.78.sw),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(22),
+          ),
+          child: ChatTypewriterText(
+            text: text,
+            style: regularStyle,
+            boldStyle: boldStyle,
+            animate: animate,
+            showCursor: showCursor,
+          ),
         ),
       ),
     );
@@ -244,8 +238,10 @@ class _ChatTypewriterTextState extends State<ChatTypewriterText> {
         return;
       }
       setState(() {
-        _visibleLength =
-            (_visibleLength + widget.charsPerTick).clamp(0, _target.length);
+        _visibleLength = (_visibleLength + widget.charsPerTick).clamp(
+          0,
+          _target.length,
+        );
       });
     });
   }
@@ -300,18 +296,18 @@ class ChatUserTextBubble extends StatelessWidget {
     return Align(
       alignment: Alignment.centerRight,
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 0.82.sw),
+        constraints: BoxConstraints(maxWidth: 0.78.sw),
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: AppColors.teal,
-            borderRadius: BorderRadius.circular(16.r),
+            color: const Color(0xFF1C1C1E),
+            borderRadius: BorderRadius.circular(22),
           ),
           child: AppText(
             text: text,
             style: AppTextStyles.regular(
-              fontSize: 16.sp,
-              color: AppColors.white,
+              fontSize: 15,
+              color: Colors.white,
             ).copyWith(height: 1.35),
           ),
         ),
@@ -571,41 +567,40 @@ class ChatSuggestionSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 10.h),
+          padding: const EdgeInsets.only(bottom: 10),
           child: AppText(
             text: 'Not sure where to start?',
             style: AppTextStyles.medium(
-              fontSize: 14.sp,
-              color: AppColors.black.withValues(alpha: 0.45),
+              fontSize: 13,
+              color: const Color(0xFF8E8E93),
             ),
           ),
         ),
         SizedBox(
-          height: 92.h,
+          height: 84,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
             physics: const BouncingScrollPhysics(),
             itemCount: suggestions.length,
-            separatorBuilder: (_, _) => SizedBox(width: 10.w),
+            separatorBuilder: (_, _) => const SizedBox(width: 10),
             itemBuilder: (context, index) {
               final suggestion = suggestions[index];
               return GestureDetector(
                 onTap: () => onSuggestionTap(suggestion),
                 child: Container(
-                  width: 168.w,
-                  padding: EdgeInsets.all(14.w),
+                  width: 168,
+                  padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(14.r),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18),
                   ),
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: AppText(
                       text: suggestion,
                       style: AppTextStyles.medium(
-                        fontSize: 15.sp,
-                        color: AppColors.black,
+                        fontSize: 14,
+                        color: _chatInk,
                         height: 1.3,
                       ),
                     ),
@@ -626,73 +621,69 @@ class ChatEmptyState extends StatelessWidget {
     super.key,
     required this.suggestions,
     required this.onSuggestionTap,
+    this.bottomReserve = 80,
   });
 
   final List<String> suggestions;
   final ValueChanged<String> onSuggestionTap;
+  final double bottomReserve;
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 16.h),
+      padding: EdgeInsets.fromLTRB(20, 12, 20, bottomReserve + 16),
       child: Column(
         children: [
-          SizedBox(height: 28.h),
+          const SizedBox(height: 28),
           Image.asset(
             AppAssets.robot,
-            width: 72.w,
-            height: 72.w,
+            width: 72,
+            height: 72,
             fit: BoxFit.contain,
           ),
-          SizedBox(height: 18.h),
+          const SizedBox(height: 18),
           AppText(
             text: 'What do you want to learn next?',
             textAlign: TextAlign.center,
-            style: AppTextStyles.semiBold(
-              fontSize: 22.sp,
-              color: AppColors.black,
-            ),
+            style: AppTextStyles.semibold(fontSize: 22, color: _chatInk),
           ),
-          SizedBox(height: 10.h),
+          const SizedBox(height: 10),
           AppText(
             text:
                 'Ask me for stories, Sparks, books, or anything you’re curious about.',
             textAlign: TextAlign.center,
             style: AppTextStyles.regular(
-              fontSize: 15.sp,
-              color: AppColors.black.withValues(alpha: 0.5),
-            ),
+              fontSize: 14,
+              color: const Color(0xFF8E8E93),
+            ).copyWith(height: 1.35),
           ),
-          SizedBox(height: 28.h),
+          const SizedBox(height: 28),
           Align(
             alignment: Alignment.centerLeft,
             child: AppText(
               text: 'Try asking',
               style: AppTextStyles.medium(
-                fontSize: 14.sp,
-                color: AppColors.black.withValues(alpha: 0.45),
+                fontSize: 13,
+                color: const Color(0xFF8E8E93),
               ),
             ),
           ),
-          SizedBox(height: 12.h),
+          const SizedBox(height: 12),
           ...suggestions.map(
             (suggestion) => Padding(
-              padding: EdgeInsets.only(bottom: 10.h),
+              padding: const EdgeInsets.only(bottom: 10),
               child: GestureDetector(
                 onTap: () => onSuggestionTap(suggestion),
                 child: Container(
                   width: double.infinity,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 14.h,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(16.r),
-                    border: Border.all(
-                      color: AppColors.black.withValues(alpha: 0.06),
-                    ),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18),
                   ),
                   child: Row(
                     children: [
@@ -700,16 +691,16 @@ class ChatEmptyState extends StatelessWidget {
                         child: AppText(
                           text: suggestion,
                           style: AppTextStyles.medium(
-                            fontSize: 15.sp,
-                            color: AppColors.black,
+                            fontSize: 14,
+                            color: _chatInk,
                             height: 1.35,
                           ),
                         ),
                       ),
-                      SizedBox(width: 10.w),
-                      Icon(
+                      const SizedBox(width: 10),
+                      const Icon(
                         Icons.arrow_forward_rounded,
-                        size: 18.w,
+                        size: 18,
                         color: AppColors.teal,
                       ),
                     ],
@@ -730,75 +721,186 @@ class ChatInputBar extends StatelessWidget {
     required this.controller,
     required this.focusNode,
     required this.onSend,
+    this.scrolling = false,
   });
 
   final TextEditingController controller;
   final FocusNode focusNode;
   final VoidCallback onSend;
+  final bool scrolling;
+
+  static const double height = 54;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: _chatBackground,
-      padding: EdgeInsets.fromLTRB(
-        20.w,
-        8.h,
-        20.w,
-        MediaQuery.of(context).padding.bottom + 12.h,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              height: 48.h,
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(24.r),
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 18.w),
-              alignment: Alignment.centerLeft,
+    final outerRadius = BorderRadius.circular(height);
+    final innerRadius = BorderRadius.circular(height - 1.4);
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween(end: scrolling ? 1 : 0),
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+      builder: (context, t, child) {
+        final sigma = 8 + (4 * t);
+        return Container(
+          height: height,
+          padding: const EdgeInsets.all(1.4),
+          decoration: BoxDecoration(
+            borderRadius: outerRadius,
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white.withValues(alpha: 0.95),
+                Colors.white.withValues(alpha: 0.22),
+                Colors.white.withValues(alpha: 0.78),
+              ],
+              stops: const [0.0, 0.46, 1.0],
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: innerRadius,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+                  child: const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color(0x2EFFFFFF),
+                          Color(0x1AFFFFFF),
+                          Color(0x12FFFFFF),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const Positioned(
+                  top: 0,
+                  left: 18,
+                  right: 18,
+                  height: 1,
+                  child: IgnorePointer(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Color(0x00FFFFFF),
+                            Color(0xF5FFFFFF),
+                            Color(0x00FFFFFF),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment(-1.15 + (1.5 * t), -1),
+                        end: Alignment(0.35 + t, 1.1),
+                        colors: [
+                          const Color(0x00FFFFFF),
+                          Colors.white.withValues(alpha: 0.08 * t),
+                          const Color(0x00FFFFFF),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                child!,
+              ],
+            ),
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 6, 0),
+        child: Row(
+          children: [
+            Expanded(
               child: TextField(
                 controller: controller,
                 focusNode: focusNode,
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => onSend(),
-                style: AppTextStyles.regular(
-                  fontSize: 16.sp,
-                  color: AppColors.black,
-                ),
+                cursorColor: AppColors.teal,
+                style: AppTextStyles.regular(fontSize: 15, color: _chatInk),
                 decoration: InputDecoration(
                   isDense: true,
                   border: InputBorder.none,
                   hintText: 'Type here',
                   hintStyle: AppTextStyles.regular(
-                    fontSize: 16.sp,
-                    color: AppColors.black.withValues(alpha: 0.35),
+                    fontSize: 15,
+                    color: const Color(0xFF8E8E93),
                   ),
                 ),
               ),
             ),
-          ),
-          SizedBox(width: 10.w),
-          GestureDetector(
-            onTap: onSend,
-            child: Container(
-              width: 48.w,
-              height: 48.w,
-              decoration: const BoxDecoration(
-                color: AppColors.teal,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.arrow_upward_rounded,
-                color: AppColors.white,
-                size: 22.w,
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: onSend,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: const BoxDecoration(
+                  color: AppColors.teal,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.send_rounded,
+                  color: Colors.white,
+                  size: 18,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
+}
+
+/// Softens messages as they pass the composer while the list is moving.
+class ChatScrollEdge extends StatelessWidget {
+  const ChatScrollEdge({super.key, required this.active});
+
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: AnimatedOpacity(
+        opacity: active ? 1 : 0,
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+        child: ClipRect(
+          child: ShaderMask(
+            blendMode: BlendMode.dstIn,
+            shaderCallback: _fadeShader,
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+              child: const ColoredBox(color: Color(0x33F2F2F7)),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+Shader _fadeShader(Rect bounds) {
+  return const LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0x00000000), Color(0xFFFFFFFF)],
+    stops: [0.0, 0.72],
+  ).createShader(bounds);
 }
 
 Color get chatBackgroundColor => _chatBackground;

@@ -68,68 +68,75 @@ class _StartQuizScreenState extends State<StartQuizScreen> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      // canPop: false,
-      // onPopInvokedWithResult: (didPop, result) {
-      //   showLeaveQuizConfirmation(context: context);
-      // },
       child: AppLayout(
-        appBar: AppBar(
-          backgroundColor: AppColors.backgroundColor,
-          leading: IconButton(
-            // onPressed: () => showLeaveQuizConfirmation(context: context),
-            onPressed: () => context.pop(),
-            icon: const Icon(Icons.close),
-          ),
-        ),
-        body: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 27.w),
-          child: Consumer<StoryProvider>(
-            builder: (context, provider, _) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Spacer(flex: 2),
-
-                  Image.asset(AppAssets.quiz, height: 92.h, width: 92.w),
-                  33.w.verticalSpace,
-
-                  AppText(
-                    text: "Time for a quick quiz!",
-                    style: AppTextStyles.bold(
-                      fontSize: 32.sp,
-                      color: AppColors.black,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  9.w.verticalSpace,
-
-                  AppText(
-                    text:
-                        "You'll answer a few quick questions about the \npassage you just read. Let's see what you remember!",
-                    style: AppTextStyles.medium(
-                      fontSize: 16.sp,
-                      color: AppColors.black.withValues(alpha: 0.6),
-                    ).copyWith(height: 1.5),
-                    textAlign: TextAlign.center,
-                  ),
-                  const Spacer(flex: 3),
-
-                  AppFilledButton(
-                    text: "Start Quiz",
-                    onTap: provider.isCreateQuizLoading
-                        ? null
-                        : () => _goToQuiz(context),
-                    backgroundColor: AppColors.orangeColor,
-                    fixedSize: Size(348.w, 42.w),
-                    isLoading: provider.isCreateQuizLoading,
-                  ),
-                  40.w.verticalSpace,
-                ],
-              );
-            },
+        body: ColoredBox(
+          color: const Color(0xFFF2F2F7),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: Consumer<StoryProvider>(
+                builder: (context, provider, _) {
+                  return Column(
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: GlassIconButton(
+                          onTap: () => context.pop(),
+                          child: const Icon(
+                            Icons.close_rounded,
+                            color: Color(0xFF1A1A1A),
+                            size: 22,
+                          ),
+                        ),
+                      ),
+                      const Spacer(flex: 2),
+                      Image.asset(AppAssets.quiz, height: 92, width: 92),
+                      const SizedBox(height: 28),
+                      AppText(
+                        text: "Time for a quick quiz!",
+                        style: AppTextStyles.semibold(
+                          fontSize: 28,
+                          color: const Color(0xFF1A1A1A),
+                        ).copyWith(height: 1.2),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 10),
+                      AppText(
+                        text:
+                            "You'll answer a few quick questions about the passage you just read. Let's see what you remember!",
+                        style: AppTextStyles.regular(
+                          fontSize: 14,
+                          color: const Color(0x991A1A1A),
+                        ).copyWith(height: 1.45),
+                        textAlign: TextAlign.center,
+                      ),
+                      const Spacer(flex: 3),
+                      AppFilledButton(
+                        text: "Start Quiz",
+                        onTap: provider.isCreateQuizLoading
+                            ? null
+                            : () => _goToQuiz(context),
+                        backgroundColor: AppColors.teal,
+                        textStyle: AppTextStyles.semibold(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ).copyWith(height: 17 / 14),
+                        fixedSize: Size(
+                          MediaQuery.sizeOf(context).width - 32,
+                          50,
+                        ),
+                        isLoading: provider.isCreateQuizLoading,
+                        loadingColor: Colors.white,
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 }
+

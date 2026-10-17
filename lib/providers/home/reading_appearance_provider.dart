@@ -60,7 +60,7 @@ class ReadingAppearanceProvider extends ChangeNotifier {
   ];
 
   /// Matches [Slider] range 0–1 with [divisions: 12] in the font bottom sheet.
-  double _fontSizeNormalized = 0.45;
+  double _fontSizeNormalized = 0.2;
   int _selectedFontIndex = 0;
   int _selectedThemeIndex = 0;
 
@@ -85,14 +85,14 @@ class ReadingAppearanceProvider extends ChangeNotifier {
     if (font.useLibreBaskerville) {
       return GoogleFonts.libreBaskerville(
         fontSize: fontSize,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w400,
         height: height,
         color: color,
       );
     }
     return TextStyle(
       fontFamily: font.fontFamily,
-      fontWeight: FontWeight.w500,
+      fontWeight: FontWeight.w400,
       fontSize: fontSize,
       height: height,
       color: color,

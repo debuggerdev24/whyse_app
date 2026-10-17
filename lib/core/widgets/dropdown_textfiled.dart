@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
+import 'package:redstreakapp/core/widgets/app_dropdown.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 
 class CustomDropDown extends StatelessWidget {
@@ -20,73 +21,11 @@ class CustomDropDown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: Theme.of(context).copyWith(
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-        hoverColor: Colors.transparent,
-        focusColor: AppColors.darkGrey.withValues(alpha: 0.1),
-        canvasColor: Colors.white,
-      ),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20.w),
-        height: 50.h,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: AppColors.black.withValues(alpha: 0.1),
-            width: 1,
-          ),
-        ),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            value: value,
-            icon: Icon(
-              Icons.keyboard_arrow_down_rounded,
-              color: AppColors.black,
-              size: 22.sp,
-            ),
-
-            dropdownColor: Colors.white,
-            elevation: 3,
-
-            style: AppTextStyles.regular(
-              fontSize: 16.sp,
-              color: AppColors.black,
-            ),
-
-            hint: AppText(
-              text: hint,
-              style: AppTextStyles.semibold(
-                fontSize: 14.sp,
-                color: AppColors.black.withValues(alpha: 0.3),
-              ),
-            ),
-
-            isExpanded: true,
-            borderRadius: BorderRadius.circular(12.r),
-
-            items: items.map((String item) {
-              return DropdownMenuItem(
-                value: item,
-                child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 10.h),
-                  child: AppText(
-                    text: item,
-                    style: AppTextStyles.medium(
-                      fontSize: 16.sp,
-                      color: AppColors.black,
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-
-            onChanged: onChanged,
-          ),
-        ),
-      ),
+    return AppDropdown(
+      hint: hint,
+      value: value,
+      items: items,
+      onChanged: onChanged,
     );
   }
 }
@@ -140,49 +79,16 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
 
         6.verticalSpace,
 
-        /// Dropdown Container
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14.r),
-            border: Border.all(color: AppColors.black.withValues(alpha: 0.1)),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              isExpanded: true,
-              value: selectedValue,
-              hint: AppText(
-                text: widget.hint,
-                style: AppTextStyles.medium(
-                  fontSize: 14.sp,
-                  color: AppColors.black.withValues(alpha: 0.3),
-                ),
-              ),
-              icon: const Icon(
-                Icons.keyboard_arrow_down_rounded,
-                color: AppColors.black,
-              ),
-              items: widget.items.map((item) {
-                return DropdownMenuItem<String>(
-                  value: item,
-                  child: AppText(
-                    text: item,
-                    style: AppTextStyles.medium(
-                      fontSize: 14.sp,
-                      color: AppColors.black,
-                    ),
-                  ),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedValue = value;
-                });
-                widget.onChanged(value);
-              },
-            ),
-          ),
+        AppDropdown(
+          hint: widget.hint,
+          value: selectedValue,
+          items: widget.items,
+          onChanged: (value) {
+            setState(() {
+              selectedValue = value;
+            });
+            widget.onChanged(value);
+          },
         ),
       ],
     );

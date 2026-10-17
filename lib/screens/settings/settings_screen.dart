@@ -1,158 +1,86 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
+import 'package:redstreakapp/screens/settings/widget/settings_chrome.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (!didPop) context.pop();
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          leading: Align(
-            alignment: Alignment.centerLeft,
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => context.pop(),
+    final bottom = MediaQuery.paddingOf(context).bottom;
+
+    return SettingsScaffold(
+      title: 'Settings',
+      bottom: Padding(
+        padding: EdgeInsets.fromLTRB(20, 8, 20, bottom + 12),
+        child: Consumer<AuthProvider>(
+          builder: (context, provider, _) {
+            return GestureDetector(
+              onTap: provider.isLogOutLoading
+                  ? null
+                  : () {
+                      provider.logOutUser(
+                        onSuccess: () {
+                          context.goNamed(AppRoutes.loginScreen.name);
+                        },
+                      );
+                    },
               child: Container(
-                padding: const EdgeInsets.only(left: 25, right: 10),
-                child: SvgIcon(AppAssets.backButton, size: 13.sp),
-              ),
-            ),
-          ),
-          centerTitle: true,
-          title: AppText(
-            text: 'Settings',
-            style: AppTextStyles.semibold(fontSize: 20),
-          ),
-          bottom: PreferredSize(
-            preferredSize: Size.fromHeight(1.h),
-            child: Container(
-              color: AppColors.black.withValues(alpha: 0.1),
-              height: 1,
-            ),
-          ),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.only(top: 15),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: EdgeInsets.only(left: 25.r, right: 25.r),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AppText(
-                        text: 'Account',
-                        style: AppTextStyles.semibold(
-                          fontSize: 14,
-                          color: AppColors.black.withValues(alpha: 0.6),
-                        ),
-                      ),
-                      25.verticalSpace,
-                      _settingsItem(
-                        title: 'Preferences',
-                        onTap: () =>
-                            context.pushNamed(AppRoutes.preferencesScreen.name),
-                      ),
-                      25.verticalSpace,
-                      _settingsItem(
-                        title: 'Profile',
-                        onTap: () =>
-                            context.pushNamed(AppRoutes.editProfileScreen.name),
-                      ),
-                      25.verticalSpace,
-                      _settingsItem(
-                        title: 'Notifications',
-                        onTap: () => context.pushNamed(
-                          AppRoutes.settingsNotificationScreen.name,
-                        ),
-                      ),
-                      25.verticalSpace,
-                      _settingsItem(title: 'Curriculum', onTap: () {}),
-                      25.verticalSpace,
-                      Container(
-                        color: AppColors.black.withValues(alpha: 0.1),
-                        height: 1,
-                        width: double.infinity,
-                      ),
-                      25.verticalSpace,
-                      AppText(
-                        text: 'Support',
-                        style: AppTextStyles.semibold(
-                          fontSize: 14,
-                          color: AppColors.black.withValues(alpha: 0.6),
-                        ),
-                      ),
-                      25.verticalSpace,
-                      _settingsItem(title: 'Help Center', onTap: () {}),
-                      25.verticalSpace,
-                      _settingsItem(title: 'Feedback', onTap: () {}),
-                    ],
-                  ),
+                height: 56,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: settingsSignOut,
+                  borderRadius: BorderRadius.circular(28),
                 ),
+                child: provider.isLogOutLoading
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : AppText(
+                        text: 'Sign Out',
+                        style: AppTextStyles.semibold(
+                          fontSize: 17,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
-              SafeArea(
-                child: Padding(
-                  padding: EdgeInsets.only(bottom: 12, left: 25.r, right: 25.r),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: Consumer<AuthProvider>(
-                      builder: (context, provider, _) {
-                        return OutlinedButton(
-                          onPressed: () {
-                            provider.logOutUser(
-                              onSuccess: () {
-                                context.goNamed(AppRoutes.loginScreen.name);
-                              },
-                            );
-                          },
-                          child: provider.isLogOutLoading
-                              ? Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(3),
-                                    child: CircularProgressIndicator(
-                                      color: AppColors.black,
-                                      strokeWidth: 1,
-                                    ),
-                                  ),
-                                )
-                              : AppText(
-                                  text: 'Sign out',
-                                  style: AppTextStyles.bold(
-                                    fontSize: 16,
-                                    color: AppColors.black,
-                                  ),
-                                ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
-    );
-  }
-
-  Widget _settingsItem({required String title, required VoidCallback onTap}) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: ListView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(20, 22, 20, 12),
         children: [
-          AppText(text: title, style: AppTextStyles.bold(fontSize: 16)),
-          Icon(Icons.arrow_forward_ios_rounded, size: 12.sp),
+          const SettingsSectionLabel('Account'),
+          const SizedBox(height: 6),
+          SettingsNavRow(
+            title: 'Preferences',
+            onTap: () => context.pushNamed(AppRoutes.preferencesScreen.name),
+          ),
+          SettingsNavRow(
+            title: 'Profile',
+            onTap: () => context.pushNamed(AppRoutes.editProfileScreen.name),
+          ),
+          SettingsNavRow(
+            title: 'Notifications',
+            onTap: () =>
+                context.pushNamed(AppRoutes.settingsNotificationScreen.name),
+          ),
+          SettingsNavRow(title: 'Curriculum', onTap: () {}),
+          SettingsNavRow(title: 'Theme', onTap: () {}),
+          const SizedBox(height: 6),
+          const SettingsDivider(),
+          const SizedBox(height: 18),
+          const SettingsSectionLabel('Support'),
+          const SizedBox(height: 6),
+          SettingsNavRow(title: 'Help Centre', onTap: () {}),
+          SettingsNavRow(title: 'Feedback', onTap: () {}),
         ],
       ),
     );

@@ -1,13 +1,25 @@
 import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/utils/network_image_url.dart';
+import 'package:redstreakapp/core/widgets/app_dropdown.dart';
+import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/models/friend/friend_model.dart';
 import 'package:redstreakapp/providers/friend/friend_provider.dart';
 import 'package:redstreakapp/providers/profile/group_provider.dart';
+import 'package:redstreakapp/screens/settings/widget/settings_chrome.dart';
+
+class AddMembersScreenArgs {
+  const AddMembersScreenArgs({required this.groupId, this.title});
+
+  final String groupId;
+  final String? title;
+}
 
 class AddMembersScreen extends StatefulWidget {
   final String groupId;
-  const AddMembersScreen({super.key, required this.groupId});
+  final String? title;
+  const AddMembersScreen({super.key, required this.groupId, this.title});
 
   @override
   State<AddMembersScreen> createState() => _AddMembersScreenState();
@@ -16,7 +28,7 @@ class AddMembersScreen extends StatefulWidget {
 class _AddMembersScreenState extends State<AddMembersScreen> {
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
+  final Map<String, String> _roles = {};
 
   @override
   void initState() {
@@ -35,9 +47,63 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
     }
   }
 
-  void _onSearchChanged(String value) {
+  void _addTypedMember(FriendProvider friends, GroupProvider groups) {
+    final query = _searchController.text.trim().toLowerCase();
+    if (query.isEmpty) return;
+    final matches = friends.friendsList.where((friend) {
+      final user = friend.friend;
+      bool hit(String? value) =>
+          value != null && value.trim().toLowerCase() == query;
+      return hit(user.email) || hit(user.username) || hit(user.phone);
+    }).toList();
+    if (matches.isEmpty) {
+      AppToast.error(context, 'No matching friend');
+      return;
+    }
+    final user = matches.first.friend;
+    if (!groups.isUserSelected(user.id)) {
+      groups.toggleUserSelection(user.id);
+    }
+    _roles.putIfAbsent(user.id, () => 'Member');
+    _searchController.clear();
+    setState(() {});
+  }
+
+  Future<void> _finish(GroupProvider groups, FriendProvider friends) async {
+    final selected = friends.friendsList
+        .map((friend) => friend.friend)
+        .where((user) => groups.isUserSelected(user.id))
+        .toList();
+    if (selected.isEmpty) {
+      if (mounted) context.pop();
+      return;
+    }
+
+    final byRole = <String, List<String>>{};
+    for (final user in selected) {
+      final role = _roles[user.id] == 'Admin' ? 'ADMIN' : 'MEMBER';
+      byRole.putIfAbsent(role, () => []).add(user.id);
+    }
+
+    for (final entry in byRole.entries) {
+      var failed = false;
+      await groups.addMembersToGroup(
+        groupId: widget.groupId,
+        userIds: entry.value,
+        role: entry.key,
+        onSuccess: () {},
+        onError: (error) {
+          failed = true;
+          AppToast.error(context, error);
+        },
+      );
+      if (failed || !mounted) return;
+    }
     if (!mounted) return;
-    setState(() => _searchQuery = value.trim().toLowerCase());
+    AppToast.success(context, 'Members added successfully');
+    groups.clearUserSelection();
+    groups.getGroupMembers(groupId: widget.groupId);
+    context.pop();
   }
 
   @override
@@ -50,115 +116,118 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AppLayout(
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundColor,
-        surfaceTintColor: Colors.transparent,
-        title: AppText(text: 'Add Members'),
+    final bottom = MediaQuery.paddingOf(context).bottom;
+    final headerTitle = (widget.title ?? '').trim();
+    final finishLabel = headerTitle.isEmpty ? 'Add Members' : 'Create Classroom';
+
+    return SettingsScaffold(
+      title: headerTitle.isEmpty ? 'Add Members' : headerTitle,
+      bottom: Padding(
+        padding: EdgeInsets.fromLTRB(20, 8, 20, bottom + 12),
+        child: Consumer2<GroupProvider, FriendProvider>(
+          builder: (context, groupProvider, friendProvider, _) {
+            final loading = groupProvider.addMembersLoading;
+            return GestureDetector(
+              onTap: loading ? null : () => _finish(groupProvider, friendProvider),
+              child: Container(
+                height: 52,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.teal,
+                  borderRadius: BorderRadius.circular(28),
+                ),
+                child: loading
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : AppText(
+                        text: finishLabel,
+                        style: AppTextStyles.semibold(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
+              ),
+            );
+          },
+        ),
       ),
       body: Consumer2<GroupProvider, FriendProvider>(
         builder: (context, groupProvider, friendProvider, _) {
-          final filteredFriends = friendProvider.friendsList.where((friend) {
-            if (_searchQuery.isEmpty) return true;
-            final name = (friend.friend.displayName ?? '').toLowerCase();
-            final email = (friend.friend.email ?? '').toLowerCase();
-            final username = (friend.friend.username ?? '').toLowerCase();
-            return name.contains(_searchQuery) ||
-                email.contains(_searchQuery) ||
-                username.contains(_searchQuery);
-          }).toList();
+          final added = friendProvider.friendsList
+              .where((friend) => groupProvider.isUserSelected(friend.friend.id))
+              .toList();
 
-          return Column(
-            children: [
-              Divider(color: AppColors.black.withValues(alpha: 0.1), height: 1),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 24.w,
-                    vertical: 20.w,
+          return Padding(
+            padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 12.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppText(
+                  text: 'Add Members',
+                  style: AppTextStyles.medium(fontSize: 14, color: settingsInk),
+                ),
+                SizedBox(height: 8.h),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      AppText(
-                        text: "Add Members",
-                        style: AppTextStyles.semiBold(fontSize: 14.sp),
-                      ),
-                      8.w.verticalSpace,
-                      AppTextField(
-                        controller: _searchController,
-                        onChanged: _onSearchChanged,
-                        hintText: "Search by name or email",
-                        hintStyle: AppTextStyles.medium(
-                          fontSize: 14.sp,
-                          color: AppColors.black.withValues(alpha: 0.25),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 18.w,
-                          vertical: 14.h,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                          borderSide: BorderSide(
-                            color: AppColors.black.withValues(alpha: 0.12),
-                            width: 1,
-                          ),
-                        ),
-                        prefixIcon: Padding(
-                          padding: EdgeInsets.only(left: 12.w),
-                          child: Icon(
-                            Icons.search_rounded,
-                            size: 20.sp,
-                            color: AppColors.black.withValues(alpha: 0.35),
-                          ),
-                        ),
-                      ),
-                      18.w.verticalSpace,
-                      AppText(
-                        text: "Members",
-                        style: AppTextStyles.semiBold(fontSize: 14.sp),
-                      ),
-                      8.w.verticalSpace,
                       Expanded(
-                        child: _buildUsersList(
-                          friendProvider: friendProvider,
-                          groupProvider: groupProvider,
-                          filteredFriends: filteredFriends,
+                        child: AppTextField(
+                          controller: _searchController,
+                          hintText: 'Enter email/username/phone no',
+                          hintStyle: AppTextStyles.regular(
+                            fontSize: 14,
+                            color: settingsMuted,
+                          ),
+                          border: const OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(14)),
+                            borderSide: BorderSide.none,
+                          ),
+                          onSubmit: (_) =>
+                              _addTypedMember(friendProvider, groupProvider),
                         ),
                       ),
-                      12.w.verticalSpace,
-                      AppFilledButton(
-                        text: groupProvider.selectedUsersCount > 0
-                            ? "Add Members (${groupProvider.selectedUsersCount})"
-                            : "Add Members",
-                        isLoading: groupProvider.addMembersLoading,
-                        onTap: groupProvider.selectedUsersCount > 0
-                            ? () {
-                                groupProvider.addMembersToGroup(
-                                  groupId: widget.groupId,
-                                  onSuccess: () {
-                                    AppToast.success(
-                                      context,
-                                      'Members added successfully',
-                                    );
-                                    groupProvider.clearUserSelection();
-                                    groupProvider.getGroupMembers(
-                                      groupId: widget.groupId,
-                                    );
-                                    context.pop();
-                                  },
-                                  onError: (error) {
-                                    AppToast.error(context, error);
-                                  },
-                                );
-                              }
-                            : null,
+                      GestureDetector(
+                        onTap: () =>
+                            _addTypedMember(friendProvider, groupProvider),
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 14),
+                          child: AppText(
+                            text: 'Add',
+                            style: AppTextStyles.semibold(
+                              fontSize: 15,
+                              color: AppColors.teal,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
+                SizedBox(height: 18.h),
+                AppText(
+                  text: 'Members',
+                  style: AppTextStyles.bold(fontSize: 18, color: settingsInk),
+                ),
+                SizedBox(height: 8.h),
+                Expanded(
+                  child: _buildUsersList(
+                    friendProvider: friendProvider,
+                    groupProvider: groupProvider,
+                    filteredFriends: added,
+                  ),
+                ),
+              ],
+            ),
           );
         },
       ),
@@ -177,7 +246,16 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
         return _buildErrorState(friendProvider);
       case DataState.success:
         if (filteredFriends.isEmpty) {
-          return _buildEmptyState();
+          if (friendProvider.friendsList.isEmpty) return _buildEmptyState();
+          return Center(
+            child: AppText(
+              text: 'No members yet',
+              style: AppTextStyles.regular(
+                fontSize: 14,
+                color: const Color(0xFF8E8E93),
+              ),
+            ),
+          );
         }
         return _buildSuccessList(
           friendProvider: friendProvider,
@@ -271,9 +349,7 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
           ),
           4.h.verticalSpace,
           AppText(
-            text: _searchQuery.isEmpty
-                ? "Add friends first, then add them to groups"
-                : "Try searching with a different keyword",
+            text: "Add friends first, then add them to groups",
             style: AppTextStyles.medium(
               fontSize: 13.sp,
               color: AppColors.black.withValues(alpha: 0.35),
@@ -289,16 +365,14 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
     required GroupProvider groupProvider,
     required List<FriendResponse> filteredFriends,
   }) {
-    final itemCount = filteredFriends.length + (friendProvider.isLoadingMore ? 1 : 0);
+    final itemCount =
+        filteredFriends.length + (friendProvider.isLoadingMore ? 1 : 0);
 
     return ListView.separated(
       controller: _scrollController,
       itemCount: itemCount,
-      separatorBuilder: (_, _) => Divider(
-        height: 24.w,
-        thickness: 1,
-        color: AppColors.black.withValues(alpha: 0.08),
-      ),
+      separatorBuilder: (_, _) =>
+          const Divider(height: 1, thickness: 1, color: Color(0xFFE5E5EA)),
       itemBuilder: (context, index) {
         if (index == filteredFriends.length) {
           return _buildPaginationLoader();
@@ -306,8 +380,8 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
         final user = filteredFriends[index].friend;
         return _MemberTile(
           user: user,
-          isSelected: groupProvider.isUserSelected(user.id),
-          onToggle: () => groupProvider.toggleUserSelection(user.id),
+          role: _roles[user.id] ?? 'Member',
+          onRole: (role) => setState(() => _roles[user.id] = role),
         );
       },
     );
@@ -335,13 +409,13 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
 class _MemberTile extends StatelessWidget {
   const _MemberTile({
     required this.user,
-    required this.isSelected,
-    required this.onToggle,
+    required this.role,
+    required this.onRole,
   });
 
   final FriendUser user;
-  final bool isSelected;
-  final VoidCallback onToggle;
+  final String role;
+  final ValueChanged<String> onRole;
 
   static const List<Color> _avatarColors = [
     Color(0xFF53C3BF),
@@ -369,68 +443,80 @@ class _MemberTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onToggle,
-      behavior: HitTestBehavior.opaque,
+    final avatarUrl = resolveNullableNetworkImageUrl(user.avatarUrl);
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 10.h),
       child: Row(
         children: [
           CircleAvatar(
-            radius: 20.r,
+            radius: 22.r,
             backgroundColor: _avatarColor,
-            child: AppText(
-              text: user.initials,
-              style: AppTextStyles.bold(
-                fontSize: 13.sp,
-                color: AppColors.white,
-              ),
-            ),
+            child: avatarUrl != null
+                ? ClipOval(
+                    child: AppNetworkImage(
+                      imageUrl: avatarUrl,
+                      width: 44.r,
+                      height: 44.r,
+                      fit: BoxFit.cover,
+                      errorCompact: true,
+                      errorIconOnly: true,
+                      errorBuilder: (_, _, _) => _initials(),
+                    ),
+                  )
+                : _initials(),
           ),
-          16.w.horizontalSpace,
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 AppText(
                   text: _fullName,
-                  style: AppTextStyles.bold(
-                    fontSize: 18.sp,
-                    color: AppColors.black,
-                  ),
-                ),
-                2.h.verticalSpace,
-                AppText(
-                  text: user.email ?? '',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.medium(
-                    fontSize: 13.sp,
-                    color: AppColors.black.withValues(alpha: 0.55),
+                  style: AppTextStyles.semibold(
+                    fontSize: 16,
+                    color: const Color(0xFF1C1C1E),
+                  ),
+                ),
+                AppText(
+                  text: user.email ?? user.username ?? '',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.regular(
+                    fontSize: 13,
+                    color: const Color(0xFF8E8E93),
                   ),
                 ),
               ],
             ),
           ),
-          10.w.horizontalSpace,
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: 24.sp,
-            height: 24.sp,
+          SizedBox(width: 8.w),
+          Container(
+            width: 132,
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isSelected ? AppColors.teal : Colors.transparent,
-              border: Border.all(
-                color: isSelected
-                    ? AppColors.teal
-                    : AppColors.black.withValues(alpha: 0.25),
-                width: 2,
-              ),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFFE5E5EA)),
             ),
-            child: isSelected
-                ? Icon(Icons.check, size: 14.sp, color: AppColors.white)
-                : null,
+            child: AppDropdown(
+              filled: false,
+              value: role,
+              items: const ['Member', 'Admin'],
+              onChanged: (value) {
+                if (value != null) onRole(value);
+              },
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _initials() {
+    return AppText(
+      text: user.initials,
+      style: AppTextStyles.bold(fontSize: 13, color: Colors.white),
     );
   }
 }

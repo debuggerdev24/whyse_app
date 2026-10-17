@@ -1,5 +1,3 @@
-import 'dart:async';
-import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/home/saved_series_model.dart';
@@ -14,10 +12,7 @@ class MySavedSeriesScreen extends StatefulWidget {
 }
 
 class _MySavedSeriesScreenState extends State<MySavedSeriesScreen> {
-  final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final FocusNode _focusNode = FocusNode();
-  Timer? _debounce;
 
   @override
   void initState() {
@@ -26,16 +21,11 @@ class _MySavedSeriesScreenState extends State<MySavedSeriesScreen> {
       context.read<SavedSeriesProvider>().fetchAllSavedSeries();
     });
     _scrollController.addListener(_onScroll);
-    _focusNode.addListener(() => setState(() {}));
-    _searchController.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
-    _searchController.dispose();
     _scrollController.dispose();
-    _focusNode.dispose();
-    _debounce?.cancel();
     super.dispose();
   }
 
@@ -46,137 +36,70 @@ class _MySavedSeriesScreenState extends State<MySavedSeriesScreen> {
     }
   }
 
-  void _onSearchChanged(String value) {
-    _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 500), () {
-      if (mounted) {
-        context.read<SavedSeriesProvider>().fetchAllSavedSeries(
-          search: value.trim(),
-        );
-      }
-    });
+  void _openSeries(SavedSeriesItem item) {
+    final topicId = item.topic.id;
+    final homeProvider = context.read<HomeProvider>();
+    homeProvider.beginTopicStoryDetailsLoad(topicId: topicId);
+    homeProvider.getTopicStoryDetails(topicId: topicId);
+    context.pushNamed(AppRoutes.createdStorySummaryScreen.name, extra: topicId);
   }
 
   @override
   Widget build(BuildContext context) {
-    return AppLayout(
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundColor,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          onPressed: () => context.pop(),
-          icon: const Icon(Icons.chevron_left_rounded),
-        ),
-        centerTitle: true,
-        title: AppText(
-          text: 'My Series List',
-          style: AppTextStyles.semibold(fontSize: 20, color: AppColors.black),
-        ),
-      ),
+    final top = MediaQuery.paddingOf(context).top;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F7),
       body: Column(
         children: [
           Padding(
-            padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
-            child: TextFormField(
-              controller: _searchController,
-              focusNode: _focusNode,
-              onChanged: _onSearchChanged,
-              cursorColor: AppColors.black,
-              onTapOutside: (_) => FocusScope.of(context).unfocus(),
-              style: AppTextStyles.medium(
-                fontSize: 14.sp,
-                color: AppColors.black,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Search series…',
-                hintStyle: AppTextStyles.medium(
-                  fontSize: 14.sp,
-                  color: AppColors.black.setOpacity(0.4),
-                ),
-                filled: true,
-                fillColor: AppColors.searchBackgroundColor,
-                suffixIcon: _searchController.text.trim().isEmpty
-                    ? Padding(
-                        padding: EdgeInsets.only(
-                          right: 15.w,
-                          top: 10.w,
-                          bottom: 10.w,
-                        ),
-                        child: SvgIcon(
-                          AppAssets.searchIcon,
-                          color: _focusNode.hasFocus
-                              ? AppColors.black
-                              : AppColors.black.setOpacity(0.4),
-                          size: 24.sp,
-                        ),
-                      )
-                    : GestureDetector(
-                        onTap: () {
-                          _searchController.clear();
-                          _focusNode.unfocus();
-                          context
-                              .read<SavedSeriesProvider>()
-                              .fetchAllSavedSeries(search: '');
-                        },
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                            right: 15.w,
-                            top: 10.w,
-                            bottom: 10.w,
-                          ),
-                          child: SvgIcon(AppAssets.closeFilled, size: 20.sp),
-                        ),
+            padding: EdgeInsets.fromLTRB(16, top + 6, 16, 8),
+            child: SizedBox(
+              height: 44,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: GlassIconButton(
+                      size: 44,
+                      onTap: () => context.pop(),
+                      child: const Icon(
+                        Icons.chevron_left_rounded,
+                        size: 28,
+                        color: Color(0xFF1C1C1E),
                       ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 20.w,
-                  vertical: 10.h,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(999),
-                  borderSide: BorderSide(
-                    color: AppColors.searchBackgroundColor,
+                    ),
                   ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(999),
-                  borderSide: BorderSide(color: AppColors.black, width: 1.4),
-                ),
+                  AppText(
+                    text: 'My Series',
+                    style: AppTextStyles.bold(
+                      fontSize: 18,
+                      color: const Color(0xFF1C1C1E),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
           Expanded(
             child: Consumer<SavedSeriesProvider>(
               builder: (context, ssp, _) {
-                if (ssp.isAllSavedSeriesLoading) {
+                if (ssp.isAllSavedSeriesLoading &&
+                    ssp.allSavedSeriesList.isEmpty) {
                   return _buildShimmer();
                 }
 
                 final list = ssp.allSavedSeriesList;
-
                 if (list.isEmpty) {
                   return Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.bookmark_border_rounded,
-                          size: 52.w,
-                          color: AppColors.black.setOpacity(0.25),
-                        ),
-                        16.h.verticalSpace,
-                        AppText(
-                          text: _searchController.text.trim().isEmpty
-                              ? "No saved series yet."
-                              : "No results for \"${_searchController.text.trim()}\"",
-                          textAlign: TextAlign.center,
-                          style: AppTextStyles.medium(
-                            fontSize: 16.sp,
-                            color: AppColors.black.setOpacity(0.5),
-                          ),
-                        ),
-                      ],
+                    child: AppText(
+                      text: 'No saved series yet.',
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.medium(
+                        fontSize: 16,
+                        color: const Color(0xFF8E8E93),
+                      ),
                     ),
                   );
                 }
@@ -184,34 +107,25 @@ class _MySavedSeriesScreenState extends State<MySavedSeriesScreen> {
                 return GridView.builder(
                   controller: _scrollController,
                   physics: const BouncingScrollPhysics(),
-                  padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 24.h),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 16.h,
-                    crossAxisSpacing: 12.w,
-                    childAspectRatio: 0.62,
+                  padding: EdgeInsets.fromLTRB(
+                    16,
+                    8,
+                    16,
+                    MediaQuery.paddingOf(context).bottom + 16,
                   ),
-                  itemCount:
-                      list.length + (ssp.isLoadingMoreSavedSeries ? 2 : 0),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 14,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 0.78,
+                  ),
+                  itemCount: list.length + (ssp.isLoadingMoreSavedSeries ? 2 : 0),
                   itemBuilder: (context, index) {
-                    if (index >= list.length) {
-                      return _buildCardShimmer();
-                    }
+                    if (index >= list.length) return const _SeriesCardShimmer();
                     final item = list[index];
-                    return _SavedSeriesCard(
+                    return _SeriesCard(
                       item: item,
-                      onTap: () {
-                        final topicId = item.topic.id;
-                        final homeProvider = context.read<HomeProvider>();
-                        homeProvider.beginTopicStoryDetailsLoad(
-                          topicId: topicId,
-                        );
-                        homeProvider.getTopicStoryDetails(topicId: topicId);
-                        context.pushNamed(
-                          AppRoutes.createdStorySummaryScreen.name,
-                          extra: topicId,
-                        );
-                      },
+                      onOpen: () => _openSeries(item),
                     );
                   },
                 );
@@ -226,178 +140,179 @@ class _MySavedSeriesScreenState extends State<MySavedSeriesScreen> {
   Widget _buildShimmer() {
     return GridView.builder(
       physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 24.h),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        mainAxisSpacing: 16.h,
-        crossAxisSpacing: 12.w,
-        childAspectRatio: 0.62,
+        mainAxisSpacing: 14,
+        crossAxisSpacing: 12,
+        childAspectRatio: 0.78,
       ),
       itemCount: 6,
-      itemBuilder: (_, __) => _buildCardShimmer(),
+      itemBuilder: (_, _) => const _SeriesCardShimmer(),
     );
   }
+}
 
-  Widget _buildCardShimmer() {
-    return AppSkeletonizer(child: Column(
-        children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16.r),
-              ),
-            ),
-          ),
-          12.h.verticalSpace,
-          Container(
-            width: 32.w,
-            height: 32.w,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-          ),
-        ],
+class _SeriesCardShimmer extends StatelessWidget {
+  const _SeriesCardShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return AppSkeletonizer(
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+        ),
       ),
     );
   }
 }
 
-class _SavedSeriesCard extends StatelessWidget {
-  const _SavedSeriesCard({required this.item, this.onTap});
+class _SeriesCard extends StatelessWidget {
+  const _SeriesCard({required this.item, required this.onOpen});
 
   final SavedSeriesItem item;
-  final VoidCallback? onTap;
+  final VoidCallback onOpen;
 
   @override
   Widget build(BuildContext context) {
     final topic = item.topic;
-    final subtitleColor = AppColors.black.setOpacity(0.45);
 
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.black.setOpacity(0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+      onTap: onOpen,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-            Expanded(
-              child: Stack(
+            ColoredBox(
+              color: const Color(0xFF1C1C1E),
+              child: AppNetworkImage(
+                imageUrl: topic.thumbnailUrl,
+                tag: 'MySavedSeries.thumbnail',
+                errorCompact: true,
+                errorIconOnly: true,
+              ),
+            ),
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0x00000000), Color(0xCC000000)],
+                  stops: [0.4, 1],
+                ),
+              ),
+            ),
+            Positioned(
+              top: 10,
+              right: 10,
+              child: _BookmarkButton(topicId: topic.id),
+            ),
+            Positioned(
+              left: 10,
+              right: 10,
+              bottom: 10,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(16.r),
-                    ),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: double.infinity,
-                      child: AppNetworkImage(
-                        imageUrl: topic.thumbnailUrl,
-                        tag: 'MySavedSeries.thumbnail',
-                        errorCompact: true,
-                        errorIconOnly: true,
-                      ),
+                  AppText(
+                    text: topic.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.bold(fontSize: 16, color: Colors.white),
+                  ),
+                  const SizedBox(height: 2),
+                  AppText(
+                    text: '0 out of ${topic.storiesCount} Reading',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.regular(
+                      fontSize: 12,
+                      color: Colors.white,
                     ),
                   ),
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: Builder(
-                      builder: (context) {
-                        final ssp = context.watch<SavedSeriesProvider>();
-                        final isToggling = ssp.isTopicListToggling(topic.id);
-                        return GestureDetector(
-                          onTap: isToggling
-                              ? null
-                              : () async {
-                                  final result = await ssp.toggleTopic(
-                                    topicId: topic.id,
-                                    onFailed: (err) {
-                                      if (context.mounted) {
-                                        AppToast.error(context, err);
-                                      }
-                                    },
-                                  );
-                                  if (result != null && context.mounted) {
-                                    AppToast.success(
-                                      context,
-                                      result.isInMyList
-                                          ? 'Added to your list'
-                                          : 'Removed from your list',
-                                    );
-                                  }
-                                },
-                          child: Container(
-                            width: 32.h,
-                            height: 32.h,
-                            margin: EdgeInsets.only(top: 10.w, right: 10.w),
-                            decoration: const BoxDecoration(
-                              color: AppColors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            alignment: Alignment.center,
-                            child: isToggling
-                                ? SizedBox(
-                                    width: 16.w,
-                                    height: 16.w,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: AppColors.teal,
-                                    ),
-                                  )
-                                : Icon(
-                                    Icons.bookmark_rounded,
-                                    size: 20.sp,
-                                    color: AppColors.teal,
-                                  ),
-                          ),
-                        );
-                      },
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: onOpen,
+                    child: Container(
+                      height: 34,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColors.teal,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: AppText(
+                        text: 'Start Reading',
+                        style: AppTextStyles.semibold(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(14.w, 13.w, 14.w, 2.w),
-              child: AppText(
-                text: topic.title,
-                style: AppTextStyles.bold(fontSize: 16.sp),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 14.w),
-              child: AppText(
-                text: '${topic.storiesCount} Readings',
-                style: AppTextStyles.medium(
-                  fontSize: 12.sp,
-                  color: subtitleColor,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            AppButton(
-              margin: EdgeInsets.fromLTRB(14.w, 12.w, 14.w, 16.w),
-              onTap: () => onTap?.call(),
-              text: "Start Reading",
-            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _BookmarkButton extends StatelessWidget {
+  const _BookmarkButton({required this.topicId});
+
+  final String topicId;
+
+  @override
+  Widget build(BuildContext context) {
+    final ssp = context.watch<SavedSeriesProvider>();
+    final isToggling = ssp.isTopicListToggling(topicId);
+
+    return GestureDetector(
+      onTap: isToggling
+          ? null
+          : () async {
+              final result = await ssp.toggleTopic(
+                topicId: topicId,
+                onFailed: (err) {
+                  if (context.mounted) AppToast.error(context, err);
+                },
+              );
+              if (result != null && context.mounted) {
+                AppToast.success(
+                  context,
+                  result.isInMyList
+                      ? 'Added to your list'
+                      : 'Removed from your list',
+                );
+              }
+            },
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.35),
+          shape: BoxShape.circle,
+        ),
+        alignment: Alignment.center,
+        child: isToggling
+            ? const SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : const Icon(
+                Icons.bookmark_rounded,
+                size: 16,
+                color: Colors.white,
+              ),
       ),
     );
   }

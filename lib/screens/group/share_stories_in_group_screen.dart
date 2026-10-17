@@ -1,9 +1,9 @@
-import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/utils/network_image_url.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/group/shareable_topic_model.dart';
 import 'package:redstreakapp/providers/profile/group_provider.dart';
+import 'package:redstreakapp/screens/settings/widget/settings_chrome.dart';
 
 class ShareStoriesInGroupScreen extends StatefulWidget {
   const ShareStoriesInGroupScreen({super.key, required this.groupId});
@@ -68,64 +68,35 @@ class _ShareStoriesInGroupScreenState extends State<ShareStoriesInGroupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AppLayout(
-      appBar: AppBar(
-        leadingWidth: 95.w,
-        leading: TextButton(
-          onPressed: () => context.pop(),
-          child: AppText(
-            text: 'Cancel',
-            style: AppTextStyles.bold(fontSize: 14, color: AppColors.black),
-          ),
-        ),
-        centerTitle: true,
-        title: AppText(
-          text: 'Select Series',
-          style: AppTextStyles.semiBold(fontSize: 20),
-        ),
-        actions: [
-          Padding(
-            padding: EdgeInsets.only(right: 16.w),
-            child: Selector<GroupProvider, bool>(
-              selector: (_, gp) => gp.isSharingTopics,
-              builder: (context, isSharingTopics, _) {
-                final canShare =
-                    _selectedTopicIds.isNotEmpty && !isSharingTopics;
-                return GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: canShare ? _shareTopics : null,
-                  child: Center(
-                    child: isSharingTopics
-                        ? SizedBox(
-                            width: 18.w,
-                            height: 18.w,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.teal,
-                            ),
-                          )
-                        : AppText(
-                            text: 'Share',
-                            style: AppTextStyles.bold(
-                              fontSize: 14,
-                              color: canShare
-                                  ? AppColors.teal
-                                  : AppColors.teal.withValues(alpha: 0.45),
-                            ),
-                          ),
+    return SettingsScaffold(
+      title: 'Select Series',
+      trailing: Selector<GroupProvider, bool>(
+        selector: (_, gp) => gp.isSharingTopics,
+        builder: (context, isSharingTopics, _) {
+          final canShare = _selectedTopicIds.isNotEmpty && !isSharingTopics;
+          return GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: canShare ? _shareTopics : null,
+            child: isSharingTopics
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Color(0xFFF6A01A),
+                    ),
+                  )
+                : AppText(
+                    text: 'Share with',
+                    style: AppTextStyles.semibold(
+                      fontSize: 15,
+                      color: canShare
+                          ? const Color(0xFFF6A01A)
+                          : const Color(0xFFF6A01A).withValues(alpha: 0.4),
+                    ),
                   ),
-                );
-              },
-            ),
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(1.h),
-          child: Container(
-            height: 1.h,
-            color: AppColors.black.withValues(alpha: 0.08),
-          ),
-        ),
+          );
+        },
       ),
       body: Consumer<GroupProvider>(
         builder: (context, gp, _) {
@@ -166,9 +137,9 @@ class _ShareStoriesInGroupScreenState extends State<ShareStoriesInGroupScreen> {
             padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 20.h),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              mainAxisSpacing: 16.h,
+              mainAxisSpacing: 14.h,
               crossAxisSpacing: 12.w,
-              childAspectRatio: 0.62,
+              childAspectRatio: 0.78,
             ),
             itemCount:
                 gp.shareableTopics.length +
@@ -249,106 +220,93 @@ class _SeriesTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageUrl = _resolveImageUrl(item.thumbnailUrl);
+    final progress = item.readingProgress;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
-      child: Column(
-        children: [
-          Expanded(
-            child: Container(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22.r),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            AppNetworkImage(
+              imageUrl: imageUrl,
+              tag: 'ShareStoriesInGroup.tile',
+              errorCompact: true,
+              errorIconOnly: true,
+            ),
+            const DecoratedBox(
               decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(18.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.black.withValues(alpha: 0.07),
-                    blurRadius: 14,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.transparent, Color(0xCC000000)],
+                  stops: [0.45, 1],
+                ),
               ),
-              clipBehavior: Clip.antiAlias,
+            ),
+            Positioned(
+              top: 10,
+              left: 10,
+              child: Container(
+                width: 26,
+                height: 26,
+                decoration: BoxDecoration(
+                  color: selected
+                      ? const Color(0xFFF6A01A)
+                      : Colors.white.withValues(alpha: 0.85),
+                  shape: BoxShape.circle,
+                ),
+                child: selected
+                    ? const Icon(Icons.check, size: 16, color: Colors.white)
+                    : null,
+              ),
+            ),
+            Positioned(
+              top: 10,
+              right: 10,
+              child: Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.28),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  item.isSavedTopic
+                      ? Icons.bookmark_rounded
+                      : Icons.bookmark_border_rounded,
+                  size: 16,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            Positioned(
+              left: 12,
+              right: 12,
+              bottom: 12,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Stack(
-                      children: [
-                        Positioned.fill(
-                          child: AppNetworkImage(
-                            imageUrl: imageUrl,
-                            tag: 'ShareStoriesInGroup.tile',
-                            errorCompact: true,
-                            errorIconOnly: true,
-                          ),
-                        ),
-                        if (item.isSavedTopic)
-                          Positioned(
-                            top: 8.h,
-                            right: 8.w,
-                            child: Container(
-                              width: 30.w,
-                              height: 30.w,
-                              decoration: const BoxDecoration(
-                                color: AppColors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              alignment: Alignment.center,
-                              child: Icon(
-                                Icons.bookmark,
-                                size: 18.sp,
-                                color: AppColors.teal,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
+                  AppText(
+                    text: item.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.bold(fontSize: 16, color: Colors.white),
                   ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(14.w, 10.h, 14.w, 12.h),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AppText(
-                          text: item.title,
-                          style: AppTextStyles.bold(fontSize: 16.sp),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        3.h.verticalSpace,
-                        AppText(
-                          text:
-                              '${item.readingProgress.totalReadings} Readings',
-                          style: AppTextStyles.medium(
-                            fontSize: 12.sp,
-                            color: AppColors.black.setOpacity(0.5),
-                          ),
-                        ),
-                      ],
+                  AppText(
+                    text:
+                        '${progress.completedReadings} out of ${progress.totalReadings} Reading',
+                    style: AppTextStyles.medium(
+                      fontSize: 12,
+                      color: Colors.white,
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-          12.h.verticalSpace,
-          Container(
-            width: 30.h,
-            height: 30.h,
-            decoration: BoxDecoration(
-              color: selected ? AppColors.teal : AppColors.white,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: selected
-                    ? AppColors.teal
-                    : AppColors.black.withValues(alpha: 0.12),
-              ),
-            ),
-            child: selected
-                ? Icon(Icons.check, size: 18.sp, color: AppColors.white)
-                : null,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

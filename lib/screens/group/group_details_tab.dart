@@ -121,49 +121,54 @@ class GroupDetailsTabBody extends StatelessWidget {
   }
 }
 
-class _DescriptionCard extends StatelessWidget {
+class _DescriptionCard extends StatefulWidget {
   const _DescriptionCard({required this.description});
 
   final String description;
 
   @override
+  State<_DescriptionCard> createState() => _DescriptionCardState();
+}
+
+class _DescriptionCardState extends State<_DescriptionCard> {
+  bool _expanded = false;
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.maxFinite,
-      padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 18.h),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.06),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AppText(
+          text: 'Description',
+          style: AppTextStyles.bold(
+            fontSize: 18,
+            color: const Color(0xFF1C1C1E),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppText(
-            text: 'Description',
-            style: AppTextStyles.semibold(
-              fontSize: 17.sp,
-              color: AppColors.black,
+        ),
+        SizedBox(height: 6.h),
+        AppText(
+          text: widget.description,
+          maxLines: _expanded ? null : 2,
+          overflow: _expanded ? null : TextOverflow.ellipsis,
+          style: AppTextStyles.regular(
+            fontSize: 14,
+            color: const Color(0xFF3A3A3C),
+          ),
+        ),
+        if (!_expanded && widget.description.length > 80)
+          GestureDetector(
+            onTap: () => setState(() => _expanded = true),
+            child: AppText(
+              text: 'more',
+              style: AppTextStyles.semibold(
+                fontSize: 14,
+                color: const Color(0xFF1C1C1E),
+              ),
             ),
           ),
-          10.h.verticalSpace,
-          AppText(
-            text: description,
-            maxLines: 48,
-            overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.medium(
-              fontSize: 14.sp,
-              color: AppColors.black.withValues(alpha: 0.68),
-            ).copyWith(height: 1.35),
-          ),
-        ],
-      ),
+        SizedBox(height: 14.h),
+        const Divider(height: 1, thickness: 1, color: Color(0xFFE5E5EA)),
+      ],
     );
   }
 }
@@ -175,20 +180,7 @@ class _MembersCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.06),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 12.h),
-      child: Selector<GroupProvider, _GroupDetailsTabVM>(
+    return Selector<GroupProvider, _GroupDetailsTabVM>(
         selector: (_, p) => _GroupDetailsTabVM.fromProvider(p, params),
         builder: (context, value, _) {
           late final Widget listSection;
@@ -254,9 +246,9 @@ class _MembersCard extends StatelessWidget {
               children: [
                 AppText(
                   text: 'Members',
-                  style: AppTextStyles.semibold(
-                    fontSize: 19.sp,
-                    color: AppColors.black,
+                  style: AppTextStyles.bold(
+                    fontSize: 18,
+                    color: const Color(0xFF1C1C1E),
                   ),
                 ),
                 12.h.verticalSpace,
@@ -322,32 +314,28 @@ class _MembersCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (value.canAddMembers) ...[
-                AppOutlinedButton(
+                GestureDetector(
                   onTap: () {
                     context.pushNamed(
                       AppRoutes.addMembersScreen.name,
                       extra: params.id,
                     );
                   },
-                  margin: EdgeInsets.only(bottom: 14.h),
-                  borderColor: AppColors.black.withValues(alpha: 0.14),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SvgIcon(
-                        AppAssets.addMembers,
-                        size: 22.sp,
-                        color: AppColors.black,
+                  child: Container(
+                    height: 48,
+                    margin: EdgeInsets.only(bottom: 14.h),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE7F6F4),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: AppText(
+                      text: 'Add Members',
+                      style: AppTextStyles.semibold(
+                        fontSize: 16,
+                        color: AppColors.teal,
                       ),
-                      6.w.horizontalSpace,
-                      AppText(
-                        text: 'Add Members',
-                        style: AppTextStyles.semibold(
-                          fontSize: 15.sp,
-                          color: AppColors.black,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ],
@@ -355,7 +343,6 @@ class _MembersCard extends StatelessWidget {
             ],
           );
         },
-      ),
     );
   }
 }
@@ -413,29 +400,16 @@ class GroupMemberRow extends StatelessWidget {
         ),
         12.w.horizontalSpace,
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AppText(
-                text: item.displayName,
-                style: AppTextStyles.semibold(
-                  fontSize: 16.sp,
-                  color: AppColors.black,
-                ),
-              ),
-              if (isMe)
-                AppText(
-                  text: 'You',
-                  style: AppTextStyles.medium(
-                    fontSize: 12.sp,
-                    color: AppColors.black.withValues(alpha: 0.45),
-                  ),
-                ),
-            ],
+          child: AppText(
+            text: isMe ? 'You' : item.displayName,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.semibold(
+              fontSize: 16,
+              color: const Color(0xFF1C1C1E),
+            ),
           ),
         ),
-        _MemberStreakBadge(streak: item.currentStreak),
-        8.w.horizontalSpace,
         _MemberTag(
           type: tag,
           onTap: switch (tag) {
@@ -450,42 +424,6 @@ class GroupMemberRow extends StatelessWidget {
   }
 }
 
-class _MemberStreakBadge extends StatelessWidget {
-  const _MemberStreakBadge({required this.streak});
-
-  final int streak;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppColors.black.withValues(alpha: 0.1)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SvgIcon(
-            AppAssets.thunder,
-            size: 12.sp,
-            color: AppColors.orangeColor,
-          ),
-          4.w.horizontalSpace,
-          AppText(
-            text: '$streak',
-            style: AppTextStyles.semibold(
-              fontSize: 12.sp,
-              color: AppColors.black,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _MemberTag extends StatelessWidget {
   const _MemberTag({required this.type, this.onTap});
 
@@ -494,39 +432,34 @@ class _MemberTag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (label, bgColor, textColor, borderColor) = switch (type) {
+    final (label, bgColor, textColor) = switch (type) {
       _MemberTagType.leave => (
         'Leave',
-        const Color(0xFFFFF5F5),
-        AppColors.redColor,
-        AppColors.redColor.withValues(alpha: 0.6),
+        const Color(0xFFFF5C4D),
+        Colors.white,
       ),
       _MemberTagType.remove => (
         'Remove',
-        const Color(0xFFFFF5F5),
-        AppColors.redColor,
-        AppColors.redColor.withValues(alpha: 0.4),
+        const Color(0xFFF2F2F4),
+        const Color(0xFF1C1C1E),
       ),
       _MemberTagType.owner => (
         'Owner',
-        AppColors.extealighttealcolor,
+        const Color(0xFFE7F6F4),
         AppColors.teal,
-        AppColors.teal.withValues(alpha: 0.4),
       ),
       _MemberTagType.member => (
         'Member',
-        const Color(0xFFF3F3F3),
-        AppColors.black.withValues(alpha: 0.6),
-        Colors.transparent,
+        const Color(0xFFF2F2F4),
+        const Color(0xFF8E8E93),
       ),
     };
 
     final child = Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: borderColor),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: AppText(
         text: label,

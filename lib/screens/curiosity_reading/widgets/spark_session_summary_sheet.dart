@@ -1,236 +1,349 @@
+import 'package:lottie/lottie.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/models/gamification/achievement_progress_model.dart';
-import 'package:redstreakapp/models/gamification/score_event_config.dart';
 import 'package:redstreakapp/providers/gamification/gamification_provider.dart';
 
-Future<void> showSparkSessionSummarySheet(
+enum SparkSummaryAction { keepExploring, home }
+
+Future<SparkSummaryAction?> showSparkSessionSummarySheet(
   BuildContext context,
   SparkSessionSummary summary,
 ) {
-  final gp = context.read<GamificationProvider>();
-
-  final sparkAchievement =
-      summary.achievementProgress ?? gp.currentSparkAchievement;
-  final interestAchievement =
-      summary.interestAchievementProgress ?? gp.currentInterestAchievement;
-  final streakGoal = gp.currentActiveStreakGoal;
-
-  final hasInterestBonus = summary.events.any(
-    (e) => e.eventType == ScoreEventConfig.firstInterestCompleted,
-  );
-  final pointsLabel = hasInterestBonus ? 'Points Earned' : 'Sparks Points';
-
-  return showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (sheetContext) {
-      return Container(
-        margin: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
-        padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(24.r),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AppText(
-              text: 'Sparks session complete',
-              style: AppTextStyles.bold(fontSize: 20.sp, color: AppColors.black),
-            ),
-            8.h.verticalSpace,
-            AppText(
-              text:
-                  'You finished ${summary.sparksCompleted} spark${summary.sparksCompleted == 1 ? '' : 's'} this session.',
-              textAlign: TextAlign.center,
-              style: AppTextStyles.medium(
-                fontSize: 14.sp,
-                color: AppColors.black.withValues(alpha: 0.55),
-              ),
-            ),
-            20.h.verticalSpace,
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFDEBDD),
-                borderRadius: BorderRadius.circular(16.r),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 44.w,
-                    height: 44.w,
-                    decoration: const BoxDecoration(
-                      color: AppColors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                    child: SvgIcon(
-                      AppAssets.thunder,
-                      size: 22.w,
-                      color: AppColors.orangeColor,
-                    ),
-                  ),
-                  const Spacer(),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      AppText(
-                        text: '+${summary.pointsEarned}',
-                        style: AppTextStyles.bold(
-                          fontSize: 28.sp,
-                          color: AppColors.orangeColor,
-                        ),
-                      ),
-                      AppText(
-                        text: pointsLabel,
-                        style: AppTextStyles.semibold(
-                          fontSize: 13.sp,
-                          color: AppColors.bluecolor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            if (sparkAchievement != null) ...[
-              16.h.verticalSpace,
-              _AchievementProgressCard(
-                progress: sparkAchievement,
-                icon: Image.asset(
-                  AppAssets.streakFire,
-                  width: 36.w,
-                  height: 36.w,
-                ),
-              ),
-            ],
-            if (interestAchievement != null) ...[
-              12.h.verticalSpace,
-              _AchievementProgressCard(
-                progress: interestAchievement,
-                icon: Container(
-                  width: 36.w,
-                  height: 36.w,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFDEBDD),
-                    borderRadius: BorderRadius.circular(18.r),
-                  ),
-                  alignment: Alignment.center,
-                  child: SvgIcon(
-                    AppAssets.brain,
-                    size: 18.w,
-                    color: AppColors.teal,
-                  ),
-                ),
-              ),
-            ],
-            if (sparkAchievement == null &&
-                interestAchievement == null &&
-                streakGoal != null) ...[
-              16.h.verticalSpace,
-              _AchievementProgressCard(
-                progress: streakGoal,
-                subtitle: 'Keep your streak alive!',
-                icon: Image.asset(
-                  AppAssets.streakFire,
-                  width: 36.w,
-                  height: 36.w,
-                ),
-              ),
-            ],
-            20.h.verticalSpace,
-            AppFilledButton(
-              text: 'Done',
-              backgroundColor: AppColors.teal,
-              fixedSize: Size(double.infinity, 48.h),
-              onTap: () => Navigator.of(sheetContext).pop(),
-            ),
-          ],
-        ),
-      );
-    },
+  return Navigator.of(context, rootNavigator: true).push<SparkSummaryAction>(
+    PageRouteBuilder<SparkSummaryAction>(
+      opaque: true,
+      barrierDismissible: false,
+      pageBuilder: (context, _, _) {
+        return _SparkSessionCompletedPage(summary: summary);
+      },
+      transitionsBuilder: (context, animation, _, child) {
+        return FadeTransition(opacity: animation, child: child);
+      },
+    ),
   );
 }
 
-class _AchievementProgressCard extends StatelessWidget {
-  const _AchievementProgressCard({
-    required this.progress,
-    required this.icon,
-    this.subtitle,
-  });
+class _SparkSessionCompletedPage extends StatelessWidget {
+  const _SparkSessionCompletedPage({required this.summary});
 
-  final AchievementProgress progress;
-  final Widget icon;
-  final String? subtitle;
-
-  String get _subtitle {
-    if (subtitle != null) return subtitle!;
-    if (progress.claimable && !progress.claimed) {
-      return 'Achievement complete! Claim ${progress.rewardPoints ?? 0} points.';
-    }
-    if (progress.completed) return 'Achievement unlocked!';
-    return progress.label;
-  }
+  final SparkSessionSummary summary;
 
   @override
   Widget build(BuildContext context) {
-    final barProgress = progress.progressValue;
+    final gp = context.read<GamificationProvider>();
+    final spark =
+        summary.achievementProgress ?? gp.currentSparkAchievement;
+    final interest =
+        summary.interestAchievementProgress ?? gp.currentInterestAchievement;
+    final sparkCount = summary.sparksCompleted;
+    final sparkWord = sparkCount == 1 ? 'spark' : 'sparks';
+    final bottom = MediaQuery.paddingOf(context).bottom;
+
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF7F7F8),
+        body: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(16, 8, 16, bottom > 0 ? 8 : 16),
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 12),
+                        const _CelebrationMark(),
+                        const SizedBox(height: 18),
+                        AppText(
+                          text: 'Spark Session Completed!',
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.semibold(
+                            fontSize: 26,
+                            color: const Color(0xFF1A1A1A),
+                          ).copyWith(height: 1.2, letterSpacing: -0.3),
+                        ),
+                        const SizedBox(height: 8),
+                        AppText(
+                          text:
+                              'You finished $sparkCount $sparkWord this session. Great curiosity!',
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.regular(
+                            fontSize: 14,
+                            color: const Color(0xFF8E8E93),
+                          ).copyWith(height: 1.35),
+                        ),
+                        if (summary.pointsEarned > 0) ...[
+                          const SizedBox(height: 22),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const SvgIcon(AppAssets.thunder, size: 28),
+                              const SizedBox(width: 6),
+                              AppText(
+                                text: '+${summary.pointsEarned}',
+                                style: AppTextStyles.bold(
+                                  fontSize: 32,
+                                  color: const Color(0xFF1A1A1A),
+                                ).copyWith(height: 1),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          AppText(
+                            text: 'Sparks Points',
+                            style: AppTextStyles.medium(
+                              fontSize: 13,
+                              color: const Color(0xFF8E8E93),
+                            ),
+                          ),
+                        ],
+                        if (spark != null || interest != null) ...[
+                          const SizedBox(height: 28),
+                          _ProgressCard(spark: spark, interest: interest),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _ActionButton(
+                  text: 'Keep Exploring',
+                  filled: true,
+                  onTap: () => Navigator.of(context).pop(
+                    SparkSummaryAction.keepExploring,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                _ActionButton(
+                  text: 'Back to Home',
+                  filled: false,
+                  onTap: () =>
+                      Navigator.of(context).pop(SparkSummaryAction.home),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CelebrationMark extends StatelessWidget {
+  const _CelebrationMark();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 210,
+      width: double.infinity,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Lottie.asset(
+            'assets/lottie/Congratulations.json',
+            height: 210,
+            fit: BoxFit.contain,
+            repeat: true,
+          ),
+          const Icon(
+            Icons.emoji_events_rounded,
+            size: 108,
+            color: Color(0xFF2BB8B4),
+          ),
+          const Positioned(
+            top: 78,
+            child: Icon(
+              Icons.star_rounded,
+              size: 28,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProgressCard extends StatelessWidget {
+  const _ProgressCard({required this.spark, required this.interest});
+
+  final AchievementProgress? spark;
+  final AchievementProgress? interest;
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = <Widget>[
+      if (spark != null)
+        _ProgressRow(
+          progress: spark!,
+          barColor: AppColors.teal,
+          icon: const SvgIcon(AppAssets.streakFireIcon, size: 22),
+          fallbackTitle: 'Sparks Completed',
+        ),
+      if (interest != null)
+        _ProgressRow(
+          progress: interest!,
+          barColor: AppColors.orangeColor,
+          icon: const SvgIcon(
+            AppAssets.brain,
+            size: 22,
+            color: Color(0xFF1A1A1A),
+          ),
+          fallbackTitle: 'Interests Completed',
+        ),
+    ];
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: AppColors.black.withValues(alpha: 0.08),
-        ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0F000000),
+            blurRadius: 16,
+            offset: Offset(0, 6),
+          ),
+        ],
       ),
+      child: Column(
+        children: [
+          for (var i = 0; i < rows.length; i++) ...[
+            if (i > 0)
+              const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
+            rows[i],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ProgressRow extends StatelessWidget {
+  const _ProgressRow({
+    required this.progress,
+    required this.barColor,
+    required this.icon,
+    required this.fallbackTitle,
+  });
+
+  final AchievementProgress progress;
+  final Color barColor;
+  final Widget icon;
+  final String fallbackTitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final title = progress.progressText.trim().isNotEmpty
+        ? progress.progressText.trim()
+        : '${progress.progress}/${progress.target} $fallbackTitle';
+    final subtitle = progress.label.trim();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
       child: Row(
         children: [
-          icon,
-          12.w.horizontalSpace,
+          Container(
+            width: 44,
+            height: 44,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              color: Color(0xFFFFF1E8),
+              shape: BoxShape.circle,
+            ),
+            child: icon,
+          ),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 AppText(
-                  text: progress.progressText.isNotEmpty
-                      ? progress.progressText
-                      : '${progress.progress}/${progress.target} Completed',
-                  style: AppTextStyles.bold(
-                    fontSize: 14.sp,
-                    color: AppColors.black,
+                  text: title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.semibold(
+                    fontSize: 15,
+                    color: const Color(0xFF1A1A1A),
                   ),
                 ),
-                4.h.verticalSpace,
-                AppText(
-                  text: _subtitle,
-                  style: AppTextStyles.medium(
-                    fontSize: 12.sp,
-                    color: AppColors.black.withValues(alpha: 0.5),
-                  ),
-                ),
-                8.h.verticalSpace,
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4.r),
-                  child: LinearProgressIndicator(
-                    value: barProgress,
-                    minHeight: 6.h,
-                    backgroundColor: AppColors.black.withValues(alpha: 0.08),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      progress.completed || progress.claimable
-                          ? AppColors.teal
-                          : AppColors.orangeColor,
+                if (subtitle.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  AppText(
+                    text: subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.regular(
+                      fontSize: 12,
+                      color: const Color(0xFF8E8E93),
                     ),
+                  ),
+                ],
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    value: progress.progressValue,
+                    minHeight: 6,
+                    backgroundColor: const Color(0xFFE8E8ED),
+                    color: barColor,
                   ),
                 ),
               ],
             ),
           ),
+          const SizedBox(width: 8),
+          const Icon(
+            Icons.chevron_right_rounded,
+            color: Color(0xFFC7C7CC),
+            size: 22,
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.text,
+    required this.filled,
+    required this.onTap,
+  });
+
+  final String text;
+  final bool filled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 50,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: filled ? AppColors.teal : Colors.white,
+          borderRadius: BorderRadius.circular(40),
+          boxShadow: filled
+              ? null
+              : const [
+                  BoxShadow(
+                    color: Color(0x14000000),
+                    blurRadius: 12,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+        ),
+        child: AppText(
+          text: text,
+          style: AppTextStyles.semibold(
+            fontSize: 14,
+            color: filled ? Colors.white : const Color(0xFF1A1A1A),
+          ).copyWith(height: 17 / 14),
+        ),
       ),
     );
   }

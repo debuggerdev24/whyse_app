@@ -1,10 +1,10 @@
 import 'package:redstreakapp/core/enums/data_status.dart';
-import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/models/group/group_response_model.dart';
 import 'package:redstreakapp/providers/profile/group_provider.dart';
 import 'package:redstreakapp/screens/group/group_details_screen.dart';
 import 'package:redstreakapp/screens/group/widget/group_image_widget.dart';
+import 'package:redstreakapp/screens/settings/widget/settings_chrome.dart';
 
 class GroupListScreen extends StatefulWidget {
   const GroupListScreen({super.key});
@@ -24,23 +24,11 @@ class _GroupListScreenState extends State<GroupListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AppLayout(
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundColor,
-        surfaceTintColor: Colors.transparent,
-        title: const AppText(text: 'Groups'),
-        leading: IconButton(
-          onPressed: () => context.pop(),
-          icon: const Icon(Icons.chevron_left_rounded),
-        ),
-      ),
-      body: Column(
-        children: [
-          Divider(color: AppColors.black.setOpacity(0.1), height: 1),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(24.w, 14.w, 24.w, 0),
-              child: Selector<GroupProvider, _GroupListVM>(
+    return SettingsScaffold(
+      title: 'Groups',
+      body: Padding(
+        padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
+        child: Selector<GroupProvider, _GroupListVM>(
                 selector: (_, p) => _GroupListVM.fromProvider(p),
                 builder: (context, vm, _) {
                   if (vm.isLoading) return const _LoadingList();
@@ -56,32 +44,19 @@ class _GroupListScreenState extends State<GroupListScreen> {
 
                   return ListView.separated(
                     itemCount: vm.groups.length,
-                    separatorBuilder: (_, _) => Divider(
-                      height: 24.w,
+                    separatorBuilder: (_, _) => const Divider(
+                      height: 1,
                       thickness: 1,
-                      color: AppColors.black.setOpacity(0.08),
+                      color: Color(0xFFE5E5EA),
                     ),
                     itemBuilder: (context, index) {
                       final group = vm.groups[index].group;
                       return _GroupTile(
                         group: group,
                         memberCount: vm.groups[index].memberCount,
-                        onGroupTap: () {
-                          context.pushNamed(
-                            AppRoutes.groupDetailsScreen.name,
-                            extra: GroupDetailsScreenParams(
-                              id: group.id,
-                              groupName: group.title,
-                              thumbnail: group.thumbnailUrl,
-                              description: group.description,
-                              inviteCode: group.joinCode,
-                              myRole: vm.groups[index].myRole,
-                            ),
-                          );
-                        },
                         onTap: () {
                           context.pushNamed(
-                            AppRoutes.viewGroupScreen.name,
+                            AppRoutes.groupDetailsScreen.name,
                             extra: GroupDetailsScreenParams(
                               id: group.id,
                               groupName: group.title,
@@ -96,10 +71,7 @@ class _GroupListScreenState extends State<GroupListScreen> {
                     },
                   );
                 },
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -148,7 +120,8 @@ class _ShimmerTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        AppSkeletonizer(child: Container(
+        AppSkeletonizer(
+          child: Container(
             width: 48,
             height: 48,
             decoration: const BoxDecoration(
@@ -173,7 +146,8 @@ class _ShimmerTile extends StatelessWidget {
   }
 
   Widget _shimmerBox({required double width, required double height}) {
-    return AppSkeletonizer(child: Container(width: width, height: height, color: Colors.white),
+    return AppSkeletonizer(
+      child: Container(width: width, height: height, color: Colors.white),
     );
   }
 }
@@ -222,63 +196,49 @@ class _GroupTile extends StatelessWidget {
   const _GroupTile({
     required this.group,
     required this.onTap,
-    required this.onGroupTap,
     required this.memberCount,
   });
 
   final Group group;
   final int memberCount;
-  final VoidCallback onTap, onGroupTap;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      onDoubleTap: onGroupTap,
-
       behavior: HitTestBehavior.opaque,
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: onGroupTap,
-            child: GroupImageWidget(size: 48.w, imageUrl: group.thumbnailUrl),
-          ),
-          16.w.horizontalSpace,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText(
-                  text: group.title,
-                  style: AppTextStyles.semibold(
-                    fontSize: 16.sp,
-                    color: AppColors.black,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 12.h),
+        child: Row(
+          children: [
+            GroupImageWidget(size: 48.w, imageUrl: group.thumbnailUrl),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText(
+                    text: group.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.semibold(
+                      fontSize: 16,
+                      color: const Color(0xFF1C1C1E),
+                    ),
                   ),
-                ),
-                AppText(
-                  text: '$memberCount Members',
-                  style: AppTextStyles.semibold(
-                    fontSize: 14.sp,
-                    color: AppColors.orangeColor,
+                  AppText(
+                    text: '$memberCount Members',
+                    style: AppTextStyles.medium(
+                      fontSize: 14,
+                      color: const Color(0xFFF6A01A),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Container(
-            width: 24.w,
-            height: 24.w,
-            decoration: BoxDecoration(
-              color: AppColors.lighttealcolor,
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: AppText(
-              text: '8',
-              style: AppTextStyles.bold(fontSize: 12.sp, color: AppColors.teal),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

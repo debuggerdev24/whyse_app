@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -1038,7 +1037,9 @@ class _StoryPage extends StatelessWidget {
     TextStyle boldStyle,
   ) {
     String processedText = text
-        .replaceAll(RegExp(r'<(strong|b|p)>', caseSensitive: false), '*')
+        .replaceAll(RegExp(r'</?p[^>]*>', caseSensitive: false), '')
+        .replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n')
+        .replaceAll(RegExp(r'<(strong|b)>', caseSensitive: false), '*')
         .replaceAll(RegExp(r'</(strong|b)>', caseSensitive: false), '*');
 
     RegExp exp = RegExp(r"<[^>]*>", multiLine: true, caseSensitive: true);
@@ -1537,41 +1538,3 @@ class _StoryImage extends StatelessWidget {
   }
 }
 
-class GlassIconButton extends StatelessWidget {
-  final Widget child;
-  final VoidCallback onTap;
-  final double size;
-  final BorderRadius borderRadius;
-
-  const GlassIconButton({
-    super.key,
-    required this.child,
-    required this.onTap,
-    this.size = 28,
-    this.borderRadius = const BorderRadius.all(Radius.circular(14)),
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: borderRadius,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-        child: InkWell(
-          onTap: onTap,
-          child: Container(
-            // height: size,
-            // width: size,
-            padding: EdgeInsets.all(6),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.35),
-              borderRadius: borderRadius,
-            ),
-            child: child,
-          ),
-        ),
-      ),
-    );
-  }
-}

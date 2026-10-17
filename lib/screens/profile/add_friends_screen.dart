@@ -3,6 +3,7 @@ import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/models/friend/friend_model.dart';
 import 'package:redstreakapp/providers/friend/friend_provider.dart';
+import 'package:redstreakapp/screens/settings/widget/settings_chrome.dart';
 
 class AddFriendsScreen extends StatefulWidget {
   const AddFriendsScreen({super.key});
@@ -50,78 +51,60 @@ class _AddFriendsScreenState extends State<AddFriendsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AppLayout(
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundColor,
-        surfaceTintColor: Colors.transparent,
-        title: const AppText(text: 'Add Friends'),
-        leading: IconButton(
-          onPressed: () => context.pop(),
-          icon: const Icon(Icons.chevron_left_rounded),
-        ),
-      ),
+    return SettingsScaffold(
+      title: 'Add Friends',
       body: Consumer<FriendProvider>(
         builder: (context, provider, _) {
-          return Column(
-            children: [
-              Divider(
-                color: AppColors.black.withValues(alpha: 0.1),
-                height: 1,
-              ),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 24.w,
-                    vertical: 20.w,
+          return Padding(
+            padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppText(
+                  text: 'Find Friends',
+                  style: AppTextStyles.bold(fontSize: 22, color: settingsInk),
+                ),
+                SizedBox(height: 10.h),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AppText(
-                        text: "Find Friends",
-                        style: AppTextStyles.semiBold(fontSize: 14.sp),
+                  child: AppTextField(
+                    controller: _searchController,
+                    onChanged: _onSearchChanged,
+                    hintText: 'Search by name or email',
+                    hintStyle: AppTextStyles.regular(
+                      fontSize: 15,
+                      color: settingsMuted,
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 14.h,
+                    ),
+                    border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(14)),
+                      borderSide: BorderSide.none,
+                    ),
+                    prefixIcon: const Padding(
+                      padding: EdgeInsets.only(left: 12),
+                      child: Icon(
+                        Icons.search_rounded,
+                        size: 20,
+                        color: settingsMuted,
                       ),
-                      8.w.verticalSpace,
-                      AppTextField(
-                        controller: _searchController,
-                        onChanged: _onSearchChanged,
-                        hintText: "Search by name or email",
-                        hintStyle: AppTextStyles.medium(
-                          fontSize: 14.sp,
-                          color: AppColors.black.withValues(alpha: 0.25),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 18.w,
-                          vertical: 14.h,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                          borderSide: BorderSide(
-                            color: AppColors.black.withValues(alpha: 0.12),
-                            width: 1,
-                          ),
-                        ),
-                        prefixIcon: Padding(
-                          padding: EdgeInsets.only(left: 12.w),
-                          child: Icon(
-                            Icons.search_rounded,
-                            size: 20.sp,
-                            color: AppColors.black.withValues(alpha: 0.35),
-                          ),
-                        ),
-                      ),
-                      18.w.verticalSpace,
-                      AppText(
-                        text: "People",
-                        style: AppTextStyles.semiBold(fontSize: 14.sp),
-                      ),
-                      8.w.verticalSpace,
-                      Expanded(child: _buildUsersList(provider)),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+                SizedBox(height: 18.h),
+                AppText(
+                  text: 'People',
+                  style: AppTextStyles.bold(fontSize: 18, color: settingsInk),
+                ),
+                SizedBox(height: 10.h),
+                Expanded(child: _buildUsersList(provider)),
+              ],
+            ),
           );
         },
       ),
@@ -146,11 +129,7 @@ class _AddFriendsScreenState extends State<AddFriendsScreen> {
     return ListView.separated(
       physics: const NeverScrollableScrollPhysics(),
       itemCount: 8,
-      separatorBuilder: (_, _) => Divider(
-        height: 24.w,
-        thickness: 1,
-        color: AppColors.black.withValues(alpha: 0.08),
-      ),
+      separatorBuilder: (_, _) => SizedBox(height: 10.h),
       itemBuilder: (context, index) {
         return const _ShimmerUserTile();
       },
@@ -249,11 +228,7 @@ class _AddFriendsScreenState extends State<AddFriendsScreen> {
     return ListView.separated(
       controller: _scrollController,
       itemCount: itemCount,
-      separatorBuilder: (_, _) => Divider(
-        height: 24.w,
-        thickness: 1,
-        color: AppColors.black.withValues(alpha: 0.08),
-      ),
+      separatorBuilder: (_, _) => SizedBox(height: 10.h),
       itemBuilder: (context, index) {
         if (index == users.length) {
           return _buildPaginationLoader();
@@ -377,66 +352,74 @@ class _UserTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        CircleAvatar(
-          radius: 22.r,
-          backgroundColor: _avatarColor,
-          child: AppText(
-            text: user.initials,
-            style: AppTextStyles.bold(
-              fontSize: 14.sp,
-              color: AppColors.white,
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 22.r,
+            backgroundColor: _avatarColor,
+            child: AppText(
+              text: user.initials,
+              style: AppTextStyles.bold(fontSize: 14, color: Colors.white),
             ),
           ),
-        ),
-        16.w.horizontalSpace,
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AppText(
-                text: user.displayName ?? user.username ?? '',
-                style: AppTextStyles.semibold(
-                  fontSize: 16.sp,
-                  color: AppColors.black,
-                ),
-              ),
-              if (user.email != null && user.email!.isNotEmpty) ...[
-                2.h.verticalSpace,
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 AppText(
-                  text: user.email!,
+                  text: user.displayName ?? user.username ?? '',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.medium(
-                    fontSize: 13.sp,
-                    color: AppColors.black.withValues(alpha: 0.5),
+                  style: AppTextStyles.semibold(
+                    fontSize: 16,
+                    color: settingsInk,
                   ),
                 ),
+                if (user.email != null && user.email!.isNotEmpty) ...[
+                  SizedBox(height: 2.h),
+                  AppText(
+                    text: user.email!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.regular(
+                      fontSize: 13,
+                      color: settingsMuted,
+                    ),
+                  ),
+                ],
               ],
-            ],
-          ),
-        ),
-        10.w.horizontalSpace,
-        GestureDetector(
-          onTap: isSent ? null : onAdd,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.w),
-            decoration: BoxDecoration(
-              color: isSent ? AppColors.extealighttealcolor : AppColors.teal,
-              borderRadius: BorderRadius.circular(20.r),
             ),
-            child: AppText(
-              text: isSent ? 'Sent' : 'Add',
-              style: AppTextStyles.semibold(
-                fontSize: 13.sp,
-                color: isSent ? AppColors.teal : AppColors.white,
+          ),
+          SizedBox(width: 10.w),
+          GestureDetector(
+            onTap: isSent ? null : onAdd,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              height: 34,
+              padding: EdgeInsets.symmetric(horizontal: 14.w),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: isSent ? const Color(0xFFDDF4F1) : settingsInk,
+                borderRadius: BorderRadius.circular(17),
+              ),
+              child: AppText(
+                text: isSent ? 'Sent' : 'Add',
+                style: AppTextStyles.semibold(
+                  fontSize: 13,
+                  color: isSent ? AppColors.teal : Colors.white,
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

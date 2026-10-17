@@ -69,9 +69,17 @@ class AppAssets {
   static const document = "$_iconPath/document.svg";
   static const dumbbell = "$_iconPath/dumbbell.svg";
   static const explore = "$_iconPath/explore.svg";
+  static const checkmarkCircle = "$_iconPath/checkmark_circle.svg";
+  static const pauseIcon = "$_iconPath/pause_icon.svg";
+  static const playIcon = "$_iconPath/play_icon.svg";
+  static const timerIcon = "$_iconPath/timer.svg";
+  static const bookOpenIcon = "$_iconPath/book-open.svg";
+  static const starOutlined = "$_iconPath/star_outlined.svg";
+  static const snow = "$_iconPath/snow.svg";
 
   // images
   static const streakFire = "$_imagePath/streak_fire.png";
+  static const rewardsTrophy = "$_imagePath/rewards_trophy.png";
   static const _imagePath = "assets/images";
   static const dargon = "$_imagePath/dinosaur.png";
   static const detativeclue = "$_imagePath/detativeclue.png";
@@ -107,7 +115,7 @@ class SvgIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SvgPicture.asset(
+    return SvgPicture.asset(  
       iconPath,
       width: width,
       height: height,

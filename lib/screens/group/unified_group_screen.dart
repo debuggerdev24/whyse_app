@@ -55,29 +55,64 @@ class _UnifiedGroupScreenState extends State<UnifiedGroupScreen>
     final p = widget.params;
     final showShareCta = _tabController.index == 1;
 
-    return AppLayout(
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundColor,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          onPressed: () => context.pop(),
-          icon: const Icon(Icons.chevron_left_rounded),
-        ),
-        title: AppText(
-          text: p.groupName,
-          style: AppTextStyles.semibold(fontSize: 20, color: AppColors.black),
-        ),
-      ),
+    final top = MediaQuery.paddingOf(context).top;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F7),
       body: Column(
         children: [
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
+            padding: EdgeInsets.fromLTRB(16, top + 6, 16, 0),
+            child: SizedBox(
+              height: 44,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: GlassIconButton(
+                      size: 44,
+                      onTap: () => context.pop(),
+                      child: const Icon(
+                        Icons.chevron_left_rounded,
+                        size: 28,
+                        color: Color(0xFF1C1C1E),
+                      ),
+                    ),
+                  ),
+                  AppText(
+                    text: 'Groups',
+                    style: AppTextStyles.bold(
+                      fontSize: 18,
+                      color: const Color(0xFF1C1C1E),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: AppText(
+                      text: 'Edit',
+                      style: AppTextStyles.semibold(
+                        fontSize: 16,
+                        color: const Color(0xFFF6A01A),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Container(
+            width: double.infinity,
+            margin: EdgeInsets.only(top: 8.h),
+            padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 16.h),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(28.r),
+              ),
+            ),
             child: Column(
               children: [
-                8.h.verticalSpace,
                 GroupImageWidget(imageUrl: p.thumbnail, size: 112.w),
                 12.h.verticalSpace,
                 Row(
@@ -169,7 +204,6 @@ class _UnifiedGroupScreenState extends State<UnifiedGroupScreen>
               ],
             ),
           ),
-          Divider(height: 1, color: AppColors.black.withValues(alpha: 0.1)),
           Expanded(
             child: TabBarView(
               controller: _tabController,
@@ -182,21 +216,34 @@ class _UnifiedGroupScreenState extends State<UnifiedGroupScreen>
           ),
           if (showShareCta)
             Padding(
-              padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 14.h),
-              child: AppFilledButton(
-                backgroundColor: AppColors.black,
-                text: ' Share Series',
-                icon: SvgIcon(
-                  AppAssets.shareIcon,
-                  size: 20.sp,
-                  color: AppColors.white,
-                ),
+              padding: EdgeInsets.fromLTRB(
+                20,
+                0,
+                20,
+                MediaQuery.paddingOf(context).bottom + 12,
+              ),
+              child: GestureDetector(
                 onTap: () {
                   context.pushNamed(
                     AppRoutes.shareStoriesInGroupScreen.name,
                     extra: p.id,
                   );
                 },
+                child: Container(
+                  height: 52,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1C1C1E),
+                    borderRadius: BorderRadius.circular(28),
+                  ),
+                  child: AppText(
+                    text: 'Share Series',
+                    style: AppTextStyles.semibold(
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ),
             ),
         ],
@@ -212,22 +259,48 @@ class _GroupTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final grey = AppColors.black.withValues(alpha: 0.45);
-    return TabBar(
-      controller: controller,
-      isScrollable: true,
-      indicatorColor: AppColors.teal,
-      indicatorWeight: 3,
-      labelColor: AppColors.teal,
-      unselectedLabelColor: grey,
-      dividerColor: Colors.transparent,
-      labelStyle: AppTextStyles.semibold(fontSize: 14.sp),
-      unselectedLabelStyle: AppTextStyles.medium(fontSize: 14.sp),
-      tabs: const [
-        Tab(text: 'Details'),
-        Tab(text: 'Updates'),
-        Tab(text: 'Streaks Ranking'),
-      ],
+    const labels = ['Details', 'Updates', 'Streaks Ranking'];
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        return Row(
+          children: [
+            for (var i = 0; i < labels.length; i++) ...[
+              if (i > 0) SizedBox(width: 8.w),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => controller.animateTo(i),
+                  child: Container(
+                    height: 36,
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: controller.index == i
+                          ? AppColors.teal
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: controller.index == i
+                          ? null
+                          : Border.all(color: const Color(0xFFE4E4E4)),
+                    ),
+                    child: AppText(
+                      text: labels[i],
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.medium(
+                        fontSize: 13,
+                        color: controller.index == i
+                            ? Colors.white
+                            : const Color(0xFF8E8E93),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        );
+      },
     );
   }
 }
@@ -246,7 +319,8 @@ class _GroupUpdatesTab extends StatelessWidget {
       itemBuilder: (_, _) => Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppSkeletonizer(child: Container(
+          AppSkeletonizer(
+            child: Container(
               width: 36.w,
               height: 36.w,
               decoration: const BoxDecoration(
@@ -257,7 +331,8 @@ class _GroupUpdatesTab extends StatelessWidget {
           ),
           10.w.horizontalSpace,
           Expanded(
-            child: AppSkeletonizer(child: Container(
+            child: AppSkeletonizer(
+              child: Container(
                 height: 200.h,
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -316,6 +391,7 @@ class _GroupUpdatesTab extends StatelessWidget {
             return _GroupFeedCard(
               topic: item,
               authorName: member.displayName,
+              authorAvatar: member.avatarUrl,
               sharedTime: DateFormatter.formatTimeFrom(item.sharedAt),
             );
           },
@@ -330,134 +406,144 @@ class _GroupFeedCard extends StatelessWidget {
     required this.topic,
     required this.authorName,
     required this.sharedTime,
+    this.authorAvatar,
   });
 
   final GroupSharedTopic topic;
   final String authorName;
   final String sharedTime;
+  final String? authorAvatar;
 
   @override
   Widget build(BuildContext context) {
     final detail = topic.topic;
     final progress = detail.readingProgress;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 36.w,
-          height: 36.w,
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppColors.lighttealcolor,
-          ),
-          child: Icon(Icons.person, size: 18.sp, color: AppColors.teal),
-        ),
-        10.w.horizontalSpace,
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(16.r),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.black.withValues(alpha: 0.08),
-                  blurRadius: 14,
-                  offset: const Offset(0, 6),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 8.h),
+            child: Row(
+              children: [
+                Expanded(
+                  child: AppText(
+                    text: authorName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.semibold(
+                      fontSize: 16,
+                      color: const Color(0xFF1C1C1E),
+                    ),
+                  ),
+                ),
+                AppText(
+                  text: sharedTime,
+                  style: AppTextStyles.regular(
+                    fontSize: 12,
+                    color: const Color(0xFF8E8E93),
+                  ),
                 ),
               ],
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.w),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16.r),
+              child: SizedBox(
+                height: 150.h,
+                width: double.infinity,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    AppNetworkImage(
+                      imageUrl: detail.thumbnailUrl,
+                      tag: 'UnifiedGroup.detailThumbnail',
+                      width: double.infinity,
+                      height: 150.h,
+                    ),
+                    const DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Colors.transparent, Color(0xCC000000)],
+                          stops: [0.45, 1],
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: 12,
+                      right: 12,
+                      bottom: 12,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AppText(
+                            text: detail.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.bold(
+                              fontSize: 18,
+                              color: Colors.white,
+                            ),
+                          ),
+                          AppText(
+                            text:
+                                '${progress.completedStories} out of ${progress.totalStories} Reading',
+                            style: AppTextStyles.medium(
+                              fontSize: 13,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 12.h),
+            child: Row(
               children: [
-                Padding(
-                  padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 8.h),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: AppText(
-                          text: authorName,
-                          style: AppTextStyles.semibold(
-                            fontSize: 15.sp,
-                            color: AppColors.black,
-                          ),
-                        ),
-                      ),
-                      AppText(
-                        text: sharedTime,
-                        style: AppTextStyles.medium(
-                          fontSize: 12.sp,
-                          color: AppColors.black.withValues(alpha: 0.45),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w),
+                ClipOval(
                   child: AppNetworkImage(
-                    imageUrl: detail.thumbnailUrl,
-                    tag: 'UnifiedGroup.detailThumbnail',
-                    width: double.infinity,
-                    height: 120.h,
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                ),
-                10.h.verticalSpace,
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w),
-                  child: Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
-                    decoration: BoxDecoration(
-                      color: AppColors.searchBackgroundColor,
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AppText(
-                          text: detail.title,
-                          style: AppTextStyles.bold(
-                            fontSize: 16.sp,
-                            color: AppColors.black,
-                          ),
-                        ),
-                        4.h.verticalSpace,
-                        AppText(
-                          text:
-                              '${progress.completedStories} out of ${progress.totalStories} Readings',
-                          style: AppTextStyles.medium(
-                            fontSize: 13.sp,
-                            color: AppColors.black.withValues(alpha: 0.72),
-                          ),
-                        ),
-                      ],
+                    imageUrl: authorAvatar,
+                    tag: 'UnifiedGroup.author',
+                    width: 28,
+                    height: 28,
+                    errorCompact: true,
+                    errorIconOnly: true,
+                    errorBuilder: (_, _, _) => Container(
+                      width: 28,
+                      height: 28,
+                      color: const Color(0xFFDDF4F1),
+                      child: const Icon(Icons.person, size: 16, color: AppColors.teal),
                     ),
                   ),
                 ),
-                10.h.verticalSpace,
-                Padding(
-                  padding: EdgeInsets.only(
-                    left: 12.w,
-                    right: 12.w,
-                    bottom: 12.h,
-                  ),
+                SizedBox(width: 8.w),
+                Expanded(
                   child: Builder(
                     builder: (context) {
                       final ssp = context.watch<SavedSeriesProvider>();
                       final topicId = detail.id;
-                      final isToggling =
-                          ssp.isTopicListToggling(topicId);
+                      final isToggling = ssp.isTopicListToggling(topicId);
                       final isInList =
-                          ssp.topicIsInMyListOverride(topicId) ??
-                          false;
+                          ssp.topicIsInMyListOverride(topicId) ?? false;
 
                       return GestureDetector(
                         onTap: isToggling
                             ? null
                             : () async {
-                                final result =
-                                    await ssp.toggleTopic(
+                                final result = await ssp.toggleTopic(
                                   topicId: topicId,
                                   onFailed: (err) {
                                     if (context.mounted) {
@@ -474,39 +560,16 @@ class _GroupFeedCard extends StatelessWidget {
                                   );
                                 }
                               },
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (isToggling)
-                              SizedBox(
-                                width: 14.w,
-                                height: 14.w,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: AppColors.teal,
-                                ),
-                              )
-                            else
-                              Icon(
-                                isInList
-                                    ? Icons.bookmark_rounded
-                                    : Icons.bookmark_border_rounded,
-                                size: 16.sp,
-                                color: AppColors.teal,
-                              ),
-                            6.w.horizontalSpace,
-                            AppText(
-                              text: isToggling
-                                  ? (isInList ? 'Removing…' : 'Adding…')
-                                  : (isInList
-                                      ? 'Remove from List'
-                                      : 'Add to My List'),
-                              style: AppTextStyles.semibold(
-                                fontSize: 14.sp,
-                                color: AppColors.teal,
-                              ),
-                            ),
-                          ],
+                        child: AppText(
+                          text: isToggling
+                              ? (isInList ? 'Removing…' : 'Adding…')
+                              : (isInList
+                                    ? 'Remove from list'
+                                    : 'Add to my list'),
+                          style: AppTextStyles.semibold(
+                            fontSize: 15,
+                            color: AppColors.teal,
+                          ),
                         ),
                       );
                     },
@@ -515,8 +578,8 @@ class _GroupFeedCard extends StatelessWidget {
               ],
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -538,52 +601,18 @@ class _GroupStreaksTab extends StatelessWidget {
 
         return SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 24.h),
-          child: Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(20.r),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.black.withValues(alpha: 0.06),
-                  blurRadius: 16,
-                  offset: const Offset(0, 6),
+          padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 24.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AppText(
+                text: 'Streaks Ranking',
+                style: AppTextStyles.bold(
+                  fontSize: 20,
+                  color: const Color(0xFF1C1C1E),
                 ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 0),
-                  child: Row(
-                    children: [
-                      SvgIcon(
-                        AppAssets.thunder,
-                        size: 22.sp,
-                        color: AppColors.orangeColor,
-                      ),
-                      10.w.horizontalSpace,
-                      AppText(
-                        text: 'Streaks Ranking',
-                        style: AppTextStyles.bold(
-                          fontSize: 18.sp,
-                          color: AppColors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                14.h.verticalSpace,
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 18.w),
-                  child: Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: AppColors.black.withValues(alpha: 0.08),
-                  ),
-                ),
+              ),
+              SizedBox(height: 8.h),
                 if (vm.isLoading)
                   Padding(
                     padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 24.h),
@@ -657,7 +686,6 @@ class _GroupStreaksTab extends StatelessWidget {
                   ),
               ],
             ),
-          ),
         );
       },
     );
@@ -767,17 +795,17 @@ class _StreakRankingRow extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SvgIcon(
-                  AppAssets.thunder,
-                  size: 14.sp,
-                  color: AppColors.orangeColor,
+                const Icon(
+                  Icons.local_fire_department_rounded,
+                  size: 16,
+                  color: Color(0xFFF6A01A),
                 ),
-                6.w.horizontalSpace,
+                const SizedBox(width: 4),
                 AppText(
                   text: '$streak',
-                  style: AppTextStyles.bold(
-                    fontSize: 16.sp,
-                    color: AppColors.black,
+                  style: AppTextStyles.semibold(
+                    fontSize: 15,
+                    color: const Color(0xFF1C1C1E),
                   ),
                 ),
               ],

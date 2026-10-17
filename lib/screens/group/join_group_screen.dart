@@ -1,7 +1,8 @@
-import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:pinput/pinput.dart';
+import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/providers/profile/group_provider.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
+import 'package:redstreakapp/screens/settings/widget/settings_chrome.dart';
 
 class JoinGroupScreen extends StatefulWidget {
   const JoinGroupScreen({super.key});
@@ -23,129 +24,151 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AppLayout(
-      appBar: AppBar(
-        title: AppText(
-          text: "Join Group",
-          style: AppTextStyles.semiBold(fontSize: 20.sp),
-        ),
-        leading: IconButton(
-          onPressed: () => context.pop(),
-          icon: const Icon(Icons.chevron_left_rounded),
+    return SettingsScaffold(
+      title: 'Join Group',
+      body: Padding(
+        padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 24.h),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppText(
+              text: 'Join a group',
+              style: AppTextStyles.bold(fontSize: 22, color: settingsInk),
+            ),
+            SizedBox(height: 6.h),
+            AppText(
+              text: 'Type the code from your teacher to join your class!',
+              style: AppTextStyles.regular(fontSize: 14, color: settingsMuted),
+            ),
+            SizedBox(height: 22.h),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                const pinLength = 6;
+                final gap = 8.w;
+                final itemWidth =
+                    (constraints.maxWidth - (gap * (pinLength - 1))) /
+                    pinLength;
+                final pinTheme = PinTheme(
+                  width: itemWidth,
+                  height: itemWidth,
+                  textStyle: AppTextStyles.semibold(
+                    fontSize: 18,
+                    color: settingsInk,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                );
+
+                return Pinput(
+                  controller: _pinController,
+                  focusNode: _pinFocusNode,
+                  length: pinLength,
+                  defaultPinTheme: pinTheme,
+                  focusedPinTheme: pinTheme.copyWith(
+                    decoration: pinTheme.decoration!.copyWith(
+                      border: Border.all(color: AppColors.teal, width: 1.4),
+                    ),
+                  ),
+                  submittedPinTheme: pinTheme,
+                  separatorBuilder: (_) => SizedBox(width: gap),
+                  keyboardType: TextInputType.text,
+                  validator: (value) {
+                    if (value?.length != pinLength) {
+                      return 'Please enter valid code';
+                    }
+                    return null;
+                  },
+                  onCompleted: (_) => FocusScope.of(context).unfocus(),
+                );
+              },
+            ),
+            SizedBox(height: 22.h),
+            Selector<GroupProvider, bool>(
+              selector: (_, provider) => provider.joinGroupLoading,
+              builder: (context, loading, _) {
+                return _GroupPillButton(
+                  label: 'Join',
+                  filled: true,
+                  loading: loading,
+                  onTap: loading
+                      ? null
+                      : () {
+                          context.read<GroupProvider>().joinGroupByCode(
+                            code: _pinController.text.trim(),
+                            onSuccess: () {
+                              _pinController.clear();
+                              AppToast.success(context, 'Joined Successfully');
+                              context.read<ProfileProvider>().getGroupsList();
+                              context.read<GroupProvider>().getGroupsList();
+                              context.pop();
+                            },
+                            onError: (error) {
+                              AppToast.error(context, error);
+                            },
+                          );
+                        },
+                );
+              },
+            ),
+            SizedBox(height: 12.h),
+            _GroupPillButton(
+              label: 'Create Group',
+              filled: false,
+              onTap: () =>
+                  context.pushNamed(AppRoutes.createGroupScreen.name),
+            ),
+          ],
         ),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Divider(color: AppColors.black.withValues(alpha: 0.1), height: 1),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(22.w, 22.h, 22.w, 24.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AppText(
-                    text: 'Join a group',
-                    style: AppTextStyles.bold(
-                      fontSize: 20.sp,
-                      color: AppColors.black,
-                    ),
-                  ),
+    );
+  }
+}
 
-                  AppText(
-                    text: 'Type the code from your teacher to join your class!',
-                    style: AppTextStyles.medium(
-                      fontSize: 14.sp,
-                      color: AppColors.black.withValues(alpha: 0.86),
-                    ),
-                  ),
-                  20.w.verticalSpace,
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      const int pinLength = 6;
-                      final gap = 8.w;
-                      final available = constraints.maxWidth;
-                      final itemWidth =
-                          (available - (gap * (pinLength - 1))) / pinLength;
+class _GroupPillButton extends StatelessWidget {
+  const _GroupPillButton({
+    required this.label,
+    required this.filled,
+    this.onTap,
+    this.loading = false,
+  });
 
-                      final pinTheme = PinTheme(
-                        width: itemWidth,
-                        height: itemWidth,
-                        textStyle: AppTextStyles.semibold(
-                          fontSize: 16.sp,
-                          color: AppColors.black,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.backgroundColor,
-                          borderRadius: BorderRadius.circular(10.r),
-                          border: Border.all(
-                            color: AppColors.black.withValues(alpha: 0.10),
-                          ),
-                        ),
-                      );
+  final String label;
+  final bool filled;
+  final VoidCallback? onTap;
+  final bool loading;
 
-                      return Pinput(
-                        controller: _pinController,
-                        focusNode: _pinFocusNode,
-                        length: pinLength,
-                        defaultPinTheme: pinTheme,
-                        focusedPinTheme: pinTheme.copyWith(
-                          decoration: pinTheme.decoration!.copyWith(
-                            border: Border.all(
-                              color: AppColors.black.withValues(alpha: 0.25),
-                            ),
-                          ),
-                        ),
-                        submittedPinTheme: pinTheme.copyWith(
-                          decoration: pinTheme.decoration!.copyWith(
-                            border: Border.all(
-                              color: AppColors.black.withValues(alpha: 0.18),
-                            ),
-                          ),
-                        ),
-                        separatorBuilder: (_) => SizedBox(width: gap),
-                        keyboardType: TextInputType.text,
-                        validator: (value) {
-                          if (value?.length != pinLength) {
-                            return 'Please enter valid code';
-                          }
-                          return null;
-                        },
-                        onCompleted: (_) => FocusScope.of(context).unfocus(),
-                      );
-                    },
-                  ),
-                  Spacer(),
-                  Selector<GroupProvider, bool>(
-                    selector: (p0, p1) => p1.joinGroupLoading,
-                    builder: (context, value, child) => AppFilledButton(
-                      text: 'Join',
-                      loadingColor: AppColors.white,
-                      isLoading: value,
-                      onTap: () {
-                        context.read<GroupProvider>().joinGroupByCode(
-                          code: _pinController.text.trim(),
-                          onSuccess: () {
-                            _pinController.clear();
-                            AppToast.success(context, 'Joined Successfully');
-                            context.read<ProfileProvider>().getGroupsList();
-                            context.read<GroupProvider>().getGroupsList();
-                            context.pop();
-                          },
-                          onError: (error) {
-                            AppToast.error(context, error);
-                          },
-                        );
-                      },
-                      margin: EdgeInsets.only(top: 24.w),
-                      backgroundColor: AppColors.teal,
-                    ),
-                  ),
-                ],
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 52,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: filled ? AppColors.teal : Colors.white,
+          borderRadius: BorderRadius.circular(28),
+          border: filled
+              ? null
+              : Border.all(color: const Color(0xFFE4E4E4)),
+        ),
+        child: loading
+            ? const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+            : AppText(
+                text: label,
+                style: AppTextStyles.semibold(
+                  fontSize: 16,
+                  color: filled ? Colors.white : settingsInk,
+                ),
               ),
-            ),
-          ),
-        ],
       ),
     );
   }

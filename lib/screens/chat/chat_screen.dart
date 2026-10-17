@@ -31,6 +31,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   bool _showSuggestions = true;
   bool _isOpeningCard = false;
+  bool _glassScrolling = false;
 
   @override
   void initState() {
@@ -180,107 +181,168 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  bool _onScroll(ScrollNotification notification) {
+    if (notification.metrics.axis != Axis.vertical) return false;
+    if (notification is ScrollEndNotification) {
+      if (_glassScrolling) setState(() => _glassScrolling = false);
+    } else if (notification is OverscrollNotification) {
+      if (!_glassScrolling) setState(() => _glassScrolling = true);
+    } else if (notification is ScrollUpdateNotification) {
+      final delta = notification.scrollDelta ?? 0;
+      if (delta.abs() > 0.5 && !_glassScrolling) {
+        setState(() => _glassScrolling = true);
+      }
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
+    // The tab pill's top edge sits 67px above the screen bottom
+    // (5px inset + 62px bar). Keep the field just above that.
+    final composerBottom = keyboard > 0
+        ? keyboard + 8
+        : MediaQuery.viewPaddingOf(context).bottom + 75;
+
     return Scaffold(
       backgroundColor: chatBackgroundColor,
-      appBar: const ChatAppBar(),
-      body: Consumer<ChatProvider>(
-        builder: (context, chatProvider, child) {
-          final messages = chatProvider.messages
-              .where(
-                (m) =>
-                    m.isUserMessage ||
-                    m.segments.isNotEmpty ||
-                    m.content.trim().isNotEmpty,
-              )
-              .toList();
-          final isTyping = chatProvider.isBotTyping;
+      resizeToAvoidBottomInset: false,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              20,
+              MediaQuery.paddingOf(context).top + 8,
+              20,
+              4,
+            ),
+            child: AppText(
+              text: 'Chat',
+              style: AppTextStyles.semibold(
+                fontSize: 32,
+                color: const Color(0xFF1A1A1A),
+              ).copyWith(height: 1.1, letterSpacing: -0.6),
+            ),
+          ),
+          Expanded(
+            child: Consumer<ChatProvider>(
+              builder: (context, chatProvider, child) {
+                final messages = chatProvider.messages
+                    .where(
+                      (m) =>
+                          m.isUserMessage ||
+                          m.segments.isNotEmpty ||
+                          m.content.trim().isNotEmpty,
+                    )
+                    .toList();
+                final isTyping = chatProvider.isBotTyping;
+                final showSuggestions =
+                    _showSuggestions &&
+                    !chatProvider.isStreaming &&
+                    messages.isNotEmpty;
+                final overlayHeight =
+                    ChatInputBar.height + (showSuggestions ? 138 : 0);
+                final listBottom =
+                    composerBottom + overlayHeight - (showSuggestions ? 0 : 28);
 
-          // While history is loading (or truly empty), show the welcome
-          // landing — not the mid-chat suggestion strip on a blank list.
-          if (messages.isEmpty && !chatProvider.isStreaming) {
-            return Column(
-              children: [
-                Expanded(
-                  child: Skeletonizer(
-                    enabled: chatProvider.isChatHistoryLoading,
-                    child: ChatEmptyState(
-                      suggestions: _suggestions,
-                      onSuggestionTap: _handleSend,
-                    ),
-                  ),
-                ),
-                ChatInputBar(
-                  controller: _messageController,
-                  focusNode: _focusNode,
-                  onSend: () => _handleSend(),
-                ),
-              ],
-            );
-          }
-
-          final itemCount = messages.length + (isTyping ? 1 : 0);
-
-          return Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                  controller: _scrollController,
-                  reverse: true,
-                  padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 16.h),
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: itemCount,
-                  itemBuilder: (context, index) {
-                    if (isTyping && index == 0) {
-                      return Padding(
-                        padding: EdgeInsets.only(top: 16.h),
-                        child: const _TypingIndicator(),
-                      );
-                    }
-
-                    final messageIndex = isTyping ? index - 1 : index;
-                    final message =
-                        messages[messages.length - 1 - messageIndex];
-                    final latestBotId = chatProvider.messages
-                        .lastWhere(
-                          (m) => !m.isUserMessage,
-                          orElse: () => message,
+                return NotificationListener<ScrollNotification>(
+                  onNotification: _onScroll,
+                  child: Stack(
+                    children: [
+                      if (messages.isEmpty && !chatProvider.isStreaming)
+                        Positioned.fill(
+                          child: Skeletonizer(
+                            enabled: chatProvider.isChatHistoryLoading,
+                            child: ChatEmptyState(
+                              suggestions: _suggestions,
+                              onSuggestionTap: _handleSend,
+                              bottomReserve: listBottom,
+                            ),
+                          ),
                         )
-                        .id;
-                    final isStreamingTarget =
-                        !message.isUserMessage && message.id == latestBotId;
-                    // Animate while the stream is active; typewriter keeps
-                    // catching up after the stream ends via its own state.
-                    final shouldAnimate =
-                        chatProvider.isStreaming && isStreamingTarget;
-                    return Padding(
-                      padding: EdgeInsets.only(top: 16.h),
-                      child: _ChatMessageTile(
-                        message: message,
-                        onCardTap: _onCardTap,
-                        animateText: shouldAnimate,
-                        isStreaming: shouldAnimate,
+                      else
+                        Positioned.fill(
+                          child: ListView.builder(
+                            controller: _scrollController,
+                            reverse: true,
+                            padding: EdgeInsets.fromLTRB(16, 8, 16, listBottom),
+                            physics: const BouncingScrollPhysics(
+                              parent: AlwaysScrollableScrollPhysics(),
+                            ),
+                            itemCount: messages.length + (isTyping ? 1 : 0),
+                            itemBuilder: (context, index) {
+                              if (isTyping && index == 0) {
+                                return const Padding(
+                                  padding: EdgeInsets.only(top: 12),
+                                  child: _TypingIndicator(),
+                                );
+                              }
+
+                              final messageIndex = isTyping ? index - 1 : index;
+                              final message =
+                                  messages[messages.length - 1 - messageIndex];
+                              final latestBotId = chatProvider.messages
+                                  .lastWhere(
+                                    (m) => !m.isUserMessage,
+                                    orElse: () => message,
+                                  )
+                                  .id;
+                              final isStreamingTarget =
+                                  !message.isUserMessage &&
+                                  message.id == latestBotId;
+                              final shouldAnimate =
+                                  chatProvider.isStreaming && isStreamingTarget;
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 12),
+                                child: _ChatMessageTile(
+                                  message: message,
+                                  onCardTap: _onCardTap,
+                                  animateText: shouldAnimate,
+                                  isStreaming: shouldAnimate,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: composerBottom + overlayHeight - 8,
+                        height: 72,
+                        child: ChatScrollEdge(active: _glassScrolling),
                       ),
-                    );
-                  },
-                ),
-              ),
-              if (_showSuggestions &&
-                  !chatProvider.isStreaming &&
-                  messages.isNotEmpty)
-                ChatSuggestionSection(
-                  suggestions: _suggestions,
-                  onSuggestionTap: _handleSend,
-                ),
-              ChatInputBar(
-                controller: _messageController,
-                focusNode: _focusNode,
-                onSend: () => _handleSend(),
-              ),
-            ],
-          );
-        },
+                      Positioned(
+                        left: 16,
+                        right: 16,
+                        bottom: composerBottom,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (showSuggestions) ...[
+                              ChatSuggestionSection(
+                                suggestions: _suggestions,
+                                onSuggestionTap: _handleSend,
+                              ),
+                              const SizedBox(height: 10),
+                            ],
+                            ChatInputBar(
+                              controller: _messageController,
+                              focusNode: _focusNode,
+                              scrolling: _glassScrolling,
+                              onSend: () => _handleSend(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -320,7 +382,6 @@ class _ChatMessageTile extends StatelessWidget {
     }
 
     final children = <Widget>[];
-    var avatarShown = false;
     final textSegmentIndexes = <int>[];
     for (var i = 0; i < segments.length; i++) {
       if (segments[i].type == ChatMessageSegmentType.text &&
@@ -328,8 +389,9 @@ class _ChatMessageTile extends StatelessWidget {
         textSegmentIndexes.add(i);
       }
     }
-    final lastTextSegmentIndex =
-        textSegmentIndexes.isEmpty ? -1 : textSegmentIndexes.last;
+    final lastTextSegmentIndex = textSegmentIndexes.isEmpty
+        ? -1
+        : textSegmentIndexes.last;
 
     for (var i = 0; i < segments.length; i++) {
       final segment = segments[i];
@@ -342,19 +404,12 @@ class _ChatMessageTile extends StatelessWidget {
             ChatBotTextBubble(
               key: ValueKey('${message.id}-text-$i'),
               text: text,
-              showAvatar: !avatarShown,
               animate: animateText,
               showCursor: isStreaming && isLastText,
             ),
           );
-          avatarShown = true;
         case ChatMessageSegmentType.cards:
           if (segment.items.isEmpty) continue;
-          if (!avatarShown) {
-            children.add(const ChatBotAvatar());
-            children.add(SizedBox(height: 8.h));
-            avatarShown = true;
-          }
           children.add(
             _ChatCardsSegment(items: segment.items, onCardTap: onCardTap),
           );
@@ -394,20 +449,19 @@ class _ChatMessageTile extends StatelessWidget {
 }
 
 class _ChatCardsSegment extends StatelessWidget {
-  const _ChatCardsSegment({
-    required this.items,
-    required this.onCardTap,
-  });
+  const _ChatCardsSegment({required this.items, required this.onCardTap});
 
   final List<CardItem> items;
   final ValueChanged<CardItem> onCardTap;
 
   @override
   Widget build(BuildContext context) {
-    final sparks =
-        items.where((item) => item.kind == CardItemType.spark).toList();
-    final stories =
-        items.where((item) => item.kind != CardItemType.spark).toList();
+    final sparks = items
+        .where((item) => item.kind == CardItemType.spark)
+        .toList();
+    final stories = items
+        .where((item) => item.kind != CardItemType.spark)
+        .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -429,38 +483,30 @@ class _TypingIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerLeft,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ChatBotAvatar(),
-          SizedBox(height: 8.h),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(16.r),
-            ),
-            child: SizedBox(
-              width: 36.w,
-              height: 8.h,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: List.generate(3, (index) {
-                  return Container(
-                    width: 6.w,
-                    height: 6.w,
-                    decoration: BoxDecoration(
-                      color: AppColors.teal.withValues(alpha: 0.55),
-                      shape: BoxShape.circle,
-                    ),
-                  );
-                }),
-              ),
-            ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+        ),
+        child: SizedBox(
+          width: 36,
+          height: 8,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(3, (index) {
+              return Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: AppColors.teal.withValues(alpha: 0.55),
+                  shape: BoxShape.circle,
+                ),
+              );
+            }),
           ),
-        ],
+        ),
       ),
     );
   }
 }
-

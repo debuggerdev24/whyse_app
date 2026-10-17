@@ -1,10 +1,10 @@
 import 'package:redstreakapp/core/enums/data_status.dart';
-import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/utils/user_facing_message.dart';
 import 'package:redstreakapp/models/friend/friend_details_model.dart';
 import 'package:redstreakapp/screens/group/widget/group_image_widget.dart';
 import 'package:redstreakapp/screens/profile/user_profile_groups_list_screen_params.dart';
+import 'package:redstreakapp/screens/settings/widget/settings_chrome.dart';
 import 'package:redstreakapp/services/profile/friend_api_service.dart';
 
 class UserProfileGroupsListScreen extends StatefulWidget {
@@ -103,26 +103,11 @@ class _UserProfileGroupsListScreenState extends State<UserProfileGroupsListScree
 
   @override
   Widget build(BuildContext context) {
-    return AppLayout(
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundColor,
-        surfaceTintColor: Colors.transparent,
-        title: AppText(text: widget.params.title ?? 'Groups'),
-        leading: IconButton(
-          onPressed: () => context.pop(),
-          icon: const Icon(Icons.chevron_left_rounded),
-        ),
-      ),
-      body: Column(
-        children: [
-          Divider(color: AppColors.black.setOpacity(0.1), height: 1),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(24.w, 14.w, 24.w, 0),
-              child: _buildBody(),
-            ),
-          ),
-        ],
+    return SettingsScaffold(
+      title: widget.params.title ?? 'Groups',
+      body: Padding(
+        padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
+        child: _buildBody(),
       ),
     );
   }
@@ -149,10 +134,10 @@ class _UserProfileGroupsListScreenState extends State<UserProfileGroupsListScree
           parent: BouncingScrollPhysics(),
         ),
         itemCount: itemCount,
-        separatorBuilder: (_, __) => Divider(
-          height: 24.w,
+        separatorBuilder: (_, _) => const Divider(
+          height: 1,
           thickness: 1,
-          color: AppColors.black.setOpacity(0.08),
+          color: Color(0xFFE5E5EA),
         ),
         itemBuilder: (context, index) {
           if (index == _groups.length) {
@@ -184,40 +169,37 @@ class _GroupListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        ClipOval(
-          child: GroupImageWidget(
-            imageUrl: group.thumbnailUrl,
-            size: 48.w,
-          ),
-        ),
-        16.w.horizontalSpace,
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AppText(
-                text: group.title ?? 'Group',
-                style: AppTextStyles.semibold(
-                  fontSize: 16.sp,
-                  color: AppColors.black,
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 12.h),
+      child: Row(
+        children: [
+          GroupImageWidget(imageUrl: group.thumbnailUrl, size: 48.w),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppText(
+                  text: group.title ?? 'Group',
+                  style: AppTextStyles.semibold(
+                    fontSize: 16,
+                    color: const Color(0xFF1C1C1E),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              4.h.verticalSpace,
-              AppText(
-                text: '${group.memberCount} members',
-                style: AppTextStyles.medium(
-                  fontSize: 13.sp,
-                  color: AppColors.black.setOpacity(0.5),
+                AppText(
+                  text: '${group.memberCount} Members',
+                  style: AppTextStyles.medium(
+                    fontSize: 14,
+                    color: const Color(0xFFF6A01A),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -229,8 +211,8 @@ class _LoadingList extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.separated(
       itemCount: 6,
-      separatorBuilder: (_, __) => SizedBox(height: 16.w),
-      itemBuilder: (_, __) => const _ShimmerTile(),
+      separatorBuilder: (_, _) => const SizedBox(height: 16),
+      itemBuilder: (_, _) => const _ShimmerTile(),
     );
   }
 }
@@ -240,38 +222,25 @@ class _ShimmerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppSkeletonizer(child: Row(
+    return AppSkeletonizer(
+      child: Row(
         children: [
           Container(
-            width: 48.w,
-            height: 48.w,
+            width: 48,
+            height: 48,
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.white,
             ),
           ),
-          16.w.horizontalSpace,
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 140.w,
-                  height: 14.h,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4.r),
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                Container(
-                  width: 80.w,
-                  height: 11.h,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4.r),
-                  ),
-                ),
+                Container(width: 140, height: 14, color: Colors.white),
+                const SizedBox(height: 8),
+                Container(width: 80, height: 12, color: Colors.white),
               ],
             ),
           ),
@@ -293,32 +262,25 @@ class _ErrorState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
-            size: 40.w,
-            color: AppColors.orangeColor,
-          ),
-          12.verticalSpace,
           AppText(
             text: message ?? 'Something went wrong',
             textAlign: TextAlign.center,
-            style: AppTextStyles.medium(fontSize: 14.sp),
+            style: AppTextStyles.regular(fontSize: 14, color: settingsMuted),
           ),
-          16.verticalSpace,
+          const SizedBox(height: 16),
           GestureDetector(
             onTap: onRetry,
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.h),
+              height: 44,
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              alignment: Alignment.center,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(color: AppColors.teal.setOpacity(0.4)),
+                color: settingsInk,
+                borderRadius: BorderRadius.circular(22),
               ),
               child: AppText(
                 text: 'Retry',
-                style: AppTextStyles.semibold(
-                  fontSize: 14.sp,
-                  color: AppColors.teal,
-                ),
+                style: AppTextStyles.semibold(fontSize: 15, color: Colors.white),
               ),
             ),
           ),
@@ -337,15 +299,9 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.groups_outlined,
-            size: 48.w,
-            color: AppColors.black.setOpacity(0.3),
-          ),
-          12.verticalSpace,
           AppText(
             text: 'No groups yet',
-            style: AppTextStyles.medium(fontSize: 16.sp),
+            style: AppTextStyles.regular(fontSize: 14, color: settingsMuted),
           ),
         ],
       ),

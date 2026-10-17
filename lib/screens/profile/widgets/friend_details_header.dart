@@ -4,48 +4,177 @@ import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/friend/friend_details_model.dart';
 import 'package:redstreakapp/screens/profile/widgets/profile_friend_avatar.dart';
 
-const Color friendDetailsHeaderBg = Color(0xFFE8D9C4);
+const Color _profileTan = Color(0xFFCFBD95);
+const Color _ink = Color(0xFF1C1C1E);
+const Color _muted = Color(0xFF8E8E93);
 
 class FriendDetailsHeader extends StatelessWidget {
-  const FriendDetailsHeader({super.key, required this.profile});
+  const FriendDetailsHeader({
+    super.key,
+    required this.profile,
+    required this.friendsCount,
+    this.familyRole,
+  });
 
   final FriendProfile profile;
+  final int friendsCount;
+  final String? familyRole;
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: friendDetailsHeaderBg,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(14.w, 15.w, 14.w, 20.w),
-        child: Column(
-          children: [
-            SafeArea(
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Positioned(
-                    left: 0,
-                    top: 0,
-                    child: _CircleOutlineIconButton(
-                      onTap: () {
-                        if (context.canPop()) context.pop();
-                      },
-                      child: Icon(
-                        Icons.chevron_left_rounded,
-                        size: 25.sp,
-                        color: AppColors.black,
+    final top = MediaQuery.paddingOf(context).top;
+    final name = profile.displayName ?? profile.username ?? '';
+    final username = profile.username;
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(30.r)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x26000000),
+            offset: Offset(0, 16),
+            blurRadius: 32,
+            spreadRadius: -8,
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(30.r)),
+        child: Container(
+          height: 286.h,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color.fromRGBO(207, 189, 149, 0),
+                Color.fromRGBO(207, 189, 149, 0.4),
+              ],
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.only(top: top + 6),
+            child: Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  child: SizedBox(
+                    height: 44,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: GlassIconButton(
+                            size: 44,
+                            onTap: () {
+                              if (context.canPop()) context.pop();
+                            },
+                            child: const Icon(
+                              Icons.chevron_left_rounded,
+                              size: 28,
+                              color: _ink,
+                            ),
+                          ),
+                        ),
+                        AppText(
+                          text: 'Profile',
+                          style: AppTextStyles.bold(fontSize: 18, color: _ink),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(18.w, 0, 18.w, 18.h),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          _ProfileAvatar(profile: profile),
+                          SizedBox(width: 14.w),
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.only(bottom: 6.h),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  AppText(
+                                    text: name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTextStyles.bold(
+                                      fontSize: 22,
+                                      color: _ink,
+                                    ),
+                                  ),
+                                  if (username != null && username.isNotEmpty)
+                                    AppText(
+                                      text: '@$username',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppTextStyles.regular(
+                                        fontSize: 14,
+                                        color: _muted,
+                                      ),
+                                    ),
+                                  if (familyRole != null) ...[
+                                    SizedBox(height: 8.h),
+                                    _RoleChip(role: familyRole!),
+                                  ],
+                                  SizedBox(height: 10.h),
+                                  AppText(
+                                    text: '$friendsCount',
+                                    style: AppTextStyles.bold(
+                                      fontSize: 22,
+                                      height: 1.05,
+                                      color: _ink,
+                                    ),
+                                  ),
+                                  AppText(
+                                    text: 'Friends',
+                                    style: AppTextStyles.regular(
+                                      fontSize: 13,
+                                      color: _muted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: _ProfileAvatar(profile: profile),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _RoleChip extends StatelessWidget {
+  const _RoleChip({required this.role});
+
+  final String role;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFFDDF4F1),
+        borderRadius: BorderRadius.circular(20.r),
+      ),
+      child: AppText(
+        text: role,
+        style: AppTextStyles.semibold(fontSize: 12, color: AppColors.teal),
       ),
     );
   }
@@ -69,39 +198,37 @@ class _ProfileAvatar extends StatelessWidget {
     final resolvedUrl = resolveNullableNetworkImageUrl(profile.avatarUrl);
 
     return Container(
-      width: 120.w,
-      height: 120.w,
-      decoration: BoxDecoration(
+      width: 96.w,
+      height: 96.w,
+      padding: const EdgeInsets.all(3),
+      decoration: const BoxDecoration(
         shape: BoxShape.circle,
-        color: _fallbackColor,
-        border: Border.all(
-          color: AppColors.black.withValues(alpha: 0.35),
-          width: 1.2,
+        color: Colors.white,
+      ),
+      child: ClipOval(
+        child: ColoredBox(
+          color: _fallbackColor,
+          child: resolvedUrl != null
+              ? AppNetworkImage(
+                  imageUrl: resolvedUrl,
+                  tag: 'FriendDetails.avatar',
+                  width: 96.w,
+                  height: 96.w,
+                  fit: BoxFit.cover,
+                  placeholder: (_) => AppSkeletonizer(
+                    child: Container(
+                      width: 96.w,
+                      height: 96.w,
+                      color: AppColors.shimmerBaseColor,
+                    ),
+                  ),
+                  errorCompact: true,
+                  errorIconOnly: true,
+                  errorBuilder: (_, _, _) => _initialsLabel(),
+                )
+              : _initialsLabel(),
         ),
       ),
-      clipBehavior: Clip.antiAlias,
-      alignment: Alignment.center,
-      child: resolvedUrl != null
-          ? AppNetworkImage(
-              imageUrl: resolvedUrl,
-              tag: 'FriendDetails.avatar',
-              width: 120.w,
-              height: 120.w,
-              fit: BoxFit.cover,
-              placeholder: (_) => AppSkeletonizer(child: Container(
-                  width: 120.w,
-                  height: 120.w,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.shimmerBaseColor,
-                  ),
-                ),
-              ),
-              errorCompact: true,
-              errorIconOnly: true,
-              errorBuilder: (_, __, ___) => _initialsLabel(),
-            )
-          : _initialsLabel(),
     );
   }
 
@@ -109,10 +236,7 @@ class _ProfileAvatar extends StatelessWidget {
     return Center(
       child: AppText(
         text: profile.initials,
-        style: AppTextStyles.bold(
-          fontSize: 40.sp,
-          color: AppColors.white.withValues(alpha: 0.92),
-        ),
+        style: AppTextStyles.bold(fontSize: 32, color: Colors.white),
       ),
     );
   }
@@ -123,68 +247,85 @@ class FriendDetailsHeaderShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: friendDetailsHeaderBg,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(14.w, 10.w, 14.w, 0.w),
-        child: SafeArea(
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Positioned(
-                left: 0,
-                top: 0,
-                child: _CircleOutlineIconButton(
-                  onTap: () {
-                    if (context.canPop()) context.pop();
-                  },
-                  child: Icon(
-                    Icons.chevron_left_rounded,
-                    size: 25.sp,
-                    color: AppColors.black,
-                  ),
-                ),
-              ),
-              AppSkeletonizer(child: Container(
-                  width: 120.w,
-                  height: 120.w,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.shimmerBaseColor,
-                    border: Border.all(
-                      color: AppColors.black.withValues(alpha: 0.12),
-                      width: 1.2,
-                    ),
-                  ),
-                ),
-              ),
+    final top = MediaQuery.paddingOf(context).top;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.vertical(bottom: Radius.circular(30.r)),
+      child: Container(
+        height: 286.h,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color.fromRGBO(207, 189, 149, 0),
+              Color.fromRGBO(207, 189, 149, 0.4),
             ],
           ),
         ),
+        padding: EdgeInsets.fromLTRB(16.w, top + 6, 16.w, 18.h),
+        child: Column(
+          children: [
+            SizedBox(
+              height: 44,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: GlassIconButton(
+                  size: 44,
+                  onTap: () {
+                    if (context.canPop()) context.pop();
+                  },
+                  child: const Icon(
+                    Icons.chevron_left_rounded,
+                    size: 28,
+                    color: _ink,
+                  ),
+                ),
+              ),
+            ),
+            const Spacer(),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                AppSkeletonizer(
+                  child: Container(
+                    width: 96.w,
+                    height: 96.w,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 14.w),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _bar(width: 140.w, height: 18.h),
+                    SizedBox(height: 8.h),
+                    _bar(width: 90.w, height: 12.h),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
-}
 
-class _CircleOutlineIconButton extends StatelessWidget {
-  const _CircleOutlineIconButton({required this.onTap, required this.child});
-
-  final VoidCallback onTap;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: 40.w,
-          height: 40.w,
-          alignment: Alignment.center,
-          child: child,
+  Widget _bar({required double width, required double height}) {
+    return AppSkeletonizer(
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(6),
         ),
       ),
     );
   }
 }
+
+const Color friendDetailsHeaderBg = _profileTan;

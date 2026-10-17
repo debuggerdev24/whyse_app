@@ -1,12 +1,12 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:redstreakapp/core/enums/data_status.dart';
-import 'package:redstreakapp/core/extensions/color.extensions.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/utils/user_facing_message.dart';
 import 'package:redstreakapp/models/friend/friend_model.dart';
 import 'package:redstreakapp/providers/family/family_provider.dart';
 import 'package:redstreakapp/screens/profile/widgets/add_family_member_bottom_sheet.dart';
+import 'package:redstreakapp/screens/settings/widget/settings_chrome.dart';
 import 'package:redstreakapp/services/profile/friend_api_service.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 class AddFamilyMemberScreen extends StatefulWidget {
   const AddFamilyMemberScreen({super.key});
@@ -144,29 +144,11 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AppLayout(
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundColor,
-        surfaceTintColor: Colors.transparent,
-        title: const AppText(text: 'Add Family Member'),
-        leading: IconButton(
-          onPressed: () => context.pop(),
-          icon: const Icon(Icons.chevron_left_rounded),
-        ),
-      ),
-      body: Column(
-        children: [
-          Divider(color: AppColors.black.setOpacity(0.1), height: 1),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(24.w, 14.w, 24.w, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [Expanded(child: _buildBody())],
-              ),
-            ),
-          ),
-        ],
+    return SettingsScaffold(
+      title: 'Add Family Member',
+      body: Padding(
+        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+        child: _buildBody(),
       ),
     );
   }
@@ -191,11 +173,7 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
               parent: BouncingScrollPhysics(),
             ),
             itemCount: _friends.length + (_hasNextPage ? 1 : 0),
-            separatorBuilder: (_, _) => Divider(
-              height: 24.w,
-              thickness: 1,
-              color: AppColors.black.setOpacity(0.08),
-            ),
+            separatorBuilder: (_, _) => SizedBox(height: 10.h),
             itemBuilder: (context, index) {
               if (index == _friends.length) {
                 return Padding(
@@ -253,111 +231,100 @@ class _FriendSelectTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Logger.debug('friend.avatarUrl: ${friend.avatarUrl}');
+    final hasAvatar = friend.avatarUrl != null && friend.avatarUrl!.isNotEmpty;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(9999),
-            child: CircleAvatar(
-              radius: 24.r,
-              backgroundColor: _avatarColor,
-              child: Container(
-                width: 48.w,
-                height: 48.w,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: friend.avatarUrl == null || friend.avatarUrl!.isEmpty
-                      ? _avatarColor
-                      : AppColors.white,
-                ),
-                child: friend.avatarUrl == null || friend.avatarUrl!.isEmpty
-                    ? Center(
-                        child: AppText(
-                          text: friend.initials,
-                          style: AppTextStyles.bold(
-                            fontSize: 16.sp,
-                            color: AppColors.white,
-                          ),
-                        ),
-                      )
-                    : CachedNetworkImage(
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            ClipOval(
+              child: SizedBox(
+                width: 44,
+                height: 44,
+                child: hasAvatar
+                    ? CachedNetworkImage(
                         imageUrl: friend.avatarUrl!,
                         fit: BoxFit.cover,
-                        placeholder: (context, url) => AppSkeletonizer(child: Container(
-                            width: 48.w,
-                            height: 48.w,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
-                            ),
-                          ),
+                        placeholder: (_, _) => const ColoredBox(color: Colors.white),
+                        errorWidget: (_, _, _) => _Initials(
+                          initials: friend.initials,
+                          color: _avatarColor,
                         ),
-                        errorWidget: (_, _, _) => Container(
-                          width: 48.w,
-                          height: 48.w,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: _avatarColor,
-                          ),
-                          alignment: Alignment.center,
-                          child: AppText(
-                            text: friend.initials,
-                            style: AppTextStyles.bold(
-                              fontSize: 16.sp,
-                              color: AppColors.white,
-                            ),
-                          ),
-                        ),
-                      ),
+                      )
+                    : _Initials(initials: friend.initials, color: _avatarColor),
               ),
             ),
-          ),
-          16.w.horizontalSpace,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText(
-                  text: friend.displayName ?? friend.username ?? '',
-                  style: AppTextStyles.semibold(
-                    fontSize: 16.sp,
-                    color: AppColors.black,
-                  ),
-                ),
-                if (friend.username != null && friend.username!.isNotEmpty) ...[
-                  2.h.verticalSpace,
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   AppText(
-                    text: '@${friend.username}',
+                    text: friend.displayName ?? friend.username ?? '',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.medium(
-                      fontSize: 13.sp,
-                      color: AppColors.black.setOpacity(0.5),
+                    style: AppTextStyles.semibold(
+                      fontSize: 16,
+                      color: settingsInk,
                     ),
                   ),
+                  if (friend.username != null && friend.username!.isNotEmpty) ...[
+                    SizedBox(height: 2.h),
+                    AppText(
+                      text: '@${friend.username}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.regular(
+                        fontSize: 13,
+                        color: settingsMuted,
+                      ),
+                    ),
+                  ],
                 ],
-              ],
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
-            decoration: BoxDecoration(
-              color: AppColors.teal.setOpacity(0.1),
-              borderRadius: BorderRadius.circular(9999.r),
-              border: Border.all(color: AppColors.teal),
-            ),
-            child: AppText(
-              text: 'Add',
-              style: AppTextStyles.semibold(
-                fontSize: 13.sp,
-                color: AppColors.teal,
               ),
             ),
-          ),
-        ],
+            SizedBox(width: 10.w),
+            Container(
+              height: 34,
+              padding: EdgeInsets.symmetric(horizontal: 14.w),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: settingsInk,
+                borderRadius: BorderRadius.circular(17),
+              ),
+              child: AppText(
+                text: 'Add',
+                style: AppTextStyles.semibold(fontSize: 13, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Initials extends StatelessWidget {
+  const _Initials({required this.initials, required this.color});
+
+  final String initials;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: color,
+      child: Center(
+        child: AppText(
+          text: initials,
+          style: AppTextStyles.bold(fontSize: 14, color: Colors.white),
+        ),
       ),
     );
   }
@@ -370,7 +337,7 @@ class _LoadingList extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.separated(
       itemCount: 6,
-      separatorBuilder: (_, _) => SizedBox(height: 16.w),
+      separatorBuilder: (_, _) => SizedBox(height: 10.h),
       itemBuilder: (_, _) => const _ShimmerTile(),
     );
   }
@@ -381,42 +348,13 @@ class _ShimmerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppSkeletonizer(child: Row(
-        children: [
-          Container(
-            width: 48.w,
-            height: 48.w,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white,
-            ),
-          ),
-          16.w.horizontalSpace,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 120.w,
-                  height: 14.h,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4.r),
-                  ),
-                ),
-                8.h.verticalSpace,
-                Container(
-                  width: 80.w,
-                  height: 12.h,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4.r),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+    return AppSkeletonizer(
+      child: Container(
+        height: 64,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
       ),
     );
   }
@@ -433,29 +371,20 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.people_outline_rounded,
-              size: 48.sp,
-              color: AppColors.black.setOpacity(0.3),
-            ),
-            12.h.verticalSpace,
             AppText(
               text: 'No friends available to add',
               textAlign: TextAlign.center,
               style: AppTextStyles.semibold(
-                fontSize: 16.sp,
-                color: AppColors.black,
+                fontSize: 16,
+                color: settingsInk,
               ),
             ),
-            6.h.verticalSpace,
+            SizedBox(height: 6.h),
             AppText(
               text:
                   'All your friends are already in your family, or you have no friends yet.',
               textAlign: TextAlign.center,
-              style: AppTextStyles.medium(
-                fontSize: 14.sp,
-                color: AppColors.black.setOpacity(0.5),
-              ),
+              style: AppTextStyles.regular(fontSize: 14, color: settingsMuted),
             ),
           ],
         ),
@@ -478,35 +407,25 @@ class _ErrorState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline_rounded,
-              size: 48.sp,
-              color: AppColors.black.setOpacity(0.3),
-            ),
-            12.h.verticalSpace,
             AppText(
               text: message ?? 'Failed to load friends',
               textAlign: TextAlign.center,
-              style: AppTextStyles.medium(
-                fontSize: 14.sp,
-                color: AppColors.black.setOpacity(0.55),
-              ),
+              style: AppTextStyles.regular(fontSize: 14, color: settingsMuted),
             ),
-            16.h.verticalSpace,
+            SizedBox(height: 16.h),
             GestureDetector(
               onTap: onRetry,
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.h),
+                height: 44,
+                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(color: AppColors.teal.setOpacity(0.4)),
+                  color: settingsInk,
+                  borderRadius: BorderRadius.circular(22),
                 ),
                 child: AppText(
                   text: 'Retry',
-                  style: AppTextStyles.semibold(
-                    fontSize: 14.sp,
-                    color: AppColors.teal,
-                  ),
+                  style: AppTextStyles.semibold(fontSize: 15, color: Colors.white),
                 ),
               ),
             ),

@@ -77,7 +77,8 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AppLayout(
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F7),
       body: FutureBuilder<FriendDetailsData>(
         future: _detailsFuture,
         builder: (context, snapshot) {
@@ -110,15 +111,20 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              FriendDetailsHeader(profile: profile),
+              Consumer<FamilyProvider>(
+                builder: (context, familyProvider, _) {
+                  return FriendDetailsHeader(
+                    profile: profile,
+                    friendsCount: details.friendsPreview.totalCount,
+                    familyRole: _familyRole(familyProvider, profile.userId),
+                  );
+                },
+              ),
               Expanded(
-                child: ColoredBox(
-                  color: AppColors.white,
-                  child: SingleChildScrollView(
+                child: SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _profileDetailsBlock(details),
                         _relationshipActionsBlock(details, profile),
                         _friendsBlock(context, details),
                         _groupsBlock(context, details),
@@ -129,7 +135,6 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
                         SizedBox(height: 24.w),
                       ],
                     ),
-                  ),
                 ),
               ),
             ],
@@ -140,9 +145,7 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
   }
 
   Widget _buildShimmerBody() {
-    return ColoredBox(
-      color: AppColors.white,
-      child: SingleChildScrollView(
+    return SingleChildScrollView(
         physics: const NeverScrollableScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -156,7 +159,6 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
             SizedBox(height: 24.w),
           ],
         ),
-      ),
     );
   }
 
@@ -342,74 +344,6 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     );
   }
 
-  Widget _profileDetailsBlock(FriendDetailsData details) {
-    final profile = details.profile;
-    final displayName = profile.displayName ?? profile.username ?? '';
-    final username = profile.username;
-    final friendsCount = details.friendsPreview.totalCount;
-
-    return Consumer<FamilyProvider>(
-      builder: (context, familyProvider, _) {
-        final familyRole = _familyRole(familyProvider, profile.userId);
-
-        return Container(
-          padding: EdgeInsets.fromLTRB(27.w, 20.h, 27.w, 20.h),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AppText(
-                      text: displayName,
-                      style: AppTextStyles.bold(
-                        fontSize: 20,
-                        color: AppColors.black,
-                      ),
-                    ),
-                    if (username != null && username.isNotEmpty)
-                      AppText(
-                        text: '@$username',
-                        style: AppTextStyles.bold(
-                          fontSize: 14,
-                          color: AppColors.black.withValues(alpha: 0.6),
-                        ),
-                      ),
-                    if (familyRole != null) ...[
-                      10.h.verticalSpace,
-                      _FamilyRoleBadge(role: familyRole),
-                    ],
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AppText(
-                    text: '$friendsCount',
-                    style: AppTextStyles.bold(
-                      fontSize: 20,
-                      color: AppColors.black,
-                    ),
-                  ),
-                  AppText(
-                    text: 'Friends',
-                    style: AppTextStyles.bold(
-                      fontSize: 14,
-                      color: AppColors.black.withValues(alpha: 0.6),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   Widget _relationshipActionsBlock(
     FriendDetailsData details,
     FriendProfile profile,
@@ -433,7 +367,7 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
         }
 
         return Padding(
-          padding: EdgeInsets.fromLTRB(27.w, 4.h, 27.w, 12.h),
+          padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 4.h),
           child: actionButton,
         );
       },
@@ -448,14 +382,16 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
 
     return SizedBox(
       width: double.infinity,
+      height: 52,
       child: OutlinedButton(
         onPressed: isLoading ? null : () => _sendFriendRequest(profile),
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.black,
-          backgroundColor: AppColors.white,
-          side: BorderSide(color: AppColors.black.setOpacity(0.15)),
-          padding: EdgeInsets.symmetric(vertical: 14.h),
-          shape: const StadiumBorder(),
+          foregroundColor: const Color(0xFF1C1C1E),
+          backgroundColor: Colors.white,
+          side: const BorderSide(color: Color(0xFFE4E4E4)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
         ),
         child: isLoading
             ? SizedBox(
@@ -492,16 +428,18 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
   Widget _buildRequestSentButton() {
     return SizedBox(
       width: double.infinity,
+      height: 52,
       child: OutlinedButton(
         onPressed: null,
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.teal,
-          backgroundColor: AppColors.extealighttealcolor,
+          backgroundColor: const Color(0xFFDDF4F1),
           disabledForegroundColor: AppColors.teal,
-          disabledBackgroundColor: AppColors.extealighttealcolor,
-          side: BorderSide(color: AppColors.teal.setOpacity(0.25)),
-          padding: EdgeInsets.symmetric(vertical: 14.h),
-          shape: const StadiumBorder(),
+          disabledBackgroundColor: const Color(0xFFDDF4F1),
+          side: BorderSide.none,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
         ),
         child: AppText(
           text: 'Request Sent',
@@ -538,14 +476,16 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
   Widget _buildAddToFamilyButton(FriendProfile profile) {
     return SizedBox(
       width: double.infinity,
+      height: 52,
       child: ElevatedButton(
         onPressed: () => _showAddToFamilySheet(profile),
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          backgroundColor: AppColors.black,
-          foregroundColor: AppColors.white,
-          padding: EdgeInsets.symmetric(vertical: 14.h),
-          shape: const StadiumBorder(),
+          backgroundColor: const Color(0xFF1C1C1E),
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -703,7 +643,10 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
         children: [
           AppText(
             text: 'Overview',
-            style: AppTextStyles.bold(fontSize: 18, color: AppColors.black),
+            style: AppTextStyles.bold(
+              fontSize: 22,
+              color: const Color(0xFF1C1C1E),
+            ),
           ),
           16.w.verticalSpace,
           IntrinsicHeight(
@@ -783,28 +726,31 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
         children: [
           AppText(
             text: 'Interests',
-            style: AppTextStyles.bold(fontSize: 18, color: AppColors.black),
+            style: AppTextStyles.bold(
+              fontSize: 22,
+              color: const Color(0xFF1C1C1E),
+            ),
           ),
           16.w.verticalSpace,
           Wrap(
-            spacing: 8.r,
-            runSpacing: 12.r,
+            spacing: 8,
+            runSpacing: 8,
             children: interests
                 .map(
                   (interest) => Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 18.w,
-                      vertical: 10.h,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.extealighttealcolor,
-                      borderRadius: BorderRadius.circular(24.r),
+                      color: const Color(0xFFF2F2F4),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     child: AppText(
                       text: interest,
-                      style: AppTextStyles.bold(
+                      style: AppTextStyles.medium(
                         fontSize: 14,
-                        color: AppColors.teal,
+                        color: const Color(0xFF1C1C1E),
                       ),
                     ),
                   ),
@@ -886,6 +832,7 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
         children: [
           _sectionTitleRow(
             title: 'Series Followed',
+            viewAllColor: AppColors.teal,
             showViewAll: details.topicsPreview.totalCount > 0,
             onViewAll: () => context.pushNamed(
               AppRoutes.userProfileTopicsListScreen.name,
@@ -956,12 +903,16 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     required String title,
     required bool showViewAll,
     required VoidCallback onViewAll,
+    Color viewAllColor = const Color(0xFFF6A01A),
   }) {
     return Row(
       children: [
         AppText(
           text: title,
-          style: AppTextStyles.bold(fontSize: 18, color: AppColors.black),
+          style: AppTextStyles.bold(
+            fontSize: 22,
+            color: const Color(0xFF1C1C1E),
+          ),
         ),
         const Spacer(),
         if (showViewAll)
@@ -970,10 +921,7 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
             behavior: HitTestBehavior.opaque,
             child: AppText(
               text: 'View all',
-              style: AppTextStyles.semibold(
-                fontSize: 14,
-                color: AppColors.teal,
-              ),
+              style: AppTextStyles.semibold(fontSize: 14, color: viewAllColor),
             ),
           ),
       ],
@@ -981,18 +929,9 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
   }
 
   Widget _sectionContainer({required Widget child}) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border(
-          top: BorderSide(color: AppColors.black.setOpacity(0.08), width: 1),
-        ),
-      ),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
-        child: child,
-      ),
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 4.h),
+      child: child,
     );
   }
 
@@ -1002,119 +941,56 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     required String label,
   }) {
     return Container(
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 16.h),
       decoration: BoxDecoration(
-        color: AppColors.lightwhiteColor,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.black.setOpacity(0.08)),
+        color: const Color(0xFFF6F6F8),
+        borderRadius: BorderRadius.circular(18.r),
       ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.r, vertical: 14.r),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Align(alignment: Alignment.topLeft, child: leading),
-            10.w.horizontalSpace,
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  AppText(
-                    text: value,
-                    style: AppTextStyles.semiBold(
-                      fontSize: 16,
-                      color: AppColors.black,
-                    ).copyWith(height: 1.2),
-                  ),
-                  4.w.verticalSpace,
-                  AppText(
-                    text: label,
-                    style: AppTextStyles.semiBold(
-                      fontSize: 11,
-                      color: AppColors.black.setOpacity(0.48),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          leading,
+          SizedBox(height: 12.h),
+          AppText(
+            text: value,
+            style: AppTextStyles.bold(
+              fontSize: 22,
+              color: const Color(0xFF1C1C1E),
             ),
-          ],
-        ),
+          ),
+          SizedBox(height: 2.h),
+          AppText(
+            text: label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.regular(
+              fontSize: 13,
+              color: const Color(0xFF8E8E93),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildFriendsEmpty() {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 16.h),
-      child: Column(
-        children: [
-          Icon(
-            Icons.people_outline_rounded,
-            size: 36.w,
-            color: AppColors.black.setOpacity(0.2),
-          ),
-          8.h.verticalSpace,
-          AppText(
-            text: 'No friends yet',
-            style: AppTextStyles.semibold(
-              fontSize: 14,
-              color: AppColors.black.setOpacity(0.45),
-            ),
-          ),
-        ],
-      ),
+    return AppText(
+      text: 'No friends yet',
+      style: AppTextStyles.regular(fontSize: 14, color: const Color(0xFF8E8E93)),
     );
   }
 
   Widget _buildGroupsEmpty() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 16.h),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.groups_outlined,
-            size: 36.w,
-            color: AppColors.black.setOpacity(0.2),
-          ),
-          8.h.verticalSpace,
-          AppText(
-            text: 'No groups yet',
-            style: AppTextStyles.semibold(
-              fontSize: 14,
-              color: AppColors.black.setOpacity(0.45),
-            ),
-          ),
-        ],
-      ),
+    return AppText(
+      text: 'No groups yet',
+      style: AppTextStyles.regular(fontSize: 14, color: const Color(0xFF8E8E93)),
     );
   }
 
   Widget _buildTopicsEmpty() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 16.h),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.auto_stories_outlined,
-            size: 36.w,
-            color: AppColors.black.setOpacity(0.2),
-          ),
-          8.h.verticalSpace,
-          AppText(
-            text: 'No series yet',
-            style: AppTextStyles.semibold(
-              fontSize: 14,
-              color: AppColors.black.setOpacity(0.45),
-            ),
-          ),
-        ],
-      ),
+    return AppText(
+      text: 'No series yet',
+      style: AppTextStyles.regular(fontSize: 14, color: const Color(0xFF8E8E93)),
     );
   }
 }
@@ -1181,15 +1057,8 @@ class _ViewOnlySeriesCard extends StatelessWidget {
       height: 228.h,
       margin: EdgeInsets.only(right: 10.w),
       decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.setOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22.r),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -1232,39 +1101,6 @@ class _ViewOnlySeriesCard extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FamilyRoleBadge extends StatelessWidget {
-  const _FamilyRoleBadge({required this.role});
-
-  final String role;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-      decoration: BoxDecoration(
-        color: AppColors.extealighttealcolor,
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: AppColors.teal.setOpacity(0.2)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.family_restroom_rounded,
-            size: 16.sp,
-            color: AppColors.teal,
-          ),
-          6.w.horizontalSpace,
-          AppText(
-            text: role,
-            style: AppTextStyles.semibold(fontSize: 13, color: AppColors.teal),
           ),
         ],
       ),

@@ -50,17 +50,16 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         bottom: false,
         child: Column(
           children: [
-            ColoredBox(
-              color: AppColors.backgroundColor,
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 12.h),
-                child: const HomeHeader(),
-              ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 12.h),
+              child: const HomeHeader(),
             ),
             Expanded(
               child: NotificationListener<ScrollNotification>(
                 onNotification: (notification) {
-                  if (notification.metrics.axis != Axis.vertical) return false;
+                  if (notification.metrics.axis != Axis.vertical) {
+                    return false;
+                  }
                   if (notification.metrics.maxScrollExtent <= 0) return false;
                   if (notification.metrics.pixels <
                       notification.metrics.maxScrollExtent - 280) {

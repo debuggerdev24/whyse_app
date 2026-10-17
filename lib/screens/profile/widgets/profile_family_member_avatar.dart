@@ -56,17 +56,9 @@ class ProfileFamilyMemberAvatar extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: AppTextStyles.medium(fontSize: 12, color: AppColors.black),
-          ),
-          2.h.verticalSpace,
-          AppText(
-            text: familyMember.relationship,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.semibold(
-              fontSize: 11,
-              color: AppColors.teal,
+            style: AppTextStyles.medium(
+              fontSize: 12,
+              color: const Color(0xFF1C1C1E),
             ),
           ),
         ],

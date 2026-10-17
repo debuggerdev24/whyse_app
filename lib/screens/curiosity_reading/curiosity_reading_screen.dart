@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
@@ -9,6 +8,7 @@ import 'package:redstreakapp/providers/gamification/gamification_provider.dart';
 import 'package:redstreakapp/screens/curiosity_reading/widget/curiosity_reading_content.dart';
 import 'package:redstreakapp/screens/curiosity_reading/widget/curiosity_reading_screen_shimmer.dart';
 import 'package:redstreakapp/screens/curiosity_reading/widgets/spark_session_summary_sheet.dart';
+import 'package:redstreakapp/screens/dashboard.dart';
 
 class CuriosityReadingScreen extends StatefulWidget {
   const CuriosityReadingScreen({super.key});
@@ -97,10 +97,14 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
       final summary = gamification.consumeSparkSessionSummary();
       if (summary != null && !summary.isEmpty) {
         final rootContext = AppRouter.rootNavigatorKey.currentContext;
+        SparkSummaryAction? action;
         if (rootContext != null && rootContext.mounted) {
-          await showSparkSessionSummarySheet(rootContext, summary);
+          action = await showSparkSessionSummarySheet(rootContext, summary);
         }
         await gamification.fetchStreakScore(force: true);
+        final tab = action == SparkSummaryAction.home ? 0 : 1;
+        tabIndex.value = tab;
+        AppRouter.indexedStackNavigationShell?.goBranch(tab);
       }
 
       if (fromExplore) {
@@ -259,7 +263,7 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
                         children: [
                           Align(
                             alignment: Alignment.centerLeft,
-                            child: _GlassCircleButton(
+                            child: GlassIconButton(
                               onTap: onBackTap,
                               child: const Icon(
                                 Icons.chevron_left_rounded,
@@ -283,7 +287,7 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
                           ),
                           Align(
                             alignment: Alignment.centerRight,
-                            child: _GlassCircleButton(
+                            child: GlassIconButton(
                               onTap: onBookmarkTap,
                               child: SvgIcon(
                                 AppAssets.bookmark,
@@ -333,47 +337,3 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
   }
 }
 
-class _GlassCircleButton extends StatelessWidget {
-  const _GlassCircleButton({required this.onTap, required this.child});
-
-  final VoidCallback onTap;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: SizedBox(
-        width: 48,
-        height: 48,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            ClipOval(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-                child: const DecoratedBox(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Color(0x8CFFFFFF),
-                  ),
-                  child: SizedBox.expand(),
-                ),
-              ),
-            ),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.7),
-                ),
-              ),
-              child: const SizedBox.expand(),
-            ),
-            child,
-          ],
-        ),
-      ),
-    );
-  }
-}

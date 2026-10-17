@@ -5,6 +5,7 @@ import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/group/group_response_model.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
 import 'package:redstreakapp/screens/group/group_details_screen.dart';
+import 'package:redstreakapp/screens/profile/widgets/profile_section_actions.dart';
 
 class GroupBlock extends StatefulWidget {
   const GroupBlock({super.key});
@@ -40,7 +41,7 @@ class _GroupBlockState extends State<GroupBlock> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _Header(showViewAll: vm.isSuccess && vm.groups.isNotEmpty),
+                const _Header(),
                 16.w.verticalSpace,
                 _GroupList(vm: vm),
                 20.w.verticalSpace,
@@ -99,21 +100,28 @@ class _GroupList extends StatelessWidget {
       );
     }
     if (vm.groups.isEmpty) {
-      return const _EmptyState();
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: ProfileDashedAddButton(
+          onTap: () => context.pushNamed(AppRoutes.createGroupScreen.name),
+        ),
+      );
     }
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: vm.groups
-            .map(
-              (g) => Padding(
-                padding: EdgeInsets.only(right: 16.w),
-                child: GroupItem(groupResponse: g),
-              ),
-            )
-            .toList(),
+        children: [
+          for (final g in vm.groups)
+            Padding(
+              padding: EdgeInsets.only(right: 12.w),
+              child: GroupItem(groupResponse: g),
+            ),
+          ProfileDashedAddButton(
+            onTap: () => context.pushNamed(AppRoutes.createGroupScreen.name),
+          ),
+        ],
       ),
     );
   }
@@ -195,29 +203,32 @@ class GroupItem extends StatelessWidget {
 }
 
 class _Header extends StatelessWidget {
-  final bool showViewAll;
-
-  const _Header({required this.showViewAll});
+  const _Header();
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        AppText(text: 'Groups', style: AppTextStyles.bold(fontSize: 20)),
+        AppText(
+          text: 'Groups',
+          style: AppTextStyles.bold(
+            fontSize: 22,
+            color: const Color(0xFF1C1C1E),
+          ),
+        ),
         const Spacer(),
-        if (showViewAll)
-          GestureDetector(
-            onTap: () {
-              context.pushNamed(AppRoutes.groupListScreen.name);
-            },
-            child: AppText(
-              text: 'View all',
-              style: AppTextStyles.semibold(
-                fontSize: 15,
-                color: AppColors.teal,
-              ),
+        GestureDetector(
+          onTap: () {
+            context.pushNamed(AppRoutes.groupListScreen.name);
+          },
+          child: AppText(
+            text: 'View all',
+            style: AppTextStyles.semibold(
+              fontSize: 16,
+              color: profileViewAllColor,
             ),
           ),
+        ),
       ],
     );
   }
@@ -270,7 +281,8 @@ class _ImageShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppSkeletonizer(child: Container(
+    return AppSkeletonizer(
+      child: Container(
         width: 64,
         height: 64,
         decoration: const BoxDecoration(
@@ -287,7 +299,45 @@ class _TextShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppSkeletonizer(child: Container(width: 30, height: 10, color: Colors.white),
+    return AppSkeletonizer(
+      child: Container(width: 30, height: 10, color: Colors.white),
+    );
+  }
+}
+
+class _GroupPillButton extends StatelessWidget {
+  const _GroupPillButton({
+    required this.label,
+    required this.filled,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool filled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 52,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: filled ? const Color(0xFF1C1C1E) : Colors.white,
+          borderRadius: BorderRadius.circular(28),
+          border: filled
+              ? null
+              : Border.all(color: const Color(0xFFE4E4E4)),
+        ),
+        child: AppText(
+          text: label,
+          style: AppTextStyles.semibold(
+            fontSize: 16,
+            color: filled ? Colors.white : const Color(0xFF1C1C1E),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -300,46 +350,18 @@ class _ActionButtons extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: OutlinedButton(
-            onPressed: () {
-              context.pushNamed(AppRoutes.createGroupScreen.name);
-            },
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.black,
-              backgroundColor: AppColors.white,
-              side: BorderSide(color: AppColors.black.withValues(alpha: 0.15)),
-              padding: EdgeInsets.symmetric(vertical: 14.h),
-              shape: const StadiumBorder(),
-            ),
-            child: AppText(
-              text: 'Create Group',
-              style: AppTextStyles.semibold(
-                fontSize: 15,
-                color: AppColors.black,
-              ),
-            ),
+          child: _GroupPillButton(
+            label: 'Create Group',
+            filled: false,
+            onTap: () => context.pushNamed(AppRoutes.createGroupScreen.name),
           ),
         ),
-        16.w.horizontalSpace,
+        SizedBox(width: 12.w),
         Expanded(
-          child: ElevatedButton(
-            onPressed: () {
-              context.pushNamed(AppRoutes.joinGroupScreen.name);
-            },
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              backgroundColor: AppColors.black,
-              foregroundColor: AppColors.white,
-              padding: EdgeInsets.symmetric(vertical: 14.h),
-              shape: const StadiumBorder(),
-            ),
-            child: AppText(
-              text: 'Join Group',
-              style: AppTextStyles.semibold(
-                fontSize: 15,
-                color: AppColors.white,
-              ),
-            ),
+          child: _GroupPillButton(
+            label: 'Join Group',
+            filled: true,
+            onTap: () => context.pushNamed(AppRoutes.joinGroupScreen.name),
           ),
         ),
       ],
@@ -347,41 +369,3 @@ class _ActionButtons extends StatelessWidget {
   }
 }
 
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 16.h),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.groups_outlined,
-            size: 36.w,
-            color: AppColors.black.setOpacity(0.2),
-          ),
-          8.h.verticalSpace,
-          AppText(
-            text: 'No groups yet',
-            style: AppTextStyles.semibold(
-              fontSize: 14,
-              color: AppColors.black.setOpacity(0.45),
-            ),
-          ),
-          4.h.verticalSpace,
-          AppText(
-            text: 'Create or join a group to start reading together',
-            textAlign: TextAlign.center,
-            style: AppTextStyles.medium(
-              fontSize: 12,
-              color: AppColors.black.setOpacity(0.35),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

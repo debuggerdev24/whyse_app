@@ -1,11 +1,10 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
+import 'package:redstreakapp/core/widgets/glass_icon_button.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
@@ -140,7 +139,7 @@ class _GlassBottomBar extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              child: _LiquidGlass(
+              child: GlassSurface(
                 borderRadius: BorderRadius.circular(barHeight),
                 child: Row(
                   children: [
@@ -160,56 +159,6 @@ class _GlassBottomBar extends StatelessWidget {
             const SizedBox(width: 8),
             _NavProfileButton(size: barHeight),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _LiquidGlass extends StatelessWidget {
-  const _LiquidGlass({required this.borderRadius, required this.child});
-
-  final BorderRadius borderRadius;
-  final Widget child;
-
-  static final ImageFilter _blur = ImageFilter.compose(
-    outer: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
-    inner: const ColorFilter.matrix(<double>[
-      1.35, -0.15, -0.15, 0, 8,
-      -0.15, 1.35, -0.15, 0, 8,
-      -0.15, -0.15, 1.35, 0, 8,
-      0, 0, 0, 1, 0,
-    ]),
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: borderRadius,
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF6E6E73).withValues(alpha: 0.22),
-            blurRadius: 28,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: borderRadius,
-        child: BackdropFilter(
-          filter: _blur,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: borderRadius,
-              color: Colors.white.withValues(alpha: 0.28),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.55),
-                width: 1,
-              ),
-            ),
-            child: child,
-          ),
         ),
       ),
     );
@@ -285,24 +234,16 @@ class _NavProfileButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return GlassIconButton(
+      size: size,
       onTap: () => context.pushNamed(AppRoutes.profileScreen.name),
-      child: SizedBox(
-        width: size,
-        height: size,
-        child: _LiquidGlass(
-          borderRadius: BorderRadius.circular(size),
-          child: Center(
-            child: SvgPicture.asset(
-              AppAssets.profileIcon,
-              width: 26,
-              height: 26,
-              colorFilter: const ColorFilter.mode(
-                Color(0xFF1C1C1E),
-                BlendMode.srcIn,
-              ),
-            ),
-          ),
+      child: SvgPicture.asset(
+        AppAssets.profileIcon,
+        width: 22,
+        height: 22,
+        colorFilter: const ColorFilter.mode(
+          Color(0xFF1C1C1E),
+          BlendMode.srcIn,
         ),
       ),
     );

@@ -9,6 +9,7 @@ import 'package:redstreakapp/providers/friend/friend_provider.dart';
 import 'package:redstreakapp/models/family/family_member_model.dart';
 import 'package:redstreakapp/models/profile/profile_data_model.dart';
 import 'package:redstreakapp/screens/profile/widgets/profile_family_member_avatar.dart';
+import 'package:redstreakapp/providers/gamification/gamification_provider.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/saved_series_provider.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
@@ -16,6 +17,7 @@ import 'package:redstreakapp/screens/profile/friend_details_screen.dart';
 import 'package:redstreakapp/screens/profile/widgets/group_block.dart';
 import 'package:redstreakapp/screens/profile/widgets/profile_friend_avatar.dart';
 import 'package:redstreakapp/screens/profile/widgets/profile_header_section.dart';
+import 'package:redstreakapp/screens/profile/widgets/profile_section_actions.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -31,6 +33,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Future.microtask(() {
       context.read<FriendProvider>().getFriends();
       context.read<FamilyProvider>().getFamilyMembersPreview();
+      final gamification = context.read<GamificationProvider>();
+      if (gamification.globalLeaderboard?.yourRank == null &&
+          !gamification.isLoadingLeaderboard) {
+        gamification.fetchLeaderboard(scope: 'global');
+      }
     });
   }
 
@@ -48,7 +55,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _profileDetailsBlock(context),
                     _familyMembersBlock(context),
                     _friendsBlock(context),
                     GroupBlock(),
@@ -69,86 +75,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _profileDetailsBlock(BuildContext context) {
-    return Consumer<ProfileProvider>(
-      builder: (context, provider, _) {
-        if (provider.getProfileState == DataState.loading) {
-          return const _ProfileDetailsBlockShimmer();
-        }
-
-        if (provider.profileData == null ||
-            provider.getProfileState == DataState.failed) {
-          return Center(child: Text('Failed to load profile data'));
-        }
-
-        return Container(
-          padding: EdgeInsets.fromLTRB(27.w, 20.h, 27.w, 20.h),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AppText(
-                    text: provider.profileData!.displayName,
-                    style: AppTextStyles.bold(
-                      fontSize: 20,
-                      color: AppColors.black,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      AppText(
-                        text: '@${provider.profileData!.username}',
-                        style: AppTextStyles.bold(
-                          fontSize: 14,
-                          color: AppColors.black.withValues(alpha: 0.6),
-                        ),
-                      ),
-                      AppText(
-                        text: ' • Joined -',
-                        style: AppTextStyles.semibold(
-                          fontSize: 14,
-                          color: AppColors.black.withValues(alpha: 0.6),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              Consumer<FriendProvider>(
-                builder: (context, provider, _) {
-                  final count = provider.getFriendsState == DataState.success
-                      ? provider.friendsList.length
-                      : 0;
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AppText(
-                        text: '$count',
-                        style: AppTextStyles.bold(
-                          fontSize: 20,
-                          color: AppColors.black,
-                        ),
-                      ),
-                      AppText(
-                        text: 'Friends',
-                        style: AppTextStyles.bold(
-                          fontSize: 14,
-                          color: AppColors.black.withValues(alpha: 0.6),
-                        ),
-                      ),    
-                    ],
-                  );
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   Widget _familyMembersBlock(BuildContext context) {
     return Container(
       width: double.infinity,
@@ -166,10 +92,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Row(
               children: [
                 AppText(
-                  text: 'Family Members',
+                  text: 'Family',
                   style: AppTextStyles.bold(
-                    fontSize: 20,
-                    color: AppColors.black,
+                    fontSize: 22,
+                    color: const Color(0xFF1C1C1E),
                   ),
                 ),
                 const Spacer(),
@@ -179,8 +105,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: AppText(
                     text: 'View all',
                     style: AppTextStyles.semibold(
-                      fontSize: 15,
-                      color: AppColors.teal,
+                      fontSize: 16,
+                      color: profileViewAllColor,
                     ),
                   ),
                 ),
@@ -240,6 +166,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
           ],
+          12.w.horizontalSpace,
+          ProfileDashedAddButton(
+            onTap: () =>
+                context.pushNamed(AppRoutes.addFamilyMemberScreen.name),
+          ),
         ],
       ),
     );
@@ -331,70 +262,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildFamilyMembersEmpty() {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 16.h),
-      child: Column(
-        children: [
-          Icon(
-            Icons.family_restroom_outlined,
-            size: 36.w,
-            color: AppColors.black.setOpacity(0.2),
-          ),
-          8.h.verticalSpace,
-          AppText(
-            text: 'No family members yet',
-            style: AppTextStyles.semibold(
-              fontSize: 14,
-              color: AppColors.black.setOpacity(0.45),
-            ),
-          ),
-          4.h.verticalSpace,
-          AppText(
-            text: 'Add family from a friend\'s profile',
-            textAlign: TextAlign.center,
-            style: AppTextStyles.medium(
-              fontSize: 12,
-              color: AppColors.black.setOpacity(0.35),
-            ),
-          ),
-        ],
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: ProfileDashedAddButton(
+        onTap: () => context.pushNamed(AppRoutes.addFamilyMemberScreen.name),
       ),
     );
   }
 
   Widget _addFamilyMemberButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton(
-        onPressed: () =>
-            context.pushNamed(AppRoutes.addFamilyMemberScreen.name),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.black,
-          backgroundColor: AppColors.white,
-          side: BorderSide(color: AppColors.black.setOpacity(0.15)),
-          padding: EdgeInsets.symmetric(vertical: 14.h),
-          shape: const StadiumBorder(),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.family_restroom_outlined,
-              size: 22.sp,
-              color: AppColors.black,
-            ),
-            16.w.horizontalSpace,
-            AppText(
-              text: 'Add Family Member',
-              style: AppTextStyles.semibold(
-                fontSize: 16,
-                color: AppColors.black,
-              ),
-            ),
-          ],
-        ),
-      ),
+    return ProfileMintButton(
+      label: 'Add Family Members',
+      onTap: () => context.pushNamed(AppRoutes.addFamilyMemberScreen.name),
     );
   }
 
@@ -417,29 +296,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 AppText(
                   text: 'Friends',
                   style: AppTextStyles.bold(
-                    fontSize: 20,
-                    color: AppColors.black,
+                    fontSize: 22,
+                    color: const Color(0xFF1C1C1E),
                   ),
                 ),
                 const Spacer(),
-                Consumer<FriendProvider>(
-                  builder: (context, provider, _) {
-                    if (provider.getFriendsState == DataState.success &&
-                        provider.friendsList.isNotEmpty) {
-                      return GestureDetector(
-                        onTap: () =>
-                            context.pushNamed(AppRoutes.friendsListScreen.name),
-                        child: AppText(
-                          text: 'View all',
-                          style: AppTextStyles.semibold(
-                            fontSize: 15,
-                            color: AppColors.teal,
-                          ),
-                        ),
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
+                GestureDetector(
+                  onTap: () =>
+                      context.pushNamed(AppRoutes.friendsListScreen.name),
+                  child: AppText(
+                    text: 'View all',
+                    style: AppTextStyles.semibold(
+                      fontSize: 16,
+                      color: profileViewAllColor,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -490,6 +361,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: ProfileFriendAvatar(friend: friends[i].friend),
             ),
           ],
+          12.w.horizontalSpace,
+          ProfileDashedAddButton(
+            onTap: () => context.pushNamed(AppRoutes.addFriendsScreen.name),
+          ),
         ],
       ),
     );
@@ -581,68 +456,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildFriendsEmpty() {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 16.h),
-      child: Column(
-        children: [
-          Icon(
-            Icons.people_outline_rounded,
-            size: 36.w,
-            color: AppColors.black.setOpacity(0.2),
-          ),
-          8.h.verticalSpace,
-          AppText(
-            text: 'No friends yet',
-            style: AppTextStyles.semibold(
-              fontSize: 14,
-              color: AppColors.black.setOpacity(0.45),
-            ),
-          ),
-          4.h.verticalSpace,
-          AppText(
-            text: 'Add friends to start reading together',
-            style: AppTextStyles.medium(
-              fontSize: 12,
-              color: AppColors.black.setOpacity(0.35),
-            ),
-          ),
-        ],
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: ProfileDashedAddButton(
+        onTap: () => context.pushNamed(AppRoutes.addFriendsScreen.name),
       ),
     );
   }
 
   Widget _addFriendsButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton(
-        onPressed: () => context.pushNamed(AppRoutes.addFriendsScreen.name),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.black,
-          backgroundColor: AppColors.white,
-          side: BorderSide(color: AppColors.black.setOpacity(0.15)),
-          padding: EdgeInsets.symmetric(vertical: 14.h),
-          shape: const StadiumBorder(),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.person_add_alt_1_rounded,
-              size: 22.sp,
-              color: AppColors.black,
-            ),
-            16.w.horizontalSpace,
-            AppText(
-              text: 'Add Friends',
-              style: AppTextStyles.semibold(
-                fontSize: 16,
-                color: AppColors.black,
-              ),
-            ),
-          ],
-        ),
-      ),
+    return ProfileMintButton(
+      label: 'Add Friends',
+      onTap: () => context.pushNamed(AppRoutes.addFriendsScreen.name),
     );
   }
 
@@ -671,77 +496,71 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 AppText(
                   text: 'Overview',
                   style: AppTextStyles.bold(
-                    fontSize: 20,
-                    color: AppColors.black,
+                    fontSize: 22,
+                    color: const Color(0xFF1C1C1E),
                   ),
                 ),
-                16.w.verticalSpace,
-                IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: _profileStatCard(
-                          leading: SvgIcon(
-                            AppAssets.thunder,
-                            size: 28.w,
-                            color: AppColors.orangeColor,
-                          ),
-                          value: isLoading
-                              ? '--'
-                              : '${overview.streak.current}',
-                          label: 'Streak',
+                14.w.verticalSpace,
+                Row(
+                  children: [
+                    Expanded(
+                      child: _profileStatCard(
+                        leading: const Icon(
+                          Icons.local_fire_department_rounded,
+                          color: Color(0xFFF5A623),
+                          size: 26,
                         ),
+                        value: isLoading ? '--' : '${overview.streak.current}',
+                        label: 'Streaks',
                       ),
-                      16.w.horizontalSpace,
-                      Expanded(
-                        child: _profileStatCard(
-                          leading: SvgIcon(
-                            AppAssets.star,
-                            size: 28.w,
-                            color: AppColors.orangeColor,
-                          ),
-                          value: isLoading ? '--' : '${overview.score}',
-                          label: 'Points',
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: _profileStatCard(
+                        leading: const Icon(
+                          Icons.menu_book_rounded,
+                          color: Color(0xFF5B8DEF),
+                          size: 24,
                         ),
+                        value: isLoading
+                            ? '--'
+                            : '${overview.reading.completedCount}',
+                        label: 'Pages Read',
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                16.w.verticalSpace,
-                IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: _profileStatCard(
-                          leading: SvgIcon(
-                            AppAssets.document,
-                            size: 28.w,
-                            color: AppColors.black.setOpacity(0.55),
-                          ),
-                          value: isLoading
-                              ? '--'
-                              : '${overview.reading.completedCount}',
-                          label: 'Readings',
+                SizedBox(height: 12.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _profileStatCard(
+                        leading: const Icon(
+                          Icons.schedule_rounded,
+                          color: Color(0xFFB07CFF),
+                          size: 24,
                         ),
+                        value: isLoading
+                            ? '--'
+                            : '${_readingHours(overview.reading.totalDuration)}',
+                        label: 'Hours',
                       ),
-                      16.w.horizontalSpace,
-                      Expanded(
-                        child: _profileStatCard(
-                          leading: Icon(
-                            Icons.emoji_events_outlined,
-                            size: 28.sp,
-                            color: AppColors.teal,
-                          ),
-                          value: isLoading
-                              ? '--'
-                              : '${overview.achievementsUnlocked}',
-                          label: 'Achievements',
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: _profileStatCard(
+                        leading: _levelMark(
+                          provider.profileData?.country ?? '',
                         ),
+                        value: isLoading
+                            ? '--'
+                            : _levelLabel(
+                                provider.profileData?.preferredLanguage ?? '',
+                              ),
+                        label: 'Level',
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -770,14 +589,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AppText(
-                  text: 'Interests',
-                  style: AppTextStyles.bold(
-                    fontSize: 20,
-                    color: AppColors.black,
-                  ),
+                Row(
+                  children: [
+                    AppText(
+                      text: 'Interests',
+                      style: AppTextStyles.bold(
+                        fontSize: 22,
+                        color: const Color(0xFF1C1C1E),
+                      ),
+                    ),
+                    const Spacer(),
+                    GestureDetector(
+                      onTap: () => context.pushNamed(
+                        AppRoutes.editInterestsScreen.name,
+                      ),
+                      child: AppText(
+                        text: 'Edit',
+                        style: AppTextStyles.semibold(
+                          fontSize: 16,
+                          color: AppColors.teal,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                16.w.verticalSpace,
+                14.w.verticalSpace,
                 _buildInterestsContent(context, provider),
               ],
             ),
@@ -810,16 +646,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: interests
           .map(
             (interest) => Container(
-              padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
               decoration: BoxDecoration(
-                color: AppColors.extealighttealcolor,
-                borderRadius: BorderRadius.circular(24.r),
+                color: const Color(0xFFF2F2F4),
+                borderRadius: BorderRadius.circular(20.r),
               ),
               child: AppText(
                 text: interest,
-                style: AppTextStyles.semibold(
-                  fontSize: 13,
-                  color: AppColors.teal,
+                style: AppTextStyles.medium(
+                  fontSize: 14,
+                  color: const Color(0xFF1C1C1E),
                 ),
               ),
             ),
@@ -941,71 +777,92 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: Padding(
         padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AppText(
-              text: 'Subscription',
-              style: AppTextStyles.bold(fontSize: 20, color: AppColors.black),
-            ),
-            11.verticalSpace,
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.lightwhiteColor,
-                borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(
-                  color: AppColors.black.withValues(alpha: 0.08),
-                ),
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 22.h),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(right: 12.w),
-                      child: AppText(
-                        text: 'Free Plan (with ads)',
-                        style: AppTextStyles.bold(
-                          fontSize: 16,
-                          color: AppColors.black,
+        child: Container(
+          padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF7F7F8),
+            borderRadius: BorderRadius.circular(22.r),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF4E5),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.center,
+                    child: const Icon(
+                      Icons.workspace_premium_rounded,
+                      color: Color(0xFFF5A623),
+                      size: 26,
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: AppText(
+                                text: 'Free Plan (with ads)',
+                                style: AppTextStyles.bold(
+                                  fontSize: 16,
+                                  color: const Color(0xFF1C1C1E),
+                                ),
+                              ),
+                            ),
+                            AppText(
+                              text: '\$0/mo',
+                              style: AppTextStyles.bold(
+                                fontSize: 16,
+                                color: const Color(0xFF1C1C1E),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
+                        SizedBox(height: 4.h),
+                        AppText(
+                          text:
+                              'Unlock a better reading experience with premium.',
+                          style: AppTextStyles.regular(
+                            fontSize: 13,
+                            color: const Color(0xFF8E8E93),
+                          ),
+                        ),
+                      ],
                     ),
-                    AppText(
-                      text: '\$0/mo',
-                      style: AppTextStyles.bold(
-                        fontSize: 16,
-                        color: AppColors.black,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ),
-            16.verticalSpace,
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  backgroundColor: AppColors.black,
-                  foregroundColor: AppColors.white,
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
-                  shape: const StadiumBorder(),
-                ),
-                child: AppText(
-                  text: 'Upgrade',
-                  style: AppTextStyles.semibold(
-                    fontSize: 15,
-                    color: AppColors.white,
+              SizedBox(height: 16.h),
+              GestureDetector(
+                onTap: () {},
+                child: Container(
+                  height: 48,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1C1C1E),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: AppText(
+                    text: 'Upgrade',
+                    style: AppTextStyles.semibold(
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -1178,7 +1035,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         final list = provider.savedSeriesList;
         final isLoading = provider.isSavedSeriesLoading;
         final hasFailed = provider.savedSeriesFailed;
-        final hasItems = list != null && list.isNotEmpty;
 
         return Container(
           width: double.infinity,
@@ -1201,24 +1057,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     AppText(
                       text: 'My Series List',
                       style: AppTextStyles.bold(
-                        fontSize: 20,
-                        color: AppColors.black,
+                        fontSize: 22,
+                        color: const Color(0xFF1C1C1E),
                       ),
                     ),
                     const Spacer(),
-                    if (hasItems)
-                      GestureDetector(
-                        onTap: () => context.pushNamed(
-                          AppRoutes.mySavedSeriesScreen.name,
-                        ),
-                        child: AppText(
-                          text: 'See all',
-                          style: AppTextStyles.semibold(
-                            fontSize: 15,
-                            color: AppColors.teal,
-                          ),
+                    GestureDetector(
+                      onTap: () => context.pushNamed(
+                        AppRoutes.mySavedSeriesScreen.name,
+                      ),
+                      child: AppText(
+                        text: 'View all',
+                        style: AppTextStyles.semibold(
+                          fontSize: 16,
+                          color: AppColors.teal,
                         ),
                       ),
+                    ),
                   ],
                 ),
                 12.verticalSpace,
@@ -1351,6 +1206,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
+    final cardWidth =
+        (MediaQuery.sizeOf(context).width - 32.w - 12.w) / 2;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
@@ -1360,6 +1217,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           final item = list[index];
           return _SavedSeriesCard(
             item: item,
+            width: cardWidth,
             onTap: () {
               final topicId = item.topic.id;
               final homeProvider = context.read<HomeProvider>();
@@ -1382,186 +1240,203 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required String label,
   }) {
     return Container(
+      padding: EdgeInsets.fromLTRB(14.w, 14.h, 12.w, 14.h),
       decoration: BoxDecoration(
-        color: AppColors.lightwhiteColor,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.black.setOpacity(0.08)),
+        color: const Color(0xFFF6F6F8),
+        borderRadius: BorderRadius.circular(18.r),
       ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 36.w,
-              child: Center(child: leading),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          leading,
+          SizedBox(height: 10.h),
+          AppText(
+            text: value,
+            style: AppTextStyles.bold(
+              fontSize: 22,
+              color: const Color(0xFF1C1C1E),
             ),
-            10.w.horizontalSpace,
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  AppText(
-                    text: value,
-                    style: AppTextStyles.bold(
-                      fontSize: 18,
-                      color: AppColors.black,
-                    ),
-                  ),
-                  4.w.verticalSpace,
-                  AppText(
-                    text: label,
-                    style: AppTextStyles.medium(
-                      fontSize: 11,
-                      color: AppColors.black.setOpacity(0.48),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
+          ),
+          AppText(
+            text: label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.regular(
+              fontSize: 13,
+              color: const Color(0xFF8E8E93),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
+int _readingHours(ProfileReadingDuration duration) {
+  final unit = duration.unit.toLowerCase();
+  if (unit.startsWith('hour')) return duration.value;
+  if (unit.startsWith('minute')) return duration.value ~/ 60;
+  return duration.value;
+}
+
+String _levelLabel(String language) {
+  final value = language.trim();
+  return value.isEmpty ? '—' : value;
+}
+
+Widget _levelMark(String country) {
+  final normalized = country.trim().toLowerCase();
+  if (normalized == 'us' || normalized.contains('united states')) {
+    return const Text('🇺🇸', style: TextStyle(fontSize: 22));
+  }
+  return const Icon(
+    Icons.flag_rounded,
+    color: Color(0xFFE24B4B),
+    size: 24,
+  );
+}
+
 class _SavedSeriesCard extends StatelessWidget {
-  const _SavedSeriesCard({required this.item, this.onTap});
+  const _SavedSeriesCard({required this.item, required this.width, this.onTap});
 
   final SavedSeriesItem item;
+  final double width;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final topic = item.topic;
-    final subtitleColor = AppColors.black.setOpacity(0.45);
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 210.w,
-        margin: EdgeInsets.only(right: 10.w),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.black.setOpacity(0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+        width: width,
+        height: 240,
+        margin: EdgeInsets.only(right: 12.w),
         clipBehavior: Clip.antiAlias,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        decoration: BoxDecoration(
+          color: const Color(0xFF1C1C1E),
+          borderRadius: BorderRadius.circular(22.r),
+        ),
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(16.r),
-                  ),
-                  child: SizedBox(
-                    height: 132.w,
-                    width: double.infinity,
-                    child: AppNetworkImage(
-                      imageUrl: topic.thumbnailUrl,
-                      tag: 'Profile.savedTopic',
-                      placeholder: (_) => _storyImageShimmer(),
-                      errorCompact: true,
-                      errorIconOnly: true,
-                    ),
-                  ),
+            AppNetworkImage(
+              imageUrl: topic.thumbnailUrl,
+              tag: 'Profile.savedTopic',
+              placeholder: (_) => _storyImageShimmer(),
+              errorCompact: true,
+              errorIconOnly: true,
+            ),
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0x00000000), Color(0xCC000000)],
+                  stops: [0.35, 1],
                 ),
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: Builder(
-                    builder: (context) {
-                      final ssp = context.watch<SavedSeriesProvider>();
-                      final isToggling = ssp.isTopicListToggling(topic.id);
-                      return GestureDetector(
-                        onTap: isToggling
-                            ? null
-                            : () async {
-                                final result = await ssp.toggleTopic(
-                                  topicId: topic.id,
-                                  onFailed: (err) {
-                                    if (context.mounted) {
-                                      AppToast.error(context, err);
-                                    }
-                                  },
-                                );
-                                if (result != null && context.mounted) {
-                                  AppToast.success(
-                                    context,
-                                    result.isInMyList
-                                        ? 'Added to your list'
-                                        : 'Removed from your list',
-                                  );
+              ),
+            ),
+            Positioned(
+              top: 10,
+              right: 10,
+              child: Builder(
+                builder: (context) {
+                  final ssp = context.watch<SavedSeriesProvider>();
+                  final isToggling = ssp.isTopicListToggling(topic.id);
+                  return GestureDetector(
+                    onTap: isToggling
+                        ? null
+                        : () async {
+                            final result = await ssp.toggleTopic(
+                              topicId: topic.id,
+                              onFailed: (err) {
+                                if (context.mounted) {
+                                  AppToast.error(context, err);
                                 }
                               },
-                        child: Container(
-                          width: 32.h,
-                          height: 32.h,
-                          margin: EdgeInsets.only(top: 10.w, right: 10.w),
-                          decoration: const BoxDecoration(
-                            color: AppColors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          alignment: Alignment.center,
-                          child: isToggling
-                              ? SizedBox(
-                                  width: 16.w,
-                                  height: 16.w,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: AppColors.teal,
-                                  ),
-                                )
-                              : Icon(
-                                  Icons.bookmark_rounded,
-                                  size: 20.sp,
-                                  color: AppColors.teal,
-                                ),
-                        ),
-                      );
-                    },
+                            );
+                            if (result != null && context.mounted) {
+                              AppToast.success(
+                                context,
+                                result.isInMyList
+                                    ? 'Added to your list'
+                                    : 'Removed from your list',
+                              );
+                            }
+                          },
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      alignment: Alignment.center,
+                      child: isToggling
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.teal,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.bookmark_rounded,
+                              size: 18,
+                              color: Color(0xFF1C1C1E),
+                            ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            Positioned(
+              left: 12,
+              right: 12,
+              bottom: 12,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText(
+                    text: topic.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.bold(fontSize: 18, color: Colors.white),
                   ),
-                ),
-              ],
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(14.w, 13.w, 14.w, 2.w),
-              child: AppText(
-                text: topic.title,
-                style: AppTextStyles.bold(fontSize: 16.sp),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+                  const SizedBox(height: 2),
+                  AppText(
+                    text: '0 out of ${topic.storiesCount} Reading',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.regular(
+                      fontSize: 12,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  GestureDetector(
+                    onTap: onTap,
+                    child: Container(
+                      height: 36,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColors.teal,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: AppText(
+                        text: 'Start Reading',
+                        style: AppTextStyles.semibold(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 14.w),
-              child: AppText(
-                text: '${topic.storiesCount} Readings',
-                style: AppTextStyles.medium(
-                  fontSize: 12.sp,
-                  color: subtitleColor,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            AppButton(
-              margin: EdgeInsets.fromLTRB(14.w, 12.w, 14.w, 16.w),
-              onTap: () => onTap?.call(),
-              text: "Start Reading",
             ),
           ],
         ),
@@ -1580,56 +1455,3 @@ Widget _storyImageShimmer() {
   );
 }
 
-class _ProfileDetailsBlockShimmer extends StatelessWidget {
-  const _ProfileDetailsBlockShimmer();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(27, 20, 27, 20),
-      child: AppSkeletonizer(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            /// LEFT SIDE (Name + Username)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _box(width: 140, height: 20),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    _box(width: 100, height: 14),
-                    const SizedBox(width: 6),
-                    _box(width: 90, height: 14),
-                  ],
-                ),
-              ],
-            ),
-
-            /// RIGHT SIDE (Friends count)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _box(width: 40, height: 20),
-                const SizedBox(height: 6),
-                _box(width: 60, height: 14),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _box({required double width, required double height}) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(6),
-      ),
-    );
-  }
-}

@@ -9,6 +9,7 @@ import 'package:redstreakapp/models/friend/friend_model.dart';
 import 'package:redstreakapp/providers/friend/friend_provider.dart';
 import 'package:redstreakapp/screens/profile/friend_details_screen.dart';
 import 'package:redstreakapp/screens/profile/friends_list_screen_params.dart';
+import 'package:redstreakapp/screens/settings/widget/settings_chrome.dart';
 import 'package:redstreakapp/services/profile/friend_api_service.dart';
 
 class FriendsListScreen extends StatefulWidget {
@@ -132,26 +133,11 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AppLayout(
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundColor,
-        surfaceTintColor: Colors.transparent,
-        title: AppText(text: widget.params?.title ?? 'Friends'),
-        leading: IconButton(
-          onPressed: () => context.pop(),
-          icon: const Icon(Icons.chevron_left_rounded),
-        ),
-      ),
-      body: Column(
-        children: [
-          Divider(color: AppColors.black.setOpacity(0.1), height: 1),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(24.w, 14.w, 24.w, 0),
-              child: _buildBody(),
-            ),
-          ),
-        ],
+    return SettingsScaffold(
+      title: widget.params?.title ?? 'Friends',
+      body: Padding(
+        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+        child: _buildBody(),
       ),
     );
   }
@@ -182,11 +168,7 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
               parent: BouncingScrollPhysics(),
             ),
             itemCount: itemCount,
-            separatorBuilder: (_, __) => Divider(
-              height: 24.w,
-              thickness: 1,
-              color: AppColors.black.setOpacity(0.08),
-            ),
+            separatorBuilder: (_, _) => SizedBox(height: 10.h),
             itemBuilder: (context, index) {
               if (index == vm.friends.length) {
                 return Padding(
@@ -240,11 +222,7 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
           parent: BouncingScrollPhysics(),
         ),
         itemCount: itemCount,
-        separatorBuilder: (_, __) => Divider(
-          height: 24.w,
-          thickness: 1,
-          color: AppColors.black.setOpacity(0.08),
-        ),
+        separatorBuilder: (_, _) => SizedBox(height: 10.h),
         itemBuilder: (context, index) {
           if (index == _userFriends.length) {
             return Padding(
@@ -281,11 +259,7 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
         controller: _scrollController,
         physics: const BouncingScrollPhysics(),
         itemCount: previews.length,
-        separatorBuilder: (_, __) => Divider(
-          height: 24.w,
-          thickness: 1,
-          color: AppColors.black.setOpacity(0.08),
-        ),
+        separatorBuilder: (_, _) => SizedBox(height: 10.h),
         itemBuilder: (context, index) {
           final preview = previews[index];
           return _PreviewFriendTile(
@@ -303,11 +277,7 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
       controller: _scrollController,
       physics: const BouncingScrollPhysics(),
       itemCount: friends.length,
-      separatorBuilder: (_, __) => Divider(
-        height: 24.w,
-        thickness: 1,
-        color: AppColors.black.setOpacity(0.08),
-      ),
+      separatorBuilder: (_, _) => SizedBox(height: 10.h),
       itemBuilder: (context, index) {
         final friendUser = friends[index];
         return _FriendTile(
@@ -378,7 +348,13 @@ class _UserProfileFriendTile extends StatelessWidget {
         extra: FriendDetailsScreenParams(friendId: friend.id),
       ),
       behavior: HitTestBehavior.opaque,
-      child: Row(
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
         children: [
           Container(
             width: 48.w,
@@ -429,6 +405,7 @@ class _UserProfileFriendTile extends StatelessWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }
@@ -473,7 +450,13 @@ class _PreviewFriendTile extends StatelessWidget {
         extra: FriendDetailsScreenParams(friendId: friend.id),
       ),
       behavior: HitTestBehavior.opaque,
-      child: Row(
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
         children: [
           CircleAvatar(
             radius: 24.r,
@@ -512,6 +495,7 @@ class _PreviewFriendTile extends StatelessWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }
@@ -686,7 +670,13 @@ class _FriendTileState extends State<_FriendTile> {
   Widget build(BuildContext context) {
     return Opacity(
       opacity: _isRemoving ? 0.5 : 1.0,
-      child: Row(
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
         children: [
           GestureDetector(
             onTap: _isRemoving ? null : _openFriendDetails,
@@ -743,11 +733,8 @@ class _FriendTileState extends State<_FriendTile> {
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.w),
                 decoration: BoxDecoration(
-                  color: Colors.red.setOpacity(0.08),
-                  borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(
-                    color: Colors.red.setOpacity(0.2),
-                  ),
+                  color: const Color(0xFFFFE8E6),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: _isRemoving
                     ? SizedBox(
@@ -768,6 +755,7 @@ class _FriendTileState extends State<_FriendTile> {
               ),
             ),
         ],
+        ),
       ),
     );
   }

@@ -17,105 +17,80 @@ class StreakFreezeWidget extends StatelessWidget {
     final totalPoints = data.scores.totalScore;
     final canAfford = totalPoints >= cost;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        AppText(
-          text: 'Streak Freeze',
-          style: AppTextStyles.semiBold(fontSize: 18.sp, color: AppColors.black),
-        ),
-        14.h.verticalSpace,
-        Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(16.w),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(18.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 14,
-                offset: const Offset(0, 4),
-              ),
-            ],
+    final title = freezes == 1
+        ? '1 Streak Freeze'
+        : '$freezes Streak Freeze${freezes == 0 ? '' : 's'}';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0F000000),
+            blurRadius: 16,
+            offset: Offset(0, 6),
           ),
-          child: Column(
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 52.w,
-                    height: 52.w,
-                    decoration: BoxDecoration(
-                      color: AppColors.streakFreezeBlueLight,
-                      shape: BoxShape.circle,
+              const SvgIcon(AppAssets.snow, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AppText(
+                      text: title,
+                      style: AppTextStyles.semibold(
+                        fontSize: 16,
+                        color: const Color(0xFF1A1A1A),
+                      ),
                     ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.ac_unit_rounded,
-                      size: 26.w,
-                      color: AppColors.streakFreezeBlue,
+                    const SizedBox(height: 4),
+                    AppText(
+                      text:
+                          'Miss a day without losing your streak. A freeze is used automatically when you skip a day',
+                      style: AppTextStyles.regular(
+                        fontSize: 13,
+                        color: const Color(0xFF8E8E93),
+                      ).copyWith(height: 1.35),
                     ),
-                  ),
-                  14.w.horizontalSpace,
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AppText(
-                          text: freezes == 1
-                              ? '1 Streak Freeze'
-                              : '$freezes Streak Freezes',
-                          style: AppTextStyles.bold(
-                            fontSize: 16.sp,
-                            color: AppColors.black,
-                          ),
-                        ),
-                        6.h.verticalSpace,
-                        AppText(
-                          text:
-                              'Miss a day without losing your streak. A freeze is used automatically when you skip a day.',
-                          style: AppTextStyles.medium(
-                            fontSize: 12.sp,
-                            color: AppColors.black.withValues(alpha: 0.5),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              16.h.verticalSpace,
-              Consumer<GamificationProvider>(
-                builder: (context, gp, _) {
-                  return AppFilledButton(
-                    text: 'Buy Streak Freeze · $cost pts',
-                    backgroundColor:
-                        canAfford ? AppColors.teal : AppColors.black.withValues(alpha: 0.2),
-                    fixedSize: Size(double.infinity, 44.h),
-                    isLoading: gp.isBuyingFreeze,
-                    onTap: !canAfford || gp.isBuyingFreeze
-                        ? null
-                        : () => _confirmAndBuy(context, gp, cost),
-                  );
-                },
-              ),
-              if (!canAfford) ...[
-                8.h.verticalSpace,
-                AppText(
-                  text: 'You need $cost Sparks Points to buy a freeze.',
-                  style: AppTextStyles.medium(
-                    fontSize: 12.sp,
-                    color: AppColors.orangeColor,
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ],
           ),
-        ),
-      ],
+          const SizedBox(height: 14),
+          Consumer<GamificationProvider>(
+            builder: (context, gp, _) {
+              return AppFilledButton(
+                text: 'Buy Streak Freeze - ${cost}pts',
+                backgroundColor: canAfford
+                    ? AppColors.teal
+                    : const Color(0xFFE5E5EA),
+                textStyle: AppTextStyles.semibold(
+                  fontSize: 14,
+                  color: canAfford ? Colors.white : const Color(0xFF8E8E93),
+                ).copyWith(height: 17 / 14),
+                fixedSize: Size(MediaQuery.sizeOf(context).width - 64, 48),
+                isLoading: gp.isBuyingFreeze,
+                loadingColor: Colors.white,
+                onTap: !canAfford || gp.isBuyingFreeze
+                    ? null
+                    : () => _confirmAndBuy(context, gp, cost),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 

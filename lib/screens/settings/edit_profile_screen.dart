@@ -5,11 +5,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:redstreakapp/core/enums/data_status.dart';
 import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
+import 'package:redstreakapp/core/widgets/app_dropdown.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/core/widgets/user_avatar_image.dart';
 import 'package:redstreakapp/core/widgets/loading_dialog.dart';
+import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/providers/profile/edit_profile_provider.dart';
+import 'package:redstreakapp/screens/settings/widget/settings_chrome.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
 import 'package:redstreakapp/services/profile/profile_service.dart';
 
@@ -75,6 +78,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   late String _initialEmail;
   late String _initialPhone;
+  late String _initialFirstName;
+  late String _initialLastName;
+  late String _initialUsername;
+  late String _initialCountry;
+  late String _initialLanguage;
+  late String _initialSocialX;
+  late String _initialSocialInstagram;
+  late String _initialSocialGoogle;
   String? _sessionVerifiedEmail;
   String? _sessionVerifiedPhone;
 
@@ -107,6 +118,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _phoneController.text = profileData.phone;
     _initialEmail = profileData.email.trim();
     _initialPhone = _normalizePhoneForE164(profileData.phone);
+    _initialFirstName = profileData.firstName.trim();
+    _initialLastName = profileData.lastName.trim();
+    _initialUsername = profileData.username.trim();
+    final edit = context.read<EditProfileProvider>();
+    _initialCountry = edit.countryDropdownValue();
+    _initialLanguage = edit.languageDropdownValue();
+    _initialSocialX = edit.socialX;
+    _initialSocialInstagram = edit.socialInstagram;
+    _initialSocialGoogle = edit.socialGoogle;
     _emailController.addListener(_onContactFieldChanged);
     _phoneController.addListener(_onContactFieldChanged);
   }
@@ -158,6 +178,45 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       _sessionVerifiedPhone != null &&
       _phonesMatch(_phoneController.text, _sessionVerifiedPhone!);
 
+  bool _profileIsDirty(EditProfileProvider edit) {
+    return _firstNameController.text.trim() != _initialFirstName ||
+        _lastNameController.text.trim() != _initialLastName ||
+        _usernameController.text.trim() != _initialUsername ||
+        !_emailsMatch(_emailController.text, _initialEmail) ||
+        !_phonesMatch(_phoneController.text, _initialPhone) ||
+        edit.countryDropdownValue() != _initialCountry ||
+        edit.languageDropdownValue() != _initialLanguage ||
+        edit.socialX != _initialSocialX ||
+        edit.socialInstagram != _initialSocialInstagram ||
+        edit.socialGoogle != _initialSocialGoogle ||
+        edit.pendingAvatarFile != null;
+  }
+
+  Future<void> _onBack() async {
+    final edit = context.read<EditProfileProvider>();
+    if (!_profileIsDirty(edit)) {
+      if (mounted) context.pop();
+      return;
+    }
+    final valid = _formKey.currentState?.validate() ?? false;
+    final emailOk = _emailUnchangedFromInitial || _emailVerifiedForCurrent;
+    final phoneOk = _phoneUnchangedFromInitial || _phoneVerifiedForCurrent;
+    if (!valid || !emailOk || !phoneOk) {
+      if (mounted) context.pop();
+      return;
+    }
+    await _onUpdateProfile();
+  }
+
+  Future<void> _onSignOut() async {
+    context.read<AuthProvider>().logOutUser(
+      onSuccess: () {
+        if (!mounted) return;
+        context.goNamed(AppRoutes.loginScreen.name);
+      },
+    );
+  }
+
   Widget _buildEmailVerificationFooter() {
     if (_emailUnchangedFromInitial) return const SizedBox.shrink();
     if (_emailVerifiedForCurrent) {
@@ -188,46 +247,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
           child: AppText(
             text: 'Verify email',
-            style: AppTextStyles.semibold(
-              fontSize: 14.sp,
-              color: AppColors.teal,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPhoneVerificationFooter() {
-    if (_phoneUnchangedFromInitial) return const SizedBox.shrink();
-    if (_phoneVerifiedForCurrent) {
-      return Padding(
-        padding: EdgeInsets.only(top: 6.h),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: AppText(
-            text: 'Verified',
-            style: AppTextStyles.semibold(
-              fontSize: 13.sp,
-              color: AppColors.teal,
-            ),
-          ),
-        ),
-      );
-    }
-    return Padding(
-      padding: EdgeInsets.only(top: 6.h),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: TextButton(
-          onPressed: _onVerifyPhone,
-          style: TextButton.styleFrom(
-            minimumSize: Size.zero,
-            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          child: AppText(
-            text: 'Verify phone number',
             style: AppTextStyles.semibold(
               fontSize: 14.sp,
               color: AppColors.teal,
@@ -606,41 +625,53 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final top = MediaQuery.paddingOf(context).top;
+    final bottom = MediaQuery.paddingOf(context).bottom;
+    const fieldBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(14)),
+      borderSide: BorderSide.none,
+    );
+
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundColor,
-        surfaceTintColor: Colors.transparent,
-        leading: Align(
-          alignment: Alignment.centerLeft,
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () => context.pop(),
-            child: Container(
-              padding: const EdgeInsets.only(left: 18, right: 18),
-              child: SvgIcon(AppAssets.backButton, size: 13.sp),
-            ),
-          ),
-        ),
-        centerTitle: true,
-        title: AppText(
-          text: 'Edit Profile',
-          style: AppTextStyles.semibold(fontSize: 20),
-        ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(1.h),
-          child: Container(
-            color: AppColors.black.withValues(alpha: 0.1),
-            height: 1,
-          ),
-        ),
-      ),
-      body: SafeArea(
-        child: Consumer<EditProfileProvider>(
-          builder: (context, provider, child) {
+      backgroundColor: settingsPageColor,
+      body: Consumer2<EditProfileProvider, AuthProvider>(
+          builder: (context, provider, auth, child) {
             return Form(
               key: _formKey,
               child: Column(
                 children: [
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(16, top + 6, 16, 4),
+                    child: SizedBox(
+                      height: 44,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: GlassIconButton(
+                              size: 44,
+                              onTap: () {
+                                _onBack();
+                              },
+                              child: const Icon(
+                                Icons.chevron_left_rounded,
+                                size: 28,
+                                color: Color(0xFF1C1C1E),
+                              ),
+                            ),
+                          ),
+                          AppText(
+                            text: 'Edit Profile',
+                            style: AppTextStyles.bold(
+                              fontSize: 18,
+                              color: const Color(0xFF1C1C1E),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   Expanded(
                     child: SingleChildScrollView(
                       physics: const BouncingScrollPhysics(),
@@ -660,10 +691,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: AppColors.teal.withValues(
-                                          alpha: 0.7,
-                                        ),
-                                        width: 1.3,
+                                        color: AppColors.teal,
+                                        width: 2,
                                       ),
                                     ),
                                     child: ClipOval(
@@ -695,8 +724,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             label: 'First Name',
                             child: AppTextField(
                               controller: _firstNameController,
-                              hintText: 'Enter your first name',
+                              hintText: 'First name',
                               validator: _validateFirstName,
+                              border: fieldBorder,
                             ),
                           ),
                           14.verticalSpace,
@@ -704,8 +734,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             label: 'Last Name',
                             child: AppTextField(
                               controller: _lastNameController,
-                              hintText: 'Enter your last name',
+                              hintText: 'Last name',
                               validator: _validateLastName,
+                              border: fieldBorder,
                             ),
                           ),
                           14.verticalSpace,
@@ -713,8 +744,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             label: 'Username',
                             child: AppTextField(
                               controller: _usernameController,
-                              hintText: 'Enter your username',
+                              hintText: 'username',
+                              prefixText: '@',
                               validator: _validateUsername,
+                              border: fieldBorder,
                             ),
                           ),
                           14.verticalSpace,
@@ -728,6 +761,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                   hintText: 'Email',
                                   keyboardType: TextInputType.emailAddress,
                                   validator: _validateEmail,
+                                  border: fieldBorder,
                                 ),
                                 _buildEmailVerificationFooter(),
                               ],
@@ -736,24 +770,61 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           14.verticalSpace,
                           _FieldBlock(
                             label: 'Phone',
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                            child: Row(
                               children: [
-                                AppTextField(
-                                  controller: _phoneController,
-                                  hintText:
-                                      'Country code and number (spaces ok)',
-                                  keyboardType: TextInputType.phone,
-                                  validator: _validatePhoneField,
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _phoneController,
+                                    keyboardType: TextInputType.phone,
+                                    validator: _validatePhoneField,
+                                    cursorColor: const Color(0xFF1C1C1E),
+                                    style: AppTextStyles.regular(
+                                      fontSize: 16,
+                                      color: const Color(0xFF1C1C1E),
+                                    ),
+                                    decoration: const InputDecoration(
+                                      hintText: 'Phone',
+                                      border: InputBorder.none,
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 16,
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                                _buildPhoneVerificationFooter(),
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 14),
+                                  child: GestureDetector(
+                                    onTap:
+                                        (_phoneUnchangedFromInitial &&
+                                                provider.phoneVerified) ||
+                                            _phoneVerifiedForCurrent
+                                        ? null
+                                        : _onVerifyPhone,
+                                    child: AppText(
+                                      text:
+                                          (_phoneUnchangedFromInitial &&
+                                                  provider.phoneVerified) ||
+                                              _phoneVerifiedForCurrent
+                                          ? 'Verified'
+                                          : 'Verify',
+                                      style: AppTextStyles.semibold(
+                                        fontSize: 15,
+                                        color: AppColors.teal,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
                           16.verticalSpace,
                           AppText(
-                            text: 'Social accounts',
-                            style: AppTextStyles.bold(fontSize: 16),
+                            text: 'Social Accounts',
+                            style: AppTextStyles.bold(
+                              fontSize: 16,
+                              color: const Color(0xFF1C1C1E),
+                            ),
                           ),
                           10.verticalSpace,
                           _SocialAccountRow(
@@ -776,50 +847,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             leading: SvgIcon(AppAssets.google, size: 22.sp),
                             value: provider.socialGoogle,
                             onTap: () => _openSocialDialog(_SocialKind.google),
-                          ),
-                          14.verticalSpace,
-                          Row(
-                            children: [
-                              Expanded(
-                                child: AppText(
-                                  text: 'Private profile',
-                                  style: AppTextStyles.bold(fontSize: 16),
-                                ),
-                              ),
-                              Switch.adaptive(
-                                value: provider.isPrivate,
-                                activeTrackColor: AppColors.teal.withValues(
-                                  alpha: 0.55,
-                                ),
-                                thumbColor: WidgetStateProperty.resolveWith(
-                                  (states) => AppColors.white,
-                                ),
-                                onChanged: provider.setIsPrivate,
-                              ),
-                            ],
-                          ),
-                          8.verticalSpace,
-                          GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () {
-                              Logger.info('Interests');
-                              context.pushNamed(
-                                AppRoutes.editInterestsScreen.name,
-                              );
-                            },
-                            child: Row(
-                              children: [
-                                AppText(
-                                  text: 'Interests',
-                                  style: AppTextStyles.bold(fontSize: 16),
-                                ),
-                                5.horizontalSpace,
-                                Icon(
-                                  Icons.arrow_forward_ios_rounded,
-                                  size: 12.sp,
-                                ),
-                              ],
-                            ),
                           ),
                           14.verticalSpace,
                           _FieldBlock(
@@ -900,12 +927,33 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 12.h),
-                    child: AppOutlinedButton(
-                      onTap: _onUpdateProfile,
-                      text: 'Update Profile',
-                      radius: 40,
-                      padding: EdgeInsets.symmetric(vertical: 13.h),
+                    padding: EdgeInsets.fromLTRB(20, 8, 20, bottom + 12),
+                    child: GestureDetector(
+                      onTap: auth.isLogOutLoading ? null : _onSignOut,
+                      child: Container(
+                        height: 56,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: settingsSignOut,
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                        child: auth.isLogOutLoading
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : AppText(
+                                text: 'Sign Out',
+                                style: AppTextStyles.semibold(
+                                  fontSize: 17,
+                                  color: Colors.white,
+                                ),
+                              ),
+                      ),
                     ),
                   ),
                 ],
@@ -913,7 +961,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             );
           },
         ),
-      ),
     );
   }
 }
@@ -1115,9 +1162,21 @@ class _FieldBlock extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppText(text: label, style: AppTextStyles.bold(fontSize: 16)),
+        AppText(
+          text: label,
+          style: AppTextStyles.medium(
+            fontSize: 14,
+            color: const Color(0xFF1C1C1E),
+          ),
+        ),
         8.verticalSpace,
-        child,
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: child,
+        ),
       ],
     );
   }
@@ -1136,47 +1195,34 @@ class _SocialAccountRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final display = value.trim().isEmpty ? '-' : value;
+    final trimmed = value.trim();
+    final empty = trimmed.isEmpty;
     return Material(
-      color: Colors.transparent,
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(14),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(14),
         onTap: onTap,
-        child: Container(
-          height: 48.h,
-          padding: EdgeInsets.symmetric(horizontal: 10.w),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: AppColors.black.withValues(alpha: 0.12)),
-          ),
+        child: SizedBox(
+          height: 52,
           child: Row(
             children: [
-              SizedBox(
-                width: 26.w,
-                child: Center(child: leading),
-              ),
-              8.horizontalSpace,
-              Container(
-                width: 1,
-                height: 20.h,
-                color: AppColors.black.withValues(alpha: 0.16),
-              ),
-              10.horizontalSpace,
+              SizedBox(width: 44, child: Center(child: leading)),
+              Container(width: 1, height: 22, color: const Color(0xFFE5E5EA)),
+              const SizedBox(width: 12),
               Expanded(
                 child: AppText(
-                  text: display,
-                  style: AppTextStyles.medium(
-                    fontSize: 14,
-                    color: AppColors.black,
+                  text: empty ? 'Add link' : trimmed,
+                  style: AppTextStyles.regular(
+                    fontSize: 15,
+                    color: empty
+                        ? const Color(0xFF8E8E93)
+                        : const Color(0xFF1C1C1E),
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 22.sp,
-                color: AppColors.black.withValues(alpha: 0.45),
-              ),
+              const SizedBox(width: 12),
             ],
           ),
         ),
@@ -1198,40 +1244,11 @@ class _SimpleDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 48.h,
-      padding: EdgeInsets.symmetric(horizontal: 14.w),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.black.withValues(alpha: 0.12)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: value,
-          isExpanded: true,
-          icon: Icon(
-            Icons.keyboard_arrow_down_rounded,
-            size: 22.sp,
-            color: AppColors.black.withValues(alpha: 0.72),
-          ),
-          style: AppTextStyles.medium(fontSize: 16, color: AppColors.black),
-          onChanged: onChanged,
-          items: items
-              .map(
-                (item) => DropdownMenuItem<String>(
-                  value: item,
-                  child: AppText(
-                    text: item,
-                    style: AppTextStyles.medium(
-                      fontSize: 16,
-                      color: AppColors.black,
-                    ),
-                  ),
-                ),
-              )
-              .toList(),
-        ),
-      ),
+    return AppDropdown(
+      filled: false,
+      value: value,
+      items: items,
+      onChanged: onChanged,
     );
   }
 }

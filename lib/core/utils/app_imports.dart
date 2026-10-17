@@ -18,6 +18,7 @@ export 'package:redstreakapp/core/routes/app_router.dart';
 export 'package:redstreakapp/core/routes/user_routes.dart';
 export 'package:redstreakapp/core/widgets/app_skeletonizer.dart';
 export 'package:redstreakapp/core/widgets/app_button.dart';
+export 'package:redstreakapp/core/widgets/glass_icon_button.dart';
 export 'package:redstreakapp/core/widgets/app_layout.dart';
 export 'package:redstreakapp/core/widgets/app_text.dart';
 export 'package:redstreakapp/core/widgets/custom_toast.dart';
