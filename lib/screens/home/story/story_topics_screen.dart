@@ -10,7 +10,6 @@ import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/utils/de_bouncing.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
-import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
@@ -112,7 +111,8 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AppLayout(
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F7),
       resizeToAvoidBottomInset: false,
       body: SafeArea(
         bottom: (Platform.isIOS) ? false : true,
@@ -123,7 +123,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
             final isTopicsApiLoading = storyProvider.isGetTopicsLoading;
 
             return Padding(
-              padding: EdgeInsets.fromLTRB(24.w, 10.w, 24.w, 0),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -143,22 +143,35 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                     },
                   ),
                   AppText(
-                    text: "Choose Your Favorite Topics",
-                    style: AppTextStyles.bold(height: 1.2, fontSize: 32.sp),
+                    text: "Choose\nYour Favourite Topics",
+                    style: AppTextStyles.bold(
+                      height: 1.15,
+                      fontSize: 30,
+                      color: const Color(0xFF1C1C1E),
+                    ),
                   ),
-                  10.w.verticalSpace,
+                  const SizedBox(height: 8),
                   AppText(
                     text:
                         "Here are some topics we think you'll love based on your interests. You can pick the ones that excite you the most!",
-                    style: AppTextStyles.medium(
-                      fontSize: 16.sp,
-                      color: AppColors.black.withValues(alpha: 0.8),
-                    ),
+                    style: AppTextStyles.regular(
+                      fontSize: 15,
+                      color: const Color(0xFF8E8E93),
+                    ).copyWith(height: 1.35),
                   ),
-                  18.w.verticalSpace,
-                  AppTextField(
+                  const SizedBox(height: 16),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: AppTextField(
                     controller: storyProvider.searchTopicCtr,
-                    hintText: "Search Topic...",
+                    hintText: "Add topic...",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
                     onChanged: (value) {
                       deBouncer.run(() {
                         storyProvider.getStoryTopics(
@@ -168,6 +181,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                         );
                       });
                     },
+                    ),
                   ),
                   18.w.verticalSpace,
                   if (isTopicsApiLoading)
@@ -196,11 +210,11 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                           bottom: 20.w,
                         ),
                         gridDelegate:
-                            SliverGridDelegateWithFixedCrossAxisCount(
+                            const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
-                              crossAxisSpacing: 20.w,
-                              mainAxisSpacing: 25.h,
-                              childAspectRatio: 1.4,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                              childAspectRatio: 1.05,
                             ),
                         itemCount:
                             storyProvider.topicsList.length +
@@ -240,7 +254,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
 
                   AppFilledButton(
                     text: "Next",
-                    backgroundColor: AppColors.orangeColor,
+                    backgroundColor: AppColors.teal,
                     margin: EdgeInsets.only(top: 4.3.w, bottom: 18.w),
                     onTap: () async {
                       // if (storyProvider.selectedTopicId.isEmpty) {
@@ -268,11 +282,11 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
     return AppSkeletonizer(child: GridView.builder(
         physics: const NeverScrollableScrollPhysics(),
         padding: EdgeInsets.only(left: 10.w, right: 10.w, bottom: 20.w),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          crossAxisSpacing: 20.w,
-          mainAxisSpacing: 25.h,
-          childAspectRatio: 1.4,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 1.05,
         ),
         itemCount: 6,
         itemBuilder: (context, index) {

@@ -50,7 +50,7 @@ class _WhatInterestScreenState extends State<WhatInterestScreen> {
                     onBack: () {
                       if (context.canPop()) {
                         context.pop();
-                      } else {
+                      } else {  
                         context.goNamed(AppRoutes.topicsScreen.name);
                       }
                     },

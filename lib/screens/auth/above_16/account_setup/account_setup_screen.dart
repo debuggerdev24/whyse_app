@@ -16,7 +16,7 @@ class AccountSetupScreen extends StatefulWidget {
 }
 
 class _AccountSetupScreenState extends State<AccountSetupScreen> {
-  static const _readingOptions = ['5 min', '10 min', '20 min'];
+  static const _readingOptions = ['5 Mins', '10 Mins', '20 Mins'];
 
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -28,6 +28,7 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
 
   String? _selectedCountry;
   String? _selectedLanguage;
+  String? _pendingReadingGoal;
   final Set<String> _selectedInterestIds = {};
   final Set<String> _selectedTopicIds = {};
   final Set<String> _selectedGoalIds = {};
@@ -87,19 +88,19 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
     _items.clear();
     if (_currentStep == AccountSetupStep.country) {
       _appendBotAndPicker(
-        '**Hello!** I\'m here to help you setup your ReadstreakApp account. Please tell me where you are situated:',
+        '**Hello!** I\'m here to help you setup your ReadstreakApp account.\n\nPlease tell me where you are situated:',
         OnboardingChatItemType.countryPicker,
       );
       return;
     }
     if (_currentStep == AccountSetupStep.language) {
       _appendBotAndPicker(
-        '**Hello!** I\'m here to help you setup your ReadstreakApp account. Please tell me where you are situated:',
+        '**Hello!** I\'m here to help you setup your ReadstreakApp account.\n\nPlease tell me where you are situated:',
         OnboardingChatItemType.countryPicker,
         active: false,
       );
       _appendBotAndPicker(
-        '**Awesome!** Next I would like to know your preferred language.',
+        '**Awesome!**\nNext I would like to know your preferred language.',
         OnboardingChatItemType.languagePicker,
       );
       return;
@@ -107,7 +108,7 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
     if (_currentStep == AccountSetupStep.readingGoal) {
       _restoreThroughLanguage();
       _appendBotAndPicker(
-        '**Great!** Now tell me how much do you aim to read daily?',
+        '**Great!**\nNow tell me how much do you aim to read daily?',
         OnboardingChatItemType.readingGoalPicker,
       );
       return;
@@ -115,7 +116,7 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
     if (_currentStep == AccountSetupStep.interests) {
       _restoreThroughReadingGoal();
       _appendBotAndPicker(
-        '**Awesome!** Now let\'s pick your interests.',
+        '**Awesome!**\nNow let\'s pick your interests.',
         OnboardingChatItemType.interestPicker,
       );
       return;
@@ -123,7 +124,7 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
     if (_currentStep == AccountSetupStep.topics) {
       _restoreThroughInterests();
       _appendBotAndPicker(
-        '**Great!** Now tell me what topics you would like to read about.',
+        '**Great!**\nNow tell me what topics you would like to read about.',
         OnboardingChatItemType.topicPicker,
       );
       return;
@@ -131,7 +132,7 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
     if (_currentStep == AccountSetupStep.goals) {
       _restoreThroughTopics();
       _appendBotAndPicker(
-        '**Great!** Now tell me what motivates you the most.',
+        '**Great!**\nNow tell me what motivates you the most.',
         OnboardingChatItemType.goalPicker,
       );
     }
@@ -140,10 +141,10 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
   void _restoreThroughLanguage() {
     _items.addAll([
       _bot(
-        '**Hello!** I\'m here to help you setup your ReadstreakApp account. Please tell me where you are situated:',
+        '**Hello!** I\'m here to help you setup your ReadstreakApp account.\n\nPlease tell me where you are situated:',
       ),
       _user('Your country'),
-      _bot('**Awesome!** Next I would like to know your preferred language.'),
+      _bot('**Awesome!**\nNext I would like to know your preferred language.'),
       _user('Your language'),
     ]);
   }
@@ -151,7 +152,7 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
   void _restoreThroughReadingGoal() {
     _restoreThroughLanguage();
     _items.addAll([
-      _bot('**Great!** Now tell me how much do you aim to read daily?'),
+      _bot('**Great!**\nNow tell me how much do you aim to read daily?'),
       _user('Your reading goal'),
     ]);
   }
@@ -159,7 +160,7 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
   void _restoreThroughInterests() {
     _restoreThroughReadingGoal();
     _items.addAll([
-      _bot('**Awesome!** Now let\'s pick your interests.'),
+      _bot('**Awesome!**\nNow let\'s pick your interests.'),
       _user('Your interests'),
     ]);
   }
@@ -167,7 +168,7 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
   void _restoreThroughTopics() {
     _restoreThroughInterests();
     _items.addAll([
-      _bot('**Great!** Now tell me what topics you would like to read about.'),
+      _bot('**Great!**\nNow tell me what topics you would like to read about.'),
       _user('Your topics'),
     ]);
   }
@@ -233,7 +234,7 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
     setState(() {
       _currentStep = AccountSetupStep.language;
       _appendBotAndPicker(
-        '**Awesome!** Next I would like to know your preferred language.',
+        '**Awesome!**\nNext I would like to know your preferred language.',
         OnboardingChatItemType.languagePicker,
       );
     });
@@ -266,7 +267,7 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
       _isBusy = false;
       _currentStep = AccountSetupStep.readingGoal;
       _appendBotAndPicker(
-        '**Great!** Now tell me how much do you aim to read daily?',
+        '**Great!**\nNow tell me how much do you aim to read daily?',
         OnboardingChatItemType.readingGoalPicker,
       );
     });
@@ -301,7 +302,7 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
       _currentStep = AccountSetupStep.interests;
       _selectedInterestIds.clear();
       _appendBotAndPicker(
-        '**Awesome!** Now let\'s pick your interests.',
+        '**Awesome!**\nNow let\'s pick your interests.',
         OnboardingChatItemType.interestPicker,
       );
     });
@@ -431,7 +432,12 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
 
     setState(() => _isBusy = true);
     _deactivatePickers();
-    _items.add(_user(labels.join(', ')));
+    final summary = labels
+        .asMap()
+        .entries
+        .map((e) => '${e.key + 1}. ${e.value}')
+        .join('\n');
+    _items.add(_user(summary));
 
     final success = await auth.saveInterests(
       context,
@@ -454,7 +460,7 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
       _selectedTopicIds.clear();
       _customInterests.clear();
       _appendBotAndPicker(
-        '**Great!** Now tell me what topics you would like to read about.',
+        '**Great!**\nNow tell me what topics you would like to read about.',
         OnboardingChatItemType.topicPicker,
       );
     });
@@ -511,7 +517,7 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
       _customTopics.clear();
       auth.selectedGoalIds.clear();
       _appendBotAndPicker(
-        '**Great!** Now tell me what motivates you the most.',
+        '**Great!**\nNow tell me what motivates you the most.',
         OnboardingChatItemType.goalPicker,
       );
     });
@@ -573,6 +579,9 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
 
   void _handleSend() {
     switch (_currentStep) {
+      case AccountSetupStep.readingGoal:
+        final option = _pendingReadingGoal;
+        if (option != null) _onReadingGoalSelected(option);
       case AccountSetupStep.interests:
         _submitInterests();
       case AccountSetupStep.topics:
@@ -599,6 +608,14 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
     return _currentStep == AccountSetupStep.interests ||
         _currentStep == AccountSetupStep.topics ||
         _currentStep == AccountSetupStep.goals;
+  }
+
+  bool get _canSend {
+    if (_isBusy) return false;
+    if (_currentStep == AccountSetupStep.readingGoal) {
+      return _pendingReadingGoal != null;
+    }
+    return _canUseInputBar;
   }
 
   String get _inputHintText {
@@ -648,6 +665,7 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
                 AccountSetupInputBar(
                   controller: _inputController,
                   enabled: _canUseInputBar && !_isBusy,
+                  sendEnabled: _canSend,
                   hintText: _canUseInputBar ? _inputHintText : 'Type here',
                   onSend: _handleSend,
                 ),
@@ -696,7 +714,10 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
         if (!item.isActive) return const SizedBox.shrink();
         return AccountSetupReadingPills(
           options: _readingOptions,
-          onSelected: _onReadingGoalSelected,
+          selected: _pendingReadingGoal,
+          onSelected: (option) {
+            setState(() => _pendingReadingGoal = option);
+          },
         );
       case OnboardingChatItemType.interestPicker:
         if (!item.isActive) return const SizedBox.shrink();

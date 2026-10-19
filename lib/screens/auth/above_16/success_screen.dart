@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
-import 'package:redstreakapp/core/widgets/app_button.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 
@@ -14,93 +12,67 @@ class SuccessScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+      backgroundColor: const Color(0xFFF5F5F7),
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             children: [
-              /// ---------- MAIN CONTENT CENTER ----------
               Expanded(
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Image.asset(AppAssets.success, width: 254.w),
-                      30.w.verticalSpace,
-
-                      AppText(
-                        text: "You’re all set!",
-                        style: AppTextStyles.bold(fontSize: 32.sp),
+                      Image.asset(
+                        AppAssets.celebratoryFlag,
+                        width: 240,
+                        fit: BoxFit.contain,
                       ),
-
-                      8.w.verticalSpace,
+                      const SizedBox(height: 28),
+                      AppText(
+                        text: "You're all set!",
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.bold(
+                          fontSize: 28,
+                          color: const Color(0xFF1C1C1E),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
                       AppText(
                         textAlign: TextAlign.center,
                         text:
-                            "Your reading journey starts today — let’s build your first streak!",
-                        style: AppTextStyles.medium(
-                          fontSize: 16.sp,
-                          color: AppColors.black.withValues(alpha: 0.8),
-                        ),
+                            "Your reading journey starts today — let's build your first streak!",
+                        style: AppTextStyles.regular(
+                          fontSize: 16,
+                          color: const Color(0xFF1C1C1E),
+                        ).copyWith(height: 1.35),
                       ),
                     ],
                   ),
                 ),
               ),
-              // ---------- BUTTON AT BOTTOM ----------
-              AppFilledButton(
-                text: "Choose a Plan",
-                backgroundColor: AppColors.black,
-                onTap: () async {
-                  // if ( context.mounted) {
-                  //           final googleIdToken =
-                  //               LocalStorageService.instance.getGoogleIdToken;
-                  //           final resgisteredUserMail = LocalStorageService
-                  //               .instance
-                  //               .getRegisteredUserMail;
-                  //           if (googleIdToken.isNotEmpty) {
-                  //             await provider.loginWithGoogle(
-                  //               idToken: LocalStorageService
-                  //                   .instance
-                  //                   .getGoogleIdToken,
-                  //               onFailed: (error) {
-                  //                 AppToast.error(context, error);
-                  //               },
-                  //               onAccountFound: () {
-                  //                 context.goNamed(AppRoutes.homeScreen.name);
-                  //                 AppToast.success(
-                  //                   context,
-                  //                   "Login Successfully.",
-                  //                 );
-                  //                 LocalStorageService.instance
-                  //                     .removeGoogleIdToken();
-                  //               },
-                  //             );
-                  //             return;
-                  //           }
-                  //           if (resgisteredUserMail.isNotEmpty) {
-                  //             provider.loginEmailCtr.text = LocalStorageService
-                  //                 .instance
-                  //                 .getRegisteredUserMail;
-                  //             provider.loginPasswordCtr.text =
-                  //                 LocalStorageService
-                  //                     .instance
-                  //                     .getRegisteredUserPassword;
-                  //             provider.loginWithMail(context: context);
-                  //             return;
-                  //           }
-                  //           context.pushNamed(AppRoutes.successScreen.name);
-                  //         }
+              GestureDetector(
+                onTap: () {
                   context.pushNamed(AppRoutes.subscriptionScreen.name);
-                  // AppToast.success(
-                  //   context,
-                  //   "Register Successfully, Login to your account.",
-                  // );
                 },
+                child: Container(
+                  height: 56,
+                  alignment: Alignment.center,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.teal,
+                    borderRadius: BorderRadius.circular(28),
+                  ),
+                  child: AppText(
+                    text: 'Choose a Plan',
+                    style: AppTextStyles.semibold(
+                      fontSize: 17,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ),
-              10.w.verticalSpace,
-            ], 
+            ],
           ),
         ),
       ),

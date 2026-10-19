@@ -8,7 +8,6 @@ import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/utils/custom_loader.dart';
-import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/onboarding_widgets.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
@@ -37,13 +36,14 @@ class _StoryInterestsScreenState extends State<StoryInterestsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AppLayout(
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F7),
       body: SafeArea(
         bottom: (Platform.isIOS) ? false : true,
         child: Consumer<StoryProvider>(
           builder: (context, provider, child) {
             return Padding(
-              padding: EdgeInsets.fromLTRB(25.w, 10.w, 25.w, 0),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -61,15 +61,18 @@ class _StoryInterestsScreenState extends State<StoryInterestsScreen> {
 
                   AppText(
                     text: "Pick Your Interests",
-                    style: AppTextStyles.bold(fontSize: 32.sp),
+                    style: AppTextStyles.bold(
+                      fontSize: 30,
+                      color: const Color(0xFF1C1C1E),
+                    ),
                   ),
-                  10.w.verticalSpace,
+                  const SizedBox(height: 8),
                   AppText(
                     text:
                         "Choose topics you love to personalize your reading journey.",
-                    style: AppTextStyles.medium(
-                      fontSize: 16.sp,
-                      color: AppColors.black.withValues(alpha: 0.8),
+                    style: AppTextStyles.regular(
+                      fontSize: 15,
+                      color: const Color(0xFF8E8E93),
                     ),
                   ),
 
@@ -125,7 +128,7 @@ class _StoryInterestsScreenState extends State<StoryInterestsScreen> {
                   AppFilledButton(
                     text: "Next",
                     margin: EdgeInsets.only(bottom: 18.w, top: 4.3.w),
-                    backgroundColor: AppColors.orangeColor,
+                    backgroundColor: AppColors.teal,
 
                     onTap: () {
                       // if (provider.selectedInterestIds.isEmpty &&

@@ -1,9 +1,8 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/utils/field_validator.dart';
-import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
@@ -19,7 +18,8 @@ class CustomStoryTopicScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppLayout(
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F7),
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
@@ -62,7 +62,7 @@ class CustomStoryTopicScreen extends StatelessWidget {
                 //todo next button
                 AppFilledButton(
                   text: "Next",
-                  backgroundColor: AppColors.orangeColor,
+                  backgroundColor: AppColors.teal,
                   margin: EdgeInsetsGeometry.only(top: 4.3.h),
                   onTap: () async {
                     if (provider.customTopicCtr.text.isEmpty) {

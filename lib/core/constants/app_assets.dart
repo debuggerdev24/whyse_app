@@ -88,6 +88,8 @@ class AppAssets {
   static const space = "$_imagePath/space.png";
   static const wizard = "$_imagePath/wizard.png";
   static const success = "$_imagePath/success.png";
+  static const celebratoryFlag = "$_imagePath/celebratory_flag.png";
+  static const dreamyCloudscape = "$_imagePath/dreamy_cloudscape.png";
   static const subscriptionbackground = "$_imagePath/background.png";
   static const profile = "$_imagePath/profile.png";
   static const story1 = "$_imagePath/story1.png";

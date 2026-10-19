@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_dropdown.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
@@ -56,39 +54,31 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        /// Label
-        Row(
-          children: [
-            Container(
-              width: 8.w,
-              height: 8.w,
-              decoration: BoxDecoration(
-                color: AppColors.orangeColor,
-                shape: BoxShape.circle,
-              ),
-            ),
-            8.w.horizontalSpace,
-            AppText(
-              text: widget.label,
-              style: AppTextStyles.textStyle16Semibold,
-            ),
-          ],
+        AppText(
+          text: widget.label,
+          style: AppTextStyles.semibold(
+            fontSize: 15,
+            color: const Color(0xFF1C1C1E),
+          ),
         ),
-
-        Divider(thickness: 0, color: AppColors.black.withValues(alpha: 0.1)),
-
-        6.verticalSpace,
-
-        AppDropdown(
-          hint: widget.hint,
-          value: selectedValue,
-          items: widget.items,
-          onChanged: (value) {
-            setState(() {
-              selectedValue = value;
-            });
-            widget.onChanged(value);
-          },
+        const SizedBox(height: 8),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: AppDropdown(
+            hint: widget.hint,
+            value: selectedValue,
+            items: widget.items,
+            filled: false,
+            onChanged: (value) {
+              setState(() {
+                selectedValue = value;
+              });
+              widget.onChanged(value);
+            },
+          ),
         ),
       ],
     );

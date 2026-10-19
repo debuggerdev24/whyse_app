@@ -13,17 +13,12 @@ class OnboardingHeader extends StatelessWidget {
   final VoidCallback? onBack;
   final VoidCallback? onSkip;
 
-  final String backIcon;
-  final double backIconSize;
-
   const OnboardingHeader({
     super.key,
     required this.currentStep,
     required this.totalSteps,
     this.onBack,
     this.onSkip,
-    this.backIcon = AppAssets.backButton,
-    this.backIconSize = 14,
   });
 
   @override
@@ -31,40 +26,48 @@ class OnboardingHeader extends StatelessWidget {
     return Column(
       children: [
         Row(
-          spacing: 16.w,
           children: [
             GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: currentStep == 0 ? null : onBack,
-              child: SizedBox(
-                width: 48.w,
-                height: 48.w,
-                child: Center(
-                  child: Opacity(
-                    opacity: currentStep == 0 ? 0.3 : 1,
-                    child: SvgIcon(
-                      backIcon,
-                      size: backIconSize.sp,
-                      color: currentStep == 0 ? Colors.grey : AppColors.black,
-                    ),
+              child: Opacity(
+                opacity: currentStep == 0 ? 0.35 : 1,
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.06),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.chevron_left_rounded,
+                    size: 28,
+                    color: Color(0xFF1C1C1E),
                   ),
                 ),
               ),
             ),
-
+            const SizedBox(width: 14),
             Expanded(
               child: Row(
                 children: List.generate(totalSteps, (index) {
                   return Expanded(
                     child: AnimatedContainer(
-                      duration: Duration(milliseconds: 600),
-                      margin: EdgeInsets.symmetric(horizontal: 3.w),
-                      height: 4.h,
+                      duration: const Duration(milliseconds: 300),
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      height: 6,
                       decoration: BoxDecoration(
                         color: index < currentStep
-                            ? AppColors.orangeColor
-                            : AppColors.lightwhiteColor,
-                        borderRadius: BorderRadius.circular(16.r),
+                            ? const Color(0xFFF6A01A)
+                            : const Color(0xFFE6E6EA),
+                        borderRadius: BorderRadius.circular(4),
                       ),
                     ),
                   );
@@ -114,33 +117,43 @@ class SelectionOption extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-        margin: EdgeInsets.only(bottom: 12.h),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        margin: const EdgeInsets.only(bottom: 10),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12.r),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected
-                ? AppColors.teal
-                : AppColors.black.withValues(alpha: 0.15),
-            width: 1.w,
+            color: isSelected ? AppColors.teal : Colors.transparent,
+            width: 1.6,
           ),
         ),
         child: Row(
           children: [
-            // if (icon != null) ...[icon!, 12.w.horizontalSpace],
-            SvgIcon(iconPath, size: 28.w),
-            14.w.horizontalSpace,
+            SvgIcon(iconPath, size: 32),
+            const SizedBox(width: 12),
             Expanded(
               child: AppText(
                 text: label,
                 style: AppTextStyles.semibold(
-                  fontSize: 15.sp,
-                  color: AppColors.black,
+                  fontSize: 16,
+                  color: const Color(0xFF1C1C1E),
                 ),
               ),
             ),
-            if (isSelected) SvgIcon(AppAssets.check, size: 20.sp),
+            if (isSelected)
+              Container(
+                width: 24,
+                height: 24,
+                decoration: const BoxDecoration(
+                  color: AppColors.teal,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.check_rounded,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
           ],
         ),
       ),
@@ -185,17 +198,9 @@ class TopicCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.5),
-              blurRadius: 5,
-              spreadRadius: -1,
-              offset: const Offset(0, 8),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(22),
           border: isSelected
-              ? Border.all(color: AppColors.orangeColor, width: 2)
+              ? Border.all(color: AppColors.teal, width: 2)
               : null,
         ),
         clipBehavior: Clip.antiAlias,
@@ -228,16 +233,27 @@ class TopicCard extends StatelessWidget {
                 height: double.infinity,
                 errorBuilder: (_, _, _) => _buildShimmerPlaceholder(),
               ),
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0x00000000), Color(0xCC000000)],
+                  stops: [0.45, 1],
+                ),
+              ),
+            ),
             Positioned(
-              left: 16.w,
-              right: 16.w,
-              bottom: 13.h,
+              left: 12,
+              right: 12,
+              bottom: 12,
               child: AppText(
                 text: label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.bold(
-                  fontSize: 14.sp,
+                  fontSize: 15,
                   color: Colors.white,
-                  letterSpacing: 0.2,
                 ),
               ),
             ),

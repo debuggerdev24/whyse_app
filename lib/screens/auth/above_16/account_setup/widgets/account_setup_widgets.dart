@@ -2,39 +2,23 @@ import 'package:redstreakapp/core/constants/app_constants.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_dropdown.dart';
 
-const Color accountSetupBackground = Color(0xFFF5F5F5);
-const Color accountSetupInputBg = Color(0xFFEFEFEF);
+const Color accountSetupBackground = Color(0xFFF3F3F6);
+const Color accountSetupInk = Color(0xFF1C1C1E);
+const Color accountSetupMuted = Color(0xFF8E8E93);
 
 class AccountSetupHeader extends StatelessWidget {
   const AccountSetupHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFF28518),
-            Color(0xFFF2A94A),
-          ],
-        ),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 18.h),
-          child: Center(
-            child: AppText(
-              text: 'Account Setup',
-              style: AppTextStyles.bold(
-                fontSize: 20.sp,
-                color: AppColors.white,
-              ),
-            ),
-          ),
+    final top = MediaQuery.paddingOf(context).top;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20, top + 8, 20, 6),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: AppText(
+          text: 'Account Setup',
+          style: AppTextStyles.bold(fontSize: 32, color: accountSetupInk),
         ),
       ),
     );
@@ -48,54 +32,39 @@ class AccountSetupBotBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 34.w,
-          height: 34.w,
-          decoration: const BoxDecoration(
-            color: AppColors.white,
-            shape: BoxShape.circle,
-          ),
-          padding: EdgeInsets.all(4.w),
-          child: Image.asset(AppAssets.robot, fit: BoxFit.contain),
-        ),
-        SizedBox(width: 10.w),
-        Flexible(
-          child: Container(
-            padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 14.h),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(14.r),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText(
-                  text: 'Chat Assistant',
-                  style: AppTextStyles.semiBold(
-                    fontSize: 13.sp,
-                    color: AppColors.teal,
-                  ),
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 0.86.sw),
+        child: _BubbleShell(
+          color: Colors.white,
+          alignEnd: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppText(
+                text: 'Chat Assistant',
+                style: AppTextStyles.semibold(
+                  fontSize: 14,
+                  color: AppColors.teal,
                 ),
-                SizedBox(height: 6.h),
-                _BoldAwareText(
-                  text: text,
-                  style: AppTextStyles.regular(
-                    fontSize: 15.sp,
-                    color: AppColors.black,
-                  ).copyWith(height: 1.35),
-                  boldStyle: AppTextStyles.bold(
-                    fontSize: 15.sp,
-                    color: AppColors.black,
-                  ).copyWith(height: 1.35),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 6),
+              _BoldAwareText(
+                text: text,
+                style: AppTextStyles.regular(
+                  fontSize: 15,
+                  color: accountSetupInk,
+                ).copyWith(height: 1.35),
+                boldStyle: AppTextStyles.bold(
+                  fontSize: 15,
+                  color: accountSetupInk,
+                ).copyWith(height: 1.35),
+              ),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 }
@@ -109,27 +78,96 @@ class AccountSetupUserBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerRight,
-      child: Container(
-        constraints: BoxConstraints(maxWidth: 0.78.sw),
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-        decoration: BoxDecoration(
-          color: AppColors.teal,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(16.r),
-            topRight: Radius.circular(16.r),
-            bottomLeft: Radius.circular(16.r),
-            bottomRight: Radius.circular(4.r),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 0.72.sw),
+        child: _BubbleShell(
+          color: accountSetupInk,
+          alignEnd: true,
+          child: AppText(
+            text: text,
+            style: AppTextStyles.regular(
+              fontSize: 15,
+              color: Colors.white,
+            ).copyWith(height: 1.35),
           ),
-        ),
-        child: AppText(
-          text: text,
-          style: AppTextStyles.regular(
-            fontSize: 15.sp,
-            color: AppColors.white,
-          ).copyWith(height: 1.3),
         ),
       ),
     );
+  }
+}
+
+class _BubbleShell extends StatelessWidget {
+  const _BubbleShell({
+    required this.color,
+    required this.alignEnd,
+    required this.child,
+  });
+
+  final Color color;
+  final bool alignEnd;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment:
+          alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: child,
+        ),
+        Padding(
+          padding: EdgeInsets.only(left: alignEnd ? 0 : 18, right: alignEnd ? 18 : 0),
+          child: CustomPaint(
+            size: const Size(14, 8),
+            painter: _TailPainter(color: color, pointRight: alignEnd),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TailPainter extends CustomPainter {
+  const _TailPainter({required this.color, required this.pointRight});
+
+  final Color color;
+  final bool pointRight;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = Path();
+    if (pointRight) {
+      path
+        ..moveTo(0, 0)
+        ..lineTo(size.width, 0)
+        ..lineTo(size.width, size.height)
+        ..close();
+    } else {
+      path
+        ..moveTo(0, 0)
+        ..lineTo(size.width, 0)
+        ..lineTo(0, size.height)
+        ..close();
+    }
+    canvas.drawPath(path, Paint()..color = color);
+  }
+
+  @override
+  bool shouldRepaint(covariant _TailPainter oldDelegate) {
+    return oldDelegate.color != color || oldDelegate.pointRight != pointRight;
   }
 }
 
@@ -181,15 +219,24 @@ class AccountSetupDropdownField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final wide = hint.length > 18;
     return Align(
       alignment: Alignment.centerRight,
       child: SizedBox(
-        width: 0.82.sw,
-        child: AppDropdown(
-          hint: hint,
-          items: items,
-          value: value,
-          onChanged: onChanged,
+        width: wide ? 0.72.sw : 0.55.sw,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE4E4E8)),
+          ),
+          child: AppDropdown(
+            hint: hint,
+            items: items,
+            value: value,
+            filled: false,
+            onChanged: onChanged,
+          ),
         ),
       ),
     );
@@ -201,40 +248,45 @@ class AccountSetupReadingPills extends StatelessWidget {
     super.key,
     required this.options,
     required this.onSelected,
+    this.selected,
   });
 
   final List<String> options;
+  final String? selected;
   final ValueChanged<String> onSelected;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
-      children: options
-          .map(
-            (option) => Padding(
-              padding: EdgeInsets.only(bottom: 10.h),
-              child: GestureDetector(
-                onTap: () => onSelected(option),
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 12.h),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(999.r),
-                    border: Border.all(color: AppColors.teal, width: 1.2),
+      children: [
+        for (final option in options)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: GestureDetector(
+              onTap: () => onSelected(option),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+                decoration: BoxDecoration(
+                  color: option == selected ? AppColors.teal : Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: option == selected
+                        ? AppColors.teal
+                        : const Color(0xFFE4E4E4),
                   ),
-                  child: AppText(
-                    text: option,
-                    style: AppTextStyles.semiBold(
-                      fontSize: 15.sp,
-                      color: AppColors.black,
-                    ),
+                ),
+                child: AppText(
+                  text: option,
+                  style: AppTextStyles.semibold(
+                    fontSize: 15,
+                    color: option == selected ? Colors.white : accountSetupInk,
                   ),
                 ),
               ),
             ),
-          )
-          .toList(),
+          ),
+      ],
     );
   }
 }
@@ -255,48 +307,50 @@ class AccountSetupInterestChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 0.82.sw),
-        child: GestureDetector(
-          onTap: onTap,
-          child: Container(
-            width: double.infinity,
-            margin: EdgeInsets.only(bottom: 10.h),
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(999.r),
-              border: Border.all(
-                color: isSelected
-                    ? AppColors.teal
-                    : AppColors.black.withValues(alpha: 0.08),
-                width: isSelected ? 1.5 : 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                _AccountSetupChipIcon(path: iconPath, size: 28.w),
-                SizedBox(width: 10.w),
-                Expanded(
-                  child: AppText(
-                    text: label,
-                    style: AppTextStyles.semiBold(fontSize: 15.sp),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? AppColors.teal : Colors.transparent,
+            width: 1.6,
           ),
+        ),
+        child: Row(
+          children: [
+            _AccountSetupChipIcon(path: iconPath, size: 32),
+            const SizedBox(width: 12),
+            Expanded(
+              child: AppText(
+                text: label,
+                style: AppTextStyles.semibold(
+                  fontSize: 16,
+                  color: accountSetupInk,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (isSelected)
+              Container(
+                width: 24,
+                height: 24,
+                decoration: const BoxDecoration(
+                  color: AppColors.teal,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.check_rounded,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -321,52 +375,40 @@ class AccountSetupTopicChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerRight,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 0.82.sw),
-        child: GestureDetector(
-          onTap: onTap,
-          child: Container(
-            width: double.infinity,
-            margin: EdgeInsets.only(bottom: 10.h),
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(999.r),
-              border: Border.all(
-                color: isSelected
-                    ? AppColors.teal
-                    : AppColors.black.withValues(alpha: 0.08),
-                width: isSelected ? 1.5 : 1,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: isSelected ? AppColors.teal : const Color(0xFFE4E4E4),
+              width: isSelected ? 1.6 : 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _AccountSetupTopicThumb(
+                imagePath: imagePath,
+                label: label,
+                size: 22,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8.r),
-                  child: _AccountSetupTopicThumb(
-                    imagePath: imagePath,
-                    label: label,
-                    size: 32.w,
+              const SizedBox(width: 8),
+              Flexible(
+                child: AppText(
+                  text: label,
+                  style: AppTextStyles.semibold(
+                    fontSize: 15,
+                    color: accountSetupInk,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(width: 10.w),
-                Expanded(
-                  child: AppText(
-                    text: label,
-                    style: AppTextStyles.semiBold(fontSize: 15.sp),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -388,12 +430,15 @@ class _AccountSetupTopicThumb extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (imagePath.startsWith('http')) {
-      return Image.network(
-        imagePath,
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => _topicFallbackIcon(label, size),
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: Image.network(
+          imagePath,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          errorBuilder: (_, _, _) => _topicFallbackIcon(label, size),
+        ),
       );
     }
 
@@ -409,21 +454,16 @@ class _AccountSetupTopicThumb extends StatelessWidget {
       imagePath,
       width: size,
       height: size,
-      fit: BoxFit.cover,
+      fit: BoxFit.contain,
       errorBuilder: (_, _, _) => _topicFallbackIcon(label, size),
     );
   }
 
   Widget _topicFallbackIcon(String label, double size) {
-    return Container(
+    return SizedBox(
       width: size,
       height: size,
-      color: AppColors.lighttealcolor,
-      alignment: Alignment.center,
-      child: AppText(
-        text: label.isNotEmpty ? label[0] : '?',
-        style: AppTextStyles.bold(fontSize: 14.sp, color: AppColors.teal),
-      ),
+      child: Icon(Icons.auto_stories_outlined, size: size, color: accountSetupInk),
     );
   }
 }
@@ -444,43 +484,38 @@ class AccountSetupGoalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: 0.82.sw,
-          margin: EdgeInsets.only(bottom: 10.h),
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(14.r),
-            border: Border.all(
-              color: isSelected
-                  ? AppColors.teal
-                  : AppColors.black.withValues(alpha: 0.12),
-              width: isSelected ? 1.5 : 1,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? AppColors.teal : Colors.transparent,
+            width: 1.6,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppText(
+              text: title,
+              style: AppTextStyles.bold(fontSize: 16, color: accountSetupInk),
             ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            if (description.isNotEmpty) ...[
+              const SizedBox(height: 4),
               AppText(
-                text: title,
-                style: AppTextStyles.bold(fontSize: 15.sp),
+                text: description,
+                style: AppTextStyles.regular(
+                  fontSize: 14,
+                  color: accountSetupMuted,
+                ).copyWith(height: 1.3),
               ),
-              if (description.isNotEmpty) ...[
-                SizedBox(height: 4.h),
-                AppText(
-                  text: description,
-                  style: AppTextStyles.regular(
-                    fontSize: 14.sp,
-                    color: AppColors.black.withValues(alpha: 0.75),
-                  ).copyWith(height: 1.3),
-                ),
-              ],
             ],
-          ),
+          ],
         ),
       ),
     );
@@ -493,76 +528,76 @@ class AccountSetupInputBar extends StatelessWidget {
     required this.controller,
     required this.onSend,
     this.enabled = true,
+    this.sendEnabled = true,
     this.hintText = 'Type here',
   });
 
   final TextEditingController controller;
   final VoidCallback onSend;
   final bool enabled;
+  final bool sendEnabled;
   final String hintText;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: accountSetupBackground,
+    return Padding(
       padding: EdgeInsets.fromLTRB(
-        20.w,
-        8.h,
-        20.w,
-        MediaQuery.of(context).padding.bottom + 12.h,
+        16,
+        8,
+        16,
+        MediaQuery.paddingOf(context).bottom + 10,
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              height: 48.h,
-              decoration: BoxDecoration(
-                color: accountSetupInputBg,
-                borderRadius: BorderRadius.circular(24.r),
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 18.w),
-              alignment: Alignment.centerLeft,
+      child: Container(
+        height: 54,
+        padding: const EdgeInsets.only(left: 18, right: 6),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(color: const Color(0xFFE6E6EA)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
               child: TextField(
                 controller: controller,
                 enabled: enabled,
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) {
-                  if (enabled) onSend();
+                  if (sendEnabled) onSend();
                 },
-                style: AppTextStyles.regular(fontSize: 16.sp),
+                style: AppTextStyles.regular(fontSize: 16, color: accountSetupInk),
                 decoration: InputDecoration(
                   isDense: true,
                   border: InputBorder.none,
                   hintText: hintText,
                   hintStyle: AppTextStyles.regular(
-                    fontSize: 16.sp,
-                    color: AppColors.black.withValues(alpha: 0.35),
+                    fontSize: 16,
+                    color: accountSetupMuted,
                   ),
                 ),
               ),
             ),
-          ),
-          SizedBox(width: 10.w),
-          GestureDetector(
-            onTap: enabled ? onSend : null,
-            child: Opacity(
-              opacity: enabled ? 1 : 0.45,
-              child: Container(
-                width: 48.w,
-                height: 48.w,
-                decoration: const BoxDecoration(
-                  color: AppColors.teal,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.arrow_upward_rounded,
-                  color: AppColors.white,
-                  size: 22.w,
+            GestureDetector(
+              onTap: sendEnabled ? onSend : null,
+              child: Opacity(
+                opacity: sendEnabled ? 1 : 0.45,
+                child: Container(
+                  width: 42,
+                  height: 42,
+                  decoration: const BoxDecoration(
+                    color: AppColors.teal,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.send_rounded,
+                    color: Colors.white,
+                    size: 18,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -598,15 +633,7 @@ class _AccountSetupChipIcon extends StatelessWidget {
       height: size,
       fit: BoxFit.contain,
       errorBuilder: (_, _, _) {
-        return Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            color: AppColors.lighttealcolor,
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-          child: Icon(Icons.category_outlined, size: size * 0.6, color: AppColors.teal),
-        );
+        return Icon(Icons.category_outlined, size: size * 0.7, color: AppColors.teal);
       },
     );
   }

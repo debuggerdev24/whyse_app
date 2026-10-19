@@ -9,7 +9,6 @@ import 'package:redstreakapp/core/enums/app_enums.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/core/utils/de_bouncing.dart';
 import 'package:redstreakapp/core/widgets/app_button.dart';
-import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
@@ -36,16 +35,19 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
 
     return PopScope(
       canPop: pr.isCreateStoryLoading ? false : true,
-      child: AppLayout(
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF5F5F7),
         resizeToAvoidBottomInset: false,
         body: SafeArea(
           bottom: false,
           child: Consumer<StoryProvider>(
             builder: (context, provider, child) {
-              return Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
-                child: SingleChildScrollView(
-                  child: Column(
+              return Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                      child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // HEADER
@@ -60,65 +62,40 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                       /// TITLE
                       AppText(
                         text: "Set Your Daily Reading Goal",
-                        style: AppTextStyles.bold(height: 1.2, fontSize: 32.sp),
+                        style: AppTextStyles.bold(
+                          height: 1.15,
+                          fontSize: 30,
+                          color: const Color(0xFF1C1C1E),
+                        ),
                       ),
 
-                      6.w.verticalSpace,
+                      const SizedBox(height: 8),
 
                       AppText(
                         text:
-                            "Choose how much time you want to read \neach day to keep your streak alive and earn rewards.",
-                        style: AppTextStyles.medium(
-                          fontSize: 16.sp,
-                          color: AppColors.black.withValues(alpha: 0.8),
-                        ),
+                            "Choose how much time you want to read each day to keep your streak alive and earn rewards.",
+                        style: AppTextStyles.regular(
+                          fontSize: 15,
+                          color: const Color(0xFF8E8E93),
+                        ).copyWith(height: 1.35),
                       ),
 
-                      18.w.verticalSpace,
+                      const SizedBox(height: 18),
 
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(
-                              color: AppColors.black.withValues(alpha: 0.1),
-                            ),
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: List.generate(
-                              provider.readingDurations.length,
-                              (index) {
-                                final option = provider.readingDurations[index];
-                                final isSelected =
-                                    provider.selectedReadingDuration == option;
-                                return Row(
-                                  children: [
-                                    _buildOptionButton(
-                                      text: option,
-                                      isSelected: isSelected,
-                                      onTap: (String text) {
-                                        provider.setSelectedReadingDuration =
-                                            text;
-                                      },
-                                    ),
-                                    if (index !=
-                                        provider.readingDurations.length - 1)
-                                      Container(
-                                        width: 1.w,
-                                        height: 22.h,
-                                        color: Colors.grey.withValues(
-                                          alpha: 0.3,
-                                        ),
-                                      ),
-                                  ],
-                                );
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          for (final option in provider.readingDurations)
+                            _buildOptionButton(
+                              text: _durationLabel(option),
+                              isSelected:
+                                  provider.selectedReadingDuration == option,
+                              onTap: (_) {
+                                provider.setSelectedReadingDuration = option;
                               },
                             ),
-                          ),
-                        ),
+                        ],
                       ),
                       if (provider.selectedReadingDuration.toLowerCase() ==
                           AppEnum.custom.name) ...[
@@ -171,11 +148,21 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                         },
                       ),
 
-                      AppFilledButton(
-                        margin: EdgeInsets.only(top: 20.h),
-                        text: "Generate",
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  20,
+                  8,
+                  20,
+                  MediaQuery.paddingOf(context).bottom + 12,
+                ),
+                child: AppFilledButton(
+                        text: "Next",
 
-                        backgroundColor: AppColors.orangeColor,
+                        backgroundColor: AppColors.teal,
                         onTap: () {
                           deBouncer.run(() {
                             // if (!provider.validateCreateStoryInput(context)) {
@@ -226,15 +213,27 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                           });
                         },
                       ),
-                    ],
-                  ),
-                ),
+              ),
+                ],
               );
             },
           ),
         ),
       ),
     );
+  }
+
+  String _durationLabel(String value) {
+    switch (value.toLowerCase()) {
+      case '5 mins':
+        return '5 Mins';
+      case '10 mins':
+        return '10 Mins';
+      case '20 mins':
+        return '20 Mins';
+      default:
+        return value;
+    }
   }
 
   Widget _buildOptionButton({
@@ -246,19 +245,20 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
       onTap: () => onTap.call(text),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(horizontal: 17.w, vertical: 12.h),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
 
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.teal : Colors.transparent,
-          borderRadius: BorderRadius.circular(12.r),
+          color: isSelected ? AppColors.teal : Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+            color: isSelected ? AppColors.teal : const Color(0xFFE4E4E4),
+          ),
         ),
         child: AppText(
           text: text,
           style: AppTextStyles.semibold(
-            fontSize: isSelected ? 15.sp : 13.sp,
-            color: isSelected
-                ? Colors.white
-                : AppColors.black.withValues(alpha: 0.3),
+            fontSize: 14,
+            color: isSelected ? Colors.white : const Color(0xFF1C1C1E),
           ),
         ),
       ),

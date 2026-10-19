@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
-import 'package:redstreakapp/core/widgets/app_layout.dart';
+import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 
 import '../../../core/constants/app_color.dart';
 import '../../../core/constants/text_style.dart';
@@ -31,7 +31,8 @@ class StoryGoalsScreen extends StatefulWidget {
 class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
   @override
   Widget build(BuildContext context) {
-    return AppLayout(
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F7),
       body: SafeArea(
         child: Consumer<StoryProvider>(
           builder: (context, provider, child) {
@@ -41,7 +42,7 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
             final goalsList = provider.goalsList;
 
             return Padding(
-              padding: EdgeInsets.fromLTRB(25.w, 10.w, 25.w, 0),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -103,16 +104,19 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                     // },
                     child: AppText(
                       text: "What's Your Goal?",
-                      style: AppTextStyles.bold(fontSize: 32.sp),
+                      style: AppTextStyles.bold(
+                        fontSize: 30,
+                        color: const Color(0xFF1C1C1E),
+                      ),
                     ),
                   ),
-                  10.w.verticalSpace,
+                  const SizedBox(height: 8),
                   AppText(
                     text:
                         "Choose what motivates you most — we'll help you reach it.",
-                    style: AppTextStyles.medium(
-                      fontSize: 16.sp,
-                      color: AppColors.black.withValues(alpha: 0.8),
+                    style: AppTextStyles.regular(
+                      fontSize: 15,
+                      color: const Color(0xFF8E8E93),
                     ),
                   ),
 
@@ -123,8 +127,9 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                   else
                     Expanded(
                       child: ListView.separated(
-                        itemCount: provider.goalsList.length, //+1
-                        separatorBuilder: (context, index) => 8.w.verticalSpace,
+                        itemCount: provider.goalsList.length + 1,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 10),
                         itemBuilder: (context, index) {
                           // todo Custom Goal Field at the bottom
                           // if (index == goalsList.length) {
@@ -155,6 +160,31 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                           //   );
                           // }
 
+                          if (index == goalsList.length) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: AppTextField(
+                                controller: provider.goalTitleController,
+                                hintText: "Add Custom Goal...",
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide.none,
+                                ),
+                                onTap: () {
+                                  if (!provider.isCustomGoalSelected) {
+                                    provider.toggleCustomGoal();
+                                  }
+                                },
+                              ),
+                              ),
+                            );
+                          }
+
                           final goal = goalsList[index];
 
                           final isSelected = provider.selectedGoalIds.contains(
@@ -166,18 +196,19 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                               provider.toggleGoal(goal.id);
                             },
                             child: Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 16.w,
-                                vertical: 13.h,
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
                               ),
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(12.r),
+                                borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
                                   color: isSelected
                                       ? AppColors.teal
-                                      : AppColors.black.withValues(alpha: 0.15),
-                                  width: 1.w,
+                                      : Colors.transparent,
+                                  width: 1.6,
                                 ),
                               ),
                               child: Column(
@@ -186,18 +217,18 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                                   AppText(
                                     text: goal.title,
                                     style: AppTextStyles.bold(
-                                      fontSize: 14.sp,
-                                      color: AppColors.black,
+                                      fontSize: 16,
+                                      color: const Color(0xFF1C1C1E),
                                     ),
                                   ),
                                   if (goal.description.isNotEmpty) ...[
-                                    3.w.verticalSpace,
+                                    const SizedBox(height: 4),
                                     AppText(
                                       text: goal.description,
                                       style: AppTextStyles.regular(
-                                        fontSize: 14.sp,
-                                        color: AppColors.black,
-                                      ),
+                                        fontSize: 14,
+                                        color: const Color(0xFF8E8E93),
+                                      ).copyWith(height: 1.3),
                                     ),
                                   ],
                                 ],
@@ -209,9 +240,9 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                     ),
 
                   AppFilledButton(
-                    text: "Next",
+                    text: "Continue",
                     margin: EdgeInsets.only(bottom: (Platform.isIOS) ? 0.w : 18.w),
-                    backgroundColor: AppColors.orangeColor,
+                    backgroundColor: AppColors.teal,
                     onTap: () async {
                       final goalText = provider.goalTitleController.text.trim();
                       final goalDesText = provider.goalDesController.text
