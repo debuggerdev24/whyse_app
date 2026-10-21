@@ -21,6 +21,7 @@ import 'package:redstreakapp/providers/friend/friend_provider.dart';
 import 'package:redstreakapp/providers/explore/explore_provider.dart';
 import 'package:redstreakapp/providers/profile/your_books_provider.dart';
 import 'package:redstreakapp/providers/gamification/gamification_provider.dart';
+import 'package:redstreakapp/providers/theme/app_theme_provider.dart';
 import 'package:redstreakapp/services/curiosity_reading/curiosity_reading_service.dart';
 import 'package:redstreakapp/services/gamification/gamification_api_service.dart';
 import 'package:redstreakapp/services/profile/group_api_service.dart';
@@ -41,6 +42,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(lazy: false, create: (_) => AppThemeProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => StoryProvider()),
         ChangeNotifierProvider(create: (_) => ReadingAppearanceProvider()),

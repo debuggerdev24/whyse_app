@@ -340,7 +340,7 @@ class AccountSetupInterestChip extends StatelessWidget {
               Container(
                 width: 24,
                 height: 24,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: AppColors.teal,
                   shape: BoxShape.circle,
                 ),
@@ -584,7 +584,7 @@ class AccountSetupInputBar extends StatelessWidget {
                 child: Container(
                   width: 42,
                   height: 42,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: AppColors.teal,
                     shape: BoxShape.circle,
                   ),

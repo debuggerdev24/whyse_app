@@ -93,7 +93,7 @@ class _GoalScreenState extends State<GoalScreen> {
                       18.w.verticalSpace,
 
                       if (provider.isLoadingGoals)
-                        const Expanded(
+                        Expanded(
                           child: Center(
                             child: CircularProgressIndicator(
                               color: AppColors.teal,

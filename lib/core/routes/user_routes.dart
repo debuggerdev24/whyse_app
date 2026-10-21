@@ -55,6 +55,7 @@ enum AppRoutes {
   profileScreen,
   settingsScreen,
   preferencesScreen,
+  themesScreen,
   settingsNotificationScreen,
   editProfileScreen,
   verifyProfileContactScreen,

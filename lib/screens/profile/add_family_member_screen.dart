@@ -182,7 +182,7 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
                     child: SizedBox(
                       width: 24.sp,
                       height: 24.sp,
-                      child: const CircularProgressIndicator(
+                      child: CircularProgressIndicator(
                         strokeWidth: 2.5,
                         color: AppColors.teal,
                       ),

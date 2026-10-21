@@ -71,7 +71,7 @@ class _RankingRow extends StatelessWidget {
         Container(
           width: 32.w,
           height: 32.w,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: AppColors.extealighttealcolor,
           ),
@@ -88,7 +88,7 @@ class _RankingRow extends StatelessWidget {
         Container(
           width: 40.w,
           height: 40.w,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: AppColors.lighttealcolor,
           ),

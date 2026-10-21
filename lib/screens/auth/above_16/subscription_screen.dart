@@ -26,7 +26,7 @@ class _SubScriptionScreenState extends State<SubScriptionScreen> {
     final top = MediaQuery.paddingOf(context).top;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F7),
+      backgroundColor: AppColors.backgroundColor,
       body: Consumer<AuthProvider>(
         builder: (context, provider, child) => Stack(
           children: [

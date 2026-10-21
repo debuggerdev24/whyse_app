@@ -1,8 +1,8 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 
-const Color explorePageColor = Color(0xFFF2F2F7);
-const Color exploreTeal = Color(0xFF1B8A82);
+Color get explorePageColor => AppColors.backgroundColor;
+Color get exploreTeal => AppColors.teal;
 
 Color parseInterestColor(String raw) {
   var hex = raw.trim();

@@ -722,9 +722,9 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
       case OnboardingChatItemType.interestPicker:
         if (!item.isActive) return const SizedBox.shrink();
         if (auth.isLoadingInterests) {
-          return const Center(
+          return Center(
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: CircularProgressIndicator(color: AppColors.teal),
             ),
           );
@@ -764,9 +764,9 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
       case OnboardingChatItemType.topicPicker:
         if (!item.isActive) return const SizedBox.shrink();
         if (auth.isLoadingTopics) {
-          return const Center(
+          return Center(
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: CircularProgressIndicator(color: AppColors.teal),
             ),
           );
@@ -809,9 +809,9 @@ class _AccountSetupScreenState extends State<AccountSetupScreen> {
       case OnboardingChatItemType.goalPicker:
         if (!item.isActive) return const SizedBox.shrink();
         if (auth.isLoadingGoals) {
-          return const Center(
+          return Center(
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: CircularProgressIndicator(color: AppColors.teal),
             ),
           );

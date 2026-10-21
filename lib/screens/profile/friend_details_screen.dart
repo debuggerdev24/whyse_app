@@ -78,7 +78,7 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F7),
+      backgroundColor: AppColors.backgroundColor,
       body: FutureBuilder<FriendDetailsData>(
         future: _detailsFuture,
         builder: (context, snapshot) {
@@ -433,9 +433,9 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
         onPressed: null,
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.teal,
-          backgroundColor: const Color(0xFFDDF4F1),
+          backgroundColor: AppColors.extealighttealcolor,
           disabledForegroundColor: AppColors.teal,
-          disabledBackgroundColor: const Color(0xFFDDF4F1),
+          disabledBackgroundColor: AppColors.extealighttealcolor,
           side: BorderSide.none,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(28),

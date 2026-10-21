@@ -763,8 +763,8 @@ class _BottomPrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return _GlassPillButton(
       onTap: onTap,
-      tint: const Color(0xFF167C80),
-      shine: const Color(0xFF1A8A8E),
+      tint: AppColors.teal,
+      shine: Color.lerp(AppColors.teal, Colors.white, 0.18)!,
       borderColor: const Color(0x33FFFFFF),
       shadowColor: const Color(0x1A000000),
       child: AppText(

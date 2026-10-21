@@ -359,7 +359,7 @@ class _SparkPageDots extends StatelessWidget {
             height: 6.w,
             decoration: BoxDecoration(
               color: i == active
-                  ? const Color(0xFF22B56E)
+                  ? AppColors.highlight
                   : const Color(0xFFD5D5DA),
               borderRadius: BorderRadius.circular(8.r),
             ),

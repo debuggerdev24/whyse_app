@@ -1,16 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:redstreakapp/core/theme/app_theme_palette.dart';
 
 class AppColors {
   AppColors._();
 
-  // Login screen colors
-  static const Color teal = Color(0xFF167C80);
+  static AppThemePalette _active = AppThemes.ocean;
+
+  static void apply(AppThemePalette palette) {
+    _active = palette;
+  }
+
+  // Login screen colors. Primary tones follow the selected light theme.
+  static Color get teal => _active.primary;
+  static Color get highlight => _active.highlight;
+  static Color get lighttealcolor => _active.primaryLight;
+  static Color get extealighttealcolor => _active.primaryWash;
+  static Color get backgroundColor => _active.background;
+
   static const Color darkGrey = Color(0xFF4A4A4A);
   static const Color black = Color(0xFF1A1A1A);
   static const Color lightblackColor = Color(0xFF1E1E1E);
 
   static const Color white = Color(0xFFFFFFFF);
-  static const Color backgroundColor = Color(0xFFFAFAFA);
   static const Color searchBackgroundColor = Color(0xFFF1F1F1);
 
   static const Color orangeColor = Color(0xFFF28518);
@@ -23,8 +34,6 @@ class AppColors {
   static const Color greenColor = Color(0xFF1EA437);
   static const Color darkgreenColor = Color(0xFF0CBA65);
 
-  static const Color lighttealcolor = Color(0xFFCFE5E5);
-  static const Color extealighttealcolor = Color(0xFFE4EFF0);
   static const Color redColor = Color(0xFFE52222);
   static const Color indicatorColor = Color(0xff030C09);
 

@@ -5,7 +5,6 @@ import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/chat/chat_history_model.dart';
 
-const Color _chatBackground = Color(0xFFF2F2F7);
 const Color _chatInk = Color(0xFF1A1A1A);
 
 class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -698,7 +697,7 @@ class ChatEmptyState extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      const Icon(
+                      Icon(
                         Icons.arrow_forward_rounded,
                         size: 18,
                         color: AppColors.teal,
@@ -848,7 +847,7 @@ class ChatInputBar extends StatelessWidget {
               child: Container(
                 width: 40,
                 height: 40,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: AppColors.teal,
                   shape: BoxShape.circle,
                 ),
@@ -903,4 +902,4 @@ Shader _fadeShader(Rect bounds) {
   ).createShader(bounds);
 }
 
-Color get chatBackgroundColor => _chatBackground;
+Color get chatBackgroundColor => AppColors.backgroundColor;

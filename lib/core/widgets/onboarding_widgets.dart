@@ -144,7 +144,7 @@ class SelectionOption extends StatelessWidget {
               Container(
                 width: 24,
                 height: 24,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: AppColors.teal,
                   shape: BoxShape.circle,
                 ),
@@ -290,7 +290,7 @@ class OptionCard extends StatelessWidget {
     if (isChecked) {
       if (isCorrect) {
         borderColor = AppColors.teal;
-        backgroundColor = const Color(0xFFE0F2F1);
+        backgroundColor = AppColors.extealighttealcolor;
         textColor = AppColors.teal;
         trailingIcon = SvgIcon(AppAssets.correctoption, size: 22);
       } else if (isSelected && !isCorrect) {
@@ -305,7 +305,7 @@ class OptionCard extends StatelessWidget {
       }
     } else if (isSelected) {
       borderColor = AppColors.teal;
-      backgroundColor = const Color(0xFFE0F2F1);
+      backgroundColor = AppColors.extealighttealcolor;
       textColor = AppColors.teal;
     }
 

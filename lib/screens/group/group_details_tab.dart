@@ -105,7 +105,7 @@ class GroupDetailsTabBody extends StatelessWidget {
               if (desc == null || desc.isEmpty) {
                 return const SizedBox.shrink();
               }
-              return Column(
+              return Column(  
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _DescriptionCard(description: desc),
@@ -445,7 +445,7 @@ class _MemberTag extends StatelessWidget {
       ),
       _MemberTagType.owner => (
         'Owner',
-        const Color(0xFFE7F6F4),
+        AppColors.extealighttealcolor,
         AppColors.teal,
       ),
       _MemberTagType.member => (

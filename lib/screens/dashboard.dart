@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/widgets/glass_icon_button.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
+import 'package:redstreakapp/core/theme/theme_refresh.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
@@ -16,6 +17,7 @@ import 'package:redstreakapp/providers/home/home_provider.dart';
 import 'package:redstreakapp/providers/home/saved_series_provider.dart';
 import 'package:redstreakapp/providers/home/story_provider.dart';
 import 'package:redstreakapp/providers/profile/profile_provider.dart';
+import 'package:redstreakapp/providers/theme/app_theme_provider.dart';
 import 'package:redstreakapp/core/routes/app_router.dart';
 
 ValueNotifier<int> tabIndex = ValueNotifier<int>(0);
@@ -76,6 +78,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
 
   @override
   Widget build(BuildContext context) {
+    final themeId = context.watch<AppThemeProvider>().palette.id;
     return ValueListenableBuilder<int>(
       valueListenable: tabIndex,
       builder: (context, value, child) => Scaffold(
@@ -91,7 +94,10 @@ class _UserDashBoardState extends State<UserDashBoard> {
                       bottom: media.viewPadding.bottom + 96,
                     ),
                   ),
-                  child: widget.navigationShell,
+                  child: ThemeRefresh(
+                    themeId: themeId,
+                    child: widget.navigationShell,
+                  ),
                 ),
                 Positioned(
                   left: 0,
@@ -180,7 +186,7 @@ class _GlassNavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? const Color(0xFF1C1C1E) : const Color(0xFF8E8E93);
+    final color = selected ? AppColors.teal : const Color(0xFF8E8E93);
 
     return GestureDetector(
       onTap: onTap,
@@ -195,9 +201,9 @@ class _GlassNavItem extends StatelessWidget {
             height: selected ? 64 : 0,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFF8E8E93).withValues(
-                alpha: selected ? 0.30 : 0,
-              ),
+              color: selected
+                  ? AppColors.extealighttealcolor
+                  : Colors.transparent,
             ),
           ),
           Column(

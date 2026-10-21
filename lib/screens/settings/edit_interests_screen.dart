@@ -176,7 +176,7 @@ class _EditInterestsScreenState extends State<EditInterestsScreen> {
       body: Consumer<AuthProvider>(
         builder: (context, provider, child) {
           if (provider.isLoadingInterests) {
-            return const Center(
+            return Center(
               child: CircularProgressIndicator(color: AppColors.teal),
             );
           }

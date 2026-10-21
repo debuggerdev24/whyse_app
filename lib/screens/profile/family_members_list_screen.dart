@@ -90,7 +90,7 @@ class _FamilyMembersListScreenState extends State<FamilyMembersListScreen> {
                             child: SizedBox(
                               width: 24,
                               height: 24,
-                              child: const CircularProgressIndicator(
+                              child: CircularProgressIndicator(
                                 strokeWidth: 2.5,
                                 color: AppColors.teal,
                               ),
@@ -329,7 +329,7 @@ class _FamilyMemberTileState extends State<_FamilyMemberTile> {
                         vertical: 2.h,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFDDF4F1),
+                        color: AppColors.extealighttealcolor,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: AppText(
@@ -350,7 +350,7 @@ class _FamilyMemberTileState extends State<_FamilyMemberTile> {
             _ActionChip(
               label: 'Edit',
               foregroundColor: AppColors.teal,
-              backgroundColor: const Color(0xFFDDF4F1),
+              backgroundColor: AppColors.extealighttealcolor,
               onTap: _showEditSheet,
             ),
             SizedBox(width: 8.w),

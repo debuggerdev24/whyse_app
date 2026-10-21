@@ -1,5 +1,6 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
+import 'package:redstreakapp/providers/theme/app_theme_provider.dart';
 import 'package:redstreakapp/screens/settings/widget/settings_chrome.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -73,7 +74,11 @@ class SettingsScreen extends StatelessWidget {
                 context.pushNamed(AppRoutes.settingsNotificationScreen.name),
           ),
           SettingsNavRow(title: 'Curriculum', onTap: () {}),
-          SettingsNavRow(title: 'Theme', onTap: () {}),
+          SettingsNavRow(
+            title: 'Theme',
+            subtitle: context.watch<AppThemeProvider>().palette.name,
+            onTap: () => context.pushNamed(AppRoutes.themesScreen.name),
+          ),
           const SizedBox(height: 6),
           const SettingsDivider(),
           const SizedBox(height: 18),

@@ -58,7 +58,7 @@ class _UnifiedGroupScreenState extends State<UnifiedGroupScreen>
     final top = MediaQuery.paddingOf(context).top;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F7),
+      backgroundColor: AppColors.backgroundColor,
       body: Column(
         children: [
           Padding(
@@ -524,8 +524,8 @@ class _GroupFeedCard extends StatelessWidget {
                     errorBuilder: (_, _, _) => Container(
                       width: 28,
                       height: 28,
-                      color: const Color(0xFFDDF4F1),
-                      child: const Icon(Icons.person, size: 16, color: AppColors.teal),
+                      color: AppColors.extealighttealcolor,
+                      child: Icon(Icons.person, size: 16, color: AppColors.teal),
                     ),
                   ),
                 ),
@@ -734,7 +734,7 @@ class _StreakRankingRow extends StatelessWidget {
             width: rankSize,
             height: rankSize,
             alignment: Alignment.center,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: AppColors.extealighttealcolor,
             ),

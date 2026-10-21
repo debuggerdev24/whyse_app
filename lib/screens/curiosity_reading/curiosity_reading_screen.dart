@@ -129,7 +129,7 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
           statusBarColor: Colors.transparent,
         ),
         child: Scaffold(
-          backgroundColor: const Color(0xFFF2F2F7),
+          backgroundColor: AppColors.backgroundColor,
           body: Consumer<CuriosityReadingProvider>(
           builder: (context, provider, child) {
             if (provider.isGettingCuriosityReading ||

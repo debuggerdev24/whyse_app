@@ -1375,7 +1375,7 @@ class _SavedSeriesCard extends StatelessWidget {
                       ),
                       alignment: Alignment.center,
                       child: isToggling
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 16,
                               height: 16,
                               child: CircularProgressIndicator(

@@ -37,7 +37,7 @@ class _StoryInterestsScreenState extends State<StoryInterestsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F7),
+      backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
         bottom: (Platform.isIOS) ? false : true,
         child: Consumer<StoryProvider>(

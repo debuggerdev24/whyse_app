@@ -59,11 +59,11 @@ class CustomBackAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Color backgroundColor;
   final VoidCallback? onBack;
 
-  const CustomBackAppBar({
+  CustomBackAppBar({
     super.key,
-    this.backgroundColor = AppColors.backgroundColor,
+    Color? backgroundColor,
     this.onBack,
-  });
+  }) : backgroundColor = backgroundColor ?? AppColors.backgroundColor;
 
   @override
   Widget build(BuildContext context) {

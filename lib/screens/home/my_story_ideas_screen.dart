@@ -369,7 +369,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
         _handleBack();
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFF2F2F7),
+        backgroundColor: AppColors.backgroundColor,
         body: Consumer2<HomeProvider, StoryProvider>(
           builder: (context, homeProvider, storyProvider, child) {
             final generatedSummary = _mapGeneratedIdeasToSummary(
@@ -876,14 +876,14 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 5, 10, 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFE0F2F1),
+        color: AppColors.extealighttealcolor,
         borderRadius: BorderRadius.circular(40),
       ),
       child: AppText(
         text: label,
         style: AppTextStyles.medium(
           fontSize: 12,
-          color: const Color(0xFF167C80),
+          color: AppColors.teal,
         ),
       ),
     );
@@ -1231,7 +1231,7 @@ class _ReadingProgressIndicator extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: AppTextStyles.bold(
               fontSize: 12,
-              color: const Color(0xFF167C80),
+              color: AppColors.teal,
             ).copyWith(height: 14 / 12),
           ),
         ),
@@ -1379,14 +1379,14 @@ class _StoryIdeaDetailsBottomSheet extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.fromLTRB(10, 5, 10, 6),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE0F2F1),
+                          color: AppColors.extealighttealcolor,
                           borderRadius: BorderRadius.circular(40),
                         ),
                         child: AppText(
                           text: tag,
                           style: AppTextStyles.medium(
                             fontSize: 12,
-                            color: const Color(0xFF167C80),
+                            color: AppColors.teal,
                           ),
                         ),
                       ),

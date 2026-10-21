@@ -244,8 +244,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     messages.isNotEmpty;
                 final overlayHeight =
                     ChatInputBar.height + (showSuggestions ? 138 : 0);
-                final listBottom =
-                    composerBottom + overlayHeight - (showSuggestions ? 0 : 28);
+                // The field is translucent, so the list must clear its full
+                // height or the last line sits underneath it.
+                final listBottom = composerBottom + overlayHeight + 16;
 
                 return NotificationListener<ScrollNotification>(
                   onNotification: _onScroll,

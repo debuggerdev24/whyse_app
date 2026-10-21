@@ -1,7 +1,9 @@
 import 'package:redstreakapp/core/auth/session_expiry_notifier.dart';
 import 'package:redstreakapp/core/session/app_session_reset.dart';
+import 'package:redstreakapp/core/theme/theme_refresh.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
+import 'package:redstreakapp/providers/theme/app_theme_provider.dart';
 import 'package:redstreakapp/services/deep_link/deep_link_handler.dart';
 
 class WhyseApp extends StatefulWidget {
@@ -54,6 +56,8 @@ class _WhyseAppState extends State<WhyseApp> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.watch<AppThemeProvider>().palette;
+
     return ScreenUtilInit(
       designSize: const Size(402, 874),
       minTextAdapt: true,
@@ -61,9 +65,15 @@ class _WhyseAppState extends State<WhyseApp> {
       builder: (context, child) {
         return MaterialApp.router(
           theme: ThemeData(
-            scaffoldBackgroundColor: AppColors.backgroundColor,
+            brightness: Brightness.light,
+            scaffoldBackgroundColor: palette.background,
+            colorScheme: ColorScheme.light(
+              primary: palette.primary,
+              secondary: palette.highlight,
+              surface: Colors.white,
+            ),
             appBarTheme: AppBarTheme(
-              systemOverlayStyle: SystemUiOverlayStyle(
+              systemOverlayStyle: const SystemUiOverlayStyle(
                 statusBarColor: Colors.transparent,
                 statusBarIconBrightness: Brightness.dark,
               ),
@@ -77,6 +87,12 @@ class _WhyseAppState extends State<WhyseApp> {
               ),
             ),
           ),
+          builder: (context, navChild) {
+            return ThemeRefresh(
+              themeId: palette.id,
+              child: navChild ?? const SizedBox.shrink(),
+            );
+          },
           debugShowCheckedModeBanner: false,
           routerConfig: AppRouter.goRouter,
         );

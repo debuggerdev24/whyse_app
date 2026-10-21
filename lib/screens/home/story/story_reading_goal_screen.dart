@@ -36,7 +36,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
     return PopScope(
       canPop: pr.isCreateStoryLoading ? false : true,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F5F7),
+        backgroundColor: AppColors.backgroundColor,
         resizeToAvoidBottomInset: false,
         body: SafeArea(
           bottom: false,

@@ -42,7 +42,7 @@ class _SparkSessionCompletedPage extends StatelessWidget {
     return PopScope(
       canPop: false,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF7F7F8),
+        backgroundColor: AppColors.backgroundColor,
         body: SafeArea(
           child: Padding(
             padding: EdgeInsets.fromLTRB(16, 8, 16, bottom > 0 ? 8 : 16),

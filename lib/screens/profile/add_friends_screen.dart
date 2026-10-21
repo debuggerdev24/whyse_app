@@ -406,7 +406,7 @@ class _UserTile extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 14.w),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: isSent ? const Color(0xFFDDF4F1) : settingsInk,
+                color: isSent ? AppColors.extealighttealcolor : settingsInk,
                 borderRadius: BorderRadius.circular(17),
               ),
               child: AppText(

@@ -3,7 +3,8 @@ import 'dart:math' as math;
 import 'package:redstreakapp/core/utils/app_imports.dart';
 
 const Color profileViewAllColor = Color(0xFFF6A01A);
-const Color profileMintFill = Color(0xFFDDF4F1);
+
+Color get profileMintFill => AppColors.extealighttealcolor;
 
 class ProfileDashedAddButton extends StatelessWidget {
   const ProfileDashedAddButton({super.key, required this.onTap});
@@ -17,7 +18,7 @@ class ProfileDashedAddButton extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: CustomPaint(
-        painter: const _DashedCirclePainter(color: AppColors.teal),
+        painter: _DashedCirclePainter(color: AppColors.teal),
         child: SizedBox(
           width: size,
           height: size,

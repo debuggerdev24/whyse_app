@@ -54,7 +54,7 @@ class PlanCard extends StatelessWidget {
                       padding: const EdgeInsets.only(bottom: 4),
                       child: Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.check_rounded,
                             size: 16,
                             color: AppColors.teal,
@@ -84,7 +84,7 @@ class PlanCard extends StatelessWidget {
                     width: 26,
                     height: 26,
                     margin: const EdgeInsets.only(bottom: 18),
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: AppColors.teal,
                       shape: BoxShape.circle,
                     ),

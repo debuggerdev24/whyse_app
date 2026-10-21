@@ -728,7 +728,7 @@ class ExploreSeriesCard extends StatelessWidget {
                     )
                   : FallbackTopicArt(
                       topic: topic,
-                      colors: const [AppColors.teal, AppColors.bluecolor],
+                      colors: [AppColors.teal, AppColors.bluecolor],
                     ),
             ),
             Expanded(

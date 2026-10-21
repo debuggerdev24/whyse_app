@@ -62,6 +62,7 @@ import 'package:redstreakapp/screens/settings/groups_notification_settings.dart'
 import 'package:redstreakapp/screens/settings/reminders_settings_screen.dart';
 import 'package:redstreakapp/screens/settings/settings_screen.dart';
 import 'package:redstreakapp/screens/settings/preferences_screen.dart';
+import 'package:redstreakapp/screens/settings/themes_screen.dart';
 import 'package:redstreakapp/screens/settings/settings_notification_screen.dart';
 import 'package:redstreakapp/screens/settings/edit_profile_screen.dart';
 import 'package:redstreakapp/screens/settings/verify_profile_contact_screen.dart';
@@ -641,6 +642,13 @@ class AppRouter {
           name: AppRoutes.preferencesScreen.name,
           builder: (context, state) {
             return const PreferencesScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.themesScreen.name,
+          name: AppRoutes.themesScreen.name,
+          builder: (context, state) {
+            return const ThemesScreen();
           },
         ),
         GoRoute(

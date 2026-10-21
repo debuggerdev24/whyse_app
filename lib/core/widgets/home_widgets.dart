@@ -63,7 +63,7 @@ class HomeHeader extends StatelessWidget {
                           text: '$name!',
                           style: AppTextStyles.bold(
                             fontSize: 20.sp,
-                            color: const Color(0xFF22B56E),
+                            color: AppColors.highlight,
                           ),
                         ),
                       ],

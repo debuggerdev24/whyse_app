@@ -146,7 +146,7 @@ class _UserProfileTopicsListScreenState extends State<UserProfileTopicsListScree
         itemCount: itemCount,
         itemBuilder: (context, index) {
           if (index == _topics.length) {
-            return const Center(
+            return Center(
               child: SizedBox(
                 width: 24,
                 height: 24,

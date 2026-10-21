@@ -1,6 +1,6 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
 
-const Color settingsPageColor = Color(0xFFF5F5F7);
+Color get settingsPageColor => AppColors.backgroundColor;
 const Color settingsInk = Color(0xFF1C1C1E);
 const Color settingsMuted = Color(0xFF8E8E93);
 const Color settingsLine = Color(0xFFE5E5EA);

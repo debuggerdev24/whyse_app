@@ -70,11 +70,11 @@ class _AchivementsScreenState extends State<AchivementsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F8),
+      backgroundColor: AppColors.backgroundColor,
       body: Consumer2<GamificationProvider, HomeProvider>(
         builder: (context, gp, home, _) {
           if (gp.isLoadingStreakScore && gp.streakScore == null) {
-            return const Center(
+            return Center(
               child: CircularProgressIndicator(color: AppColors.teal),
             );
           }

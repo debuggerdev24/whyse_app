@@ -112,7 +112,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F7),
+      backgroundColor: AppColors.backgroundColor,
       resizeToAvoidBottomInset: false,
       body: SafeArea(
         bottom: (Platform.isIOS) ? false : true,
