@@ -64,6 +64,7 @@ class _WhyseAppState extends State<WhyseApp> {
       splitScreenMode: true,
       builder: (context, child) {
         return MaterialApp.router(
+          title: 'Whyse',
           theme: ThemeData(
             brightness: Brightness.light,
             scaffoldBackgroundColor: palette.background,

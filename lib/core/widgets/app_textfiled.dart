@@ -39,6 +39,8 @@ class AppTextField extends StatelessWidget {
     this.onSubmit, this.onTapOutside,
     this.cursorColor,
     this.minLines,
+    this.fillColor,
+    this.focusedBorder,
   });
 
   final String? labelText;
@@ -70,6 +72,8 @@ class AppTextField extends StatelessWidget {
   final ValueChanged<String>? onSubmit;
   final Function()? onTapOutside;
   final Color? cursorColor;
+  final Color? fillColor;
+  final InputBorder? focusedBorder;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -104,7 +108,8 @@ class AppTextField extends StatelessWidget {
               color: AppColors.redColor,
               fontSize: 14.sp,
             ),
-            filled: false,
+            filled: fillColor != null,
+            fillColor: fillColor,
             prefixIcon: prefixIcon,
             prefixText: prefixText,
             prefixStyle: style,
@@ -132,6 +137,7 @@ class AppTextField extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12.r),
                 ),
             focusedBorder:
+                focusedBorder ??
                 border ??
                 OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),

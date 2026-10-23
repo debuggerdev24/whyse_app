@@ -97,6 +97,7 @@ class AppAssets {
   static const story3 = "$_imagePath/story3.png";
   static const robot = "$_imagePath/robot.png";
   static const quizcomplete = "$_imagePath/quizcomplete.png";
+  static const whyseLogo = "$_imagePath/whyse_logo 1.png";
 
   static const book1 = "$_imagePath/book.png";
 

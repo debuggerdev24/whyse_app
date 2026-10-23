@@ -3,13 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
-import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/utils/custom_loader.dart';
-import 'package:redstreakapp/core/widgets/app_button.dart';
-import 'package:redstreakapp/core/widgets/app_text.dart';
-import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
+import 'package:redstreakapp/screens/auth/widgets/auth_chrome.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 
@@ -36,160 +33,92 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+      backgroundColor: AuthChrome.background,
       body: SafeArea(
         child: Consumer<AuthProvider>(
           builder: (context, provider, child) => Stack(
             children: [
-              Center(
-                child: SingleChildScrollView(
-                  // height:
-                  //     MediaQuery.of(context).size.height -
-                  //     MediaQuery.of(context).padding.top,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 24.w,
-                    vertical: 30.h,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SvgIcon(AppAssets.welcome),
-                      20.w.verticalSpace,
-
-                      AppText(
-                        text: 'Welcome Back!',
-                        style: AppTextStyles.bold(
-                          fontSize: 32.sp,
-                          color: AppColors.teal,
+              SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 24.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(child: AuthChrome.logo(width: 150.w)),
+                    18.h.verticalSpace,
+                    AuthChrome.titleText('Welcome back!'),
+                    8.h.verticalSpace,
+                    AuthChrome.subtitleText(
+                      'Sign in to continue your learning journey.',
+                    ),
+                    28.h.verticalSpace,
+                    AuthChrome.fieldLabel('Email ID'),
+                    8.h.verticalSpace,
+                    AuthChrome.textField(
+                      hintText: 'Enter email id',
+                      controller: provider.loginEmailCtr,
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    16.h.verticalSpace,
+                    AuthChrome.fieldLabel('Password'),
+                    8.h.verticalSpace,
+                    AuthChrome.textField(
+                      hintText: 'Enter password',
+                      controller: provider.loginPasswordCtr,
+                      obscureText: _isObscure,
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() => _isObscure = !_isObscure);
+                        },
+                        icon: SvgIcon(
+                          _isObscure ? AppAssets.password : AppAssets.eye,
+                          size: 22.w,
+                          color: const Color(0xFF8E8E93),
                         ),
                       ),
-                      10.w.verticalSpace,
-                      AppText(
-                        text: 'Login',
-                        style: AppTextStyles.semibold(
-                          fontSize: 16.sp,
-                          color: AppColors.black,
+                    ),
+                    8.h.verticalSpace,
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          context.pushNamed(
+                            AppRoutes.forgotPasswordScreen.name,
+                          );
+                          provider.forgotPasswordEmailCtr.clear();
+                        },
+                        child: Text(
+                          'Forget Password?',
+                          style: AppTextStyles.semibold(
+                            fontSize: 14.sp,
+                            color: AuthChrome.link,
+                          ),
                         ),
                       ),
-
-                      20.w.verticalSpace,
-
-                      Column(
-                        children: [
-                          AppTextField(
-                            hintText: "Email",
-                            controller: provider.loginEmailCtr,
-                          ),
-                          8.w.verticalSpace,
-                          AppTextField(
-                            hintText: "Password",
-                            obSecureText: _isObscure,
-                            controller: provider.loginPasswordCtr,
-                            suffixIcon: Padding(
-                              padding: const EdgeInsets.all(13.0),
-                              child: GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _isObscure = !_isObscure;
-                                  });
-                                },
-                                child: _isObscure
-                                    ? SvgIcon(
-                                        AppAssets.password,
-                                        size: 24.w,
-                                        color: AppColors.black,
-                                      )
-                                    : SvgIcon(
-                                        AppAssets.eye,
-                                        size: 24.w,
-                                        color: AppColors.black,
-                                      ),
-                              ),
-                            ),
-                          ),
-                          10.w.verticalSpace,
-
-                          Align(
-                            alignment: AlignmentGeometry.centerRight,
-                            child: GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: () {
-                                context.pushNamed(
-                                  AppRoutes.forgotPasswordScreen.name,
-                                );
-                                provider.forgotPasswordEmailCtr.clear();
-                              },
-                              child: Text(
-                                "Forget Password?",
-                                style: AppTextStyles.textStyle14Bold,
-                              ),
-                            ),
-                          ),
-                          32.w.verticalSpace,
-                          AppFilledButton(
-                            onTap: () async {
-                              await provider.loginWithMail(context: context);
-                              // if (success && context.mounted) {
-                              //   context.goNamed(AppRoutes.homeScreen.name);
-                              // }
-                            },
-                            text: "Login with Email",
-                          ),
-                        ],
-                      ),
-                      17.w.verticalSpace,
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Don't have an account? ",
-                            style: AppTextStyles.textStyle14Regular,
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              provider.clearLoginFields();
-                              context.pushNamed(AppRoutes.signUpScreen.name);
-                            },
-                            child: Text(
-                              'Create Account',
-                              style: AppTextStyles.textStyle14Bold,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      36.w.verticalSpace,
-
-                      // ---- OR Divider ----
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Divider(
-                              color: AppColors.black.withValues(alpha: 0.2),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16.w),
-                            child: Text(
-                              'OR',
-                              style: AppTextStyles.textStyle14Semibold,
-                            ),
-                          ),
-                          Expanded(
-                            child: Divider(
-                              color: AppColors.black.withValues(alpha: 0.2),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      32.w.verticalSpace,
-                      //todo Google Login
-                      _socialButton(
-                        label: "Login with Google",
-                        icon: AppAssets.google,
-                        onTap: () async {
+                    ),
+                    22.h.verticalSpace,
+                    AuthChrome.primaryButton(
+                      text: 'Login with Email',
+                      onTap: () async {
+                        await provider.loginWithMail(context: context);
+                      },
+                    ),
+                    16.h.verticalSpace,
+                    AuthChrome.footerLink(
+                      prefix: "Don't have an account? ",
+                      action: 'Create Account',
+                      onTap: () {
+                        provider.clearLoginFields();
+                        context.pushNamed(AppRoutes.signUpScreen.name);
+                      },
+                    ),
+                    22.h.verticalSpace,
+                    AuthChrome.orDivider(),
+                    22.h.verticalSpace,
+                    AuthChrome.socialButton(
+                      label: 'Login with Google',
+                      icon: SvgIcon(AppAssets.google, size: 20.sp),
+                      onTap: () async {
                           //todo getting id token
                           final idToken = await provider.getGoogleIDTokenForLogin();
                           if (idToken == null) {
@@ -243,51 +172,17 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                       ),
 
-                      8.w.verticalSpace,
-                      //todo Apple Login
-                      _socialButton(
-                        label: "Login with Apple",
-                        icon: AppAssets.apple,
-                        onTap: () {},
-                      ),
-                    ],
-                  ),
+                    12.h.verticalSpace,
+                    AuthChrome.socialButton(
+                      label: 'Login with Apple',
+                      icon: SvgIcon(AppAssets.apple, size: 20.sp),
+                      onTap: () {},
+                    ),
+                  ],
                 ),
               ),
               if (provider.isLoginLoading || provider.isSocialLoginLoading)
                 FullPageIndicator(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _socialButton({
-    required String label,
-    required String icon,
-    required VoidCallback onTap,
-  }) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.lightwhiteColor,
-        borderRadius: BorderRadius.circular(40.r),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(40.r),
-        onTap: onTap,
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 28.w),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: SvgIcon(icon, size: 20.sp),
-              ),
-
-              AppText(text: label, style: AppTextStyles.textStyle14Bold),
             ],
           ),
         ),

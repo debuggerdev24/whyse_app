@@ -2,16 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:redstreakapp/core/constants/app_assets.dart';
-import 'package:redstreakapp/core/constants/app_color.dart';
-import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/utils/custom_loader.dart';
 import 'package:redstreakapp/core/utils/de_bouncing.dart';
-import 'package:redstreakapp/core/widgets/app_button.dart';
-import 'package:redstreakapp/core/widgets/app_layout.dart';
-import 'package:redstreakapp/core/widgets/app_text.dart';
-import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
+import 'package:redstreakapp/screens/auth/widgets/auth_chrome.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 
 import '../../core/widgets/custom_toast.dart';
@@ -36,7 +30,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AppLayout(
+    return Scaffold(
+      backgroundColor: AuthChrome.background,
       body: SafeArea(
         child: Consumer<AuthProvider>(
           builder: (context, provider, child) {
@@ -47,97 +42,59 @@ class _SignupScreenState extends State<SignupScreen> {
                     // height:
                     //     MediaQuery.of(context).size.height -
                     //     MediaQuery.of(context).padding.top,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 24.w,
-                      vertical: 30.h,
-                    ),
+                    padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 24.h),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        88.w.verticalSpace,
-
-                        Column(
-                          children: [
-                            SvgIcon(AppAssets.welcome),
-                            30.w.verticalSpace,
-
-                            AppText(
-                              text: 'Welcome to',
-                              style: AppTextStyles.bold(
-                                fontSize: 32.sp,
-                                color: AppColors.teal,
-                              ),
-                            ),
-                            AppText(
-                              text: 'ReadStreakApp',
-                              style: AppTextStyles.bold(
-                                fontSize: 32.sp,
-                                color: AppColors.teal,
-                              ),
-                            ),
-
-                            15.w.verticalSpace,
-                            AppText(
-                              text: 'Read. Learn. Grow.',
-                              style: AppTextStyles.textStyle16Semibold,
-                            ),
-
-                            61.w.verticalSpace,
-
-                            AppTextField(
-                              hintText: "Email",
-                              controller: provider.signUpEmailCtr,
-                            ),
-
-                            32.w.verticalSpace,
-
-                            AppFilledButton(
-                              onTap: () async {
-                                deBouncer.run(() async {
-                                  await provider.startOnboarding(
-                                    context: context,
-                                    onSuccess: () {
-                                      AppToast.success(
-                                        context,
-                                        "Onboarding session started",
-                                      );
-                                      context.pushNamed(
-                                        AppRoutes.enterAgeScreen.name,
-                                      );
-                                    },
-
-                                    onFailed: (error) {
-                                      AppToast.error(context, error);
-                                    },
+                        AuthChrome.backButton(context),
+                        12.h.verticalSpace,
+                        Center(child: AuthChrome.logo(width: 150.w)),
+                        22.h.verticalSpace,
+                        AuthChrome.titleText('Welcome to Whyse'),
+                        8.h.verticalSpace,
+                        AuthChrome.subtitleText('Read. Learn. Grow.'),
+                        32.h.verticalSpace,
+                        AuthChrome.fieldLabel('Email ID'),
+                        8.h.verticalSpace,
+                        AuthChrome.textField(
+                          hintText: 'Enter email id',
+                          controller: provider.signUpEmailCtr,
+                          keyboardType: TextInputType.emailAddress,
+                        ),
+                        22.h.verticalSpace,
+                        AuthChrome.primaryButton(
+                          text: 'Sign up with Email',
+                          onTap: () async {
+                            deBouncer.run(() async {
+                              await provider.startOnboarding(
+                                context: context,
+                                onSuccess: () {
+                                  AppToast.success(
+                                    context,
+                                    "Onboarding session started",
                                   );
-                                });
-                              },
-                              text: "Sign up with Email",
-                            ),
-
-                            17.w.verticalSpace,
-
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                AppText(
-                                  text: "Already have an account? ",
-                                  style: AppTextStyles.textStyle14Regular,
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    context.pushNamed(
-                                      AppRoutes.loginScreen.name,
-                                    );
-                                  },
-                                  child: AppText(
-                                    text: "Login",
-                                    style: AppTextStyles.textStyle14Bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                                  context.pushNamed(
+                                    AppRoutes.enterAgeScreen.name,
+                                  );
+                                },
+                                onFailed: (error) {
+                                  AppToast.error(context, error);
+                                },
+                              );
+                            });
+                          },
+                        ),
+                        16.h.verticalSpace,
+                        AuthChrome.footerLink(
+                          prefix: 'Already have an account? ',
+                          action: 'Login',
+                          onTap: () {
+                            if (Navigator.of(context).canPop()) {
+                              context.pop();
+                              return;
+                            }
+                            context.goNamed(AppRoutes.loginScreen.name);
+                          },
                         ),
                         // 32.w.verticalSpace,
                         // Row(

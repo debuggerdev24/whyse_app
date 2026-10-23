@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:redstreakapp/core/constants/app_assets.dart';
-import 'package:redstreakapp/core/constants/app_color.dart';
+import 'package:redstreakapp/screens/auth/widgets/auth_chrome.dart';
 import 'package:redstreakapp/core/utils/shared_pref.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
@@ -107,11 +106,11 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.teal,
+      backgroundColor: AuthChrome.background,
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnimation,
-          child: SvgIcon(AppAssets.splascreen, size: 120.w),
+          child: AuthChrome.logo(width: 298.w),
         ),
       ),
     );

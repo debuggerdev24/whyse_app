@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:redstreakapp/core/constants/text_style.dart';
+import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/core/utils/field_validator.dart';
-import 'package:redstreakapp/core/widgets/app_button.dart';
-import 'package:redstreakapp/core/widgets/app_layout.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
+import 'package:redstreakapp/screens/auth/widgets/auth_chrome.dart';
 
-import '../../core/constants/app_color.dart';
 import '../../core/utils/custom_loader.dart';
 import '../../core/utils/de_bouncing.dart';
-import '../../core/widgets/app_textfiled.dart';
 import '../../providers/auth/auth_provider.dart';
 
 class ForgotPasswordScreen extends StatelessWidget {
@@ -18,39 +16,36 @@ class ForgotPasswordScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppLayout(
+    return Scaffold(
+      backgroundColor: AuthChrome.background,
       body: SafeArea(
         child: Consumer<AuthProvider>(
           builder: (context, provider, child) {
             return Stack(
               children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24.w),
+                SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 24.h),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      26.w.verticalSpace,
-                      Text(
-                        "Forgot Password",
-                        style: AppTextStyles.bold(
-                          fontSize: 32.sp,
-                          color: AppColors.teal,
-                        ),
+                      AuthChrome.backButton(context),
+                      12.h.verticalSpace,
+                      Center(child: AuthChrome.logo(width: 150.w)),
+                      22.h.verticalSpace,
+                      AuthChrome.titleText('Forgot password?'),
+                      8.h.verticalSpace,
+                      AuthChrome.subtitleText(
+                        'We will send you a link to the email address you signed up with.',
                       ),
-                      28.w.verticalSpace,
-                      Text(
-                        textAlign: TextAlign.center,
-                        "We will send you a link to the email address you signed up with.",
-                        style: AppTextStyles.textStyle16Semibold,
-                      ),
-                      26.w.verticalSpace,
-                      AppTextField(
+                      28.h.verticalSpace,
+                      AuthChrome.fieldLabel('Email ID'),
+                      8.h.verticalSpace,
+                      AuthChrome.textField(
+                        hintText: 'Enter email id',
                         controller: provider.forgotPasswordEmailCtr,
-                        hintText: "Email",
+                        keyboardType: TextInputType.emailAddress,
                       ),
-
-                      Spacer(),
-
+                      22.h.verticalSpace,
                       // if (provider.isSendForgotPassVerification)
                       //   AppOutlinedButton(
                       //     margin: EdgeInsets.only(bottom: 10),
@@ -72,11 +67,10 @@ class ForgotPasswordScreen extends StatelessWidget {
                       //     },
                       //     text: "Verify Email",
                       //   ),
-                      AppFilledButton(
-                        margin: EdgeInsets.only(bottom: 20.h),
+                      AuthChrome.primaryButton(
                         text: (provider.isResendTimerRunning)
                             ? "Resend in ${provider.resendSeconds}s"
-                            : "Send Link",
+                            : "Send Reset Link",
                         onTap: (provider.isResendTimerRunning)
                             ? () {}
                             : () {
@@ -102,6 +96,18 @@ class ForgotPasswordScreen extends StatelessWidget {
                                   );
                                 });
                               },
+                      ),
+                      16.h.verticalSpace,
+                      AuthChrome.footerLink(
+                        prefix: 'Already have an account? ',
+                        action: 'Login',
+                        onTap: () {
+                          if (Navigator.of(context).canPop()) {
+                            context.pop();
+                            return;
+                          }
+                          context.goNamed(AppRoutes.loginScreen.name);
+                        },
                       ),
                     ],
                   ),
