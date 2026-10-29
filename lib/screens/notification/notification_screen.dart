@@ -46,17 +46,17 @@ class _NotificationScreenState extends State<NotificationScreen> {
             height: 52,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: settingsInk,
+              color: AppColors.buttonBackground,
               borderRadius: BorderRadius.circular(26),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.check_rounded, color: Colors.white, size: 18),
+                Icon(Icons.check_rounded, color: AppColors.onFill, size: 18),
                 const SizedBox(width: 8),
                 AppText(
                   text: 'Mark all as read',
-                  style: AppTextStyles.semibold(fontSize: 16, color: Colors.white),
+                  style: AppTextStyles.semibold(fontSize: 16, color: AppColors.onFill),
                 ),
               ],
             ),
@@ -175,14 +175,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: settingsInk,
+                        color: AppColors.buttonBackground,
                         borderRadius: BorderRadius.circular(22),
                       ),
                       child: AppText(
                         text: 'Retry',
                         style: AppTextStyles.semibold(
                           fontSize: 15,
-                          color: Colors.white,
+                          color: AppColors.onFill,
                         ),
                       ),
                     ),
@@ -260,14 +260,14 @@ class _FilterChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? AppColors.teal : Colors.white,
+          color: selected ? AppColors.teal : AppColors.lightwhiteColor,
           borderRadius: BorderRadius.circular(20),
         ),
         child: AppText(
           text: label,
           style: AppTextStyles.medium(
             fontSize: 14,
-            color: selected ? Colors.white : settingsMuted,
+            color: selected ? AppColors.onFill : AppColors.black,
           ),
         ),
       ),

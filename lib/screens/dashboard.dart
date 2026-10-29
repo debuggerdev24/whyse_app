@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -7,7 +6,6 @@ import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/widgets/glass_icon_button.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/theme/theme_refresh.dart';
-import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/core/widgets/custom_toast.dart';
 import 'package:redstreakapp/providers/curiosity_reading/curiosity_reading_provider.dart';
@@ -86,12 +84,14 @@ class _UserDashBoardState extends State<UserDashBoard> {
         body: Builder(
           builder: (context) {
             final media = MediaQuery.of(context);
+            final hideBottomBar = value == 3;
             return Stack(
               children: [
                 MediaQuery(
                   data: media.copyWith(
                     padding: media.padding.copyWith(
-                      bottom: media.viewPadding.bottom + 96,
+                      bottom: media.viewPadding.bottom +
+                          (hideBottomBar ? 0 : 96),
                     ),
                   ),
                   child: ThemeRefresh(
@@ -99,15 +99,21 @@ class _UserDashBoardState extends State<UserDashBoard> {
                     child: widget.navigationShell,
                   ),
                 ),
-                Positioned(
+                if (!hideBottomBar)
+                  Positioned(
                   left: 0,
                   right: 0,
                   bottom: 0,
                   child: _GlassBottomBar(
                     currentIndex: value,
                     onTap: (index) {
+                      final shell = AppRouter.indexedStackNavigationShell;
+                      final alreadyOnTab = shell?.currentIndex == index;
                       tabIndex.value = index;
-                      AppRouter.indexedStackNavigationShell?.goBranch(index);
+                      shell?.goBranch(
+                        index,
+                        initialLocation: alreadyOnTab,
+                      );
                     },
                   ),
                 ),
@@ -130,7 +136,7 @@ class _GlassBottomBar extends StatelessWidget {
     (AppAssets.homeIcon, 'Home'),
     (AppAssets.explore, 'Explore'),
     (AppAssets.rewards, 'Rewards'),
-    (AppAssets.community, 'Community'),
+    (AppAssets.aiChat, 'AI Chat'),
   ];
 
   @override
@@ -147,18 +153,42 @@ class _GlassBottomBar extends StatelessWidget {
             Expanded(
               child: GlassSurface(
                 borderRadius: BorderRadius.circular(barHeight),
-                child: Row(
-                  children: [
-                    for (var i = 0; i < _items.length; i++)
-                      Expanded(
-                        child: _GlassNavItem(
-                          icon: _items[i].$1,
-                          label: _items[i].$2,
-                          selected: currentIndex == i,
-                          onTap: () => onTap(i),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final slot = constraints.maxWidth / _items.length;
+                    const inset = 5.0;
+                    return Stack(
+                      children: [
+                        AnimatedPositioned(
+                          duration: const Duration(milliseconds: 480),
+                          curve: Curves.easeOutBack,
+                          left: currentIndex * slot + inset,
+                          width: slot - inset * 2,
+                          top: 5,
+                          bottom: 5,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: AppColors.teal.withValues(alpha: 0.82),
+                              borderRadius: BorderRadius.circular(22),
+                            ),
+                          ),
                         ),
-                      ),
-                  ],
+                        Row(
+                          children: [
+                            for (var i = 0; i < _items.length; i++)
+                              Expanded(
+                                child: _GlassNavItem(
+                                  icon: _items[i].$1,
+                                  label: _items[i].$2,
+                                  selected: currentIndex == i,
+                                  onTap: () => onTap(i),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
@@ -186,46 +216,49 @@ class _GlassNavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppColors.teal : const Color(0xFF8E8E93);
+    final color = selected
+        ? AppColors.onFill
+        : (AppColors.isDark ? AppColors.muted : const Color(0xFF3C3C43));
 
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Stack(
-        alignment: Alignment.center,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 220),
+          TweenAnimationBuilder<Color?>(
+            tween: ColorTween(end: color),
+            duration: const Duration(milliseconds: 320),
             curve: Curves.easeOutCubic,
-            width: selected ? 64 : 0,
-            height: selected ? 64 : 0,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: selected
-                  ? AppColors.extealighttealcolor
-                  : Colors.transparent,
-            ),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgPicture.asset(
+            builder: (context, value, child) {
+              return SvgPicture.asset(
                 icon,
                 width: 22,
                 height: 22,
-                colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.clip,
-                style: AppTextStyles.medium(
-                  fontSize: 11,
-                  color: color,
-                ).copyWith(height: 1.05, letterSpacing: -0.2),
-              ),
-            ],
+                colorFilter: ColorFilter.mode(
+                  value ?? color,
+                  BlendMode.srcIn,
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 2),
+          AnimatedDefaultTextStyle(
+            duration: const Duration(milliseconds: 320),
+            curve: Curves.easeOutCubic,
+            style: TextStyle(
+              fontFamily: 'SFProText',
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              fontSize: 10,
+              height: 1.05,
+              letterSpacing: -0.08,
+              color: color,
+            ),
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),
@@ -247,8 +280,8 @@ class _NavProfileButton extends StatelessWidget {
         AppAssets.profileIcon,
         width: 22,
         height: 22,
-        colorFilter: const ColorFilter.mode(
-          Color(0xFF1C1C1E),
+        colorFilter: ColorFilter.mode(
+          AppColors.black,
           BlendMode.srcIn,
         ),
       ),

@@ -245,17 +245,35 @@ class CuriosityReadingProvider extends ChangeNotifier {
       (error) {
         Logger.error('Failed to load spark body for ${reading.id}: ${error.errorMsg}');
         if (reading.body.article.trim().isNotEmpty) return reading;
+        final fallback = reading.question.trim().isNotEmpty
+            ? reading.question.trim()
+            : reading.title.trim();
         return reading.copyWith(
           body: ReadingBody(
-            article: reading.question,
+            article: fallback,
             keyFacts: const [],
             quote: '',
             readingLevel: '',
           ),
+          hasBody: fallback.isNotEmpty,
+        );
+      },
+      (enriched) {
+        if (enriched.body.article.trim().isNotEmpty) return enriched;
+        final fallback = reading.question.trim().isNotEmpty
+            ? reading.question.trim()
+            : reading.title.trim();
+        if (fallback.isEmpty) return enriched;
+        return enriched.copyWith(
+          body: ReadingBody(
+            article: fallback,
+            keyFacts: enriched.body.keyFacts,
+            quote: enriched.body.quote,
+            readingLevel: enriched.body.readingLevel,
+          ),
           hasBody: true,
         );
       },
-      (enriched) => enriched,
     );
   }
 

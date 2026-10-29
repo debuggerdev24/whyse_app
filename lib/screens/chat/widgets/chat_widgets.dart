@@ -5,7 +5,7 @@ import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/chat/chat_history_model.dart';
 
-const Color _chatInk = Color(0xFF1A1A1A);
+Color get _chatInk => AppColors.black;
 
 class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
   const ChatAppBar({super.key});
@@ -96,7 +96,7 @@ class ChatBotTextBubble extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(22),
           ),
           child: ChatTypewriterText(
@@ -299,14 +299,14 @@ class ChatUserTextBubble extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFF1C1C1E),
+            color: AppColors.buttonBackground,
             borderRadius: BorderRadius.circular(22),
           ),
           child: AppText(
             text: text,
             style: AppTextStyles.regular(
               fontSize: 15,
-              color: Colors.white,
+              color: AppColors.onFill,
             ).copyWith(height: 1.35),
           ),
         ),
@@ -348,8 +348,6 @@ class _ChatSparkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cta = item.ctaLabel.trim().isEmpty ? 'Read' : item.ctaLabel;
-
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -403,21 +401,13 @@ class _ChatSparkCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.bold(
                           fontSize: 14.sp,
-                          color: AppColors.white,
+                          color: AppColors.onFill,
                           height: 1.25,
                         ),
                       ),
                     ),
                   ],
                 ),
-              ),
-            ),
-            SizedBox(height: 10.h),
-            AppText(
-              text: cta,
-              style: AppTextStyles.semiBold(
-                fontSize: 15.sp,
-                color: AppColors.teal,
               ),
             ),
           ],
@@ -460,7 +450,7 @@ class ChatTopicCardsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 248.h,
+      height: 210.h,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.only(left: 4.w, right: 4.w),
@@ -485,7 +475,6 @@ class _ChatTopicCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final subtitleColor = AppColors.black.withValues(alpha: 0.45);
-    final cta = item.ctaLabel.trim().isEmpty ? 'Open Series' : item.ctaLabel;
 
     return GestureDetector(
       onTap: onTap,
@@ -521,7 +510,7 @@ class _ChatTopicCard extends StatelessWidget {
             ),
             if (item.question.isNotEmpty)
               Padding(
-                padding: EdgeInsets.fromLTRB(14.w, 4.h, 14.w, 0),
+                padding: EdgeInsets.fromLTRB(14.w, 4.h, 14.w, 14.h),
                 child: AppText(
                   text: item.question,
                   maxLines: 2,
@@ -532,17 +521,6 @@ class _ChatTopicCard extends StatelessWidget {
                   ),
                 ),
               ),
-            const Spacer(),
-            Padding(
-              padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
-              child: AppText(
-                text: cta,
-                style: AppTextStyles.semiBold(
-                  fontSize: 14.sp,
-                  color: AppColors.teal,
-                ),
-              ),
-            ),
           ],
         ),
       ),
@@ -571,7 +549,7 @@ class ChatSuggestionSection extends StatelessWidget {
             text: 'Not sure where to start?',
             style: AppTextStyles.medium(
               fontSize: 13,
-              color: const Color(0xFF8E8E93),
+              color: AppColors.muted,
             ),
           ),
         ),
@@ -590,8 +568,9 @@ class ChatSuggestionSection extends StatelessWidget {
                   width: 168,
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: AppColors.divider),
                   ),
                   child: Align(
                     alignment: Alignment.centerLeft,
@@ -654,7 +633,7 @@ class ChatEmptyState extends StatelessWidget {
             textAlign: TextAlign.center,
             style: AppTextStyles.regular(
               fontSize: 14,
-              color: const Color(0xFF8E8E93),
+              color: AppColors.muted,
             ).copyWith(height: 1.35),
           ),
           const SizedBox(height: 28),
@@ -664,7 +643,7 @@ class ChatEmptyState extends StatelessWidget {
               text: 'Try asking',
               style: AppTextStyles.medium(
                 fontSize: 13,
-                color: const Color(0xFF8E8E93),
+                color: AppColors.muted,
               ),
             ),
           ),
@@ -681,8 +660,9 @@ class ChatEmptyState extends StatelessWidget {
                     vertical: 14,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: AppColors.divider),
                   ),
                   child: Row(
                     children: [
@@ -720,146 +700,76 @@ class ChatInputBar extends StatelessWidget {
     required this.controller,
     required this.focusNode,
     required this.onSend,
-    this.scrolling = false,
   });
 
   final TextEditingController controller;
   final FocusNode focusNode;
   final VoidCallback onSend;
-  final bool scrolling;
 
   static const double height = 54;
 
   @override
   Widget build(BuildContext context) {
-    final outerRadius = BorderRadius.circular(height);
-    final innerRadius = BorderRadius.circular(height - 1.4);
-
-    return TweenAnimationBuilder<double>(
-      tween: Tween(end: scrolling ? 1 : 0),
-      duration: const Duration(milliseconds: 280),
-      curve: Curves.easeOutCubic,
-      builder: (context, t, child) {
-        final sigma = 8 + (4 * t);
-        return Container(
-          height: height,
-          padding: const EdgeInsets.all(1.4),
-          decoration: BoxDecoration(
-            borderRadius: outerRadius,
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white.withValues(alpha: 0.95),
-                Colors.white.withValues(alpha: 0.22),
-                Colors.white.withValues(alpha: 0.78),
-              ],
-              stops: const [0.0, 0.46, 1.0],
-            ),
-          ),
-          child: ClipRRect(
-            borderRadius: innerRadius,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
-                  child: const DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Color(0x2EFFFFFF),
-                          Color(0x1AFFFFFF),
-                          Color(0x12FFFFFF),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const Positioned(
-                  top: 0,
-                  left: 18,
-                  right: 18,
-                  height: 1,
-                  child: IgnorePointer(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Color(0x00FFFFFF),
-                            Color(0xF5FFFFFF),
-                            Color(0x00FFFFFF),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                IgnorePointer(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment(-1.15 + (1.5 * t), -1),
-                        end: Alignment(0.35 + t, 1.1),
-                        colors: [
-                          const Color(0x00FFFFFF),
-                          Colors.white.withValues(alpha: 0.08 * t),
-                          const Color(0x00FFFFFF),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                child!,
-              ],
-            ),
-          ),
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 6, 0),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: controller,
-                focusNode: focusNode,
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => onSend(),
-                cursorColor: AppColors.teal,
-                style: AppTextStyles.regular(fontSize: 15, color: _chatInk),
-                decoration: InputDecoration(
-                  isDense: true,
-                  border: InputBorder.none,
-                  hintText: 'Type here',
-                  hintStyle: AppTextStyles.regular(
-                    fontSize: 15,
-                    color: const Color(0xFF8E8E93),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            GestureDetector(
-              onTap: onSend,
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: AppColors.teal,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.send_rounded,
-                  color: Colors.white,
-                  size: 18,
-                ),
-              ),
-            ),
-          ],
+    return Container(
+      height: height,
+      padding: const EdgeInsets.fromLTRB(16, 0, 6, 0),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(height),
+        border: Border.all(
+          color: AppColors.teal.withValues(alpha: 0.7),
+          width: 1.5,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: controller,
+              focusNode: focusNode,
+              textInputAction: TextInputAction.send,
+              onSubmitted: (_) => onSend(),
+              cursorColor: AppColors.teal,
+              style: AppTextStyles.regular(fontSize: 15, color: AppColors.black),
+              decoration: InputDecoration(
+                isDense: true,
+                filled: false,
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                hintText: 'Type here',
+                hintStyle: AppTextStyles.regular(
+                  fontSize: 15,
+                  color: AppColors.muted,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: onSend,
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.teal,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.send_rounded,
+                color: AppColors.onFill,
+                size: 18,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

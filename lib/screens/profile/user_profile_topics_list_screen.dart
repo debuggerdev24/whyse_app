@@ -183,7 +183,7 @@ class _TopicListTile extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           ColoredBox(
-            color: const Color(0xFF1C1C1E),
+            color: AppColors.black,
             child: imageUrl == null
                 ? const Icon(Icons.auto_stories_outlined, color: Colors.white54)
                 : AppNetworkImage(
@@ -264,7 +264,7 @@ class _ShimmerTile extends StatelessWidget {
     return AppSkeletonizer(
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(22),
         ),
       ),
@@ -297,12 +297,12 @@ class _ErrorState extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: settingsInk,
+                color: AppColors.buttonBackground,
                 borderRadius: BorderRadius.circular(22),
               ),
               child: AppText(
                 text: 'Retry',
-                style: AppTextStyles.semibold(fontSize: 15, color: Colors.white),
+                style: AppTextStyles.semibold(fontSize: 15, color: AppColors.onFill),
               ),
             ),
           ),

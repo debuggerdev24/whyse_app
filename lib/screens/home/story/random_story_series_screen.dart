@@ -91,7 +91,7 @@ class _RandomTopicReadingScreenState extends State<RandomTopicReadingScreen> {
           title: Text(
             "Story is not generated yet",
             style: AppTextStyles.textStyle20Regular.copyWith(
-              color: AppColors.bluecolor,
+              color: AppColors.black,
             ),
           ),
           content: Text(
@@ -114,7 +114,7 @@ class _RandomTopicReadingScreenState extends State<RandomTopicReadingScreen> {
                 "OK",
                 style: AppTextStyles.semibold(
                   fontSize: 17.sp,
-                  color: AppColors.bluecolor,
+                  color: AppColors.teal,
                 ),
               ),
             ),

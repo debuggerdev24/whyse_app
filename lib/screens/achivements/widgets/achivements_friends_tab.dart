@@ -210,7 +210,7 @@ class _PodiumPlayer extends StatelessWidget {
                   text: '${entry.rank}',
                   style: AppTextStyles.semiBold(
                     fontSize: 12.sp,
-                    color: AppColors.white,
+                    color: AppColors.onFill,
                   ),
                 ),
               ),
@@ -363,7 +363,7 @@ class _LeaderboardAvatar extends StatelessWidget {
         text: _initials,
         style: AppTextStyles.bold(
           fontSize: (size * 0.34).sp,
-          color: AppColors.white,
+          color: AppColors.onFill,
         ),
       ),
     );

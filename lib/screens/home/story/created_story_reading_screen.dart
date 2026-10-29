@@ -796,7 +796,7 @@ class _BottomSecondaryButton extends StatelessWidget {
         text: text,
         style: AppTextStyles.semibold(
           fontSize: 14,
-          color: const Color(0xFF1A1A1A),
+          color: AppColors.onLight,
         ).copyWith(height: 17 / 14),
       ),
     );
@@ -876,8 +876,8 @@ class _RoundBlackButton extends StatelessWidget {
         width: 34,
         height: 34,
         alignment: Alignment.center,
-        decoration: const BoxDecoration(
-          color: Color(0xFF1A1A1A),
+        decoration: BoxDecoration(
+          color: AppColors.buttonBackground,
           shape: BoxShape.circle,
         ),
         child: child,
@@ -897,7 +897,7 @@ class _TimerPill extends StatelessWidget {
       height: 34,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: AppColors.buttonBackground,
         borderRadius: BorderRadius.circular(40),
       ),
       child: Row(
@@ -987,9 +987,9 @@ class _ReadingHero extends StatelessWidget {
                           children: [
                             GlassIconButton(
                               onTap: onBack,
-                              child: const Icon(
+                              child: Icon(
                                 Icons.chevron_left_rounded,
-                                color: Color(0xFF1A1A1A),
+                                color: AppColors.black,
                                 size: 26,
                               ),
                             ),
@@ -1000,7 +1000,7 @@ class _ReadingHero extends StatelessWidget {
                                 text: 'Aa',
                                 style: AppTextStyles.semibold(
                                   fontSize: 16,
-                                  color: const Color(0xFF1A1A1A),
+                                  color: AppColors.black,
                                 ),
                               ),
                             ),
@@ -1056,7 +1056,7 @@ class _FrostedPill extends StatelessWidget {
             text: label,
             style: AppTextStyles.semibold(
               fontSize: 14,
-              color: const Color(0xFF1A1A1A),
+              color: AppColors.onLight,
             ),
           ),
         ),
@@ -1074,11 +1074,11 @@ class _ReadingBookmarkButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final id = topicId?.trim() ?? '';
     if (id.isEmpty) {
-      return const GlassIconButton(
+      return GlassIconButton(
         onTap: _noop,
         child: Icon(
           Icons.bookmark_border_rounded,
-          color: Color(0xFF1A1A1A),
+          color: AppColors.black,
           size: 22,
         ),
       );
@@ -1112,17 +1112,17 @@ class _ReadingBookmarkButton extends StatelessWidget {
                   });
             },
       child: isToggling
-          ? const SizedBox(
+          ? SizedBox(
               width: 18,
               height: 18,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: Color(0xFF1A1A1A),
+                color: AppColors.black,
               ),
             )
           : Icon(
               isInList ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-              color: const Color(0xFF1A1A1A),
+              color: AppColors.black,
               size: 22,
             ),
     );

@@ -182,30 +182,34 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
                   provider.previousReading();
                 }
               },
-              child: SingleChildScrollView(
-                key: ValueKey(currentReading.id),
-                controller: _scrollController,
-                physics: const BouncingScrollPhysics(),
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.paddingOf(context).bottom + 24.h,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _buildHeaderSection(
-                      context,
-                      title: currentReading.question,
-                      category: currentReading.interestName,
-                      imageUrl: currentReading.imgUrl,
-                      onBackTap: _exitReading,
-                      onBookmarkTap: () {},
-                    ),
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildHeaderSection(
+                    context,
+                    title: currentReading.title.trim().isNotEmpty
+                        ? currentReading.title
+                        : currentReading.question,
+                    category: currentReading.interestName,
+                    imageUrl: currentReading.imgUrl,
+                    onBackTap: _exitReading,
+                    onBookmarkTap: () {},
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      key: ValueKey(currentReading.id),
+                      controller: _scrollController,
+                      physics: const BouncingScrollPhysics(),
+                      padding: EdgeInsets.fromLTRB(
+                        20.w,
+                        18.h,
+                        20.w,
+                        MediaQuery.paddingOf(context).bottom + 24.h,
+                      ),
                       child: CuriosityReadingContent(reading: currentReading),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             );
           },
@@ -265,23 +269,10 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
                             alignment: Alignment.centerLeft,
                             child: GlassIconButton(
                               onTap: onBackTap,
-                              child: const Icon(
+                              child: Icon(
                                 Icons.chevron_left_rounded,
-                                color: Color(0xFF1C1C1E),
+                                color: AppColors.black,
                                 size: 28,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 56),
-                            child: AppText(
-                              text: 'Curiosity Reading',
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTextStyles.bold(
-                                fontSize: 17,
-                                color: Colors.white,
                               ),
                             ),
                           ),
@@ -292,7 +283,7 @@ class _CuriosityReadingScreenState extends State<CuriosityReadingScreen> {
                               child: SvgIcon(
                                 AppAssets.bookmark,
                                 size: 20,
-                                color: const Color(0xFF1C1C1E),
+                                color: AppColors.black,
                               ),
                             ),
                           ),

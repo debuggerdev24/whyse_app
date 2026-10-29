@@ -280,7 +280,7 @@ class _SeriesCard extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
-            child: Icon(Icons.check_rounded, size: 18.w, color: AppColors.white),
+            child: Icon(Icons.check_rounded, size: 18.w, color: AppColors.onFill),
           ),
         ),
       ],
@@ -298,7 +298,7 @@ class _PointsCard extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF4D6),
+        color: AppColors.accentFill(const Color(0xFFFFF4D6)),
         borderRadius: BorderRadius.circular(16.r),
       ),
       child: Row(
@@ -306,7 +306,7 @@ class _PointsCard extends StatelessWidget {
           Container(
             width: 44.w,
             height: 44.w,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.white,
               shape: BoxShape.circle,
             ),
@@ -332,7 +332,7 @@ class _PointsCard extends StatelessWidget {
                 text: 'Sparks Points',
                 style: AppTextStyles.semibold(
                   fontSize: 13.sp,
-                  color: AppColors.bluecolor,
+                  color: AppColors.black,
                 ),
               ),
             ],

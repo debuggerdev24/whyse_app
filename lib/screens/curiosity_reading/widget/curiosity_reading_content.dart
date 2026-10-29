@@ -30,7 +30,7 @@ class CuriosityReadingContent extends StatelessWidget {
               text: entry.value,
               style: AppTextStyles.regular(
                 fontSize: 16,
-                color: const Color(0xFF3A3A3C),
+                color: AppColors.black,
               ).copyWith(height: 1.45),
             ).animate().fadeInRight(
               delay: Duration(milliseconds: 150 + (entry.key * 80)),

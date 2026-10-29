@@ -23,7 +23,7 @@ class StreakRankingScreen extends StatelessWidget {
               size: 16.sp,
               color: AppColors.orangeColor,
             ),
-            6.w.horizontalSpace,
+            6.w.horizontalSpace, 
             AppText(
               text: 'Streaks Ranking',
               style: AppTextStyles.semibold(

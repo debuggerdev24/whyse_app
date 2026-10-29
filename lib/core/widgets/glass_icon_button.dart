@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:redstreakapp/core/constants/app_color.dart';
 
 /// Frosted surface used by the bottom bar and the round icon buttons.
 class GlassSurface extends StatelessWidget {
@@ -31,6 +32,9 @@ class GlassSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final edge = AppColors.isDark ? const Color(0xFF8FB4B6) : Colors.white;
+    final fill = AppColors.isDark ? const Color(0xFF1A2C2E) : Colors.white;
+
     return Container(
       padding: const EdgeInsets.all(1.4),
       decoration: BoxDecoration(
@@ -39,9 +43,9 @@ class GlassSurface extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.white.withValues(alpha: 0.95),
-            Colors.white.withValues(alpha: 0.22),
-            Colors.white.withValues(alpha: 0.78),
+            edge.withValues(alpha: AppColors.isDark ? 0.55 : 0.95),
+            edge.withValues(alpha: 0.18),
+            edge.withValues(alpha: AppColors.isDark ? 0.35 : 0.78),
           ],
           stops: const [0.0, 0.46, 1.0],
         ),
@@ -54,19 +58,19 @@ class GlassSurface extends StatelessWidget {
             Positioned.fill(
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                child: const DecoratedBox(
+                child: DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        Color(0x2EFFFFFF),
-                        Color(0x1AFFFFFF),
-                        Color(0x12FFFFFF),
+                        fill.withValues(alpha: AppColors.isDark ? 0.92 : 0.96),
+                        fill.withValues(alpha: AppColors.isDark ? 0.78 : 0.92),
+                        fill.withValues(alpha: AppColors.isDark ? 0.88 : 0.94),
                       ],
                     ),
                   ),
-                  child: SizedBox.expand(),
+                  child: const SizedBox.expand(),
                 ),
               ),
             ),

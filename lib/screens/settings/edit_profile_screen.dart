@@ -654,10 +654,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               onTap: () {
                                 _onBack();
                               },
-                              child: const Icon(
+                              child: Icon(
                                 Icons.chevron_left_rounded,
                                 size: 28,
-                                color: Color(0xFF1C1C1E),
+                                color: AppColors.black,
                               ),
                             ),
                           ),
@@ -665,7 +665,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             text: 'Edit Profile',
                             style: AppTextStyles.bold(
                               fontSize: 18,
-                              color: const Color(0xFF1C1C1E),
+                              color: AppColors.black,
                             ),
                           ),
                         ],
@@ -777,10 +777,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                     controller: _phoneController,
                                     keyboardType: TextInputType.phone,
                                     validator: _validatePhoneField,
-                                    cursorColor: const Color(0xFF1C1C1E),
+                                    cursorColor: AppColors.black,
                                     style: AppTextStyles.regular(
                                       fontSize: 16,
-                                      color: const Color(0xFF1C1C1E),
+                                      color: AppColors.black,
                                     ),
                                     decoration: const InputDecoration(
                                       hintText: 'Phone',
@@ -823,7 +823,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             text: 'Social Accounts',
                             style: AppTextStyles.bold(
                               fontSize: 16,
-                              color: const Color(0xFF1C1C1E),
+                              color: AppColors.black,
                             ),
                           ),
                           10.verticalSpace,
@@ -1124,8 +1124,8 @@ class _EditSocialLinkDialogState extends State<_EditSocialLinkDialog> {
                         onPressed: _submit,
                         style: ElevatedButton.styleFrom(
                           elevation: 0,
-                          backgroundColor: AppColors.black,
-                          foregroundColor: AppColors.white,
+                          backgroundColor: AppColors.buttonBackground,
+                          foregroundColor: AppColors.onFill,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(40.r),
                           ),
@@ -1135,7 +1135,7 @@ class _EditSocialLinkDialogState extends State<_EditSocialLinkDialog> {
                           text: 'Save',
                           style: AppTextStyles.semibold(
                             fontSize: 16.sp,
-                            color: AppColors.white,
+                            color: AppColors.onFill,
                           ),
                         ),
                       ),
@@ -1166,13 +1166,13 @@ class _FieldBlock extends StatelessWidget {
           text: label,
           style: AppTextStyles.medium(
             fontSize: 14,
-            color: const Color(0xFF1C1C1E),
+            color: AppColors.black,
           ),
         ),
         8.verticalSpace,
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(14),
           ),
           child: child,
@@ -1198,7 +1198,7 @@ class _SocialAccountRow extends StatelessWidget {
     final trimmed = value.trim();
     final empty = trimmed.isEmpty;
     return Material(
-      color: Colors.white,
+      color: AppColors.surface,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
@@ -1216,8 +1216,8 @@ class _SocialAccountRow extends StatelessWidget {
                   style: AppTextStyles.regular(
                     fontSize: 15,
                     color: empty
-                        ? const Color(0xFF8E8E93)
-                        : const Color(0xFF1C1C1E),
+                        ? AppColors.muted
+                        : AppColors.black,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),

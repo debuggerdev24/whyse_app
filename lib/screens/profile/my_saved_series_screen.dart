@@ -64,10 +64,10 @@ class _MySavedSeriesScreenState extends State<MySavedSeriesScreen> {
                     child: GlassIconButton(
                       size: 44,
                       onTap: () => context.pop(),
-                      child: const Icon(
+                      child: Icon(
                         Icons.chevron_left_rounded,
                         size: 28,
-                        color: Color(0xFF1C1C1E),
+                        color: AppColors.black,
                       ),
                     ),
                   ),
@@ -75,7 +75,7 @@ class _MySavedSeriesScreenState extends State<MySavedSeriesScreen> {
                     text: 'My Series',
                     style: AppTextStyles.bold(
                       fontSize: 18,
-                      color: const Color(0xFF1C1C1E),
+                      color: AppColors.black,
                     ),
                   ),
                 ],
@@ -98,7 +98,7 @@ class _MySavedSeriesScreenState extends State<MySavedSeriesScreen> {
                       textAlign: TextAlign.center,
                       style: AppTextStyles.medium(
                         fontSize: 16,
-                        color: const Color(0xFF8E8E93),
+                        color: AppColors.muted,
                       ),
                     ),
                   );
@@ -161,7 +161,7 @@ class _SeriesCardShimmer extends StatelessWidget {
     return AppSkeletonizer(
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(22),
         ),
       ),
@@ -187,7 +187,7 @@ class _SeriesCard extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             ColoredBox(
-              color: const Color(0xFF1C1C1E),
+              color: AppColors.black,
               child: AppNetworkImage(
                 imageUrl: topic.thumbnailUrl,
                 tag: 'MySavedSeries.thumbnail',
@@ -225,31 +225,14 @@ class _SeriesCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   AppText(
-                    text: '0 out of ${topic.storiesCount} Reading',
+                    text: topic.storiesCount == 1
+                        ? '1 reading'
+                        : '${topic.storiesCount} readings',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.regular(
                       fontSize: 12,
                       color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  GestureDetector(
-                    onTap: onOpen,
-                    child: Container(
-                      height: 34,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: AppColors.teal,
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: AppText(
-                        text: 'Start Reading',
-                        style: AppTextStyles.semibold(
-                          fontSize: 14,
-                          color: Colors.white,
-                        ),
-                      ),
                     ),
                   ),
                 ],

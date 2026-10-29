@@ -106,7 +106,7 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                       text: "What's Your Goal?",
                       style: AppTextStyles.bold(
                         fontSize: 30,
-                        color: const Color(0xFF1C1C1E),
+                        color: AppColors.black,
                       ),
                     ),
                   ),
@@ -116,7 +116,7 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                         "Choose what motivates you most — we'll help you reach it.",
                     style: AppTextStyles.regular(
                       fontSize: 15,
-                      color: const Color(0xFF8E8E93),
+                      color: AppColors.muted,
                     ),
                   ),
 
@@ -165,7 +165,7 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                               padding: const EdgeInsets.only(bottom: 12),
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: AppColors.surface,
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                                 child: AppTextField(
@@ -202,7 +202,7 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                                 vertical: 14,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: AppColors.surface,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
                                   color: isSelected
@@ -218,7 +218,7 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                                     text: goal.title,
                                     style: AppTextStyles.bold(
                                       fontSize: 16,
-                                      color: const Color(0xFF1C1C1E),
+                                      color: AppColors.black,
                                     ),
                                   ),
                                   if (goal.description.isNotEmpty) ...[
@@ -227,7 +227,7 @@ class _StoryGoalsScreenState extends State<StoryGoalsScreen> {
                                       text: goal.description,
                                       style: AppTextStyles.regular(
                                         fontSize: 14,
-                                        color: const Color(0xFF8E8E93),
+                                        color: AppColors.muted,
                                       ).copyWith(height: 1.3),
                                     ),
                                   ],

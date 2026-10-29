@@ -1,3 +1,4 @@
+import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_dropdown.dart';
@@ -58,13 +59,13 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
           text: widget.label,
           style: AppTextStyles.semibold(
             fontSize: 15,
-            color: const Color(0xFF1C1C1E),
+            color: AppColors.black,
           ),
         ),
         const SizedBox(height: 8),
         DecoratedBox(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(14),
           ),
           child: AppDropdown(

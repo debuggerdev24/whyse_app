@@ -213,7 +213,7 @@ class _Header extends StatelessWidget {
           text: 'Groups',
           style: AppTextStyles.bold(
             fontSize: 22,
-            color: const Color(0xFF1C1C1E),
+            color: AppColors.black,
           ),
         ),
         const Spacer(),
@@ -285,9 +285,9 @@ class _ImageShimmer extends StatelessWidget {
       child: Container(
         width: 64,
         height: 64,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white,
+          color: AppColors.surface,
         ),
       ),
     );
@@ -300,7 +300,7 @@ class _TextShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppSkeletonizer(
-      child: Container(width: 30, height: 10, color: Colors.white),
+      child: Container(width: 30, height: 10, color: AppColors.surface),
     );
   }
 }
@@ -324,7 +324,7 @@ class _GroupPillButton extends StatelessWidget {
         height: 52,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: filled ? const Color(0xFF1C1C1E) : Colors.white,
+          color: filled ? AppColors.black : Colors.white,
           borderRadius: BorderRadius.circular(28),
           border: filled
               ? null
@@ -334,7 +334,7 @@ class _GroupPillButton extends StatelessWidget {
           text: label,
           style: AppTextStyles.semibold(
             fontSize: 16,
-            color: filled ? Colors.white : const Color(0xFF1C1C1E),
+            color: filled ? Colors.white : AppColors.black,
           ),
         ),
       ),

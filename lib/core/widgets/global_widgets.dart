@@ -73,7 +73,7 @@ class NoImageFound extends StatelessWidget {
                 height: 72.w,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.white.withValues(alpha: 0.35),
+                  color: AppColors.onFill.withValues(alpha: 0.35),
                 ),
               ),
             ),
@@ -88,7 +88,7 @@ class NoImageFound extends StatelessWidget {
                     padding: EdgeInsets.all(circlePad),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColors.white.withValues(alpha: 0.94),
+                      color: AppColors.onFill.withValues(alpha: 0.94),
                       border: Border.all(
                         color: AppColors.teal.withValues(alpha: 0.28),
                         width: 1,

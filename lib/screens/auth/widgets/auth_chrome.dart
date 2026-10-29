@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
+import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/core/widgets/app_textfiled.dart';
@@ -10,15 +11,16 @@ import 'package:redstreakapp/core/widgets/app_textfiled.dart';
 class AuthChrome {
   AuthChrome._();
 
-  static const Color background = Color(0xFFF2F2F7);
-  static const Color title = Color(0xFF121212);
-  static const Color body = Color(0xFF1A1A1A);
-  static const Color subtitle = Color(0xFF6C6C6E);
-  static const Color hint = Color(0xFFA3A3A6);
-  static const Color teal = Color(0xFF157B7F);
-  static const Color link = Color(0xFF167C80);
-  static const Color divider = Color(0xFFDCDCE1);
-  static const Color field = Color(0xFFFFFFFF);
+  static Color get background => AppColors.backgroundColor;
+  static Color get title => AppColors.black;
+  static Color get body => AppColors.black;
+  static Color get subtitle => AppColors.muted;
+  static Color get hint =>
+      AppColors.isDark ? const Color(0xFF7E9091) : const Color(0xFFA3A3A6);
+  static Color get teal => AppColors.teal;
+  static Color get link => AppColors.teal;
+  static Color get divider => AppColors.divider;
+  static Color get field => AppColors.surface;
 
   static Widget logo({required double width}) {
     return Image.asset(
@@ -33,7 +35,7 @@ class AuthChrome {
     return Align(
       alignment: Alignment.centerLeft,
       child: Material(
-        color: Colors.white,
+        color: AppColors.surface,
         elevation: 2,
         shadowColor: Colors.black26,
         shape: const CircleBorder(),
@@ -111,7 +113,7 @@ class AuthChrome {
       border: OutlineInputBorder(borderRadius: radius, borderSide: BorderSide.none),
       focusedBorder: OutlineInputBorder(
         borderRadius: radius,
-        borderSide: const BorderSide(color: teal, width: 1.2),
+        borderSide: BorderSide(color: teal, width: 1.2),
       ),
     );
   }
@@ -168,7 +170,7 @@ class AuthChrome {
   static Widget orDivider() {
     return Row(
       children: [
-        const Expanded(child: Divider(color: divider, thickness: 1)),
+        Expanded(child: Divider(color: divider, thickness: 1)),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 14.w),
           child: Text(
@@ -176,7 +178,7 @@ class AuthChrome {
             style: AppTextStyles.medium(fontSize: 13.sp, color: subtitle),
           ),
         ),
-        const Expanded(child: Divider(color: divider, thickness: 1)),
+        Expanded(child: Divider(color: divider, thickness: 1)),
       ],
     );
   }
@@ -187,11 +189,11 @@ class AuthChrome {
     required VoidCallback onTap,
   }) {
     return Material(
-      color: Colors.white,
+      color: AppColors.surface,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(40.r),
-        side: const BorderSide(color: Color(0xFFE6E6EB)),
+        side: BorderSide(color: AppColors.divider),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(40.r),

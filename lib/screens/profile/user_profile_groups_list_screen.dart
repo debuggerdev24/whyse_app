@@ -183,7 +183,7 @@ class _GroupListTile extends StatelessWidget {
                   text: group.title ?? 'Group',
                   style: AppTextStyles.semibold(
                     fontSize: 16,
-                    color: const Color(0xFF1C1C1E),
+                    color: AppColors.black,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -228,9 +228,9 @@ class _ShimmerTile extends StatelessWidget {
           Container(
             width: 48,
             height: 48,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white,
+              color: AppColors.surface,
             ),
           ),
           const SizedBox(width: 12),
@@ -238,9 +238,9 @@ class _ShimmerTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(width: 140, height: 14, color: Colors.white),
+                Container(width: 140, height: 14, color: AppColors.surface),
                 const SizedBox(height: 8),
-                Container(width: 80, height: 12, color: Colors.white),
+                Container(width: 80, height: 12, color: AppColors.surface),
               ],
             ),
           ),
@@ -275,12 +275,12 @@ class _ErrorState extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: settingsInk,
+                color: AppColors.buttonBackground,
                 borderRadius: BorderRadius.circular(22),
               ),
               child: AppText(
                 text: 'Retry',
-                style: AppTextStyles.semibold(fontSize: 15, color: Colors.white),
+                style: AppTextStyles.semibold(fontSize: 15, color: AppColors.onFill),
               ),
             ),
           ),

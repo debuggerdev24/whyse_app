@@ -70,14 +70,14 @@ class AppToast {
           maxLines: 2,
           style: AppTextStyles.medium(
             fontSize: 16.sp,
-            color: AppColors.white,
+            color: AppColors.onFill,
           ),
         ),
         style: ToastificationStyle.fillColored,
         backgroundColor: primaryColor,
         type: type,
         primaryColor: primaryColor,
-        icon: Icon(icon, color: AppColors.white),
+        icon: Icon(icon, color: AppColors.onFill),
         autoCloseDuration: Duration(seconds: durationSeconds ?? 3),
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [

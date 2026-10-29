@@ -60,7 +60,7 @@ class _SparkSessionCompletedPage extends StatelessWidget {
                           textAlign: TextAlign.center,
                           style: AppTextStyles.semibold(
                             fontSize: 26,
-                            color: const Color(0xFF1A1A1A),
+                            color: AppColors.black,
                           ).copyWith(height: 1.2, letterSpacing: -0.3),
                         ),
                         const SizedBox(height: 8),
@@ -70,7 +70,7 @@ class _SparkSessionCompletedPage extends StatelessWidget {
                           textAlign: TextAlign.center,
                           style: AppTextStyles.regular(
                             fontSize: 14,
-                            color: const Color(0xFF8E8E93),
+                            color: AppColors.muted,
                           ).copyWith(height: 1.35),
                         ),
                         if (summary.pointsEarned > 0) ...[
@@ -84,7 +84,7 @@ class _SparkSessionCompletedPage extends StatelessWidget {
                                 text: '+${summary.pointsEarned}',
                                 style: AppTextStyles.bold(
                                   fontSize: 32,
-                                  color: const Color(0xFF1A1A1A),
+                                  color: AppColors.black,
                                 ).copyWith(height: 1),
                               ),
                             ],
@@ -94,7 +94,7 @@ class _SparkSessionCompletedPage extends StatelessWidget {
                             text: 'Sparks Points',
                             style: AppTextStyles.medium(
                               fontSize: 13,
-                              color: const Color(0xFF8E8E93),
+                              color: AppColors.muted,
                             ),
                           ),
                         ],
@@ -179,6 +179,7 @@ class _ProgressCard extends StatelessWidget {
         _ProgressRow(
           progress: spark!,
           barColor: AppColors.teal,
+          iconBackground: const Color(0xFFE4EFF0),
           icon: const SvgIcon(AppAssets.streakFireIcon, size: 22),
           fallbackTitle: 'Sparks Completed',
         ),
@@ -186,10 +187,11 @@ class _ProgressCard extends StatelessWidget {
         _ProgressRow(
           progress: interest!,
           barColor: AppColors.orangeColor,
-          icon: const SvgIcon(
+          iconBackground: const Color(0xFFFFF1E0),
+          icon: SvgIcon(
             AppAssets.brain,
             size: 22,
-            color: Color(0xFF1A1A1A),
+            color: AppColors.black,
           ),
           fallbackTitle: 'Interests Completed',
         ),
@@ -198,21 +200,15 @@ class _ProgressCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(22),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0F000000),
-            blurRadius: 16,
-            offset: Offset(0, 6),
-          ),
-        ],
+        border: Border.all(color: AppColors.divider),
       ),
       child: Column(
         children: [
           for (var i = 0; i < rows.length; i++) ...[
             if (i > 0)
-              const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
+              Divider(height: 1, thickness: 1, color: AppColors.divider),
             rows[i],
           ],
         ],
@@ -225,12 +221,14 @@ class _ProgressRow extends StatelessWidget {
   const _ProgressRow({
     required this.progress,
     required this.barColor,
+    required this.iconBackground,
     required this.icon,
     required this.fallbackTitle,
   });
 
   final AchievementProgress progress;
   final Color barColor;
+  final Color iconBackground;
   final Widget icon;
   final String fallbackTitle;
 
@@ -249,10 +247,10 @@ class _ProgressRow extends StatelessWidget {
             width: 44,
             height: 44,
             alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: Color(0xFFFFF1E8),
-              shape: BoxShape.circle,
-            ),
+          decoration: BoxDecoration(
+            color: AppColors.accentFill(iconBackground),
+            shape: BoxShape.circle,
+          ),
             child: icon,
           ),
           const SizedBox(width: 12),
@@ -266,7 +264,7 @@ class _ProgressRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.semibold(
                     fontSize: 15,
-                    color: const Color(0xFF1A1A1A),
+                    color: AppColors.black,
                   ),
                 ),
                 if (subtitle.isNotEmpty) ...[
@@ -277,7 +275,7 @@ class _ProgressRow extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.regular(
                       fontSize: 12,
-                      color: const Color(0xFF8E8E93),
+                      color: AppColors.muted,
                     ),
                   ),
                 ],
@@ -287,7 +285,7 @@ class _ProgressRow extends StatelessWidget {
                   child: LinearProgressIndicator(
                     value: progress.progressValue,
                     minHeight: 6,
-                    backgroundColor: const Color(0xFFE8E8ED),
+                    backgroundColor: AppColors.divider,
                     color: barColor,
                   ),
                 ),
@@ -295,9 +293,9 @@ class _ProgressRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          const Icon(
+          Icon(
             Icons.chevron_right_rounded,
-            color: Color(0xFFC7C7CC),
+            color: AppColors.muted,
             size: 22,
           ),
         ],
@@ -325,23 +323,15 @@ class _ActionButton extends StatelessWidget {
         height: 50,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: filled ? AppColors.teal : Colors.white,
+          color: filled ? AppColors.teal : AppColors.surface,
           borderRadius: BorderRadius.circular(40),
-          boxShadow: filled
-              ? null
-              : const [
-                  BoxShadow(
-                    color: Color(0x14000000),
-                    blurRadius: 12,
-                    offset: Offset(0, 4),
-                  ),
-                ],
+          border: filled ? null : Border.all(color: AppColors.divider),
         ),
         child: AppText(
           text: text,
           style: AppTextStyles.semibold(
             fontSize: 14,
-            color: filled ? Colors.white : const Color(0xFF1A1A1A),
+            color: filled ? AppColors.onFill : AppColors.black,
           ).copyWith(height: 17 / 14),
         ),
       ),

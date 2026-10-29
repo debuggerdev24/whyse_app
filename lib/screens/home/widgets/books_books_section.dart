@@ -275,7 +275,7 @@ class _ShelfImageError extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFECEFF3),
+        color: AppColors.accentFill(const Color(0xFFECEFF3)),
         borderRadius: borderRadius,
       ),
       alignment: Alignment.center,

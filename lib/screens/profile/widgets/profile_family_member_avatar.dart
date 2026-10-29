@@ -58,7 +58,7 @@ class ProfileFamilyMemberAvatar extends StatelessWidget {
             textAlign: TextAlign.center,
             style: AppTextStyles.medium(
               fontSize: 12,
-              color: const Color(0xFF1C1C1E),
+              color: AppColors.black,
             ),
           ),
         ],
@@ -79,7 +79,7 @@ class ProfileFamilyMemberAvatar extends StatelessWidget {
         text: initials,
         style: AppTextStyles.bold(
           fontSize: 22.sp,
-          color: AppColors.white.setOpacity(0.92),
+          color: AppColors.onFill.setOpacity(0.92),
         ),
       ),
     );

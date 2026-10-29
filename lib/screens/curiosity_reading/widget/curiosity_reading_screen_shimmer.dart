@@ -18,7 +18,7 @@ class CuriosityReadingScreenShimmer extends StatelessWidget {
                   Container(
                     width: double.infinity,
                     height: double.infinity,
-                    color: Colors.white,
+                    color: AppColors.surface,
                   ),
 
                   /// Top Bar
@@ -33,7 +33,7 @@ class CuriosityReadingScreenShimmer extends StatelessWidget {
                         Container(
                           width: 140.w,
                           height: 20.h,
-                          color: Colors.white,
+                          color: AppColors.surface,
                         ),
                         _circle(),
                       ],
@@ -51,13 +51,13 @@ class CuriosityReadingScreenShimmer extends StatelessWidget {
                         Container(
                           height: 26.h,
                           width: double.infinity,
-                          color: Colors.white,
+                          color: AppColors.surface,
                         ),
                         10.verticalSpace,
                         Container(
                           height: 26.h,
                           width: 220.w,
-                          color: Colors.white,
+                          color: AppColors.surface,
                         ),
                       ],
                     ),
@@ -71,7 +71,7 @@ class CuriosityReadingScreenShimmer extends StatelessWidget {
                     child: Container(
                       height: 30.h,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.surface,
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(12.r),
                           topRight: Radius.circular(12.r),
@@ -98,7 +98,7 @@ class CuriosityReadingScreenShimmer extends StatelessWidget {
                         child: Container(
                           width: double.infinity,
                           height: 14.h,
-                          color: Colors.white,
+                          color: AppColors.surface,
                         ),
                       ),
                     ),
@@ -113,7 +113,7 @@ class CuriosityReadingScreenShimmer extends StatelessWidget {
                         vertical: 18.h,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.surface,
                         borderRadius: BorderRadius.circular(20.r),
                       ),
                       child: Column(
@@ -144,8 +144,8 @@ class CuriosityReadingScreenShimmer extends StatelessWidget {
     return Container(
       width: 40,
       height: 40,
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
         shape: BoxShape.circle,
       ),
     );

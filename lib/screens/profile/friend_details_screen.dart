@@ -386,8 +386,8 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
       child: OutlinedButton(
         onPressed: isLoading ? null : () => _sendFriendRequest(profile),
         style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFF1C1C1E),
-          backgroundColor: Colors.white,
+          foregroundColor: AppColors.black,
+          backgroundColor: AppColors.surface,
           side: const BorderSide(color: Color(0xFFE4E4E4)),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(28),
@@ -481,7 +481,7 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
         onPressed: () => _showAddToFamilySheet(profile),
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          backgroundColor: const Color(0xFF1C1C1E),
+          backgroundColor: AppColors.black,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(28),
@@ -494,14 +494,14 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
             Icon(
               Icons.family_restroom_rounded,
               size: 22.sp,
-              color: AppColors.white,
+              color: AppColors.onFill,
             ),
             16.w.horizontalSpace,
             AppText(
               text: 'Add to Family',
               style: AppTextStyles.semibold(
                 fontSize: 16,
-                color: AppColors.white,
+                color: AppColors.onFill,
               ),
             ),
           ],
@@ -645,7 +645,7 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
             text: 'Overview',
             style: AppTextStyles.bold(
               fontSize: 22,
-              color: const Color(0xFF1C1C1E),
+              color: AppColors.black,
             ),
           ),
           16.w.verticalSpace,
@@ -728,7 +728,7 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
             text: 'Interests',
             style: AppTextStyles.bold(
               fontSize: 22,
-              color: const Color(0xFF1C1C1E),
+              color: AppColors.black,
             ),
           ),
           16.w.verticalSpace,
@@ -743,14 +743,14 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF2F2F4),
+                      color: AppColors.accentFill(const Color(0xFFF2F2F4)),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: AppText(
                       text: interest,
                       style: AppTextStyles.medium(
                         fontSize: 14,
-                        color: const Color(0xFF1C1C1E),
+                        color: AppColors.black,
                       ),
                     ),
                   ),
@@ -911,7 +911,7 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
           text: title,
           style: AppTextStyles.bold(
             fontSize: 22,
-            color: const Color(0xFF1C1C1E),
+            color: AppColors.black,
           ),
         ),
         const Spacer(),
@@ -943,7 +943,7 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 16.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFF6F6F8),
+        color: AppColors.accentFill(const Color(0xFFF6F6F8)),
         borderRadius: BorderRadius.circular(18.r),
       ),
       child: Column(
@@ -955,7 +955,7 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
             text: value,
             style: AppTextStyles.bold(
               fontSize: 22,
-              color: const Color(0xFF1C1C1E),
+              color: AppColors.black,
             ),
           ),
           SizedBox(height: 2.h),
@@ -965,7 +965,7 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
             overflow: TextOverflow.ellipsis,
             style: AppTextStyles.regular(
               fontSize: 13,
-              color: const Color(0xFF8E8E93),
+              color: AppColors.muted,
             ),
           ),
         ],
@@ -976,21 +976,21 @@ class _FriendDetailsScreenState extends State<FriendDetailsScreen> {
   Widget _buildFriendsEmpty() {
     return AppText(
       text: 'No friends yet',
-      style: AppTextStyles.regular(fontSize: 14, color: const Color(0xFF8E8E93)),
+      style: AppTextStyles.regular(fontSize: 14, color: AppColors.muted),
     );
   }
 
   Widget _buildGroupsEmpty() {
     return AppText(
       text: 'No groups yet',
-      style: AppTextStyles.regular(fontSize: 14, color: const Color(0xFF8E8E93)),
+      style: AppTextStyles.regular(fontSize: 14, color: AppColors.muted),
     );
   }
 
   Widget _buildTopicsEmpty() {
     return AppText(
       text: 'No series yet',
-      style: AppTextStyles.regular(fontSize: 14, color: const Color(0xFF8E8E93)),
+      style: AppTextStyles.regular(fontSize: 14, color: AppColors.muted),
     );
   }
 }
@@ -1057,7 +1057,7 @@ class _ViewOnlySeriesCard extends StatelessWidget {
       height: 228.h,
       margin: EdgeInsets.only(right: 10.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(22.r),
       ),
       clipBehavior: Clip.antiAlias,

@@ -351,7 +351,7 @@ class _UserProfileFriendTile extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -415,7 +415,7 @@ class _UserProfileFriendTile extends StatelessWidget {
       text: friend.initials,
       style: AppTextStyles.bold(
         fontSize: 14.sp,
-        color: AppColors.white,
+        color: AppColors.onFill,
       ),
     );
   }
@@ -453,7 +453,7 @@ class _PreviewFriendTile extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -465,7 +465,7 @@ class _PreviewFriendTile extends StatelessWidget {
               text: friend.initials,
               style: AppTextStyles.bold(
                 fontSize: 14.sp,
-                color: AppColors.white,
+                color: AppColors.onFill,
               ),
             ),
           ),
@@ -624,7 +624,7 @@ class _FriendTileState extends State<_FriendTile> {
                           text: 'Remove',
                           style: AppTextStyles.semibold(
                             fontSize: 15.sp,
-                            color: AppColors.white,
+                            color: AppColors.onFill,
                           ),
                         ),
                       ),
@@ -673,7 +673,7 @@ class _FriendTileState extends State<_FriendTile> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -688,7 +688,7 @@ class _FriendTileState extends State<_FriendTile> {
                 text: widget.friend.initials,
                 style: AppTextStyles.bold(
                   fontSize: 14.sp,
-                  color: AppColors.white,
+                  color: AppColors.onFill,
                 ),
               ),
             ),
@@ -784,9 +784,9 @@ class _ShimmerTile extends StatelessWidget {
           Container(
             width: 48.w,
             height: 48.w,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white,
+              color: AppColors.surface,
             ),
           ),
           16.w.horizontalSpace,
@@ -798,7 +798,7 @@ class _ShimmerTile extends StatelessWidget {
                   width: 120.w,
                   height: 14.h,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(4.r),
                   ),
                 ),
@@ -807,7 +807,7 @@ class _ShimmerTile extends StatelessWidget {
                   width: 80.w,
                   height: 11.h,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(4.r),
                   ),
                 ),

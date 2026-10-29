@@ -520,14 +520,14 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                               Icon(
                                 Icons.refresh_rounded,
                                 size: 20.w,
-                                color: AppColors.white,
+                                color: AppColors.onFill,
                               ),
                               8.w.horizontalSpace,
                               AppText(
                                 text: "Retry",
                                 style: AppTextStyles.semibold(
                                   fontSize: 16.sp,
-                                  color: AppColors.white,
+                                  color: AppColors.onFill,
                                 ),
                               ),
                             ],
@@ -577,6 +577,13 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
             final tags =
                 summary.subjects?.all.map((e) => e.name).toList() ?? [];
             tags.addAll(summary.topicInterests.map((e) => e.name).toList());
+            final hasStartedReading = summary.storyIdeas.any((idea) {
+              final progress = idea.continueReading;
+              if (progress == null) return false;
+              return progress.readPages > 0 ||
+                  progress.percentComplete > 0 ||
+                  progress.isCompleted;
+            });
 
             return AnnotatedRegion<SystemUiOverlayStyle>(
               value: SystemUiOverlayStyle.light.copyWith(
@@ -608,14 +615,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                                 description: topicDescription,
                                 tags: tags,
                               ),
-                              14.h.verticalSpace,
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: [
-                                  for (final tag in tags) _infoChip(tag),
-                                ],
-                              ),
+                              if (hasStartedReading) ...[
                               16.h.verticalSpace,
                               GestureDetector(
                                 onTap: () {
@@ -766,18 +766,16 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                                   padding: EdgeInsets.symmetric(vertical: 15.w),
                                   width: double.infinity,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF1A1A1A),
+                                    color: AppColors.buttonBackground,
                                     borderRadius: BorderRadius.circular(40),
                                   ),
                                   alignment: Alignment.center,
                                   child: AppText(
-                                    text: summary.storyIdeas.first.isGenerated
-                                        ? 'Continue Reading'
-                                        : 'Start Reading',
+                                    text: 'Continue Reading',
                                     style:
                                         AppTextStyles.semibold(
                                           fontSize: 14,
-                                          color: AppColors.white,
+                                          color: AppColors.onFill,
                                         ).copyWith(
                                           height: 17 / 14,
                                           letterSpacing: 0,
@@ -785,6 +783,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                                   ),
                                 ),
                               ),
+                              ],
                             ],
                           ),
                         ),
@@ -803,7 +802,7 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
                                 text: '${summary.storyIdeas.length} Readings',
                                 style: AppTextStyles.semibold(
                                   fontSize: 16,
-                                  color: const Color(0xCC1A1A1A),
+                                  color: AppColors.black.withValues(alpha: 0.8),
                                 ),
                               ),
                               16.h.verticalSpace,
@@ -872,22 +871,6 @@ class _MyStoryIdeasScreenState extends State<MyStoryIdeasScreen> {
     );
   }
 
-  Widget _infoChip(String label) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(10, 5, 10, 6),
-      decoration: BoxDecoration(
-        color: AppColors.extealighttealcolor,
-        borderRadius: BorderRadius.circular(40),
-      ),
-      child: AppText(
-        text: label,
-        style: AppTextStyles.medium(
-          fontSize: 12,
-          color: AppColors.teal,
-        ),
-      ),
-    );
-  }
 }
 
 class _StoryListHero extends StatelessWidget {
@@ -1111,7 +1094,7 @@ class _MyReadingItemTile extends StatelessWidget {
         height: 100,
         padding: const EdgeInsets.all(5),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -1155,7 +1138,7 @@ class _MyReadingItemTile extends StatelessWidget {
                     text: '$index. $title',
                     style: AppTextStyles.semibold(
                       fontSize: 16,
-                      color: const Color(0xFF1A1A1A),
+                      color: AppColors.black,
                     ).copyWith(height: 20 / 16, letterSpacing: -0.32),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -1167,7 +1150,7 @@ class _MyReadingItemTile extends StatelessWidget {
                         : description.trim(),
                     style: AppTextStyles.regular(
                       fontSize: 14,
-                      color: const Color(0xCC1A1A1A),
+                      color: AppColors.black.withValues(alpha: 0.8),
                     ).copyWith(height: 18 / 14, letterSpacing: -0.28),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -1204,7 +1187,9 @@ class _ReadingProgressIndicator extends StatelessWidget {
     final progress = pageCount > 0
         ? (readPages / pageCount).clamp(0.0, 1.0)
         : 0.0;
-    final label = pageCount > 0 ? '$readPages/$pageCount pages' : '0 pages';
+    if (pageCount <= 0) return const SizedBox.shrink();
+
+    final label = '$readPages/$pageCount pages';
 
     return Row(
       children: [
@@ -1265,23 +1250,29 @@ class _MyExpandableDescriptionState extends State<_MyExpandableDescription> {
 
     final bodyStyle = AppTextStyles.regular(
       fontSize: 14,
-      color: const Color(0xCC1A1A1A),
+      color: AppColors.black.withValues(alpha: 0.8),
     ).copyWith(height: 1.57);
     final linkStyle = AppTextStyles.bold(
       fontSize: 14,
-      color: const Color(0xFF1A1A1A),
+      color: AppColors.black,
     ).copyWith(height: 1.57);
 
-    if (display.length <= _minCharsForToggle) {
+    final showMore =
+        display.length > _minCharsForToggle || widget.tags.isNotEmpty;
+    if (!showMore) {
       return AppText(text: display, style: bodyStyle);
     }
+
+    final preview = display.length <= _minCharsForToggle
+        ? '$display '
+        : '${display.substring(0, _minCharsForToggle)}... ';
 
     return RichText(
       text: TextSpan(
         style: bodyStyle,
         children: [
           TextSpan(
-            text: '${display.substring(0, _minCharsForToggle)}... ',
+            text: preview,
             style: AppTextStyles.regular(
               fontSize: 14.sp,
               color: AppColors.black.setOpacity(0.8),
@@ -1330,17 +1321,17 @@ class _StoryIdeaDetailsBottomSheet extends StatelessWidget {
       children: [
         GlassIconButton(
           onTap: () => Navigator.of(context).pop(),
-          child: const Icon(
+          child: Icon(
             Icons.close_rounded,
             size: 24,
-            color: Color(0xFF1A1A1A),
+            color: AppColors.black,
           ),
         ),
         const SizedBox(height: 10),
         Container(
           width: double.infinity,
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
             borderRadius: BorderRadius.vertical(top: Radius.circular(38)),
             boxShadow: [
               BoxShadow(
@@ -1358,7 +1349,7 @@ class _StoryIdeaDetailsBottomSheet extends StatelessWidget {
                 text: title,
                 style: AppTextStyles.bold(
                   fontSize: 22,
-                  color: const Color(0xFF1A1A1A),
+                  color: AppColors.black,
                 ),
               ),
               const SizedBox(height: 12),
@@ -1366,7 +1357,7 @@ class _StoryIdeaDetailsBottomSheet extends StatelessWidget {
                 text: description,
                 style: AppTextStyles.regular(
                   fontSize: 15,
-                  color: const Color(0xCC1A1A1A),
+                  color: AppColors.black.withValues(alpha: 0.8),
                 ).copyWith(height: 1.45),
               ),
               if (tags.isNotEmpty) ...[

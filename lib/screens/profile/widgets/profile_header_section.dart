@@ -59,10 +59,10 @@ class ProfileHeaderSection extends StatelessWidget {
                             onTap: () {
                               if (context.canPop()) context.pop();
                             },
-                            child: const Icon(
+                            child: Icon(
                               Icons.chevron_left_rounded,
                               size: 28,
-                              color: Color(0xFF1C1C1E),
+                              color: AppColors.black,
                             ),
                           ),
                         ),
@@ -70,7 +70,7 @@ class ProfileHeaderSection extends StatelessWidget {
                           text: 'Your Profile',
                           style: AppTextStyles.bold(
                             fontSize: 18,
-                            color: const Color(0xFF1C1C1E),
+                            color: AppColors.black,
                           ),
                         ),
                         Align(
@@ -83,10 +83,10 @@ class ProfileHeaderSection extends StatelessWidget {
                                 onTap: () => context.pushNamed(
                                   AppRoutes.notificationScreen.name,
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.notifications_none_rounded,
                                   size: 22,
-                                  color: Color(0xFF1C1C1E),
+                                  color: AppColors.black,
                                 ),
                               ),
                               SizedBox(width: 8.w),
@@ -95,10 +95,10 @@ class ProfileHeaderSection extends StatelessWidget {
                                 onTap: () => context.pushNamed(
                                   AppRoutes.settingsScreen.name,
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.settings_outlined,
                                   size: 22,
-                                  color: Color(0xFF1C1C1E),
+                                  color: AppColors.black,
                                 ),
                               ),
                             ],
@@ -169,8 +169,8 @@ class _IdentityRow extends StatelessWidget {
               height: avatarSize.w,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white,
-                border: Border.all(color: Colors.white, width: 3),
+                color: AppColors.surface,
+                border: Border.all(color: AppColors.surface, width: 3),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.08),
@@ -207,7 +207,7 @@ class _IdentityRow extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                   style: AppTextStyles.bold(
                                     fontSize: 22,
-                                    color: const Color(0xFF1C1C1E),
+                                    color: AppColors.black,
                                   ),
                                 ),
                               ),
@@ -221,7 +221,7 @@ class _IdentityRow extends StatelessWidget {
                                 child: SvgIcon(
                                   AppAssets.shareIcon,
                                   size: 18,
-                                  color: const Color(0xFF1C1C1E),
+                                  color: AppColors.black,
                                 ),
                               ),
                             ],
@@ -233,7 +233,7 @@ class _IdentityRow extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: AppTextStyles.regular(
                               fontSize: 14,
-                              color: const Color(0xFF8E8E93),
+                              color: AppColors.muted,
                             ),
                           ),
                           SizedBox(height: 10.h),
@@ -281,14 +281,14 @@ class _Stat extends StatelessWidget {
           text: value,
           style: AppTextStyles.bold(
             fontSize: 22,
-            color: const Color(0xFF1C1C1E),
+            color: AppColors.black,
           ),
         ),
         AppText(
           text: label,
           style: AppTextStyles.regular(
             fontSize: 14,
-            color: const Color(0xFF8E8E93),
+            color: AppColors.muted,
           ),
         ),
       ],
@@ -306,11 +306,11 @@ class _IdentityShimmer extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(width: 140, height: 22, color: Colors.white),
+          Container(width: 140, height: 22, color: AppColors.surface),
           const SizedBox(height: 8),
-          Container(width: 160, height: 14, color: Colors.white),
+          Container(width: 160, height: 14, color: AppColors.surface),
           const SizedBox(height: 16),
-          Container(width: 120, height: 36, color: Colors.white),
+          Container(width: 120, height: 36, color: AppColors.surface),
         ],
       ),
     );

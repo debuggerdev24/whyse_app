@@ -6,7 +6,10 @@ import 'package:redstreakapp/screens/achivements/widgets/streak_calendar_widget.
 import 'package:redstreakapp/screens/achivements/widgets/streak_freeze_widget.dart';
 
 class AchivementsScreen extends StatefulWidget {
-  const AchivementsScreen({super.key});
+  const AchivementsScreen({super.key, this.showBackButton = false});
+
+  /// Home's streak icon opens this page on its own, above the tab bar.
+  final bool showBackButton;
 
   @override
   State<AchivementsScreen> createState() => _AchivementsScreenState();
@@ -25,13 +28,35 @@ class _AchivementsScreenState extends State<AchivementsScreen> {
     });
   }
 
+  Widget _withBackButton(BuildContext context, {required Widget child}) {
+    if (!widget.showBackButton) return child;
+    final top = MediaQuery.paddingOf(context).top;
+    return Stack(
+      children: [
+        child,
+        Positioned(
+          top: top + 12,
+          left: 16,
+          child: GlassIconButton(
+            onTap: () => context.pop(),
+            child: Icon(
+              Icons.chevron_left_rounded,
+              size: 28,
+              color: AppColors.black,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   void _openCalendar(GamificationProvider gp) {
     final days = gp.streakScore?.calendarDays ?? const [];
     showModalBottomSheet<void>(
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -74,34 +99,40 @@ class _AchivementsScreenState extends State<AchivementsScreen> {
       body: Consumer2<GamificationProvider, HomeProvider>(
         builder: (context, gp, home, _) {
           if (gp.isLoadingStreakScore && gp.streakScore == null) {
-            return Center(
-              child: CircularProgressIndicator(color: AppColors.teal),
+            return _withBackButton(
+              context,
+              child: Center(
+                child: CircularProgressIndicator(color: AppColors.teal),
+              ),
             );
           }
 
           final data = gp.streakScore;
           if (data == null) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    AppText(
-                      text: gp.streakScoreError ?? 'Unable to load rewards.',
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.regular(
-                        fontSize: 14,
-                        color: const Color(0xFF8E8E93),
+            return _withBackButton(
+              context,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AppText(
+                        text: gp.streakScoreError ?? 'Unable to load rewards.',
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.regular(
+                          fontSize: 14,
+                          color: AppColors.muted,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    AppFilledButton(
-                      text: 'Retry',
-                      backgroundColor: AppColors.teal,
-                      onTap: () => gp.fetchStreakScore(force: true),
-                    ),
-                  ],
+                      const SizedBox(height: 16),
+                      AppFilledButton(
+                        text: 'Retry',
+                        backgroundColor: AppColors.teal,
+                        onTap: () => gp.fetchStreakScore(force: true),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );
@@ -137,6 +168,17 @@ class _AchivementsScreenState extends State<AchivementsScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (widget.showBackButton) ...[
+                      GlassIconButton(
+                        onTap: () => context.pop(),
+                        child: Icon(
+                          Icons.chevron_left_rounded,
+                          size: 28,
+                          color: AppColors.black,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,7 +187,7 @@ class _AchivementsScreenState extends State<AchivementsScreen> {
                             text: 'Achievement',
                             style: AppTextStyles.semibold(
                               fontSize: 28,
-                              color: const Color(0xFF1A1A1A),
+                              color: AppColors.black,
                             ).copyWith(height: 1.15, letterSpacing: -0.4),
                           ),
                           const SizedBox(height: 4),
@@ -154,7 +196,7 @@ class _AchivementsScreenState extends State<AchivementsScreen> {
                                 'Track your progress and celebrate every spark along the way.',
                             style: AppTextStyles.regular(
                               fontSize: 14,
-                              color: const Color(0xFF8E8E93),
+                              color: AppColors.muted,
                             ).copyWith(height: 1.35),
                           ),
                         ],
@@ -167,8 +209,8 @@ class _AchivementsScreenState extends State<AchivementsScreen> {
                         width: 44,
                         height: 44,
                         alignment: Alignment.center,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
@@ -178,10 +220,10 @@ class _AchivementsScreenState extends State<AchivementsScreen> {
                             ),
                           ],
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.calendar_today_outlined,
                           size: 18,
-                          color: Color(0xFF1A1A1A),
+                          color: AppColors.black,
                         ),
                       ),
                     ),
@@ -203,7 +245,7 @@ class _AchivementsScreenState extends State<AchivementsScreen> {
                         textAlign: TextAlign.center,
                         style: AppTextStyles.semibold(
                           fontSize: 16,
-                          color: const Color(0xFF1A1A1A),
+                          color: AppColors.black,
                         ).copyWith(height: 1.3),
                       ),
                       const SizedBox(height: 14),
@@ -216,7 +258,7 @@ class _AchivementsScreenState extends State<AchivementsScreen> {
                             text: '${data.scores.totalScore}',
                             style: AppTextStyles.bold(
                               fontSize: 32,
-                              color: const Color(0xFF1A1A1A),
+                              color: AppColors.black,
                             ).copyWith(height: 1),
                           ),
                         ],
@@ -226,7 +268,7 @@ class _AchivementsScreenState extends State<AchivementsScreen> {
                         textAlign: TextAlign.center,
                         style: AppTextStyles.medium(
                           fontSize: 13,
-                          color: const Color(0xFF8E8E93),
+                          color: AppColors.muted,
                         ),
                       ),
                       const SizedBox(height: 18),
@@ -355,7 +397,7 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(18),
         boxShadow: const [
           BoxShadow(
@@ -382,7 +424,7 @@ class _StatCard extends StatelessWidget {
             text: value,
             style: AppTextStyles.bold(
               fontSize: 18,
-              color: const Color(0xFF1A1A1A),
+              color: AppColors.black,
             ),
           ),
           const SizedBox(height: 2),
@@ -393,7 +435,7 @@ class _StatCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: AppTextStyles.regular(
               fontSize: 11,   
-              color: const Color(0xFF8E8E93),
+              color: AppColors.muted,
             ),
           ),
         ],
@@ -417,7 +459,7 @@ class _SectionTitle extends StatelessWidget {
             text: title,
             style: AppTextStyles.semibold(
               fontSize: 18,
-              color: const Color(0xFF1A1A1A),
+              color: AppColors.black,
             ),
           ),
         ),
@@ -441,7 +483,7 @@ class _SeeAll extends StatelessWidget {
         text: expanded ? 'See less' : 'See all',
         style: AppTextStyles.medium(
           fontSize: 13,
-          color: const Color(0xFF8E8E93),
+          color: AppColors.muted,
         ),
       ),
     );
@@ -503,14 +545,16 @@ class _BadgeTile extends StatelessWidget {
           height: 64,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: _earned ? style.background : const Color(0xFFF2F2F4),
+            color: _earned
+                ? style.background
+                : AppColors.accentFill(const Color(0xFFF2F2F4)),
             shape: BoxShape.circle,
           ),
           child: _earned
               ? style.icon
-              : const Icon(
+              : Icon(
                   Icons.lock_outline_rounded,
-                  color: Color(0xFFC7C7CC),
+                  color: AppColors.muted,
                   size: 26,
                 ),
         ),
@@ -522,7 +566,7 @@ class _BadgeTile extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: AppTextStyles.semibold(
             fontSize: 12,
-            color: const Color(0xFF1A1A1A),
+            color: AppColors.black,
           ),
         ),
         const SizedBox(height: 2),
@@ -530,7 +574,7 @@ class _BadgeTile extends StatelessWidget {
           text: _earned ? 'Earned' : 'Locked',
           style: AppTextStyles.regular(
             fontSize: 11,
-            color: const Color(0xFF8E8E93),
+            color: AppColors.muted,
           ),
         ),
       ],
@@ -572,7 +616,7 @@ class _MilestoneRow extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.semibold(
                   fontSize: 14,
-                  color: const Color(0xFF1A1A1A),
+                  color: AppColors.black,
                 ),
               ),
               const SizedBox(height: 6),
@@ -581,7 +625,7 @@ class _MilestoneRow extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: achievement.progressValue,
                   minHeight: 6,
-                  backgroundColor: const Color(0xFFE8E8ED),
+                  backgroundColor: AppColors.divider,
                   color: style.bar,
                 ),
               ),
@@ -593,12 +637,12 @@ class _MilestoneRow extends StatelessWidget {
           text: '${achievement.progress}/${achievement.target}',
           style: AppTextStyles.medium(
             fontSize: 13,
-            color: const Color(0xFF8E8E93),
+            color: AppColors.muted,
           ),
         ),
-        const Icon(
+        Icon(
           Icons.chevron_right_rounded,
-          color: Color(0xFFC7C7CC),
+          color: AppColors.muted,
           size: 18,
         ),
       ],

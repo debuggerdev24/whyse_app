@@ -163,12 +163,12 @@ class _EditInterestsScreenState extends State<EditInterestsScreen> {
             height: 56,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: settingsInk,
+              color: AppColors.buttonBackground,
               borderRadius: BorderRadius.circular(28),
             ),
             child: AppText(
               text: 'Save',
-              style: AppTextStyles.semibold(fontSize: 17, color: Colors.white),
+              style: AppTextStyles.semibold(fontSize: 17, color: AppColors.onFill),
             ),
           ),
         ),
@@ -223,7 +223,7 @@ class _EditInterestsScreenState extends State<EditInterestsScreen> {
               SizedBox(height: 18.h),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: AppTextField(
@@ -262,7 +262,7 @@ class _InterestChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? AppColors.teal : Colors.white,
+          color: selected ? AppColors.teal : AppColors.surface,
           borderRadius: BorderRadius.circular(20),
         ),
         child: AppText(

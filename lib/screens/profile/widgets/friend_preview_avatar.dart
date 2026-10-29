@@ -72,7 +72,7 @@ class FriendPreviewAvatar extends StatelessWidget {
         text: friend.initials,
         style: AppTextStyles.bold(
           fontSize: 22.sp,
-          color: AppColors.white.setOpacity(0.92),
+          color: AppColors.onFill.setOpacity(0.92),
         ),
       ),
     );

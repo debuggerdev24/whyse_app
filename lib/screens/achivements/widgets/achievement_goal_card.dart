@@ -102,7 +102,7 @@ class AchievementGoalCard extends StatelessWidget {
                     text: '+${achievement.rewardPoints} pts reward',
                     style: AppTextStyles.medium(
                       fontSize: 12.sp,
-                      color: AppColors.bluecolor,
+                      color: AppColors.black,
                     ),
                   ),
                 ],
@@ -131,11 +131,11 @@ class AchievementGoalCard extends StatelessWidget {
   Color get _iconBackgroundColor {
     switch (achievement.type) {
       case 'spark':
-        return const Color(0xFFFDEBDD);
+        return AppColors.accentFill(const Color(0xFFFDEBDD));
       case 'series':
-        return const Color(0xFFE8F4FF);
+        return AppColors.accentFill(const Color(0xFFE8F4FF));
       case 'interest':
-        return const Color(0xFFEAF8F0);
+        return AppColors.accentFill(const Color(0xFFEAF8F0));
       default:
         return AppColors.teal;
     }
@@ -153,7 +153,7 @@ class AchievementGoalCard extends StatelessWidget {
         return SvgIcon(
           AppAssets.bookOpen,
           size: 22.w,
-          color: AppColors.bluecolor,
+          color: AppColors.teal,
         );
       case 'interest':
         return SvgIcon(
@@ -162,7 +162,7 @@ class AchievementGoalCard extends StatelessWidget {
           color: AppColors.teal,
         );
       default:
-        return SvgIcon(AppAssets.page, size: 22.w, color: AppColors.white);
+        return SvgIcon(AppAssets.page, size: 22.w, color: AppColors.onFill);
     }
   }
 }

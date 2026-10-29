@@ -65,7 +65,7 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                         style: AppTextStyles.bold(
                           height: 1.15,
                           fontSize: 30,
-                          color: const Color(0xFF1C1C1E),
+                          color: AppColors.black,
                         ),
                       ),
 
@@ -76,25 +76,32 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
                             "Choose how much time you want to read each day to keep your streak alive and earn rewards.",
                         style: AppTextStyles.regular(
                           fontSize: 15,
-                          color: const Color(0xFF8E8E93),
+                          color: AppColors.muted,
                         ).copyWith(height: 1.35),
                       ),
 
                       const SizedBox(height: 18),
 
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
+                      Row(
                         children: [
-                          for (final option in provider.readingDurations)
-                            _buildOptionButton(
-                              text: _durationLabel(option),
-                              isSelected:
-                                  provider.selectedReadingDuration == option,
-                              onTap: (_) {
-                                provider.setSelectedReadingDuration = option;
-                              },
+                          for (var i = 0;
+                              i < provider.readingDurations.length;
+                              i++) ...[
+                            if (i > 0) const SizedBox(width: 8),
+                            Expanded(
+                              child: _buildOptionButton(
+                                text: _durationLabel(
+                                  provider.readingDurations[i],
+                                ),
+                                isSelected: provider.selectedReadingDuration ==
+                                    provider.readingDurations[i],
+                                onTap: (_) {
+                                  provider.setSelectedReadingDuration =
+                                      provider.readingDurations[i];
+                                },
+                              ),
                             ),
+                          ],
                         ],
                       ),
                       if (provider.selectedReadingDuration.toLowerCase() ==
@@ -245,20 +252,23 @@ class _StoryReadingGoalScreenState extends State<StoryReadingGoalScreen> {
       onTap: () => onTap.call(text),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-
+        width: double.infinity,
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.teal : Colors.white,
+          color: isSelected ? AppColors.teal : AppColors.surface,
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
-            color: isSelected ? AppColors.teal : const Color(0xFFE4E4E4),
+            color: isSelected ? AppColors.teal : AppColors.divider,
           ),
         ),
         child: AppText(
           text: text,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: AppTextStyles.semibold(
             fontSize: 14,
-            color: isSelected ? Colors.white : const Color(0xFF1C1C1E),
+            color: isSelected ? AppColors.onFill : AppColors.black,
           ),
         ),
       ),

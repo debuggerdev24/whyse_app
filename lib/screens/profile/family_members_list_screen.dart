@@ -278,7 +278,7 @@ class _FamilyMemberTileState extends State<_FamilyMemberTile> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -451,7 +451,7 @@ class _ShimmerTile extends StatelessWidget {
       child: Container(
         height: 64,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
         ),
       ),
@@ -500,12 +500,12 @@ class _ErrorState extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 24.w),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: settingsInk,
+                  color: AppColors.buttonBackground,
                   borderRadius: BorderRadius.circular(22),
                 ),
                 child: AppText(
                   text: 'Retry',
-                  style: AppTextStyles.semibold(fontSize: 15, color: Colors.white),
+                  style: AppTextStyles.semibold(fontSize: 15, color: AppColors.onFill),
                 ),
               ),
             ),

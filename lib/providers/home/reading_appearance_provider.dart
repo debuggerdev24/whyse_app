@@ -60,7 +60,8 @@ class ReadingAppearanceProvider extends ChangeNotifier {
   ];
 
   /// Matches [Slider] range 0–1 with [divisions: 12] in the font bottom sheet.
-  double _fontSizeNormalized = 0.2;
+  /// 0.5 is the middle tick, the Medium size.
+  double _fontSizeNormalized = 0.5;
   int _selectedFontIndex = 0;
   int _selectedThemeIndex = 0;
 

@@ -117,7 +117,7 @@ class _StreakCalendarWidgetState extends State<StreakCalendarWidget> {
           text: 'Streak Calendar',
           style: AppTextStyles.semibold(
             fontSize: 18,
-            color: const Color(0xFF1A1A1A),
+            color: AppColors.black,
           ),
         ),
         const SizedBox(height: 16),
@@ -133,7 +133,7 @@ class _StreakCalendarWidgetState extends State<StreakCalendarWidget> {
                 textAlign: TextAlign.center,
                 style: AppTextStyles.semibold(
                   fontSize: 16,
-                  color: const Color(0xFF1A1A1A),
+                  color: AppColors.black,
                 ),
               ),
             ),
@@ -153,7 +153,7 @@ class _StreakCalendarWidgetState extends State<StreakCalendarWidget> {
                   textAlign: TextAlign.center,
                   style: AppTextStyles.medium(
                     fontSize: 12,
-                    color: const Color(0xFF8E8E93),
+                    color: AppColors.muted,
                   ),
                 ),
               ),
@@ -206,7 +206,7 @@ class _DayCell extends StatelessWidget {
         ? Colors.white
         : isFuture
         ? const Color(0xFFC7C7CC)
-        : const Color(0xFF1A1A1A);
+        : AppColors.black;
 
     return SizedBox(
       height: 40,
@@ -220,7 +220,7 @@ class _DayCell extends StatelessWidget {
             color: isCompleted
                 ? AppColors.orangeColor
                 : isFrozen
-                ? const Color(0xFFE7F6F6)
+                ? AppColors.accentFill(const Color(0xFFE7F6F6))
                 : Colors.transparent,
             border: isToday && !isCompleted
                 ? Border.all(color: AppColors.orangeColor, width: 1.5)
@@ -255,11 +255,11 @@ class _MonthNavButton extends StatelessWidget {
         width: 32,
         height: 32,
         alignment: Alignment.center,
-        decoration: const BoxDecoration(
-          color: Color(0xFFF2F2F7),
+        decoration: BoxDecoration(
+          color: AppColors.accentFill(const Color(0xFFF2F2F7)),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, size: 20, color: const Color(0xFF1A1A1A)),
+        child: Icon(icon, size: 20, color: AppColors.black),
       ),
     );
   }

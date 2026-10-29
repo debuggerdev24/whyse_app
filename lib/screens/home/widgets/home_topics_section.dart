@@ -58,6 +58,7 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
                 ),
               ],
             ),
+            _generateSeriesButton(context),
             12.h.verticalSpace,
             if (list.isNotEmpty)
               LayoutBuilder(
@@ -189,7 +190,7 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
           ),
         ),
         24.w.verticalSpace,
-        _addNewReadingButton(context),
+        _generateSeriesButton(context),
       ],
     );
   }
@@ -205,7 +206,7 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
       child: Container(
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -284,7 +285,7 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
                             height: 42.h,
                             width: 132.w,
                             decoration: BoxDecoration(
-                              color: AppColors.black,
+                              color: AppColors.buttonBackground,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             alignment: Alignment.center,
@@ -347,8 +348,8 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
     );
   }
 
-  /// ---------------- ADD NEW READING BUTTON ----------------
-  Widget _addNewReadingButton(BuildContext context) {
+  /// Starts the existing story-goals flow that generates a series.
+  Widget _generateSeriesButton(BuildContext context) {
     return GestureDetector(
       onTap: () {
         // showModalBottomSheet(
@@ -372,7 +373,7 @@ class _HomeStoryTopicsState extends State<HomeStoryTopics> {
         ),
         alignment: Alignment.center,
         child: AppText(
-          text: "Add New Reading",
+          text: "Generate Series",
           style: AppTextStyles.bold(fontSize: 15.sp, color: AppColors.teal),
         ),
       ),
@@ -604,19 +605,19 @@ class _FilledActionButton extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.w),
         decoration: BoxDecoration(
-          color: AppColors.black,
+          color: AppColors.buttonBackground,
           borderRadius: BorderRadius.circular(8.r),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 22.sp, color: AppColors.white),
+            Icon(icon, size: 22.sp, color: AppColors.onFill),
             8.w.horizontalSpace,
             AppText(
               text: label,
               style: AppTextStyles.semibold(
                 fontSize: 14.sp,
-                color: AppColors.white,
+                color: AppColors.onFill,
               ),
             ),
           ],
@@ -724,12 +725,14 @@ class StoryCard extends StatelessWidget {
         ? story.noOfStoriesGenerated
         : readCount;
     final hasImage = story.thumbnailUrl.trim().isNotEmpty;
-    final fill = _fallbackFills[colorIndex % _fallbackFills.length];
+    final fill = AppColors.accentFill(
+      _fallbackFills[colorIndex % _fallbackFills.length],
+    );
     final accent = _fallbackAccents[colorIndex % _fallbackAccents.length];
-    final titleColor = hasImage ? Colors.white : AppColors.black;
+    final titleColor = hasImage ? AppColors.onFill : AppColors.black;
     final metaColor = hasImage
-        ? Colors.white.withValues(alpha: 0.82)
-        : AppColors.black.withValues(alpha: 0.45);
+        ? AppColors.onFill.withValues(alpha: 0.82)
+        : AppColors.black.withValues(alpha: 0.55);
 
     return GestureDetector(
       onTap: onTap,

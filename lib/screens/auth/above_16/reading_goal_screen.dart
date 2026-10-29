@@ -76,7 +76,7 @@ class _ReadingGoalScreenState extends State<ReadingGoalScreen> {
 
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.surface,
                         border: Border.all(
                           color: AppColors.black.withValues(alpha: 0.1),
                         ),

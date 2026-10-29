@@ -70,7 +70,7 @@ class _StartQuizScreenState extends State<StartQuizScreen> {
     return PopScope(
       child: AppLayout(
         body: ColoredBox(
-          color: const Color(0xFFF2F2F7),
+          color: AppColors.backgroundColor,
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -82,9 +82,9 @@ class _StartQuizScreenState extends State<StartQuizScreen> {
                         alignment: Alignment.centerLeft,
                         child: GlassIconButton(
                           onTap: () => context.pop(),
-                          child: const Icon(
+                          child: Icon(
                             Icons.close_rounded,
-                            color: Color(0xFF1A1A1A),
+                            color: AppColors.black,
                             size: 22,
                           ),
                         ),
@@ -96,7 +96,7 @@ class _StartQuizScreenState extends State<StartQuizScreen> {
                         text: "Time for a quick quiz!",
                         style: AppTextStyles.semibold(
                           fontSize: 28,
-                          color: const Color(0xFF1A1A1A),
+                          color: AppColors.black,
                         ).copyWith(height: 1.2),
                         textAlign: TextAlign.center,
                       ),

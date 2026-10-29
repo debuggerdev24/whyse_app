@@ -1,9 +1,9 @@
 import 'package:redstreakapp/core/utils/app_imports.dart';
 
 Color get settingsPageColor => AppColors.backgroundColor;
-const Color settingsInk = Color(0xFF1C1C1E);
-const Color settingsMuted = Color(0xFF8E8E93);
-const Color settingsLine = Color(0xFFE5E5EA);
+Color get settingsInk => AppColors.black;
+Color get settingsMuted => AppColors.muted;
+Color get settingsLine => AppColors.divider;
 const Color settingsSignOut = Color(0xFFFF5C4D);
 const Color settingsSwitchOn = Color(0xFFFF9F0A);
 
@@ -47,7 +47,7 @@ class SettingsScaffold extends StatelessWidget {
                       child: GlassIconButton(
                         size: 44,
                         onTap: () => context.pop(),
-                        child: const Icon(
+                        child: Icon(
                           Icons.chevron_left_rounded,
                           size: 28,
                           color: settingsInk,
@@ -138,7 +138,7 @@ class SettingsNavRow extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, size: 22, color: settingsInk),
+            Icon(Icons.chevron_right, size: 22, color: settingsInk),
           ],
         ),
       ),
@@ -151,9 +151,9 @@ class SettingsDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ColoredBox(
+    return ColoredBox(
       color: settingsLine,
-      child: SizedBox(height: 1, width: double.infinity),
+      child: const SizedBox(height: 1, width: double.infinity),
     );
   }
 }

@@ -626,6 +626,13 @@ class AppRouter {
       builder: (context, state) => const NotificationScreen(),
     ),
     GoRoute(
+      path: AppRoutes.homeAchivementsScreen.path,
+      name: AppRoutes.homeAchivementsScreen.name,
+      parentNavigatorKey: AppRouter.rootNavigatorKey,
+      builder: (context, state) =>
+          const AchivementsScreen(showBackButton: true),
+    ),
+    GoRoute(
       path: AppRoutes.profileScreen.path,
       name: AppRoutes.profileScreen.name,
       builder: (context, state) => ProfileScreen(),

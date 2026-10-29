@@ -136,14 +136,14 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: settingsInk,
+                      color: AppColors.buttonBackground,
                       borderRadius: BorderRadius.circular(18),
                     ),
                     child: AppText(
                       text: 'Choose file',
                       style: AppTextStyles.medium(
                         fontSize: 14,
-                        color: Colors.white,
+                        color: AppColors.onFill,
                       ),
                     ),
                   ),
@@ -201,7 +201,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   Widget _whiteField({required Widget child}) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
       ),
       child: child,

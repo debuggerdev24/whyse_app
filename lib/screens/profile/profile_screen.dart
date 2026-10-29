@@ -63,7 +63,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _subscriptionBlock(),
                     // _yourBooksBlock(context),
                     // _yourEBooksBlock(context),
-                    _mySeriesListBlock(),
+                    // _mySeriesListBlock(),
                     SizedBox(height: 24.w),
                   ],
                 ),
@@ -95,7 +95,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   text: 'Family',
                   style: AppTextStyles.bold(
                     fontSize: 22,
-                    color: const Color(0xFF1C1C1E),
+                    color: AppColors.black,
                   ),
                 ),
                 const Spacer(),
@@ -195,9 +195,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Container(
                       width: 64.w,
                       height: 64.w,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white,
+                        color: AppColors.surface,
                       ),
                     ),
                     8.h.verticalSpace,
@@ -205,7 +205,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       width: 52.w,
                       height: 12.h,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.surface,
                         borderRadius: BorderRadius.circular(4.r),
                       ),
                     ),
@@ -214,7 +214,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       width: 40.w,
                       height: 10.h,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.surface,
                         borderRadius: BorderRadius.circular(4.r),
                       ),
                     ),
@@ -297,7 +297,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   text: 'Friends',
                   style: AppTextStyles.bold(
                     fontSize: 22,
-                    color: const Color(0xFF1C1C1E),
+                    color: AppColors.black,
                   ),
                 ),
                 const Spacer(),
@@ -389,9 +389,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Container(
                       width: 64.w,
                       height: 64.w,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white,
+                        color: AppColors.surface,
                       ),
                     ),
                     8.h.verticalSpace,
@@ -399,7 +399,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       width: 52.w,
                       height: 12.h,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.surface,
                         borderRadius: BorderRadius.circular(4.r),
                       ),
                     ),
@@ -497,7 +497,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   text: 'Overview',
                   style: AppTextStyles.bold(
                     fontSize: 22,
-                    color: const Color(0xFF1C1C1E),
+                    color: AppColors.black,
                   ),
                 ),
                 14.w.verticalSpace,
@@ -595,7 +595,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       text: 'Interests',
                       style: AppTextStyles.bold(
                         fontSize: 22,
-                        color: const Color(0xFF1C1C1E),
+                        color: AppColors.black,
                       ),
                     ),
                     const Spacer(),
@@ -648,14 +648,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             (interest) => Container(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
               decoration: BoxDecoration(
-                color: const Color(0xFFF2F2F4),
+                color: AppColors.accentFill(const Color(0xFFF2F2F4)),
                 borderRadius: BorderRadius.circular(20.r),
               ),
               child: AppText(
                 text: interest,
                 style: AppTextStyles.medium(
                   fontSize: 14,
-                  color: const Color(0xFF1C1C1E),
+                  color: AppColors.black,
                 ),
               ),
             ),
@@ -678,7 +678,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 width: widths[i].w,
                 height: 38.h,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(24.r),
                 ),
               ),
@@ -780,7 +780,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Container(
           padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
           decoration: BoxDecoration(
-            color: const Color(0xFFF7F7F8),
+            color: AppColors.accentFill(const Color(0xFFF7F7F8)),
             borderRadius: BorderRadius.circular(22.r),
           ),
           child: Column(
@@ -793,7 +793,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFF4E5),
+                      color: AppColors.accentFill(const Color(0xFFFFF4E5)),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     alignment: Alignment.center,
@@ -815,7 +815,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 text: 'Free Plan (with ads)',
                                 style: AppTextStyles.bold(
                                   fontSize: 16,
-                                  color: const Color(0xFF1C1C1E),
+                                  color: AppColors.black,
                                 ),
                               ),
                             ),
@@ -823,7 +823,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               text: '\$0/mo',
                               style: AppTextStyles.bold(
                                 fontSize: 16,
-                                color: const Color(0xFF1C1C1E),
+                                color: AppColors.black,
                               ),
                             ),
                           ],
@@ -834,7 +834,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               'Unlock a better reading experience with premium.',
                           style: AppTextStyles.regular(
                             fontSize: 13,
-                            color: const Color(0xFF8E8E93),
+                            color: AppColors.muted,
                           ),
                         ),
                       ],
@@ -849,14 +849,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   height: 48,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1C1C1E),
+                    color: AppColors.buttonBackground,
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: AppText(
                     text: 'Upgrade',
                     style: AppTextStyles.semibold(
                       fontSize: 16,
-                      color: Colors.white,
+                      color: AppColors.onFill,
                     ),
                   ),
                 ),
@@ -1029,6 +1029,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   //   );
   // }
 
+  // Hidden from the profile screen. Uncomment the call above to show it again.
+  // ignore: unused_element
   Widget _mySeriesListBlock() {
     return Consumer<SavedSeriesProvider>(
       builder: (context, provider, _) {
@@ -1058,7 +1060,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       text: 'My Series List',
                       style: AppTextStyles.bold(
                         fontSize: 22,
-                        color: const Color(0xFF1C1C1E),
+                        color: AppColors.black,
                       ),
                     ),
                     const Spacer(),
@@ -1242,7 +1244,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       padding: EdgeInsets.fromLTRB(14.w, 14.h, 12.w, 14.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFF6F6F8),
+        color: AppColors.accentFill(const Color(0xFFF6F6F8)),
         borderRadius: BorderRadius.circular(18.r),
       ),
       child: Column(
@@ -1254,7 +1256,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             text: value,
             style: AppTextStyles.bold(
               fontSize: 22,
-              color: const Color(0xFF1C1C1E),
+              color: AppColors.black,
             ),
           ),
           AppText(
@@ -1263,7 +1265,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             overflow: TextOverflow.ellipsis,
             style: AppTextStyles.regular(
               fontSize: 13,
-              color: const Color(0xFF8E8E93),
+              color: AppColors.muted,
             ),
           ),
         ],
@@ -1315,7 +1317,7 @@ class _SavedSeriesCard extends StatelessWidget {
         margin: EdgeInsets.only(right: 12.w),
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          color: const Color(0xFF1C1C1E),
+          color: const Color(0xFF1A1A1A),
           borderRadius: BorderRadius.circular(22.r),
         ),
         child: Stack(
@@ -1369,8 +1371,8 @@ class _SavedSeriesCard extends StatelessWidget {
                     child: Container(
                       width: 32,
                       height: 32,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
                         shape: BoxShape.circle,
                       ),
                       alignment: Alignment.center,
@@ -1383,10 +1385,10 @@ class _SavedSeriesCard extends StatelessWidget {
                                 color: AppColors.teal,
                               ),
                             )
-                          : const Icon(
+                          : Icon(
                               Icons.bookmark_rounded,
                               size: 18,
-                              color: Color(0xFF1C1C1E),
+                              color: AppColors.black,
                             ),
                     ),
                   );

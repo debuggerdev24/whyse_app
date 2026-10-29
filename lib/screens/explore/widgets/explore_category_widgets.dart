@@ -19,14 +19,12 @@ class ExploreInterestCard extends StatelessWidget {
   const ExploreInterestCard({
     super.key,
     required this.title,
-    required this.subtitle,
     required this.imageUrl,
     required this.fallbackColor,
     required this.onTap,
   });
 
   final String title;
-  final String subtitle;
   final String imageUrl;
   final Color fallbackColor;
   final VoidCallback onTap;
@@ -59,26 +57,13 @@ class ExploreInterestCard extends StatelessWidget {
                   const Spacer(),
                   AppText(
                     text: title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    maxLines: 3,
                     style: AppTextStyles.bold(
-                      fontSize: 22,
+                      fontSize: 18,
                       color: Colors.white,
                       height: 1.15,
                     ),
                   ),
-                  if (subtitle.trim().isNotEmpty) ...[
-                    4.h.verticalSpace,
-                    AppText(
-                      text: subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.medium(
-                        fontSize: 13,
-                        color: Colors.white.withValues(alpha: 0.92),
-                      ),
-                    ),
-                  ],
                   10.h.verticalSpace,
                   Container(
                     width: 34,
@@ -184,7 +169,7 @@ class ExploreSectionHeader extends StatelessWidget {
         Expanded(
           child: AppText(
             text: title,
-            style: AppTextStyles.bold(fontSize: 20, color: const Color(0xFF1C1C1E)),
+            style: AppTextStyles.bold(fontSize: 20, color: AppColors.black),
           ),
         ),
         if (onSeeAll != null)
@@ -223,7 +208,7 @@ class ExploreModeSwitch extends StatelessWidget {
       height: 52,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFFE6E6EB),
+        color: AppColors.accentFill(const Color(0xFFE6E6EB)),
         borderRadius: BorderRadius.circular(16.r),
       ),
       child: Row(
@@ -272,7 +257,7 @@ class _ModeChip extends StatelessWidget {
             text: label,
             style: AppTextStyles.bold(
               fontSize: 16,
-              color: selected ? Colors.white : const Color(0xFF1C1C1E),
+              color: selected ? Colors.white : AppColors.black,
             ),
           ),
         ),

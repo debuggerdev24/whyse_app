@@ -61,7 +61,7 @@ class AppSkeletonImagePlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const AppSkeletonizer(
+    return AppSkeletonizer(
       child: ColoredBox(
         color: AppColors.lightwhiteColor,
         child: SizedBox.expand(),

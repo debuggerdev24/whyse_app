@@ -2,7 +2,6 @@ import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/home/continue_reading_item_model.dart';
 import 'package:redstreakapp/providers/home/home_provider.dart';
-import 'package:redstreakapp/providers/home/story_provider.dart';
 
 double _continueReadingCardWidth(BuildContext context) {
   final screen = MediaQuery.sizeOf(context).width;
@@ -50,28 +49,17 @@ class _ContinueReadingSectionState extends State<ContinueReadingSection>
     context.read<HomeProvider>().getContinueReading(force: true);
   }
 
-  Future<void> _openContinueReading(
+  void _openContinueReading(
     BuildContext context,
     ContinueReadingItemModel item,
-  ) async {
-    final storyProvider = context.read<StoryProvider>();
-
-    // Navigate immediately; the reading screen already shows a shimmer while
-    // story data is loading.
-    storyProvider.clareStoryData();
-    if (!context.mounted) return;
+  ) {
+    final topicId = item.topic.id;
+    if (topicId.isEmpty) return;
+    final homeProvider = context.read<HomeProvider>();
+    homeProvider.beginTopicStoryDetailsLoad(topicId: topicId);
+    homeProvider.getTopicStoryDetails(topicId: topicId);
     context
-        .pushNamed(
-          AppRoutes.createdStoryReadingScreen.name,
-          extra: <String, dynamic>{
-            "storyIdeaId": item.storyIdeaId,
-            "initialPageIndex": item.continueFromPageIndex,
-            "initialConfirmedPageIndex": item.lastPageIndex,
-            "fromContinueReading": true,
-            "continueReadingTopicId": item.topic.id,
-            "resumeStoryIsGenerated": item.isGenerated,
-          },
-        )
+        .pushNamed(AppRoutes.createdStorySummaryScreen.name, extra: topicId)
         .then((_) {
           if (!mounted) return;
           context.read<HomeProvider>().getContinueReading(force: true);
@@ -346,7 +334,7 @@ class _ContinueReadingEmptyState extends StatelessWidget {
         width: double.infinity,
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: const Color(0xFFF7F8FA),
+          color: AppColors.accentFill(const Color(0xFFF7F8FA)),
           borderRadius: BorderRadius.circular(16.r),
         ),
         child: Row(
@@ -409,9 +397,11 @@ class _ContinueReadingErrorState extends StatelessWidget {
         width: double.infinity,
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: const Color(0xFFFFF6F6),
+          color: AppColors.accentFill(const Color(0xFFFFF6F6)),
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: const Color(0xFFFFD6D6)),
+          border: Border.all(
+            color: AppColors.accentFill(const Color(0xFFFFD6D6)),
+          ),
         ),
         child: Row(
           children: [
@@ -428,7 +418,7 @@ class _ContinueReadingErrorState extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.semiBold(
                   fontSize: 12.sp,
-                  color: AppColors.black.withValues(alpha: 0.8),
+                  color: AppColors.black.withValues(alpha: 0.85),
                 ),
               ),
             ),
@@ -445,7 +435,7 @@ class _ContinueReadingErrorState extends StatelessWidget {
                   text: "Retry",
                   style: AppTextStyles.bold(
                     fontSize: 12.sp,
-                    color: AppColors.white,
+                    color: AppColors.onFill,
                   ),
                 ),
               ),

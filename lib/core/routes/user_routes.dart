@@ -85,5 +85,6 @@ enum AppRoutes {
   mySavedSeriesScreen,
   exploreScreen,
   achivementsScreen,
+  homeAchivementsScreen,
   chatScreen,
 }

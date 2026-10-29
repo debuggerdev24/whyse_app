@@ -238,7 +238,7 @@ class _FriendSelectTile extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -251,7 +251,7 @@ class _FriendSelectTile extends StatelessWidget {
                     ? CachedNetworkImage(
                         imageUrl: friend.avatarUrl!,
                         fit: BoxFit.cover,
-                        placeholder: (_, _) => const ColoredBox(color: Colors.white),
+                        placeholder: (_, _) => ColoredBox(color: AppColors.surface),
                         errorWidget: (_, _, _) => _Initials(
                           initials: friend.initials,
                           color: _avatarColor,
@@ -295,12 +295,12 @@ class _FriendSelectTile extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 14.w),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: settingsInk,
+                color: AppColors.buttonBackground,
                 borderRadius: BorderRadius.circular(17),
               ),
               child: AppText(
                 text: 'Add',
-                style: AppTextStyles.semibold(fontSize: 13, color: Colors.white),
+                style: AppTextStyles.semibold(fontSize: 13, color: AppColors.onFill),
               ),
             ),
           ],
@@ -352,7 +352,7 @@ class _ShimmerTile extends StatelessWidget {
       child: Container(
         height: 64,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
         ),
       ),
@@ -420,12 +420,12 @@ class _ErrorState extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 24.w),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: settingsInk,
+                  color: AppColors.buttonBackground,
                   borderRadius: BorderRadius.circular(22),
                 ),
                 child: AppText(
                   text: 'Retry',
-                  style: AppTextStyles.semibold(fontSize: 15, color: Colors.white),
+                  style: AppTextStyles.semibold(fontSize: 15, color: AppColors.onFill),
                 ),
               ),
             ),

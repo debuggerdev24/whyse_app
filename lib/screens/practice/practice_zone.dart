@@ -94,7 +94,7 @@ class PracticeCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -155,7 +155,7 @@ class PracticeCard extends StatelessWidget {
                 width: 96.w,
                 height: 96.w,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEDF5F5),
+                  color: AppColors.accentFill(const Color(0xFFEDF5F5)),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 alignment: Alignment.center,

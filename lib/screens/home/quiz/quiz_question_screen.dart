@@ -116,7 +116,7 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
 
         return AppLayout(
           body: ColoredBox(
-            color: const Color(0xFFF2F2F7),
+            color: AppColors.backgroundColor,
             child: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -128,9 +128,9 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                         GlassIconButton(
                           onTap: () =>
                               showLeaveQuizConfirmation(context: context),
-                          child: const Icon(
+                          child: Icon(
                             Icons.close_rounded,
-                            color: Color(0xFF1A1A1A),
+                            color: AppColors.black,
                             size: 22,
                           ),
                         ),
@@ -150,7 +150,7 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                                   decoration: BoxDecoration(
                                     color: filled
                                         ? AppColors.orangeColor
-                                        : const Color(0x1A1A1A1A),
+                                        : AppColors.black.withValues(alpha: 0.12),
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                 ),
@@ -171,7 +171,7 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                               text: currentQuestion['question'],
                               style: AppTextStyles.semibold(
                                 fontSize: 22,
-                                color: const Color(0xFF1A1A1A),
+                                color: AppColors.black,
                               ).copyWith(height: 1.25, letterSpacing: -0.3),
                             ),
                             const SizedBox(height: 20),
@@ -197,7 +197,7 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                             "${quiz.currentQuestionIndex + 1} / ${quiz.questions.length}",
                         style: AppTextStyles.medium(
                           fontSize: 12,
-                          color: const Color(0x991A1A1A),
+                          color: AppColors.black.withValues(alpha: 0.6),
                         ),
                       ),
                     ),
@@ -247,12 +247,12 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                             onTap: canCheck ? quiz.checkAnswer : () {},
                             backgroundColor: canCheck
                                 ? AppColors.teal
-                                : const Color(0xFFE5E5EA),
+                                : AppColors.accentFill(const Color(0xFFE5E5EA)),
                             textStyle: AppTextStyles.semibold(
                               fontSize: 14,
                               color: canCheck
                                   ? Colors.white
-                                  : const Color(0xFF8E8E93),
+                                  : AppColors.muted,
                             ).copyWith(height: 17 / 14),
                             fixedSize: Size(buttonWidth, 50),
                           ),
@@ -273,7 +273,7 @@ void showLeaveQuizConfirmation({required BuildContext context}) {
     builder: (dialogContext) {
       return ZoomIn(
         child: AlertDialog(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
           ),
@@ -281,7 +281,7 @@ void showLeaveQuizConfirmation({required BuildContext context}) {
             "Are you sure you want to quit this quiz?",
             style: AppTextStyles.semibold(
               fontSize: 18,
-              color: const Color(0xFF1A1A1A),
+              color: AppColors.black,
             ).copyWith(height: 1.3),
           ),
           actions: [

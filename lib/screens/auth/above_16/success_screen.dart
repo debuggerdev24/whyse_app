@@ -34,7 +34,7 @@ class SuccessScreen extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: AppTextStyles.bold(
                           fontSize: 28,
-                          color: const Color(0xFF1C1C1E),
+                          color: AppColors.black,
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -44,7 +44,7 @@ class SuccessScreen extends StatelessWidget {
                             "Your reading journey starts today — let's build your first streak!",
                         style: AppTextStyles.regular(
                           fontSize: 16,
-                          color: const Color(0xFF1C1C1E),
+                          color: AppColors.black,
                         ).copyWith(height: 1.35),
                       ),
                     ],

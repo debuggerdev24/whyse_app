@@ -63,7 +63,7 @@ class _StoryInterestsScreenState extends State<StoryInterestsScreen> {
                     text: "Pick Your Interests",
                     style: AppTextStyles.bold(
                       fontSize: 30,
-                      color: const Color(0xFF1C1C1E),
+                      color: AppColors.black,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -72,7 +72,7 @@ class _StoryInterestsScreenState extends State<StoryInterestsScreen> {
                         "Choose topics you love to personalize your reading journey.",
                     style: AppTextStyles.regular(
                       fontSize: 15,
-                      color: const Color(0xFF8E8E93),
+                      color: AppColors.muted,
                     ),
                   ),
 

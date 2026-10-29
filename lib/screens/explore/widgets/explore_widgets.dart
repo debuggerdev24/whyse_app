@@ -123,7 +123,7 @@ class _ExploreSearchFieldState extends State<ExploreSearchField> {
         contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(999),
-          borderSide: const BorderSide(color: AppColors.searchBackgroundColor),
+          borderSide: BorderSide(color: AppColors.searchBackgroundColor),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(999),
@@ -842,7 +842,7 @@ class ExploreSparkArticleCard extends StatelessWidget {
                   child: SvgIcon(
                     AppAssets.brain,
                     size: 22.w,
-                    color: AppColors.white,
+                    color: AppColors.onFill,
                   ),
                 ),
               ),
@@ -855,7 +855,7 @@ class ExploreSparkArticleCard extends StatelessWidget {
                   style: AppTextStyles.bold(
                     fontSize: 16.sp,
                     height: 1.3,
-                    color: AppColors.white,
+                    color: AppColors.onFill,
                   ),
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,

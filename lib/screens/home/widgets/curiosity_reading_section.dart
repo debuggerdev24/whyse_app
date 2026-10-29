@@ -696,7 +696,7 @@ class _CuriosityReadingErrorUI extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.refresh_rounded,
-                      color: AppColors.white,
+                      color: AppColors.onFill,
                       size: 18.r,
                     ),
                     8.w.horizontalSpace,
@@ -704,7 +704,7 @@ class _CuriosityReadingErrorUI extends StatelessWidget {
                       text: 'Try again',
                       style: AppTextStyles.bold(
                         fontSize: 14.sp,
-                        color: AppColors.white,
+                        color: AppColors.onFill,
                       ),
                     ),
                   ],

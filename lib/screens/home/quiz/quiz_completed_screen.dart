@@ -242,9 +242,9 @@ class _QuizCompletedScreenState extends State<QuizCompletedScreen> {
     return AppLayout(
       body: Stack(
         children: [
-          const ColoredBox(
-            color: Color(0xFFF2F2F7),
-            child: SizedBox.expand(),
+          ColoredBox(
+            color: AppColors.backgroundColor,
+            child: const SizedBox.expand(),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -256,7 +256,7 @@ class _QuizCompletedScreenState extends State<QuizCompletedScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: const [
                         BoxShadow(
@@ -313,7 +313,7 @@ class _QuizCompletedScreenState extends State<QuizCompletedScreen> {
                     text: headline,
                     style: AppTextStyles.semibold(
                       fontSize: 28,
-                      color: const Color(0xFF1A1A1A),
+                      color: AppColors.black,
                     ).copyWith(height: 1.2),
                     textAlign: TextAlign.center,
                   ),
@@ -396,7 +396,7 @@ class _QuizCompletedScreenState extends State<QuizCompletedScreen> {
                               text: 'Sparks Points',
                               style: AppTextStyles.medium(
                                 fontSize: 12.sp,
-                                color: AppColors.bluecolor,
+                                color: AppColors.black,
                               ),
                             ),
                           ],

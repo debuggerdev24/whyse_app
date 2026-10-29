@@ -69,7 +69,7 @@ class _FriendRequestTileState extends State<FriendRequestTile> {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -90,14 +90,14 @@ class _FriendRequestTileState extends State<FriendRequestTile> {
                         text: name,
                         style: AppTextStyles.bold(
                           fontSize: 15,
-                          color: const Color(0xFF1C1C1E),
+                          color: AppColors.black,
                         ),
                       ),
                       TextSpan(
                         text: ' sent you a friend request',
                         style: AppTextStyles.regular(
                           fontSize: 15,
-                          color: const Color(0xFF1C1C1E),
+                          color: AppColors.black,
                         ),
                       ),
                     ],
@@ -110,7 +110,7 @@ class _FriendRequestTileState extends State<FriendRequestTile> {
                   text: 'Friend request',
                   style: AppTextStyles.medium(
                     fontSize: 12,
-                    color: const Color(0xFF8E8E93),
+                    color: AppColors.muted,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -167,13 +167,13 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = filled ? Colors.white : const Color(0xFF1C1C1E);
+    final color = filled ? Colors.white : AppColors.black;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
         decoration: BoxDecoration(
-          color: filled ? const Color(0xFF1C1C1E) : Colors.white,
+          color: filled ? AppColors.black : Colors.white,
           borderRadius: BorderRadius.circular(22),
           border: filled
               ? null
@@ -209,7 +209,7 @@ class NotificationShimmerList extends StatelessWidget {
             width: 80.w,
             height: 20.h,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(4.r),
             ),
           ),
@@ -232,9 +232,9 @@ class _ShimmerTile extends StatelessWidget {
           Container(
             width: 52.w,
             height: 52.w,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white,
+              color: AppColors.surface,
             ),
           ),
           12.w.horizontalSpace,
@@ -246,7 +246,7 @@ class _ShimmerTile extends StatelessWidget {
                   width: 120.w,
                   height: 14.h,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(4.r),
                   ),
                 ),
@@ -255,7 +255,7 @@ class _ShimmerTile extends StatelessWidget {
                   width: 170.w,
                   height: 11.h,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(4.r),
                   ),
                 ),
@@ -267,7 +267,7 @@ class _ShimmerTile extends StatelessWidget {
             width: 70.w,
             height: 34.h,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(22.r),
             ),
           ),
@@ -276,7 +276,7 @@ class _ShimmerTile extends StatelessWidget {
             width: 70.w,
             height: 34.h,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(22.r),
             ),
           ),

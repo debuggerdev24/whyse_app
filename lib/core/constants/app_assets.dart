@@ -62,6 +62,7 @@ class AppAssets {
   static const homeIcon = "$_iconPath/home.svg";
   static const rewards = "$_iconPath/rewards.svg";
   static const community = "$_iconPath/community.svg";
+  static const aiChat = "$_iconPath/ai_chat.svg";
   static const profileIcon = "$_iconPath/profile.svg";
   static const shareIcon = "$_iconPath/share.svg";
   static const addMembers = "$_iconPath/addMember.svg";

@@ -160,7 +160,7 @@ class _GoalScreenState extends State<GoalScreen> {
                                     vertical: 13.h,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: AppColors.surface,
                                     borderRadius: BorderRadius.circular(12.r),
                                     border: Border.all(
                                       color: isSelected

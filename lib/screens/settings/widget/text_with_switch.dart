@@ -29,7 +29,9 @@ class TextWithSwitch extends StatelessWidget {
             value: value,
             onChanged: onChanged,
             activeTrackColor: settingsSwitchOn,
-            inactiveTrackColor: const Color(0xFFE9E9EB),
+            inactiveTrackColor: AppColors.isDark
+                ? const Color(0xFF3A4A4C)
+                : const Color(0xFFE9E9EB),
             thumbColor: Colors.white,
           ),
         ],

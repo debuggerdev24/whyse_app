@@ -27,7 +27,7 @@ class PlanCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.fromLTRB(18, 16, 16, 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: isSelected ? AppColors.teal : Colors.transparent,
@@ -45,7 +45,7 @@ class PlanCard extends StatelessWidget {
                     text: title,
                     style: AppTextStyles.bold(
                       fontSize: 16,
-                      color: const Color(0xFF1C1C1E),
+                      color: AppColors.black,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -65,7 +65,7 @@ class PlanCard extends StatelessWidget {
                               text: feature,
                               style: AppTextStyles.medium(
                                 fontSize: 14,
-                                color: const Color(0xFF1C1C1E),
+                                color: AppColors.black,
                               ),
                             ),
                           ),
@@ -100,7 +100,7 @@ class PlanCard extends StatelessWidget {
                   text: price,
                   style: AppTextStyles.bold(
                     fontSize: 16,
-                    color: const Color(0xFF1C1C1E),
+                    color: AppColors.black,
                   ),
                 ),
               ],

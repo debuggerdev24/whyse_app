@@ -17,10 +17,14 @@ enum CardItemType {
   spark;
 
   static CardItemType fromString(String value) {
-    return CardItemType.values.firstWhere(
-      (e) => e.name == value,
-      orElse: () => CardItemType.story,
-    );
+    switch (value.toLowerCase()) {
+      case 'spark':
+      case 'reading':
+      case 'curiosity':
+        return CardItemType.spark;
+      default:
+        return CardItemType.story;
+    }
   }
 }
 
@@ -154,6 +158,7 @@ class CardItem {
   final String imageUrl;
   final String ctaLabel;
   final String question;
+  final Map<String, dynamic> raw;
 
   CardItem({
     required this.id,
@@ -162,18 +167,39 @@ class CardItem {
     required this.imageUrl,
     required this.ctaLabel,
     required this.question,
+    this.raw = const {},
   });
 
   factory CardItem.fromJson(Map<String, dynamic> json) {
+    final nested = json['reading'] ?? json['spark'];
+    final source = nested is Map
+        ? <String, dynamic>{
+            ...Map<String, dynamic>.from(nested),
+            ...json,
+          }
+        : json;
     final rawImage =
-        json['imgUrl']?.toString() ?? json['imageUrl']?.toString() ?? '';
+        source['imgUrl']?.toString() ??
+        source['imageUrl']?.toString() ??
+        '';
     return CardItem(
-      id: json['id']?.toString() ?? '',
-      kind: CardItemType.fromString(json['kind']?.toString() ?? ''),
-      title: json['title']?.toString() ?? '',
+      id: _cardId(source),
+      kind: CardItemType.fromString(
+        source['kind']?.toString() ?? source['type']?.toString() ?? '',
+      ),
+      title: source['title']?.toString() ?? '',
       imageUrl: resolveNetworkImageUrl(rawImage),
-      ctaLabel: json['ctaLabel']?.toString() ?? '',
-      question: json['question']?.toString() ?? '',
+      ctaLabel: source['ctaLabel']?.toString() ?? '',
+      question: source['question']?.toString() ?? '',
+      raw: Map<String, dynamic>.from(source),
     );
   }
+}
+
+String _cardId(Map<String, dynamic> json) {
+  for (final key in ['id', 'readingId', 'sparkId']) {
+    final value = json[key]?.toString().trim() ?? '';
+    if (value.isNotEmpty) return value;
+  }
+  return '';
 }

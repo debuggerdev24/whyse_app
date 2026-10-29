@@ -25,7 +25,7 @@ class StreakFreezeWidget extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(22),
         boxShadow: const [
           BoxShadow(
@@ -51,7 +51,7 @@ class StreakFreezeWidget extends StatelessWidget {
                       text: title,
                       style: AppTextStyles.semibold(
                         fontSize: 16,
-                        color: const Color(0xFF1A1A1A),
+                        color: AppColors.black,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -60,7 +60,7 @@ class StreakFreezeWidget extends StatelessWidget {
                           'Miss a day without losing your streak. A freeze is used automatically when you skip a day',
                       style: AppTextStyles.regular(
                         fontSize: 13,
-                        color: const Color(0xFF8E8E93),
+                        color: AppColors.muted,
                       ).copyWith(height: 1.35),
                     ),
                   ],
@@ -78,7 +78,7 @@ class StreakFreezeWidget extends StatelessWidget {
                     : const Color(0xFFE5E5EA),
                 textStyle: AppTextStyles.semibold(
                   fontSize: 14,
-                  color: canAfford ? Colors.white : const Color(0xFF8E8E93),
+                  color: canAfford ? Colors.white : AppColors.muted,
                 ).copyWith(height: 17 / 14),
                 fixedSize: Size(MediaQuery.sizeOf(context).width - 64, 48),
                 isLoading: gp.isBuyingFreeze,

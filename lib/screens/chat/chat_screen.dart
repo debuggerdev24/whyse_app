@@ -6,6 +6,7 @@ import 'package:redstreakapp/providers/chat/chat_provider.dart';
 import 'package:redstreakapp/providers/curiosity_reading/curiosity_reading_provider.dart';
 import 'package:redstreakapp/providers/explore/explore_provider.dart';
 import 'package:redstreakapp/screens/chat/widgets/chat_widgets.dart';
+import 'package:redstreakapp/screens/dashboard.dart';
 import 'package:redstreakapp/services/home/home_api_service.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -31,7 +32,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
   bool _showSuggestions = true;
   bool _isOpeningCard = false;
-  bool _glassScrolling = false;
 
   @override
   void initState() {
@@ -94,6 +94,12 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _openSpark(CardItem item) async {
     final curiosity = context.read<CuriosityReadingProvider>();
+    final raw = Map<String, dynamic>.from(item.raw);
+    raw['id'] = item.id;
+    if (item.title.isNotEmpty) raw['title'] = item.title;
+    if (item.question.isNotEmpty) raw['question'] = item.question;
+    if (item.imageUrl.isNotEmpty) raw['imgUrl'] = item.imageUrl;
+
     curiosity.beginExploreSession(
       items: [
         ExploreSparkItem(
@@ -101,13 +107,8 @@ class _ChatScreenState extends State<ChatScreen> {
           title: item.title,
           question: item.question,
           imageUrl: item.imageUrl,
-          interestName: '',
-          rawJson: {
-            'id': item.id,
-            'title': item.title,
-            'question': item.question,
-            'imgUrl': item.imageUrl,
-          },
+          interestName: raw['interestName']?.toString() ?? '',
+          rawJson: raw,
         ),
       ],
       startIndex: 0,
@@ -130,6 +131,8 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
 
+    if (!mounted) return;
+    await curiosity.loadExploreSessionBody();
     if (!mounted) return;
     context.pushNamed(AppRoutes.curiosityReadingScreen.name);
   }
@@ -181,21 +184,6 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  bool _onScroll(ScrollNotification notification) {
-    if (notification.metrics.axis != Axis.vertical) return false;
-    if (notification is ScrollEndNotification) {
-      if (_glassScrolling) setState(() => _glassScrolling = false);
-    } else if (notification is OverscrollNotification) {
-      if (!_glassScrolling) setState(() => _glassScrolling = true);
-    } else if (notification is ScrollUpdateNotification) {
-      final delta = notification.scrollDelta ?? 0;
-      if (delta.abs() > 0.5 && !_glassScrolling) {
-        setState(() => _glassScrolling = true);
-      }
-    }
-    return false;
-  }
-
   @override
   Widget build(BuildContext context) {
     final keyboard = MediaQuery.viewInsetsOf(context).bottom;
@@ -203,7 +191,7 @@ class _ChatScreenState extends State<ChatScreen> {
     // (5px inset + 62px bar). Keep the field just above that.
     final composerBottom = keyboard > 0
         ? keyboard + 8
-        : MediaQuery.viewPaddingOf(context).bottom + 75;
+        : MediaQuery.viewPaddingOf(context).bottom + 12;
 
     return Scaffold(
       backgroundColor: chatBackgroundColor,
@@ -213,17 +201,36 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           Padding(
             padding: EdgeInsets.fromLTRB(
-              20,
+              16,
               MediaQuery.paddingOf(context).top + 8,
               20,
               4,
             ),
-            child: AppText(
-              text: 'Chat',
-              style: AppTextStyles.semibold(
-                fontSize: 32,
-                color: const Color(0xFF1A1A1A),
-              ).copyWith(height: 1.1, letterSpacing: -0.6),
+            child: Row(
+              children: [
+                GlassIconButton(
+                  size: 44,
+                  onTap: () {
+                    tabIndex.value = 0;
+                    AppRouter.indexedStackNavigationShell?.goBranch(0);
+                  },
+                  child: Icon(
+                    Icons.chevron_left_rounded,
+                    size: 28,
+                    color: AppColors.black,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: AppText(
+                    text: 'AI Chat',
+                    style: AppTextStyles.semibold(
+                      fontSize: 32,
+                      color: AppColors.black,
+                    ).copyWith(height: 1.1, letterSpacing: -0.6),
+                  ),
+                ),
+              ],
             ),
           ),
           Expanded(
@@ -242,82 +249,71 @@ class _ChatScreenState extends State<ChatScreen> {
                     _showSuggestions &&
                     !chatProvider.isStreaming &&
                     messages.isNotEmpty;
-                final overlayHeight =
-                    ChatInputBar.height + (showSuggestions ? 138 : 0);
-                // The field is translucent, so the list must clear its full
-                // height or the last line sits underneath it.
-                final listBottom = composerBottom + overlayHeight + 16;
 
-                return NotificationListener<ScrollNotification>(
-                  onNotification: _onScroll,
-                  child: Stack(
+                return Column(
                     children: [
-                      if (messages.isEmpty && !chatProvider.isStreaming)
-                        Positioned.fill(
-                          child: Skeletonizer(
-                            enabled: chatProvider.isChatHistoryLoading,
-                            child: ChatEmptyState(
-                              suggestions: _suggestions,
-                              onSuggestionTap: _handleSend,
-                              bottomReserve: listBottom,
-                            ),
-                          ),
-                        )
-                      else
-                        Positioned.fill(
-                          child: ListView.builder(
-                            controller: _scrollController,
-                            reverse: true,
-                            padding: EdgeInsets.fromLTRB(16, 8, 16, listBottom),
-                            physics: const BouncingScrollPhysics(
-                              parent: AlwaysScrollableScrollPhysics(),
-                            ),
-                            itemCount: messages.length + (isTyping ? 1 : 0),
-                            itemBuilder: (context, index) {
-                              if (isTyping && index == 0) {
-                                return const Padding(
-                                  padding: EdgeInsets.only(top: 12),
-                                  child: _TypingIndicator(),
-                                );
-                              }
-
-                              final messageIndex = isTyping ? index - 1 : index;
-                              final message =
-                                  messages[messages.length - 1 - messageIndex];
-                              final latestBotId = chatProvider.messages
-                                  .lastWhere(
-                                    (m) => !m.isUserMessage,
-                                    orElse: () => message,
-                                  )
-                                  .id;
-                              final isStreamingTarget =
-                                  !message.isUserMessage &&
-                                  message.id == latestBotId;
-                              final shouldAnimate =
-                                  chatProvider.isStreaming && isStreamingTarget;
-                              return Padding(
-                                padding: const EdgeInsets.only(top: 12),
-                                child: _ChatMessageTile(
-                                  message: message,
-                                  onCardTap: _onCardTap,
-                                  animateText: shouldAnimate,
-                                  isStreaming: shouldAnimate,
+                      Expanded(
+                        child: messages.isEmpty && !chatProvider.isStreaming
+                            ? Skeletonizer(
+                                enabled: chatProvider.isChatHistoryLoading,
+                                child: ChatEmptyState(
+                                  suggestions: _suggestions,
+                                  onSuggestionTap: _handleSend,
                                 ),
-                              );
-                            },
-                          ),
-                        ),
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: composerBottom + overlayHeight - 8,
-                        height: 72,
-                        child: ChatScrollEdge(active: _glassScrolling),
+                              )
+                            : ListView.builder(
+                                controller: _scrollController,
+                                reverse: true,
+                                padding: const EdgeInsets.fromLTRB(
+                                  16,
+                                  8,
+                                  16,
+                                  12,
+                                ),
+                                physics: const BouncingScrollPhysics(
+                                  parent: AlwaysScrollableScrollPhysics(),
+                                ),
+                                itemCount: messages.length + (isTyping ? 1 : 0),
+                                itemBuilder: (context, index) {
+                                  if (isTyping && index == 0) {
+                                    return const Padding(
+                                      padding: EdgeInsets.only(top: 12),
+                                      child: _TypingIndicator(),
+                                    );
+                                  }
+
+                                  final messageIndex = isTyping
+                                      ? index - 1
+                                      : index;
+                                  final message = messages[messages.length -
+                                      1 -
+                                      messageIndex];
+                                  final latestBotId = chatProvider.messages
+                                      .lastWhere(
+                                        (m) => !m.isUserMessage,
+                                        orElse: () => message,
+                                      )
+                                      .id;
+                                  final isStreamingTarget =
+                                      !message.isUserMessage &&
+                                      message.id == latestBotId;
+                                  final shouldAnimate =
+                                      chatProvider.isStreaming &&
+                                      isStreamingTarget;
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 12),
+                                    child: _ChatMessageTile(
+                                      message: message,
+                                      onCardTap: _onCardTap,
+                                      animateText: shouldAnimate,
+                                      isStreaming: shouldAnimate,
+                                    ),
+                                  );
+                                },
+                              ),
                       ),
-                      Positioned(
-                        left: 16,
-                        right: 16,
-                        bottom: composerBottom,
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(16, 8, 16, composerBottom),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -331,14 +327,12 @@ class _ChatScreenState extends State<ChatScreen> {
                             ChatInputBar(
                               controller: _messageController,
                               focusNode: _focusNode,
-                              scrolling: _glassScrolling,
                               onSend: () => _handleSend(),
                             ),
                           ],
                         ),
                       ),
                     ],
-                  ),
                 );
               },
             ),
@@ -487,7 +481,7 @@ class _TypingIndicator extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(22),
         ),
         child: SizedBox(

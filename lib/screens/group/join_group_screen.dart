@@ -56,7 +56,7 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
                     color: settingsInk,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                 );
@@ -147,18 +147,18 @@ class _GroupPillButton extends StatelessWidget {
         height: 52,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: filled ? AppColors.teal : Colors.white,
+          color: filled ? AppColors.teal : AppColors.surface,
           borderRadius: BorderRadius.circular(28),
           border: filled
               ? null
-              : Border.all(color: const Color(0xFFE4E4E4)),
+              : Border.all(color: AppColors.divider),
         ),
         child: loading
-            ? const SizedBox(
+            ? SizedBox(
                 width: 22,
                 height: 22,
                 child: CircularProgressIndicator(
-                  color: Colors.white,
+                  color: filled ? AppColors.onFill : AppColors.teal,
                   strokeWidth: 2,
                 ),
               )
@@ -166,7 +166,7 @@ class _GroupPillButton extends StatelessWidget {
                 text: label,
                 style: AppTextStyles.semibold(
                   fontSize: 16,
-                  color: filled ? Colors.white : settingsInk,
+                  color: filled ? AppColors.onFill : settingsInk,
                 ),
               ),
       ),

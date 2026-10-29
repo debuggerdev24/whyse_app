@@ -67,7 +67,7 @@ class _AddFriendsScreenState extends State<AddFriendsScreen> {
                 SizedBox(height: 10.h),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: AppTextField(
@@ -86,7 +86,7 @@ class _AddFriendsScreenState extends State<AddFriendsScreen> {
                       borderRadius: BorderRadius.all(Radius.circular(14)),
                       borderSide: BorderSide.none,
                     ),
-                    prefixIcon: const Padding(
+                    prefixIcon: Padding(
                       padding: EdgeInsets.only(left: 12),
                       child: Icon(
                         Icons.search_rounded,
@@ -355,7 +355,7 @@ class _UserTile extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(

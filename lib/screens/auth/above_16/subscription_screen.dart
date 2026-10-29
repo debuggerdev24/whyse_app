@@ -41,7 +41,7 @@ class _SubScriptionScreenState extends State<SubScriptionScreen> {
                     alignment: Alignment.centerRight,
                   ),
                 ),
-                const Expanded(child: ColoredBox(color: Color(0xFFF5F5F7))),
+                Expanded(child: ColoredBox(color: AppColors.backgroundColor)),
               ],
             ),
             Column(
@@ -60,9 +60,9 @@ class _SubScriptionScreenState extends State<SubScriptionScreen> {
                             color: Colors.white.withValues(alpha: 0.9),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.chevron_left_rounded,
-                            color: Color(0xFF1C1C1E),
+                            color: AppColors.onLight,
                             size: 28,
                           ),
                         ),

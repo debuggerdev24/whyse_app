@@ -73,10 +73,10 @@ class _UnifiedGroupScreenState extends State<UnifiedGroupScreen>
                     child: GlassIconButton(
                       size: 44,
                       onTap: () => context.pop(),
-                      child: const Icon(
+                      child: Icon(
                         Icons.chevron_left_rounded,
                         size: 28,
-                        color: Color(0xFF1C1C1E),
+                        color: AppColors.black,
                       ),
                     ),
                   ),
@@ -84,7 +84,7 @@ class _UnifiedGroupScreenState extends State<UnifiedGroupScreen>
                     text: 'Groups',
                     style: AppTextStyles.bold(
                       fontSize: 18,
-                      color: const Color(0xFF1C1C1E),
+                      color: AppColors.black,
                     ),
                   ),
                   Align(
@@ -106,7 +106,7 @@ class _UnifiedGroupScreenState extends State<UnifiedGroupScreen>
             margin: EdgeInsets.only(top: 8.h),
             padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 16.h),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               borderRadius: BorderRadius.vertical(
                 bottom: Radius.circular(28.r),
               ),
@@ -233,14 +233,14 @@ class _UnifiedGroupScreenState extends State<UnifiedGroupScreen>
                   height: 52,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1C1C1E),
+                    color: AppColors.buttonBackground,
                     borderRadius: BorderRadius.circular(28),
                   ),
                   child: AppText(
                     text: 'Share Series',
                     style: AppTextStyles.semibold(
                       fontSize: 16,
-                      color: Colors.white,
+                      color: AppColors.onFill,
                     ),
                   ),
                 ),
@@ -291,7 +291,7 @@ class _GroupTabBar extends StatelessWidget {
                         fontSize: 13,
                         color: controller.index == i
                             ? Colors.white
-                            : const Color(0xFF8E8E93),
+                            : AppColors.muted,
                       ),
                     ),
                   ),
@@ -323,9 +323,9 @@ class _GroupUpdatesTab extends StatelessWidget {
             child: Container(
               width: 36.w,
               height: 36.w,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white,
+                color: AppColors.surface,
               ),
             ),
           ),
@@ -335,7 +335,7 @@ class _GroupUpdatesTab extends StatelessWidget {
               child: Container(
                 height: 200.h,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(16.r),
                 ),
               ),
@@ -420,7 +420,7 @@ class _GroupFeedCard extends StatelessWidget {
     final progress = detail.readingProgress;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(22.r),
       ),
       child: Column(
@@ -437,7 +437,7 @@ class _GroupFeedCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.semibold(
                       fontSize: 16,
-                      color: const Color(0xFF1C1C1E),
+                      color: AppColors.black,
                     ),
                   ),
                 ),
@@ -445,7 +445,7 @@ class _GroupFeedCard extends StatelessWidget {
                   text: sharedTime,
                   style: AppTextStyles.regular(
                     fontSize: 12,
-                    color: const Color(0xFF8E8E93),
+                    color: AppColors.muted,
                   ),
                 ),
               ],
@@ -609,7 +609,7 @@ class _GroupStreaksTab extends StatelessWidget {
                 text: 'Streaks Ranking',
                 style: AppTextStyles.bold(
                   fontSize: 20,
-                  color: const Color(0xFF1C1C1E),
+                  color: AppColors.black,
                 ),
               ),
               SizedBox(height: 8.h),
@@ -805,7 +805,7 @@ class _StreakRankingRow extends StatelessWidget {
                   text: '$streak',
                   style: AppTextStyles.semibold(
                     fontSize: 15,
-                    color: const Color(0xFF1C1C1E),
+                    color: AppColors.black,
                   ),
                 ),
               ],

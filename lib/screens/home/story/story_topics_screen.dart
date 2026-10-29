@@ -147,7 +147,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                     style: AppTextStyles.bold(
                       height: 1.15,
                       fontSize: 30,
-                      color: const Color(0xFF1C1C1E),
+                      color: AppColors.black,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -156,13 +156,13 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
                         "Here are some topics we think you'll love based on your interests. You can pick the ones that excite you the most!",
                     style: AppTextStyles.regular(
                       fontSize: 15,
-                      color: const Color(0xFF8E8E93),
+                      color: AppColors.muted,
                     ).copyWith(height: 1.35),
                   ),
                   const SizedBox(height: 16),
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: AppTextField(
@@ -292,7 +292,7 @@ class _StoryTopicsScreenState extends State<StoryTopicsScreen> {
         itemBuilder: (context, index) {
           return Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(16.r),
             ),
           );

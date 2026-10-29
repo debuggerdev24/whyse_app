@@ -1,3 +1,4 @@
+import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -72,7 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         icon: SvgIcon(
                           _isObscure ? AppAssets.password : AppAssets.eye,
                           size: 22.w,
-                          color: const Color(0xFF8E8E93),
+                          color: AppColors.muted,
                         ),
                       ),
                     ),

@@ -56,7 +56,7 @@ class AppFilledButton extends StatelessWidget {
           ),
 
           elevation: 0,
-          backgroundColor: backgroundColor ?? AppColors.black,
+          backgroundColor: backgroundColor ?? AppColors.buttonBackground,
 
           fixedSize: fixedSize ?? Size(354.w, 50.h),
           splashFactory: NoSplash.splashFactory,
@@ -79,7 +79,7 @@ class AppFilledButton extends StatelessWidget {
                     textStyle ??
                     AppTextStyles.semibold(
                       fontSize: 16.5.sp,
-                      color: AppColors.white,
+                      color: AppColors.onFill,
                     ),
               ),
       ),
@@ -219,7 +219,7 @@ class ReadingSkillButton extends StatelessWidget {
         height: 52.h,
         width: 170.w,
         decoration: BoxDecoration(
-          color: isSelected ? Colors.black : Colors.white,
+          color: isSelected ? AppColors.buttonBackground : AppColors.surface,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: isSelected
@@ -235,7 +235,7 @@ class ReadingSkillButton extends StatelessWidget {
                 icon,
                 size: 18.sp,
                 color: isSelected
-                    ? Colors.white
+                    ? AppColors.onFill
                     : AppColors.black.withValues(alpha: 0.4),
               ),
               8.w.horizontalSpace,
@@ -244,7 +244,7 @@ class ReadingSkillButton extends StatelessWidget {
                 style: AppTextStyles.bold(
                   fontSize: 14.sp,
                   color: isSelected
-                      ? Colors.white
+                      ? AppColors.onFill
                       : AppColors.black.withValues(alpha: 0.4),
                 ),
               ),
@@ -288,7 +288,7 @@ class AppButton extends StatelessWidget {
           text: text,
           style: AppTextStyles.bold(
             fontSize: fontSize ?? 13.sp,
-            color: AppColors.white,
+            color: AppColors.onFill,
           ),
         ),
       ),

@@ -6,10 +6,11 @@ import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/widgets/app_text.dart';
 
-const Color _dropdownInk = Color(0xFF1C1C1E);
-const Color _dropdownMuted = Color(0xFF8E8E93);
-const Color _dropdownLine = Color(0xFFE5E5EA);
-const Color _dropdownSelectedFill = Color(0xFFE7F4F4);
+Color get _dropdownInk => AppColors.black;
+Color get _dropdownMuted => AppColors.muted;
+Color get _dropdownLine => AppColors.divider;
+Color get _dropdownSelectedFill =>
+    AppColors.isDark ? AppColors.lighttealcolor : const Color(0xFFE7F4F4);
 
 /// White dropdown field. The open list is a rounded card with the same
 /// type, spacing, and teal selection used on the rest of the new screens.
@@ -66,7 +67,7 @@ class AppDropdown extends StatelessWidget {
       ),
       child: PopupMenuTheme(
         data: PopupMenuThemeData(
-          color: Colors.white,
+          color: AppColors.surface,
           surfaceTintColor: Colors.transparent,
           elevation: 12,
           shadowColor: const Color(0x26000000),
@@ -116,7 +117,7 @@ class AppDropdown extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(14.r),
       ),
       child: field,
@@ -237,7 +238,7 @@ class _DropdownMenuCardState extends State<_DropdownMenuCard> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: AppColors.surface,
       surfaceTintColor: Colors.transparent,
       elevation: 8,
       shadowColor: const Color(0x33000000),
@@ -249,14 +250,14 @@ class _DropdownMenuCardState extends State<_DropdownMenuCard> {
         shrinkWrap: true,
         itemCount: widget.items.length,
         separatorBuilder: (_, _) =>
-            const Divider(height: 1, thickness: 1, color: _dropdownLine),
+            Divider(height: 1, thickness: 1, color: _dropdownLine),
         itemBuilder: (context, index) {
           final label = widget.items[index];
           final selected = label == widget.selectedValue;
           return InkWell(
             onTap: () => Navigator.of(context).pop(label),
             child: ColoredBox(
-              color: selected ? _dropdownSelectedFill : Colors.white,
+              color: selected ? _dropdownSelectedFill : AppColors.surface,
               child: SizedBox(
                 height: _rowHeight,
                 child: Padding(

@@ -118,7 +118,7 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
   Widget build(BuildContext context) {
     final bottom = MediaQuery.paddingOf(context).bottom;
     final headerTitle = (widget.title ?? '').trim();
-    final finishLabel = headerTitle.isEmpty ? 'Add Members' : 'Create Classroom';
+    final finishLabel = headerTitle.isEmpty ? 'Add Members' : 'Create Group';
 
     return SettingsScaffold(
       title: headerTitle.isEmpty ? 'Add Members' : headerTitle,
@@ -175,7 +175,7 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
                 SizedBox(height: 8.h),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Row(
@@ -252,7 +252,7 @@ class _AddMembersScreenState extends State<AddMembersScreen> {
               text: 'No members yet',
               style: AppTextStyles.regular(
                 fontSize: 14,
-                color: const Color(0xFF8E8E93),
+                color: AppColors.muted,
               ),
             ),
           );
@@ -476,7 +476,7 @@ class _MemberTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.semibold(
                     fontSize: 16,
-                    color: const Color(0xFF1C1C1E),
+                    color: AppColors.black,
                   ),
                 ),
                 AppText(
@@ -485,7 +485,7 @@ class _MemberTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.regular(
                     fontSize: 13,
-                    color: const Color(0xFF8E8E93),
+                    color: AppColors.muted,
                   ),
                 ),
               ],
@@ -495,7 +495,7 @@ class _MemberTile extends StatelessWidget {
           Container(
             width: 132,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: const Color(0xFFE5E5EA)),
             ),

@@ -65,7 +65,7 @@ class CreatedIdeasList extends StatelessWidget {
                   ),
                   titleStyle: AppTextStyles.bold(
                     fontSize: 24.sp,
-                    color: AppColors.white,
+                    color: AppColors.onFill,
                   ),
                 ),
                 Padding(
@@ -103,7 +103,7 @@ class CreatedIdeasList extends StatelessWidget {
                           width: double.infinity,
                           height: 48.w,
                           decoration: BoxDecoration(
-                            color: AppColors.black,
+                            color: AppColors.buttonBackground,
                             borderRadius: BorderRadius.circular(30.r),
                           ),
                           alignment: Alignment.center,
@@ -111,7 +111,7 @@ class CreatedIdeasList extends StatelessWidget {
                             text: 'Continue Reading',
                             style: AppTextStyles.bold(
                               fontSize: 18.sp,
-                              color: AppColors.white,
+                              color: AppColors.onFill,
                             ),
                           ),
                         ),
@@ -368,7 +368,7 @@ class _ReadingItemTile extends StatelessWidget {
                     child: Icon(
                       Icons.check,
                       size: 14.w,
-                      color: AppColors.white,
+                      color: AppColors.onFill,
                     ),
                   ),
                 ),

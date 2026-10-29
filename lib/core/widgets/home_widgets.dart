@@ -55,14 +55,18 @@ class HomeHeader extends StatelessWidget {
                         TextSpan(
                           text: 'Hey, ',
                           style: AppTextStyles.bold(
-                            fontSize: 20.sp,
+                            fontSize: 28,
+                            height: 1.05,
+                            letterSpacing: -0.6,
                             color: AppColors.black,
                           ),
                         ),
                         TextSpan(
                           text: '$name!',
                           style: AppTextStyles.bold(
-                            fontSize: 20.sp,
+                            fontSize: 28,
+                            height: 1.05,
+                            letterSpacing: -0.6,
                             color: AppColors.highlight,
                           ),
                         ),
@@ -77,7 +81,7 @@ class HomeHeader extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.medium(
-                      fontSize: 13.sp,
+                      fontSize: 16,
                       color: AppColors.darkGrey,
                     ),
                   ),
@@ -88,13 +92,18 @@ class HomeHeader extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         GlassIconButton(
-          onTap: () => context.pushNamed(AppRoutes.achivementsScreen.name),
+          onTap: () =>
+              context.pushNamed(AppRoutes.homeAchivementsScreen.name),
           child: const SvgIcon(AppAssets.streakFireIcon, size: 24),
         ),
         const SizedBox(width: 10),
         GlassIconButton(
           onTap: () => context.pushNamed(AppRoutes.notificationScreen.name),
-          child: const SvgIcon(AppAssets.notification, size: 24),
+          child: SvgIcon(
+            AppAssets.notification,
+            size: 24,
+            color: AppColors.black,
+          ),
         ),
       ],
     );
@@ -252,7 +261,7 @@ class _CalendarStripState extends State<CalendarStrip> {
                 ? Icon(
                     Icons.ac_unit_rounded,
                     size: 14.w,
-                    color: AppColors.white,
+                    color: AppColors.onFill,
                   )
                 : AppText(
                     text: date.day.toString(),
@@ -260,7 +269,7 @@ class _CalendarStripState extends State<CalendarStrip> {
                       fontSize: 13.sp,
                       height: 1,
                       color: isCompleted
-                          ? AppColors.white
+                          ? AppColors.onFill
                           : isToday
                           ? AppColors.black
                           : AppColors.black.withValues(alpha: 0.55),
@@ -330,14 +339,14 @@ class BottomStatsCard extends StatelessWidget {
                 text: "Oxford Vocabulary",
                 style: AppTextStyles.bold(
                   fontSize: 16.sp,
-                  color: AppColors.white,
+                  color: AppColors.onFill,
                   letterSpacing: 1,
                 ),
               ),
               AppText(
                 text: "OXFORD",
                 style: AppTextStyles.textStyle16Regular.copyWith(
-                  color: AppColors.white.withValues(alpha: 0.5),
+                  color: AppColors.onFill.withValues(alpha: 0.5),
                   fontSize: 14.sp,
                   letterSpacing: 2,
                 ),
@@ -352,7 +361,7 @@ class BottomStatsCard extends StatelessWidget {
                 text: "3,500/5,000",
                 style: AppTextStyles.medium(
                   fontSize: 12.sp,
-                  color: AppColors.white,
+                  color: AppColors.onFill,
                 ),
               ),
               AppText(

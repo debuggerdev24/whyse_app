@@ -1,5 +1,6 @@
 import 'package:redstreakapp/core/auth/session_expiry_notifier.dart';
 import 'package:redstreakapp/core/session/app_session_reset.dart';
+import 'package:redstreakapp/core/theme/app_theme_palette.dart';
 import 'package:redstreakapp/core/theme/theme_refresh.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
@@ -54,6 +55,57 @@ class _WhyseAppState extends State<WhyseApp> {
     SessionExpiryNotifier.instance.reset();
   }
 
+  ThemeData _themeFor(AppThemePalette palette) {
+    final isDark = palette.isDark;
+    final base = isDark ? ThemeData.dark() : ThemeData.light();
+    return base.copyWith(
+      brightness: palette.brightness,
+      scaffoldBackgroundColor: palette.background,
+      canvasColor: palette.background,
+      dividerColor: palette.divider,
+      colorScheme: ColorScheme(
+        brightness: palette.brightness,
+        primary: palette.primary,
+        onPrimary: AppColors.onFill,
+        secondary: palette.highlight,
+        onSecondary: AppColors.onFill,
+        error: const Color(0xFFE52222),
+        onError: AppColors.onFill,
+        surface: palette.surface,
+        onSurface: palette.onSurface,
+      ),
+      iconTheme: IconThemeData(color: palette.onSurface),
+      textTheme: base.textTheme.apply(
+        bodyColor: palette.onSurface,
+        displayColor: palette.onSurface,
+        fontFamily: 'SFProDisplay',
+      ),
+      cardTheme: CardThemeData(color: palette.surface),
+      dialogTheme: DialogThemeData(backgroundColor: palette.surface),
+      bottomSheetTheme: BottomSheetThemeData(backgroundColor: palette.surface),
+      appBarTheme: AppBarTheme(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+          statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+          systemNavigationBarColor: palette.background,
+          systemNavigationBarIconBrightness: isDark
+              ? Brightness.light
+              : Brightness.dark,
+        ),
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        foregroundColor: palette.onSurface,
+        titleTextStyle: AppTextStyles.semibold(
+          fontSize: 20,
+          color: palette.onSurface,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final palette = context.watch<AppThemeProvider>().palette;
@@ -65,29 +117,9 @@ class _WhyseAppState extends State<WhyseApp> {
       builder: (context, child) {
         return MaterialApp.router(
           title: 'Whyse',
-          theme: ThemeData(
-            brightness: Brightness.light,
-            scaffoldBackgroundColor: palette.background,
-            colorScheme: ColorScheme.light(
-              primary: palette.primary,
-              secondary: palette.highlight,
-              surface: Colors.white,
-            ),
-            appBarTheme: AppBarTheme(
-              systemOverlayStyle: const SystemUiOverlayStyle(
-                statusBarColor: Colors.transparent,
-                statusBarIconBrightness: Brightness.dark,
-              ),
-              scrolledUnderElevation: 0,
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              centerTitle: true,
-              titleTextStyle: AppTextStyles.semibold(
-                fontSize: 20,
-                color: AppColors.black,
-              ),
-            ),
-          ),
+          theme: _themeFor(AppThemes.light),
+          darkTheme: _themeFor(AppThemes.dark),
+          themeMode: palette.isDark ? ThemeMode.dark : ThemeMode.light,
           builder: (context, navChild) {
             return ThemeRefresh(
               themeId: palette.id,

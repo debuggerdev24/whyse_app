@@ -212,7 +212,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 )
               : _CategoryGrid(
                   provider: provider,
-                  blurbFor: _blurb,
                   coverFor: _cover,
                   onOpen: _openCategory,
                   onSearch: () =>
@@ -227,14 +226,12 @@ class _ExploreScreenState extends State<ExploreScreen> {
 class _CategoryGrid extends StatelessWidget {
   const _CategoryGrid({
     required this.provider,
-    required this.blurbFor,
     required this.coverFor,
     required this.onOpen,
     required this.onSearch,
   });
 
   final ExploreProvider provider;
-  final String Function(ExploreProvider, ExploreDiscoverInterest) blurbFor;
   final String Function(ExploreProvider, ExploreDiscoverInterest) coverFor;
   final ValueChanged<ExploreDiscoverInterest> onOpen;
   final VoidCallback onSearch;
@@ -260,17 +257,17 @@ class _CategoryGrid extends StatelessWidget {
                   text: 'Explore',
                   style: AppTextStyles.bold(
                     fontSize: 34,
-                    color: const Color(0xFF1C1C1E),
+                    color: AppColors.black,
                   ),
                 ),
               ),
               GlassIconButton(
                 size: 44,
                 onTap: onSearch,
-                child: const SvgIcon(
+                child: SvgIcon(
                   AppAssets.searchIcon,
                   size: 22,
-                  color: Color(0xFF1C1C1E),
+                  color: AppColors.black,
                 ),
               ),
             ],
@@ -282,14 +279,14 @@ class _CategoryGrid extends StatelessWidget {
             text: 'Choose an interest to discover amazing series and Sparks.',
             style: AppTextStyles.regular(
               fontSize: 15,
-              color: const Color(0xFF8E8E93),
+              color: AppColors.muted,
             ).copyWith(height: 1.35),
           ),
         ),
         Expanded(
           child: RefreshIndicator(
             color: exploreTeal,
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.surface,
             onRefresh: () => provider.loadDiscoverInterests(force: true),
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(
@@ -316,7 +313,7 @@ class _CategoryGrid extends StatelessWidget {
               text: 'No interests available',
               style: AppTextStyles.medium(
                 fontSize: 15,
-                color: const Color(0xFF8E8E93),
+                color: AppColors.muted,
               ),
             )
           else
@@ -334,7 +331,6 @@ class _CategoryGrid extends StatelessWidget {
                 final interest = interests[index];
                 return ExploreInterestCard(
                   title: interest.name,
-                  subtitle: blurbFor(provider, interest),
                   imageUrl: coverFor(provider, interest),
                   fallbackColor: parseInterestColor(interest.color),
                   onTap: () => onOpen(interest),
@@ -491,9 +487,9 @@ class _Hero extends StatelessWidget {
                   GlassIconButton(
                     onTap: onBack,
                     size: 44,
-                    child: const Icon(
+                    child: Icon(
                       Icons.chevron_left_rounded,
-                      color: Color(0xFF1C1C1E),
+                      color: AppColors.black,
                       size: 28,
                     ),
                   ),
@@ -742,7 +738,7 @@ class _PreviewRow extends StatelessWidget {
             text: 'Nothing here yet',
             style: AppTextStyles.medium(
               fontSize: 14,
-              color: const Color(0xFF8E8E93),
+              color: AppColors.muted,
             ),
           )
         else
@@ -807,13 +803,13 @@ class _SeeAllView extends StatelessWidget {
               IconButton(
                 onPressed: onBack,
                 icon: const Icon(Icons.chevron_left_rounded, size: 30),
-                color: const Color(0xFF1C1C1E),
+                color: AppColors.black,
               ),
               AppText(
                 text: title,
                 style: AppTextStyles.bold(
                   fontSize: 22,
-                  color: const Color(0xFF1C1C1E),
+                  color: AppColors.black,
                 ),
               ),
             ],
@@ -826,7 +822,7 @@ class _SeeAllView extends StatelessWidget {
                     text: 'Nothing here yet',
                     style: AppTextStyles.medium(
                       fontSize: 15,
-                      color: const Color(0xFF8E8E93),
+                      color: AppColors.muted,
                     ),
                   ),
                 )

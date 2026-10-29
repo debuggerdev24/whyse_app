@@ -5,8 +5,8 @@ import 'package:redstreakapp/models/friend/friend_details_model.dart';
 import 'package:redstreakapp/screens/profile/widgets/profile_friend_avatar.dart';
 
 const Color _profileTan = Color(0xFFCFBD95);
-const Color _ink = Color(0xFF1C1C1E);
-const Color _muted = Color(0xFF8E8E93);
+Color get _ink => AppColors.black;
+Color get _muted => AppColors.muted;
 
 class FriendDetailsHeader extends StatelessWidget {
   const FriendDetailsHeader({
@@ -70,7 +70,7 @@ class FriendDetailsHeader extends StatelessWidget {
                             onTap: () {
                               if (context.canPop()) context.pop();
                             },
-                            child: const Icon(
+                            child: Icon(
                               Icons.chevron_left_rounded,
                               size: 28,
                               color: _ink,
@@ -201,9 +201,9 @@ class _ProfileAvatar extends StatelessWidget {
       width: 96.w,
       height: 96.w,
       padding: const EdgeInsets.all(3),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.white,
+        color: AppColors.surface,
       ),
       child: ClipOval(
         child: ColoredBox(
@@ -275,7 +275,7 @@ class FriendDetailsHeaderShimmer extends StatelessWidget {
                   onTap: () {
                     if (context.canPop()) context.pop();
                   },
-                  child: const Icon(
+                  child: Icon(
                     Icons.chevron_left_rounded,
                     size: 28,
                     color: _ink,
@@ -291,9 +291,9 @@ class FriendDetailsHeaderShimmer extends StatelessWidget {
                   child: Container(
                     width: 96.w,
                     height: 96.w,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white,
+                      color: AppColors.surface,
                     ),
                   ),
                 ),
@@ -320,7 +320,7 @@ class FriendDetailsHeaderShimmer extends StatelessWidget {
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(6),
         ),
       ),

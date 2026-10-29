@@ -13,7 +13,7 @@ Widget addReadingBottomSheet({required BuildContext context}) {
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 27.w, vertical: 16.h),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: AppColors.surface,
       borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
     ),
     child: Column(
@@ -112,7 +112,7 @@ class _OptionCard extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: Colors.grey.shade200, //isSelected ? AppColors.black :
@@ -174,7 +174,7 @@ class ReadingLevelCard extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(color: AppColors.black.withValues(alpha: 0.1)),
         ),

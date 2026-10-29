@@ -2,9 +2,9 @@ import 'package:redstreakapp/core/constants/app_constants.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_dropdown.dart';
 
-const Color accountSetupBackground = Color(0xFFF3F3F6);
-const Color accountSetupInk = Color(0xFF1C1C1E);
-const Color accountSetupMuted = Color(0xFF8E8E93);
+Color get accountSetupBackground => AppColors.backgroundColor;
+Color get accountSetupInk => AppColors.black;
+Color get accountSetupMuted => AppColors.muted;
 
 class AccountSetupHeader extends StatelessWidget {
   const AccountSetupHeader({super.key});
@@ -37,7 +37,7 @@ class AccountSetupBotBubble extends StatelessWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: 0.86.sw),
         child: _BubbleShell(
-          color: Colors.white,
+          color: AppColors.surface,
           alignEnd: false,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,13 +81,13 @@ class AccountSetupUserBubble extends StatelessWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: 0.72.sw),
         child: _BubbleShell(
-          color: accountSetupInk,
+          color: AppColors.buttonBackground,
           alignEnd: true,
           child: AppText(
             text: text,
             style: AppTextStyles.regular(
               fontSize: 15,
-              color: Colors.white,
+              color: AppColors.onFill,
             ).copyWith(height: 1.35),
           ),
         ),
@@ -226,7 +226,7 @@ class AccountSetupDropdownField extends StatelessWidget {
         width: wide ? 0.72.sw : 0.55.sw,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: const Color(0xFFE4E4E8)),
           ),
@@ -268,19 +268,19 @@ class AccountSetupReadingPills extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
                 decoration: BoxDecoration(
-                  color: option == selected ? AppColors.teal : Colors.white,
+                  color: option == selected ? AppColors.teal : AppColors.surface,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
                     color: option == selected
                         ? AppColors.teal
-                        : const Color(0xFFE4E4E4),
+                        : AppColors.divider,
                   ),
                 ),
                 child: AppText(
                   text: option,
                   style: AppTextStyles.semibold(
                     fontSize: 15,
-                    color: option == selected ? Colors.white : accountSetupInk,
+                    color: option == selected ? AppColors.onFill : accountSetupInk,
                   ),
                 ),
               ),
@@ -314,7 +314,7 @@ class AccountSetupInterestChip extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? AppColors.teal : Colors.transparent,
@@ -381,7 +381,7 @@ class AccountSetupTopicChip extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 10),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
               color: isSelected ? AppColors.teal : const Color(0xFFE4E4E4),
@@ -491,7 +491,7 @@ class AccountSetupGoalCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? AppColors.teal : Colors.transparent,
@@ -551,7 +551,7 @@ class AccountSetupInputBar extends StatelessWidget {
         height: 54,
         padding: const EdgeInsets.only(left: 18, right: 6),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(28),
           border: Border.all(color: const Color(0xFFE6E6EA)),
         ),

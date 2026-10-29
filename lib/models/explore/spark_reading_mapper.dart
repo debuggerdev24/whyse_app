@@ -2,16 +2,40 @@ import 'package:redstreakapp/core/utils/network_image_url.dart';
 import 'package:redstreakapp/models/curiosity_reading/curiosity_reading_model.dart';
 import 'package:redstreakapp/models/explore/explore_models.dart';
 
+ReadingBody _readingBodyFromSparkJson(Map<String, dynamic> json) {
+  final raw = json['body'] ?? json['article'] ?? json['content'];
+  if (raw is String) {
+    return ReadingBody(
+      article: raw,
+      keyFacts: const [],
+      quote: '',
+      readingLevel: '',
+    );
+  }
+  if (raw is Map) {
+    final map = Map<String, dynamic>.from(raw);
+    final article =
+        map['article'] ?? map['content'] ?? map['text'] ?? map['markdown'] ?? '';
+    final facts = map['keyFacts'];
+    return ReadingBody(
+      article: article.toString(),
+      keyFacts: facts is List
+          ? facts.map((fact) => fact.toString()).toList()
+          : const [],
+      quote: map['quote']?.toString() ?? '',
+      readingLevel: map['readingLevel']?.toString() ?? '',
+    );
+  }
+  return const ReadingBody(
+    article: '',
+    keyFacts: [],
+    quote: '',
+    readingLevel: '',
+  );
+}
+
 Reading readingFromSparkJson(Map<String, dynamic> json) {
-  final bodyMap = json['body'];
-  final body = bodyMap is Map<String, dynamic>
-      ? ReadingBody.fromJson(bodyMap)
-      : const ReadingBody(
-          article: '',
-          keyFacts: [],
-          quote: '',
-          readingLevel: '',
-        );
+  final body = _readingBodyFromSparkJson(json);
 
   return Reading(
     id: json['id']?.toString() ?? '',
