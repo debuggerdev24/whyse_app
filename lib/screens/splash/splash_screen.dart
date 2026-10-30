@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:redstreakapp/screens/auth/widgets/auth_chrome.dart';
 import 'package:redstreakapp/core/utils/shared_pref.dart';
 import 'package:redstreakapp/core/helper/log_helper.dart';
 import 'package:redstreakapp/providers/auth/auth_provider.dart';
@@ -10,6 +10,8 @@ import 'package:redstreakapp/core/routes/user_routes.dart';
 import 'package:redstreakapp/core/network/base_api_service.dart';
 import 'package:redstreakapp/services/home/story_api_service.dart';
 
+import '../../core/constants/app_assets.dart';
+import '../../core/constants/text_style.dart';
 import '../../services/auth/auth_api_service.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -55,7 +57,7 @@ class _SplashScreenState extends State<SplashScreen>
         final response = await StoryApiService.instance.getAllStories();
         response.fold(
           (l) async {
-            if (l.code == "401" 
+            if (l.code == "401"
             // &&    l.errorMsg.toLowerCase().contains(AppConstants.unAuthorized)
             ) {
               final result = await AuthApiServices().refreshToken();
@@ -103,14 +105,85 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
+  static const Color _background = Color(0xFF17C2C7);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AuthChrome.background,
-      body: Center(
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: AuthChrome.logo(width: 298.w),
+      backgroundColor: _background,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Upper-left glow, matched to the splash screenshot. Its box
+          // sits mostly off the left edge of the 402×874 design.
+          const _SplashEllipse(left: -700, top: 80, width: 880, height: 520),
+          // Ellipse 108: 749×699 at left 124, top 500.
+          const _SplashEllipse(left: 124, top: 500, width: 749, height: 699),
+          Center(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SvgPicture.asset(
+                    AppAssets.whyseWordmark,
+                    width: 267.w,
+                    fit: BoxFit.contain,
+                  ),
+                  SizedBox(height: 10.h),
+                  Text(
+                    'Curiosity today. A brighter tomorrow.',
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.medium(
+                      fontSize: 20,
+                      color: const Color(0xFF000E41),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Oval glow. Coordinates are in the 402×874 design space.
+class _SplashEllipse extends StatelessWidget {
+  const _SplashEllipse({
+    required this.left,
+    required this.top,
+    required this.width,
+    required this.height,
+  });
+
+  final double left;
+  final double top;
+  final double width;
+  final double height;
+
+  static const LinearGradient _glow = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      Color.fromRGBO(81, 251, 255, 0.2),
+      Color.fromRGBO(23, 194, 199, 0),
+    ],
+    stops: [0.0006, 0.6329],
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: left.w,
+      top: top.h,
+      width: width.w,
+      height: height.h,
+      child: const ClipOval(
+        child: DecoratedBox(
+          decoration: BoxDecoration(gradient: _glow),
+          child: SizedBox.expand(),
         ),
       ),
     );
