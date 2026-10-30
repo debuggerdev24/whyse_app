@@ -7,6 +7,7 @@ class AppAssets {
   // icons
   static const _iconPath = "assets/icons";
   static const splascreen = "$_iconPath/splash.svg";
+  static const whyseWordmark = "$_iconPath/whyse.svg";
   static const welcome = "$_iconPath/welcome.svg";
   static const password = "$_iconPath/password.svg";
   static const apple = "$_iconPath/apple.svg";
