@@ -275,7 +275,9 @@ class _AgeEntryScreenState extends State<AgeEntryScreen> {
                     ],
                   ),
                 ),
-                if (provider.isSaveUserAgeLoading) FullPageIndicator(),
+                if (provider.isSaveUserAgeLoading ||
+                    provider.isSocialLoginLoading)
+                  FullPageIndicator(),
               ],
             ),
           );

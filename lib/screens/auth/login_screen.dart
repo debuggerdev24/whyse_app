@@ -120,7 +120,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       label: 'Login with Google',
                       icon: SvgIcon(AppAssets.google, size: 20.sp),
                       onTap: () async {
-                          //todo getting id token
+                          if (provider.isGoogleSignInInProgress ||
+                              provider.isSocialLoginLoading) {
+                            return;
+                          }
                           final idToken = await provider.getGoogleIDTokenForLogin();
                           if (idToken == null) {
                             if (context.mounted) {

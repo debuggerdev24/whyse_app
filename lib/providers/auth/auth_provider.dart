@@ -55,7 +55,7 @@ class AuthProvider with ChangeNotifier {
   GoogleSignInAccount? _lastGoogleSignInAccount;
   String? _pendingGoogleIdToken;
   VoidCallback? _onGoogleAccountFound;
-  VoidCallback? _onGoogleNoAccountFound;
+  Future<void> Function()? _onGoogleNoAccountFound;
   Function(String)? _onGoogleLoginFailed;
 
   static const _googleBirthdayScope =
@@ -178,7 +178,7 @@ class AuthProvider with ChangeNotifier {
     required BuildContext context,
     required String idToken,
     required VoidCallback onAccountFound,
-    required VoidCallback onNoAccountFound,
+    required Future<void> Function() onNoAccountFound,
     required Function(String error) onFailed,
   }) async {
     _pendingGoogleIdToken = idToken;
@@ -204,38 +204,47 @@ class AuthProvider with ChangeNotifier {
       return;
     }
 
-    var outcome = await _performGoogleSocialLogin(
-      idToken: idToken,
-      dateOfBirth: dateOfBirth,
-    );
+    isSocialLoginLoading = true;
+    notifyListeners();
+    try {
+      var outcome = await _performGoogleSocialLogin(
+        idToken: idToken,
+        dateOfBirth: dateOfBirth,
+        controlLoading: false,
+      );
 
-    if (outcome == _GoogleSocialLoginOutcome.existingAccount) {
-      _finishGoogleLoginWithExistingAccount();
-      return;
-    }
-    if (outcome == _GoogleSocialLoginOutcome.failed || !context.mounted) {
-      return;
-    }
+      if (outcome == _GoogleSocialLoginOutcome.existingAccount) {
+        _finishGoogleLoginWithExistingAccount();
+        return;
+      }
+      if (outcome == _GoogleSocialLoginOutcome.failed || !context.mounted) {
+        return;
+      }
 
-    await LocalStorageService.instance.clearOnboardingSession();
-    final ageSaved = await ensureOnboardingAndSaveAgeForGoogle(
-      context: context,
-      onFailed: (error) => _onGoogleLoginFailed?.call(error),
-    );
-    if (!ageSaved || !context.mounted) return;
+      await LocalStorageService.instance.clearOnboardingSession();
+      final ageSaved = await ensureOnboardingAndSaveAgeForGoogle(
+        context: context,
+        onFailed: (error) => _onGoogleLoginFailed?.call(error),
+      );
+      if (!ageSaved || !context.mounted) return;
 
-    outcome = await _performGoogleSocialLogin(
-      idToken: idToken,
-      dateOfBirth: dateOfBirth,
-      onboardingId: LocalStorageService.instance.onboardingId,
-    );
+      outcome = await _performGoogleSocialLogin(
+        idToken: idToken,
+        dateOfBirth: dateOfBirth,
+        onboardingId: LocalStorageService.instance.onboardingId,
+        controlLoading: false,
+      );
 
-    if (outcome == _GoogleSocialLoginOutcome.existingAccount) {
-      _finishGoogleLoginWithExistingAccount();
-      return;
-    }
-    if (outcome == _GoogleSocialLoginOutcome.newAccount) {
-      _onGoogleNoAccountFound?.call();
+      if (outcome == _GoogleSocialLoginOutcome.existingAccount) {
+        _finishGoogleLoginWithExistingAccount();
+        return;
+      }
+      if (outcome == _GoogleSocialLoginOutcome.newAccount) {
+        await _onGoogleNoAccountFound?.call();
+      }
+    } finally {
+      isSocialLoginLoading = false;
+      notifyListeners();
     }
   }
 
@@ -254,27 +263,35 @@ class AuthProvider with ChangeNotifier {
       return;
     }
 
-    if (LocalStorageService.instance.onboardingId == null) {
-      await LocalStorageService.instance.clearOnboardingSession();
-      final ageSaved = await ensureOnboardingAndSaveAgeForGoogle(
-        context: context,
-        onFailed: (error) => _onGoogleLoginFailed?.call(error),
+    isSocialLoginLoading = true;
+    notifyListeners();
+    try {
+      if (LocalStorageService.instance.onboardingId == null) {
+        await LocalStorageService.instance.clearOnboardingSession();
+        final ageSaved = await ensureOnboardingAndSaveAgeForGoogle(
+          context: context,
+          onFailed: (error) => _onGoogleLoginFailed?.call(error),
+        );
+        if (!ageSaved || !context.mounted) return;
+      }
+
+      final outcome = await _performGoogleSocialLogin(
+        idToken: idToken,
+        dateOfBirth: dateOfBirth,
+        onboardingId: LocalStorageService.instance.onboardingId,
+        controlLoading: false,
       );
-      if (!ageSaved || !context.mounted) return;
-    }
 
-    final outcome = await _performGoogleSocialLogin(
-      idToken: idToken,
-      dateOfBirth: dateOfBirth,
-      onboardingId: LocalStorageService.instance.onboardingId,
-    );
-
-    if (outcome == _GoogleSocialLoginOutcome.existingAccount) {
-      _finishGoogleLoginWithExistingAccount();
-      return;
-    }
-    if (outcome == _GoogleSocialLoginOutcome.newAccount) {
-      _onGoogleNoAccountFound?.call();
+      if (outcome == _GoogleSocialLoginOutcome.existingAccount) {
+        _finishGoogleLoginWithExistingAccount();
+        return;
+      }
+      if (outcome == _GoogleSocialLoginOutcome.newAccount) {
+        await _onGoogleNoAccountFound?.call();
+      }
+    } finally {
+      isSocialLoginLoading = false;
+      notifyListeners();
     }
   }
 
@@ -288,9 +305,12 @@ class AuthProvider with ChangeNotifier {
     required String idToken,
     required String dateOfBirth,
     String? onboardingId,
+    bool controlLoading = true,
   }) async {
-    isSocialLoginLoading = true;
-    notifyListeners();
+    if (controlLoading) {
+      isSocialLoginLoading = true;
+      notifyListeners();
+    }
 
     try {
       final payload = {
@@ -332,8 +352,10 @@ class AuthProvider with ChangeNotifier {
       _onGoogleLoginFailed?.call("Failed google login, please try again");
       return _GoogleSocialLoginOutcome.failed;
     } finally {
-      isSocialLoginLoading = false;
-      notifyListeners();
+      if (controlLoading) {
+        isSocialLoginLoading = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -1600,6 +1622,9 @@ class AuthProvider with ChangeNotifier {
   }
 
   bool _isGoogleSignInInitialized = false;
+  bool _googleSignInInProgress = false;
+
+  bool get isGoogleSignInInProgress => _googleSignInInProgress;
 
   Future<void> _ensureGoogleSignInInitialized() async {
     if (_isGoogleSignInInitialized) return;
@@ -1611,13 +1636,11 @@ class AuthProvider with ChangeNotifier {
     _isGoogleSignInInitialized = true;
   }
 
-  Future<GoogleSignInAccount?> _authenticateWithGoogle({
-    required List<String> scopes,
-  }) async {
+  Future<GoogleSignInAccount?> _authenticateWithGoogle() async {
     await _ensureGoogleSignInInitialized();
 
     try {
-      final account = await GoogleSignIn.instance.authenticate(scopeHint: scopes);
+      final account = await GoogleSignIn.instance.authenticate();
       _lastGoogleSignInAccount = account;
       return account;
     } on GoogleSignInException catch (e) {
@@ -1646,19 +1669,18 @@ class AuthProvider with ChangeNotifier {
     googleLoginEmail = account.email;
   }
 
-  Future<String?> _authorizeGoogleAccessToken(
+  /// Reads an access token only when Google already granted it.
+  /// Never calls [GoogleSignInAuthorizationClient.authorizeScopes], which
+  /// opens a second browser sign-in on iOS.
+  Future<String?> _silentGoogleAccessToken(
     GoogleSignInAccount account,
     List<String> scopes,
   ) async {
     try {
-      final authorization =
-          await account.authorizationClient.authorizeScopes(scopes);
-      return authorization.accessToken;
+      final authorization = await account.authorizationClient
+          .authorizationForScopes(scopes);
+      return authorization?.accessToken;
     } on GoogleSignInException catch (e) {
-      if (e.code == GoogleSignInExceptionCode.canceled) {
-        Logger.error("User cancelled Google authorization");
-        return null;
-      }
       Logger.error(
         "Google authorization error: ${e.code.name} ${e.description ?? ''}",
       );
@@ -1669,84 +1691,64 @@ class AuthProvider with ChangeNotifier {
   //todo google login functions
   //todo Google Sign-In Platform Exception: com.google.android.gms.common.api.ApiException: 16:
   Future<String?> getGoogleIDTokenForLogin() async {
-    try {
-      isSocialLoginLoading = true;
-      notifyListeners();
+    if (_googleSignInInProgress || isSocialLoginLoading) return null;
 
-      const scopes = ['email', 'profile'];
-      final account = await _authenticateWithGoogle(scopes: scopes);
+    _googleSignInInProgress = true;
+    notifyListeners();
+    try {
+      final account = await _authenticateWithGoogle();
       if (account == null) return null;
 
       _populateFieldsFromGoogleAccount(account);
 
-      final auth = account.authentication;
-      final accessToken = await _authorizeGoogleAccessToken(account, scopes);
+      final idToken = account.authentication.idToken;
       Logger.info(account.email);
-      Logger.info("Account: /${account.toString()}");
-      Logger.info("access Token: ${accessToken ?? 'NULL'}");
-      Logger.info("idToken: /${auth.idToken ?? 'NULL'}");
-      Logger.info("\nclose");
+      Logger.info("idToken: /${idToken ?? 'NULL'}");
 
-      if (auth.idToken == null) {
+      if (idToken == null) {
         Logger.error(
-          "⚠️ ID Token is NULL - Check serverClientId configuration!",
-        );
-        Logger.error(
-          "Make sure you're using the Web Client ID, not Android Client ID",
+          "ID Token is NULL - Check serverClientId configuration. Use the Web Client ID.",
         );
         return null;
       }
 
-      return auth.idToken;
+      return idToken;
     } catch (e) {
       Logger.error("Google Sign In catch error : ${e.toString()}");
       return null;
     } finally {
-      isSocialLoginLoading = false;
+      _googleSignInInProgress = false;
       notifyListeners();
     }
   }
 
   Future<String?> getGoogleIDToken() async {
+    if (_googleSignInInProgress || isSocialLoginLoading) return null;
+
+    _googleSignInInProgress = true;
+    notifyListeners();
     try {
-      isSocialLoginLoading = true;
-      notifyListeners();
-
-      const scopes = [
-        'email',
-        'profile',
-        _googleBirthdayScope,
-      ];
-
-      // Critical: Ensure UI thread is ready (prevents deadlock)
-      await Future.delayed(const Duration(milliseconds: 100));
-
-      final account = await _authenticateWithGoogle(scopes: scopes);
+      final account = await _authenticateWithGoogle();
       if (account == null) return null;
 
       _populateFieldsFromGoogleAccount(account);
 
+      final idToken = account.authentication.idToken;
       Logger.info("Email: ${account.email}");
-      Logger.info("Display Name: ${account.displayName?.trim() ?? ''}");
+      Logger.info("ID Token: ${idToken ?? 'NULL'}");
 
-      final auth = account.authentication;
-      final accessToken = await _authorizeGoogleAccessToken(account, scopes);
-
-      Logger.info("Access Token: ${accessToken ?? 'NULL'}");
-      Logger.info("ID Token: ${auth.idToken ?? 'NULL'}");
-
-      if (auth.idToken == null) {
+      if (idToken == null) {
         Logger.error(
-          "⚠️ ID Token is NULL - Check serverClientId configuration!",
-        );
-        Logger.error(
-          "Make sure you're using the Web Client ID, not Android Client ID",
+          "ID Token is NULL - Check serverClientId configuration. Use the Web Client ID.",
         );
         return null;
       }
 
+      final accessToken = await _silentGoogleAccessToken(
+        account,
+        const [_googleBirthdayScope],
+      );
       if (accessToken != null) {
-        Logger.info("Birthdate API Calling");
         await _fetchGoogleBirthday(accessToken);
       } else {
         googleBirthDate = "";
@@ -1754,20 +1756,12 @@ class AuthProvider with ChangeNotifier {
       }
 
       generateStrongPassword();
-
-      return auth.idToken;
+      return idToken;
     } catch (e) {
       Logger.error("Google Sign In error: ${e.toString()}");
-
-      try {
-        await GoogleSignIn.instance.signOut();
-      } catch (signOutError) {
-        Logger.error("Sign out error: $signOutError");
-      }
-
       return null;
     } finally {
-      isSocialLoginLoading = false;
+      _googleSignInInProgress = false;
       notifyListeners();
     }
   }
@@ -1779,7 +1773,7 @@ class AuthProvider with ChangeNotifier {
       return false;
     }
 
-    final accessToken = await _authorizeGoogleAccessToken(
+    final accessToken = await _silentGoogleAccessToken(
       account,
       const [_googleBirthdayScope],
     );

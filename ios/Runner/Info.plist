@@ -41,6 +41,7 @@
 	<string>1072520967140-6hu941fhtps4i2sjkl1gf31l395j2ia2.apps.googleusercontent.com</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
+		<string>google</string>
 		<string>https</string>
 		<string>googlegmail</string>
 	</array>
