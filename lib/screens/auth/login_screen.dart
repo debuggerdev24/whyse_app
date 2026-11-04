@@ -44,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Center(child: AuthChrome.logo(width: 150.w)),
+                    Center(child: AuthChrome.logo(width: 200.w)),
                     18.h.verticalSpace,
                     AuthChrome.titleText('Welcome back!'),
                     8.h.verticalSpace,

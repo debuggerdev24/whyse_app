@@ -48,7 +48,7 @@ class AppThemes {
     onSurface: Color(0xFF1A1A1A),
     muted: Color(0xFF8E8E93),
     divider: Color(0xFFE5E5EA),
-    highlight: Color(0xFF22B56E),
+    highlight: Color(0xFF167C80),
   );
 
   static const dark = AppThemePalette(
@@ -63,7 +63,7 @@ class AppThemes {
     onSurface: Color(0xFFF2F6F6),
     muted: Color(0xFF93A4A5),
     divider: Color(0xFF2C3E40),
-    highlight: Color(0xFF3DDC8A),
+    highlight: Color(0xFF167C80),
   );
 
   static const ocean = light;

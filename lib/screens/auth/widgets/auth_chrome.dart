@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
@@ -23,11 +24,11 @@ class AuthChrome {
   static Color get field => AppColors.surface;
 
   static Widget logo({required double width}) {
-    return Image.asset(
-      AppAssets.whyseLogo,
+    return SvgPicture.asset(
+      AppAssets.whyseWordmark,
       width: width,
       fit: BoxFit.contain,
-      filterQuality: FilterQuality.high,
+      colorMapper: _WhyseWordmarkColors(dark: AppColors.isDark),
     );
   }
 
@@ -215,4 +216,36 @@ class AuthChrome {
       ),
     );
   }
+}
+
+/// Splash wordmark is navy with a white “y”, drawn for the cyan splash.
+/// On auth screens the “y” uses the brand accent, and in dark mode the navy
+/// letters switch to the light text color so the mark stays readable.
+class _WhyseWordmarkColors extends ColorMapper {
+  const _WhyseWordmarkColors({required this.dark});
+
+  final bool dark;
+
+  static const _accent = Color(0xFF167C80);
+  static const _onDark = Color(0xFFF2F6F6);
+
+  @override
+  Color substitute(
+    String? id,
+    String elementName,
+    String attributeName,
+    Color color,
+  ) {
+    final value = color.toARGB32();
+    if (value == 0xFFFFFFFF) return _accent;
+    if (dark && value == 0xFF000E41) return _onDark;
+    return color;
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is _WhyseWordmarkColors && other.dark == dark;
+
+  @override
+  int get hashCode => dark.hashCode;
 }

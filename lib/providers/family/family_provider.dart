@@ -408,7 +408,7 @@ class FamilyProvider extends ChangeNotifier {
         memberUserId: member.id,
         role: role,
       );
-      return result.fold(
+      return await result.fold(
         (failure) {
           _familyMembers.removeWhere(
             (m) => m.member.id == member.id && m.id.startsWith('family-'),

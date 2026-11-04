@@ -48,7 +48,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       children: [
                         AuthChrome.backButton(context),
                         12.h.verticalSpace,
-                        Center(child: AuthChrome.logo(width: 150.w)),
+                        Center(child: AuthChrome.logo(width: 200.w)),
                         22.h.verticalSpace,
                         AuthChrome.titleText('Welcome to Whyse'),
                         8.h.verticalSpace,
