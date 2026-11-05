@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:redstreakapp/core/constants/app_assets.dart';
+import 'package:redstreakapp/core/constants/app_fonts.dart';
 import 'package:redstreakapp/core/constants/app_color.dart';
 import 'package:redstreakapp/core/constants/text_style.dart';
 import 'package:redstreakapp/core/utils/custom_loader.dart';
@@ -77,6 +78,7 @@ class _AgeEntryScreenState extends State<AgeEntryScreen> {
                       color: AppColors.teal,
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
+                      fontStyle: AppFonts.legacyItalic(FontWeight.w600),
                     ),
                   ),
                 ),

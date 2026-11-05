@@ -1,4 +1,5 @@
 import 'package:redstreakapp/core/auth/session_expiry_notifier.dart';
+import 'package:redstreakapp/core/constants/app_fonts.dart';
 import 'package:redstreakapp/core/session/app_session_reset.dart';
 import 'package:redstreakapp/core/theme/app_theme_palette.dart';
 import 'package:redstreakapp/core/theme/theme_refresh.dart';
@@ -78,7 +79,7 @@ class _WhyseAppState extends State<WhyseApp> {
       textTheme: base.textTheme.apply(
         bodyColor: palette.onSurface,
         displayColor: palette.onSurface,
-        fontFamily: 'SFProDisplay',
+        fontFamily: AppFonts.sfProDisplay,
       ),
       cardTheme: CardThemeData(color: palette.surface),
       dialogTheme: DialogThemeData(backgroundColor: palette.surface),

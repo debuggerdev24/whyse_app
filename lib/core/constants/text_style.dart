@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:redstreakapp/core/constants/app_fonts.dart';
 
 class AppTextStyles {
   AppTextStyles._();
@@ -7,7 +8,7 @@ class AppTextStyles {
   // SF Pro Display Styles
   static TextStyle regular({double? fontSize, Color? color}) {
     return TextStyle(
-      fontFamily: 'SFProDisplay',
+      fontFamily: AppFonts.sfProDisplay,
       fontWeight: FontWeight.w400,
       fontSize: fontSize?.sp ?? 16.sp,
       color: color,
@@ -21,7 +22,7 @@ class AppTextStyles {
   }) {
     return TextStyle(
       height: height,
-      fontFamily: 'SFProDisplay',
+      fontFamily: AppFonts.sfProDisplay,
       fontWeight: FontWeight.w500,
       fontSize: fontSize?.sp ?? 16.sp,
       color: color,
@@ -30,7 +31,7 @@ class AppTextStyles {
 
   static TextStyle semibold({double? fontSize, Color? color}) {
     return TextStyle(
-      fontFamily: 'SFProDisplay',
+      fontFamily: AppFonts.sfProDisplay,
       fontWeight: FontWeight.w700,
       fontSize: fontSize?.sp ?? 16.sp,
       color: color,
@@ -46,7 +47,7 @@ class AppTextStyles {
   }) {
     return TextStyle(
       height: height,
-      fontFamily: 'SFProDisplay',
+      fontFamily: AppFonts.sfProDisplay,
       fontWeight: FontWeight.w700,
       fontSize: fontSize?.sp ?? 16.sp,
       color: color,

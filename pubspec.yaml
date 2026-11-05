@@ -105,6 +105,8 @@ flutter:
     - assets/lottie/
     - .env
 
+  # Android only. iOS uses the system SF Pro face, and
+  # ios/scripts/strip_apple_fonts.sh removes these files from the iOS app.
   fonts:
     - family: SFProDisplay
       fonts:

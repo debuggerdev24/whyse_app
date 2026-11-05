@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:redstreakapp/core/constants/app_fonts.dart';
 
 class ReadingFontOption {
   final String name;
@@ -12,6 +13,11 @@ class ReadingFontOption {
     required this.fontFamily,
     this.useLibreBaskerville = false,
   });
+
+  /// SF Pro resolves to the iOS system font. Other names stay as stored.
+  String get effectiveFontFamily => fontFamily == AppFonts.sfProDisplayAsset
+      ? AppFonts.sfProDisplay
+      : fontFamily;
 }
 
 class ReadingThemeOption {
@@ -27,7 +33,7 @@ class ReadingThemeOption {
 
 class ReadingAppearanceProvider extends ChangeNotifier {
   static const List<ReadingFontOption> fonts = [
-    ReadingFontOption(name: 'SF Pro', fontFamily: 'SFProDisplay'),
+    ReadingFontOption(name: 'SF Pro', fontFamily: AppFonts.sfProDisplayAsset),
     ReadingFontOption(name: 'Georgia', fontFamily: 'Georgia'),
     ReadingFontOption(
       name: 'Baskerville',
@@ -92,7 +98,7 @@ class ReadingAppearanceProvider extends ChangeNotifier {
       );
     }
     return TextStyle(
-      fontFamily: font.fontFamily,
+      fontFamily: font.effectiveFontFamily,
       fontWeight: FontWeight.w400,
       fontSize: fontSize,
       height: height,

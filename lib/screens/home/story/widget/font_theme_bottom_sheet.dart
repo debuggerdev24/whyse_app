@@ -1,4 +1,5 @@
 import 'package:redstreakapp/core/constants/app_color.dart';
+import 'package:redstreakapp/core/constants/app_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -90,10 +91,11 @@ class _FontThemeBottomSheetState extends State<_FontThemeBottomSheet>
       indicatorColor: AppColors.teal,
       indicatorWeight: 3,
       indicatorSize: TabBarIndicatorSize.label,
-      labelStyle: const TextStyle(
+      labelStyle: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w600,
         letterSpacing: 0,
+        fontStyle: AppFonts.legacyItalic(FontWeight.w600),
       ),
       unselectedLabelStyle: const TextStyle(
         fontSize: 16,
@@ -274,7 +276,7 @@ class _FontCard extends StatelessWidget {
                   : TextStyle(
                       fontSize: 45,
                       height: 1,
-                      fontFamily: font.fontFamily,
+                      fontFamily: font.effectiveFontFamily,
                       color: AppColors.black,
                       fontWeight: FontWeight.w400,
                     ),

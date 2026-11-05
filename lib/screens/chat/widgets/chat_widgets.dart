@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:redstreakapp/core/constants/app_fonts.dart';
 import 'package:redstreakapp/core/utils/app_imports.dart';
 import 'package:redstreakapp/core/widgets/app_network_image.dart';
 import 'package:redstreakapp/models/chat/chat_history_model.dart';
@@ -261,6 +262,7 @@ class _ChatTypewriterTextState extends State<ChatTypewriterText> {
               style: widget.style.copyWith(
                 color: AppColors.teal,
                 fontWeight: FontWeight.w600,
+                fontStyle: AppFonts.legacyItalic(FontWeight.w600),
               ),
             ),
         ],
