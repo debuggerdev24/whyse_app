@@ -81,7 +81,8 @@ flutter_launcher_icons:
   image_path: assets/launcher/app_icon.png
   min_sdk_android: 21
   adaptive_icon_background: "#17C2C7"
-  adaptive_icon_foreground: assets/launcher/app_icon.png
+  # Foreground is inset so the wordmark stays inside Android's circular mask.
+  adaptive_icon_foreground: assets/launcher/app_icon_foreground.png
   adaptive_icon_foreground_inset: 0
   remove_alpha_ios: true
   background_color_ios: "#17C2C7"
